@@ -1,0 +1,224 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page">
+			<text class="page__title">nax-icon</text>
+			<text class="page__desc">Lucide 语义子集 · name / size / color / click</text>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="row">
+					<view class="item">
+						<nax-icon name="search" size="sm"></nax-icon>
+						<text class="item__label">sm</text>
+					</view>
+					<view class="item">
+						<nax-icon name="search" size="md"></nax-icon>
+						<text class="item__label">md</text>
+					</view>
+					<view class="item">
+						<nax-icon name="search" size="lg"></nax-icon>
+						<text class="item__label">lg</text>
+					</view>
+					<view class="item">
+						<nax-icon name="search" size="28"></nax-icon>
+						<text class="item__label">28</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">颜色 color</text>
+				<view class="row">
+					<view class="item">
+						<nax-icon name="heart" color="#ff3141"></nax-icon>
+						<text class="item__label">#ff3141</text>
+					</view>
+					<view class="item">
+						<nax-icon name="star" color="#ff8f1f"></nax-icon>
+						<text class="item__label">#ff8f1f</text>
+					</view>
+					<view class="item">
+						<nax-icon name="success" color="#00b578"></nax-icon>
+						<text class="item__label">success</text>
+					</view>
+					<view class="item">
+						<nax-icon name="info" color="#1677ff"></nax-icon>
+						<text class="item__label">primary</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">状态</text>
+				<view class="row">
+					<view class="item">
+						<nax-icon name="settings" @click="onTap('settings')"></nax-icon>
+						<text class="item__label">可点</text>
+					</view>
+					<view class="item">
+						<nax-icon name="settings" disabled @click="onTap('disabled')"></nax-icon>
+						<text class="item__label">disabled</text>
+					</view>
+				</view>
+				<text class="page__hint">{{ tip }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">配合 nax-button</text>
+				<view class="row">
+					<view class="item-wide">
+						<nax-button type="primary" label="搜索" @click="onTap('button-search')">
+							<template #icon>
+								<nax-icon name="search" size="sm" color="#ffffff"></nax-icon>
+							</template>
+						</nax-button>
+					</view>
+					<view class="item-wide">
+						<nax-button type="error" variant="outline" label="删除" @click="onTap('button-delete')">
+							<template #icon>
+								<nax-icon name="delete" size="sm" color="#ff3141"></nax-icon>
+							</template>
+						</nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">全部图标</text>
+				<view class="grid">
+					<view class="grid__item" v-for="item in icons" :key="item">
+						<nax-icon :name="item" @click="onTap(item)"></nax-icon>
+						<text class="grid__name">{{ item }}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	const tip = ref('点击图标查看 name')
+
+	const icons = ref([
+		'close',
+		'check',
+		'plus',
+		'minus',
+		'arrow-left',
+		'arrow-right',
+		'arrow-up',
+		'arrow-down',
+		'chevron-left',
+		'chevron-right',
+		'chevron-up',
+		'chevron-down',
+		'search',
+		'loading',
+		'info',
+		'warning',
+		'success',
+		'error',
+		'user',
+		'home',
+		'more',
+		'edit',
+		'delete',
+		'star',
+		'heart',
+		'settings',
+		'eye',
+		'eye-off',
+		'copy',
+		'share'
+	] as string[])
+
+	function onTap(name : string) {
+		tip.value = 'click: ' + name
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #f5f6f8);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-bottom: 12px;
+	}
+
+	.page__hint {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-top: 8px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-lg, 12px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e5e6eb);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #1f1f1f);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.item {
+		width: 72px;
+		margin-right: 8px;
+		margin-bottom: 10px;
+		align-items: center;
+	}
+
+	.item-wide {
+		margin-right: 12px;
+		margin-bottom: 10px;
+	}
+
+	.item__label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-top: 6px;
+	}
+
+	.grid {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.grid__item {
+		width: 25%;
+		padding-top: 10px;
+		padding-bottom: 10px;
+		align-items: center;
+	}
+
+	.grid__name {
+		font-size: 11px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-top: 6px;
+		lines: 1;
+	}
+</style>

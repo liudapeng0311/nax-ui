@@ -1,0 +1,146 @@
+<template>
+	<view class="nax-icon" :class="rootClass" @click="onClick">
+		<text class="nax-icon__glyph" :class="glyphClass" :style="glyphStyle">{{ glyph }}</text>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-icon
+	 * @description 字体图标。默认图标集来自 Lucide（ISC）语义子集。
+	 * @property {string} name 图标名，如 close / search / arrow-right
+	 * @property {string} size sm | md | lg | 数字字符串（如 20）
+	 * @property {string} color 可选颜色；默认走 --nax-icon-color / --nax-color-text
+	 * @property {boolean} disabled 禁用点击
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击；disabled 时不触发
+	 */
+	import { getNaxIconGlyph } from '../../icons/glyphs.uts'
+
+	const props = defineProps({
+		name: {
+			type: String,
+			default: ''
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		color: {
+			type: String,
+			default: ''
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click'])
+
+	const glyph = computed((): string => {
+		if (props.name.length == 0) {
+			return ''
+		}
+		return getNaxIconGlyph(props.name)
+	})
+
+	const sizeToken = computed((): string => {
+		const value = props.size
+		if (value == 'sm' || value == 'md' || value == 'lg') {
+			return value
+		}
+		return ''
+	})
+
+	const customSizePx = computed((): number => {
+		if (sizeToken.value.length > 0) {
+			return 0
+		}
+		const n = parseInt(props.size)
+		if (n > 0) {
+			return n
+		}
+		return 0
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.disabled) {
+			cls += ' nax-icon--disabled'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const glyphClass = computed((): string => {
+		const token = sizeToken.value
+		if (token.length > 0) {
+			return 'nax-icon__glyph--' + token
+		}
+		return 'nax-icon__glyph--md'
+	})
+
+	const glyphStyle = computed((): string => {
+		let style = ''
+		if (customSizePx.value > 0) {
+			style += 'font-size:' + customSizePx.value.toString() + 'px;'
+		}
+		if (props.color.length > 0) {
+			style += 'color:' + props.color + ';'
+		}
+		return style
+	})
+
+	function onClick() {
+		if (props.disabled) {
+			return
+		}
+		emit('click')
+	}
+</script>
+
+<style>
+	@font-face {
+		font-family: nax-icon;
+		src: url('/uni_modules/nax-icon/static/nax-icon.ttf');
+		font-weight: normal;
+		font-style: normal;
+	}
+
+	.nax-icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-icon--disabled {
+		opacity: var(--nax-opacity-disabled, 0.45);
+	}
+
+	.nax-icon__glyph {
+		font-family: nax-icon;
+		font-style: normal;
+		font-weight: normal;
+		color: var(--nax-icon-color, var(--nax-color-text, #1f1f1f));
+		lines: 1;
+	}
+
+	.nax-icon__glyph--sm {
+		font-size: 16px;
+	}
+
+	.nax-icon__glyph--md {
+		font-size: 18px;
+	}
+
+	.nax-icon__glyph--lg {
+		font-size: 20px;
+	}
+</style>

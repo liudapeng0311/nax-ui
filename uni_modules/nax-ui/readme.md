@@ -1,4 +1,4 @@
-﻿# nax-ui
+# nax-ui
 
 uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不强制单包套装）。
 
@@ -8,6 +8,7 @@ uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不�
 |------|------|
 | `nax-ui-theme` | 主题 token 约定包（CSS 变量） |
 | `nax-button` | 通用按钮 |
+| `nax-icon` | 字体图标（Lucide 语义子集） |
 
 ## 推荐接入
 

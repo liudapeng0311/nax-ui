@@ -1,4 +1,9 @@
-﻿## 0.1.0（2026-07-14）
+﻿## 0.1.1（2026-07-14）
+
+- 主题挂载选择器由 `page` 改为 `.nax-theme`（兼容 uvue / 鸿蒙，仅 class 选择器）
+- 暗色改为 `.nax-theme-dark`，移除 `page.nax-theme-dark`
+
+## 0.1.0（2026-07-14）
 
 - 初始化 token 约定包
 - 提供 `theme/default.css` 默认浅色语义变量

@@ -1,9 +1,10 @@
 /**
  * nax-ui-theme / default
- * 默认浅色语义 token。挂在 page 上，供所有 nax-* 组件 var(--nax-*, fallback) 读取。
- * 业务可在 App.uvue 或页面中覆盖同名变量。
+ * 默认浅色语义 token。
+ * uvue 仅支持 class 选择器，故挂在 .nax-theme 上（勿使用 page / tag 选择器）。
+ * 业务在页面根节点加 class="nax-theme"，组件通过 var(--nax-*, fallback) 读取。
  */
-page {
+.nax-theme {
 	/* ===== Color: brand & status ===== */
 	--nax-color-primary: #1677ff;
 	--nax-color-success: #00b578;

@@ -1,11 +1,16 @@
-﻿<template>
-	<view class="home">
+<template>
+	<view class="nax-theme home">
 		<text class="home__title">nax-ui</text>
 		<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
 
 		<view class="home__card" @click="goButton">
 			<text class="home__card-title">nax-button</text>
 			<text class="home__card-desc">按钮：类型 / 变体 / 尺寸 / 状态</text>
+		</view>
+
+		<view class="home__card home__card--gap" @click="goIcon">
+			<text class="home__card-title">nax-icon</text>
+			<text class="home__card-desc">图标：Lucide 子集 / 尺寸 / 颜色</text>
 		</view>
 	</view>
 </template>
@@ -14,6 +19,12 @@
 	function goButton() {
 		uni.navigateTo({
 			url: '/pages/components/button/index'
+		})
+	}
+
+	function goIcon() {
+		uni.navigateTo({
+			url: '/pages/components/icon/index'
 		})
 	}
 </script>
@@ -45,6 +56,10 @@
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #e5e6eb);
+	}
+
+	.home__card--gap {
+		margin-top: 12px;
 	}
 
 	.home__card-title {

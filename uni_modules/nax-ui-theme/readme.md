@@ -1,4 +1,4 @@
-# nax-ui-theme
+﻿# nax-ui-theme
 
 `nax-ui` 设计 **Token 约定包**（不是 UI 组件）。
 
@@ -26,21 +26,31 @@ uni_modules/nax-ui-theme
 @import "@/uni_modules/nax-ui-theme/theme/dark.css";
 ```
 
+页面根节点：
+
+```html
+<view class="nax-theme">
+  <nax-button type="primary" label="确定"></nax-button>
+</view>
+```
+
 覆盖品牌色：
 
 ```css
-page {
+.nax-theme {
 	--nax-color-primary: #7c3aed;
 }
 ```
 
+> uvue / 鸿蒙仅支持 class 选择器，**禁止** `page {}`。
+
 ## 暗色主题
 
 1. 引入 `default.css` + `dark.css`
-2. 给页面根节点或局部容器加 class：`nax-theme-dark`
+2. 给页面根节点或局部容器加 class：`nax-theme nax-theme-dark`
 
 ```html
-<view class="nax-theme-dark">
+<view class="nax-theme nax-theme-dark">
 	<nax-button type="primary" label="暗色区按钮"></nax-button>
 </view>
 ```
@@ -69,7 +79,7 @@ page {
 | `--nax-color-border` | `#e5e6eb` |
 | `--nax-button-height` | `36px` |
 | `--nax-button-padding-x` | `16px` |
-| `--nax-button-radius` | `8px` |
+| `--nax-button-radius` | `3px` |
 
 完整设计说明见：`docs/design-system.md`、`docs/theme.md`。
 

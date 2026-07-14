@@ -231,7 +231,7 @@ MVP 组件默认目标 **A**。
 |------|------|------|--------|------|
 | nax-button | mvp | done | - | 已实现，demo: pages/components/button |
 | nax-text | mvp | planned | - | 样板组件 |
-| nax-icon | mvp | planned | - | |
+| nax-icon | mvp | done | - | Lucide 语义子集；demo: pages/components/icon |
 | nax-space | mvp | planned | - | |
 | nax-divider | mvp | planned | - | |
 | nax-tag | mvp | planned | - | |
