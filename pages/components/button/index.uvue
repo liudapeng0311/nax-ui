@@ -1,0 +1,176 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="page">
+			<text class="page__title">nax-button</text>
+			<text class="page__desc">type: default / tertiary / primary / info / success / warning / error</text>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="row">
+					<view class="item">
+						<nax-button label="Default" @click="onTap('default')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="tertiary" label="Tertiary" @click="onTap('tertiary')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" label="Primary" @click="onTap('primary')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="info" label="Info" @click="onTap('info')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" label="Success" @click="onTap('success')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="warning" label="Warning" @click="onTap('warning')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" label="Error" @click="onTap('error')"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">变体 variant</text>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" variant="solid" label="solid"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="outline" label="outline"></nax-button>
+					</view>
+				</view>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" variant="light" label="light"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="text" label="text"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" size="sm" label="small"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" size="md" label="medium"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" size="lg" label="large"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">形状 shape</text>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" shape="square" label="square"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" shape="round" label="round"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" shape="circle" label="好"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">状态</text>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" label="正常" @click="onTap('normal')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" disabled label="禁用" @click="onTap('disabled')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" :loading="loading" label="加载" @click="toggleLoading"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">块级 block</text>
+				<nax-button type="primary" block label="块级主按钮" @click="onTap('block')"></nax-button>
+				<view class="gap"></view>
+				<nax-button type="error" variant="outline" block label="块级描边按钮"></nax-button>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最近点击</text>
+				<text class="page__desc">{{ lastClick }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	const loading = ref(false)
+	const lastClick = ref('暂无')
+
+	function onTap(name : string) {
+		lastClick.value = name
+		uni.showToast({
+			title: name,
+			icon: 'none'
+		})
+	}
+
+	function toggleLoading() {
+		loading.value = !loading.value
+		lastClick.value = loading.value ? 'loading:on' : 'loading:off'
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.item {
+		margin-right: 10px;
+		margin-bottom: 8px;
+	}
+
+	.gap {
+		height: 10px;
+	}
+</style>

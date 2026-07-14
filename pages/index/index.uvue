@@ -1,0 +1,61 @@
+﻿<template>
+	<view class="home">
+		<text class="home__title">nax-ui</text>
+		<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
+
+		<view class="home__card" @click="goButton">
+			<text class="home__card-title">nax-button</text>
+			<text class="home__card-desc">按钮：类型 / 变体 / 尺寸 / 状态</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	function goButton() {
+		uni.navigateTo({
+			url: '/pages/components/button/index'
+		})
+	}
+</script>
+
+<style>
+	.home {
+		padding: 20px;
+		background-color: var(--nax-color-bg-secondary, #f5f6f8);
+		flex: 1;
+	}
+
+	.home__title {
+		font-size: 22px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.home__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-bottom: 20px;
+	}
+
+	.home__card {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-lg, 12px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e5e6eb);
+	}
+
+	.home__card-title {
+		font-size: 16px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 500;
+		margin-bottom: 6px;
+	}
+
+	.home__card-desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+	}
+</style>
