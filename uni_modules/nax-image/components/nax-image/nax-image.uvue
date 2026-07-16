@@ -1,0 +1,417 @@
+<template>
+	<view class="nax-image" :class="rootClass" :style="rootStyle" @click="onClick">
+		<image
+			v-if="showImage"
+			class="nax-image__img"
+			:class="imgClass"
+			:src="src"
+			:mode="mode"
+			:lazy-load="lazyLoad"
+			:fade-show="fadeShow"
+			:webp="webp"
+			:draggable="draggable"
+			:show-menu-by-longpress="showMenuByLongpress"
+			@load="onLoad"
+			@error="onError"
+		></image>
+
+		<view v-if="showLoadingLayer" class="nax-image__status" :style="statusLayerStyle">
+			<slot name="loading">
+				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
+				<view class="nax-image__spin" :style="loadingStyle">
+					<nax-icon name="loading" :size="iconSizeName" color="#999999"></nax-icon>
+				</view>
+				<!-- #endif -->
+				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+				<view class="nax-image__spin">
+					<nax-icon name="loading" :size="iconSizeName" color="#999999"></nax-icon>
+				</view>
+				<!-- #endif -->
+				<text v-if="loadingText.length > 0" class="nax-image__status-text">{{ loadingText }}</text>
+			</slot>
+		</view>
+
+		<view v-if="showErrorLayer" class="nax-image__status" :style="statusLayerStyle">
+			<slot name="error">
+				<view class="nax-image__error-icon">
+					<nax-icon name="error" :size="iconSizeName" color="#999999"></nax-icon>
+				</view>
+				<text v-if="errorText.length > 0" class="nax-image__status-text">{{ errorText }}</text>
+			</slot>
+		</view>
+
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-image
+	 * @description 图片。基于原生 image 封装，支持加载中 / 失败占位。
+	 * @property {string} src 图片地址
+	 * @property {string} mode 裁剪/缩放模式，同原生 image
+	 * @property {string} width 宽度；纯数字按 px
+	 * @property {string} height 高度；纯数字按 px
+	 * @property {string} shape square | round | circle
+	 * @property {boolean} lazyLoad 懒加载
+	 * @property {boolean} fadeShow 加载完成淡入（App 等端）
+	 * @property {boolean} webp 是否解析 webp（按端支持）
+	 * @property {boolean} draggable 是否可拖拽（Web）
+	 * @property {boolean} showMenuByLongpress 长按菜单（小程序）
+	 * @property {boolean} showLoading 是否展示加载占位
+	 * @property {boolean} showError 是否展示失败占位
+	 * @property {string} loadingText 加载文案
+	 * @property {string} errorText 失败文案
+	 * @property {string} customClass 根节点扩展 class
+	 * @event load 加载成功
+	 * @event error 加载失败
+	 * @event click 点击
+	 * @slot default 覆盖内容
+	 * @slot loading 自定义加载占位
+	 * @slot error 自定义失败占位
+	 */
+	const props = defineProps({
+		src: {
+			type: String,
+			default: ''
+		},
+		mode: {
+			type: String,
+			default: 'aspectFill'
+		},
+		width: {
+			type: String,
+			default: '100%'
+		},
+		height: {
+			type: String,
+			default: '200'
+		},
+		shape: {
+			type: String,
+			default: 'square'
+		},
+		lazyLoad: {
+			type: Boolean,
+			default: false
+		},
+		fadeShow: {
+			type: Boolean,
+			default: true
+		},
+		webp: {
+			type: Boolean,
+			default: false
+		},
+		draggable: {
+			type: Boolean,
+			default: true
+		},
+		showMenuByLongpress: {
+			type: Boolean,
+			default: false
+		},
+		showLoading: {
+			type: Boolean,
+			default: true
+		},
+		showError: {
+			type: Boolean,
+			default: true
+		},
+		loadingText: {
+			type: String,
+			default: ''
+		},
+		errorText: {
+			type: String,
+			default: '加载失败'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['load', 'error', 'click'])
+
+	// loading | loaded | error
+	const status = ref('loading')
+
+	const hasSrc = computed((): boolean => {
+		return props.src.length > 0
+	})
+
+	const showImage = computed((): boolean => {
+		return hasSrc.value && status.value != 'error'
+	})
+
+	const showLoadingLayer = computed((): boolean => {
+		if (!props.showLoading) {
+			return false
+		}
+		if (!hasSrc.value) {
+			return false
+		}
+		return status.value == 'loading'
+	})
+
+	const showErrorLayer = computed((): boolean => {
+		if (!props.showError) {
+			return false
+		}
+		if (!hasSrc.value) {
+			return true
+		}
+		return status.value == 'error'
+	})
+
+	const iconSizeName = computed((): string => {
+		return 'lg'
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		const shapeName = normalizeShape(props.shape)
+		cls += ' nax-image--shape-' + shapeName
+		if (status.value == 'loading') {
+			cls += ' nax-image--loading'
+		}
+		if (status.value == 'error' || !hasSrc.value) {
+			cls += ' nax-image--error'
+		}
+		if (status.value == 'loaded') {
+			cls += ' nax-image--loaded'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const imgClass = computed((): string => {
+		const shapeName = normalizeShape(props.shape)
+		return 'nax-image__img--shape-' + shapeName
+	})
+
+	const widthCss = computed((): string => {
+		return toCssSize(props.width, '100%')
+	})
+
+	const heightCss = computed((): string => {
+		return toCssSize(props.height, '200px')
+	})
+
+	const rootStyle = computed((): string => {
+		// root bg fallback for Harmony
+		return 'width:' + widthCss.value + ';height:' + heightCss.value + ';background-color:#f5f6f8;'
+	})
+
+	// status layer inline bg fallback for Harmony
+	const statusLayerStyle = computed((): string => {
+		return 'width:100%;height:100%;background-color:#f5f6f8;'
+	})
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App: no @keyframes, timer rotate fallback
+	const loadingAngle = ref(0)
+	let loadingTimerId = -1
+
+	const loadingStyle = computed((): string => {
+		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
+	})
+
+	function startLoadingSpin() {
+		stopLoadingSpin()
+		loadingAngle.value = 0
+		loadingTimerId = setInterval(() => {
+			let next = loadingAngle.value + 30
+			if (next >= 360) {
+				next = 0
+			}
+			loadingAngle.value = next
+		}, 50)
+	}
+
+	function stopLoadingSpin() {
+		if (loadingTimerId >= 0) {
+			clearInterval(loadingTimerId)
+			loadingTimerId = -1
+		}
+		loadingAngle.value = 0
+	}
+
+	watch((): boolean => {
+		return showLoadingLayer.value
+	}, (val: boolean) => {
+		if (val) {
+			startLoadingSpin()
+		} else {
+			stopLoadingSpin()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopLoadingSpin()
+	})
+	// #endif
+
+	watch((): string => {
+		return props.src
+	}, () => {
+		resetStatus()
+	}, { immediate: true })
+
+	function resetStatus() {
+		if (!hasSrc.value) {
+			status.value = 'error'
+			return
+		}
+		status.value = 'loading'
+	}
+
+	function normalizeShape(value: string): string {
+		if (value == 'round' || value == 'circle') {
+			return value
+		}
+		return 'square'
+	}
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function toCssSize(value: string, fallback: string): string {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (isDigits(value)) {
+			return value + 'px'
+		}
+		return value
+	}
+
+	function onLoad(e: any) {
+		status.value = 'loaded'
+		emit('load', e)
+	}
+
+	function onError(e: any) {
+		status.value = 'error'
+		emit('error', e)
+	}
+
+	function onClick() {
+		emit('click')
+	}
+</script>
+
+<style>
+	.nax-image {
+		position: relative;
+		overflow: hidden;
+		background-color: var(--nax-image-bg, #f5f6f8);
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: center;
+	}
+
+	.nax-image--shape-round {
+		border-radius: var(--nax-image-radius, 8px);
+	}
+
+	.nax-image--shape-circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-image__img {
+		width: 100%;
+		height: 100%;
+	}
+
+	.nax-image__img--shape-round {
+		border-radius: var(--nax-image-radius, 8px);
+	}
+
+	.nax-image__img--shape-circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-image__status {
+		position: absolute;
+		left: 0;
+		top: 0;
+		/* Harmony: explicit 100% size for absolute layer */
+		width: 100%;
+		height: 100%;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-image-status-bg, #f5f6f8);
+	}
+
+	.nax-image__spin {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		overflow: hidden;
+		transform-origin: center center;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web / MP: CSS spin */
+	.nax-image__spin {
+		animation-name: nax-image-spin;
+		animation-duration: 0.8s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-image-spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+	/* #endif */
+
+	.nax-image__error-icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+	}
+
+	.nax-image__status-text {
+		margin-top: 8px;
+		font-size: var(--nax-font-size-xs, 12px);
+		color: var(--nax-color-text-placeholder, #999999);
+		lines: 1;
+	}
+
+	/* #ifdef APP-HARMONY */
+	/* Harmony: solid bg fallback when CSS vars fail */
+	.nax-image {
+		background-color: #f5f6f8;
+	}
+	.nax-image__status {
+		background-color: #f5f6f8;
+	}
+	/* #endif */
+</style>

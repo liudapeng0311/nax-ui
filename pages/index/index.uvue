@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="nax-theme home">
 		<text class="home__title">nax-ui</text>
 		<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
@@ -16,6 +16,11 @@
 		<view class="home__card home__card--gap" @click="goSwiper">
 			<text class="home__card-title">nax-swiper</text>
 			<text class="home__card-desc">轮播：list / autoplay / indicator / current</text>
+		</view>
+
+		<view class="home__card home__card--gap" @click="goImage">
+			<text class="home__card-title">nax-image</text>
+			<text class="home__card-desc">图片：加载中 / 失败占位 / shape / mode</text>
 		</view>
 	</view>
 </template>
@@ -36,6 +41,12 @@
 	function goSwiper() {
 		uni.navigateTo({
 			url: '/pages/components/swiper/index'
+		})
+	}
+
+	function goImage() {
+		uni.navigateTo({
+			url: '/pages/image/index'
 		})
 	}
 </script>

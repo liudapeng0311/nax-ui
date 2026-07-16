@@ -1,0 +1,230 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page">
+			<text class="page__title">nax-image</text>
+			<text class="page__desc">原生 image 封装：尺寸 / 圆角 / 加载中 / 失败占位</text>
+
+			<view class="section">
+				<text class="section__title">基础 / mode</text>
+				<view class="row">
+					<view class="item">
+						<nax-image
+							:src="okSrc"
+							width="100"
+							height="100"
+							mode="aspectFill"
+						></nax-image>
+						<text class="item__label">aspectFill</text>
+					</view>
+					<view class="item">
+						<nax-image
+							:src="okSrc"
+							width="100"
+							height="100"
+							mode="aspectFit"
+						></nax-image>
+						<text class="item__label">aspectFit</text>
+					</view>
+					<view class="item">
+						<nax-image
+							:src="okSrc"
+							width="100"
+							height="100"
+							mode="scaleToFill"
+						></nax-image>
+						<text class="item__label">scaleToFill</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">形状 shape</text>
+				<view class="row">
+					<view class="item">
+						<nax-image
+							:src="okSrc"
+							width="88"
+							height="88"
+							shape="square"
+						></nax-image>
+						<text class="item__label">square</text>
+					</view>
+					<view class="item">
+						<nax-image
+							:src="okSrc"
+							width="88"
+							height="88"
+							shape="round"
+						></nax-image>
+						<text class="item__label">round</text>
+					</view>
+					<view class="item">
+						<nax-image
+							:src="okSrc"
+							width="88"
+							height="88"
+							shape="circle"
+						></nax-image>
+						<text class="item__label">circle</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">加载中 / 失败</text>
+				<view class="row">
+					<view class="item">
+						<nax-image
+							:src="slowSrc"
+							width="120"
+							height="120"
+							loading-text="加载中"
+							@load="onLoadOk"
+							@error="onError"
+						></nax-image>
+						<text class="item__label">加载占位</text>
+					</view>
+					<view class="item">
+						<nax-image
+							:src="badSrc"
+							width="120"
+							height="120"
+							error-text="加载失败"
+							@error="onError"
+						></nax-image>
+						<text class="item__label">失败占位</text>
+					</view>
+					<view class="item">
+						<nax-image
+							src=""
+							width="120"
+							height="120"
+							error-text="无图片"
+						></nax-image>
+						<text class="item__label">空 src</text>
+					</view>
+				</view>
+				<text class="page__hint">{{ tip }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义插槽</text>
+				<nax-image
+					:src="badSrc"
+					width="100%"
+					height="140"
+					shape="round"
+				>
+					<template #error>
+						<view class="slot-box">
+							<text class="slot-box__text">自定义失败插槽</text>
+						</view>
+					</template>
+				</nax-image>
+			</view>
+
+			<view class="section">
+				<text class="section__title">宽图（块级）</text>
+				<nax-image
+					:src="okSrc"
+					width="100%"
+					height="160"
+					shape="round"
+					mode="aspectFill"
+					@click="onClickImage"
+				></nax-image>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	const okSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg')
+	const slowSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg?t=' + Date.now().toString())
+	const badSrc = ref('https://invalid.nax-ui.local/not-found-' + Date.now().toString() + '.png')
+	const tip = ref('点击图片或观察 load / error 事件')
+
+	function onLoadOk() {
+		tip.value = 'load: 加载成功'
+	}
+
+	function onError() {
+		tip.value = 'error: 加载失败'
+	}
+
+	function onClickImage() {
+		tip.value = 'click: 宽图'
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #f5f6f8);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-bottom: 12px;
+	}
+
+	.page__hint {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-top: 8px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-lg, 12px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e5e6eb);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #1f1f1f);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-start;
+	}
+
+	.item {
+		margin-right: 12px;
+		margin-bottom: 8px;
+		align-items: center;
+	}
+
+	.item__label {
+		margin-top: 6px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #666666);
+	}
+
+	.slot-box {
+		align-items: center;
+		justify-content: center;
+		padding: 8px;
+	}
+
+	.slot-box__text {
+		font-size: 13px;
+		color: var(--nax-color-text-placeholder, #999999);
+	}
+</style>
