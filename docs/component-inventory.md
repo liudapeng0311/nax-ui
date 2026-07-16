@@ -103,6 +103,7 @@
 | 标签页 | `nax-tabs` | P1 | 内容切换 |
 | 宫格 | `nax-grid` | P2 | 入口宫格 |
 | 列表 | `nax-list` | P2 | 滚动列表壳 |
+| 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
 | 图片 | `nax-image` | P2 | 占位/失败态 |
 | 业务卡片等 | — | later | 不进 MVP |
 
@@ -114,6 +115,7 @@
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
 | `nax-icon` | mvp | 插件包已有骨架 |
+| `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | 其余 MVP | planned | 按依赖自底向上 |
 

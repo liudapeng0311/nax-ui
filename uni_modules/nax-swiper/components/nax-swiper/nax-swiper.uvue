@@ -1,0 +1,580 @@
+<template>
+	<view class="nax-swiper" :class="rootClass" :style="rootStyle">
+		<!-- list 有数据时走数据驱动（微信小程序最稳） -->
+		<swiper
+			v-if="useListMode"
+			class="nax-swiper__track"
+			:style="trackStyle"
+			:current="innerCurrent"
+			:autoplay="autoplay"
+			:interval="interval"
+			:duration="duration"
+			:circular="circular"
+			:vertical="vertical"
+			:indicator-dots="showNativeIndicator"
+			:indicator-color="indicatorColorValue"
+			:indicator-active-color="indicatorActiveColorValue"
+			:previous-margin="previousMargin"
+			:next-margin="nextMargin"
+			:display-multiple-items="resolvedDisplayMultipleItems"
+			:disable-touch="disableTouch"
+			@change="onChange"
+			@animationfinish="onAnimationFinish"
+		>
+			<swiper-item
+				v-for="(item, index) in list"
+				:key="itemKey(item, index)"
+				class="nax-swiper__item"
+			>
+				<view
+					class="nax-swiper__item-inner"
+					:class="itemInnerClass(item)"
+					:style="itemInnerStyle(item)"
+					@click="onItemClick(index)"
+				>
+					<image
+						v-if="resolveSrc(item).length > 0"
+						class="nax-swiper__image"
+						:src="resolveSrc(item)"
+						:mode="imageMode"
+					></image>
+					<text
+						v-if="resolveText(item).length > 0"
+						class="nax-swiper__text"
+					>{{ resolveText(item) }}</text>
+				</view>
+			</swiper-item>
+		</swiper>
+
+		<!-- 自定义 swiper-item：仅 slot；微信小程序必须 itemCount > 0 再挂载 swiper -->
+		<swiper
+			v-else-if="slotModeReady"
+			class="nax-swiper__track"
+			:style="trackStyle"
+			:current="innerCurrent"
+			:autoplay="autoplay"
+			:interval="interval"
+			:duration="duration"
+			:circular="circular"
+			:vertical="vertical"
+			:indicator-dots="showNativeIndicator"
+			:indicator-color="indicatorColorValue"
+			:indicator-active-color="indicatorActiveColorValue"
+			:previous-margin="previousMargin"
+			:next-margin="nextMargin"
+			:display-multiple-items="resolvedDisplayMultipleItems"
+			:disable-touch="disableTouch"
+			@change="onChange"
+			@animationfinish="onAnimationFinish"
+		>
+			<slot></slot>
+		</swiper>
+
+		<view v-if="showNumberIndicator" class="nax-swiper__number-bar" :class="numberBarClass">
+			<view class="nax-swiper__number">
+				<text class="nax-swiper__number-text">{{ numberText }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-swiper
+	 * @description 轮播。基于原生 swiper 封装。
+	 * @property {Array} list 图片 url，或 { src|image|url, text, bg|background }
+	 * @property {number} current 当前页（v-model:current）
+	 * @property {string} height 高度，默认 160（纯数字补 px）
+	 * @property {boolean} autoplay 自动播放
+	 * @property {number} interval 间隔 ms
+	 * @property {number} duration 动画 ms
+	 * @property {boolean} circular 循环
+	 * @property {boolean} vertical 纵向
+	 * @property {boolean} indicator 指示器
+	 * @property {string} indicatorType dot | number
+	 * @property {string} indicatorColor 指示点颜色
+	 * @property {string} indicatorActiveColor 当前指示点颜色
+	 * @property {string} indicatorPosition number 指示器位置
+	 * @property {string} imageMode image mode
+	 * @property {string} previousMargin 前边距
+	 * @property {string} nextMargin 后边距
+	 * @property {number} displayMultipleItems 同时显示滑块数
+	 * @property {number} itemCount 自定义 slot 时的 swiper-item 数量（list 为空时必传，微信小程序）
+	 * @property {boolean} disableTouch 禁止手势
+	 * @property {boolean} radius 圆角
+	 * @property {string} customClass 扩展 class
+	 * @event change / update:current / animationfinish / click
+	 * @slot default 自定义 swiper-item（list 为空；微信小程序请传 itemCount）
+	 */
+	const props = defineProps({
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		current: {
+			type: Number,
+			default: 0
+		},
+		height: {
+			type: String,
+			default: '160'
+		},
+		autoplay: {
+			type: Boolean,
+			default: false
+		},
+		interval: {
+			type: Number,
+			default: 3000
+		},
+		duration: {
+			type: Number,
+			default: 500
+		},
+		circular: {
+			type: Boolean,
+			default: true
+		},
+		vertical: {
+			type: Boolean,
+			default: false
+		},
+		indicator: {
+			type: Boolean,
+			default: true
+		},
+		indicatorType: {
+			type: String,
+			default: 'dot'
+		},
+		indicatorColor: {
+			type: String,
+			default: ''
+		},
+		indicatorActiveColor: {
+			type: String,
+			default: ''
+		},
+		indicatorPosition: {
+			type: String,
+			default: 'bottom'
+		},
+		imageMode: {
+			type: String,
+			default: 'aspectFill'
+		},
+		previousMargin: {
+			type: String,
+			default: '0px'
+		},
+		nextMargin: {
+			type: String,
+			default: '0px'
+		},
+		displayMultipleItems: {
+			type: Number,
+			default: 1
+		},
+		itemCount: {
+			type: Number,
+			default: 0
+		},
+		disableTouch: {
+			type: Boolean,
+			default: false
+		},
+		radius: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['change', 'update:current', 'animationfinish', 'click'])
+
+	const innerCurrent = ref(0)
+
+	const listLength = computed((): number => {
+		return props.list.length
+	})
+
+	/** list 优先；为空时走默认插槽自定义 swiper-item */
+	const useListMode = computed((): boolean => {
+		return listLength.value > 0
+	})
+
+	/** slot 模式仅在已知 itemCount 时挂载，避免微信小程序 item=0 却 display-multiple-items=1 */
+	const slotModeReady = computed((): boolean => {
+		return listLength.value == 0 && props.itemCount > 0
+	})
+
+	const knownItemCount = computed((): number => {
+		if (listLength.value > 0) {
+			return listLength.value
+		}
+		if (props.itemCount > 0) {
+			return props.itemCount
+		}
+		return 0
+	})
+
+	/**
+	 * 微信小程序硬约束：display-multiple-items 不能大于 swiper-item 数量。
+	 * knownItemCount 为 0 时仍返回 1 会报错，因此 slot 模式务必传 itemCount。
+	 */
+	const resolvedDisplayMultipleItems = computed((): number => {
+		let want = props.displayMultipleItems
+		if (want < 1) {
+			want = 1
+		}
+		const total = knownItemCount.value
+		if (total > 0 && want > total) {
+			return total
+		}
+		// total==0 时不应挂载 swiper（见 slotModeReady）
+		return 1
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.radius) {
+			cls += ' nax-swiper--radius'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const heightCss = computed((): string => {
+		const s = props.height
+		if (s.length == 0) {
+			return '160px'
+		}
+		if (isDigits(s)) {
+			return s + 'px'
+		}
+		return s
+	})
+
+	const rootStyle = computed((): string => {
+		return 'height:' + heightCss.value + ';'
+	})
+
+	const trackStyle = computed((): string => {
+		return 'height:' + heightCss.value + ';'
+	})
+
+	const isNumberIndicator = computed((): boolean => {
+		return props.indicatorType == 'number'
+	})
+
+	const showNativeIndicator = computed((): boolean => {
+		if (knownItemCount.value <= 0) {
+			return false
+		}
+		return props.indicator && !isNumberIndicator.value
+	})
+
+	const showNumberIndicator = computed((): boolean => {
+		return props.indicator && isNumberIndicator.value && knownItemCount.value > 0
+	})
+
+	const indicatorColorValue = computed((): string => {
+		if (props.indicatorColor.length > 0) {
+			return props.indicatorColor
+		}
+		return 'rgba(255, 255, 255, 0.45)'
+	})
+
+	const indicatorActiveColorValue = computed((): string => {
+		if (props.indicatorActiveColor.length > 0) {
+			return props.indicatorActiveColor
+		}
+		return '#ffffff'
+	})
+
+	const numberBarClass = computed((): string => {
+		const p = props.indicatorPosition
+		if (p == 'bottom-left') {
+			return 'nax-swiper__number-bar--bottom-left'
+		}
+		if (p == 'bottom-right') {
+			return 'nax-swiper__number-bar--bottom-right'
+		}
+		if (p == 'top') {
+			return 'nax-swiper__number-bar--top'
+		}
+		if (p == 'top-left') {
+			return 'nax-swiper__number-bar--top-left'
+		}
+		if (p == 'top-right') {
+			return 'nax-swiper__number-bar--top-right'
+		}
+		return 'nax-swiper__number-bar--bottom'
+	})
+
+	const numberText = computed((): string => {
+		const total = knownItemCount.value
+		if (total <= 0) {
+			return '0/0'
+		}
+		let cur = innerCurrent.value + 1
+		if (cur < 1) {
+			cur = 1
+		}
+		if (cur > total) {
+			cur = total
+		}
+		return cur.toString() + '/' + total.toString()
+	})
+
+	innerCurrent.value = props.current
+
+	watch((): number => {
+		return props.current
+	}, (val: number) => {
+		if (val != innerCurrent.value) {
+			innerCurrent.value = val
+		}
+	})
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function asObject(item: any): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function resolveSrc(item: any): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const src = obj.getString('src')
+		if (src != null && src.length > 0) {
+			return src
+		}
+		const image = obj.getString('image')
+		if (image != null && image.length > 0) {
+			return image
+		}
+		const url = obj.getString('url')
+		if (url != null && url.length > 0) {
+			return url
+		}
+		return ''
+	}
+
+	function resolveText(item: any): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const text = obj.getString('text')
+		if (text != null && text.length > 0) {
+			return text
+		}
+		const title = obj.getString('title')
+		if (title != null && title.length > 0) {
+			return title
+		}
+		return ''
+	}
+
+	function resolveBg(item: any): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const bg = obj.getString('bg')
+		if (bg != null && bg.length > 0) {
+			return bg
+		}
+		const background = obj.getString('background')
+		if (background != null && background.length > 0) {
+			return background
+		}
+		return ''
+	}
+
+	function itemInnerClass(item: any): string {
+		if (resolveSrc(item).length > 0) {
+			return ''
+		}
+		if (resolveBg(item).length > 0 || resolveText(item).length > 0) {
+			return 'nax-swiper__item-inner--panel'
+		}
+		return ''
+	}
+
+	function itemInnerStyle(item: any): string {
+		const bg = resolveBg(item)
+		if (bg.length == 0) {
+			return ''
+		}
+		return 'background-color:' + bg + ';'
+	}
+
+	function itemKey(item: any, index: number): string {
+		const src = resolveSrc(item)
+		if (src.length > 0) {
+			return index.toString() + '-' + src
+		}
+		const text = resolveText(item)
+		if (text.length > 0) {
+			return index.toString() + '-' + text
+		}
+		return 'nax-swiper-' + index.toString()
+	}
+
+	function onChange(e: UniSwiperChangeEvent) {
+		const detail = e.detail
+		const cur = detail.current
+		innerCurrent.value = cur
+		emit('update:current', cur)
+		emit('change', cur)
+	}
+
+	function onAnimationFinish(e: UniSwiperAnimationFinishEvent) {
+		const detail = e.detail
+		const cur = detail.current
+		innerCurrent.value = cur
+		emit('animationfinish', cur)
+	}
+
+	function onItemClick(index: number) {
+		emit('click', index)
+	}
+</script>
+
+<style>
+	.nax-swiper {
+		position: relative;
+		width: 100%;
+		overflow: hidden;
+		background-color: var(--nax-color-bg-secondary, #f5f6f8);
+	}
+
+	.nax-swiper--radius {
+		border-radius: var(--nax-swiper-radius, var(--nax-radius-lg, 12px));
+	}
+
+	.nax-swiper__track {
+		width: 100%;
+	}
+
+	.nax-swiper__item {
+		width: 100%;
+		height: 100%;
+	}
+
+	.nax-swiper__item-inner {
+		width: 100%;
+		height: 100%;
+		position: relative;
+	}
+
+	.nax-swiper__item-inner--panel {
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-swiper__image {
+		width: 100%;
+		height: 100%;
+	}
+
+	.nax-swiper__text {
+		font-size: var(--nax-font-size-lg, 16px);
+		color: var(--nax-color-text-inverse, #ffffff);
+		font-weight: 500;
+		lines: 1;
+	}
+
+	.nax-swiper__number-bar {
+		position: absolute;
+		left: 0;
+		right: 0;
+		z-index: 2;
+		flex-direction: row;
+		align-items: center;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-swiper__number-bar--bottom {
+		bottom: 10px;
+		justify-content: center;
+	}
+
+	.nax-swiper__number-bar--bottom-left {
+		bottom: 10px;
+		justify-content: flex-start;
+	}
+
+	.nax-swiper__number-bar--bottom-right {
+		bottom: 10px;
+		justify-content: flex-end;
+	}
+
+	.nax-swiper__number-bar--top {
+		top: 10px;
+		justify-content: center;
+	}
+
+	.nax-swiper__number-bar--top-left {
+		top: 10px;
+		justify-content: flex-start;
+	}
+
+	.nax-swiper__number-bar--top-right {
+		top: 10px;
+		justify-content: flex-end;
+	}
+
+	.nax-swiper__number {
+		padding-left: 8px;
+		padding-right: 8px;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		border-radius: var(--nax-radius-full, 999px);
+		background-color: var(--nax-swiper-number-bg, #666666);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-swiper__number-text {
+		font-size: var(--nax-font-size-xs, 12px);
+		color: var(--nax-swiper-number-color, #ffffff);
+		lines: 1;
+	}
+</style>

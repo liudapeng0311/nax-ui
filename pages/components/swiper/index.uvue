@@ -1,0 +1,175 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page">
+			<text class="page__title">nax-swiper</text>
+			<text class="page__desc">轮播 · list / autoplay / indicator / v-model:current</text>
+
+			<view class="section">
+				<text class="section__title">基础（点指示器）</text>
+				<nax-swiper
+					:list="banners"
+					height="160"
+					@change="onChange"
+					@click="onClickItem"
+				></nax-swiper>
+				<text class="page__hint">current: {{ currentHint }} · {{ tip }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自动播放 + 循环</text>
+				<nax-swiper
+					:list="banners"
+					height="160"
+					autoplay
+					:interval="2500"
+					circular
+				></nax-swiper>
+			</view>
+
+			<view class="section">
+				<text class="section__title">数字指示器</text>
+				<nax-swiper
+					:list="banners"
+					height="160"
+					indicator
+					indicator-type="number"
+					indicator-position="bottom-right"
+				></nax-swiper>
+			</view>
+
+			<view class="section">
+				<text class="section__title">受控 current</text>
+				<nax-swiper
+					:list="banners"
+					height="160"
+					v-model:current="current"
+					:indicator="true"
+				></nax-swiper>
+				<view class="row">
+					<view class="item">
+						<nax-button size="sm" label="上一页" @click="prev"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button size="sm" type="primary" label="下一页" @click="next"></nax-button>
+					</view>
+					<text class="page__hint">v-model: {{ current }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">色块文案（list 对象，小程序推荐）</text>
+				<nax-swiper
+					:list="panels"
+					height="140"
+					indicator
+				></nax-swiper>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	const banners = ref([
+		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
+		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/muwu.jpg',
+		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/yinhua.jpg'
+	] as string[])
+
+	// 微信小程序：自定义内容优先用 list 对象（bg/text），避免 slot 内 swiper-item 计数为 0
+	const panels = ref([
+		{
+			bg: '#1677ff',
+			text: '自定义页 1'
+		} as UTSJSONObject,
+		{
+			bg: '#18a058',
+			text: '自定义页 2'
+		} as UTSJSONObject,
+		{
+			bg: '#f0a020',
+			text: '自定义页 3'
+		} as UTSJSONObject
+	] as UTSJSONObject[])
+
+	const current = ref(0)
+	const currentHint = ref(0)
+	const tip = ref('点击轮播项查看 index')
+
+	function onChange(cur: number) {
+		currentHint.value = cur
+	}
+
+	function onClickItem(index: number) {
+		tip.value = 'click index: ' + index.toString()
+	}
+
+	function prev() {
+		if (current.value <= 0) {
+			current.value = banners.value.length - 1
+			return
+		}
+		current.value = current.value - 1
+	}
+
+	function next() {
+		if (current.value >= banners.value.length - 1) {
+			current.value = 0
+			return
+		}
+		current.value = current.value + 1
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #f5f6f8);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #1f1f1f);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-bottom: 12px;
+	}
+
+	.page__hint {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-top: 8px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-lg, 12px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e5e6eb);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #1f1f1f);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		margin-top: 10px;
+	}
+
+	.item {
+		margin-right: 10px;
+	}
+</style>
