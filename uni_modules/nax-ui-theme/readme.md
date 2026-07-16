@@ -3,7 +3,7 @@
 `nax-ui` 设计 **Token 约定包**（不是 UI 组件）。
 
 - 提供统一的 `--nax-*` CSS 变量
-- 默认浅色：`theme/default.css`
+- 默认浅色（设计稿橙主色）：`theme/default.css`
 - 暗色覆盖：`theme/dark.css`
 - 供 `nax-button` 等**独立插件**共享主题
 - **运行时弱依赖**：组件不强制安装本包，内有 fallback
@@ -44,7 +44,7 @@ uni_modules/nax-ui-theme
 
 ```css
 .nax-theme {
-	--nax-color-primary: #7c3aed;
+	--nax-color-primary: #18a058;
 }
 ```
 
@@ -67,20 +67,20 @@ uni_modules/nax-ui-theme
 | 包 | 职责 |
 |----|------|
 | `nax-ui-theme` | 定义变量名与默认值 |
-| `nax-*` 组件 | `var(--nax-color-primary, #1677ff)` 消费变量 |
+| `nax-*` 组件 | `var(--nax-color-primary, #18a058)` 消费变量 |
 | 业务 App / layout | `@import` + 挂载 `.nax-theme`，可选覆盖与 dark |
 
 ## 变量一览（核心）
 
 | 变量 | 默认（浅色） |
 |------|----------------|
-| `--nax-color-primary` | `#1677ff` |
+| `--nax-color-primary` | `#18a058` |
 | `--nax-color-success` | `#18a058` |
 | `--nax-color-warning` | `#f0a020` |
 | `--nax-color-error` | `#d03050` |
 | `--nax-color-text` | `#333639` |
 | `--nax-color-bg` | `#ffffff` |
-| `--nax-color-bg-secondary` | `#f5f6f8` |
+| `--nax-color-bg-secondary` | `#fafafc` |
 | `--nax-color-border` | `#e0e0e6` |
 
 完整说明见：`docs/design-system.md`、`docs/theme.md`。

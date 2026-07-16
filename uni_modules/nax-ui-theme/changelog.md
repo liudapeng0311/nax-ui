@@ -1,3 +1,11 @@
+## 0.1.4（2026-07-16）
+- 色板改回 **Naive UI light/dark** 官方 common 色（按钮演示同款）
+- primary/success `#18a058`，info `#2080f0`，warning `#f0a020`，error `#d03050`
+- 补充 hover/pressed token；soft fill 按 Naive secondary 透明度实色近似
+## 0.1.3（2026-07-16）
+- 色板对齐设计稿 Color 色彩：主题主色改为 `#ff6b35`，同步成功/警告/错误/信息及文字/背景/描边/遮罩
+- 补充色阶 token：`*-deep` / `*-disabled`、`--nax-color-divider`、`--nax-color-bg-dark`、`--nax-color-shadow`
+- soft fill（secondary/tertiary）改为设计稿禁用/淡阶实色
 ## 0.1.2（2026-07-16）
 
 - 文档：主题接入改为 L0 默认色 / L1 启动配置 / L2 运行时切换

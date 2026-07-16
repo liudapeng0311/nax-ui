@@ -19,12 +19,12 @@
 			<slot name="loading">
 				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
 				<view class="nax-image__spin" :style="loadingStyle">
-					<nax-icon name="loading" :size="iconSizeName" color="#999999"></nax-icon>
+					<nax-icon name="loading" :size="iconSizeName" color="#c2c2c2"></nax-icon>
 				</view>
 				<!-- #endif -->
 				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
 				<view class="nax-image__spin">
-					<nax-icon name="loading" :size="iconSizeName" color="#999999"></nax-icon>
+					<nax-icon name="loading" :size="iconSizeName" color="#c2c2c2"></nax-icon>
 				</view>
 				<!-- #endif -->
 				<text v-if="loadingText.length > 0" class="nax-image__status-text">{{ loadingText }}</text>
@@ -34,7 +34,7 @@
 		<view v-if="showErrorLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="error">
 				<view class="nax-image__error-icon">
-					<nax-icon name="error" :size="iconSizeName" color="#999999"></nax-icon>
+					<nax-icon name="error" :size="iconSizeName" color="#c2c2c2"></nax-icon>
 				</view>
 				<text v-if="errorText.length > 0" class="nax-image__status-text">{{ errorText }}</text>
 			</slot>
@@ -204,12 +204,12 @@
 
 	const rootStyle = computed((): string => {
 		// root bg fallback for Harmony
-		return 'width:' + widthCss.value + ';height:' + heightCss.value + ';background-color:#f5f6f8;'
+		return 'width:' + widthCss.value + ';height:' + heightCss.value + ';background-color:#fafafc;'
 	})
 
 	// status layer inline bg fallback for Harmony
 	const statusLayerStyle = computed((): string => {
-		return 'width:100%;height:100%;background-color:#f5f6f8;'
+		return 'width:100%;height:100%;background-color:#fafafc;'
 	})
 
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
@@ -321,7 +321,7 @@
 	.nax-image {
 		position: relative;
 		overflow: hidden;
-		background-color: var(--nax-image-bg, #f5f6f8);
+		background-color: var(--nax-image-bg, #fafafc);
 		flex-direction: column;
 		align-items: stretch;
 		justify-content: center;
@@ -358,7 +358,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		background-color: var(--nax-image-status-bg, #f5f6f8);
+		background-color: var(--nax-image-status-bg, #fafafc);
 	}
 
 	.nax-image__spin {
@@ -401,17 +401,17 @@
 	.nax-image__status-text {
 		margin-top: 8px;
 		font-size: var(--nax-font-size-xs, 12px);
-		color: var(--nax-color-text-placeholder, #999999);
+		color: var(--nax-color-text-placeholder, #c2c2c2);
 		lines: 1;
 	}
 
 	/* #ifdef APP-HARMONY */
 	/* Harmony: solid bg fallback when CSS vars fail */
 	.nax-image {
-		background-color: #f5f6f8;
+		background-color: #fafafc;
 	}
 	.nax-image__status {
-		background-color: #f5f6f8;
+		background-color: #fafafc;
 	}
 	/* #endif */
 </style>

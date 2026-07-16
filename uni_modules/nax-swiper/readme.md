@@ -91,7 +91,7 @@ const banners = ref([
 
 ```uts
 const panels = ref([
-  { bg: '#1677ff', text: '页 1' } as UTSJSONObject,
+  { bg: '#18a058', text: '页 1' } as UTSJSONObject,
   { bg: '#18a058', text: '页 2' } as UTSJSONObject
 ] as UTSJSONObject[])
 ```

@@ -31,13 +31,13 @@
 uvue（尤其 App / 鸿蒙）核心样式以 **class 选择器** 为主，**不要**写：
 
 ```css
-page { --nax-color-primary: #1677ff; } /* 鸿蒙可能报 Selector page is not supported */
+page { --nax-color-primary: #18a058; } /* 鸿蒙可能报 Selector page is not supported */
 ```
 
 `nax-ui-theme` 把变量挂在宿主 class 上：
 
 ```css
-.nax-theme { --nax-color-primary: #1677ff; /* ... */ }
+.nax-theme { --nax-color-primary: #18a058; /* ... */ }
 ```
 
 因此：
@@ -56,7 +56,7 @@ Sass / `uni.scss` 属于 **编译期** 变量，适合生成 CSS 或工程内部
 ## 3. L0：默认色（零配置）
 
 - 不安装或不安引入 `nax-ui-theme` 也可以
-- 组件样式形如：`var(--nax-color-primary, #1677ff)`
+- 组件样式形如：`var(--nax-color-primary, #18a058)`
 - 观感接近默认浅色，但 **不是** 完整 token 表，也不支持统一换肤
 
 适合：demo 试组件、暂不接主题的业务页。
@@ -95,7 +95,7 @@ Sass / `uni.scss` 属于 **编译期** 变量，适合生成 CSS 或工程内部
 
 ```css
 .nax-theme {
-  --nax-color-primary: #7c3aed;
+  --nax-color-primary: #18a058;
 }
 ```
 
@@ -127,8 +127,8 @@ Sass / `uni.scss` 属于 **编译期** 变量，适合生成 CSS 或工程内部
 在已有 `.nax-theme` 宿主上覆盖变量即可，例如改节点 style 或切换预置 class：
 
 ```css
-.nax-theme--brand-a { --nax-color-primary: #1677ff; }
-.nax-theme--brand-b { --nax-color-primary: #7c3aed; }
+.nax-theme--brand-a { --nax-color-primary: #18a058; }
+.nax-theme--brand-b { --nax-color-primary: #18a058; }
 ```
 
 ### 5.3 不建议一上来做的

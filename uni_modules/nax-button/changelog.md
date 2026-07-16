@@ -1,3 +1,7 @@
+## 0.1.13（2026-07-16）
+- fallback 对齐 Naive UI 按钮色：primary/success `#18a058`，info/warning/error 同步官方 common
+## 0.1.12（2026-07-16）
+- fallback 色值对齐设计稿：主色 `#ff6b35`，同步 success/warning/error/info 与中性色
 ## 0.1.11（2026-07-16）
 
 - package：安装依赖增加 nax-ui-theme（运行时仍弱依赖 + fallback）

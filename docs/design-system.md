@@ -82,7 +82,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 
 | Token | 默认值 | 用途 |
 |-------|--------|------|
-| `--nax-color-primary` | `#1677ff` | 主操作、链接 |
+| `--nax-color-primary` | `#18a058` | 主操作、链接 |
 | `--nax-color-success` | `#18a058` | 成功 |
 | `--nax-color-warning` | `#f0a020` | 警告 |
 | `--nax-color-danger` | `#d03050` | 危险/错误（兼容） |
@@ -94,9 +94,9 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | Token | 默认值 | 用途 |
 |-------|--------|------|
 | `--nax-color-text` | `#333639` | 主文案 |
-| `--nax-color-text-secondary` | `#666666` | 次文案 |
-| `--nax-color-text-placeholder` | `#999999` | 占位 |
-| `--nax-color-text-disabled` | `#c0c0c0` | 禁用 |
+| `--nax-color-text-secondary` | `#767c82` | 次文案（Naive textColor3） |
+| `--nax-color-text-placeholder` | `#c2c2c2` | 占位（Naive placeholder） |
+| `--nax-color-text-disabled` | `#c2c2c2` | 禁用 |
 | `--nax-color-text-inverse` | `#ffffff` | 深色底上的文字 |
 
 #### 背景 / 边框 / 遮罩
@@ -104,11 +104,33 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | Token | 默认值 | 用途 |
 |-------|--------|------|
 | `--nax-color-bg` | `#ffffff` | 页面/卡片底 |
-| `--nax-color-bg-secondary` | `#f5f6f8` | 次级背景 |
-| `--nax-color-bg-hover` | `#f2f3f5` | 点击态 |
-| `--nax-color-border` | `#e0e0e6` | 默认边框 |
-| `--nax-color-border-strong` | `#c9cdd4` | 强调边框 |
-| `--nax-color-mask` | `rgba(0, 0, 0, 0.45)` | 弹层遮罩 |
+| `--nax-color-bg-secondary` | `#fafafc` | 次级背景（actionColor） |
+| `--nax-color-bg-hover` | `#f3f3f5` | 点击态（hoverColor） |
+| `--nax-color-border` | `#e0e0e6` | 默认边框（borderColor） |
+| `--nax-color-border-strong` | `#c2c2c2` | 强调边框 |
+| `--nax-color-mask` | `rgba(0, 0, 0, 0.4)` | 弹层遮罩 |
+
+
+#### 品牌与状态色阶（Naive hover / pressed）
+
+| Token | 默认值 | 用途 |
+|-------|--------|------|
+| `--nax-color-primary-hover` | `#36ad6a` | 主题悬停 |
+| `--nax-color-primary-deep` | `#0c7a43` | 主题按压 |
+| `--nax-color-primary-secondary` | `#daefe4` | 主题 secondary 浅底 |
+| `--nax-color-primary-tertiary` | `#e3f3eb` | 主题 tertiary 浅底 |
+| `--nax-color-success-hover` / `deep` | `#36ad6a` / `#0c7a43` | 成功悬停/按压 |
+| `--nax-color-success-secondary` / `tertiary` | `#daefe4` / `#e3f3eb` | 成功浅底 |
+| `--nax-color-warning-hover` / `deep` | `#fcb040` / `#c97c10` | 警告悬停/按压 |
+| `--nax-color-warning-secondary` / `tertiary` | `#fcefda` / `#fdf3e4` | 警告浅底 |
+| `--nax-color-error-hover` / `deep` | `#de576d` / `#ab1f3f` | 错误悬停/按压 |
+| `--nax-color-error-secondary` / `tertiary` | `#f7dde3` / `#f9e6ea` | 错误浅底 |
+| `--nax-color-info-hover` / `deep` | `#4098fc` / `#1060c9` | 信息悬停/按压 |
+| `--nax-color-info-secondary` / `tertiary` | `#dbeafc` / `#e4effd` | 信息浅底 |
+| `--nax-color-divider` | `#efeff5` | 分割线 |
+| `--nax-color-button-secondary` / `tertiary` | `#ececed` / `#f2f3f3` | 默认次要/次次要底 |
+
+> 色板来源：[Naive UI common/light](https://github.com/tusen-ai/naive-ui/blob/main/src/_styles/common/light.ts)。默认 **primary 与 success 同为绿色 `#18a058`**（官方默认）。
 
 > 暗黑主题：先预留 `--nax-*` 覆盖层，MVP 不做自动跟随系统；后续在 `theme-dark` class 或页面根变量中切换。
 
@@ -231,18 +253,18 @@ MVP 只做必要过渡；复杂动画后置。
 | 描边 | `outline` | 透明底 + 色边（兼容保留） |
 | 禁用 | `disabled` prop | `opacity: var(--nax-opacity-disabled, 0.5)`，不触发事件 |
 
-色板默认值（可被 `nax-ui-theme` 覆盖）：
+色板默认值（Naive UI light，可被 `nax-ui-theme` 覆盖）：
 
-| Token | 默认（Naive light 近似） |
+| Token | 默认（Naive light） |
 |-------|--------------------------|
-| `--nax-color-primary` | `#1677ff` |
+| `--nax-color-primary` | `#18a058` |
 | `--nax-color-success` | `#18a058` |
 | `--nax-color-info` | `#2080f0` |
 | `--nax-color-warning` | `#f0a020` |
 | `--nax-color-error` | `#d03050` |
-| `--nax-color-button-secondary` | `#ececed` |
-| `--nax-color-button-tertiary` | `#f2f3f3` |
-| 彩色 secondary / tertiary | 实色浅底（如 primary `#dae9ff` / `#e3eeff`），避免鸿蒙 `rgba` 失效 |
+| `--nax-color-button-secondary` | `#fafafc` |
+| `--nax-color-button-tertiary` | `#f3f3f5` |
+| 彩色 secondary / tertiary | 实色浅底（primary `#daefe4` / `#e3f3eb`，对应 Naive 0.16/更淡叠白），避免鸿蒙 `rgba` 失效 |
 ### 4.3 表单组件约定
 
 | 约定 | 说明 |
