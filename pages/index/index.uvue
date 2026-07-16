@@ -1,8 +1,19 @@
 <template>
 	<scroll-view style="flex:1" scroll-y="true">
-		<view class="nax-theme home">
-			<text class="home__title">nax-ui</text>
-			<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
+		<view class="nax-theme home" :class="themeExtraClass">
+			<view class="home__header">
+				<view class="home__header-text">
+					<text class="home__title">nax-ui</text>
+					<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
+				</view>
+				<nax-button
+					size="sm"
+					:type="darkMode ? 'primary' : 'default'"
+					:variant="darkMode ? 'solid' : 'secondary'"
+					:label="themeToggleLabel"
+					@click="toggleDarkMode"
+				></nax-button>
+			</view>
 
 			<view class="home__section">
 				<text class="home__section-title">基础组件</text>
@@ -32,6 +43,35 @@
 </template>
 
 <script setup lang="uts">
+	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+
+	// setup 同步读全局，避免首帧 false 白闪
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const themeToggleLabel = computed((): string => {
+		if (darkMode.value) {
+			return '浅色'
+		}
+		return '深色'
+	})
+
+	function toggleDarkMode() {
+		const next = !darkMode.value
+		darkMode.value = next
+		setDemoDarkMode(next)
+	}
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
 	function goButton() {
 		uni.navigateTo({
 			url: '/pages/components/button/index'
@@ -64,6 +104,19 @@
 		flex: 1;
 	}
 
+	.home__header {
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: 20px;
+	}
+
+	.home__header-text {
+		flex: 1;
+		margin-right: 12px;
+		flex-direction: column;
+	}
+
 	.home__title {
 		font-size: 22px;
 		color: var(--nax-color-text, #1f1f1f);
@@ -74,7 +127,6 @@
 	.home__desc {
 		font-size: 13px;
 		color: var(--nax-color-text-secondary, #666666);
-		margin-bottom: 20px;
 	}
 
 	.home__section {

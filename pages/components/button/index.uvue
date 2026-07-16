@@ -1,6 +1,6 @@
 <template>
 	<scroll-view style="flex:1" scroll-y="true">
-		<view class="nax-theme page">
+		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__title">nax-button</text>
 			<text class="page__desc">色系与层级参考 Naive UI：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用</text>
 
@@ -300,6 +300,24 @@
 </template>
 
 <script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	// setup 同步读全局，避免首帧浅色白闪
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+
+
 	const loading = ref(false)
 	const lastClick = ref('暂无')
 

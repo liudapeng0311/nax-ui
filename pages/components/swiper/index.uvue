@@ -1,6 +1,6 @@
 <template>
 	<scroll-view style="flex:1" scroll-y="true">
-		<view class="nax-theme page">
+		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__title">nax-swiper</text>
 			<text class="page__desc">轮播 · list / autoplay / indicator / v-model:current</text>
 
@@ -69,6 +69,24 @@
 </template>
 
 <script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	// setup 同步读全局，避免首帧浅色白闪
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+
+
 	const banners = ref([
 		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
 		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/muwu.jpg',

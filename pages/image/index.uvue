@@ -1,6 +1,6 @@
 <template>
 	<scroll-view style="flex:1" scroll-y="true">
-		<view class="nax-theme page">
+		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__title">nax-image</text>
 			<text class="page__desc">原生 image 封装：尺寸 / 圆角 / 加载中 / 失败占位</text>
 
@@ -139,6 +139,24 @@
 </template>
 
 <script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	// setup 同步读全局，避免首帧浅色白闪
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+
+
 	const okSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg')
 	const slowSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg?t=' + Date.now().toString())
 	const badSrc = ref('https://invalid.nax-ui.local/not-found-' + Date.now().toString() + '.png')

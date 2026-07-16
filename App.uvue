@@ -1,9 +1,12 @@
 <script setup lang="uts">
+	import { initDemoTheme } from '@/common/demo-theme.uts'
+
 	// #ifdef APP-ANDROID || APP-HARMONY
 	let firstBackTime = 0
 	// #endif
 
 	onLaunch(() => {
+		initDemoTheme()
 		console.log('App Launch')
 	})
 
@@ -40,11 +43,11 @@
 </script>
 
 <style>
-	/* 全局主题：nax-ui-theme（仅 class 选择器，兼容鸿蒙/uvue） */
+	/* global theme: nax-ui-theme (class selectors only) */
 	@import "@/uni_modules/nax-ui-theme/theme/default.css";
 	@import "@/uni_modules/nax-ui-theme/theme/dark.css";
 
-	/* 业务覆盖示例：挂在 .nax-theme 上，不要写 page {}
+	/*
 	.nax-theme {
 		--nax-color-primary: #7c3aed;
 	}

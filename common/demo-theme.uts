@@ -1,0 +1,92 @@
+/**
+ * 演示工程全局主题状态（宿主 demo）
+ * 模块单例 + storage；setup 同步读取，减少进页白闪
+ *
+ * 说明：uni-app x App 蒸汽模式不宜引入 Pinia 等重状态库；
+ * 宿主用本模块作为轻量全局状态即可。
+ */
+const STORAGE_KEY = 'nax_demo_dark_mode'
+
+var darkModeFlag = false
+var themeInited = false
+
+function readStorage(): boolean {
+	const raw = uni.getStorageSync(STORAGE_KEY)
+	if (raw == null) {
+		return false
+	}
+	const s = '' + raw
+	if (s == '1' || s == 'true') {
+		return true
+	}
+	return false
+}
+
+function writeStorage(val: boolean) {
+	if (val) {
+		uni.setStorageSync(STORAGE_KEY, '1')
+	} else {
+		uni.setStorageSync(STORAGE_KEY, '0')
+	}
+}
+
+export function initDemoTheme() {
+	if (themeInited) {
+		return
+	}
+	darkModeFlag = readStorage()
+	themeInited = true
+	applyDemoThemeChrome(darkModeFlag)
+}
+
+export function isDemoDarkMode(): boolean {
+	if (!themeInited) {
+		initDemoTheme()
+	}
+	return darkModeFlag
+}
+
+export function setDemoDarkMode(val: boolean) {
+	darkModeFlag = val
+	themeInited = true
+	writeStorage(val)
+	applyDemoThemeChrome(val)
+}
+
+export function toggleDemoDarkMode(): boolean {
+	const next = !isDemoDarkMode()
+	setDemoDarkMode(next)
+	return next
+}
+
+export function demoThemeExtraClass(): string {
+	if (isDemoDarkMode()) {
+		return 'nax-theme-dark'
+	}
+	return ''
+}
+
+/**
+ * 原生导航栏颜色
+ * 注意：uni-app x 的 Uni 类型无 setBackgroundColor，页面底色靠 nax-theme / CSS 变量
+ */
+export function applyDemoThemeChrome(dark: boolean) {
+	if (dark) {
+		uni.setNavigationBarColor({
+			frontColor: '#ffffff',
+			backgroundColor: '#101014'
+		})
+	} else {
+		uni.setNavigationBarColor({
+			frontColor: '#000000',
+			backgroundColor: '#F8F8F8'
+		})
+	}
+}
+
+/** 页面 setup 同步调用：刷导航栏，返回是否暗黑 */
+export function bindDemoThemePage(): boolean {
+	const dark = isDemoDarkMode()
+	applyDemoThemeChrome(dark)
+	return dark
+}

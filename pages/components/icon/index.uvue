@@ -1,6 +1,6 @@
 <template>
 	<scroll-view style="flex:1" scroll-y="true">
-		<view class="nax-theme page">
+		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__title">nax-icon</text>
 			<text class="page__desc">Lucide 语义子集 · name / size / color / click</text>
 
@@ -97,6 +97,24 @@
 </template>
 
 <script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	// setup 同步读全局，避免首帧浅色白闪
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+
+
 	const tip = ref('点击图标查看 name')
 
 	const icons = ref([
