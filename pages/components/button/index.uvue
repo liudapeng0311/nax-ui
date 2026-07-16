@@ -2,16 +2,61 @@
 	<scroll-view style="flex:1" scroll-y="true">
 		<view class="nax-theme page">
 			<text class="page__title">nax-button</text>
-			<text class="page__desc">type: default / tertiary / primary / info / success / warning / error</text>
+			<text class="page__desc">色系与层级参考 Naive UI：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用</text>
 
 			<view class="section">
-				<text class="section__title">类型 type</text>
+				<text class="section__title">基础层级（default）</text>
+				<view class="row">
+					<view class="item">
+						<nax-button label="基础" @click="onTap('base')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button variant="secondary" label="次要" @click="onTap('secondary')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button variant="tertiary" label="次次要" @click="onTap('tertiary')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button variant="quaternary" label="次次次要" @click="onTap('quaternary')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button variant="dashed" label="虚线" @click="onTap('dashed')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button disabled label="禁用" @click="onTap('disabled')"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">主色层级（primary）</text>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" label="基础"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="secondary" label="次要"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="tertiary" label="次次要"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="quaternary" label="次次次要"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="dashed" label="虚线"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" disabled label="禁用"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type（基础 / solid）</text>
 				<view class="row">
 					<view class="item">
 						<nax-button label="Default" @click="onTap('default')"></nax-button>
-					</view>
-					<view class="item">
-						<nax-button type="tertiary" label="Tertiary" @click="onTap('tertiary')"></nax-button>
 					</view>
 					<view class="item">
 						<nax-button type="primary" label="Primary" @click="onTap('primary')"></nax-button>
@@ -32,21 +77,133 @@
 			</view>
 
 			<view class="section">
-				<text class="section__title">变体 variant</text>
+				<text class="section__title">次要 secondary × type</text>
 				<view class="row">
 					<view class="item">
-						<nax-button type="primary" variant="solid" label="solid"></nax-button>
+						<nax-button variant="secondary" label="Default"></nax-button>
 					</view>
+					<view class="item">
+						<nax-button type="primary" variant="secondary" label="Primary"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="info" variant="secondary" label="Info"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" variant="secondary" label="Success"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="warning" variant="secondary" label="Warning"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" variant="secondary" label="Error"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">次次要 tertiary × type</text>
+				<view class="row">
+					<view class="item">
+						<nax-button variant="tertiary" label="Default"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="tertiary" label="Primary"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="info" variant="tertiary" label="Info"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" variant="tertiary" label="Success"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="warning" variant="tertiary" label="Warning"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" variant="tertiary" label="Error"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">次次次要 quaternary × type</text>
+				<view class="row">
+					<view class="item">
+						<nax-button variant="quaternary" label="Default"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="quaternary" label="Primary"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="info" variant="quaternary" label="Info"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" variant="quaternary" label="Success"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="warning" variant="quaternary" label="Warning"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" variant="quaternary" label="Error"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">虚线 dashed × type</text>
+				<view class="row">
+					<view class="item">
+						<nax-button variant="dashed" label="Default"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" variant="dashed" label="Primary"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="info" variant="dashed" label="Info"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" variant="dashed" label="Success"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="warning" variant="dashed" label="Warning"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" variant="dashed" label="Error"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 disabled × type</text>
+				<view class="row">
+					<view class="item">
+						<nax-button disabled label="Default"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" disabled label="Primary"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="info" disabled label="Info"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" disabled label="Success"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="warning" disabled label="Warning"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" disabled label="Error"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">描边 outline（兼容）</text>
+				<view class="row">
 					<view class="item">
 						<nax-button type="primary" variant="outline" label="outline"></nax-button>
 					</view>
-				</view>
-				<view class="row">
 					<view class="item">
-						<nax-button type="primary" variant="light" label="light"></nax-button>
-					</view>
-					<view class="item">
-						<nax-button type="primary" variant="text" label="text"></nax-button>
+						<nax-button type="error" variant="outline" label="outline error"></nax-button>
 					</view>
 				</view>
 			</view>
@@ -81,17 +238,48 @@
 				</view>
 			</view>
 
+
 			<view class="section">
-				<text class="section__title">状态</text>
+				<text class="section__title">图标 icon（nax-icon）</text>
+				<view class="row">
+					<view class="item">
+						<nax-button type="primary" icon="search" label="搜索" @click="onTap('icon-search')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" icon="arrow-right" icon-position="right" label="下一步" @click="onTap('icon-right')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" variant="secondary" icon="check" label="完成"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="error" variant="outline" icon="delete" label="删除"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" shape="circle" icon="plus" @click="onTap('icon-circle')"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" icon="search" :loading="loading" label="加载中"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">状态 loading 动画</text>
 				<view class="row">
 					<view class="item">
 						<nax-button type="primary" label="正常" @click="onTap('normal')"></nax-button>
 					</view>
 					<view class="item">
-						<nax-button type="primary" disabled label="禁用" @click="onTap('disabled')"></nax-button>
+						<nax-button type="primary" :loading="loading" label="加载" @click="toggleLoading"></nax-button>
 					</view>
 					<view class="item">
-						<nax-button type="primary" :loading="loading" label="加载" @click="toggleLoading"></nax-button>
+						<nax-button type="primary" loading label="提交中"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="success" variant="secondary" loading label="保存中"></nax-button>
+					</view>
+					<view class="item">
+						<nax-button type="primary" shape="circle" loading></nax-button>
 					</view>
 				</view>
 			</view>
@@ -100,7 +288,7 @@
 				<text class="section__title">块级 block</text>
 				<nax-button type="primary" block label="块级主按钮" @click="onTap('block')"></nax-button>
 				<view class="gap"></view>
-				<nax-button type="error" variant="outline" block label="块级描边按钮"></nax-button>
+				<nax-button type="error" variant="secondary" block label="块级次要错误按钮"></nax-button>
 			</view>
 
 			<view class="section">

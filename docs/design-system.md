@@ -83,17 +83,17 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | Token | 默认值 | 用途 |
 |-------|--------|------|
 | `--nax-color-primary` | `#1677ff` | 主操作、链接 |
-| `--nax-color-success` | `#00b578` | 成功 |
-| `--nax-color-warning` | `#ff8f1f` | 警告 |
-| --nax-color-danger | #ff3141 | 危险/错误（兼容） |
-| --nax-color-error | #ff3141 | 错误（推荐，与按钮 type=error 对齐） |
-| `--nax-color-info` | `#3491fa` | 信息提示 |
+| `--nax-color-success` | `#18a058` | 成功 |
+| `--nax-color-warning` | `#f0a020` | 警告 |
+| `--nax-color-danger` | `#d03050` | 危险/错误（兼容） |
+| `--nax-color-error` | `#d03050` | 错误（推荐，与按钮 type=error 对齐） |
+| `--nax-color-info` | `#2080f0` | 信息提示 |
 
 #### 文本色
 
 | Token | 默认值 | 用途 |
 |-------|--------|------|
-| `--nax-color-text` | `#1f1f1f` | 主文案 |
+| `--nax-color-text` | `#333639` | 主文案 |
 | `--nax-color-text-secondary` | `#666666` | 次文案 |
 | `--nax-color-text-placeholder` | `#999999` | 占位 |
 | `--nax-color-text-disabled` | `#c0c0c0` | 禁用 |
@@ -106,7 +106,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-color-bg` | `#ffffff` | 页面/卡片底 |
 | `--nax-color-bg-secondary` | `#f5f6f8` | 次级背景 |
 | `--nax-color-bg-hover` | `#f2f3f5` | 点击态 |
-| `--nax-color-border` | `#e5e6eb` | 默认边框 |
+| `--nax-color-border` | `#e0e0e6` | 默认边框 |
 | `--nax-color-border-strong` | `#c9cdd4` | 强调边框 |
 | `--nax-color-mask` | `rgba(0, 0, 0, 0.45)` | 弹层遮罩 |
 
@@ -166,9 +166,9 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 
 | size | 高度参考 | 字号 | 左右内边距 |
 |------|----------|------|------------|
-| `sm` | `28px` | `13px` | `12px` |
-| `md` | `36px` | `14px` | `16px` |
-| `lg` | `44px` | `16px` | `20px` |
+| `sm` | `28px` | `13px` | `10px` |
+| `md` | `34px` | `14px` | `14px` |
+| `lg` | `40px` | `15px` | `18px` |
 
 图标默认跟随 size：
 
@@ -208,14 +208,41 @@ MVP 只做必要过渡；复杂动画后置。
 
 | Prop | 允许值 | 默认 |
 |------|--------|------|
-| `type` | 组件自定；按钮为 `default` / `tertiary` / `primary` / `info` / `success` / `warning` / `error` | `default` |
-| `variant` | `solid` / `outline` / `text` / `light` | `solid` |
+| `type` | 组件自定；按钮为 `default` / `primary` / `info` / `success` / `warning` / `error`（兼容 `tertiary`→default+tertiary、`danger`→error） | `default` |
+| `variant` | 按钮：`solid`(基础) / `secondary`(次要) / `tertiary`(次次要) / `quaternary`(次次次要) / `dashed`(虚线) / `outline`；兼容 `light`→secondary、`text`→quaternary | `solid` |
 | `size` | `sm` / `md` / `lg` | `md` |
 | `status` | `default` / `success` / `warning` / `error` | `default` |
 | `shape` | `square` / `round` / `circle` | 组件自定默认 |
 
 未列出的枚举需在组件文档中声明，并尽量复用上表语义。
 
+
+### 4.2.1 按钮层级（对齐 Naive UI）
+
+参考 [Naive UI Button](https://www.naiveui.com/zh-CN/light/components/button)：
+
+| 中文 | `variant` | 说明 |
+|------|-----------|------|
+| 基础 | `solid` | 默认主操作层级。`type=default` 为白底+边框；彩色 `type` 为实心 |
+| 次要 | `secondary` | 浅色填充、无边框（旧 `light` 映射至此） |
+| 次次要 | `tertiary` | 更弱浅底 |
+| 次次次要 | `quaternary` | 无底无边（旧 `text` 映射至此） |
+| 虚线 | `dashed` | `border-style: dashed` |
+| 描边 | `outline` | 透明底 + 色边（兼容保留） |
+| 禁用 | `disabled` prop | `opacity: var(--nax-opacity-disabled, 0.5)`，不触发事件 |
+
+色板默认值（可被 `nax-ui-theme` 覆盖）：
+
+| Token | 默认（Naive light 近似） |
+|-------|--------------------------|
+| `--nax-color-primary` | `#1677ff` |
+| `--nax-color-success` | `#18a058` |
+| `--nax-color-info` | `#2080f0` |
+| `--nax-color-warning` | `#f0a020` |
+| `--nax-color-error` | `#d03050` |
+| `--nax-color-button-secondary` | `#ececed` |
+| `--nax-color-button-tertiary` | `#f2f3f3` |
+| 彩色 secondary / tertiary | 实色浅底（如 primary `#dae9ff` / `#e3eeff`），避免鸿蒙 `rgba` 失效 |
 ### 4.3 表单组件约定
 
 | 约定 | 说明 |
@@ -380,5 +407,6 @@ MVP 只做必要过渡；复杂动画后置。
 | v1.0 | 文档完整、插件市场可发布、平台兼容表稳定 |
 
 变更 token 默认值属于 **潜在破坏性变更**，需在 changelog 标注。
+
 
 

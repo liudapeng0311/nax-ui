@@ -1,20 +1,35 @@
 /**
  * nax-ui-theme / default
  * 默认浅色语义 token。
+ * 按钮层级样式参考 Naive UI（基础/次要/次次要/次次次要/虚线/禁用）。
+ * 品牌主色仍用 nax 语义色；可通过覆盖 --nax-color-primary 切换为 Naive 绿等。
  * uvue 仅支持 class 选择器，故挂在 .nax-theme 上（勿使用 page / tag 选择器）。
- * 业务在页面根节点加 class="nax-theme"，组件通过 var(--nax-*, fallback) 读取。
  */
 .nax-theme {
 	/* ===== Color: brand & status ===== */
 	--nax-color-primary: #1677ff;
-	--nax-color-success: #00b578;
-	--nax-color-warning: #ff8f1f;
-	--nax-color-danger: #ff3141;
-	--nax-color-error: #ff3141;
-	--nax-color-info: #3491fa;
+	--nax-color-success: #18a058;
+	--nax-color-warning: #f0a020;
+	--nax-color-danger: #d03050;
+	--nax-color-error: #d03050;
+	--nax-color-info: #2080f0;
+
+	/* soft fills for button secondary / tertiary（实色近似，兼容鸿蒙不支持 rgba 背景） */
+	--nax-color-button-secondary: #ececed;
+	--nax-color-button-tertiary: #f2f3f3;
+	--nax-color-primary-secondary: #dae9ff;
+	--nax-color-primary-tertiary: #e3eeff;
+	--nax-color-info-secondary: #dbeafc;
+	--nax-color-info-tertiary: #e4effd;
+	--nax-color-success-secondary: #daefe4;
+	--nax-color-success-tertiary: #e3f3eb;
+	--nax-color-warning-secondary: #fcefda;
+	--nax-color-warning-tertiary: #fdf3e4;
+	--nax-color-error-secondary: #f7dde3;
+	--nax-color-error-tertiary: #f9e6ea;
 
 	/* ===== Color: text ===== */
-	--nax-color-text: #1f1f1f;
+	--nax-color-text: #333639;
 	--nax-color-text-secondary: #666666;
 	--nax-color-text-placeholder: #999999;
 	--nax-color-text-disabled: #c0c0c0;
@@ -24,7 +39,7 @@
 	--nax-color-bg: #ffffff;
 	--nax-color-bg-secondary: #f5f6f8;
 	--nax-color-bg-hover: #f2f3f5;
-	--nax-color-border: #e5e6eb;
+	--nax-color-border: #e0e0e6;
 	--nax-color-border-strong: #c9cdd4;
 	--nax-color-mask: rgba(0, 0, 0, 0.45);
 
@@ -65,10 +80,10 @@
 	--nax-duration-normal: 250ms;
 	--nax-duration-slow: 350ms;
 	--nax-ease-out: ease-out;
-	--nax-opacity-disabled: 0.45;
+	--nax-opacity-disabled: 0.5;
 
 	/* ===== Component tokens: button ===== */
-	--nax-button-height: 36px;
-	--nax-button-padding-x: 16px;
+	--nax-button-height: 34px;
+	--nax-button-padding-x: 14px;
 	--nax-button-radius: 3px;
 }

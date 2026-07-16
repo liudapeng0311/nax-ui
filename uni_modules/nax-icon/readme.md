@@ -33,6 +33,10 @@ uni_modules/nax-ui-theme
 配合按钮：
 
 ```html
+<!-- 推荐：直接传 icon prop -->
+<nax-button type="primary" icon="search" label="搜索"></nax-button>
+
+<!-- 或自定义插槽 -->
 <nax-button type="primary" label="搜索">
   <template #icon>
     <nax-icon name="search" size="sm" color="#ffffff"></nax-icon>
@@ -113,11 +117,14 @@ node scripts/build-icons.mjs
 
 ## 说明
 
-- 当前字体文件来自 Lucide 官方 font（体积较大，约 800KB+）。
-- 组件 API 只暴露语义化 `name`，后续可做字体子集裁剪而不改业务代码。
+- 当前分发字体为 **30 图标子集**（约 10KB），不是完整 Lucide font。
+- 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序（禁止本地字体路径）。
+- 组件 API 只暴露语义化 `name`。
 - 图标源： [Lucide](https://lucide.dev/)（ISC License）。
 
 ## 已知注意
 
-- `@font-face` 路径按 `/uni_modules/nax-icon/static/nax-icon.ttf` 引用；若某端加载失败，优先检查静态资源是否被打包。
+- uvue / 鸿蒙 `@font-face` 仅支持 `font-family` 与 `src`，不要写 `font-weight` / `font-style`。
+- 微信小程序不要改回本地 `url('/uni_modules/...ttf')`，会触发 `do-not-use-local-path`。
+- 重新生成映射/子集需要本机 Python `fontTools`：`pip install fonttools`。
 - 未在真机全端验证前，请在目标端做一次显示确认。

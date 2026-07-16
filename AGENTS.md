@@ -1,7 +1,7 @@
 # AGENTS.md — nax-ui 仓库约束
 
-本文件约束在本仓库内工作的 AI 助手与协作者。  
-**范围：整个仓库根目录及子目录。**  
+本文件约束在本仓库内工作的 AI 助手与协作者。
+**范围：整个仓库根目录及子目录。**
 更细的产品规范见 `docs/`；若与本文件冲突，以 **更严格且不破坏 uni-app x 兼容性** 的规则为准。
 
 ---
@@ -32,7 +32,7 @@
 - 组合式 API（`ref` / `computed` / `watch` / props / emits 等）
 - `uni_modules/nax-ui/components/nax-*/nax-*.uvue` 结构
 - CSS 变量（`--nax-*`）与 class 修饰符主题化
-- 必要的条件编译：`#ifdef` / `#ifndef`（尽量少）
+- 必要的条件编译：`#ifdef` / `#ifndef`
 - 演示页、`docs` 规范、组件 demo
 
 ### 2.2 禁止
@@ -52,12 +52,44 @@
 
 ### 2.3 样式硬约束（uni-app x）
 
-1. **仅 class 选择器**作为核心样式手段  
-2. 默认布局按 **flex** 思考；横向必须显式 `flex-direction: row`  
-3. 文本样式写在 **`<text>`** 上，不假设继承  
-4. 组件默认 **样式隔离**；对外扩展用 `class` / `externalClasses` / CSS 变量  
-5. 仓库已启用 `styleIsolationVersion: "2"`，新组件按隔离 2.0 设计  
-6. 禁止依赖 tag/id/属性选择器实现关键外观  
+1. **仅 class 选择器**作为核心样式手段
+2. 默认布局按 **flex** 思考；横向必须显式 `flex-direction: row`
+3. 文本样式写在 **`<text>`** 上，不假设继承
+4. 组件默认 **样式隔离**；对外扩展用 `class` / `externalClasses` / CSS 变量
+5. 仓库已启用 `styleIsolationVersion: "2"`，新组件按隔离 2.0 设计
+6. 禁止依赖 tag/id/属性选择器实现关键外观
+
+### 2.4 平台差异与条件编译（硬约束）
+
+**触发条件：** 用户提问 / 需求 / 反馈中出现任一平台语义时，**必须**用条件编译实现端差异，禁止用“统一写法硬扛全端”或只改某一端却污染其它端。
+
+常见平台表述（含同义说法）→ 条件编译宏：
+
+| 用户表述（示例） | 优先宏 | 说明 |
+|------------------|--------|------|
+| 鸿蒙 / HarmonyOS / App 鸿蒙 | `APP-HARMONY` | App 鸿蒙端 |
+| 安卓 / Android | `APP-ANDROID` | App Android 端 |
+| iOS / 苹果 | `APP-IOS` | App iOS 端 |
+| App / 原生 App / 客户端 | `APP-ANDROID` `APP-IOS` `APP-HARMONY` 按需组合 | 三端或子集 |
+| Web / H5 / 浏览器 | `WEB` / `H5`（按官方与工程实际宏） | Web 端 |
+| 微信小程序 / 小程序 | `MP-WEIXIN` / `MP` | 小程序端 |
+
+实现要求：
+
+1. **template / script / style 均可**使用 `// #ifdef`、`// #ifndef`、`/* #ifdef */`、`<!-- #ifdef -->`（按所在区块语法）
+2. **仅某端支持的 API / CSS / 行为**必须包在对应 `#ifdef` / `#ifndef` 内  
+   - 例：Web 支持的 `@keyframes`，App uvue 不支持时，CSS 动画放在 `#ifndef APP-ANDROID || APP-IOS || APP-HARMONY`，App 用其它兜底
+3. **默认能力放公共代码**；差异逻辑用条件编译拆分，避免复制整份组件
+4. **禁止**为迁就一端而删除另一端可用能力（除非用户明确要求“只保留某端”）
+5. 条件编译处写**简短必要注释**（说明为何分端）；不要写长篇说明
+6. 改完后在回复中点明：影响哪些端、用了哪些宏、其它端行为是否保持不变
+7. 宏名以 [uni-app x 条件编译官方文档](https://doc.dcloud.net.cn/uni-app-x/) 与本仓库既有写法为准；拿不准时先与仓库内已有 `#ifdef` 对齐（见 `App.uvue` 等）
+
+协作默认：
+
+- 用户只提一端问题（如“鸿蒙下…”）→ 修该端，并用条件编译隔离，**不破坏** Web / 小程序 / 其它 App 端
+- 用户提多端差异 → 按端分别实现并写清宏组合
+- 用户未提平台 → 仍优先写**全端安全**的公共实现；只有确认存在端能力差时才加条件编译
 
 ---
 
@@ -104,7 +136,7 @@ nax-ui/                          # 演示宿主
 
 实现任何组件时遵守：
 
-1. **props 管行为，样式管外观**  
+1. **props 管行为，样式管外观**
 2. 枚举优先复用：
    - `type`: 组件自定；按钮为 `default | tertiary | primary | info | success | warning | error`
    - `variant`: `solid | outline | text | light`
@@ -142,11 +174,11 @@ nax-ui/                          # 演示宿主
 
 除非用户点名某组件，否则按依赖从底向上：
 
-1. 设计 token / 主题入口  
-2. `nax-text` `nax-icon`  
-3. `nax-button` `nax-space` `nax-divider` `nax-tag`  
-4. `nax-cell` `nax-cell-group` `nax-card`  
-5. `nax-badge` `nax-avatar` `nax-empty`  
+1. 设计 token / 主题入口
+2. `nax-text` `nax-icon`
+3. `nax-button` `nax-space` `nax-divider` `nax-tag`
+4. `nax-cell` `nax-cell-group` `nax-card`
+5. `nax-badge` `nax-avatar` `nax-empty`
 6. 再进入 v0.2 表单与反馈（见清单）
 
 禁止先做业务大组件（如 goods-card）再补基础件。
@@ -155,11 +187,11 @@ nax-ui/                          # 演示宿主
 
 ## 7. 编码风格
 
-- 最小改动原则：不重构无关文件，不“顺便”大改宿主工程  
-- 不添加无意义注释；只在端差异/条件编译处写必要说明  
-- 不新增版权头，除非用户要求  
-- 用户未要求则 **不 git commit**  
-- 演示文案默认中文  
+- 最小改动原则：不重构无关文件，不“顺便”大改宿主工程
+- 不添加无意义注释；只在端差异/条件编译处写必要说明
+- 不新增版权头，除非用户要求
+- 用户未要求则 **不 git commit**
+- 演示文案默认中文
 - 保持与现有 uni-app x 脚手架风格一致（uvue + uts setup）
 
 ### 组件文件骨架（推荐）
@@ -194,10 +226,10 @@ const emit = defineEmits(['click'])
 
 本仓库当前未必有完整单测体系。改动后至少：
 
-1. 保证 easycom 路径可被页面直接使用  
-2. 新增/修改 demo 页，覆盖主 props 与关键状态  
-3. 不引入明显的类型/语法问题（`lang="uts"`）  
-4. 若用户要求，再补充多端运行验证说明  
+1. 保证 easycom 路径可被页面直接使用
+2. 新增/修改 demo 页，覆盖主 props 与关键状态
+3. 不引入明显的类型/语法问题（`lang="uts"`）
+4. 若用户要求，再补充多端运行验证说明
 
 不要虚构“已在真机验证”的结果。
 
@@ -215,23 +247,25 @@ const emit = defineEmits(['click'])
 | 组件粒度 | 清单内 MVP/P0 优先 |
 | 包结构 | 单包 `uni_modules/nax-ui` |
 | 原生能力 | 不做 uts 原生组件 |
+| 平台差异 | 用户点名端差异时用条件编译；未点名则优先全端安全公共实现 |
 
 若用户要求与文档冲突：
 
-1. 先指出冲突点  
-2. 按用户明确指令执行  
-3. 回写 `docs/*` / 本文件，避免再次漂移  
+1. 先指出冲突点
+2. 按用户明确指令执行
+3. 回写 `docs/*` / 本文件，避免再次漂移
 
 ---
 
 ## 10. 变更检查清单（PR / 任务完成前）
 
-- [ ] 未违反第 2 节硬约束  
-- [ ] 命名符合 `nax-` / easycom  
-- [ ] 样式符合 ucss / 隔离 2.0 思路  
-- [ ] 清单或设计文档已同步  
-- [ ] 有可运行 demo 或明确说明为何没有  
-- [ ] 无无关重构与无关文件打扰  
+- [ ] 未违反第 2 节硬约束（含 2.4 条件编译）
+- [ ] 若需求涉及鸿蒙 / 安卓 / iOS / Web / 小程序等平台表述，端差异已用 `#ifdef` / `#ifndef` 隔离
+- [ ] 命名符合 `nax-` / easycom
+- [ ] 样式符合 ucss / 隔离 2.0 思路
+- [ ] 清单或设计文档已同步
+- [ ] 有可运行 demo 或明确说明为何没有
+- [ ] 无无关重构与无关文件打扰
 
 ---
 
