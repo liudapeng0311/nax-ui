@@ -1,3 +1,6 @@
+## 0.1.6（2026-07-16）
+
+- 鸿蒙：include-font-padding 仅在 APP-ANDROID 条件编译中声明，消除 uvue-css WARNING
 ## 0.1.5（2026-07-15）
 
 - 根节点改为单 `<text>`，去掉 view/text 嵌套，修复字形在方盒内偏移
