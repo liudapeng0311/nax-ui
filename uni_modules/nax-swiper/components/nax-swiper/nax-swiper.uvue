@@ -197,6 +197,139 @@
 
 	const innerCurrent = ref(0)
 
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function asObject(item: any): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function resolveSrc(item: any): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const src = obj.getString('src')
+		if (src != null && src.length > 0) {
+			return src
+		}
+		const image = obj.getString('image')
+		if (image != null && image.length > 0) {
+			return image
+		}
+		const url = obj.getString('url')
+		if (url != null && url.length > 0) {
+			return url
+		}
+		return ''
+	}
+
+	function resolveText(item: any): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const text = obj.getString('text')
+		if (text != null && text.length > 0) {
+			return text
+		}
+		const title = obj.getString('title')
+		if (title != null && title.length > 0) {
+			return title
+		}
+		return ''
+	}
+
+	function resolveBg(item: any): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const bg = obj.getString('bg')
+		if (bg != null && bg.length > 0) {
+			return bg
+		}
+		const background = obj.getString('background')
+		if (background != null && background.length > 0) {
+			return background
+		}
+		return ''
+	}
+
+	function itemInnerClass(item: any): string {
+		if (resolveSrc(item).length > 0) {
+			return ''
+		}
+		if (resolveBg(item).length > 0 || resolveText(item).length > 0) {
+			return 'nax-swiper__item-inner--panel'
+		}
+		return ''
+	}
+
+	function itemInnerStyle(item: any): string {
+		const bg = resolveBg(item)
+		if (bg.length == 0) {
+			return ''
+		}
+		return 'background-color:' + bg + ';'
+	}
+
+	function itemKey(item: any, index: number): string {
+		const src = resolveSrc(item)
+		if (src.length > 0) {
+			return index.toString() + '-' + src
+		}
+		const text = resolveText(item)
+		if (text.length > 0) {
+			return index.toString() + '-' + text
+		}
+		return 'nax-swiper-' + index.toString()
+	}
+
+	function onChange(e: UniSwiperChangeEvent) {
+		const detail = e.detail
+		const cur = detail.current
+		innerCurrent.value = cur
+		emit('update:current', cur)
+		emit('change', cur)
+	}
+
+	function onAnimationFinish(e: UniSwiperAnimationFinishEvent) {
+		const detail = e.detail
+		const cur = detail.current
+		innerCurrent.value = cur
+		emit('animationfinish', cur)
+	}
+
+	function onItemClick(index: number) {
+		emit('click', index)
+	}
+
 	const listLength = computed((): number => {
 		return props.list.length
 	})
@@ -342,137 +475,16 @@
 		}
 	})
 
-	function isDigits(s: string): boolean {
-		if (s.length == 0) {
-			return false
-		}
-		let i = 0
-		while (i < s.length) {
-			const c = s.charAt(i)
-			if (c < '0' || c > '9') {
-				return false
-			}
-			i++
-		}
-		return true
-	}
 
-	function asObject(item: any): UTSJSONObject | null {
-		if (item == null) {
-			return null
-		}
-		if (typeof item == 'string') {
-			return null
-		}
-		return item as UTSJSONObject
-	}
 
-	function resolveSrc(item: any): string {
-		if (item == null) {
-			return ''
-		}
-		if (typeof item == 'string') {
-			return item as string
-		}
-		const obj = asObject(item)
-		if (obj == null) {
-			return ''
-		}
-		const src = obj.getString('src')
-		if (src != null && src.length > 0) {
-			return src
-		}
-		const image = obj.getString('image')
-		if (image != null && image.length > 0) {
-			return image
-		}
-		const url = obj.getString('url')
-		if (url != null && url.length > 0) {
-			return url
-		}
-		return ''
-	}
 
-	function resolveText(item: any): string {
-		const obj = asObject(item)
-		if (obj == null) {
-			return ''
-		}
-		const text = obj.getString('text')
-		if (text != null && text.length > 0) {
-			return text
-		}
-		const title = obj.getString('title')
-		if (title != null && title.length > 0) {
-			return title
-		}
-		return ''
-	}
 
-	function resolveBg(item: any): string {
-		const obj = asObject(item)
-		if (obj == null) {
-			return ''
-		}
-		const bg = obj.getString('bg')
-		if (bg != null && bg.length > 0) {
-			return bg
-		}
-		const background = obj.getString('background')
-		if (background != null && background.length > 0) {
-			return background
-		}
-		return ''
-	}
 
-	function itemInnerClass(item: any): string {
-		if (resolveSrc(item).length > 0) {
-			return ''
-		}
-		if (resolveBg(item).length > 0 || resolveText(item).length > 0) {
-			return 'nax-swiper__item-inner--panel'
-		}
-		return ''
-	}
 
-	function itemInnerStyle(item: any): string {
-		const bg = resolveBg(item)
-		if (bg.length == 0) {
-			return ''
-		}
-		return 'background-color:' + bg + ';'
-	}
 
-	function itemKey(item: any, index: number): string {
-		const src = resolveSrc(item)
-		if (src.length > 0) {
-			return index.toString() + '-' + src
-		}
-		const text = resolveText(item)
-		if (text.length > 0) {
-			return index.toString() + '-' + text
-		}
-		return 'nax-swiper-' + index.toString()
-	}
 
-	function onChange(e: UniSwiperChangeEvent) {
-		const detail = e.detail
-		const cur = detail.current
-		innerCurrent.value = cur
-		emit('update:current', cur)
-		emit('change', cur)
-	}
 
-	function onAnimationFinish(e: UniSwiperAnimationFinishEvent) {
-		const detail = e.detail
-		const cur = detail.current
-		innerCurrent.value = cur
-		emit('animationfinish', cur)
-	}
 
-	function onItemClick(index: number) {
-		emit('click', index)
-	}
 </script>
 
 <style>

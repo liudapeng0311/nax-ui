@@ -114,6 +114,79 @@
 
 	const emit = defineEmits(['click'])
 
+	function normalizeType(value : string) : string {
+		// danger 兼容为 error
+		if (value == 'danger') {
+			return 'error'
+		}
+		// type=tertiary 仅表示色系 default，层级由 variant 处理
+		if (value == 'tertiary') {
+			return 'default'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function normalizeVariant(typeValue : string, variantValue : string) : string {
+		// 兼容旧写法：type="tertiary" 等价次次要
+		if (typeValue == 'tertiary' && (variantValue == 'solid' || variantValue.length == 0)) {
+			return 'tertiary'
+		}
+		// light → secondary（次要）
+		if (variantValue == 'light' || variantValue == 'secondary') {
+			return 'secondary'
+		}
+		// text → quaternary（次次次要）
+		if (variantValue == 'text' || variantValue == 'quaternary') {
+			return 'quaternary'
+		}
+		if (
+			variantValue == 'tertiary' ||
+			variantValue == 'outline' ||
+			variantValue == 'dashed'
+		) {
+			return variantValue
+		}
+		return 'solid'
+	}
+
+	function normalizeSize(value : string) : string {
+		if (value == 'sm' || value == 'lg') {
+			return value
+		}
+		return 'md'
+	}
+
+	function normalizeShape(value : string) : string {
+		if (value == 'round' || value == 'circle') {
+			return value
+		}
+		return 'square'
+	}
+
+	function normalizeIconPosition(value : string) : string {
+		if (value == 'right' || value == 'end') {
+			return 'right'
+		}
+		return 'left'
+	}
+
+	function onClick() {
+		if (props.disabled || props.loading) {
+			return
+		}
+		emit('click')
+	}
+
+
 	/**
 	 * Naive 层级映射：
 	 * - solid      基础（主实心 / default 描边底）
@@ -234,6 +307,14 @@
 		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
 	})
 
+	function stopLoadingSpin() {
+		if (loadingTimerId >= 0) {
+			clearInterval(loadingTimerId)
+			loadingTimerId = -1
+		}
+		loadingAngle.value = 0
+	}
+
 	function startLoadingSpin() {
 		stopLoadingSpin()
 		loadingAngle.value = 0
@@ -244,14 +325,6 @@
 			}
 			loadingAngle.value = next
 		}, 50)
-	}
-
-	function stopLoadingSpin() {
-		if (loadingTimerId >= 0) {
-			clearInterval(loadingTimerId)
-			loadingTimerId = -1
-		}
-		loadingAngle.value = 0
 	}
 
 	watch((): boolean => {
@@ -277,77 +350,6 @@
 		return 'nax-button--hover nax-button--hover-' + variantName
 	})
 
-	function normalizeType(value : string) : string {
-		// danger 兼容为 error
-		if (value == 'danger') {
-			return 'error'
-		}
-		// type=tertiary 仅表示色系 default，层级由 variant 处理
-		if (value == 'tertiary') {
-			return 'default'
-		}
-		if (
-			value == 'primary' ||
-			value == 'info' ||
-			value == 'success' ||
-			value == 'warning' ||
-			value == 'error'
-		) {
-			return value
-		}
-		return 'default'
-	}
-
-	function normalizeVariant(typeValue : string, variantValue : string) : string {
-		// 兼容旧写法：type="tertiary" 等价次次要
-		if (typeValue == 'tertiary' && (variantValue == 'solid' || variantValue.length == 0)) {
-			return 'tertiary'
-		}
-		// light → secondary（次要）
-		if (variantValue == 'light' || variantValue == 'secondary') {
-			return 'secondary'
-		}
-		// text → quaternary（次次次要）
-		if (variantValue == 'text' || variantValue == 'quaternary') {
-			return 'quaternary'
-		}
-		if (
-			variantValue == 'tertiary' ||
-			variantValue == 'outline' ||
-			variantValue == 'dashed'
-		) {
-			return variantValue
-		}
-		return 'solid'
-	}
-
-	function normalizeSize(value : string) : string {
-		if (value == 'sm' || value == 'lg') {
-			return value
-		}
-		return 'md'
-	}
-
-	function normalizeShape(value : string) : string {
-		if (value == 'round' || value == 'circle') {
-			return value
-		}
-		return 'square'
-	}
-
-	function normalizeIconPosition(value : string) : string {
-		if (value == 'right' || value == 'end') {
-			return 'right'
-		}
-		return 'left'
-	}
-
-	function onClick() {
-		if (props.disabled || props.loading) {
-			return
-		}
-		emit('click')
-	}
 </script>
 
 <style>

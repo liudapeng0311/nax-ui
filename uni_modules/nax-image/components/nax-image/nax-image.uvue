@@ -138,6 +138,39 @@
 	// loading | loaded | error
 	const status = ref('loading')
 
+
+	function normalizeShape(value: string): string {
+		if (value == 'round' || value == 'circle') {
+			return value
+		}
+		return 'square'
+	}
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function toCssSize(value: string, fallback: string): string {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (isDigits(value)) {
+			return value + 'px'
+		}
+		return value
+	}
+
 	const hasSrc = computed((): boolean => {
 		return props.src.length > 0
 	})
@@ -221,6 +254,14 @@
 		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
 	})
 
+	function stopLoadingSpin() {
+		if (loadingTimerId >= 0) {
+			clearInterval(loadingTimerId)
+			loadingTimerId = -1
+		}
+		loadingAngle.value = 0
+	}
+
 	function startLoadingSpin() {
 		stopLoadingSpin()
 		loadingAngle.value = 0
@@ -233,13 +274,6 @@
 		}, 50)
 	}
 
-	function stopLoadingSpin() {
-		if (loadingTimerId >= 0) {
-			clearInterval(loadingTimerId)
-			loadingTimerId = -1
-		}
-		loadingAngle.value = 0
-	}
 
 	watch((): boolean => {
 		return showLoadingLayer.value
@@ -256,50 +290,12 @@
 	})
 	// #endif
 
-	watch((): string => {
-		return props.src
-	}, () => {
-		resetStatus()
-	}, { immediate: true })
-
-	function resetStatus() {
+		function resetStatus() {
 		if (!hasSrc.value) {
 			status.value = 'error'
 			return
 		}
 		status.value = 'loading'
-	}
-
-	function normalizeShape(value: string): string {
-		if (value == 'round' || value == 'circle') {
-			return value
-		}
-		return 'square'
-	}
-
-	function isDigits(s: string): boolean {
-		if (s.length == 0) {
-			return false
-		}
-		let i = 0
-		while (i < s.length) {
-			const c = s.charAt(i)
-			if (c < '0' || c > '9') {
-				return false
-			}
-			i++
-		}
-		return true
-	}
-
-	function toCssSize(value: string, fallback: string): string {
-		if (value.length == 0) {
-			return fallback
-		}
-		if (isDigits(value)) {
-			return value + 'px'
-		}
-		return value
 	}
 
 	function onLoad(e: any) {
@@ -315,6 +311,19 @@
 	function onClick() {
 		emit('click')
 	}
+
+watch((): string => {
+		return props.src
+	}, () => {
+		resetStatus()
+	}, { immediate: true })
+
+
+
+
+
+
+
 </script>
 
 <style>
