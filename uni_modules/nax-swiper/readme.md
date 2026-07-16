@@ -26,6 +26,14 @@ uni_modules/nax-ui-theme
 
 页面根节点加 `class="nax-theme"`。
 
+## 依赖
+
+| 依赖 | 说明 |
+|------|------|
+| `nax-ui-theme` | **安装时依赖**（下载本插件时建议自动带上）；**运行时弱依赖**（未 `@import` / 未挂 `nax-theme` 时组件走 fallback） |
+
+> 安装 theme 后仍需：`App.uvue` `@import` + 应用 layout/页面 **一处** `class="nax-theme"`。详见仓库 `docs/theme.md`（L0/L1/L2）。
+
 ## 基础用法
 
 ```html

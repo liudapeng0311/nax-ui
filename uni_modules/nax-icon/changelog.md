@@ -1,3 +1,7 @@
+## 0.1.7（2026-07-16）
+
+- package：安装依赖增加 nax-ui-theme（运行时仍弱依赖 + fallback）
+
 ## 0.1.6（2026-07-16）
 
 - 鸿蒙：include-font-padding 仅在 APP-ANDROID 条件编译中声明，消除 uvue-css WARNING

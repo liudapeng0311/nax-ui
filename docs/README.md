@@ -1,4 +1,4 @@
-﻿# nax-ui 文档索引
+# nax-ui 文档索引
 
 本目录存放 **nax-ui**（uni-app x 通用 UI 组件库）的产品与工程规范。
 
@@ -8,14 +8,14 @@
 |------|------|--------|
 | [design-system.md](./design-system.md) | 设计规范：定位、命名、Token、API、样式、主题、质量门槛 | 设计与开发 |
 | [component-inventory.md](./component-inventory.md) | 组件清单：分期、依赖、兼容策略、状态看板 | 开发与排期 |
-| [theme.md](./theme.md) | 主题接入：`nax-ui-theme` 用法与覆盖优先级 | 业务接入与组件作者 |
+| [theme.md](./theme.md) | 主题接入：L0 默认色 / L1 启动配置 / L2 运行时切换 | 业务接入与组件作者 |
 | [../AGENTS.md](../AGENTS.md) | 给 Codex / 协作者的仓库约束（实现时强制遵守） | 所有 AI/贡献者 |
 
 ## 推荐阅读顺序
 
 1. `design-system.md` — 先统一设计与 API 原则  
 2. `component-inventory.md` — 再按分期选组件实现  
-3. `theme.md` — 独立插件下的全局主题接入  
+3. `theme.md` — 主题分档接入（默认能用、可选换肤）  
 4. `AGENTS.md` — 编码/改文档时的硬约束  
 
 ## 仓库角色

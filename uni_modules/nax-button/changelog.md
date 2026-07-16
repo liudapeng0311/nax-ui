@@ -1,3 +1,7 @@
+## 0.1.11（2026-07-16）
+
+- package：安装依赖增加 nax-ui-theme（运行时仍弱依赖 + fallback）
+
 ## 0.1.10（2026-07-16）
 
 - 修复带图标按钮图标颜色不对：改为通过 nax-icon color prop 传色
@@ -29,7 +33,8 @@
 
 ## 0.1.4（2026-07-15）
 
-- 鸿蒙：次要/次次要 soft fill 改为实色 hex（gba 背景在 ucss 下会丢失）
+- 鸿蒙：次要/次次要 soft fill 改为实色 hex（
+gba 背景在 ucss 下会丢失）
 - 禁用态：无背景（基础/描边/虚线）保留边框；有 soft fill 的次要/次次要仍去边
 - secondary / tertiary / quaternary 统一无边框
 ## 0.1.3（2026-07-15）

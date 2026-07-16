@@ -1,28 +1,34 @@
 <template>
-	<view class="nax-theme home">
-		<text class="home__title">nax-ui</text>
-		<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme home">
+			<text class="home__title">nax-ui</text>
+			<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
 
-		<view class="home__card" @click="goButton">
-			<text class="home__card-title">nax-button</text>
-			<text class="home__card-desc">按钮：类型 / 变体 / 尺寸 / 状态</text>
-		</view>
+			<view class="home__section">
+				<text class="home__section-title">基础组件</text>
+				<view class="home__card" @click="goButton">
+					<text class="home__card-name">按钮</text>
+					<text class="home__card-tag">nax-button</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goIcon">
+					<text class="home__card-name">图标</text>
+					<text class="home__card-tag">nax-icon</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goImage">
+					<text class="home__card-name">图片</text>
+					<text class="home__card-tag">nax-image</text>
+				</view>
+			</view>
 
-		<view class="home__card home__card--gap" @click="goIcon">
-			<text class="home__card-title">nax-icon</text>
-			<text class="home__card-desc">图标：Lucide 子集 / 尺寸 / 颜色</text>
+			<view class="home__section home__section--gap">
+				<text class="home__section-title">布局组件</text>
+				<view class="home__card" @click="goSwiper">
+					<text class="home__card-name">轮播</text>
+					<text class="home__card-tag">nax-swiper</text>
+				</view>
+			</view>
 		</view>
-
-		<view class="home__card home__card--gap" @click="goSwiper">
-			<text class="home__card-title">nax-swiper</text>
-			<text class="home__card-desc">轮播：list / autoplay / indicator / current</text>
-		</view>
-
-		<view class="home__card home__card--gap" @click="goImage">
-			<text class="home__card-title">nax-image</text>
-			<text class="home__card-desc">图片：加载中 / 失败占位 / shape / mode</text>
-		</view>
-	</view>
+	</scroll-view>
 </template>
 
 <script setup lang="uts">
@@ -38,15 +44,15 @@
 		})
 	}
 
-	function goSwiper() {
-		uni.navigateTo({
-			url: '/pages/components/swiper/index'
-		})
-	}
-
 	function goImage() {
 		uni.navigateTo({
 			url: '/pages/image/index'
+		})
+	}
+
+	function goSwiper() {
+		uni.navigateTo({
+			url: '/pages/components/swiper/index'
 		})
 	}
 </script>
@@ -71,28 +77,48 @@
 		margin-bottom: 20px;
 	}
 
+	.home__section {
+		flex-direction: column;
+	}
+
+	.home__section--gap {
+		margin-top: 20px;
+	}
+
+	.home__section-title {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--nax-color-text-secondary, #666666);
+		margin-bottom: 8px;
+	}
+
 	.home__card {
-		padding: 16px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 12px;
+		padding-right: 12px;
 		background-color: var(--nax-color-bg, #ffffff);
-		border-radius: var(--nax-radius-lg, 12px);
+		border-radius: var(--nax-radius-md, 8px);
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #e5e6eb);
 	}
 
 	.home__card--gap {
-		margin-top: 12px;
+		margin-top: 8px;
 	}
 
-	.home__card-title {
-		font-size: 16px;
+	.home__card-name {
+		font-size: 14px;
 		color: var(--nax-color-text, #1f1f1f);
 		font-weight: 500;
-		margin-bottom: 6px;
 	}
 
-	.home__card-desc {
-		font-size: 13px;
+	.home__card-tag {
+		font-size: 12px;
 		color: var(--nax-color-text-secondary, #666666);
 	}
 </style>
