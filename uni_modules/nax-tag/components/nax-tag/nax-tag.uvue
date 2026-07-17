@@ -1,0 +1,655 @@
+<template>
+	<view
+		v-if="!closed"
+		class="nax-tag"
+		:class="rootClass"
+		:style="rootStyle"
+		@click="onClick"
+	>
+		<!-- 前缀图标 -->
+		<view v-if="hasIcon" class="nax-tag__icon" :class="iconBoxClass">
+			<nax-icon :name="icon" :size="iconSizePx" :color="iconColor"></nax-icon>
+		</view>
+		<slot name="icon"></slot>
+
+		<!-- 文案：label 或默认插槽 -->
+		<text
+			v-if="hasLabel"
+			class="nax-tag__text"
+			:class="textClass"
+			:style="textStyle"
+			:lines="1"
+		>{{ label }}</text>
+		<slot></slot>
+
+		<!-- 关闭 -->
+		<view
+			v-if="closable"
+			class="nax-tag__close"
+			:class="closeClass"
+			@click.stop="onClose"
+		>
+			<nax-icon name="close" :size="closeSizePx" :color="closeIconColor"></nax-icon>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-tag
+	 * @description 标签。能力对齐 Naive UI Tag：类型 / 尺寸 / 边框 / 圆角 / 可关闭 / 可选中。
+	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
+	 * @property {string} variant solid | light(secondary) | outline | text(quaternary)；默认 light（对齐 Naive 浅底）
+	 * @property {string} size sm | md | lg；兼容 tiny/small/medium/large（Naive）
+	 * @property {boolean} closable 是否可关闭
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} round 圆角胶囊
+	 * @property {boolean} bordered 是否显示边框，默认 true
+	 * @property {boolean} checkable 可选中模式
+	 * @property {boolean} checked 选中态（配合 checkable / update:checked）
+	 * @property {boolean} strong 加粗文字
+	 * @property {boolean} triggerClickOnClose 点关闭时是否同时触发 click，默认 true（对齐 Naive）
+	 * @property {string} label 文案；也可用默认插槽
+	 * @property {string} icon 前缀 nax-icon 名
+	 * @property {string} color 自定义主色（覆盖 type 色）
+	 * @property {string} textColor 自定义文字色
+	 * @property {string} borderColor 自定义边框色
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击（disabled 不触发；关闭区见 triggerClickOnClose）
+	 * @event close 关闭
+	 * @event update:checked 选中态变化（checkable）
+	 * @slot default 自定义内容
+	 * @slot icon 自定义前缀图标区域
+	 */
+	const props = defineProps({
+		type: { type: String, default: 'default' },
+		variant: { type: String, default: 'light' },
+		size: { type: String, default: 'md' },
+		closable: { type: Boolean, default: false },
+		disabled: { type: Boolean, default: false },
+		round: { type: Boolean, default: false },
+		bordered: { type: Boolean, default: true },
+		checkable: { type: Boolean, default: false },
+		checked: { type: Boolean, default: false },
+		strong: { type: Boolean, default: false },
+		triggerClickOnClose: { type: Boolean, default: true },
+		label: { type: String, default: '' },
+		icon: { type: String, default: '' },
+		color: { type: String, default: '' },
+		textColor: { type: String, default: '' },
+		borderColor: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['click', 'close', 'update:checked'])
+
+	const closed = ref(false)
+
+	function normalizeType(value : string) : string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function normalizeVariant(value : string) : string {
+		// light / secondary 浅底（Naive 默认观感）
+		if (value == 'light' || value == 'secondary') {
+			return 'light'
+		}
+		// text / quaternary 纯文字
+		if (value == 'text' || value == 'quaternary') {
+			return 'text'
+		}
+		if (value == 'solid' || value == 'outline') {
+			return value
+		}
+		return 'light'
+	}
+
+	function normalizeSize(value : string) : string {
+		// Naive: tiny | small | medium | large
+		if (value == 'tiny' || value == 'small' || value == 'sm') {
+			return 'sm'
+		}
+		if (value == 'large' || value == 'lg') {
+			return 'lg'
+		}
+		// medium / md / 其它
+		return 'md'
+	}
+
+	function typeMainColor(name : string) : string {
+		if (name == 'primary' || name == 'success') {
+			return '#18a058'
+		}
+		if (name == 'info') {
+			return '#2080f0'
+		}
+		if (name == 'warning') {
+			return '#f0a020'
+		}
+		if (name == 'error') {
+			return '#d03050'
+		}
+		return '#333639'
+	}
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const variantName = computed((): string => {
+		return normalizeVariant(props.variant)
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const hasCustomColor = computed((): boolean => {
+		return props.color.length > 0
+	})
+
+	const hasLabel = computed((): boolean => {
+		return props.label.length > 0
+	})
+
+	const hasIcon = computed((): boolean => {
+		return props.icon.length > 0
+	})
+
+	/** checkable 未选中时走 default 灰态；已选中 / 非 checkable 用 type */
+	const effectiveType = computed((): string => {
+		if (props.checkable && !props.checked) {
+			return 'default'
+		}
+		return typeName.value
+	})
+
+	const effectiveVariant = computed((): string => {
+		// checkable 选中时强化为 solid，更易辨识
+		if (props.checkable && props.checked) {
+			const v = variantName.value
+			if (v == 'text' || v == 'outline') {
+				return v
+			}
+			return 'solid'
+		}
+		return variantName.value
+	})
+
+	const tone = computed((): string => {
+		return effectiveType.value + '-' + effectiveVariant.value
+	})
+
+	const iconSizePx = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '12'
+		}
+		if (s == 'lg') {
+			return '16'
+		}
+		return '14'
+	})
+
+	const closeSizePx = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '12'
+		}
+		if (s == 'lg') {
+			return '14'
+		}
+		return '12'
+	})
+
+	const resolvedMainColor = computed((): string => {
+		if (hasCustomColor.value) {
+			return props.color
+		}
+		return typeMainColor(effectiveType.value)
+	})
+
+	const iconColor = computed((): string => {
+		if (props.textColor.length > 0) {
+			return props.textColor
+		}
+		const v = effectiveVariant.value
+		if (v == 'solid') {
+			if (effectiveType.value == 'default' && !hasCustomColor.value) {
+				return '#333639'
+			}
+			return '#ffffff'
+		}
+		return resolvedMainColor.value
+	})
+
+	const closeIconColor = computed((): string => {
+		return iconColor.value
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-tag--' + tone.value
+		cls += ' nax-tag--' + sizeName.value
+		if (props.round) {
+			cls += ' nax-tag--round'
+		}
+		if (!props.bordered || effectiveVariant.value == 'text') {
+			cls += ' nax-tag--no-border'
+		}
+		if (props.disabled) {
+			cls += ' nax-tag--disabled'
+		}
+		if (props.checkable) {
+			cls += ' nax-tag--checkable'
+		}
+		if (props.checkable && props.checked) {
+			cls += ' nax-tag--checked'
+		}
+		if (props.strong) {
+			cls += ' nax-tag--strong'
+		}
+		if (hasCustomColor.value) {
+			cls += ' nax-tag--custom'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const textClass = computed((): string => {
+		let cls = 'nax-tag__text--' + tone.value
+		cls += ' nax-tag__text--' + sizeName.value
+		if (props.strong) {
+			cls += ' nax-tag__text--strong'
+		}
+		if (props.disabled) {
+			cls += ' nax-tag__text--disabled'
+		}
+		return cls
+	})
+
+	const iconBoxClass = computed((): string => {
+		return 'nax-tag__icon--' + sizeName.value
+	})
+
+	const closeClass = computed((): string => {
+		return 'nax-tag__close--' + sizeName.value
+	})
+
+	/**
+	 * 自定义色走 inline；type 色走 class + token。
+	 * 蒸汽模式不支持 rgba 叠色，light 自定义色用透明底 + 边框/文字着色。
+	 */
+	const rootStyle = computed((): string => {
+		if (!hasCustomColor.value && props.borderColor.length == 0) {
+			return ''
+		}
+		let style = ''
+		const main = resolvedMainColor.value
+		const v = effectiveVariant.value
+		if (hasCustomColor.value) {
+			if (v == 'solid') {
+				style += 'background-color:' + main + ';'
+				style += 'border-color:' + main + ';'
+			} else if (v == 'outline') {
+				style += 'background-color:transparent;'
+				style += 'border-color:' + main + ';'
+			} else if (v == 'text') {
+				style += 'background-color:transparent;'
+				style += 'border-color:transparent;'
+			} else {
+				// light：中性浅底 + 自定义边框色（蒸汽模式无 rgba 叠色）
+				style += 'background-color:#fafafc;'
+				style += 'border-color:' + main + ';'
+			}
+		}
+		if (props.borderColor.length > 0) {
+			style += 'border-color:' + props.borderColor + ';'
+		}
+		return style
+	})
+
+	const textStyle = computed((): string => {
+		if (props.textColor.length > 0) {
+			return 'color:' + props.textColor + ';'
+		}
+		if (!hasCustomColor.value) {
+			return ''
+		}
+		const main = props.color
+		const v = effectiveVariant.value
+		if (v == 'solid') {
+			return 'color:#ffffff;'
+		}
+		return 'color:' + main + ';'
+	})
+
+	function onClick() {
+		if (props.disabled || closed.value) {
+			return
+		}
+		if (props.checkable) {
+			const next = !props.checked
+			emit('update:checked', next)
+		}
+		emit('click')
+	}
+
+	function onClose() {
+		if (props.disabled || closed.value) {
+			return
+		}
+		closed.value = true
+		emit('close')
+		if (props.triggerClickOnClose) {
+			emit('click')
+		}
+	}
+</script>
+
+<style>
+	.nax-tag {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		align-self: flex-start;
+		border-width: 1px;
+		border-style: solid;
+		border-radius: var(--nax-radius-sm, 4px);
+		/* 默认灰底（default-light 保底，避免无 token 时透明） */
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-color: var(--nax-color-border, #e0e0e6);
+		overflow: hidden;
+	}
+
+	/* ========== size ========== */
+	.nax-tag--sm {
+		height: 22px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-tag--md {
+		height: 26px;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.nax-tag--lg {
+		height: 30px;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+
+	.nax-tag--round {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-tag--no-border {
+		border-color: transparent;
+	}
+
+	.nax-tag--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+
+	/* ========== default ========== */
+	.nax-tag--default-light {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-tag--default-solid {
+		background-color: var(--nax-color-button-secondary, #ececed);
+		border-color: var(--nax-color-button-secondary, #ececed);
+	}
+
+	.nax-tag--default-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-tag--default-text {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* ========== primary ========== */
+	.nax-tag--primary-light {
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-tag--primary-solid {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-tag--primary-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-tag--primary-text {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* ========== info ========== */
+	.nax-tag--info-light {
+		background-color: var(--nax-color-info-secondary, #dbeafc);
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-tag--info-solid {
+		background-color: var(--nax-color-info, #2080f0);
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-tag--info-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-tag--info-text {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* ========== success ========== */
+	.nax-tag--success-light {
+		background-color: var(--nax-color-success-secondary, #daefe4);
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-tag--success-solid {
+		background-color: var(--nax-color-success, #18a058);
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-tag--success-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-tag--success-text {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* ========== warning ========== */
+	.nax-tag--warning-light {
+		background-color: var(--nax-color-warning-secondary, #fcefda);
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-tag--warning-solid {
+		background-color: var(--nax-color-warning, #f0a020);
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-tag--warning-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-tag--warning-text {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* ========== error ========== */
+	.nax-tag--error-light {
+		background-color: var(--nax-color-error-secondary, #f7dde3);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-tag--error-solid {
+		background-color: var(--nax-color-error, #d03050);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-tag--error-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-tag--error-text {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* 无边框修饰：覆盖上述 type 边框色 */
+	.nax-tag--no-border {
+		border-color: transparent;
+	}
+
+	/* ========== text ========== */
+	.nax-tag__text {
+		text-align: center;
+		font-weight: var(--nax-font-weight-regular, 400);
+		text-overflow: ellipsis;
+	}
+
+	.nax-tag__text--sm {
+		font-size: var(--nax-font-size-xs, 12px);
+	}
+
+	.nax-tag__text--md {
+		font-size: var(--nax-font-size-sm, 13px);
+	}
+
+	.nax-tag__text--lg {
+		font-size: var(--nax-font-size-md, 14px);
+	}
+
+	.nax-tag__text--strong {
+		font-weight: var(--nax-font-weight-semibold, 600);
+	}
+
+
+	/* default 文字色 */
+	.nax-tag__text--default-light,
+	.nax-tag__text--default-solid,
+	.nax-tag__text--default-outline,
+	.nax-tag__text--default-text {
+		color: var(--nax-color-text, #333639);
+	}
+
+	/* solid 彩色：反白 */
+	.nax-tag__text--primary-solid,
+	.nax-tag__text--info-solid,
+	.nax-tag__text--success-solid,
+	.nax-tag__text--warning-solid,
+	.nax-tag__text--error-solid {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	/* light / outline / text 彩色 */
+	.nax-tag__text--primary-light,
+	.nax-tag__text--primary-outline,
+	.nax-tag__text--primary-text {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-tag__text--info-light,
+	.nax-tag__text--info-outline,
+	.nax-tag__text--info-text {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-tag__text--success-light,
+	.nax-tag__text--success-outline,
+	.nax-tag__text--success-text {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-tag__text--warning-light,
+	.nax-tag__text--warning-outline,
+	.nax-tag__text--warning-text {
+		color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-tag__text--error-light,
+	.nax-tag__text--error-outline,
+	.nax-tag__text--error-text {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	/* ========== icon / close ========== */
+	.nax-tag__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 4px;
+	}
+
+	.nax-tag__icon--sm {
+		margin-right: 2px;
+	}
+
+	.nax-tag__icon--md {
+		margin-right: 4px;
+	}
+
+	.nax-tag__icon--lg {
+		margin-right: 4px;
+	}
+
+
+	.nax-tag__close {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: 4px;
+	}
+
+	.nax-tag__close--sm {
+		margin-left: 2px;
+	}
+
+	.nax-tag__close--md {
+		margin-left: 4px;
+	}
+
+	.nax-tag__close--lg {
+		margin-left: 4px;
+	}
+</style>
+

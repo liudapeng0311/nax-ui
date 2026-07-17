@@ -38,7 +38,7 @@
 | 图标 | `nax-icon` | P0 | 字体/图片图标壳 | `name` `size` `color` / `click` |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器 | `direction` `size` `wrap` `align` |
 | 分割线 | `nax-divider` | P1 | 内容分隔 | `direction` `dashed` `text` |
-| 标签 | `nax-tag` | P1 | 状态/分类标记 | `type` `variant` `size` `closable` / `close` |
+| 标签 | `nax-tag` | P1 | 状态/分类标记（对齐 Naive Tag） | `type` `variant` `size` `closable` `round` `bordered` `checkable` `checked` / `close` `click` `update:checked` **done** |
 
 ### 2.2 布局与列表单元
 
@@ -118,6 +118,7 @@
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
+| `nax-tag` | done | 插件包 `uni_modules/nax-tag`；对齐 Naive Tag；type/variant/size/closable/checkable/round/bordered |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

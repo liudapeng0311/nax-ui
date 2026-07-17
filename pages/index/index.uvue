@@ -25,6 +25,10 @@
 					<text class="home__card-name">图标</text>
 					<text class="home__card-tag">nax-icon</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goTag">
+					<text class="home__card-name">标签</text>
+					<text class="home__card-tag">nax-tag</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goBadge">
 					<text class="home__card-name">徽标</text>
 					<text class="home__card-tag">nax-badge</text>
@@ -89,6 +93,12 @@
 	function goIcon() {
 		uni.navigateTo({
 			url: '/pages/components/icon/index'
+		})
+	}
+
+	function goTag() {
+		uni.navigateTo({
+			url: '/pages/components/tag/index'
 		})
 	}
 
@@ -194,3 +204,4 @@
 		color: var(--nax-color-text-secondary, #767c82);
 	}
 </style>
+
