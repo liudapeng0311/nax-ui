@@ -25,6 +25,10 @@
 					<text class="home__card-name">图标</text>
 					<text class="home__card-tag">nax-icon</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goBadge">
+					<text class="home__card-name">徽标</text>
+					<text class="home__card-tag">nax-badge</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goImage">
 					<text class="home__card-name">图片</text>
 					<text class="home__card-tag">nax-image</text>
@@ -81,6 +85,12 @@
 	function goIcon() {
 		uni.navigateTo({
 			url: '/pages/components/icon/index'
+		})
+	}
+
+	function goBadge() {
+		uni.navigateTo({
+			url: '/pages/components/badge/index'
 		})
 	}
 

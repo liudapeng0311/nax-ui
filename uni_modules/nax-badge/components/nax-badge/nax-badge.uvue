@@ -1,0 +1,556 @@
+<template>
+	<view class="nax-badge" :class="rootClass">
+		<slot></slot>
+		<view
+			v-if="badgeVisible"
+			class="nax-badge__sup"
+			:class="supClass"
+			:style="supStyle"
+		>
+			<!-- processing 波纹：Web/小程序 CSS 动画；App 端 JS transform 兜底 -->
+			<view
+				v-if="processing"
+				class="nax-badge__wave"
+				:class="waveClass"
+				:style="waveStyle"
+			></view>
+			<slot name="value">
+				<text
+					v-if="!isDot && displayText.length > 0"
+					class="nax-badge__text"
+					:style="textStyle"
+					:lines="1"
+				>{{ displayText }}</text>
+			</slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-badge
+	 * @description 徽标。能力对齐 Naive UI Badge。
+	 * @property {string} value 显示值；数字超过 max 显示 {max}+
+	 * @property {number} max 最大值，0 表示不限制
+	 * @property {boolean} dot 红点
+	 * @property {boolean} showZero 值为 0 时是否展示
+	 * @property {boolean} show 是否显示徽标
+	 * @property {boolean} processing 处理中波纹
+	 * @property {boolean} alone 独立展示
+	 * @property {string} type default | success | error | warning | info
+	 * @property {string} color 自定义颜色
+	 * @property {string} offsetX 水平偏移，正值向右
+	 * @property {string} offsetY 垂直偏移，正值向下
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 锚定内容
+	 * @slot value 自定义徽标内容
+	 */
+	const props = defineProps({
+		value: { type: String, default: '' },
+		max: { type: Number, default: 0 },
+		dot: { type: Boolean, default: false },
+		showZero: { type: Boolean, default: false },
+		show: { type: Boolean, default: true },
+		processing: { type: Boolean, default: false },
+		alone: { type: Boolean, default: false },
+		type: { type: String, default: 'default' },
+		color: { type: String, default: '' },
+		offsetX: { type: String, default: '' },
+		offsetY: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	function normalizeType(value : string) : string {
+		if (value == 'success' || value == 'error' || value == 'warning' || value == 'info') {
+			return value
+		}
+		if (value == 'danger') {
+			return 'error'
+		}
+		return 'default'
+	}
+
+	function parseOffsetPx(value : string) : number {
+		if (value.length == 0) {
+			return 0
+		}
+		const n = parseFloat(value)
+		if (isNaN(n)) {
+			return 0
+		}
+		return n
+	}
+
+	function isStrictNumber(raw : string) : boolean {
+		const trimmed = raw.trim()
+		if (trimmed.length == 0) {
+			return false
+		}
+		if (isNaN(parseFloat(trimmed))) {
+			return false
+		}
+		var i = 0
+		if (trimmed.charAt(0) == '+' || trimmed.charAt(0) == '-') {
+			i = 1
+		}
+		if (i >= trimmed.length) {
+			return false
+		}
+		var sawDigit = false
+		var sawDot = false
+		while (i < trimmed.length) {
+			const c = trimmed.charAt(i)
+			if (c >= '0' && c <= '9') {
+				sawDigit = true
+			} else if (c == '.' && !sawDot) {
+				sawDot = true
+			} else {
+				return false
+			}
+			i++
+		}
+		return sawDigit
+	}
+
+	function isZeroValue(raw : string) : boolean {
+		if (!isStrictNumber(raw)) {
+			return false
+		}
+		return parseFloat(raw.trim()) == 0
+	}
+
+	function typeColor(name : string) : string {
+		if (name == 'success') {
+			return '#18a058'
+		}
+		if (name == 'warning') {
+			return '#f0a020'
+		}
+		if (name == 'info') {
+			return '#2080f0'
+		}
+		// default / error
+		return '#d03050'
+	}
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const isDot = computed((): boolean => {
+		return props.dot
+	})
+
+	const hasCustomColor = computed((): boolean => {
+		return props.color.length > 0
+	})
+
+	const displayText = computed((): string => {
+		const raw = props.value
+		if (raw.length == 0) {
+			return ''
+		}
+		if (!isStrictNumber(raw)) {
+			return raw
+		}
+		const num = parseFloat(raw.trim())
+		if (props.max > 0 && num > props.max) {
+			return '' + props.max + '+'
+		}
+		if (num == Math.floor(num)) {
+			return '' + Math.floor(num)
+		}
+		return '' + num
+	})
+
+	const badgeVisible = computed((): boolean => {
+		if (!props.show) {
+			return false
+		}
+		if (props.dot) {
+			return true
+		}
+		const raw = props.value
+		if (raw.length == 0) {
+			return false
+		}
+		if (isZeroValue(raw) && !props.showZero) {
+			return false
+		}
+		return true
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.alone) {
+			cls += 'nax-badge--alone'
+		}
+		if (props.customClass.length > 0) {
+			if (cls.length > 0) {
+				cls += ' '
+			}
+			cls += props.customClass
+		}
+		return cls
+	})
+
+	const supClass = computed((): string => {
+		var cls = ''
+		if (props.alone) {
+			cls += 'nax-badge__sup--alone'
+		}
+		if (isDot.value) {
+			if (cls.length > 0) {
+				cls += ' '
+			}
+			cls += 'nax-badge__sup--dot'
+		} else {
+			if (cls.length > 0) {
+				cls += ' '
+			}
+			cls += 'nax-badge__sup--value'
+			const text = displayText.value
+			if (text.length <= 1) {
+				cls += ' nax-badge__sup--single'
+			} else if (text.length == 2) {
+				cls += ' nax-badge__sup--double'
+			} else {
+				cls += ' nax-badge__sup--multi'
+			}
+		}
+		if (props.processing) {
+			cls += ' nax-badge__sup--processing'
+		}
+		if (!hasCustomColor.value) {
+			cls += ' nax-badge__sup--' + typeName.value
+		} else {
+			cls += ' nax-badge__sup--custom'
+		}
+		return cls
+	})
+
+	const waveClass = computed((): string => {
+		var cls = ''
+		if (!hasCustomColor.value) {
+			cls += 'nax-badge__wave--' + typeName.value
+		} else {
+			cls += 'nax-badge__wave--custom'
+		}
+		if (isDot.value) {
+			cls += ' nax-badge__wave--dot'
+		}
+		if (props.processing) {
+			cls += ' nax-badge__wave--active'
+		}
+		return cls
+	})
+
+	const textStyle = computed((): string => {
+		return 'font-size:12px;line-height:16px;height:16px;color:#ffffff;font-weight:500;text-align:center;'
+	})
+
+	const supStyle = computed((): string => {
+		var style = ''
+		if (hasCustomColor.value) {
+			style += 'background-color:' + props.color + ';'
+		}
+		if (props.dot) {
+			style += 'width:8px;height:8px;min-width:8px;min-height:8px;padding-left:0;padding-right:0;'
+		} else {
+			style += 'height:18px;min-height:18px;'
+			const text = displayText.value
+			if (text.length <= 1) {
+				style += 'width:18px;min-width:18px;padding-left:0;padding-right:0;'
+			} else if (text.length == 2) {
+				style += 'min-width:22px;padding-left:5px;padding-right:5px;'
+			} else {
+				style += 'min-width:26px;padding-left:6px;padding-right:6px;'
+			}
+		}
+		if (props.alone) {
+			return style
+		}
+		const ox = parseOffsetPx(props.offsetX)
+		const oy = parseOffsetPx(props.offsetY)
+		var half = 9
+		if (props.dot) {
+			half = 4
+		}
+		const top = (0 - half) + oy
+		const right = (0 - half) - ox
+		style += 'top:' + top.toString() + 'px;'
+		style += 'right:' + right.toString() + 'px;'
+		return style
+	})
+
+	function waveBgStyle() : string {
+		if (hasCustomColor.value) {
+			return 'background-color:' + props.color + ';'
+		}
+		return 'background-color:' + typeColor(typeName.value) + ';'
+	}
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App uvue 不支持 @keyframes：高频小步进改 transform/opacity，减轻掉帧感
+	// 一周期约 1.2s：30 步 * 40ms（接近 nax-button loading 的 50ms 刷新）
+	const WAVE_STEPS = 30
+	const WAVE_INTERVAL_MS = 40
+	const waveStep = ref(0)
+	let waveTimerId = -1
+
+	/** 百分位整数 → "a.bc" / "0.ab"，避免 UTS 浮点 toString 不稳定 */
+	function fixed2FromCent(cent : number) : string {
+		var c = cent
+		if (c < 0) {
+			c = 0
+		}
+		const whole = Math.floor(c / 100)
+		var frac = c % 100
+		if (frac < 0) {
+			frac = 0
+		}
+		if (frac < 10) {
+			return '' + whole + '.0' + frac
+		}
+		return '' + whole + '.' + frac
+	}
+
+	function waveScaleAt(step : number) : string {
+		// 1.00 → 2.20，每步 +0.04
+		var s = step
+		if (s < 0) {
+			s = 0
+		}
+		if (s > WAVE_STEPS) {
+			s = WAVE_STEPS
+		}
+		const cent = 100 + s * 4
+		return fixed2FromCent(cent)
+	}
+
+	function waveOpacityAt(step : number) : string {
+		// 0.55 → 0.00 线性衰减
+		var s = step
+		if (s < 0) {
+			s = 0
+		}
+		if (s > WAVE_STEPS) {
+			s = WAVE_STEPS
+		}
+		const cent = Math.floor(55 * (WAVE_STEPS - s) / WAVE_STEPS)
+		return fixed2FromCent(cent)
+	}
+
+	const waveStyle = computed((): string => {
+		var style = waveBgStyle()
+		// 明确中心缩放，避免部分端默认原点偏移导致观感跳动
+		style += 'transform:scale(' + waveScaleAt(waveStep.value) + ');'
+		style += 'opacity:' + waveOpacityAt(waveStep.value) + ';'
+		return style
+	})
+
+	function stopWavePulse() {
+		if (waveTimerId >= 0) {
+			clearInterval(waveTimerId)
+			waveTimerId = -1
+		}
+		waveStep.value = 0
+	}
+
+	function startWavePulse() {
+		stopWavePulse()
+		waveStep.value = 0
+		waveTimerId = setInterval(() => {
+			// 末帧 opacity≈0 后再回到 0，接缝更不明显
+			let next = waveStep.value + 1
+			if (next > WAVE_STEPS) {
+				next = 0
+			}
+			waveStep.value = next
+		}, WAVE_INTERVAL_MS)
+	}
+
+	watch((): boolean => {
+		return props.processing && badgeVisible.value
+	}, (val : boolean) => {
+		if (val) {
+			startWavePulse()
+		} else {
+			stopWavePulse()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopWavePulse()
+	})
+	// #endif
+
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	// Web / 小程序：颜色内联，动画走 CSS @keyframes
+	const waveStyle = computed((): string => {
+		return waveBgStyle()
+	})
+	// #endif
+</script>
+
+<style>
+	.nax-badge {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		align-self: flex-start;
+		overflow: visible;
+	}
+
+	.nax-badge--alone {
+		flex-direction: row;
+		align-items: center;
+		overflow: visible;
+	}
+
+	.nax-badge__sup {
+		position: absolute;
+		top: 0;
+		right: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		z-index: 10;
+		background-color: #d03050;
+		border-radius: 9999px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: #ffffff;
+		overflow: visible;
+	}
+
+	.nax-badge__sup--alone {
+		position: relative;
+		top: 0;
+		right: 0;
+	}
+
+	.nax-badge__sup--value {
+		height: 18px;
+		min-height: 18px;
+		min-width: 18px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-badge__sup--single {
+		width: 18px;
+		min-width: 18px;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.nax-badge__sup--double {
+		min-width: 22px;
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+
+	.nax-badge__sup--multi {
+		min-width: 26px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-badge__sup--dot {
+		width: 8px;
+		height: 8px;
+		min-width: 8px;
+		min-height: 8px;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.nax-badge__sup--default,
+	.nax-badge__sup--error {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-badge__sup--success {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-badge__sup--warning {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-badge__sup--info {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-badge__sup--processing {
+		overflow: visible;
+	}
+
+	.nax-badge__text {
+		font-size: 12px;
+		line-height: 16px;
+		height: 16px;
+		color: #ffffff;
+		font-weight: 500;
+		text-align: center;
+	}
+
+	.nax-badge__wave {
+		position: absolute;
+		top: -3px;
+		right: -3px;
+		bottom: -3px;
+		left: -3px;
+		border-radius: 9999px;
+		background-color: #d03050;
+		opacity: 0.35;
+		z-index: 0;
+	}
+
+	.nax-badge__wave--default,
+	.nax-badge__wave--error {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-badge__wave--success {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-badge__wave--warning {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-badge__wave--info {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web / 小程序：CSS 波纹动画 */
+	.nax-badge__wave--active {
+		animation-name: nax-badge-wave;
+		animation-duration: 1.2s;
+		animation-timing-function: ease-out;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-badge-wave {
+		0% {
+			transform: scale(1);
+			opacity: 0.55;
+		}
+		100% {
+			transform: scale(2.2);
+			opacity: 0;
+		}
+	}
+	/* #endif */
+
+	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* App：动画由 JS transform 驱动，这里只保证可溢出 */
+	.nax-badge__wave--active {
+		opacity: 0.55;
+	}
+	/* #endif */
+</style>

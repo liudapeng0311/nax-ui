@@ -180,13 +180,21 @@ function injectBase64IntoUvue(b64) {
     '\t}'
   ].join('\n')
 
-  const re = /\t\/\*[\s\S]*?\*\/\s*\t@font-face\s*\{[\s\S]*?\t\}|\t@font-face\s*\{[\s\S]*?\t\}/
-  if (!re.test(uvue)) {
+  // Only rewrite style-block @font-face that declares nax-icon.
+  // Do not use open /* ... */ across the file (would delete <script>).
+  const re = /\t@font-face\s*\{[\s\S]*?font-family:\s*nax-icon;[\s\S]*?\t\}/
+  // Prefer replacing comment + @font-face when the comment is immediately above.
+  const reWithComment = /\t\/\*\s*\n\t \*[\s\S]*?\*\/\s*\n\t@font-face\s*\{[\s\S]*?font-family:\s*nax-icon;[\s\S]*?\t\}/
+  if (reWithComment.test(uvue)) {
+    uvue = uvue.replace(reWithComment, face)
+  } else if (re.test(uvue)) {
+    uvue = uvue.replace(re, face)
+  } else {
     throw new Error('Cannot find @font-face block in nax-icon.uvue')
   }
-  uvue = uvue.replace(re, face)
   fs.writeFileSync(uvuePath, uvue, 'utf8')
 }
+
 
 function main() {
   if (!fs.existsSync(catalogPath)) {

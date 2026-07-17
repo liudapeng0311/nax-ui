@@ -52,7 +52,7 @@
 
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
-| 徽标 | `nax-badge` | P1 | 数字/红点 | `value` `dot` `max` `show-zero` |
+| 徽标 | `nax-badge` | P1 | 数字/红点（对齐 Naive Badge） | `value` `max` `dot` `show-zero` `show` `processing` `type` `color` `offsetX/Y` `alone` / 插槽 `value` **done** |
 | 头像 | `nax-avatar` | P1 | 图/文字头像 | `src` `text` `size` `shape` |
 | 空状态 | `nax-empty` | P1 | 无数据占位 | `description` `image` 插槽 `action` |
 

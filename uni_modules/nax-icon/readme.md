@@ -84,7 +84,7 @@ arrow-left, arrow-right, arrow-up, arrow-down
 chevron-left, chevron-right, chevron-up, chevron-down
 search, loading, info, warning, success, error
 user, home, more, edit, delete, star, heart
-settings, eye, eye-off, copy, share
+settings, eye, eye-off, copy, share, image, image-off, loader
 ```
 
 完整映射见：`assets/icons/catalog.json`、`icons/mapping.json`。

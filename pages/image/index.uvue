@@ -75,12 +75,10 @@
 				<view class="row">
 					<view class="item">
 						<nax-image
-							:src="slowSrc"
+							force-loading
 							width="120"
 							height="120"
 							loading-text="加载中"
-							@load="onLoadOk"
-							@error="onError"
 						></nax-image>
 						<text class="item__label">加载占位</text>
 					</view>
@@ -89,6 +87,7 @@
 							:src="badSrc"
 							width="120"
 							height="120"
+							:timeout="8000"
 							error-text="加载失败"
 							@error="onError"
 						></nax-image>
@@ -110,7 +109,7 @@
 			<view class="section">
 				<text class="section__title">自定义插槽</text>
 				<nax-image
-					:src="badSrc"
+					:src="badSrc" :timeout="8000"
 					width="100%"
 					height="140"
 					shape="round"
@@ -158,8 +157,7 @@
 
 
 	const okSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg')
-	const slowSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg?t=' + Date.now().toString())
-	const badSrc = ref('https://invalid.nax-ui.local/not-found-' + Date.now().toString() + '.png')
+	const badSrc = ref('https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/nax-ui-not-found.png')
 	const tip = ref('点击图片或观察 load / error 事件')
 
 	function onLoadOk() {

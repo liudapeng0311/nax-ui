@@ -1,0 +1,345 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-badge</text>
+			<text class="page__desc">徽标。能力对齐 Naive UI Badge。</text>
+
+			<view class="section">
+				<text class="section__title">基础 value</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="5">
+							<view class="avatar">
+								<text class="avatar__text">消息</text>
+							</view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="15">
+							<view class="avatar">
+								<text class="avatar__text">通知</text>
+							</view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="hot">
+							<view class="avatar">
+								<text class="avatar__text">文本</text>
+							</view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">红点 dot</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge dot>
+							<view class="avatar">
+								<text class="avatar__text">未读</text>
+							</view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge dot type="success">
+							<view class="avatar">
+								<text class="avatar__text">在线</text>
+							</view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="6" type="default">
+							<view class="avatar"><text class="avatar__text">default</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="6" type="error">
+							<view class="avatar"><text class="avatar__text">error</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="6" type="info">
+							<view class="avatar"><text class="avatar__text">info</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="6" type="success">
+							<view class="avatar"><text class="avatar__text">success</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="6" type="warning">
+							<view class="avatar"><text class="avatar__text">warning</text></view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最大值 max</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="100" :max="99">
+							<view class="avatar"><text class="avatar__text">99+</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="1000" :max="999">
+							<view class="avatar"><text class="avatar__text">999+</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge :value="countText" :max="99">
+							<view class="avatar"><text class="avatar__text">动态</text></view>
+						</nax-badge>
+					</view>
+				</view>
+				<view class="row row--gap">
+					<nax-button size="sm" label="-10" @click="changeCount(-10)"></nax-button>
+					<view class="btn-gap"></view>
+					<nax-button size="sm" label="+10" @click="changeCount(10)"></nax-button>
+					<view class="btn-gap"></view>
+					<text class="hint">count = {{ countText }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">show-zero</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="0">
+							<view class="avatar"><text class="avatar__text">隐藏 0</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="0" show-zero>
+							<view class="avatar"><text class="avatar__text">显示 0</text></view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">show 开关</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="8" :show="badgeShow">
+							<view class="avatar"><text class="avatar__text">可控</text></view>
+						</nax-badge>
+					</view>
+					<nax-button size="sm" :label="badgeShow ? '隐藏' : '显示'" @click="toggleShow"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">processing 处理中</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="3" processing>
+							<view class="avatar"><text class="avatar__text">同步</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge dot processing type="info">
+							<view class="avatar"><text class="avatar__text">点</text></view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义 color</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="8" color="#8a2be2">
+							<view class="avatar"><text class="avatar__text">紫</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge dot color="#f0a020">
+							<view class="avatar"><text class="avatar__text">橙点</text></view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">偏移 offset</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="6" offset-x="0" offset-y="0">
+							<view class="avatar"><text class="avatar__text">默认</text></view>
+						</nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge value="6" offset-x="8" offset-y="-4">
+							<view class="avatar"><text class="avatar__text">偏移</text></view>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">独立 alone</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge alone value="15"></nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge alone value="99+" type="success"></nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge alone dot></nax-badge>
+					</view>
+					<view class="item">
+						<nax-badge alone value="NEW" type="warning"></nax-badge>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义 value 插槽</text>
+				<view class="row">
+					<view class="item">
+						<nax-badge value="VIP">
+							<view class="avatar"><text class="avatar__text">插槽</text></view>
+							<template #value>
+								<text class="custom-value">VIP</text>
+							</template>
+						</nax-badge>
+					</view>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const count = ref(100)
+	const countText = computed((): string => {
+		return '' + count.value
+	})
+
+	const badgeShow = ref(true)
+
+	function changeCount(delta : number) {
+		const next = count.value + delta
+		if (next < 0) {
+			count.value = 0
+			return
+		}
+		count.value = next
+	}
+
+	function toggleShow() {
+		badgeShow.value = !badgeShow.value
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		overflow: visible;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 10px;
+	}
+
+	.item {
+		margin-right: 20px;
+		margin-bottom: 12px;
+		overflow: visible;
+		padding-top: 8px;
+		padding-right: 8px;
+	}
+
+	.btn-gap {
+		width: 8px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-left: 8px;
+	}
+
+	.avatar {
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		overflow: visible;
+	}
+
+	.avatar__text {
+		font-size: 11px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.custom-value {
+		font-size: 10px;
+		color: #ffffff;
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+</style>

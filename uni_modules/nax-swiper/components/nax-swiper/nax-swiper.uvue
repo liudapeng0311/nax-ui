@@ -213,7 +213,7 @@
 		return true
 	}
 
-	function asObject(item: any): UTSJSONObject | null {
+	function asObject(item: any | null): UTSJSONObject | null {
 		if (item == null) {
 			return null
 		}
@@ -223,7 +223,7 @@
 		return item as UTSJSONObject
 	}
 
-	function resolveSrc(item: any): string {
+	function resolveSrc(item: any | null): string {
 		if (item == null) {
 			return ''
 		}
@@ -249,7 +249,7 @@
 		return ''
 	}
 
-	function resolveText(item: any): string {
+	function resolveText(item: any | null): string {
 		const obj = asObject(item)
 		if (obj == null) {
 			return ''
@@ -265,7 +265,7 @@
 		return ''
 	}
 
-	function resolveBg(item: any): string {
+	function resolveBg(item: any | null): string {
 		const obj = asObject(item)
 		if (obj == null) {
 			return ''
@@ -281,7 +281,7 @@
 		return ''
 	}
 
-	function itemInnerClass(item: any): string {
+	function itemInnerClass(item: any | null): string {
 		if (resolveSrc(item).length > 0) {
 			return ''
 		}
@@ -291,7 +291,7 @@
 		return ''
 	}
 
-	function itemInnerStyle(item: any): string {
+	function itemInnerStyle(item: any | null): string {
 		const bg = resolveBg(item)
 		if (bg.length == 0) {
 			return ''
@@ -299,7 +299,7 @@
 		return 'background-color:' + bg + ';'
 	}
 
-	function itemKey(item: any, index: number): string {
+	function itemKey(item: any | null, index: number): string {
 		const src = resolveSrc(item)
 		if (src.length > 0) {
 			return index.toString() + '-' + src
@@ -515,6 +515,7 @@
 	}
 
 	.nax-swiper__item-inner--panel {
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 	}

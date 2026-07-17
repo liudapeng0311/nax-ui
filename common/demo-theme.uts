@@ -71,6 +71,11 @@ export function demoThemeExtraClass(): string {
  * 注意：uni-app x 的 Uni 类型无 setBackgroundColor，页面底色靠 nax-theme / CSS 变量
  */
 export function applyDemoThemeChrome(dark: boolean) {
+	// App onLaunch 时尚无页面栈，Android 调 setNavigationBarColor 会 ArrayIndexOutOfBounds
+	const pages = getCurrentPages()
+	if (pages.length == 0) {
+		return
+	}
 	if (dark) {
 		uni.setNavigationBarColor({
 			frontColor: '#ffffff',

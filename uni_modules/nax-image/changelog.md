@@ -1,3 +1,14 @@
+## 0.1.5（2026-07-17）
+- 新增 forceLoading：强制展示加载占位（demo/预览）
+- demo「加载占位」改为 force-loading，避免真实图加载成功后盖住图标
+
+## 0.1.4（2026-07-17）
+- 新增 timeout：超时未 load 则进入失败态（缓解鸿蒙等端无效域名 DNS 久等）
+
+## 0.1.3（2026-07-17）
+- 加载中占位改用 nax-icon `image`，失败占位改用 `image-off`
+- 移除 loading 旋转动画（静态图片占位）
+
 ## 0.1.2（2026-07-16）
 
 - package：安装依赖增加 nax-ui-theme（运行时仍弱依赖 + fallback）

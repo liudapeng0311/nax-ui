@@ -2,12 +2,12 @@
 	<scroll-view style="flex:1" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__title">nax-swiper</text>
-			<text class="page__desc">轮播 · list / autoplay / indicator / v-model:current</text>
+			<text class="page__desc">轮播 · list 色块演示 / autoplay / indicator / v-model:current</text>
 
 			<view class="section">
 				<text class="section__title">基础（点指示器）</text>
 				<nax-swiper
-					:list="banners"
+					:list="slides"
 					height="160"
 					@change="onChange"
 					@click="onClickItem"
@@ -18,7 +18,7 @@
 			<view class="section">
 				<text class="section__title">自动播放 + 循环</text>
 				<nax-swiper
-					:list="banners"
+					:list="slides"
 					height="160"
 					autoplay
 					:interval="2500"
@@ -29,7 +29,7 @@
 			<view class="section">
 				<text class="section__title">数字指示器</text>
 				<nax-swiper
-					:list="banners"
+					:list="slides"
 					height="160"
 					indicator
 					indicator-type="number"
@@ -40,7 +40,7 @@
 			<view class="section">
 				<text class="section__title">受控 current</text>
 				<nax-swiper
-					:list="banners"
+					:list="slides"
 					height="160"
 					v-model:current="current"
 					:indicator="true"
@@ -54,15 +54,6 @@
 					</view>
 					<text class="page__hint">v-model: {{ current }}</text>
 				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">色块文案（list 对象，小程序推荐）</text>
-				<nax-swiper
-					:list="panels"
-					height="140"
-					indicator
-				></nax-swiper>
 			</view>
 		</view>
 	</scroll-view>
@@ -85,33 +76,28 @@
 		darkMode.value = bindDemoThemePage()
 	})
 
-
-
-	const banners = ref([
-		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
-		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/muwu.jpg',
-		'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/yinhua.jpg'
-	] as string[])
-
-	// 微信小程序：自定义内容优先用 list 对象（bg/text），避免 slot 内 swiper-item 计数为 0
-	const panels = ref([
+	/**
+	 * 演示用色块 list，不依赖外链图片（避免 CDN 404）
+	 * 业务侧仍可传 string url 或 { src|image|url, text, bg|background }
+	 */
+	const slides = ref([
 		{
 			bg: '#18a058',
-			text: '自定义页 1'
+			text: '色块 1 · primary'
 		} as UTSJSONObject,
 		{
-			bg: '#18a058',
-			text: '自定义页 2'
+			bg: '#2080f0',
+			text: '色块 2 · info'
 		} as UTSJSONObject,
 		{
 			bg: '#f0a020',
-			text: '自定义页 3'
+			text: '色块 3 · warning'
 		} as UTSJSONObject
 	] as UTSJSONObject[])
 
 	const current = ref(0)
 	const currentHint = ref(0)
-	const tip = ref('点击轮播项查看 index')
+	const tip = ref('点击轮播页查看 index')
 
 	function onChange(cur: number) {
 		currentHint.value = cur
@@ -123,14 +109,14 @@
 
 	function prev() {
 		if (current.value <= 0) {
-			current.value = banners.value.length - 1
+			current.value = slides.value.length - 1
 			return
 		}
 		current.value = current.value - 1
 	}
 
 	function next() {
-		if (current.value >= banners.value.length - 1) {
+		if (current.value >= slides.value.length - 1) {
 			current.value = 0
 			return
 		}

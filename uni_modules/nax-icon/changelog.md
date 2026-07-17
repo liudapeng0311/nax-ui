@@ -1,3 +1,6 @@
+## 0.1.8（2026-07-17）
+- 新增内置图标：image / image-off / loader
+
 ## 0.1.7（2026-07-16）
 
 - package：安装依赖增加 nax-ui-theme（运行时仍弱依赖 + fallback）

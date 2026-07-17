@@ -17,24 +17,17 @@
 
 		<view v-if="showLoadingLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="loading">
-				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
-				<view class="nax-image__spin" :style="loadingStyle">
-					<nax-icon name="loading" :size="iconSizeName" color="#c2c2c2"></nax-icon>
+				<view class="nax-image__status-icon">
+					<nax-icon name="image" :size="iconSizeName" color="#c2c2c2"></nax-icon>
 				</view>
-				<!-- #endif -->
-				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
-				<view class="nax-image__spin">
-					<nax-icon name="loading" :size="iconSizeName" color="#c2c2c2"></nax-icon>
-				</view>
-				<!-- #endif -->
 				<text v-if="loadingText.length > 0" class="nax-image__status-text">{{ loadingText }}</text>
 			</slot>
 		</view>
 
 		<view v-if="showErrorLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="error">
-				<view class="nax-image__error-icon">
-					<nax-icon name="error" :size="iconSizeName" color="#c2c2c2"></nax-icon>
+				<view class="nax-image__status-icon">
+					<nax-icon name="image-off" :size="iconSizeName" color="#c2c2c2"></nax-icon>
 				</view>
 				<text v-if="errorText.length > 0" class="nax-image__status-text">{{ errorText }}</text>
 			</slot>
@@ -127,6 +120,15 @@
 			type: String,
 			default: '加载失败'
 		},
+		timeout: {
+			type: Number,
+			default: 0
+		},
+		/** 强制显示加载占位（不发起/不展示真实图，便于演示） */
+		forceLoading: {
+			type: Boolean,
+			default: false
+		},
 		customClass: {
 			type: String,
 			default: ''
@@ -176,12 +178,18 @@
 	})
 
 	const showImage = computed((): boolean => {
+		if (props.forceLoading) {
+			return false
+		}
 		return hasSrc.value && status.value != 'error'
 	})
 
 	const showLoadingLayer = computed((): boolean => {
 		if (!props.showLoading) {
 			return false
+		}
+		if (props.forceLoading) {
+			return true
 		}
 		if (!hasSrc.value) {
 			return false
@@ -190,6 +198,9 @@
 	})
 
 	const showErrorLayer = computed((): boolean => {
+		if (props.forceLoading) {
+			return false
+		}
 		if (!props.showError) {
 			return false
 		}
@@ -207,7 +218,7 @@
 		let cls = ''
 		const shapeName = normalizeShape(props.shape)
 		cls += ' nax-image--shape-' + shapeName
-		if (status.value == 'loading') {
+		if (props.forceLoading || status.value == 'loading') {
 			cls += ' nax-image--loading'
 		}
 		if (status.value == 'error' || !hasSrc.value) {
@@ -245,65 +256,52 @@
 		return 'width:100%;height:100%;background-color:#fafafc;'
 	})
 
-	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App: no @keyframes, timer rotate fallback
-	const loadingAngle = ref(0)
-	let loadingTimerId = -1
 
-	const loadingStyle = computed((): string => {
-		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
-	})
+	let loadTimerId = -1
 
-	function stopLoadingSpin() {
-		if (loadingTimerId >= 0) {
-			clearInterval(loadingTimerId)
-			loadingTimerId = -1
+	function clearLoadTimer() {
+		if (loadTimerId >= 0) {
+			clearTimeout(loadTimerId)
+			loadTimerId = -1
 		}
-		loadingAngle.value = 0
 	}
 
-	function startLoadingSpin() {
-		stopLoadingSpin()
-		loadingAngle.value = 0
-		loadingTimerId = setInterval(() => {
-			let next = loadingAngle.value + 30
-			if (next >= 360) {
-				next = 0
+	function armLoadTimer() {
+		clearLoadTimer()
+		const ms = props.timeout
+		if (ms <= 0) {
+			return
+		}
+		if (!hasSrc.value) {
+			return
+		}
+		loadTimerId = setTimeout(() => {
+			loadTimerId = -1
+			if (status.value == 'loading') {
+				status.value = 'error'
+				emit('error', null)
 			}
-			loadingAngle.value = next
-		}, 50)
+		}, ms)
 	}
 
-
-	watch((): boolean => {
-		return showLoadingLayer.value
-	}, (val: boolean) => {
-		if (val) {
-			startLoadingSpin()
-		} else {
-			stopLoadingSpin()
-		}
-	}, { immediate: true })
-
-	onUnmounted(() => {
-		stopLoadingSpin()
-	})
-	// #endif
-
-		function resetStatus() {
+	function resetStatus() {
+		clearLoadTimer()
 		if (!hasSrc.value) {
 			status.value = 'error'
 			return
 		}
 		status.value = 'loading'
+		armLoadTimer()
 	}
 
 	function onLoad(e: any) {
+		clearLoadTimer()
 		status.value = 'loaded'
 		emit('load', e)
 	}
 
 	function onError(e: any) {
+		clearLoadTimer()
 		status.value = 'error'
 		emit('error', e)
 	}
@@ -312,17 +310,15 @@
 		emit('click')
 	}
 
-watch((): string => {
+	watch((): string => {
 		return props.src
 	}, () => {
 		resetStatus()
 	}, { immediate: true })
 
-
-
-
-
-
+	onUnmounted(() => {
+		clearLoadTimer()
+	})
 
 </script>
 
@@ -370,36 +366,7 @@ watch((): string => {
 		background-color: var(--nax-image-status-bg, #fafafc);
 	}
 
-	.nax-image__spin {
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		overflow: hidden;
-		transform-origin: center center;
-	}
-
-	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
-	/* Web / MP: CSS spin */
-	.nax-image__spin {
-		animation-name: nax-image-spin;
-		animation-duration: 0.8s;
-		animation-timing-function: linear;
-		animation-iteration-count: infinite;
-	}
-
-	@keyframes nax-image-spin {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
-	}
-	/* #endif */
-
-	.nax-image__error-icon {
+	.nax-image__status-icon {
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
