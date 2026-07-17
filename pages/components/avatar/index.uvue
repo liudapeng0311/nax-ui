@@ -1,0 +1,295 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-avatar</text>
+			<text class="page__desc">头像。能力对齐 Naive UI Avatar：图片 / 文字 / 尺寸 / 形状 / 描边 / 失败回退。</text>
+
+			<view class="section">
+				<text class="section__title">基础图片</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar :src="okSrc"></nax-avatar>
+						<text class="item__label">默认</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" bordered></nax-avatar>
+						<text class="item__label">bordered</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" @click="onAvatarClick"></nax-avatar>
+						<text class="item__label">可点击</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">描边色 border-color</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar :src="okSrc" bordered></nax-avatar>
+						<text class="item__label">默认边色</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" border-color="#18a058"></nax-avatar>
+						<text class="item__label">primary</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" border-color="#2080f0" size="48"></nax-avatar>
+						<text class="item__label">info</text>
+					</view>
+					<view class="item">
+						<nax-avatar text="NA" color="#18a058" border-color="#0c7a43" size="48"></nax-avatar>
+						<text class="item__label">文字+边</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar :src="okSrc" size="sm"></nax-avatar>
+						<text class="item__label">sm 28</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" size="md"></nax-avatar>
+						<text class="item__label">md 34</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" size="lg"></nax-avatar>
+						<text class="item__label">lg 40</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" size="56"></nax-avatar>
+						<text class="item__label">56</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">形状 shape</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar :src="okSrc" shape="circle" size="48"></nax-avatar>
+						<text class="item__label">circle</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" shape="round" size="48"></nax-avatar>
+						<text class="item__label">round</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" shape="square" size="48"></nax-avatar>
+						<text class="item__label">square</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">文字头像 text + color</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar text="A"></nax-avatar>
+						<text class="item__label">默认灰底</text>
+					</view>
+					<view class="item">
+						<nax-avatar text="NA" color="#18a058"></nax-avatar>
+						<text class="item__label">primary</text>
+					</view>
+					<view class="item">
+						<nax-avatar text="UI" color="#2080f0"></nax-avatar>
+						<text class="item__label">info</text>
+					</view>
+					<view class="item">
+						<nax-avatar text="!" color="#d03050" size="lg"></nax-avatar>
+						<text class="item__label">error</text>
+					</view>
+					<view class="item">
+						<nax-avatar text="文" color="#f0a020" text-color="#333639"></nax-avatar>
+						<text class="item__label">自定义字色</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">object-fit（Naive）</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar :src="okSrc" size="56" object-fit="cover"></nax-avatar>
+						<text class="item__label">cover</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" size="56" object-fit="contain"></nax-avatar>
+						<text class="item__label">contain</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="okSrc" size="56" object-fit="fill"></nax-avatar>
+						<text class="item__label">fill</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">失败回退 fallback-src / text</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar
+							:src="badSrc"
+							:fallback-src="okSrc"
+							size="48"
+							@error="onError"
+						></nax-avatar>
+						<text class="item__label">fallback 图</text>
+					</view>
+					<view class="item">
+						<nax-avatar
+							:src="badSrc"
+							text="FB"
+							color="#18a058"
+							size="48"
+							@error="onError"
+						></nax-avatar>
+						<text class="item__label">回退文字</text>
+					</view>
+					<view class="item">
+						<nax-avatar :src="badSrc" size="48" @error="onError">
+							<nax-icon name="user" size="20" color="#c2c2c2"></nax-icon>
+						</nax-avatar>
+						<text class="item__label">插槽图标</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">仅插槽（无图无字）</text>
+				<view class="row">
+					<view class="item">
+						<nax-avatar size="48">
+							<nax-icon name="user" size="22" color="#767c82"></nax-icon>
+						</nax-avatar>
+						<text class="item__label">icon</text>
+					</view>
+					<view class="item">
+						<nax-avatar size="48" color="#18a058">
+							<nax-icon name="user" size="22" color="#ffffff"></nax-icon>
+						</nax-avatar>
+						<text class="item__label">icon+色</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">与 nax-badge 组合</text>
+				<view class="row">
+					<view class="item item--badge">
+						<nax-badge value="8">
+							<nax-avatar :src="okSrc" size="48"></nax-avatar>
+						</nax-badge>
+						<text class="item__label">数字</text>
+					</view>
+					<view class="item item--badge">
+						<nax-badge dot type="success">
+							<nax-avatar text="在" color="#2080f0" size="48"></nax-avatar>
+						</nax-badge>
+						<text class="item__label">在线点</text>
+					</view>
+					<view class="item item--badge">
+						<nax-badge value="99+" type="error">
+							<nax-avatar :src="okSrc" size="48" shape="round"></nax-avatar>
+						</nax-badge>
+						<text class="item__label">消息</text>
+					</view>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	// demo image: repo static; bad url for error / fallback
+	// Web caches same-url images aggressively; bump v after replacing static/logo.png
+	const okSrc = '/static/logo.png?v=2'
+	const badSrc = 'https://example.com/nax-avatar-not-found.png'
+
+	function onAvatarClick() {
+		uni.showToast({
+			title: 'avatar click',
+			icon: 'none'
+		})
+	}
+
+	function onError() {
+		console.log('nax-avatar error')
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		overflow: visible;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-end;
+	}
+
+	.item {
+		margin-right: 16px;
+		margin-bottom: 12px;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.item--badge {
+		padding-top: 8px;
+		padding-right: 8px;
+		overflow: visible;
+	}
+
+	.item__label {
+		margin-top: 6px;
+		font-size: 11px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>

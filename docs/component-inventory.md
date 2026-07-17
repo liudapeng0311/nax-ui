@@ -53,7 +53,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 徽标 | `nax-badge` | P1 | 数字/红点（对齐 Naive Badge） | `value` `max` `dot` `show-zero` `show` `processing` `type` `color` `offsetX/Y` `alone` / 插槽 `value` **done** |
-| 头像 | `nax-avatar` | P1 | 图/文字头像 | `src` `text` `size` `shape` |
+| 头像 | `nax-avatar` | P1 | 图/文字头像（对齐 Naive Avatar） | `src` `text` `size` `shape` `bordered` `color` `fallback-src` / `click` `load` `error` **done** |
 | 空状态 | `nax-empty` | P1 | 无数据占位 | `description` `image` 插槽 `action` |
 
 ### 2.4 MVP 验收标准
@@ -117,6 +117,7 @@
 | `nax-icon` | mvp | 插件包已有骨架 |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
+| `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---
