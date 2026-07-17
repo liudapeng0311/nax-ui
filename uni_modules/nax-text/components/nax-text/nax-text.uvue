@@ -1,0 +1,634 @@
+<template>
+	<view
+		v-if="show"
+		class="nax-text"
+		:class="rootClass"
+		:style="rootStyle"
+		@click="onClick"
+	>
+		<view v-if="hasPrefixIcon" class="nax-text__icon nax-text__icon--prefix">
+			<nax-icon :name="prefixIcon" :size="iconSizeValue" :color="iconColorValue"></nax-icon>
+		</view>
+		<slot name="prefix"></slot>
+
+		<!-- 有 lines：绑定省略行数 -->
+		<text
+			v-if="hasText && isPriceMode && hasLines"
+			class="nax-text__value nax-text__value--price"
+			:class="valueClass"
+			:style="valueStyle"
+			:lines="lines"
+			:selectable="selectable"
+		>￥{{ displayValue }}</text>
+		<text
+			v-else-if="hasText && isPriceMode"
+			class="nax-text__value nax-text__value--price"
+			:class="valueClass"
+			:style="valueStyle"
+			:selectable="selectable"
+		>￥{{ displayValue }}</text>
+
+		<text
+			v-else-if="hasText && hasLines"
+			class="nax-text__value"
+			:class="valueClass"
+			:style="valueStyle"
+			:lines="lines"
+			:selectable="selectable"
+		>{{ displayValue }}</text>
+		<text
+			v-else-if="hasText"
+			class="nax-text__value"
+			:class="valueClass"
+			:style="valueStyle"
+			:selectable="selectable"
+		>{{ displayValue }}</text>
+
+		<slot></slot>
+
+		<view v-if="hasSuffixIcon" class="nax-text__icon nax-text__icon--suffix">
+			<nax-icon :name="suffixIcon" :size="iconSizeValue" :color="iconColorValue"></nax-icon>
+		</view>
+		<slot name="suffix"></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-text
+	 * @description 文本。能力对齐 uView Pro Text：主题色 / 字号 / 省略 / 加粗 / 装饰 / 模式格式化（价格、手机号、姓名、日期、链接）等。
+	 * @property {string} type default | primary | info | success | warning | error | secondary | placeholder（兼容 main/content/tips/light/danger）
+	 * @property {boolean} show 是否显示
+	 * @property {string} text 显示文案
+	 * @property {string} prefixIcon 前置 nax-icon 名
+	 * @property {string} suffixIcon 后置 nax-icon 名
+	 * @property {string} mode text | price | phone | name | date | link
+	 * @property {string} href mode=link 时的链接
+	 * @property {string} format 格式化：phone/name 传 encrypt；date 传时间格式（默认 yyyy-mm-dd）
+	 * @property {boolean} call mode=phone 时点击是否拨号
+	 * @property {boolean} bold 是否加粗
+	 * @property {boolean} block 是否块级
+	 * @property {number} lines 最大行数，>0 时超出省略；0 不限制
+	 * @property {string} color 自定义文字色（优先于 type）
+	 * @property {string} size sm | md | lg | xl | 数字字符串（px）
+	 * @property {string} decoration none | underline | line-through
+	 * @property {string} align left | center | right
+	 * @property {string} lineHeight 行高，如 22 或 22px
+	 * @property {boolean} selectable 是否可选中复制
+	 * @property {string} iconSize 图标尺寸；默认跟随字号
+	 * @property {string} iconColor 图标颜色；默认跟随文字色
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击
+	 * @slot default 自定义附加内容
+	 * @slot prefix 自定义前置区域
+	 * @slot suffix 自定义后置区域
+	 */
+	const props = defineProps({
+		type: { type: String, default: 'default' },
+		show: { type: Boolean, default: true },
+		text: { type: String, default: '' },
+		prefixIcon: { type: String, default: '' },
+		suffixIcon: { type: String, default: '' },
+		mode: { type: String, default: 'text' },
+		href: { type: String, default: '' },
+		format: { type: String, default: '' },
+		call: { type: Boolean, default: false },
+		bold: { type: Boolean, default: false },
+		block: { type: Boolean, default: false },
+		lines: { type: Number, default: 0 },
+		color: { type: String, default: '' },
+		size: { type: String, default: 'md' },
+		decoration: { type: String, default: 'none' },
+		align: { type: String, default: 'left' },
+		lineHeight: { type: String, default: '' },
+		selectable: { type: Boolean, default: false },
+		iconSize: { type: String, default: '' },
+		iconColor: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['click'])
+
+	function normalizeType(value : string) : string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (value == 'main' || value == 'content') {
+			return 'default'
+		}
+		if (value == 'tips') {
+			return 'secondary'
+		}
+		if (value == 'light') {
+			return 'placeholder'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error' ||
+			value == 'secondary' ||
+			value == 'placeholder'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function normalizeMode(value : string) : string {
+		if (
+			value == 'price' ||
+			value == 'phone' ||
+			value == 'name' ||
+			value == 'date' ||
+			value == 'link'
+		) {
+			return value
+		}
+		return 'text'
+	}
+
+	function normalizeDecoration(value : string) : string {
+		if (value == 'underline' || value == 'line-through') {
+			return value
+		}
+		return 'none'
+	}
+
+	function normalizeAlign(value : string) : string {
+		if (value == 'center' || value == 'right') {
+			return value
+		}
+		return 'left'
+	}
+
+	function resolveFontSizePx(value : string) : number {
+		if (value == 'xs') {
+			return 12
+		}
+		if (value == 'sm') {
+			return 13
+		}
+		if (value == 'lg') {
+			return 16
+		}
+		if (value == 'xl') {
+			return 18
+		}
+		if (value == 'xxl') {
+			return 22
+		}
+		if (value == 'md' || value == 'medium' || value.length == 0) {
+			return 14
+		}
+		let raw = value
+		if (raw.length > 2) {
+			const tail = raw.substring(raw.length - 2)
+			if (tail == 'px') {
+				raw = raw.substring(0, raw.length - 2)
+			}
+		}
+		const n = parseInt(raw)
+		if (n > 0) {
+			return n
+		}
+		return 14
+	}
+
+	function pad2(n : number) : string {
+		if (n < 10) {
+			return '0' + n.toString()
+		}
+		return n.toString()
+	}
+
+	function timeFormat(input : string, pattern : string) : string {
+		if (input.length == 0) {
+			return ''
+		}
+		let ms : number = 0
+		const asNum = parseFloat(input)
+		if (asNum == asNum && input.length > 0) {
+			// NaN != NaN；合法数字时间戳
+			const abs = asNum < 0 ? -asNum : asNum
+			if (abs < 100000000000.0) {
+				ms = Math.floor(asNum * 1000.0)
+			} else {
+				ms = Math.floor(asNum)
+			}
+		} else {
+			const dTry = new Date(input)
+			ms = dTry.getTime()
+			if (ms != ms) {
+				return input
+			}
+		}
+		const d = new Date(ms)
+		const t = d.getTime()
+		if (t != t) {
+			return input
+		}
+		let out = pattern
+		out = out.replace('yyyy', d.getFullYear().toString())
+		out = out.replace('mm', pad2(d.getMonth() + 1))
+		out = out.replace('dd', pad2(d.getDate()))
+		out = out.replace('HH', pad2(d.getHours()))
+		out = out.replace('MM', pad2(d.getMinutes()))
+		out = out.replace('ss', pad2(d.getSeconds()))
+		return out
+	}
+
+	function formatPrice(val : string) : string {
+		const n = parseFloat(val)
+		if (n != n) {
+			return val
+		}
+		const negative = n < 0
+		const abs = negative ? -n : n
+		const scaled = Math.floor(abs * 100.0 + 0.5)
+		const intPart = Math.floor(scaled / 100)
+		const dec = scaled % 100
+		const body = intPart.toString() + '.' + pad2(dec)
+		if (negative) {
+			return '-' + body
+		}
+		return body
+	}
+
+	function encryptPhone(phone : string) : string {
+		if (phone.length < 7) {
+			return phone
+		}
+		if (phone.length >= 11) {
+			return phone.substring(0, 3) + '****' + phone.substring(phone.length - 4)
+		}
+		return phone.substring(0, 2) + '****' + phone.substring(phone.length - 2)
+	}
+
+	function encryptName(name : string) : string {
+		const len = name.length
+		if (len <= 1) {
+			return name
+		}
+		if (len == 2) {
+			return name.substring(0, 1) + '*'
+		}
+		return name.substring(0, 1) + '*' + name.substring(len - 1)
+	}
+
+	function isLikelyPriceNumber(val : string) : boolean {
+		if (val.length == 0) {
+			return false
+		}
+		let dot = 0
+		let i = 0
+		const first = val.substring(0, 1)
+		if (first == '-' || first == '+') {
+			i = 1
+		}
+		if (i >= val.length) {
+			return false
+		}
+		while (i < val.length) {
+			const ch = val.substring(i, i + 1)
+			if (ch == '.') {
+				dot++
+				if (dot > 1) {
+					return false
+				}
+			} else {
+				const code = ch.charCodeAt(0)
+				if (code < 48 || code > 57) {
+					return false
+				}
+			}
+			i++
+		}
+		return true
+	}
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const modeName = computed((): string => {
+		return normalizeMode(props.mode)
+	})
+
+	const isPriceMode = computed((): boolean => {
+		return modeName.value == 'price'
+	})
+
+	const hasText = computed((): boolean => {
+		return props.text.length > 0
+	})
+
+	const hasLines = computed((): boolean => {
+		return props.lines > 0
+	})
+
+	const hasPrefixIcon = computed((): boolean => {
+		return props.prefixIcon.length > 0
+	})
+
+	const hasSuffixIcon = computed((): boolean => {
+		return props.suffixIcon.length > 0
+	})
+
+	const fontSizePx = computed((): number => {
+		return resolveFontSizePx(props.size)
+	})
+
+	const iconSizeValue = computed((): string => {
+		if (props.iconSize.length > 0) {
+			return props.iconSize
+		}
+		const px = fontSizePx.value
+		if (px <= 13) {
+			return 'sm'
+		}
+		if (px >= 18) {
+			return 'lg'
+		}
+		return 'md'
+	})
+
+	const displayValue = computed((): string => {
+		const raw = props.text
+		const mode = modeName.value
+		const fmt = props.format
+
+		if (mode == 'price') {
+			if (isLikelyPriceNumber(raw)) {
+				return formatPrice(raw)
+			}
+			return raw
+		}
+		if (mode == 'phone') {
+			if (fmt == 'encrypt') {
+				return encryptPhone(raw)
+			}
+			return raw
+		}
+		if (mode == 'name') {
+			if (fmt == 'encrypt') {
+				return encryptName(raw)
+			}
+			return raw
+		}
+		if (mode == 'date') {
+			let pattern = 'yyyy-mm-dd'
+			if (fmt.length > 0) {
+				pattern = fmt
+			}
+			return timeFormat(raw, pattern)
+		}
+		return raw
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.block || props.lines > 0) {
+			cls += ' nax-text--block'
+		} else {
+			cls += ' nax-text--inline'
+		}
+		if (props.bold) {
+			cls += ' nax-text--bold'
+		}
+		const align = normalizeAlign(props.align)
+		cls += ' nax-text--align-' + align
+		if (modeName.value == 'link') {
+			cls += ' nax-text--link'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		const align = normalizeAlign(props.align)
+		if (align == 'center') {
+			return 'justify-content:center'
+		}
+		if (align == 'right') {
+			return 'justify-content:flex-end'
+		}
+		return 'justify-content:flex-start'
+	})
+
+	const valueClass = computed((): string => {
+		let cls = 'nax-text__value--' + typeName.value
+		const deco = normalizeDecoration(props.decoration)
+		if (deco == 'underline') {
+			cls += ' nax-text__value--underline'
+		} else if (deco == 'line-through') {
+			cls += ' nax-text__value--line-through'
+		}
+		if (props.bold) {
+			cls += ' nax-text__value--bold'
+		}
+		// link 默认主色：仅在 default 且无自定义 color 时用 link 色
+		if (modeName.value == 'link' && typeName.value == 'default' && props.color.length == 0) {
+			cls += ' nax-text__value--link'
+		}
+		return cls
+	})
+
+	const valueStyle = computed((): string => {
+		let style = 'font-size:' + fontSizePx.value.toString() + 'px'
+		if (props.color.length > 0) {
+			style += ';color:' + props.color
+		}
+		if (props.lineHeight.length > 0) {
+			let lh = props.lineHeight
+			const n = parseInt(lh)
+			if (n > 0 && lh.indexOf('px') < 0 && lh.indexOf('%') < 0) {
+				lh = n.toString() + 'px'
+			}
+			style += ';line-height:' + lh
+		}
+		return style
+	})
+
+	const iconColorValue = computed((): string => {
+		if (props.iconColor.length > 0) {
+			return props.iconColor
+		}
+		if (props.color.length > 0) {
+			return props.color
+		}
+		const t = typeName.value
+		if (t == 'primary' || t == 'success') {
+			return '#18a058'
+		}
+		if (t == 'info') {
+			return '#2080f0'
+		}
+		if (t == 'warning') {
+			return '#f0a020'
+		}
+		if (t == 'error') {
+			return '#d03050'
+		}
+		if (t == 'secondary') {
+			return '#767c82'
+		}
+		if (t == 'placeholder') {
+			return '#c2c2c2'
+		}
+		if (modeName.value == 'link') {
+			return '#2080f0'
+		}
+		return ''
+	})
+
+	function openExternalUrl(url : string) {
+		if (url.length == 0) {
+			return
+		}
+		// App：系统浏览器打开
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		plus.runtime.openURL(url)
+		// #endif
+		// 小程序：复制链接
+		// #ifdef MP-WEIXIN
+		uni.setClipboardData({
+			data: url,
+			success: () => {
+				uni.showToast({
+					title: '链接已复制',
+					icon: 'none'
+				})
+			}
+		})
+		// #endif
+		// Web：不在此强制跳转（避免 uts 对 window 类型差异）；业务可监听 click 自行处理
+	}
+
+	function onClick() {
+		const mode = modeName.value
+		if (mode == 'phone' && props.call) {
+			const phone = props.text
+			if (phone.length > 0) {
+				uni.makePhoneCall({
+					phoneNumber: phone
+				})
+			}
+		} else if (mode == 'link') {
+			openExternalUrl(props.href)
+		}
+		emit('click')
+	}
+</script>
+
+<style>
+	.nax-text {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: nowrap;
+	}
+
+	.nax-text--inline {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-text--block {
+		flex-direction: row;
+		align-items: center;
+		/* 块级：尽量占满一行（各端对 100% 支持度不一，见条件编译） */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		align-self: stretch;
+		/* #endif */
+	}
+
+	.nax-text--align-left {
+		justify-content: flex-start;
+	}
+
+	.nax-text--align-center {
+		justify-content: center;
+	}
+
+	.nax-text--align-right {
+		justify-content: flex-end;
+	}
+
+	.nax-text__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.nax-text__icon--prefix {
+		margin-right: 4px;
+	}
+
+	.nax-text__icon--suffix {
+		margin-left: 4px;
+	}
+
+	.nax-text__value {
+		font-size: var(--nax-font-size-md, 14px);
+		font-weight: var(--nax-font-weight-regular, 400);
+		color: var(--nax-color-text, #333639);
+		text-overflow: ellipsis;
+	}
+
+	.nax-text__value--bold {
+		font-weight: var(--nax-font-weight-semibold, 600);
+	}
+
+	.nax-text__value--underline {
+		text-decoration: underline;
+	}
+
+	.nax-text__value--line-through {
+		text-decoration: line-through;
+	}
+
+	.nax-text__value--link {
+		color: var(--nax-color-info, #2080f0);
+		text-decoration: underline;
+	}
+
+	.nax-text__value--default {
+		color: var(--nax-color-text, #333639);
+	}
+
+	.nax-text__value--primary {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-text__value--info {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-text__value--success {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-text__value--warning {
+		color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-text__value--error {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-text__value--secondary {
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-text__value--placeholder {
+		color: var(--nax-color-text-placeholder, #c2c2c2);
+	}
+</style>
+

@@ -34,7 +34,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 按钮 | `nax-button` | P0 | 主操作入口；层级参考 Naive：基础/次要/次次要/次次次要/虚线/禁用 | `type(default/primary/info/success/warning/error)` `variant(solid/secondary/tertiary/quaternary/dashed/outline)` `size` `disabled` `loading` `block` `label` `icon` `iconPosition` / `click` |
-| 文本 | `nax-text` | P0 | 统一字号/颜色/省略 | `type` `size` `lines` `selectable` |
+| 文本 | `nax-text` | P0 | 统一字号/颜色/省略/模式格式化（对齐 uView Pro Text） | `type` `size` `lines` `selectable` `mode` `format` `call` `decoration` `bold` `block` / `click` **done** |
 | 图标 | `nax-icon` | P0 | 字体/图片图标壳 | `name` `size` `color` / `click` |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器 | `direction` `size` `wrap` `align` |
 | 分割线 | `nax-divider` | P1 | 内容分隔 | `direction` `dashed` `text` |
@@ -114,6 +114,7 @@
 | 组件 | 状态 | 备注 |
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
+| `nax-text` | done | 插件包 `uni_modules/nax-text`；对齐 uView Pro Text（type/size/lines/mode/format/call/decoration/icons） |
 | `nax-icon` | mvp | 插件包已有骨架 |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
@@ -135,3 +136,4 @@
 | 禁用 | `disabled` | 整体 opacity ≈ 0.5，不触发 click |
 
 兼容：`light`→`secondary`，`text`→`quaternary`，`type="tertiary"`→`default`+`tertiary`。
+
