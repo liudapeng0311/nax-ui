@@ -1,3 +1,8 @@
+## 0.1.5（2026-07-18）
+
+- **破坏性**：默认圆角统一为 3px，与 
+nax-button（--nnax-button-radius）一致
+- --nax-radius-sm/md/lg/xl 默认均改为 3px（--nax-radius-full 仍为胶囊/圆形）
 ## 0.1.4（2026-07-16）
 - 色板改回 **Naive UI light/dark** 官方 common 色（按钮演示同款）
 - primary/success `#18a058`，info `#2080f0`，warning `#f0a020`，error `#d03050`

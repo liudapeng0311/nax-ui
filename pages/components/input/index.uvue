@@ -1,0 +1,253 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-input</text>
+			<text class="page__desc">单行输入（对齐 uView Pro Input 主能力，不含 select / textarea）</text>
+
+			<view class="section">
+				<text class="section__title">基础 + 边框</text>
+				<nax-input
+					v-model="basic"
+					border
+					placeholder="请输入内容"
+					@change="onChange('basic')"
+				></nax-input>
+				<text class="hint">值：{{ basic }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">无边框</text>
+				<view class="panel">
+					<nax-input v-model="plain" placeholder="无边框输入"></nax-input>
+				</view>
+				<view class="item item--gap">
+					<nax-input
+						v-model="plainBg"
+						background="#f3f3f5"
+						placeholder="无边框 + 背景色"
+					></nax-input>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="item">
+					<nax-input v-model="sizeSm" size="sm" border placeholder="sm"></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="sizeMd" size="md" border placeholder="md"></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="sizeLg" size="lg" border placeholder="lg"></nax-input>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="item">
+					<nax-input v-model="typeText" type="text" border placeholder="text"></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="typeNumber" type="number" border placeholder="number"></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="typeDigit" type="digit" border placeholder="digit"></nax-input>
+				</view>
+
+				<view class="item">
+					<nax-input v-model="typeTel" type="tel" border placeholder="tel"></nax-input>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">密码 password</text>
+				<nax-input
+					v-model="password"
+					type="password"
+					border
+					placeholder="请输入密码"
+					:password-icon="true"
+				></nax-input>
+				<text class="hint">值：{{ password }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">可清除 clearable</text>
+				<nax-input
+					v-model="clearable"
+					border
+					clearable
+					placeholder="有内容时可清除"
+					@clear="onClear"
+				></nax-input>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">对齐 input-align</text>
+				<view class="item">
+					<nax-input v-model="alignLeft" border input-align="left" placeholder="left"></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="alignCenter" border input-align="center" placeholder="center"></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="alignRight" border input-align="right" placeholder="right"></nax-input>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">前后缀图标</text>
+				<nax-input
+					v-model="withIcon"
+					border
+					prefix-icon="search"
+					suffix-icon="user"
+					placeholder="搜索用户"
+				></nax-input>
+			</view>
+
+			<view class="section">
+				<text class="section__title">maxlength + confirm</text>
+				<nax-input
+					v-model="limited"
+					border
+					:maxlength="10"
+					confirm-type="search"
+					placeholder="最多 10 字，键盘 search"
+					@confirm="onConfirm"
+				></nax-input>
+				<text class="hint">{{ limited.length }}/10 · {{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 / 只读</text>
+				<view class="item">
+					<nax-input v-model="disabledVal" border disabled></nax-input>
+				</view>
+				<view class="item">
+					<nax-input v-model="readonlyVal" border readonly></nax-input>
+				</view>
+			</view>
+
+						<view class="section">
+				<text class="section__title">仅下边框 border-type=bottom</text>
+				<nax-input
+					v-model="bottomBorder"
+					border
+					border-type="bottom"
+					placeholder="下划线风格输入"
+				></nax-input>
+			</view>
+<view class="section">
+				<text class="section__title">自定义边框色</text>
+				<nax-input
+					v-model="colorBorder"
+					border
+					border-color="#18a058"
+					placeholder="border-color primary"
+				></nax-input>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basic = ref('')
+	const plain = ref('')
+	const plainBg = ref('')
+	const sizeSm = ref('')
+	const sizeMd = ref('')
+	const sizeLg = ref('')
+	const typeText = ref('')
+	const typeNumber = ref('')
+	const typeDigit = ref('')
+	const typeTel = ref('')
+	const password = ref('')
+	const clearable = ref('可清除示例')
+	const alignLeft = ref('左对齐')
+	const alignCenter = ref('居中')
+	const alignRight = ref('右对齐')
+	const withIcon = ref('')
+	const limited = ref('')
+	const disabledVal = ref('禁用状态')
+	const readonlyVal = ref('只读状态')
+	const bottomBorder = ref('')
+	const colorBorder = ref('')
+	const lastEvent = ref('无')
+
+	function onChange(name: string) {
+		lastEvent.value = 'change ' + name
+	}
+
+	function onClear() {
+		lastEvent.value = 'clear'
+	}
+
+	function onConfirm(val: string) {
+		lastEvent.value = 'confirm: ' + val
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.item {
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 6px;
+	}
+</style>

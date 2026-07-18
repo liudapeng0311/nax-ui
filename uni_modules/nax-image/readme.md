@@ -120,4 +120,4 @@ uni_modules/nax-ui-theme
 |-------|------|
 | `--nax-image-bg` | 容器背景 |
 | `--nax-image-status-bg` | 占位层背景 |
-| `--nax-image-radius` | `shape=round` 圆角（默认跟 `--nax-radius-md`） |
+| `--nax-image-radius` | `shape=round` 圆角（默认跟 `--nax-radius-md` / 3px，对齐 button） |

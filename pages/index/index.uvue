@@ -48,6 +48,14 @@
 			</view>
 
 			<view class="home__section home__section--gap">
+				<text class="home__section-title">表单组件</text>
+				<view class="home__card" @click="goInput">
+					<text class="home__card-name">输入框</text>
+					<text class="home__card-tag">nax-input</text>
+				</view>
+			</view>
+
+			<view class="home__section home__section--gap">
 				<text class="home__section-title">布局组件</text>
 				<view class="home__card" @click="goSwiper">
 					<text class="home__card-name">轮播</text>
@@ -130,6 +138,12 @@
 		})
 	}
 
+	function goInput() {
+		uni.navigateTo({
+			url: '/pages/components/input/index'
+		})
+	}
+
 	function goSwiper() {
 		uni.navigateTo({
 			url: '/pages/components/swiper/index'
@@ -193,7 +207,7 @@
 		padding-left: 12px;
 		padding-right: 12px;
 		background-color: var(--nax-color-bg, #ffffff);
-		border-radius: var(--nax-radius-md, 8px);
+		border-radius: var(--nax-radius-md, 3px);
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #e0e0e6);

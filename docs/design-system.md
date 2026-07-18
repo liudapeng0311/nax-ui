@@ -171,11 +171,11 @@ ax-text 正文默认 size=md 也用 16px**（阅读友好，与控件标签 14 �
 
 | Token | 默认值 | 用途 |
 |-------|--------|------|
-| `--nax-radius-sm` | `4px` | 标签、小控件 |
-| `--nax-radius-md` | `8px` | 输入框等通用控件 |
-| `--nax-button-radius` | `3px` | 按钮默认圆角 |
-| `--nax-radius-lg` | `12px` | 卡片 |
-| `--nax-radius-xl` | `16px` | 弹层/大卡片 |
+| `--nax-radius-sm` | `3px` | 标签、小控件（与 button 默认一致） |
+| `--nax-radius-md` | `3px` | 输入框等通用控件默认圆角 |
+| `--nax-button-radius` | `3px` | 按钮默认圆角（与 `--nax-radius-md` 同值） |
+| `--nax-radius-lg` | `3px` | 卡片等（默认同 button；需要更大圆角可业务覆盖） |
+| `--nax-radius-xl` | `3px` | 弹层/大卡片（默认同 button；可覆盖） |
 | `--nax-radius-full` | `999px` | 胶囊/圆形 |
 | `--nax-border-width` | `1px` | 默认描边 |
 | `--nax-shadow-sm` | `0 1px 2px rgba(0,0,0,.06)` | 轻浮层 |

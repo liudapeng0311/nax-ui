@@ -1,0 +1,819 @@
+<template>
+	<view
+		class="nax-input"
+		:class="rootClass"
+		:style="rootStyle"
+		@click="onRootClick"
+	>
+		<!-- 前缀图标 -->
+		<view v-if="hasPrefixIcon" class="nax-input__icon nax-input__icon--prefix" @click.stop="onPrefixClick">
+			<nax-icon :name="prefixIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
+		</view>
+		<slot name="prefix"></slot>
+
+		<input
+			class="nax-input__field"
+			:class="fieldClass"
+			:style="fieldStyle"
+			:value="innerValue"
+			:type="nativeType"
+			:password="nativePassword"
+			:placeholder="placeholder"
+			:placeholder-style="resolvedPlaceholderStyle"
+			:disabled="isInputDisabled"
+			:maxlength="resolvedMaxlength"
+			:focus="focus"
+			:confirm-type="confirmType"
+			:confirm-hold="confirmHold"
+			:cursor-spacing="cursorSpacing"
+			:selection-start="selectionStart"
+			:selection-end="selectionEnd"
+			:adjust-position="adjustPosition"
+			:hold-keyboard="holdKeyboard"
+			@input="onInput"
+			@focus="onFocus"
+			@blur="onBlur"
+			@confirm="onConfirm"
+			@click="onFieldClick"
+		/>
+
+		<!-- 清除：touchstart 优先，避免 Web 先 blur 卸载节点导致 click 丢失 -->
+		<view
+			v-if="showClear"
+			class="nax-input__icon nax-input__icon--action"
+			@touchstart.stop.prevent="onClear"
+			@click.stop.prevent="onClear"
+		>
+			<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+		</view>
+
+		<!-- 密码可见切换 -->
+		<view
+			v-if="showPasswordToggle"
+			class="nax-input__icon nax-input__icon--action"
+			@touchstart.stop.prevent="onTogglePassword"
+			@click.stop.prevent="onTogglePassword"
+		>
+			<nax-icon :name="passwordEyeName" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+		</view>
+
+		<!-- 后缀图标 -->
+		<view v-if="hasSuffixIcon" class="nax-input__icon nax-input__icon--suffix" @click.stop="onSuffixClick">
+			<nax-icon :name="suffixIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
+		</view>
+		<slot name="suffix"></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-input
+	 * @description 单行输入框。功能主要对齐 uView Pro Input（不含 select / textarea / idcard）。
+	 * @property {string} modelValue v-model 绑定值
+	 * @property {string} type text | number | digit | tel | password | email | url | nickname | safe-password | none（不支持 select / textarea / idcard）
+	 * @property {boolean} clearable 是否显示清除按钮，默认 true
+	 * @property {string} inputAlign left | center | right
+	 * @property {string} placeholder 占位文案
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} readonly 只读（不可编辑，样式弱于 disabled）
+	 * @property {number} maxlength 最大长度；-1 不限制（默认 140，对齐 uView）
+	 * @property {string} placeholderStyle placeholder 样式字符串
+	 * @property {string} confirmType 键盘右下角按钮：done | send | search | next | go
+	 * @property {boolean} focus 是否自动聚焦
+	 * @property {boolean} passwordIcon type=password 时是否显示可见性切换，默认 true
+	 * @property {boolean} border 是否显示边框，默认 false
+	 * @property {string} borderType 边框形态：surround 四边（默认）| bottom 仅下边框
+	 * @property {string} borderColor 边框色
+	 * @property {string} background 背景色；无边框默认透明，有值时覆盖
+	 * @property {string} height 高度，数字字符串按 px；空则跟随 size
+	 * @property {number} cursorSpacing 光标与键盘距离 px
+	 * @property {number} selectionStart 聚焦时选区起点
+	 * @property {number} selectionEnd 聚焦时选区终点
+	 * @property {boolean} trim 失焦时去掉两端空格，默认 true
+	 * @property {boolean} confirmHold 点完成是否保持键盘
+	 * @property {boolean} adjustPosition 键盘弹起是否上推页面
+	 * @property {boolean} holdKeyboard 聚焦时点页面不收起键盘
+	 * @property {string} size sm | md | lg
+	 * @property {string} prefixIcon 前缀 nax-icon 名
+	 * @property {string} suffixIcon 后缀 nax-icon 名
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event input 输入变化（当前值）
+	 * @event change 输入变化（与 input 同步，便于表单）
+	 * @event focus 聚焦（当前值）
+	 * @event blur 失焦（当前值）
+	 * @event confirm 键盘完成（当前值）
+	 * @event click 点击输入区域
+	 * @event clear 点击清除
+	 * @slot prefix 自定义前缀
+	 * @slot suffix 自定义后缀
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: String,
+			default: ''
+		},
+		type: {
+			type: String,
+			default: 'text'
+		},
+		clearable: {
+			type: Boolean,
+			default: true
+		},
+		inputAlign: {
+			type: String,
+			default: 'left'
+		},
+		placeholder: {
+			type: String,
+			default: '请输入内容'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		readonly: {
+			type: Boolean,
+			default: false
+		},
+		maxlength: {
+			type: Number,
+			default: 140
+		},
+		placeholderStyle: {
+			type: String,
+			default: 'color: #c2c2c2;'
+		},
+		confirmType: {
+			type: String,
+			default: 'done'
+		},
+		focus: {
+			type: Boolean,
+			default: false
+		},
+		passwordIcon: {
+			type: Boolean,
+			default: true
+		},
+		border: {
+			type: Boolean,
+			default: false
+		},
+		/** surround=四边；bottom=仅下边框（下划线风格） */
+		borderType: {
+			type: String,
+			default: 'surround'
+		},
+		borderColor: {
+			type: String,
+			default: ''
+		},
+		/** 背景色；无边框默认透明，传入后覆盖 */
+		background: {
+			type: String,
+			default: ''
+		},
+		height: {
+			type: String,
+			default: ''
+		},
+		cursorSpacing: {
+			type: Number,
+			default: 0
+		},
+		selectionStart: {
+			type: Number,
+			default: -1
+		},
+		selectionEnd: {
+			type: Number,
+			default: -1
+		},
+		trim: {
+			type: Boolean,
+			default: true
+		},
+		confirmHold: {
+			type: Boolean,
+			default: false
+		},
+		adjustPosition: {
+			type: Boolean,
+			default: true
+		},
+		holdKeyboard: {
+			type: Boolean,
+			default: false
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		prefixIcon: {
+			type: String,
+			default: ''
+		},
+		suffixIcon: {
+			type: String,
+			default: ''
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:modelValue',
+		'input',
+		'change',
+		'focus',
+		'blur',
+		'confirm',
+		'click',
+		'clear'
+	])
+
+	const innerValue = ref(props.modelValue)
+	const isFocused = ref(false)
+	const showPassword = ref(false)
+
+	watch((): string => {
+		return props.modelValue
+	}, (val: string) => {
+		if (val != innerValue.value) {
+			innerValue.value = val
+		}
+	})
+
+	watch((): string => {
+		return props.type
+	}, (_val: string) => {
+		showPassword.value = false
+	})
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeAlign(value: string): string {
+		if (value == 'center' || value == 'right') {
+			return value
+		}
+		return 'left'
+	}
+
+	/**
+	 * 规范化 type：忽略 select / textarea / idcard（后续独立组件）
+	 * password 单独走 password 属性
+	 */
+	function normalizeType(value: string): string {
+		if (value == 'select' || value == 'textarea' || value == 'idcard') {
+			return 'text'
+		}
+		if (
+			value == 'number' ||
+			value == 'digit' ||
+			value == 'tel' ||
+			value == 'email' ||
+			value == 'url' ||
+			value == 'nickname' ||
+			value == 'safe-password' ||
+			value == 'none' ||
+			value == 'password'
+		) {
+			return value
+		}
+		return 'text'
+	}
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const alignName = computed((): string => {
+		return normalizeAlign(props.inputAlign)
+	})
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const isPasswordType = computed((): boolean => {
+		return typeName.value == 'password'
+	})
+
+	/** 原生 type：password 用 text + password 属性 */
+	const nativeType = computed((): string => {
+		if (isPasswordType.value) {
+			return 'text'
+		}
+		return typeName.value
+	})
+
+	/** 是否以密文显示 */
+	const nativePassword = computed((): boolean => {
+		if (!isPasswordType.value) {
+			return false
+		}
+		return !showPassword.value
+	})
+
+	const isInputDisabled = computed((): boolean => {
+		return props.disabled || props.readonly
+	})
+
+	const hasPrefixIcon = computed((): boolean => {
+		return props.prefixIcon.length > 0
+	})
+
+	const hasSuffixIcon = computed((): boolean => {
+		return props.suffixIcon.length > 0
+	})
+
+	/**
+	 * 有内容即显示清除，不依赖 focus。
+	 * 原因：鸿蒙等端 input @focus 可能不触发；Web 点击清除会先 blur 卸载按钮导致 click 丢失。
+	 */
+	const showClear = computed((): boolean => {
+		if (!props.clearable) {
+			return false
+		}
+		if (props.disabled || props.readonly) {
+			return false
+		}
+		return innerValue.value.length > 0
+	})
+
+	const showPasswordToggle = computed((): boolean => {
+		if (!isPasswordType.value) {
+			return false
+		}
+		if (!props.passwordIcon) {
+			return false
+		}
+		if (props.disabled || props.readonly) {
+			return false
+		}
+		return true
+	})
+
+	const passwordEyeName = computed((): string => {
+		// 密文中：显示 eye（点击可见）；明文中：显示 eye-off（点击隐藏）
+		if (showPassword.value) {
+			return 'eye-off'
+		}
+		return 'eye'
+	})
+
+	const iconSizePx = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '16'
+		}
+		if (s == 'lg') {
+			return '20'
+		}
+		return '18'
+	})
+
+	const actionIconSizePx = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '14'
+		}
+		if (s == 'lg') {
+			return '18'
+		}
+		return '16'
+	})
+
+	const iconColor = computed((): string => {
+		if (props.disabled) {
+			return '#c2c2c2'
+		}
+		return '#767c82'
+	})
+
+	const actionIconColor = computed((): string => {
+		return iconColor.value
+	})
+
+	const resolvedMaxlength = computed((): number => {
+		// uni-app x：非法 / 负数按不限制；与官方「非合法值不限制」一致，-1 表示不限
+		return props.maxlength
+	})
+
+	const resolvedPlaceholderStyle = computed((): string => {
+		if (props.placeholderStyle.length > 0) {
+			return props.placeholderStyle
+		}
+		return 'color: #c2c2c2;'
+	})
+
+	function isDigitHeight(value: string): boolean {
+		if (value.length == 0) {
+			return false
+		}
+		const chars = value
+		let i = 0
+		while (i < chars.length) {
+			const c = chars.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	const heightCss = computed((): string => {
+		const h = props.height
+		if (h.length > 0) {
+			if (isDigitHeight(h)) {
+				return h + 'px'
+			}
+			return h
+		}
+		const s = sizeName.value
+		if (s == 'sm') {
+			// #ifdef APP-HARMONY
+			// 鸿蒙原生 input 字形度量更高，整体略加高
+			return '40px'
+			// #endif
+			// #ifndef APP-HARMONY
+			return '32px'
+			// #endif
+		}
+		if (s == 'lg') {
+			// #ifdef APP-HARMONY
+			// lg 加高，配合 field 固定 line-height 避免裁字
+			return '56px'
+			// #endif
+			// #ifndef APP-HARMONY
+			return '44px'
+			// #endif
+		}
+		// #ifdef APP-HARMONY
+		return '48px'
+		// #endif
+		// #ifndef APP-HARMONY
+		return '36px'
+		// #endif
+	})
+
+	const fontSizeCss = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '13px'
+		}
+		if (s == 'lg') {
+			return '16px'
+		}
+		return '14px'
+	})
+
+	function normalizeBorderType(value: string): string {
+		if (value == 'bottom' || value == 'underline' || value == 'line') {
+			return 'bottom'
+		}
+		// surround / full / all / 其它 → 四边
+		return 'surround'
+	}
+
+	const borderTypeName = computed((): string => {
+		return normalizeBorderType(props.borderType)
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-input--' + sizeName.value
+		cls += ' nax-input--align-' + alignName.value
+		if (props.border) {
+			if (borderTypeName.value == 'bottom') {
+				cls += ' nax-input--border-bottom'
+			} else {
+				cls += ' nax-input--border'
+			}
+		} else if (props.background.length > 0) {
+			// 无边框有背景：保留内边距/圆角，无描边
+			cls += ' nax-input--borderless-bg'
+		} else {
+			// 纯无边框：透明贴合父级
+			cls += ' nax-input--borderless'
+		}
+		if (props.disabled) {
+			cls += ' nax-input--disabled'
+		}
+		if (props.readonly && !props.disabled) {
+			cls += ' nax-input--readonly'
+		}
+		if (isFocused.value) {
+			cls += ' nax-input--focus'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		let style = 'height:' + heightCss.value + ';'
+		if (props.border && props.borderColor.length > 0) {
+			style += 'border-color:' + props.borderColor + ';'
+		}
+		if (props.background.length > 0) {
+			style += 'background-color:' + props.background + ';'
+		}
+		return style
+	})
+
+	const fieldClass = computed((): string => {
+		let cls = 'nax-input__field--align-' + alignName.value
+		if (props.disabled) {
+			cls += ' nax-input__field--disabled'
+		}
+		return cls
+	})
+
+	const fieldStyle = computed((): string => {
+		let style = ''
+		style += 'font-size:' + fontSizeCss.value + ';'
+		style += 'text-align:' + alignName.value + ';'
+		// #ifdef APP-HARMONY
+		// 鸿蒙原生 input：固定高度 + 等值 line-height 垂直居中，避免 height:100% 裁字
+		// 注意：不要把 line-height 设成字号本身，否则会压扁字形
+		style += 'height:' + heightCss.value + ';'
+		style += 'line-height:' + heightCss.value + ';'
+		// #endif
+		return style
+	})
+
+	function setValue(val: string) {
+		if (innerValue.value == val) {
+			return
+		}
+		innerValue.value = val
+		emit('update:modelValue', val)
+		emit('input', val)
+		emit('change', val)
+	}
+
+	function onInput(e: UniInputEvent) {
+		if (props.disabled || props.readonly) {
+			return
+		}
+		// 输入中补聚焦态（部分端 focus 回调不稳定）
+		isFocused.value = true
+		const val = e.detail.value
+		setValue(val)
+	}
+
+	function onFocus(e: UniInputFocusEvent) {
+		isFocused.value = true
+		const val = e.detail.value
+		emit('focus', val)
+	}
+
+	function onBlur(e: UniInputBlurEvent) {
+		// 延迟失焦态：给清除/眼睛按钮的 touch/mouse 事件留出窗口（Web 上 blur 早于 click）
+		const valFromEvent = e.detail.value
+		setTimeout(() => {
+			isFocused.value = false
+		}, 150)
+		let val = valFromEvent
+		if (props.trim) {
+			const trimmed = val.trim()
+			if (trimmed != val) {
+				val = trimmed
+				setValue(val)
+			}
+		}
+		emit('blur', val)
+	}
+
+	function onConfirm(e: UniInputConfirmEvent) {
+		const val = e.detail.value
+		emit('confirm', val)
+	}
+
+	function onClear() {
+		if (props.disabled || props.readonly) {
+			return
+		}
+		// touchstart + click 可能各触发一次，第二次内容已空则跳过
+		if (innerValue.value.length == 0) {
+			return
+		}
+		setValue('')
+		// 清除后保持聚焦态样式；真实焦点由端决定
+		isFocused.value = true
+		emit('clear')
+	}
+
+	function onTogglePassword() {
+		if (props.disabled || props.readonly) {
+			return
+		}
+		showPassword.value = !showPassword.value
+		isFocused.value = true
+	}
+
+	function onRootClick() {
+		if (props.disabled) {
+			return
+		}
+		emit('click')
+	}
+
+	function onFieldClick() {
+		if (props.disabled) {
+			return
+		}
+		// 鸿蒙等端 focus 事件可能缺失，点击时补聚焦态
+		isFocused.value = true
+		emit('click')
+	}
+
+	function onPrefixClick() {
+		// 仅阻止冒泡到 root 重复；不额外派发
+	}
+
+	function onSuffixClick() {
+		// 仅阻止冒泡
+	}
+</script>
+
+<style>
+	.nax-input {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+		background-color: var(--nax-input-bg, var(--nax-color-bg, #ffffff));
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 0;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-sizing: border-box;
+		/* #endif */
+	}
+
+	.nax-input--border {
+		border-width: var(--nax-border-width, 1px);
+	}
+
+	/* 仅下边框（下划线风格） */
+	.nax-input--border-bottom {
+		border-width: 0;
+		border-bottom-width: var(--nax-border-width, 1px);
+		border-radius: 0;
+	}
+
+
+	.nax-input--focus {
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-input--disabled {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-input--readonly {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.nax-input--sm {
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-input--lg {
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+	}
+
+	/* 无边框：透明底、去侧边阴影/描边感；放在 size 后覆盖 sm/lg 内边距 */
+	.nax-input--borderless {
+		/* 默认可透；可用 background prop 或 --nax-input-bg 设色 */
+		background-color: var(--nax-input-bg, transparent);
+		border-width: 0;
+		border-radius: 0;
+		padding-left: 0;
+		padding-right: 0;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: none;
+		/* #endif */
+	}
+
+
+	/* 无边框 + 背景色 */
+	.nax-input--borderless-bg {
+		background-color: var(--nax-input-bg, var(--nax-color-bg-secondary, #fafafc));
+		border-width: 0;
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: none;
+		/* #endif */
+	}
+	.nax-input__field {
+		flex: 1;
+		/* width:0 保证 flex 子项收缩，避免原生 input 盖住右侧操作图标 */
+		width: 0;
+		height: 100%;
+		min-width: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		color: var(--nax-color-text, #333639);
+		background-color: transparent;
+		border-width: 0;
+		border-color: transparent;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		outline: none;
+		box-shadow: none;
+		-webkit-appearance: none;
+		appearance: none;
+		/* #endif */
+	}
+
+
+	
+	/* 鸿蒙：原生 input 不用 height:100%，改由 inline height/line-height 控高 */
+	/* #ifdef APP-HARMONY */
+	.nax-input {
+		overflow: visible;
+	}
+
+	.nax-input--sm {
+		min-height: 40px;
+	}
+
+	.nax-input--lg {
+		min-height: 56px;
+	}
+
+	.nax-input__field {
+		/* 高度/行高由 fieldStyle 内联；勿用 100% 压缩字形 */
+		height: auto;
+		padding-top: 0;
+		padding-bottom: 0;
+		overflow: visible;
+	}
+	/* #endif */
+	.nax-input__field--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-input__field--align-left {
+		text-align: left;
+	}
+
+	.nax-input__field--align-center {
+		text-align: center;
+	}
+
+	.nax-input__field--align-right {
+		text-align: right;
+	}
+
+	.nax-input__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.nax-input__icon--prefix {
+		margin-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-input__icon--suffix {
+		margin-left: var(--nax-space-2, 8px);
+	}
+
+	.nax-input__icon--action {
+		margin-left: var(--nax-space-2, 8px);
+		/* 扩大点击热区 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		position: relative;
+		z-index: 2;
+		cursor: pointer;
+		/* #endif */
+	}
+</style>

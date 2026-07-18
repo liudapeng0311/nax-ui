@@ -160,6 +160,6 @@ const panels = ref([
 
 | Token | 用途 |
 |-------|------|
-| `--nax-swiper-radius` | 圆角（默认跟 `--nax-radius-lg`） |
+| `--nax-swiper-radius` | 圆角（默认跟 `--nax-radius-md` / 3px，对齐 button） |
 | `--nax-swiper-number-bg` | 数字指示器背景 |
 | `--nax-swiper-number-color` | 数字指示器文字色 |
