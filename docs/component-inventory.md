@@ -72,7 +72,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 输入框 | `nax-input` | P0 | 单行输入（对齐 uView Pro Input 主能力；不含 select/textarea） | `v-model` `type(text/password/number/digit/tel/…；不含 idcard/select/textarea)` `placeholder` `clearable` `disabled` `readonly` `maxlength` `border` `inputAlign` `passwordIcon` `size` `prefixIcon` `suffixIcon` / `input` `change` `focus` `blur` `confirm` `clear` `click` **done** |
-| 多行输入 | `nax-textarea` | P1 | 多行文本 | `v-model` `auto-height` `maxlength` `show-count` |
+| 多行输入 | `nax-textarea` | P1 | 多行文本（对齐 uView Pro Textarea 主能力；不含 formatter） | `v-model` `placeholder` `height` `auto-height` `maxlength` `count` `disabled` `readonly` `border` `borderType` `confirmType` `focus` / `input` `change` `focus` `blur` `confirm` `linechange` `keyboardheightchange` `click` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换 | `v-model` `disabled` `loading` / `change` |
 | 复选框 | `nax-checkbox` | P0 | 多选 | `v-model` `value` `disabled` |
 | 复选框组 | `nax-checkbox-group` | P0 | 多选组 | `v-model` / `change` |

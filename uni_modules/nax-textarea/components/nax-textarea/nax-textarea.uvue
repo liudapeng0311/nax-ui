@@ -1,0 +1,578 @@
+<template>
+	<view
+		class="nax-textarea"
+		:class="rootClass"
+		:style="rootStyle"
+		@click="onRootClick"
+	>
+		<textarea
+			class="nax-textarea__field"
+			:class="fieldClass"
+			:style="fieldStyle"
+			:value="innerValue"
+			:placeholder="placeholder"
+			:placeholder-style="resolvedPlaceholderStyle"
+			:disabled="isFieldDisabled"
+			:maxlength="resolvedMaxlength"
+			:focus="focus"
+			:auto-height="autoHeight"
+			:confirm-type="confirmType"
+			:confirm-hold="confirmHold"
+			:cursor="cursor"
+			:cursor-spacing="cursorSpacing"
+			:selection-start="selectionStart"
+			:selection-end="selectionEnd"
+			:adjust-position="adjustPosition"
+			:hold-keyboard="holdKeyboard"
+			:show-confirm-bar="showConfirmBar"
+			:fixed="fixed"
+			@input="onInput"
+			@focus="onFocus"
+			@blur="onBlur"
+			@confirm="onConfirm"
+			@linechange="onLineChange"
+			@keyboardheightchange="onKeyboardHeightChange"
+			@click="onFieldClick"
+		></textarea>
+		<text v-if="showCountUi" class="nax-textarea__count" :class="countClass">{{ countText }}</text>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-textarea
+	 * @description 多行文本域。功能主要对齐 uView Pro Textarea；UTS 不支持的 formatter 等能力暂不做。
+	 * @property {string} modelValue v-model 绑定值
+	 * @property {string} placeholder 占位文案
+	 * @property {string} height 高度，数字按 px；autoHeight 时作为 min-height（默认 70）
+	 * @property {string} confirmType 键盘右下角：return（默认，回车换行）| done | send | search | next | go
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} readonly 只读
+	 * @property {boolean} count 是否显示字数统计
+	 * @property {boolean} focus 是否获取焦点
+	 * @property {boolean} autoHeight 是否自动增高
+	 * @property {boolean} fixed textarea 在 fixed 区域时需设 true
+	 * @property {number} cursorSpacing 光标与键盘距离
+	 * @property {number} cursor focus 时光标位置
+	 * @property {boolean} showConfirmBar 是否显示键盘上方完成栏
+	 * @property {number} selectionStart 聚焦选区起点
+	 * @property {number} selectionEnd 聚焦选区终点
+	 * @property {boolean} adjustPosition 键盘弹起是否上推页面
+	 * @property {boolean} holdKeyboard 聚焦时点页面不收起键盘
+	 * @property {number} maxlength 最大长度；-1 不限制（默认 140）
+	 * @property {boolean} border 是否显示边框，默认 true
+	 * @property {string} borderType surround | bottom
+	 * @property {string} borderColor 边框色
+	 * @property {string} background 背景色
+	 * @property {string} placeholderStyle placeholder 样式字符串
+	 * @property {boolean} confirmHold 点完成是否保持键盘
+	 * @property {string} size sm | md | lg
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event input 输入变化（当前值）
+	 * @event change 输入变化
+	 * @event focus 聚焦（当前值）
+	 * @event blur 失焦（当前值）
+	 * @event confirm 键盘完成（当前值）
+	 * @event linechange 行数变化
+	 * @event keyboardheightchange 键盘高度变化
+	 * @event click 点击区域
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: String,
+			default: ''
+		},
+		placeholder: {
+			type: String,
+			default: '请输入内容'
+		},
+		height: {
+			type: String,
+			default: '70'
+		},
+		confirmType: {
+			// 多行默认 return：回车插入换行
+			type: String,
+			default: 'return'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		readonly: {
+			type: Boolean,
+			default: false
+		},
+		count: {
+			type: Boolean,
+			default: false
+		},
+		focus: {
+			type: Boolean,
+			default: false
+		},
+		autoHeight: {
+			type: Boolean,
+			default: false
+		},
+		fixed: {
+			type: Boolean,
+			default: false
+		},
+		cursorSpacing: {
+			type: Number,
+			default: 0
+		},
+		cursor: {
+			type: Number,
+			default: -1
+		},
+		showConfirmBar: {
+			type: Boolean,
+			default: true
+		},
+		selectionStart: {
+			type: Number,
+			default: -1
+		},
+		selectionEnd: {
+			type: Number,
+			default: -1
+		},
+		adjustPosition: {
+			type: Boolean,
+			default: true
+		},
+		holdKeyboard: {
+			type: Boolean,
+			default: false
+		},
+		maxlength: {
+			type: Number,
+			default: 140
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		borderType: {
+			type: String,
+			default: 'surround'
+		},
+		borderColor: {
+			type: String,
+			default: ''
+		},
+		background: {
+			type: String,
+			default: ''
+		},
+		placeholderStyle: {
+			type: String,
+			default: 'color: #c2c2c2;'
+		},
+		confirmHold: {
+			type: Boolean,
+			default: false
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:modelValue',
+		'input',
+		'change',
+		'focus',
+		'blur',
+		'confirm',
+		'linechange',
+		'keyboardheightchange',
+		'click'
+	])
+
+	const innerValue = ref(props.modelValue)
+	const isFocused = ref(false)
+
+	watch((): string => {
+		return props.modelValue
+	}, (val: string) => {
+		if (val != innerValue.value) {
+			innerValue.value = val
+		}
+	})
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeBorderType(value: string): string {
+		if (value == 'bottom' || value == 'underline' || value == 'line') {
+			return 'bottom'
+		}
+		return 'surround'
+	}
+
+	function isDigitHeight(value: string): boolean {
+		if (value.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < value.length) {
+			const c = value.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const borderTypeName = computed((): string => {
+		return normalizeBorderType(props.borderType)
+	})
+
+	const isFieldDisabled = computed((): boolean => {
+		return props.disabled || props.readonly
+	})
+
+	const resolvedMaxlength = computed((): number => {
+		return props.maxlength
+	})
+
+	const resolvedPlaceholderStyle = computed((): string => {
+		if (props.placeholderStyle.length > 0) {
+			return props.placeholderStyle
+		}
+		return 'color: #c2c2c2;'
+	})
+
+	/**
+	 * 高度与 nax-input 一致：始终产出明确 px，供原生 textarea 测位/键盘避让。
+	 * 鸿蒙对 height:100% 解析不稳定，会导致键盘上推测高失败。
+	 */
+	const heightCss = computed((): string => {
+		const h = props.height
+		if (h.length > 0) {
+			if (isDigitHeight(h)) {
+				return h + 'px'
+			}
+			return h
+		}
+		return '70px'
+	})
+
+	const fontSizeCss = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '14px'
+		}
+		if (s == 'lg') {
+			return '18px'
+		}
+		return '16px'
+	})
+
+	const showCountUi = computed((): boolean => {
+		return props.count
+	})
+
+	const countText = computed((): string => {
+		const len = innerValue.value.length
+		const max = props.maxlength
+		if (max < 0) {
+			return '' + len
+		}
+		return '' + len + '/' + max
+	})
+
+	const countClass = computed((): string => {
+		if (props.disabled) {
+			return 'nax-textarea__count--disabled'
+		}
+		const max = props.maxlength
+		if (max > 0 && innerValue.value.length >= max) {
+			return 'nax-textarea__count--limit'
+		}
+		return ''
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-textarea--' + sizeName.value
+		if (props.border) {
+			if (borderTypeName.value == 'bottom') {
+				cls += ' nax-textarea--border-bottom'
+			} else {
+				cls += ' nax-textarea--border'
+			}
+		} else if (props.background.length > 0) {
+			cls += ' nax-textarea--borderless-bg'
+		} else {
+			cls += ' nax-textarea--borderless'
+		}
+		if (props.disabled) {
+			cls += ' nax-textarea--disabled'
+		}
+		if (props.readonly && !props.disabled) {
+			cls += ' nax-textarea--readonly'
+		}
+		if (isFocused.value) {
+			cls += ' nax-textarea--focus'
+		}
+		if (props.autoHeight) {
+			cls += ' nax-textarea--auto-height'
+		}
+		if (props.count) {
+			cls += ' nax-textarea--has-count'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	/** 根节点：边框/背景；高度由 field 明确高度撑开（对齐 nax-input 不靠 %） */
+	const rootStyle = computed((): string => {
+		let style = ''
+		if (props.border && props.borderColor.length > 0) {
+			style += 'border-color:' + props.borderColor + ';'
+		}
+		if (props.background.length > 0) {
+			style += 'background-color:' + props.background + ';'
+		}
+		return style
+	})
+
+	const fieldClass = computed((): string => {
+		let cls = ''
+		if (props.disabled) {
+			cls += ' nax-textarea__field--disabled'
+		}
+		return cls
+	})
+
+	/**
+	 * 关键：高度写在原生 textarea 上（明确 px），与 nax-input fieldStyle 同思路。
+	 * 鸿蒙键盘避让依赖原生节点 getBoundingClientRect，height:100% 会导致测高失败而不上推。
+	 */
+	const fieldStyle = computed((): string => {
+		let style = 'font-size:' + fontSizeCss.value + ';'
+		if (props.autoHeight) {
+			style += 'min-height:' + heightCss.value + ';'
+		} else {
+			style += 'height:' + heightCss.value + ';'
+		}
+		return style
+	})
+
+	function setValue(val: string) {
+		if (innerValue.value == val) {
+			return
+		}
+		innerValue.value = val
+		emit('update:modelValue', val)
+		emit('input', val)
+		emit('change', val)
+	}
+
+	function onInput(e: UniInputEvent) {
+		if (props.disabled || props.readonly) {
+			return
+		}
+		isFocused.value = true
+		const val = e.detail.value
+		setValue(val)
+	}
+
+	function onFocus(e: UniTextareaFocusEvent) {
+		isFocused.value = true
+		const val = e.detail.value
+		emit('focus', val)
+	}
+
+	function onBlur(e: UniTextareaBlurEvent) {
+		setTimeout(() => {
+			isFocused.value = false
+		}, 150)
+		const val = e.detail.value
+		emit('blur', val)
+	}
+
+	function onConfirm(e: UniInputConfirmEvent) {
+		const val = e.detail.value
+		emit('confirm', val)
+	}
+
+	function onLineChange(e: UniTextareaLineChangeEvent) {
+		emit('linechange', e.detail)
+	}
+
+	function onKeyboardHeightChange(e: UniInputKeyboardHeightChangeEvent) {
+		emit('keyboardheightchange', e.detail)
+	}
+
+	function onRootClick() {
+		if (props.disabled) {
+			return
+		}
+		emit('click')
+	}
+
+	function onFieldClick() {
+		if (props.disabled) {
+			return
+		}
+		// 鸿蒙等端 focus 事件可能缺失，点击时补聚焦态（同 nax-input）
+		isFocused.value = true
+		emit('click')
+	}
+</script>
+
+<style>
+	.nax-textarea {
+		flex-direction: column;
+		width: 100%;
+		padding-top: var(--nax-space-2, 8px);
+		padding-bottom: var(--nax-space-2, 8px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+		background-color: var(--nax-textarea-bg, var(--nax-color-bg, #ffffff));
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 0;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-sizing: border-box;
+		/* #endif */
+	}
+
+	.nax-textarea--border {
+		border-width: var(--nax-border-width, 1px);
+	}
+
+	.nax-textarea--border-bottom {
+		border-width: 0;
+		border-bottom-width: var(--nax-border-width, 1px);
+		border-radius: 0;
+	}
+
+	.nax-textarea--focus {
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-textarea--disabled {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-textarea--readonly {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.nax-textarea--sm {
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-textarea--lg {
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+	}
+
+	.nax-textarea--borderless {
+		background-color: var(--nax-textarea-bg, transparent);
+		border-width: 0;
+		border-radius: 0;
+		padding-left: 0;
+		padding-right: 0;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: none;
+		/* #endif */
+	}
+
+	.nax-textarea--borderless-bg {
+		background-color: var(--nax-textarea-bg, var(--nax-color-bg-secondary, #fafafc));
+		border-width: 0;
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: none;
+		/* #endif */
+	}
+
+	.nax-textarea--auto-height {
+		height: auto;
+	}
+
+	.nax-textarea__field {
+		width: 100%;
+		min-width: 0;
+		flex-shrink: 1;
+		padding-top: 0;
+		padding-bottom: 0;
+		padding-left: 0;
+		padding-right: 0;
+		color: var(--nax-color-text, #333639);
+		background-color: transparent;
+		border-width: 0;
+		border-color: transparent;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		outline: none;
+		box-shadow: none;
+		-webkit-appearance: none;
+		appearance: none;
+		resize: none;
+		/* #endif */
+	}
+
+	/* 鸿蒙：对齐 nax-input —— 不用百分比高度，由 fieldStyle 内联 px 控高，保证键盘避让测位正确 */
+	/* #ifdef APP-HARMONY */
+	.nax-textarea {
+		overflow: visible;
+	}
+
+	.nax-textarea__field {
+		/* 高度由 fieldStyle 内联；勿写 height:100% */
+		height: auto;
+		overflow: visible;
+	}
+	/* #endif */
+
+	.nax-textarea__field--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-textarea__count {
+		margin-top: var(--nax-space-1, 4px);
+		font-size: var(--nax-font-size-xs, 12px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: right;
+		lines: 1;
+	}
+
+	.nax-textarea__count--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-textarea__count--limit {
+		color: var(--nax-color-error, #d03050);
+	}
+</style>

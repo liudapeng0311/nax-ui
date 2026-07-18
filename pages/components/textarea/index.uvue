@@ -1,0 +1,360 @@
+<template>
+	<scroll-view
+		style="flex:1"
+		scroll-y="true"
+		:scroll-top="scrollTop"
+		:scroll-with-animation="true"
+		@scroll="onPageScroll"
+	>
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-textarea</text>
+			<text class="page__desc">多行输入（对齐 uView Pro Textarea 主能力，不含 formatter）</text>
+
+			<view id="sec-basic" class="section">
+				<text class="section__title">基础用法</text>
+				<nax-textarea
+					v-model="basic"
+					placeholder="请输入内容"
+					@focus="onFieldFocus('sec-basic')"
+					@blur="onFieldBlur"
+					@keyboardheightchange="onTaKeyboard"
+					@change="onChange('basic')"
+				></nax-textarea>
+				<text class="hint">值：{{ basic }}</text>
+			</view>
+
+			<view id="sec-count" class="section">
+				<text class="section__title">字数统计 count</text>
+				<nax-textarea
+					v-model="withCount"
+					count
+					:maxlength="100"
+					placeholder="最多 100 字"
+					@focus="onFieldFocus('sec-count')"
+					@blur="onFieldBlur"
+					@keyboardheightchange="onTaKeyboard"
+				></nax-textarea>
+			</view>
+
+			<view id="sec-auto" class="section">
+				<text class="section__title">自动增高 auto-height</text>
+				<nax-textarea
+					v-model="autoH"
+					auto-height
+					height="70"
+					placeholder="输入时自动增高"
+					@focus="onFieldFocus('sec-auto')"
+					@blur="onFieldBlur"
+					@keyboardheightchange="onTaKeyboard"
+				></nax-textarea>
+			</view>
+
+			<view id="sec-plain" class="section">
+				<text class="section__title">无边框 / 背景色</text>
+				<view class="panel">
+					<nax-textarea
+						v-model="plain"
+						:border="false"
+						placeholder="无边框"
+						@focus="onFieldFocus('sec-plain')"
+						@blur="onFieldBlur"
+						@keyboardheightchange="onTaKeyboard"
+					></nax-textarea>
+				</view>
+				<view class="item item--gap">
+					<nax-textarea
+						v-model="plainBg"
+						:border="false"
+						background="#f3f3f5"
+						placeholder="无边框 + 背景色"
+						@focus="onFieldFocus('sec-plain')"
+						@blur="onFieldBlur"
+						@keyboardheightchange="onTaKeyboard"
+					></nax-textarea>
+				</view>
+			</view>
+
+			<view id="sec-bottom-border" class="section">
+				<text class="section__title">仅下边框 border-type=bottom</text>
+				<nax-textarea
+					v-model="bottomBorder"
+					border
+					border-type="bottom"
+					placeholder="下划线风格"
+					@focus="onFieldFocus('sec-bottom-border')"
+					@blur="onFieldBlur"
+					@keyboardheightchange="onTaKeyboard"
+				></nax-textarea>
+			</view>
+
+			<view id="sec-size" class="section">
+				<text class="section__title">尺寸 size</text>
+				<view id="sec-size-sm" class="item">
+					<nax-textarea
+						v-model="sizeSm"
+						size="sm"
+						height="56"
+						placeholder="sm"
+						@focus="onFieldFocus('sec-size-sm')"
+						@blur="onFieldBlur"
+						@keyboardheightchange="onTaKeyboard"
+					></nax-textarea>
+				</view>
+				<view id="sec-size-md" class="item">
+					<nax-textarea
+						v-model="sizeMd"
+						size="md"
+						height="70"
+						placeholder="md"
+						@focus="onFieldFocus('sec-size-md')"
+						@blur="onFieldBlur"
+						@keyboardheightchange="onTaKeyboard"
+					></nax-textarea>
+				</view>
+				<view id="sec-size-lg" class="item">
+					<nax-textarea
+						v-model="sizeLg"
+						size="lg"
+						height="88"
+						placeholder="lg"
+						@focus="onFieldFocus('sec-size-lg')"
+						@blur="onFieldBlur"
+						@keyboardheightchange="onTaKeyboard"
+					></nax-textarea>
+				</view>
+			</view>
+
+			<view id="sec-state" class="section">
+				<text class="section__title">禁用 / 只读</text>
+				<view class="item">
+					<nax-textarea v-model="disabledVal" disabled count></nax-textarea>
+				</view>
+				<view class="item">
+					<nax-textarea v-model="readonlyVal" readonly></nax-textarea>
+				</view>
+			</view>
+
+			<view id="sec-color" class="section">
+				<text class="section__title">自定义边框色 + 高度</text>
+				<nax-textarea
+					v-model="colorBorder"
+					border
+					border-color="#18a058"
+					height="100"
+					placeholder="height=100，边框 primary"
+					@focus="onFieldFocus('sec-color')"
+					@blur="onFieldBlur"
+					@keyboardheightchange="onTaKeyboard"
+					@confirm="onConfirm"
+				></nax-textarea>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
+
+			<!-- 鸿蒙：仅垫高可滚区域，不强制滚到顶部，避免输入框与键盘间距过大 -->
+			<!-- #ifdef APP-HARMONY -->
+			<view v-if="keyboardPad > 0" class="keyboard-pad" :style="keyboardPadStyle"></view>
+			<!-- #endif -->
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basic = ref('')
+	const withCount = ref('统计字数')
+	const autoH = ref('')
+	const plain = ref('')
+	const plainBg = ref('')
+	const bottomBorder = ref('')
+	const sizeSm = ref('')
+	const sizeMd = ref('')
+	const sizeLg = ref('')
+	const disabledVal = ref('文本域已被禁用')
+	const readonlyVal = ref('只读状态，不可编辑')
+	const colorBorder = ref('')
+	const lastEvent = ref('无')
+
+	const focusSecId = ref('')
+	/** scroll-view 滚动位置（受控，仅在需要微调时写入） */
+	const scrollTop = ref(0)
+	let lastScrollTop: number = 0
+	let blurClearTimer: number = 0
+	/** 仅鸿蒙演示页键盘占位；其它端恒 0 */
+	const keyboardPad = ref(0)
+	/** 输入框底边与键盘顶边的目标间距（px），尽量贴紧 */
+	const KEYBOARD_GAP = 8
+
+	const keyboardPadStyle = computed((): string => {
+		return 'height:' + keyboardPad.value.toString() + 'px;'
+	})
+
+	function onPageScroll(e: UniScrollEvent) {
+		lastScrollTop = e.detail.scrollTop
+	}
+
+	/**
+	 * 只滚「被挡掉的那一段」，不要 scroll-into-view 顶到页面顶部（会留出很大空白）。
+	 */
+	function scrollJustAboveKeyboard(keyboardHeight: number) {
+		// #ifdef APP-HARMONY
+		const id = focusSecId.value
+		if (id.length == 0 || keyboardHeight <= 0) {
+			return
+		}
+		const el = uni.getElementById(id)
+		if (el == null) {
+			return
+		}
+		const rect = el.getBoundingClientRect()
+		const winH = uni.getSystemInfoSync().windowHeight
+		const bottom = rect.y + rect.height
+		const safeBottom = winH - keyboardHeight - KEYBOARD_GAP
+		const overflow = bottom - safeBottom
+		if (overflow > 1) {
+			// 强制变更 scroll-top：相同值可能不触发滚动
+			const next = lastScrollTop + overflow
+			if (next == scrollTop.value) {
+				scrollTop.value = next + 0.5
+			} else {
+				scrollTop.value = next
+			}
+			lastScrollTop = next
+		}
+		// #endif
+	}
+
+	/**
+	 * 组件 keyboardheightchange。
+	 * 鸿蒙演示页：垫高可滚区域 + 按遮挡量微调 scroll-top，保持输入框贴近键盘。
+	 */
+	function onTaKeyboard(detail: UniInputKeyboardHeightChangeEventDetail) {
+		// #ifdef APP-HARMONY
+		const h = detail.height
+		if (h > 0) {
+			if (blurClearTimer > 0) {
+				clearTimeout(blurClearTimer)
+				blurClearTimer = 0
+			}
+			// 垫高约等于键盘高度，保证能滚够；不再额外 +24 造成空洞
+			keyboardPad.value = h
+			setTimeout(() => {
+				scrollJustAboveKeyboard(h)
+			}, 40)
+		} else {
+			keyboardPad.value = 0
+		}
+		// #endif
+	}
+
+	function onFieldFocus(secId: string) {
+		lastEvent.value = 'focus: ' + secId
+		// #ifdef APP-HARMONY
+		if (blurClearTimer > 0) {
+			clearTimeout(blurClearTimer)
+			blurClearTimer = 0
+		}
+		focusSecId.value = secId
+		// 若键盘已弹起，立即按当前占位高度微调（切换输入框时）
+		if (keyboardPad.value > 0) {
+			setTimeout(() => {
+				scrollJustAboveKeyboard(keyboardPad.value)
+			}, 40)
+		}
+		// #endif
+	}
+
+	function onFieldBlur(val: string) {
+		lastEvent.value = 'blur: ' + val
+		// #ifdef APP-HARMONY
+		if (blurClearTimer > 0) {
+			clearTimeout(blurClearTimer)
+		}
+		blurClearTimer = setTimeout(() => {
+			keyboardPad.value = 0
+			focusSecId.value = ''
+			blurClearTimer = 0
+		}, 280) as number
+		// #endif
+	}
+
+	function onChange(name: string) {
+		lastEvent.value = 'change ' + name
+	}
+
+	function onConfirm(val: string) {
+		lastEvent.value = 'confirm: ' + val
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.item {
+		margin-bottom: 10px;
+	}
+
+	.item--gap {
+		margin-top: 10px;
+	}
+
+	.panel {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 6px;
+	}
+
+	/* #ifdef APP-HARMONY */
+	.keyboard-pad {
+		width: 100%;
+		flex-shrink: 0;
+	}
+	/* #endif */
+</style>
