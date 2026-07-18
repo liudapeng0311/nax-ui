@@ -1,2 +1,27 @@
+## 0.1.8
+- 鸿蒙编译：	ext-decoration 改为仅 #ifdef WEB || MP-WEIXIN 编入，彻底避免 App uvue-css 警告
+
+## 0.1.7
+- 消除鸿蒙编译警告：App 端样式不再包含 	ext-decoration（#ifndef APP-*）
+
+## 0.1.6
+- 修复鸿蒙点击 link 不触发 click：文案层 @click.stop + 先 emit 再 openURL
+
+## 0.1.5
+- 修复 link 模式 Web 端文字色被 default 覆盖为黑色；与鸿蒙统一信息蓝
+- 演示文案改为 nax-ui文档
+
+## 0.1.4
+- 修复鸿蒙下划线/删除线不生效：	ext-decoration 改用底边框与中线视图兜底（#ifdef APP-HARMONY）
+
+## 0.1.3
+- 正文默认字号调整为 16px（size=md）；阶梯 sm14 / md16 / lg18 / xl20
+
+## 0.1.2
+- 修复 Web 端单行/多行省略不生效：white-space:nowrap / -webkit-line-clamp + 宽度与 min-width 约束（#ifdef WEB）
+
+## 0.1.1
+- 修复鸿蒙（APP-HARMONY）单行/多行省略不生效：约束宽度、flex 收缩，并双写 CSS lines
+
 ## 0.1.0
 - 首版：对齐 uView Pro Text 核心能力（type/size/lines/mode/format/call/decoration/icons/selectable 等）

@@ -141,7 +141,8 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-font-size-xs` | `12px` | 辅助说明、角标 |
 | `--nax-font-size-sm` | `13px` | 次要文案 |
 | `--nax-font-size-md` | `14px` | 正文默认 |
-| `--nax-font-size-lg` | `16px` | 标题/大按钮 |
+| `--nax-font-size-lg` | `16px` | 标题/大按钮；**
+ax-text 正文默认 size=md 也用 16px**（阅读友好，与控件标签 14 区分） |
 | `--nax-font-size-xl` | `18px` | 页头/强调 |
 | `--nax-font-size-xxl` | `22px` | 大标题 |
 | `--nax-font-weight-regular` | `400` | 正文 |

@@ -30,10 +30,10 @@
 			<view class="section">
 				<text class="section__title">尺寸 size</text>
 				<view class="stack">
-					<nax-text size="sm" text="sm 13px"></nax-text>
-					<nax-text size="md" text="md 14px（默认）"></nax-text>
-					<nax-text size="lg" text="lg 16px"></nax-text>
-					<nax-text size="xl" text="xl 18px"></nax-text>
+					<nax-text size="sm" text="sm 14px"></nax-text>
+					<nax-text size="md" text="md 16px（默认）"></nax-text>
+					<nax-text size="lg" text="lg 18px"></nax-text>
+					<nax-text size="xl" text="xl 20px"></nax-text>
 					<nax-text size="20" text="数字 20px"></nax-text>
 				</view>
 			</view>
@@ -49,7 +49,7 @@
 
 			<view class="section">
 				<text class="section__title">省略 lines</text>
-				<view class="stack">
+				<view class="stack box">
 					<nax-text
 						:lines="1"
 						block
@@ -75,8 +75,8 @@
 					<nax-text mode="date" format="yyyy-mm-dd HH:MM" text="1710000000000" type="secondary"></nax-text>
 					<nax-text
 						mode="link"
-						text="打开 uView Pro 文档"
-						href="https://uviewpro.cn/zh/components/text.html"
+						text="nax-ui文档"
+						href="https://gitee.com/liusixsix/nax-ui"
 						@click="onLinkClick"
 					></nax-text>
 				</view>
@@ -144,6 +144,10 @@
 
 	function onLinkClick() {
 		lastEvent.value = 'click link'
+		uni.showToast({
+			title: '已触发 click',
+			icon: 'none'
+		})
 	}
 
 	function onCallClick() {
@@ -155,6 +159,11 @@
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg, #ffffff);
+		/* 省略演示依赖百分比宽度，Web 需可传递宽度 */
+		/* #ifdef WEB */
+		width: 100%;
+		box-sizing: border-box;
+		/* #endif */
 	}
 
 	.page__title {
@@ -183,6 +192,9 @@
 
 	.stack {
 		flex-direction: column;
+		/* #ifdef WEB */
+		width: 100%;
+		/* #endif */
 	}
 
 	
@@ -194,6 +206,13 @@
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #e0e0e6);
+		/* 给省略演示提供确定宽度的容器 */
+		align-self: stretch;
+		/* #ifdef WEB */
+		width: 100%;
+		box-sizing: border-box;
+		overflow: hidden;
+		/* #endif */
 	}
 
 	.hint {

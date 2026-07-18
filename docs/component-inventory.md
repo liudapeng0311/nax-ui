@@ -114,7 +114,7 @@
 | 组件 | 状态 | 备注 |
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
-| `nax-text` | done | 插件包 `uni_modules/nax-text`；对齐 uView Pro Text（type/size/lines/mode/format/call/decoration/icons） |
+| `nax-text` | done | 插件包 `uni_modules/nax-text`；对齐 uView Pro Text；鸿蒙省略用 `#ifdef APP-HARMONY` 双写 lines/宽度约束 |
 | `nax-icon` | mvp | 插件包已有骨架 |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |

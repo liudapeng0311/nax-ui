@@ -11,7 +11,43 @@
 		</view>
 		<slot name="prefix"></slot>
 
-		<!-- 有 lines：绑定省略行数 -->
+		<!-- 鸿蒙：text-decoration 不可用，用边框/中线视图兜底 -->
+		<!-- #ifdef APP-HARMONY -->
+		<view
+			v-if="hasText && hasLines"
+			class="nax-text__value-wrap"
+			:class="valueWrapClass"
+			:style="valueWrapStyle"
+			@click.stop="onClick"
+		>
+			<text
+				class="nax-text__value"
+				:class="valueClass"
+				:style="valueStyle"
+				:lines="lines"
+				:selectable="selectable"
+			>{{ fullDisplayText }}</text>
+			<view v-if="isStrike" class="nax-text__strike" :style="strikeStyle"></view>
+		</view>
+		<view
+			v-else-if="hasText"
+			class="nax-text__value-wrap"
+			:class="valueWrapClass"
+			:style="valueWrapStyle"
+			@click.stop="onClick"
+		>
+			<text
+				class="nax-text__value"
+				:class="valueClass"
+				:style="valueStyle"
+				:selectable="selectable"
+			>{{ fullDisplayText }}</text>
+			<view v-if="isStrike" class="nax-text__strike" :style="strikeStyle"></view>
+		</view>
+		<!-- #endif -->
+
+		<!-- 非鸿蒙：原生 text-decoration -->
+		<!-- #ifndef APP-HARMONY -->
 		<text
 			v-if="hasText && isPriceMode && hasLines"
 			class="nax-text__value nax-text__value--price"
@@ -27,7 +63,6 @@
 			:style="valueStyle"
 			:selectable="selectable"
 		>￥{{ displayValue }}</text>
-
 		<text
 			v-else-if="hasText && hasLines"
 			class="nax-text__value"
@@ -43,6 +78,7 @@
 			:style="valueStyle"
 			:selectable="selectable"
 		>{{ displayValue }}</text>
+		<!-- #endif -->
 
 		<slot></slot>
 
@@ -52,7 +88,6 @@
 		<slot name="suffix"></slot>
 	</view>
 </template>
-
 <script setup lang="uts">
 	/**
 	 * nax-text
@@ -70,7 +105,7 @@
 	 * @property {boolean} block 是否块级
 	 * @property {number} lines 最大行数，>0 时超出省略；0 不限制
 	 * @property {string} color 自定义文字色（优先于 type）
-	 * @property {string} size sm | md | lg | xl | 数字字符串（px）
+	 * @property {string} size sm(14) | md(16 默认) | lg(18) | xl(20) | 数字字符串（px）
 	 * @property {string} decoration none | underline | line-through
 	 * @property {string} align left | center | right
 	 * @property {string} lineHeight 行高，如 22 或 22px
@@ -164,23 +199,24 @@
 	}
 
 	function resolveFontSizePx(value : string) : number {
+		// 文本字号阶梯：正文默认 16（比控件标签 14 更易读）
 		if (value == 'xs') {
 			return 12
 		}
 		if (value == 'sm') {
-			return 13
+			return 14
 		}
 		if (value == 'lg') {
-			return 16
+			return 18
 		}
 		if (value == 'xl') {
-			return 18
+			return 20
 		}
 		if (value == 'xxl') {
 			return 22
 		}
 		if (value == 'md' || value == 'medium' || value.length == 0) {
-			return 14
+			return 16
 		}
 		let raw = value
 		if (raw.length > 2) {
@@ -193,7 +229,7 @@
 		if (n > 0) {
 			return n
 		}
-		return 14
+		return 16
 	}
 
 	function pad2(n : number) : string {
@@ -394,6 +430,10 @@
 		} else {
 			cls += ' nax-text--inline'
 		}
+		// 省略场景：根节点需约束宽度，避免子 text 被内容撑开导致 lines 失效
+		if (props.lines > 0) {
+			cls += ' nax-text--ellipsis'
+		}
 		if (props.bold) {
 			cls += ' nax-text--bold'
 		}
@@ -410,13 +450,21 @@
 
 	const rootStyle = computed((): string => {
 		const align = normalizeAlign(props.align)
+		let style = 'justify-content:flex-start'
 		if (align == 'center') {
-			return 'justify-content:center'
+			style = 'justify-content:center'
+		} else if (align == 'right') {
+			style = 'justify-content:flex-end'
 		}
-		if (align == 'right') {
-			return 'justify-content:flex-end'
+		// 鸿蒙 / Web：省略时根节点强制定宽裁剪，防止被长文本撑开
+		// #ifdef APP-HARMONY || WEB
+		if (props.lines > 0) {
+			style += ';overflow:hidden'
+			style += ';width:100%'
+			style += ';max-width:100%'
 		}
-		return 'justify-content:flex-start'
+		// #endif
+		return style
 	})
 
 	const valueClass = computed((): string => {
@@ -434,6 +482,14 @@
 		if (modeName.value == 'link' && typeName.value == 'default' && props.color.length == 0) {
 			cls += ' nax-text__value--link'
 		}
+		if (props.lines > 0) {
+			cls += ' nax-text__value--ellipsis'
+			if (props.lines == 1) {
+				cls += ' nax-text__value--lines-1'
+			} else {
+				cls += ' nax-text__value--lines-multi'
+			}
+		}
 		return cls
 	})
 
@@ -441,6 +497,12 @@
 		let style = 'font-size:' + fontSizePx.value.toString() + 'px'
 		if (props.color.length > 0) {
 			style += ';color:' + props.color
+		} else if (modeName.value == 'link') {
+			// link 统一信息蓝（全端一致，不被 --default 类覆盖）
+			const t = typeName.value
+			if (t == 'default') {
+				style += ';color:#2080f0'
+			}
 		}
 		if (props.lineHeight.length > 0) {
 			let lh = props.lineHeight
@@ -450,6 +512,30 @@
 			}
 			style += ';line-height:' + lh
 		}
+		// App 鸿蒙：属性 :lines 在 flex 子项上常不生效，同步写 CSS lines
+		// #ifdef APP-HARMONY
+		if (props.lines > 0) {
+			style += ';lines:' + props.lines.toString()
+			style += ';overflow:hidden'
+			style += ';text-overflow:ellipsis'
+		}
+		// #endif
+		// Web：:lines 不可靠，单行 nowrap，多行 -webkit-line-clamp
+		// #ifdef WEB
+		if (props.lines > 0) {
+			style += ';overflow:hidden'
+			style += ';text-overflow:ellipsis'
+			style += ';lines:' + props.lines.toString()
+			if (props.lines == 1) {
+				style += ';white-space:nowrap'
+			} else {
+				style += ';display:-webkit-box'
+				style += ';-webkit-box-orient:vertical'
+				style += ';-webkit-line-clamp:' + props.lines.toString()
+				style += ';white-space:normal'
+			}
+		}
+		// #endif
 		return style
 	})
 
@@ -485,11 +571,99 @@
 		return ''
 	})
 
+	/** 展示文案（价格模式带 ￥，鸿蒙单节点用） */
+	const fullDisplayText = computed((): string => {
+		if (isPriceMode.value) {
+			return '￥' + displayValue.value
+		}
+		return displayValue.value
+	})
+
+	/** 实际装饰：link 模式默认下划线 */
+	const decorationName = computed((): string => {
+		const deco = normalizeDecoration(props.decoration)
+		if (deco != 'none') {
+			return deco
+		}
+		if (modeName.value == 'link') {
+			return 'underline'
+		}
+		return 'none'
+	})
+
+	const isUnderline = computed((): boolean => {
+		return decorationName.value == 'underline'
+	})
+
+	const isStrike = computed((): boolean => {
+		return decorationName.value == 'line-through'
+	})
+
+	/** 装饰线颜色（对齐文字色） */
+	const decorationColor = computed((): string => {
+		if (props.color.length > 0) {
+			return props.color
+		}
+		const t = typeName.value
+		if (t == 'primary' || t == 'success') {
+			return '#18a058'
+		}
+		if (t == 'info') {
+			return '#2080f0'
+		}
+		if (t == 'warning') {
+			return '#f0a020'
+		}
+		if (t == 'error') {
+			return '#d03050'
+		}
+		if (t == 'secondary') {
+			return '#767c82'
+		}
+		if (t == 'placeholder') {
+			return '#c2c2c2'
+		}
+		if (modeName.value == 'link') {
+			return '#2080f0'
+		}
+		return '#333639'
+	})
+
+	const valueWrapClass = computed((): string => {
+		let cls = ''
+		if (isUnderline.value) {
+			cls += ' nax-text__value-wrap--underline'
+		}
+		if (isStrike.value) {
+			cls += ' nax-text__value-wrap--strike'
+		}
+		if (props.lines > 0) {
+			cls += ' nax-text__value-wrap--ellipsis'
+		}
+		return cls.trim()
+	})
+
+	const valueWrapStyle = computed((): string => {
+		// 鸿蒙下划线：底边框模拟 text-decoration
+		if (isUnderline.value) {
+			return 'border-bottom-color:' + decorationColor.value
+		}
+		return ''
+	})
+
+	const strikeStyle = computed((): string => {
+		// 中线位置约在字号一半；颜色跟文字
+		const top = Math.floor(fontSizePx.value / 2)
+		let style = 'background-color:' + decorationColor.value
+		style += ';top:' + top.toString() + 'px'
+		return style
+	})
+
 	function openExternalUrl(url : string) {
 		if (url.length == 0) {
 			return
 		}
-		// App：系统浏览器打开
+		// App：系统浏览器打开（click 已先 emit，此处失败不影响事件）
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		plus.runtime.openURL(url)
 		// #endif
@@ -509,6 +683,8 @@
 	}
 
 	function onClick() {
+		// 先抛出 click，避免 openURL / 拨号异常或跳转导致事件丢失（鸿蒙尤甚）
+		emit('click')
 		const mode = modeName.value
 		if (mode == 'phone' && props.call) {
 			const phone = props.text
@@ -517,10 +693,14 @@
 					phoneNumber: phone
 				})
 			}
-		} else if (mode == 'link') {
-			openExternalUrl(props.href)
+			return
 		}
-		emit('click')
+		if (mode == 'link') {
+			const url = props.href
+			if (url.length > 0) {
+				openExternalUrl(url)
+			}
+		}
 	}
 </script>
 
@@ -547,6 +727,24 @@
 		align-self: stretch;
 		/* #endif */
 	}
+
+	/* 省略：根节点必须有确定宽度，并裁剪溢出（否则子 text 会被长文案撑开） */
+	.nax-text--ellipsis {
+		overflow: hidden;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		align-self: stretch;
+		/* #endif */
+	}
+
+	/* 鸿蒙：省略时显式 100% 宽，避免仅 stretch 时子 text 按内容撑开 */
+	/* #ifdef APP-HARMONY */
+	.nax-text--ellipsis {
+		width: 100%;
+	}
+	/* #endif */
 
 	.nax-text--align-left {
 		justify-content: flex-start;
@@ -576,16 +774,76 @@
 	}
 
 	.nax-text__value {
-		font-size: var(--nax-font-size-md, 14px);
+		font-size: var(--nax-font-size-lg, 16px);
 		font-weight: var(--nax-font-weight-regular, 400);
 		color: var(--nax-color-text, #333639);
 		text-overflow: ellipsis;
 	}
 
+	/* 省略文本：在 flex 行内强制可收缩，内容超宽才触发 lines/ellipsis */
+	.nax-text__value--ellipsis {
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* 鸿蒙：CSS lines 与属性 :lines 双写；单行/多行共用 overflow */
+	/* #ifdef APP-HARMONY */
+	.nax-text__value--lines-1 {
+		lines: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.nax-text__value--lines-multi {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* #endif */
+
+	/* Web：标准单行/多行省略（uni text 的 :lines 在 Web 常不生效） */
+	/* #ifdef WEB */
+	.nax-text--ellipsis {
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+	}
+
+	.nax-text__value--ellipsis {
+		/* flex 子项默认可不收缩，Web 必须 min-width:0 才能触发省略 */
+		min-width: 0;
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.nax-text__value--lines-1 {
+		display: block;
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		lines: 1;
+	}
+
+	.nax-text__value--lines-multi {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: normal;
+		word-break: break-all;
+	}
+	/* #endif */
+
 	.nax-text__value--bold {
 		font-weight: var(--nax-font-weight-semibold, 600);
 	}
 
+	/* text-decoration 仅 Web / 微信小程序；App（含鸿蒙）不编入，避免 uvue-css 警告 */
+	/* #ifdef WEB || MP-WEIXIN */
 	.nax-text__value--underline {
 		text-decoration: underline;
 	}
@@ -593,11 +851,7 @@
 	.nax-text__value--line-through {
 		text-decoration: line-through;
 	}
-
-	.nax-text__value--link {
-		color: var(--nax-color-info, #2080f0);
-		text-decoration: underline;
-	}
+	/* #endif */
 
 	.nax-text__value--default {
 		color: var(--nax-color-text, #333639);
@@ -630,5 +884,44 @@
 	.nax-text__value--placeholder {
 		color: var(--nax-color-text-placeholder, #c2c2c2);
 	}
-</style>
 
+	/* link 放在 type 色之后，保证覆盖 default 黑字 */
+	.nax-text__value--link {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	/* #ifdef WEB || MP-WEIXIN */
+	.nax-text__value--link {
+		text-decoration: underline;
+	}
+	/* #endif */
+
+	/* 鸿蒙：text-decoration 不可用，边框下划线 + 绝对定位中线 */
+	/* #ifdef APP-HARMONY */
+	.nax-text__value-wrap {
+		flex-direction: row;
+		align-items: center;
+		position: relative;
+		flex-shrink: 1;
+	}
+
+	.nax-text__value-wrap--ellipsis {
+		flex: 1;
+		overflow: hidden;
+	}
+
+	.nax-text__value-wrap--underline {
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		padding-bottom: 1px;
+	}
+
+	.nax-text__strike {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 1px;
+	}
+
+	/* #endif */
+</style>
