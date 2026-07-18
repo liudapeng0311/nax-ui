@@ -1,3 +1,6 @@
+## （2026-07-18）
+
+- 默认字号仍为 md=16；与全局 `--nax-font-size-md` 对齐（不再单独大于控件）
 ## 0.1.8
 - 鸿蒙编译：	ext-decoration 改为仅 #ifdef WEB || MP-WEIXIN 编入，彻底避免 App uvue-css 警告
 

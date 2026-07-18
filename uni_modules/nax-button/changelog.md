@@ -1,3 +1,6 @@
+## （2026-07-18）
+
+- 默认字号与尺寸档对齐新标准：sm14 / **md16** / lg18；高度 sm32 / md40 / lg48
 ## 0.1.13（2026-07-16）
 - fallback 对齐 Naive UI 按钮色：primary/success `#18a058`，info/warning/error 同步官方 common
 ## 0.1.12（2026-07-16）

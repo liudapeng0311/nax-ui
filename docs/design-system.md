@@ -1,4 +1,4 @@
-# nax-ui 设计规范
+﻿# nax-ui 设计规范
 
 > 适用范围：`uni_modules/nax-ui` 及本仓库演示工程  
 > 目标端：App（Android / iOS / HarmonyOS）+ Web + 微信小程序  
@@ -139,11 +139,10 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | Token | 默认值 | 场景 |
 |-------|--------|------|
 | `--nax-font-size-xs` | `12px` | 辅助说明、角标 |
-| `--nax-font-size-sm` | `13px` | 次要文案 |
-| `--nax-font-size-md` | `14px` | 正文默认 |
-| `--nax-font-size-lg` | `16px` | 标题/大按钮；**
-ax-text 正文默认 size=md 也用 16px**（阅读友好，与控件标签 14 区分） |
-| `--nax-font-size-xl` | `18px` | 页头/强调 |
+| `--nax-font-size-sm` | `14px` | 次要文案 / 紧凑控件 |
+| `--nax-font-size-md` | `16px` | **正文与控件默认**（含 nax-text size=md） |
+| `--nax-font-size-lg` | `18px` | 标题 / 大控件 |
+| `--nax-font-size-xl` | `20px` | 页头/强调 |
 | `--nax-font-size-xxl` | `22px` | 大标题 |
 | `--nax-font-weight-regular` | `400` | 正文 |
 | `--nax-font-weight-medium` | `500` | 强调 |
@@ -189,9 +188,9 @@ ax-text 正文默认 size=md 也用 16px**（阅读友好，与控件标签 14 �
 
 | size | 高度参考 | 字号 | 左右内边距 |
 |------|----------|------|------------|
-| `sm` | `28px` | `13px` | `10px` |
-| `md` | `34px` | `14px` | `14px` |
-| `lg` | `40px` | `15px` | `18px` |
+| `sm` | `32px` | `14px` | `12px` |
+| `md` | `40px` | `16px` | `16px` |
+| `lg` | `48px` | `18px` | `20px` |
 
 图标默认跟随 size：
 
@@ -323,7 +322,7 @@ MVP 只做必要过渡；复杂动画后置。
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  height: var(--nax-button-height, 36px);
+  height: var(--nax-button-height, 40px);
   padding-left: var(--nax-space-4);
   padding-right: var(--nax-space-4);
   border-radius: var(--nax-radius-md);

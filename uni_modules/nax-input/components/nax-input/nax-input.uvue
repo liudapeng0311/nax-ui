@@ -456,29 +456,29 @@
 		if (s == 'lg') {
 			// #ifdef APP-HARMONY
 			// lg 加高，配合 field 固定 line-height 避免裁字
-			return '56px'
+			return '60px'
 			// #endif
 			// #ifndef APP-HARMONY
-			return '44px'
+			return '48px'
 			// #endif
 		}
 		// #ifdef APP-HARMONY
 		return '48px'
 		// #endif
 		// #ifndef APP-HARMONY
-		return '36px'
+		return '40px'
 		// #endif
 	})
 
 	const fontSizeCss = computed((): string => {
 		const s = sizeName.value
 		if (s == 'sm') {
-			return '13px'
+			return '14px'
 		}
 		if (s == 'lg') {
-			return '16px'
+			return '18px'
 		}
-		return '14px'
+		return '16px'
 	})
 
 	function normalizeBorderType(value: string): string {

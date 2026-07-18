@@ -199,7 +199,7 @@
 	}
 
 	function resolveFontSizePx(value : string) : number {
-		// 文本字号阶梯：正文默认 16（比控件标签 14 更易读）
+		// 文本字号阶梯：与全局 token 对齐，正文默认 md=16
 		if (value == 'xs') {
 			return 12
 		}
@@ -774,7 +774,7 @@
 	}
 
 	.nax-text__value {
-		font-size: var(--nax-font-size-lg, 16px);
+		font-size: var(--nax-font-size-md, 16px);
 		font-weight: var(--nax-font-weight-regular, 400);
 		color: var(--nax-color-text, #333639);
 		text-overflow: ellipsis;
