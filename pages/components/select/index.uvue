@@ -1,0 +1,311 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-select</text>
+			<text class="page__desc">列选择器（对齐 uView Pro Select，含触发条与多列联动）</text>
+
+			<view class="section">
+				<text class="section__title">单列 + 按钮打开</text>
+				<nax-button label="选择水果" type="primary" @click="openSingle"></nax-button>
+				<text class="hint">结果：{{ singleText }}</text>
+				<nax-select
+					v-model:show="singleShow"
+					:list="fruitList"
+					title="选择水果"
+					:default-value="singleDefault"
+					@confirm="onSingleConfirm"
+					@cancel="onCancel('single')"
+				></nax-select>
+			</view>
+
+			<view class="section">
+				<text class="section__title">内置触发条 show-trigger</text>
+				<nax-select
+					v-model:show="triggerShow"
+					show-trigger
+					placeholder="请选择城市"
+					:list="cityList"
+					title="城市"
+					@confirm="onTriggerConfirm"
+				></nax-select>
+				<text class="hint">结果：{{ triggerText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">多列 multi-column</text>
+				<nax-button label="选择时间段" @click="multiShow = true"></nax-button>
+				<text class="hint">结果：{{ multiText }}</text>
+				<nax-select
+					v-model:show="multiShow"
+					mode="multi-column"
+					:list="multiList"
+					title="上课时间"
+					@confirm="onMultiConfirm"
+				></nax-select>
+			</view>
+
+			<view class="section">
+				<text class="section__title">多列联动 multi-column-auto</text>
+				<nax-select
+					v-model:show="cascadeShow"
+					show-trigger
+					mode="multi-column-auto"
+					:list="regionList"
+					title="选择地区"
+					placeholder="省 / 市 / 区"
+					@confirm="onCascadeConfirm"
+					@change="onCascadeChange"
+				></nax-select>
+				<text class="hint">结果：{{ cascadeText }}</text>
+				<text class="hint">滚动中：{{ cascadeLive }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义字段名</text>
+				<nax-button label="打开（id/name）" size="sm" @click="customShow = true"></nax-button>
+				<text class="hint">结果：{{ customText }}</text>
+				<nax-select
+					v-model:show="customShow"
+					:list="customList"
+					value-name="id"
+					label-name="name"
+					title="自定义字段"
+					@confirm="onCustomConfirm"
+				></nax-select>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用触发条</text>
+				<nax-select
+					show-trigger
+					disabled
+					placeholder="已禁用"
+					:list="fruitList"
+				></nax-select>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最近事件</text>
+				<text class="hint">{{ lastEvent }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const lastEvent = ref('无')
+
+	const singleShow = ref(false)
+	const singleDefault = [1] as number[]
+	const singleText = ref('未选择')
+	const fruitList = [
+		{ value: 'apple', label: '苹果' },
+		{ value: 'banana', label: '香蕉' },
+		{ value: 'orange', label: '橙子' },
+		{ value: 'grape', label: '葡萄' },
+		{ value: 'mango', label: '芒果' }
+	]
+
+	const triggerShow = ref(false)
+	const triggerText = ref('未选择')
+	const cityList = [
+		{ value: 'bj', label: '北京' },
+		{ value: 'sh', label: '上海' },
+		{ value: 'gz', label: '广州' },
+		{ value: 'sz', label: '深圳' },
+		{ value: 'cd', label: '成都' }
+	]
+
+	const multiShow = ref(false)
+	const multiText = ref('未选择')
+	const multiList = [
+		[
+			{ value: 'mon', label: '周一' },
+			{ value: 'tue', label: '周二' },
+			{ value: 'wed', label: '周三' },
+			{ value: 'thu', label: '周四' },
+			{ value: 'fri', label: '周五' }
+		],
+		[
+			{ value: 'am', label: '上午' },
+			{ value: 'pm', label: '下午' },
+			{ value: 'eve', label: '晚上' }
+		]
+	]
+
+	const cascadeShow = ref(false)
+	const cascadeText = ref('未选择')
+	const cascadeLive = ref('-')
+	const regionList = [
+		{
+			value: 'zhejiang',
+			label: '浙江',
+			children: [
+				{
+					value: 'hangzhou',
+					label: '杭州',
+					children: [
+						{ value: 'xihu', label: '西湖' },
+						{ value: 'yuhang', label: '余杭' }
+					]
+				},
+				{
+					value: 'ningbo',
+					label: '宁波',
+					children: [
+						{ value: 'haishu', label: '海曙' },
+						{ value: 'jiangbei', label: '江北' }
+					]
+				}
+			]
+		},
+		{
+			value: 'jiangsu',
+			label: '江苏',
+			children: [
+				{
+					value: 'nanjing',
+					label: '南京',
+					children: [
+						{ value: 'xuanwu', label: '玄武' },
+						{ value: 'gulou', label: '鼓楼' }
+					]
+				},
+				{
+					value: 'suzhou',
+					label: '苏州',
+					children: [
+						{ value: 'gusu', label: '姑苏' },
+						{ value: 'wuzhong', label: '吴中' }
+					]
+				}
+			]
+		}
+	]
+
+	const customShow = ref(false)
+	const customText = ref('未选择')
+	const customList = [
+		{ id: 10, name: '一号方案' },
+		{ id: 20, name: '二号方案' },
+		{ id: 30, name: '三号方案' }
+	]
+
+	function formatItems(items: UTSJSONObject[]): string {
+		if (items.length == 0) {
+			return '空'
+		}
+		let text = ''
+		let i = 0
+		while (i < items.length) {
+			const row = items[i]
+			const label = row.getString('label')
+			const valueAny = row.getAny('value')
+			let valueText = ''
+			if (valueAny != null) {
+				if (typeof valueAny == 'string') {
+					valueText = valueAny as string
+				} else if (typeof valueAny == 'number') {
+					valueText = (valueAny as number).toString()
+				}
+			}
+			const part = (label != null ? label : '') + '(' + valueText + ')'
+			if (i > 0) {
+				text += ' / '
+			}
+			text += part
+			i++
+		}
+		return text
+	}
+
+	function openSingle() {
+		singleShow.value = true
+	}
+
+	function onSingleConfirm(items: UTSJSONObject[]) {
+		singleText.value = formatItems(items)
+		lastEvent.value = 'confirm single'
+	}
+
+	function onTriggerConfirm(items: UTSJSONObject[]) {
+		triggerText.value = formatItems(items)
+		lastEvent.value = 'confirm trigger'
+	}
+
+	function onMultiConfirm(items: UTSJSONObject[]) {
+		multiText.value = formatItems(items)
+		lastEvent.value = 'confirm multi'
+	}
+
+	function onCascadeConfirm(items: UTSJSONObject[]) {
+		cascadeText.value = formatItems(items)
+		lastEvent.value = 'confirm cascade'
+	}
+
+	function onCascadeChange(items: UTSJSONObject[]) {
+		cascadeLive.value = formatItems(items)
+	}
+
+	function onCustomConfirm(items: UTSJSONObject[]) {
+		customText.value = formatItems(items)
+		lastEvent.value = 'confirm custom'
+	}
+
+	function onCancel(name: string) {
+		lastEvent.value = 'cancel ' + name
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 6px;
+	}
+</style>

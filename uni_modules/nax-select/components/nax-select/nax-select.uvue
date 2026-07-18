@@ -1,0 +1,1345 @@
+<template>
+	<view class="nax-select" :class="rootClass">
+		<!-- 可选触发条：方便表单场景直接选用 -->
+		<view
+			v-if="showTrigger"
+			class="nax-select__trigger"
+			:class="triggerClass"
+			:hover-class="triggerHoverClass"
+			:hover-start-time="20"
+			:hover-stay-time="70"
+			@click="onTriggerClick"
+		>
+			<slot name="trigger">
+				<text class="nax-select__trigger-text" :class="triggerTextClass" :lines="1" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+				<view class="nax-select__trigger-arrow">
+					<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
+				</view>
+			</slot>
+		</view>
+
+		<!-- 弹层：自包含遮罩 + 底部面板（不依赖尚未完成的 nax-popup） -->
+		<view v-if="innerShow" class="nax-select__root" :style="rootOverlayStyle">
+			<!-- 遮罩单独一层，z-index 低于面板，避免鸿蒙点不到确认/取消 -->
+			<view class="nax-select__mask" @click="onMaskClick"></view>
+			<view class="nax-select__panel" :class="panelClass" :style="panelStyle">
+				<view class="nax-select__header">
+					<!-- 鸿蒙：text 不冒泡，按钮与文字都绑定点击 -->
+					<view
+						class="nax-select__btn nax-select__btn--cancel"
+						:hover-class="btnHoverClass"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click.stop="onCancel"
+					>
+						<text class="nax-select__btn-text" :style="cancelTextStyle" @click.stop="onCancel">{{ cancelTextValue }}</text>
+					</view>
+					<view class="nax-select__title-wrap">
+						<text v-if="title.length > 0" class="nax-select__title" :lines="1">{{ title }}</text>
+					</view>
+					<view
+						class="nax-select__btn nax-select__btn--confirm"
+						:hover-class="btnHoverClass"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click.stop="onConfirm"
+					>
+						<text class="nax-select__btn-text nax-select__btn-text--confirm" :style="confirmTextStyle" @click.stop="onConfirm">{{ confirmTextValue }}</text>
+					</view>
+				</view>
+
+				<view class="nax-select__body">
+					<!-- 全端原生滚轮 -->
+					<picker-view
+						v-if="readyToRender"
+						:key="pickerRenderKey"
+						class="nax-select__picker"
+						:class="pickerClass"
+						:value="pickerValue"
+						:indicator-style="indicatorStyle"
+						@change="onColumnChange"
+						@pickstart="onPickStart"
+						@pickend="onPickEnd"
+					>
+						<!-- #ifdef APP-HARMONY -->
+						<!-- 鸿蒙：选项 click 直接吞掉，不提供点选；滑动仍由原生滚轮处理 -->
+						<picker-view-column v-if="columnNum > 0" class="nax-select__column">
+							<view
+								v-for="(item, index) in column0"
+								:key="colItemKey(0, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
+							<view
+								v-for="(item, index) in column1"
+								:key="colItemKey(1, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
+							<view
+								v-for="(item, index) in column2"
+								:key="colItemKey(2, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
+							<view
+								v-for="(item, index) in column3"
+								:key="colItemKey(3, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<!-- #endif -->
+
+						<!-- #ifndef APP-HARMONY -->
+						<picker-view-column v-if="columnNum > 0" class="nax-select__column">
+							<view
+								v-for="(item, index) in column0"
+								:key="colItemKey(0, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
+							<view
+								v-for="(item, index) in column1"
+								:key="colItemKey(1, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
+							<view
+								v-for="(item, index) in column2"
+								:key="colItemKey(2, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
+							<view
+								v-for="(item, index) in column3"
+								:key="colItemKey(3, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<!-- #endif -->
+					</picker-view>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-select
+	 * @description 列选择器（底部弹层 + picker-view）。功能主要对齐 uView Pro Select，并做表单友好优化。
+	 * @property {boolean} show v-model:show 控制弹层显隐（对齐 uView 的 v-model 布尔用法）
+	 * @property {Array} list 列数据；单列一维 / 多列二维 / 联动树形（children）
+	 * @property {string} mode single-column | multi-column | multi-column-auto（兼容 mutil-column / mutil-column-auto）
+	 * @property {Array} defaultValue 默认选中下标数组，如 [0] / [1, 2]
+	 * @property {string} title 顶部标题
+	 * @property {string} confirmText 确认文案，默认「确认」
+	 * @property {string} cancelText 取消文案，默认「取消」
+	 * @property {string} confirmColor 确认色；空则用主题主色
+	 * @property {string} cancelColor 取消色；空则用次文案色
+	 * @property {string} valueName list 项 value 字段名，默认 value
+	 * @property {string} labelName list 项 label 字段名，默认 label
+	 * @property {string} childName 联动子级字段名，默认 children
+	 * @property {boolean} maskClosable 点击遮罩是否关闭，默认 true（兼容 maskCloseAble）
+	 * @property {boolean} maskCloseAble 兼容 uView 拼写，与 maskClosable 任一为 false 则不可点遮罩关闭
+	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true（比 uView 默认更友好）
+	 * @property {number} zIndex 弹层层级，默认 10075
+	 * @property {boolean} preserveSelection 再次打开是否保留上次确认项，默认 true
+	 * @property {boolean} showTrigger 是否渲染内置触发条
+	 * @property {string} placeholder 触发条占位
+	 * @property {boolean} disabled 触发条禁用
+	 * @property {string} separator 多列展示分隔符，默认「 / 」
+	 * @property {boolean} border 触发条是否描边，默认 true
+	 * @property {string} size 触发条尺寸 sm | md | lg
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:show 弹层显隐
+	 * @event confirm 点确认，回调选中项数组 { value, label, index, extra? }
+	 * @event cancel 点取消 / 遮罩关闭，回调当前滚轮项
+	 * @event change 滚轮变化（当前选中项数组）
+	 * @event open / close 打开 / 关闭
+	 * @slot trigger 自定义触发区域（需 showTrigger）
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		mode: {
+			type: String,
+			default: 'single-column'
+		},
+		defaultValue: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		confirmText: {
+			type: String,
+			default: '确认'
+		},
+		cancelText: {
+			type: String,
+			default: '取消'
+		},
+		confirmColor: {
+			type: String,
+			default: ''
+		},
+		cancelColor: {
+			type: String,
+			default: ''
+		},
+		valueName: {
+			type: String,
+			default: 'value'
+		},
+		labelName: {
+			type: String,
+			default: 'label'
+		},
+		childName: {
+			type: String,
+			default: 'children'
+		},
+		maskClosable: {
+			type: Boolean,
+			default: true
+		},
+		/** 兼容 uView 拼写 */
+		maskCloseAble: {
+			type: Boolean,
+			default: true
+		},
+		safeAreaInsetBottom: {
+			type: Boolean,
+			default: true
+		},
+		zIndex: {
+			type: Number,
+			default: 10075
+		},
+		preserveSelection: {
+			type: Boolean,
+			default: true
+		},
+		showTrigger: {
+			type: Boolean,
+			default: false
+		},
+		placeholder: {
+			type: String,
+			default: '请选择'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		separator: {
+			type: String,
+			default: ' / '
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'confirm',
+		'cancel',
+		'change',
+		'open',
+		'close'
+	])
+
+	const innerShow = ref(false)
+	const readyToRender = ref(false)
+	const pickerRenderKey = ref(0)
+	const moving = ref(false)
+	const columnNum = ref(1)
+	const pickerValue = ref([] as number[])
+	const lastSelectIndex = ref([] as number[])
+	const savedSelector = ref([] as number[])
+	const hasSavedSelector = ref(false)
+	const selectResult = ref([] as UTSJSONObject[])
+	const confirmedResult = ref([] as UTSJSONObject[])
+	const safeBottomPx = ref(0)
+
+	/** 最多 4 列，覆盖省市区等常见联动 */
+	const column0 = ref([] as any[])
+	const column1 = ref([] as any[])
+	const column2 = ref([] as any[])
+	const column3 = ref([] as any[])
+
+	function normalizeMode(value: string): string {
+		if (value == 'mutil-column' || value == 'multi-column') {
+			return 'multi-column'
+		}
+		if (value == 'mutil-column-auto' || value == 'multi-column-auto' || value == 'cascade') {
+			return 'multi-column-auto'
+		}
+		return 'single-column'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	const modeName = computed((): string => {
+		return normalizeMode(props.mode)
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const cancelTextValue = computed((): string => {
+		if (props.cancelText.length > 0) {
+			return props.cancelText
+		}
+		return '取消'
+	})
+
+	const confirmTextValue = computed((): string => {
+		if (props.confirmText.length > 0) {
+			return props.confirmText
+		}
+		return '确认'
+	})
+
+	const canCloseByMask = computed((): boolean => {
+		return props.maskClosable && props.maskCloseAble
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const triggerClass = computed((): string => {
+		let cls = 'nax-select__trigger--' + sizeName.value
+		if (props.border) {
+			cls += ' nax-select__trigger--border'
+		}
+		if (props.disabled) {
+			cls += ' nax-select__trigger--disabled'
+		}
+		return cls
+	})
+
+	const triggerHoverClass = computed((): string => {
+		if (props.disabled) {
+			return ''
+		}
+		return 'nax-select__trigger--hover'
+	})
+
+	const btnHoverClass = computed((): string => {
+		return 'nax-select__btn--hover'
+	})
+
+	const triggerTextClass = computed((): string => {
+		if (confirmedResult.value.length == 0) {
+			return 'nax-select__trigger-text--placeholder'
+		}
+		if (props.disabled) {
+			return 'nax-select__trigger-text--disabled'
+		}
+		return ''
+	})
+
+	const triggerDisplayText = computed((): string => {
+		if (confirmedResult.value.length == 0) {
+			return props.placeholder
+		}
+		let text = ''
+		let i = 0
+		while (i < confirmedResult.value.length) {
+			const row = confirmedResult.value[i]
+			const label = row.getString('label')
+			const part = label != null ? label : ''
+			if (i > 0) {
+				text += props.separator
+			}
+			text += part
+			i++
+		}
+		if (text.length == 0) {
+			return props.placeholder
+		}
+		return text
+	})
+
+	const arrowColor = computed((): string => {
+		if (props.disabled) {
+			return 'var(--nax-color-text-disabled, #c2c2c2)'
+		}
+		return 'var(--nax-color-text-secondary, #767c82)'
+	})
+
+	const cancelTextStyle = computed((): string => {
+		if (props.cancelColor.length > 0) {
+			return 'color:' + props.cancelColor + ';'
+		}
+		return ''
+	})
+
+	const confirmTextStyle = computed((): string => {
+		if (moving.value) {
+			if (props.cancelColor.length > 0) {
+				return 'color:' + props.cancelColor + ';'
+			}
+			return 'color:var(--nax-color-text-disabled, #c2c2c2);'
+		}
+		if (props.confirmColor.length > 0) {
+			return 'color:' + props.confirmColor + ';'
+		}
+		return 'color:var(--nax-color-primary, #18a058);'
+	})
+
+	const rootOverlayStyle = computed((): string => {
+		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const panelClass = computed((): string => {
+		if (props.safeAreaInsetBottom) {
+			return 'nax-select__panel--safe'
+		}
+		return ''
+	})
+
+	const panelStyle = computed((): string => {
+		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+			return 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+		}
+		return ''
+	})
+
+	const indicatorStyle = computed((): string => {
+		return 'height: 40px;'
+	})
+
+	function asObject(item: any | null): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function isArrayValue(val: any | null): boolean {
+		if (val == null) {
+			return false
+		}
+		// 排除基础类型与 UTSJSONObject（无 length）
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		if (typeof len != 'number') {
+			return false
+		}
+		return true
+	}
+
+	function asAnyArray(val: any | null): any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		if (!isArrayValue(val)) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function is2DList(list: any[]): boolean {
+		if (list.length == 0) {
+			return false
+		}
+		return isArrayValue(list[0])
+	}
+
+	function resolveLabel(item: any | null): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		if (typeof item == 'number') {
+			return (item as number).toString()
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const key = props.labelName
+		const s = obj.getString(key)
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const n = obj.getNumber(key)
+		if (n != null) {
+			return n.toString()
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null) {
+			if (typeof anyVal == 'string') {
+				return anyVal as string
+			}
+			if (typeof anyVal == 'number') {
+				return (anyVal as number).toString()
+			}
+		}
+		// 兼容 text / name
+		const text = obj.getString('text')
+		if (text != null && text.length > 0) {
+			return text
+		}
+		const name = obj.getString('name')
+		if (name != null && name.length > 0) {
+			return name
+		}
+		return ''
+	}
+
+	function resolveValue(item: any | null): any | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return item
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return null
+		}
+		const key = props.valueName
+		const anyVal = obj.getAny(key)
+		if (anyVal != null) {
+			return anyVal
+		}
+		// 无 value 时回落 label，便于纯文案列表
+		const label = resolveLabel(item)
+		if (label.length > 0) {
+			return label
+		}
+		return null
+	}
+
+	function resolveExtra(item: any | null): any | null {
+		const obj = asObject(item)
+		if (obj == null) {
+			return null
+		}
+		return obj.getAny('extra')
+	}
+
+	function copyAnyArray(list: any[]): any[] {
+		const out = [] as any[]
+		let i = 0
+		while (i < list.length) {
+			out.push(list[i])
+			i++
+		}
+		return out
+	}
+
+	function getChildren(item: any | null): any[] {
+		if (item == null) {
+			return [] as any[]
+		}
+		// 已是数组则直接用（容错）
+		if (isArrayValue(item)) {
+			return item as any[]
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return [] as any[]
+		}
+		const key = props.childName
+		// 1) getArray
+		const arr = obj.getArray(key)
+		if (arr != null && arr.length >= 0) {
+			return arr as any[]
+		}
+		// 2) getAny + 数组判断（鸿蒙嵌套字段常见）
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && isArrayValue(anyVal)) {
+			return anyVal as any[]
+		}
+		// 3) 兼容 children / child / list
+		if (key != 'children') {
+			const arr2 = obj.getArray('children')
+			if (arr2 != null) {
+				return arr2 as any[]
+			}
+			const any2 = obj.getAny('children')
+			if (any2 != null && isArrayValue(any2)) {
+				return any2 as any[]
+			}
+		}
+		return [] as any[]
+	}
+
+	function getColumnList(colIndex: number): any[] {
+		if (colIndex == 0) {
+			return column0.value
+		}
+		if (colIndex == 1) {
+			return column1.value
+		}
+		if (colIndex == 2) {
+			return column2.value
+		}
+		if (colIndex == 3) {
+			return column3.value
+		}
+		return [] as any[]
+	}
+
+	function setColumnList(colIndex: number, list: any[]) {
+		// 拷贝新数组，保证响应式与鸿蒙 picker-view 能感知列数据变化
+		const next = copyAnyArray(list)
+		if (colIndex == 0) {
+			column0.value = next
+			return
+		}
+		if (colIndex == 1) {
+			column1.value = next
+			return
+		}
+		if (colIndex == 2) {
+			column2.value = next
+			return
+		}
+		if (colIndex == 3) {
+			column3.value = next
+		}
+	}
+
+	function clearColumnsFrom(start: number) {
+		let i = start
+		while (i < 4) {
+			setColumnList(i, [] as any[])
+			i++
+		}
+	}
+
+	function colItemKey(colIndex: number, itemIndex: number, item: any | null): string {
+		// 带上 label，避免子列数据替换后节点被错误复用
+		const label = resolveLabel(item)
+		return colIndex.toString() + '-' + itemIndex.toString() + '-' + label
+	}
+
+	function parseIndexArray(raw: any[]): number[] {
+		const result = [] as number[]
+		let i = 0
+		while (i < raw.length) {
+			const item = raw[i]
+			if (typeof item == 'number') {
+				result.push(item as number)
+			} else if (typeof item == 'string') {
+				const n = parseInt(item as string)
+				if (n.toString() == (item as string) || n >= 0) {
+					result.push(n)
+				} else {
+					result.push(0)
+				}
+			} else {
+				result.push(0)
+			}
+			i++
+		}
+		return result
+	}
+
+	function clampIndex(index: number, len: number): number {
+		if (len <= 0) {
+			return 0
+		}
+		if (index < 0) {
+			return 0
+		}
+		if (index >= len) {
+			return len - 1
+		}
+		return index
+	}
+
+	function buildIndexArray(len: number, prefer: number[]): number[] {
+		const result = [] as number[]
+		let i = 0
+		while (i < len) {
+			if (i < prefer.length) {
+				result.push(prefer[i])
+			} else {
+				result.push(0)
+			}
+			i++
+		}
+		return result
+	}
+
+	function computeColumnNum(): number {
+		const mode = modeName.value
+		const list = props.list as any[]
+		if (mode == 'single-column') {
+			return 1
+		}
+		if (mode == 'multi-column') {
+			if (is2DList(list)) {
+				const n = list.length
+				if (n > 4) {
+					return 4
+				}
+				if (n < 1) {
+					return 1
+				}
+				return n
+			}
+			return 1
+		}
+		// multi-column-auto：沿首条链路数 children 深度
+		let num = 1
+		if (list.length == 0) {
+			return 1
+		}
+		let column: any | null = list[0]
+		while (column != null) {
+			const children = getChildren(column)
+			if (children.length == 0) {
+				break
+			}
+			num++
+			if (num >= 4) {
+				break
+			}
+			column = children[0]
+		}
+		return num
+	}
+
+	function pickPreferSelector(): number[] {
+		if (props.preserveSelection && hasSavedSelector.value && savedSelector.value.length > 0) {
+			return savedSelector.value.slice()
+		}
+		const def = parseIndexArray(props.defaultValue as any[])
+		if (def.length > 0) {
+			return def
+		}
+		if (hasSavedSelector.value && savedSelector.value.length > 0) {
+			return savedSelector.value.slice()
+		}
+		return [] as number[]
+	}
+
+	function setColumnDataByMode(selector: number[]) {
+		const mode = modeName.value
+		const list = props.list as any[]
+		const num = columnNum.value
+		clearColumnsFrom(0)
+
+		if (mode == 'single-column') {
+			if (is2DList(list)) {
+				setColumnList(0, asAnyArray(list[0]))
+			} else {
+				setColumnList(0, list)
+			}
+			return
+		}
+
+		if (mode == 'multi-column') {
+			if (is2DList(list)) {
+				let i = 0
+				while (i < num) {
+					setColumnList(i, asAnyArray(list[i]))
+					i++
+				}
+			} else {
+				setColumnList(0, list)
+			}
+			return
+		}
+
+		// multi-column-auto
+		let currentLevel = list
+		let i = 0
+		while (i < num) {
+			setColumnList(i, currentLevel)
+			if (i >= num - 1) {
+				break
+			}
+			const idx = clampIndex(i < selector.length ? selector[i] : 0, currentLevel.length)
+			const node = currentLevel.length > 0 ? currentLevel[idx] : null
+			currentLevel = getChildren(node)
+			i++
+		}
+	}
+
+	function buildSelectResult(selector: number[]): UTSJSONObject[] {
+		const result = [] as UTSJSONObject[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			const idx = clampIndex(i < selector.length ? selector[i] : 0, col.length)
+			const item = col.length > 0 ? col[idx] : null
+			const value = resolveValue(item)
+			const label = resolveLabel(item)
+			const extra = resolveExtra(item)
+			if (extra != null) {
+				const rowWithExtra = {
+					value: value,
+					label: label,
+					index: idx,
+					extra: extra
+				} as UTSJSONObject
+				result.push(rowWithExtra)
+			} else {
+				const row = {
+					value: value,
+					label: label,
+					index: idx
+				} as UTSJSONObject
+				result.push(row)
+			}
+			i++
+		}
+		return result
+	}
+
+	function syncPickerValue(selector: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			const idx = clampIndex(i < selector.length ? selector[i] : 0, col.length)
+			next.push(idx)
+			i++
+		}
+		pickerValue.value = next
+		lastSelectIndex.value = next.slice()
+		selectResult.value = buildSelectResult(next)
+	}
+
+	function initPicker() {
+		columnNum.value = computeColumnNum()
+		const prefer = pickPreferSelector()
+		const selector = buildIndexArray(columnNum.value, prefer)
+		setColumnDataByMode(selector)
+		// 联动时再刷一遍，保证子列与父选中一致
+		if (modeName.value == 'multi-column-auto') {
+			setColumnDataByMode(selector)
+		}
+		// 打开时换 key，避免沿用上一次原生列缓存（鸿蒙等）
+		pickerRenderKey.value = pickerRenderKey.value + 1
+		syncPickerValue(selector)
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function openPicker() {
+		if (props.disabled) {
+			return
+		}
+		refreshSafeArea()
+		innerShow.value = true
+		readyToRender.value = false
+		initPicker()
+		// 等数据就绪再挂载 picker-view，避免首帧空列
+		readyToRender.value = true
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function closePicker(emitUpdate: boolean) {
+		innerShow.value = false
+		readyToRender.value = false
+		moving.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+		emit('close')
+	}
+
+	function onTriggerClick() {
+		if (props.disabled) {
+			return
+		}
+		if (innerShow.value) {
+			return
+		}
+		openPicker()
+	}
+
+	function onMaskClick() {
+		if (!canCloseByMask.value) {
+			return
+		}
+		emit('cancel', selectResult.value)
+		closePicker(true)
+	}
+
+	function onCancel() {
+		emit('cancel', selectResult.value)
+		closePicker(true)
+	}
+
+	function onConfirm() {
+		// #ifdef MP-WEIXIN
+		if (moving.value) {
+			return
+		}
+		// #endif
+		const result = selectResult.value
+		savedSelector.value = pickerValue.value.slice()
+		hasSavedSelector.value = true
+		confirmedResult.value = result.slice(0)
+		emit('confirm', result)
+		closePicker(true)
+	}
+
+	/** 鸿蒙：吞掉滚轮选项点击，避免误以为可点选；不影响滑动 */
+	function onWheelItemClickBlock() {
+		// no-op
+	}
+
+	const pickerClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		return 'nax-select__picker--harmony'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	function onPickStart() {
+		// #ifdef MP-WEIXIN
+		moving.value = true
+		// #endif
+	}
+
+	function onPickEnd() {
+		// #ifdef MP-WEIXIN
+		moving.value = false
+		// #endif
+	}
+
+	function findChangedColumn(prev: number[], next: number[]): number {
+		const len = prev.length < next.length ? prev.length : next.length
+		let i = 0
+		while (i < len) {
+			if (prev[i] != next[i]) {
+				return i
+			}
+			i++
+		}
+		if (prev.length != next.length) {
+			return 0
+		}
+		return -1
+	}
+
+	function rebuildCascadeColumns(selector: number[]) {
+		const list = props.list as any[]
+		let currentLevel = list
+		let c = 0
+		while (c < columnNum.value) {
+			setColumnList(c, currentLevel)
+			if (c >= columnNum.value - 1) {
+				break
+			}
+			const idx = clampIndex(c < selector.length ? selector[c] : 0, currentLevel.length)
+			const node = currentLevel.length > 0 ? currentLevel[idx] : null
+			currentLevel = getChildren(node)
+			c++
+		}
+	}
+
+	/**
+	 * 写入选中下标。
+	 * 禁止在滚动过程中整表 remount picker-view：鸿蒙会先闪第 0 项再跳到目标项。
+	 */
+	function applyPickerIndexes(next: number[]) {
+		const fixed = buildIndexArray(columnNum.value, next)
+		let k = 0
+		while (k < fixed.length) {
+			fixed[k] = clampIndex(fixed[k], getColumnList(k).length)
+			k++
+		}
+		pickerValue.value = fixed.slice()
+		lastSelectIndex.value = fixed.slice()
+		selectResult.value = buildSelectResult(fixed)
+		emit('change', selectResult.value)
+	}
+
+	/**
+	 * 点击某一列某一项（补齐鸿蒙 picker-view 点选不触发 change 的情况）
+	 */
+	function onColumnChange(e: UniPickerViewChangeEvent) {
+		const detail = e.detail
+		const columnIndex = detail.value
+		const mode = modeName.value
+		const next = [] as number[]
+		let n = 0
+		while (n < columnIndex.length) {
+			const raw = columnIndex[n]
+			if (typeof raw == 'number') {
+				next.push(raw as number)
+			} else if (typeof raw == 'string') {
+				const parsed = parseInt(raw as string)
+				next.push(parsed >= 0 ? parsed : 0)
+			} else {
+				next.push(0)
+			}
+			n++
+		}
+		if (next.length == 0) {
+			return
+		}
+
+		if (mode == 'multi-column-auto') {
+			const changed = findChangedColumn(lastSelectIndex.value, next)
+			// 只有父列变化才重建子列；最后一列滚动只更新选中
+			if (changed >= 0 && changed < columnNum.value - 1) {
+				let j = changed + 1
+				while (j < columnNum.value) {
+					if (j < next.length) {
+						next[j] = 0
+					} else {
+						next.push(0)
+					}
+					j++
+				}
+				rebuildCascadeColumns(next)
+				applyPickerIndexes(next)
+				return
+			}
+			applyPickerIndexes(next)
+			return
+		}
+
+		applyPickerIndexes(next)
+	}
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val == innerShow.value) {
+			return
+		}
+		if (val) {
+			openPicker()
+		} else {
+			closePicker(false)
+		}
+	})
+
+	watch((): any[] => {
+		return props.list as any[]
+	}, (_val: any[]) => {
+		if (innerShow.value) {
+			initPicker()
+		}
+	})
+
+	// 外部 defaultValue 变化且不保留选择时，下次打开会吃到新默认值
+	watch((): any[] => {
+		return props.defaultValue as any[]
+	}, (_val: any[]) => {
+		if (!props.preserveSelection) {
+			hasSavedSelector.value = false
+		}
+	})
+
+	// 首次若 show 已为 true
+	if (props.show) {
+		openPicker()
+	}
+</script>
+
+<style>
+	.nax-select {
+		flex-direction: column;
+	}
+
+	.nax-select__trigger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+	}
+
+	.nax-select__trigger--sm {
+		height: 32px;
+	}
+
+	.nax-select__trigger--md {
+		height: 40px;
+	}
+
+	.nax-select__trigger--lg {
+		height: 48px;
+	}
+
+	.nax-select__trigger--border {
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-select__trigger--disabled {
+		opacity: 0.5;
+	}
+
+	.nax-select__trigger--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-select__trigger-text {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		/* #endif */
+	}
+
+	.nax-select__trigger--sm .nax-select__trigger-text {
+		font-size: var(--nax-font-size-sm, 14px);
+	}
+
+	.nax-select__trigger--lg .nax-select__trigger-text {
+		font-size: var(--nax-font-size-lg, 18px);
+	}
+
+	.nax-select__trigger-text--placeholder {
+		color: var(--nax-color-text-placeholder, #c2c2c2);
+	}
+
+	.nax-select__trigger-text--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-select__trigger-arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: var(--nax-space-2, 8px);
+		flex-shrink: 0;
+	}
+
+	.nax-select__root {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	.nax-select__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		/* 必须低于面板，否则鸿蒙上会吃掉确认/取消点击 */
+		z-index: 1;
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+
+	.nax-select__panel {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	/* Web 用 env 兜底安全区；App 用 inline padding-bottom */
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-select__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-select__header {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 48px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-select__btn {
+		min-width: 72px;
+		height: 48px;
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-select__btn--hover {
+		opacity: 0.7;
+	}
+
+	.nax-select__btn-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-select__btn-text--confirm {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+	}
+
+	.nax-select__title-wrap {
+		flex: 1;
+		min-width: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-select__title {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		text-align: center;
+	}
+
+	.nax-select__body {
+		height: 240px;
+		flex-direction: column;
+	}
+
+
+
+	.nax-select__picker {
+		flex: 1;
+		height: 240px;
+	}
+
+	.nax-select__column {
+		flex: 1;
+	}
+
+	.nax-select__item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-select__item-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	/* 鸿蒙：选项不可点选（仅视觉/点击吞掉；勿 pointer-events:none，以免影响滑动） */
+	/* #ifdef APP-HARMONY */
+	.nax-select__item--no-tap {
+		/* 保持可滑动区域 */
+	}
+
+	.nax-select__picker--harmony {
+		/* 占位：与其它端同滚轮，仅行为上禁点选 */
+	}
+	/* #endif */
+</style>
