@@ -543,15 +543,14 @@
 		/* #endif */
 	}
 
-	/* 鸿蒙：对齐 nax-input —— 不用百分比高度，由 fieldStyle 内联 px 控高，保证键盘避让测位正确 */
+	/* 鸿蒙：对齐 nax-input —— 高度只由 fieldStyle 内联 px 控高，勿写 height:100%/auto，保证键盘避让测位正确 */
 	/* #ifdef APP-HARMONY */
 	.nax-textarea {
 		overflow: visible;
 	}
 
 	.nax-textarea__field {
-		/* 高度由 fieldStyle 内联；勿写 height:100% */
-		height: auto;
+		/* 高度由 fieldStyle 内联；class 不写 height，避免覆盖内联 px 导致测高失败 */
 		overflow: visible;
 	}
 	/* #endif */

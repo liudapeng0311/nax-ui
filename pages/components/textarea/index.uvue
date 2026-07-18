@@ -3,7 +3,7 @@
 		style="flex:1"
 		scroll-y="true"
 		:scroll-top="scrollTop"
-		:scroll-with-animation="true"
+		:scroll-with-animation="false"
 		@scroll="onPageScroll"
 	>
 		<view class="nax-theme page" :class="themeExtraClass">
@@ -14,7 +14,9 @@
 				<text class="section__title">基础用法</text>
 				<nax-textarea
 					v-model="basic"
+					:adjust-position="textareaAdjustPosition"
 					placeholder="请输入内容"
+					@click="onFieldFocus('sec-basic')"
 					@focus="onFieldFocus('sec-basic')"
 					@blur="onFieldBlur"
 					@keyboardheightchange="onTaKeyboard"
@@ -29,7 +31,9 @@
 					v-model="withCount"
 					count
 					:maxlength="100"
+					:adjust-position="textareaAdjustPosition"
 					placeholder="最多 100 字"
+					@click="onFieldFocus('sec-count')"
 					@focus="onFieldFocus('sec-count')"
 					@blur="onFieldBlur"
 					@keyboardheightchange="onTaKeyboard"
@@ -42,7 +46,9 @@
 					v-model="autoH"
 					auto-height
 					height="70"
+					:adjust-position="textareaAdjustPosition"
 					placeholder="输入时自动增高"
+					@click="onFieldFocus('sec-auto')"
 					@focus="onFieldFocus('sec-auto')"
 					@blur="onFieldBlur"
 					@keyboardheightchange="onTaKeyboard"
@@ -55,7 +61,9 @@
 					<nax-textarea
 						v-model="plain"
 						:border="false"
+						:adjust-position="textareaAdjustPosition"
 						placeholder="无边框"
+						@click="onFieldFocus('sec-plain')"
 						@focus="onFieldFocus('sec-plain')"
 						@blur="onFieldBlur"
 						@keyboardheightchange="onTaKeyboard"
@@ -66,7 +74,9 @@
 						v-model="plainBg"
 						:border="false"
 						background="#f3f3f5"
+						:adjust-position="textareaAdjustPosition"
 						placeholder="无边框 + 背景色"
+						@click="onFieldFocus('sec-plain')"
 						@focus="onFieldFocus('sec-plain')"
 						@blur="onFieldBlur"
 						@keyboardheightchange="onTaKeyboard"
@@ -80,7 +90,9 @@
 					v-model="bottomBorder"
 					border
 					border-type="bottom"
+					:adjust-position="textareaAdjustPosition"
 					placeholder="下划线风格"
+					@click="onFieldFocus('sec-bottom-border')"
 					@focus="onFieldFocus('sec-bottom-border')"
 					@blur="onFieldBlur"
 					@keyboardheightchange="onTaKeyboard"
@@ -94,7 +106,9 @@
 						v-model="sizeSm"
 						size="sm"
 						height="56"
+						:adjust-position="textareaAdjustPosition"
 						placeholder="sm"
+						@click="onFieldFocus('sec-size-sm')"
 						@focus="onFieldFocus('sec-size-sm')"
 						@blur="onFieldBlur"
 						@keyboardheightchange="onTaKeyboard"
@@ -105,7 +119,9 @@
 						v-model="sizeMd"
 						size="md"
 						height="70"
+						:adjust-position="textareaAdjustPosition"
 						placeholder="md"
+						@click="onFieldFocus('sec-size-md')"
 						@focus="onFieldFocus('sec-size-md')"
 						@blur="onFieldBlur"
 						@keyboardheightchange="onTaKeyboard"
@@ -116,7 +132,9 @@
 						v-model="sizeLg"
 						size="lg"
 						height="88"
+						:adjust-position="textareaAdjustPosition"
 						placeholder="lg"
+						@click="onFieldFocus('sec-size-lg')"
 						@focus="onFieldFocus('sec-size-lg')"
 						@blur="onFieldBlur"
 						@keyboardheightchange="onTaKeyboard"
@@ -141,7 +159,9 @@
 					border
 					border-color="#18a058"
 					height="100"
+					:adjust-position="textareaAdjustPosition"
 					placeholder="height=100，边框 primary"
+					@click="onFieldFocus('sec-color')"
 					@focus="onFieldFocus('sec-color')"
 					@blur="onFieldBlur"
 					@keyboardheightchange="onTaKeyboard"
@@ -150,9 +170,9 @@
 				<text class="hint">最近事件：{{ lastEvent }}</text>
 			</view>
 
-			<!-- 鸿蒙：仅垫高可滚区域，不强制滚到顶部，避免输入框与键盘间距过大 -->
+			<!-- 鸿蒙：垫高保证可滚够；真正避让靠按遮挡量 scroll-top，不顶到页面顶部 -->
 			<!-- #ifdef APP-HARMONY -->
-			<view v-if="keyboardPad > 0" class="keyboard-pad" :style="keyboardPadStyle"></view>
+			<view class="keyboard-pad" :style="keyboardPadStyle"></view>
 			<!-- #endif -->
 		</view>
 	</scroll-view>
@@ -172,6 +192,9 @@
 
 	onShow(() => {
 		darkMode.value = bindDemoThemePage()
+		// #ifdef APP-HARMONY
+		captureBaseWindowHeight()
+		// #endif
 	})
 
 	const basic = ref('')
@@ -188,59 +211,152 @@
 	const colorBorder = ref('')
 	const lastEvent = ref('无')
 
+	/**
+	 * 鸿蒙演示页关闭原生 adjust-position，由页面精确滚动避让；
+	 * 其它端保持默认 true。
+	 */
+	const textareaAdjustPosition = computed((): boolean => {
+		// #ifdef APP-HARMONY
+		return false
+		// #endif
+		// #ifndef APP-HARMONY
+		return true
+		// #endif
+	})
+
 	const focusSecId = ref('')
-	/** scroll-view 滚动位置（受控，仅在需要微调时写入） */
 	const scrollTop = ref(0)
 	let lastScrollTop: number = 0
 	let blurClearTimer: number = 0
-	/** 仅鸿蒙演示页键盘占位；其它端恒 0 */
+	let scrollTick: number = 0
+	/** 仅鸿蒙演示页键盘占位 */
 	const keyboardPad = ref(0)
-	/** 输入框底边与键盘顶边的目标间距（px），尽量贴紧 */
+	let currentKeyboardHeight: number = 0
+	/** 输入框底边与键盘顶边目标间距 */
 	const KEYBOARD_GAP = 8
+	/**
+	 * 键盘未弹起时的窗口高度。避让计算一律用它减键盘高，
+	 * 避免窗口缩放后用「已缩小的 windowHeight」再减键盘高导致滚不够/滚过头。
+	 */
+	let baseWindowHeight: number = 0
 
 	const keyboardPadStyle = computed((): string => {
-		return 'height:' + keyboardPad.value.toString() + 'px;'
+		const h = keyboardPad.value
+		if (h <= 0) {
+			return 'height:0px;'
+		}
+		return 'height:' + h.toString() + 'px;'
 	})
+
+	function captureBaseWindowHeight() {
+		// #ifdef APP-HARMONY
+		const h = uni.getSystemInfoSync().windowHeight
+		// 只在更大时更新，防止键盘已弹起时误记成矮窗口
+		if (h > baseWindowHeight) {
+			baseWindowHeight = h
+		}
+		// #endif
+	}
 
 	function onPageScroll(e: UniScrollEvent) {
 		lastScrollTop = e.detail.scrollTop
 	}
 
 	/**
-	 * 只滚「被挡掉的那一段」，不要 scroll-into-view 顶到页面顶部（会留出很大空白）。
+	 * 强制写入 scroll-top：相同值不触发时做扰动。
 	 */
-	function scrollJustAboveKeyboard(keyboardHeight: number) {
+	function applyScrollTop(next: number) {
 		// #ifdef APP-HARMONY
-		const id = focusSecId.value
-		if (id.length == 0 || keyboardHeight <= 0) {
-			return
+		if (next < 0) {
+			next = 0
 		}
-		const el = uni.getElementById(id)
-		if (el == null) {
-			return
-		}
-		const rect = el.getBoundingClientRect()
-		const winH = uni.getSystemInfoSync().windowHeight
-		const bottom = rect.y + rect.height
-		const safeBottom = winH - keyboardHeight - KEYBOARD_GAP
-		const overflow = bottom - safeBottom
-		if (overflow > 1) {
-			// 强制变更 scroll-top：相同值可能不触发滚动
-			const next = lastScrollTop + overflow
-			if (next == scrollTop.value) {
-				scrollTop.value = next + 0.5
-			} else {
+		// 先写一个不同值再写目标，提高鸿蒙受控 scroll-top 命中率
+		const nudge = next + 0.5
+		if (scrollTop.value == next) {
+			scrollTop.value = nudge
+			setTimeout(() => {
 				scrollTop.value = next
-			}
-			lastScrollTop = next
+			}, 16)
+		} else {
+			scrollTop.value = next
 		}
+		lastScrollTop = next
 		// #endif
 	}
 
 	/**
-	 * 组件 keyboardheightchange。
-	 * 鸿蒙演示页：垫高可滚区域 + 按遮挡量微调 scroll-top，保持输入框贴近键盘。
+	 * 可视区底边 = 弹起前窗口高 - 键盘高。
+	 * 与运行时原生避让公式一致：overflow = bottom - (windowH - keyboardH)。
 	 */
+	function resolveSafeBottom(keyboardHeight: number): number {
+		captureBaseWindowHeight()
+		let winH = baseWindowHeight
+		if (winH <= 0) {
+			winH = uni.getSystemInfoSync().windowHeight
+		}
+		// 若当前窗口明显比 base 矮，说明已缩放：可视底取当前窗口底（键盘在窗外）
+		const curH = uni.getSystemInfoSync().windowHeight
+		const shrunk = winH - curH
+		if (shrunk > keyboardHeight * 0.4) {
+			return curH - KEYBOARD_GAP
+		}
+		// 覆盖模式：键盘叠在窗口上
+		return winH - keyboardHeight - KEYBOARD_GAP
+	}
+
+	/**
+	 * 只滚被挡掉的距离；若仍被挡会在外部多次重试补滚。
+	 */
+	function scrollJustAboveKeyboard(keyboardHeight: number): boolean {
+		// #ifdef APP-HARMONY
+		const id = focusSecId.value
+		if (id.length == 0 || keyboardHeight <= 0) {
+			return false
+		}
+		const el = uni.getElementById(id)
+		if (el == null) {
+			return false
+		}
+		const rect = el.getBoundingClientRect()
+		const bottom = rect.y + rect.height
+		const safeBottom = resolveSafeBottom(keyboardHeight)
+		const overflow = bottom - safeBottom
+		if (overflow > 1) {
+			applyScrollTop(lastScrollTop + overflow)
+			return true
+		}
+		return false
+		// #endif
+		// #ifndef APP-HARMONY
+		return false
+		// #endif
+	}
+
+	/**
+	 * 垫高完成后再测位滚动，并多拍几次补齐（键盘动画 / 占位渲染延迟）。
+	 */
+	function ensureFieldAboveKeyboard(keyboardHeight: number) {
+		// #ifdef APP-HARMONY
+		const delays = [80, 160, 280]
+		let i = 0
+		const run = () => {
+			if (currentKeyboardHeight <= 0) {
+				return
+			}
+			scrollJustAboveKeyboard(keyboardHeight)
+			i++
+			if (i < delays.length) {
+				scrollTick = setTimeout(run, delays[i] - (i > 0 ? delays[i - 1] : 0)) as number
+			}
+		}
+		if (scrollTick > 0) {
+			clearTimeout(scrollTick)
+			scrollTick = 0
+		}
+		scrollTick = setTimeout(run, delays[0]) as number
+		// #endif
+	}
+
 	function onTaKeyboard(detail: UniInputKeyboardHeightChangeEventDetail) {
 		// #ifdef APP-HARMONY
 		const h = detail.height
@@ -249,13 +365,26 @@
 				clearTimeout(blurClearTimer)
 				blurClearTimer = 0
 			}
-			// 垫高约等于键盘高度，保证能滚够；不再额外 +24 造成空洞
+			// 键盘刚弹起时尽量锁住「弹起前」窗口高
+			if (currentKeyboardHeight <= 0) {
+				captureBaseWindowHeight()
+			}
+			currentKeyboardHeight = h
+			// 占位 = 键盘高，保证底部项能滚够；不额外加大，避免可见空洞
 			keyboardPad.value = h
-			setTimeout(() => {
-				scrollJustAboveKeyboard(h)
-			}, 40)
+			ensureFieldAboveKeyboard(h)
 		} else {
+			currentKeyboardHeight = 0
 			keyboardPad.value = 0
+			if (scrollTick > 0) {
+				clearTimeout(scrollTick)
+				scrollTick = 0
+			}
+			// 收起后刷新 base，供下次使用
+			setTimeout(() => {
+				baseWindowHeight = 0
+				captureBaseWindowHeight()
+			}, 50)
 		}
 		// #endif
 	}
@@ -268,11 +397,11 @@
 			blurClearTimer = 0
 		}
 		focusSecId.value = secId
-		// 若键盘已弹起，立即按当前占位高度微调（切换输入框时）
-		if (keyboardPad.value > 0) {
-			setTimeout(() => {
-				scrollJustAboveKeyboard(keyboardPad.value)
-			}, 40)
+		if (currentKeyboardHeight <= 0) {
+			captureBaseWindowHeight()
+		}
+		if (currentKeyboardHeight > 0) {
+			ensureFieldAboveKeyboard(currentKeyboardHeight)
 		}
 		// #endif
 	}
@@ -284,8 +413,13 @@
 			clearTimeout(blurClearTimer)
 		}
 		blurClearTimer = setTimeout(() => {
+			currentKeyboardHeight = 0
 			keyboardPad.value = 0
 			focusSecId.value = ''
+			if (scrollTick > 0) {
+				clearTimeout(scrollTick)
+				scrollTick = 0
+			}
 			blurClearTimer = 0
 		}, 280) as number
 		// #endif

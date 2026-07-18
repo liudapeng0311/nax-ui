@@ -83,5 +83,5 @@
 - 基于原生 `textarea`，`auto-height` / 键盘相关能力随端差异以官方文档为准。
 - `readonly` 通过禁用原生编辑实现（样式弱于 `disabled`）。
 - App 端去掉 Web 专用 `outline` / `resize`（条件编译）。
-- **鸿蒙**：高度与 nax-input 相同，写在原生 textarea 的明确 px 上，避免 height:100% 导致键盘上推测高失败；原生 cursor-spacing 仍不支持。
-- **鸿蒙**：原生 cursor-spacing 暂不支持；键盘遮挡时在 adjust-position=true 下按遮挡量 translateY 上移兜底（`#ifdef APP-HARMONY`，不影响其它端）。
+- **鸿蒙**：高度与 nax-input 相同，写在原生 textarea 的明确 px 上，避免 height:100% / class height:auto 覆盖导致键盘避让测高失败；原生 cursor-spacing 仍不支持。
+- **鸿蒙演示页**：关闭原生 `adjust-position`，通过 `#ifdef APP-HARMONY` 的底部键盘占位 + 按遮挡量微调 `scroll-top`（不使用 `scroll-into-view`，避免输入框被顶到顶部留白过大）。组件默认 `adjust-position` 仍为 true，业务页可直接使用原生上推。
