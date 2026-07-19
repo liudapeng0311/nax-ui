@@ -67,6 +67,10 @@
 					<text class="home__card-name">开关</text>
 					<text class="home__card-tag">nax-switch</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goSlider">
+					<text class="home__card-name">滑动选择器</text>
+					<text class="home__card-tag">nax-slider</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goTextarea">
 					<text class="home__card-name">多行输入</text>
 					<text class="home__card-tag">nax-textarea</text>
@@ -198,6 +202,12 @@
 	function goSwitch() {
 		uni.navigateTo({
 			url: '/pages/components/switch/index'
+		})
+	}
+
+	function goSlider() {
+		uni.navigateTo({
+			url: '/pages/components/slider/index'
 		})
 	}
 
