@@ -1,0 +1,213 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-rate</text>
+			<text class="page__desc">评分（对齐 uView Pro Rate 主能力）</text>
+
+			<view class="section">
+				<text class="section__title">基础用法</text>
+				<view class="row">
+					<nax-rate v-model="basic" @change="onBasicChange"></nax-rate>
+					<text class="row__text">{{ basicText }} · {{ lastEvent }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="row">
+					<nax-rate v-model="sizeSm" size="sm"></nax-rate>
+					<text class="row__text">sm · {{ sizeSm }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-rate v-model="sizeMd" size="md"></nax-rate>
+					<text class="row__text">md · {{ sizeMd }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-rate v-model="sizeLg" size="lg"></nax-rate>
+					<text class="row__text">lg · {{ sizeLg }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-rate v-model="sizePx" size="32"></nax-rate>
+					<text class="row__text">32px · {{ sizePx }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">星星数量 count</text>
+				<view class="row">
+					<nax-rate v-model="countVal" :count="8"></nax-rate>
+					<text class="row__text">count=8 · {{ countVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义颜色 / 间距</text>
+				<view class="row">
+					<nax-rate
+						v-model="colorVal"
+						active-color="#d03050"
+						inactive-color="#e0e0e6"
+						:gutter="12"
+					></nax-rate>
+					<text class="row__text">error 红 · gutter=12 · {{ colorVal }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-rate
+						v-model="infoVal"
+						active-color="#2080f0"
+						inactive-color="#d6e4ff"
+					></nax-rate>
+					<text class="row__text">info 蓝 · {{ infoVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最少可选 minCount</text>
+				<view class="row">
+					<nax-rate v-model="minVal" :min-count="2"></nax-rate>
+					<text class="row__text">最少 2 星 · {{ minVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">半星 allowHalf</text>
+				<view class="row">
+					<nax-rate v-model="halfVal" allow-half></nax-rate>
+					<text class="row__text">点击半/整切换，可滑动 · {{ halfVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 / 只读</text>
+				<view class="row">
+					<nax-rate v-model="disabledVal" disabled></nax-rate>
+					<text class="row__text">disabled · {{ disabledVal }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-rate v-model="readonlyVal" readonly></nax-rate>
+					<text class="row__text">readonly · {{ readonlyVal }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-rate v-model="halfReadonly" allow-half readonly></nax-rate>
+					<text class="row__text">半星只读 · {{ halfReadonly }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用滑动 touchable=false</text>
+				<view class="row">
+					<nax-rate v-model="noTouchVal" :touchable="false"></nax-rate>
+					<text class="row__text">仅点击 · {{ noTouchVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义图标</text>
+				<view class="row">
+					<nax-rate
+						v-model="heartVal"
+						active-icon="heart"
+						inactive-icon="heart"
+						active-color="#d03050"
+					></nax-rate>
+					<text class="row__text">heart · {{ heartVal }}</text>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basic = ref(3.0)
+	const basicText = computed((): string => {
+		return basic.value.toString()
+	})
+	const lastEvent = ref('—')
+
+	const sizeSm = ref(2.0)
+	const sizeMd = ref(3.0)
+	const sizeLg = ref(4.0)
+	const sizePx = ref(3.0)
+	const countVal = ref(5.0)
+	const colorVal = ref(4.0)
+	const infoVal = ref(3.0)
+	const minVal = ref(2.0)
+	const halfVal = ref(2.5)
+	const disabledVal = ref(4.0)
+	const readonlyVal = ref(3.0)
+	const halfReadonly = ref(3.5)
+	const noTouchVal = ref(2.0)
+	const heartVal = ref(3.0)
+
+	function onBasicChange(v : number) {
+		lastEvent.value = 'change: ' + v.toString()
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		margin-left: 12px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+</style>

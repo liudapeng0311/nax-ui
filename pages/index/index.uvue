@@ -75,6 +75,10 @@
 					<text class="home__card-name">步进器</text>
 					<text class="home__card-tag">nax-number-box</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goRate">
+					<text class="home__card-name">评分</text>
+					<text class="home__card-tag">nax-rate</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goTextarea">
 					<text class="home__card-name">多行输入</text>
 					<text class="home__card-tag">nax-textarea</text>
@@ -221,6 +225,12 @@
 		})
 	}
 
+	function goRate() {
+		uni.navigateTo({
+			url: '/pages/components/rate/index'
+		})
+	}
+
 	function goTextarea() {
 		uni.navigateTo({
 			url: '/pages/components/textarea/index'
@@ -351,5 +361,6 @@
 		color: var(--nax-color-text-secondary, #767c82);
 	}
 </style>
+
 
 
