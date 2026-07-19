@@ -1,0 +1,318 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-number-box</text>
+			<text class="page__desc">步进器（对齐 uView Pro NumberBox 主能力）</text>
+
+			<view class="section">
+				<text class="section__title">基础用法</text>
+				<view class="row">
+					<nax-number-box v-model="basic" @change="onBasicChange"></nax-number-box>
+					<text class="row__text">值：{{ basicText }} · {{ lastEvent }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="row">
+					<nax-number-box v-model="sizeSm" size="sm"></nax-number-box>
+					<text class="row__text">sm · {{ sizeSm }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-number-box v-model="sizeMd" size="md"></nax-number-box>
+					<text class="row__text">md · {{ sizeMd }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-number-box v-model="sizeLg" size="lg"></nax-number-box>
+					<text class="row__text">lg · {{ sizeLg }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">范围 min / max / step</text>
+				<view class="row">
+					<nax-number-box
+						v-model="rangeVal"
+						:min="1"
+						:max="10"
+						:step="1"
+						@overlimit="onOverlimit"
+					></nax-number-box>
+					<text class="row__text">1–10 · {{ rangeVal }} · {{ overlimitText }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-number-box
+						v-model="stepVal"
+						:min="0"
+						:max="5"
+						:step="0.5"
+					></nax-number-box>
+					<text class="row__text">step=0.5 · {{ stepVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">仅整数 integer</text>
+				<view class="row">
+					<nax-number-box v-model="intVal" integer :min="0" :max="99"></nax-number-box>
+					<text class="row__text">{{ intVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用</text>
+				<view class="row">
+					<nax-number-box v-model="disabledAll" disabled></nax-number-box>
+					<text class="row__text">整体 disabled</text>
+				</view>
+				<view class="row row--gap">
+					<nax-number-box v-model="disabledInputVal" disabled-input></nax-number-box>
+					<text class="row__text">disabledInput（仅输入）</text>
+				</view>
+				<view class="row row--gap">
+					<nax-number-box
+						v-model="disableBtnVal"
+						disable-plus
+						disable-minus
+					></nax-number-box>
+					<text class="row__text">disablePlus + disableMinus</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">长按 longPress</text>
+				<view class="row">
+					<nax-number-box v-model="longPressOn" :long-press="true"></nax-number-box>
+					<text class="row__text">开启 · {{ longPressOn }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-number-box v-model="longPressOff" :long-press="false"></nax-number-box>
+					<text class="row__text">关闭 · {{ longPressOff }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">异步变更 asyncChange</text>
+				<view class="row">
+					<nax-number-box
+						v-model="asyncVal"
+						async-change
+						@change="onAsyncChange"
+					></nax-number-box>
+					<text class="row__text">{{ asyncText }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义颜色 / 宽度</text>
+				<view class="row">
+					<nax-number-box
+						v-model="colorVal"
+						bg-color="#e8f5ee"
+						color="#18a058"
+						:button-size="36"
+						:input-width="56"
+					></nax-number-box>
+					<text class="row__text">主题绿 · {{ colorVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义插槽</text>
+				<view class="row">
+					<nax-number-box v-model="slotVal">
+						<template #minus>
+							<text class="slot-text">减</text>
+						</template>
+						<template #plus>
+							<text class="slot-text">加</text>
+						</template>
+					</nax-number-box>
+					<text class="row__text">{{ slotVal }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">事件</text>
+				<view class="row">
+					<nax-number-box
+						v-model="eventVal"
+						:min="0"
+						:max="20"
+						@change="onEventChange"
+						@focus="onEventFocus"
+						@blur="onEventBlur"
+						@plus="onEventPlus"
+						@minus="onEventMinus"
+						@overlimit="onOverlimit"
+					></nax-number-box>
+				</view>
+				<text class="section__meta">{{ eventLog }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basic = ref(1)
+	const basicText = computed((): string => {
+		return '' + basic.value
+	})
+	const lastEvent = ref('—')
+
+	const sizeSm = ref(1)
+	const sizeMd = ref(2)
+	const sizeLg = ref(3)
+
+	const rangeVal = ref(1)
+	const stepVal = ref(0)
+	const overlimitText = ref('—')
+
+	const intVal = ref(3)
+
+	const disabledAll = ref(5)
+	const disabledInputVal = ref(2)
+	const disableBtnVal = ref(4)
+
+	const longPressOn = ref(0)
+	const longPressOff = ref(0)
+
+	const asyncVal = ref(1)
+	const asyncBusy = ref(false)
+	const asyncText = computed((): string => {
+		if (asyncBusy.value) {
+			return '提交中…'
+		}
+		return '值：' + asyncVal.value.toString()
+	})
+
+	const colorVal = ref(1)
+	const slotVal = ref(1)
+
+	const eventVal = ref(0)
+	const eventLog = ref('等待操作')
+
+	function onBasicChange(v : number) {
+		lastEvent.value = 'change: ' + v.toString()
+	}
+
+	function onOverlimit(type : string) {
+		overlimitText.value = 'overlimit: ' + type
+		eventLog.value = 'overlimit: ' + type
+	}
+
+	/**
+	 * 模拟异步：收到 change 后延迟回写 v-model
+	 */
+	function onAsyncChange(v : number) {
+		if (asyncBusy.value) {
+			return
+		}
+		asyncBusy.value = true
+		const target = v
+		setTimeout(() => {
+			asyncVal.value = target
+			asyncBusy.value = false
+		}, 800)
+	}
+
+	function onEventChange(v : number) {
+		eventLog.value = 'change: ' + v.toString()
+	}
+
+	function onEventFocus() {
+		eventLog.value = 'focus'
+	}
+
+	function onEventBlur(v : number) {
+		eventLog.value = 'blur: ' + v.toString()
+	}
+
+	function onEventPlus() {
+		eventLog.value = 'plus'
+	}
+
+	function onEventMinus() {
+		eventLog.value = 'minus'
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.section__meta {
+		margin-top: 10px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		margin-left: 12px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.slot-text {
+		font-size: 13px;
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+	}
+</style>

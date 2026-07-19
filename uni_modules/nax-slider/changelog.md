@@ -1,3 +1,8 @@
+﻿## 0.1.3（2026-07-19）
+
+- 修复 Web 类型告警：click 改用 `UniPointerEvent.clientX`，不再访问 `UniEvent.detail`
+- App（含鸿蒙）click 走条件编译直接返回，选点仍由 touch 路径处理
+
 ## 0.1.2（2026-07-19）
 
 - 修复小数 step 吸附：整数网格计算，避免浮点误差

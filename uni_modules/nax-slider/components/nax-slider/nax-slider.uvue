@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<view class="nax-slider" :class="rootClass" :style="rootStyle">
 		<view v-if="showEdgeValue && edgeValuePosition == 'top'" class="nax-slider__edges nax-slider__edges--top">
 			<text class="nax-slider__edge-text">{{ startLabel }}</text>
@@ -600,10 +600,20 @@
 		}
 	}
 
-	function onClick(e : UniEvent) {
+	/**
+	 * Web / 小程序：点击选点。App 端由 touch 处理，这里直接返回。
+	 * 使用 UniPointerEvent（clientX），避免 UniEvent 无 detail 在 Web 类型检查报错。
+	 */
+	function onClick(e : UniPointerEvent) {
 		if (props.disabled) {
 			return
 		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// App 点选已由 touch 路径处理，避免 click 重复
+		return
+		// #endif
+
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		const now = Date.now()
 		if (now - lastTouchEndAt.value < 350) {
 			return
@@ -611,18 +621,7 @@
 		if (dragStatus.value != 'end') {
 			return
 		}
-		// 仅处理带坐标的 click（小程序 detail.x 等）；纯 touch 路径已处理选点
-		var x = -1.0
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
-		const detail = e.detail
-		if (detail != null) {
-			const anyDetail = detail as UTSJSONObject
-			const dx = anyDetail['x']
-			if (dx != null) {
-				x = dx as number
-			}
-		}
-		// #endif
+		const x = e.clientX
 		if (x < 0) {
 			return
 		}
@@ -633,6 +632,7 @@
 		} else {
 			measureTrack()
 		}
+		// #endif
 	}
 
 	watch((): number => {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
 	<view class="page-root">
 		<scroll-view class="page-scroll" scroll-y="true">
@@ -70,6 +70,10 @@
 				<view class="home__card home__card--gap" @click="goSlider">
 					<text class="home__card-name">滑动选择器</text>
 					<text class="home__card-tag">nax-slider</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goNumberBox">
+					<text class="home__card-name">步进器</text>
+					<text class="home__card-tag">nax-number-box</text>
 				</view>
 				<view class="home__card home__card--gap" @click="goTextarea">
 					<text class="home__card-name">多行输入</text>
@@ -208,6 +212,12 @@
 	function goSlider() {
 		uni.navigateTo({
 			url: '/pages/components/slider/index'
+		})
+	}
+
+	function goNumberBox() {
+		uni.navigateTo({
+			url: '/pages/components/number-box/index'
 		})
 	}
 
