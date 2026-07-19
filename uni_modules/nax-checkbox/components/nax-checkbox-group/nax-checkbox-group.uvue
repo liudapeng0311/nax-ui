@@ -1,0 +1,208 @@
+<template>
+	<view class="nax-checkbox-group" :class="rootClass">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-checkbox-group
+	 * @description 复选框组。管理多个 nax-checkbox 的选中值数组。
+	 * @property {Array} modelValue 选中项 name/value 数组（v-model）
+	 * @property {boolean} disabled 整组禁用
+	 * @property {string} shape square | circle
+	 * @property {string} size sm | md | lg
+	 * @property {string} activeColor 选中色；空则主题 primary
+	 * @property {string} iconSize 勾选图标字号（数字字符串 px）
+	 * @property {string} labelSize 文案字号（数字字符串 px）
+	 * @property {boolean} labelDisabled 为 true 时点击文案不切换
+	 * @property {number} max 最多可选数量；0 不限制
+	 * @property {boolean} wrap 是否每个选项独占一行
+	 * @property {string} width 子项宽度（如 50% / 120px）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 选中数组变化
+	 * @slot default 放置 nax-checkbox
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: Array,
+			default: () => [] as string[]
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		shape: {
+			type: String,
+			default: 'square'
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		activeColor: {
+			type: String,
+			default: ''
+		},
+		iconSize: {
+			type: String,
+			default: ''
+		},
+		labelSize: {
+			type: String,
+			default: ''
+		},
+		labelDisabled: {
+			type: Boolean,
+			default: false
+		},
+		max: {
+			type: Number,
+			default: 0
+		},
+		wrap: {
+			type: Boolean,
+			default: false
+		},
+		width: {
+			type: String,
+			default: ''
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	const selected = ref([] as string[])
+
+	function copyStringArray(raw : any | null) : string[] {
+		const next = [] as string[]
+		if (raw == null) {
+			return next
+		}
+		const list = raw as string[]
+		var i = 0
+		while (i < list.length) {
+			next.push('' + list[i])
+			i++
+		}
+		return next
+	}
+
+	function syncFromProps() {
+		selected.value = copyStringArray(props.modelValue)
+	}
+
+	syncFromProps()
+
+	watch((): any => {
+		return props.modelValue
+	}, (_ : any) => {
+		syncFromProps()
+	})
+
+	/**
+	 * 切换选项
+	 * @return -1 未变更；0 取消选中；1 选中
+	 */
+	function toggleItem(name : string) : number {
+		if (props.disabled) {
+			return -1
+		}
+		if (name.length == 0) {
+			return -1
+		}
+		const prev = selected.value
+		const next = [] as string[]
+		var found = false
+		var i = 0
+		while (i < prev.length) {
+			const item = prev[i]
+			if (item == name) {
+				found = true
+			} else {
+				next.push(item)
+			}
+			i++
+		}
+		if (found) {
+			selected.value = next
+			emit('update:modelValue', next)
+			emit('change', next)
+			return 0
+		}
+		if (props.max > 0 && next.length >= props.max) {
+			return -1
+		}
+		next.push(name)
+		selected.value = next
+		emit('update:modelValue', next)
+		emit('change', next)
+		return 1
+	}
+
+	// 向子 checkbox 注入上下文（字符串 key，避免跨端符号问题）
+	provide('naxCbInGroup', true)
+	provide('naxCbSelected', selected)
+	provide('naxCbToggle', toggleItem)
+	provide('naxCbDisabled', computed((): boolean => {
+		return props.disabled
+	}))
+	provide('naxCbShape', computed((): string => {
+		return props.shape
+	}))
+	provide('naxCbSize', computed((): string => {
+		return props.size
+	}))
+	provide('naxCbActiveColor', computed((): string => {
+		return props.activeColor
+	}))
+	provide('naxCbIconSize', computed((): string => {
+		return props.iconSize
+	}))
+	provide('naxCbLabelSize', computed((): string => {
+		return props.labelSize
+	}))
+	provide('naxCbLabelDisabled', computed((): boolean => {
+		return props.labelDisabled
+	}))
+	provide('naxCbMax', computed((): number => {
+		return props.max
+	}))
+	provide('naxCbWidth', computed((): string => {
+		return props.width
+	}))
+	provide('naxCbWrap', computed((): boolean => {
+		return props.wrap
+	}))
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.wrap) {
+			cls += ' nax-checkbox-group--wrap'
+		} else {
+			cls += ' nax-checkbox-group--row'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+</script>
+
+<style>
+	.nax-checkbox-group--row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.nax-checkbox-group--wrap {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+</style>

@@ -1,0 +1,207 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-checkbox</text>
+			<text class="page__desc">复选框 / 复选框组（对齐 uView Pro Checkbox 主能力）</text>
+
+			<view class="section">
+				<text class="section__title">单独使用</text>
+				<nax-checkbox v-model="alone" label="同意用户协议" @change="onAloneChange"></nax-checkbox>
+				<text class="hint">checked：{{ aloneText }} · {{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">基础组</text>
+				<nax-checkbox-group v-model="basic" @change="onGroupChange">
+					<nax-checkbox name="apple" label="苹果"></nax-checkbox>
+					<nax-checkbox name="banana" label="香蕉"></nax-checkbox>
+					<nax-checkbox name="orange" label="橙子"></nax-checkbox>
+				</nax-checkbox-group>
+				<text class="hint">值：{{ basicText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">形状 shape</text>
+				<nax-checkbox-group v-model="shapeVals" shape="circle">
+					<nax-checkbox name="a" label="圆形"></nax-checkbox>
+					<nax-checkbox name="b" label="多选"></nax-checkbox>
+				</nax-checkbox-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="block">
+					<nax-checkbox-group v-model="sizeSm" size="sm">
+						<nax-checkbox name="s" label="sm"></nax-checkbox>
+					</nax-checkbox-group>
+				</view>
+				<view class="block">
+					<nax-checkbox-group v-model="sizeMd" size="md">
+						<nax-checkbox name="m" label="md"></nax-checkbox>
+					</nax-checkbox-group>
+				</view>
+				<view class="block">
+					<nax-checkbox-group v-model="sizeLg" size="lg">
+						<nax-checkbox name="l" label="lg"></nax-checkbox>
+					</nax-checkbox-group>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 disabled</text>
+				<nax-checkbox-group v-model="disabledVals">
+					<nax-checkbox name="on" label="可选"></nax-checkbox>
+					<nax-checkbox name="off" label="禁用项" disabled></nax-checkbox>
+				</nax-checkbox-group>
+				<view class="block">
+					<nax-checkbox-group v-model="disabledGroup" disabled>
+						<nax-checkbox name="g1" label="整组禁用"></nax-checkbox>
+						<nax-checkbox name="g2" label="不可点"></nax-checkbox>
+					</nax-checkbox-group>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">文案不可点 labelDisabled</text>
+				<nax-checkbox-group v-model="labelLock" label-disabled>
+					<nax-checkbox name="x" label="只能点左侧方框"></nax-checkbox>
+					<nax-checkbox name="y" label="点文字无效"></nax-checkbox>
+				</nax-checkbox-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最多选 2 项 max</text>
+				<nax-checkbox-group v-model="maxVals" :max="2" wrap>
+					<nax-checkbox name="1" label="选项一"></nax-checkbox>
+					<nax-checkbox name="2" label="选项二"></nax-checkbox>
+					<nax-checkbox name="3" label="选项三"></nax-checkbox>
+					<nax-checkbox name="4" label="选项四"></nax-checkbox>
+				</nax-checkbox-group>
+				<text class="hint">值：{{ maxText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义颜色 activeColor</text>
+				<nax-checkbox-group v-model="colorVals" active-color="#2080f0">
+					<nax-checkbox name="c1" label="信息色"></nax-checkbox>
+					<nax-checkbox name="c2" label="多选"></nax-checkbox>
+				</nax-checkbox-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">横向均分 width</text>
+				<nax-checkbox-group v-model="widthVals" width="50%">
+					<nax-checkbox name="w1" label="左侧 50%"></nax-checkbox>
+					<nax-checkbox name="w2" label="右侧 50%"></nax-checkbox>
+					<nax-checkbox name="w3" label="再一行左"></nax-checkbox>
+					<nax-checkbox name="w4" label="再一行右"></nax-checkbox>
+				</nax-checkbox-group>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const alone = ref(true)
+	const aloneText = computed((): string => {
+		if (alone.value) {
+			return 'true'
+		}
+		return 'false'
+	})
+
+	const basic = ref(['apple'] as string[])
+	const basicText = computed((): string => {
+		return basic.value.join(', ')
+	})
+
+	const shapeVals = ref(['a'] as string[])
+	const sizeSm = ref(['s'] as string[])
+	const sizeMd = ref(['m'] as string[])
+	const sizeLg = ref(['l'] as string[])
+	const disabledVals = ref(['on'] as string[])
+	const disabledGroup = ref(['g1'] as string[])
+	const labelLock = ref([] as string[])
+	const maxVals = ref(['1'] as string[])
+	const maxText = computed((): string => {
+		return maxVals.value.join(', ')
+	})
+	const colorVals = ref(['c1'] as string[])
+	const widthVals = ref(['w1', 'w2'] as string[])
+
+	const lastEvent = ref('—')
+
+	function onAloneChange(v : boolean) {
+		if (v) {
+			lastEvent.value = 'change: true'
+		} else {
+			lastEvent.value = 'change: false'
+		}
+	}
+
+	function onGroupChange(v : string[]) {
+		lastEvent.value = 'group: ' + v.join(',')
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 8px;
+	}
+
+	.block {
+		margin-top: 8px;
+	}
+</style>

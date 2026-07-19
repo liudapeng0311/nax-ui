@@ -1,3 +1,6 @@
+## 0.1.9（2026-07-19）
+- 新增内置图标：square / circle / square-check
+
 ## 0.1.8（2026-07-17）
 - 新增内置图标：image / image-off / loader
 
@@ -8,6 +11,7 @@
 ## 0.1.6（2026-07-16）
 
 - 鸿蒙：include-font-padding 仅在 APP-ANDROID 条件编译中声明，消除 uvue-css WARNING
+
 ## 0.1.5（2026-07-15）
 
 - 根节点改为单 `<text>`，去掉 view/text 嵌套，修复字形在方盒内偏移
@@ -23,6 +27,7 @@
 ## 0.1.3（2026-07-15）
 
 - 图标字号方盒 + line-height 对齐，改善按钮内居中
+- Android 关闭 includeFontPadding，减少 TextView 额外留白
 
 ## 0.1.2（2026-07-15）
 

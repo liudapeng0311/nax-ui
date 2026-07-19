@@ -84,7 +84,7 @@ arrow-left, arrow-right, arrow-up, arrow-down
 chevron-left, chevron-right, chevron-up, chevron-down
 search, loading, info, warning, success, error
 user, home, more, edit, delete, star, heart
-settings, eye, eye-off, copy, share, image, image-off, loader
+settings, eye, eye-off, copy, share, image, image-off, loader, square, circle, square-check
 ```
 
 完整映射见：`assets/icons/catalog.json`、`icons/mapping.json`。
@@ -125,7 +125,7 @@ node scripts/build-icons.mjs
 
 ## 说明
 
-- 当前分发字体为 **30 图标子集**（约 10KB），不是完整 Lucide font。
+- 当前分发字体为 **36 图标子集**（约 10KB），不是完整 Lucide font。
 - 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序（禁止本地字体路径）。
 - 组件 API 只暴露语义化 `name`。
 - 图标源： [Lucide](https://lucide.dev/)（ISC License）。

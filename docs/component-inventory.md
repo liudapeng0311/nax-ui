@@ -76,8 +76,8 @@
 | 列选择器 | `nax-select` | P0 | 底部列选择（对齐 uView Pro Select；单列/多列/联动） | `v-model:show` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` / `confirm` `cancel` `change` **done** |
 | 日历 | `nax-calendar` | P1 | 日期/范围选择（对齐 uView Pro Calendar） | `v-model:show` `mode(date/range)` `isPage` `minDate` `maxDate` `defaultDate` `startDate` `endDate` `readonly` `holidays` `workdays` `festivals` `checkinMode` / `change` `open` `close` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换 | `v-model` `disabled` `loading` / `change` |
-| 复选框 | `nax-checkbox` | P0 | 多选 | `v-model` `value` `disabled` |
-| 复选框组 | `nax-checkbox-group` | P0 | 多选组 | `v-model` / `change` |
+| 复选框 | `nax-checkbox` | P0 | 多选（对齐 uView Pro Checkbox） | `v-model` `name`/`value` `label` `shape` `size` `disabled` `labelDisabled` `activeColor` / `change` **done** |
+| 复选框组 | `nax-checkbox-group` | P0 | 多选组 | `v-model` `shape` `size` `max` `wrap` `width` `labelDisabled` `activeColor` / `change` **done** |
 | 单选框 | `nax-radio` | P0 | 单选 | `value` `disabled` |
 | 单选组 | `nax-radio-group` | P0 | 单选组 | `v-model` / `change` |
 | 步进器 | `nax-stepper` | P1 | 数量调节 | `v-model` `min` `max` `step` `disabled` |
@@ -127,6 +127,7 @@
 | `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
 | `nax-picker` | done | 插件包 `uni_modules/nax-picker`；通用弹出容器；position bottom/center/left/right；动画复用 `nax-transition` |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；对齐 uView Pro Calendar；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
+| `nax-checkbox` / `nax-checkbox-group` | done | 插件包 `uni_modules/nax-checkbox`；单独布尔 v-model / 组 string[]；provide-inject |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---
