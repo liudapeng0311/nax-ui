@@ -1,0 +1,301 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-picker</text>
+			<text class="page__desc">通用弹出容器：自定义内容，支持底部 / 中间 / 左侧 / 右侧弹出。</text>
+
+			<view class="section">
+				<text class="section__title">弹出位置 position</text>
+				<view class="row">
+					<nax-button type="primary" label="底部 bottom" @click="openAt('bottom')"></nax-button>
+				</view>
+				<view class="row row--gap">
+					<nax-button label="中间 center" @click="openAt('center')"></nax-button>
+					<view class="gap"></view>
+					<nax-button label="左侧 left" @click="openAt('left')"></nax-button>
+					<view class="gap"></view>
+					<nax-button label="右侧 right" @click="openAt('right')"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">行为</text>
+				<view class="row">
+					<nax-button size="sm" label="禁止点遮罩关闭" @click="openMaskLocked"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="无圆角" @click="openNoRound"></nax-button>
+				</view>
+				<view class="row row--gap">
+					<nax-button size="sm" label="自定义宽高（右侧 60%）" @click="openCustomSize"></nax-button>
+				</view>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
+
+			<!-- 主演示：四向弹出 -->
+			<nax-picker
+				v-model:show="mainShow"
+				:position="mainPosition"
+				@open="onEvent('open')"
+				@opened="onEvent('opened')"
+				@close="onEvent('close')"
+				@click-mask="onEvent('click-mask')"
+			>
+				<view class="panel" :class="'panel--' + mainPosition">
+					<view class="panel__header">
+						<text class="panel__title">{{ positionTitle }}</text>
+						<view class="panel__close" @click="mainShow = false">
+							<text class="panel__close-text">关闭</text>
+						</view>
+					</view>
+					<text class="panel__desc">{{ panelDesc }}</text>
+					<view class="panel__body">
+						<text class="panel__line">position = {{ mainPosition }}</text>
+						<text class="panel__line">动画由 nax-transition 驱动</text>
+					</view>
+					<view class="panel__footer">
+						<nax-button type="primary" label="完成" @click="mainShow = false"></nax-button>
+					</view>
+				</view>
+			</nax-picker>
+
+			<!-- 禁止遮罩关闭 -->
+			<nax-picker
+				v-model:show="lockedShow"
+				position="center"
+				:mask-closable="false"
+				@open="onEvent('open-locked')"
+				@close="onEvent('close-locked')"
+			>
+				<view class="panel panel--center">
+					<text class="panel__title">不可点遮罩关闭</text>
+					<text class="panel__desc">请点击下方按钮关闭</text>
+					<nax-button type="primary" label="知道了" @click="lockedShow = false"></nax-button>
+				</view>
+			</nax-picker>
+
+			<!-- 无圆角 -->
+			<nax-picker
+				v-model:show="noRoundShow"
+				position="bottom"
+				:round="false"
+			>
+				<view class="panel panel--bottom">
+					<text class="panel__title">无圆角底部面板</text>
+					<text class="panel__desc">round = false</text>
+					<nax-button label="关闭" @click="noRoundShow = false"></nax-button>
+				</view>
+			</nax-picker>
+
+			<!-- 自定义宽高 -->
+			<nax-picker
+				v-model:show="sizeShow"
+				position="right"
+				width="60%"
+			>
+				<view class="panel panel--right">
+					<text class="panel__title">宽 60% 侧栏</text>
+					<text class="panel__desc">width = 60%</text>
+					<nax-button type="primary" label="关闭" @click="sizeShow = false"></nax-button>
+				</view>
+			</nax-picker>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const mainShow = ref(false)
+	const mainPosition = ref('bottom')
+	const lockedShow = ref(false)
+	const noRoundShow = ref(false)
+	const sizeShow = ref(false)
+	const lastEvent = ref('无')
+
+	const panelDesc = computed((): string => {
+		const p = mainPosition.value
+		if (p == 'left' || p == 'right') {
+			return '侧边抽屉：贴边全高，可放菜单/筛选等内容。'
+		}
+		if (p == 'center') {
+			return '居中弹层（更宽），插槽内可放任意自定义内容。'
+		}
+		return '插槽内可放任意自定义内容。'
+	})
+
+	const positionTitle = computed((): string => {
+		const p = mainPosition.value
+		if (p == 'center') {
+			return '中间弹出'
+		}
+		if (p == 'left') {
+			return '左侧抽屉'
+		}
+		if (p == 'right') {
+			return '右侧抽屉'
+		}
+		return '底部弹出'
+	})
+
+	function openAt(pos: string) {
+		mainPosition.value = pos
+		mainShow.value = true
+	}
+
+	function openMaskLocked() {
+		lockedShow.value = true
+	}
+
+	function openNoRound() {
+		noRoundShow.value = true
+	}
+
+	function openCustomSize() {
+		sizeShow.value = true
+	}
+
+	function onEvent(name: string) {
+		lastEvent.value = name
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 24px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.row--gap {
+		margin-top: 10px;
+	}
+
+	.gap {
+		width: 8px;
+		height: 1px;
+	}
+
+	.hint {
+		margin-top: 10px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.panel {
+		flex-direction: column;
+		padding: 16px;
+	}
+
+	.panel--bottom {
+		min-height: 180px;
+	}
+
+	.panel--center {
+		min-height: 160px;
+		width: 100%;
+	}
+
+	/* 抽屉内容区：铺满侧栏高度 */
+	.panel--left {
+		flex: 1;
+		height: 100%;
+		width: 100%;
+	}
+
+	.panel--right {
+		flex: 1;
+		height: 100%;
+		width: 100%;
+	}
+
+	.panel__footer {
+		margin-top: auto;
+		flex-direction: column;
+	}
+
+	.panel__header {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	.panel__title {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.panel__close {
+		padding-top: 4px;
+		padding-bottom: 4px;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.panel__close-text {
+		font-size: 13px;
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.panel__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.panel__body {
+		flex-direction: column;
+		margin-bottom: 16px;
+	}
+
+	.panel__line {
+		font-size: 13px;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 4px;
+	}
+</style>

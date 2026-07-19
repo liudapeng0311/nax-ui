@@ -83,6 +83,10 @@
 					<text class="home__card-name">过渡动画</text>
 					<text class="home__card-tag">nax-transition</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goPicker">
+					<text class="home__card-name">弹出容器</text>
+					<text class="home__card-tag">nax-picker</text>
+				</view>
 			</view>
 			</view>
 		</scroll-view>
@@ -194,6 +198,12 @@
 	function goTransition() {
 		uni.navigateTo({
 			url: '/pages/components/transition/index'
+		})
+	}
+
+	function goPicker() {
+		uni.navigateTo({
+			url: '/pages/components/picker/index'
 		})
 	}
 </script>

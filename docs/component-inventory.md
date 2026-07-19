@@ -91,7 +91,7 @@
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
 | 加载 | `nax-loading` | P0 | 局部/页面加载 | `size` `vertical` `text` |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `show` `z-index` / `click` |
-| 弹出层 | `nax-popup` | P0 | 底部/中心/侧滑 | `v-model:open` `position` `round` `close-on-mask` |
+| 弹出层 | `nax-picker` | P0 | 自定义内容弹出；底部/中心/左/右（原规划 nax-popup） | `v-model:show` `position(bottom/center/left/right)` `round` `mask` `maskClosable` `width` `height` / `open` `opened` `close` `click-mask` **done** |
 | 轻提示 | `nax-toast` | P1 | 短反馈（函数式后置） | API 型 |
 | 对话框 | `nax-dialog` | P1 | 确认/告警 | `title` `content` / `confirm` `cancel` |
 | 动作面板 | `nax-action-sheet` | P1 | 底部操作列表 | `actions` / `select` `cancel` |
@@ -125,6 +125,7 @@
 | `nax-select` | done | 插件包 `uni_modules/nax-select`；对齐 uView Pro Select；单列/多列/联动 + showTrigger；弹层动画复用 `nax-transition` |
 | `nax-tag` | done | 插件包 `uni_modules/nax-tag`；对齐 Naive Tag；type/variant/size/closable/checkable/round/bordered |
 | `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
+| `nax-picker` | done | 插件包 `uni_modules/nax-picker`；通用弹出容器；position bottom/center/left/right；动画复用 `nax-transition` |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；对齐 uView Pro Calendar；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
 | 其余 MVP | planned | 按依赖自底向上 |
 

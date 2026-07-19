@@ -19,6 +19,9 @@
 	 * @event before-leave 退场开始
 	 * @event after-leave 退场结束（DOM 已卸载）
 	 * @slot default 需要过渡的内容
+	 *
+	 * 鸿蒙：class + CSS transition 易「先画最终态再回播」。
+	 * 进场三阶段：起始态(无 transition) → 开启 transition → 结束态；动画值走 inline style。
 	 */
 	const props = defineProps({
 		show: {
@@ -56,7 +59,10 @@
 
 	const innerShow = ref(false)
 	const animShow = ref(false)
+	/** 鸿蒙：是否允许 CSS transition（须在起始态落稳后再开） */
+	const hmAnimReady = ref(false)
 	let openTimer: number = -1
+	let readyTimer: number = -1
 	let closeTimer: number = -1
 	let enterDoneTimer: number = -1
 
@@ -95,6 +101,15 @@
 	})
 
 	const rootClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		// 鸿蒙：不用 class 驱动 transform/opacity，避免首帧样式未就绪导致闪动
+		let hmCls = ''
+		if (props.customClass.length > 0) {
+			hmCls = props.customClass
+		}
+		return hmCls
+		// #endif
+		// #ifndef APP-HARMONY
 		let cls = 'nax-transition--' + animName.value
 		// 展开态用独立 class，避免复合选择器在 App 端兼容性差异
 		if (animShow.value) {
@@ -104,18 +119,91 @@
 			cls += ' ' + props.customClass
 		}
 		return cls
+		// #endif
 	})
+
+	/** 各预设的起始 / 结束 inline 样式（鸿蒙） */
+	function hmFromStyle(name: string): string {
+		if (name == 'slide-up') {
+			return 'opacity:0;transform:translateY(100%);'
+		}
+		if (name == 'slide-down') {
+			return 'opacity:0;transform:translateY(-100%);'
+		}
+		if (name == 'slide-left') {
+			return 'opacity:0;transform:translateX(-100%);'
+		}
+		if (name == 'slide-right') {
+			return 'opacity:0;transform:translateX(100%);'
+		}
+		if (name == 'zoom') {
+			return 'opacity:0;transform:scale(0.8);'
+		}
+		if (name == 'fade-up') {
+			return 'opacity:0;transform:translateY(16px);'
+		}
+		// fade
+		return 'opacity:0;'
+	}
+
+	function hmToStyle(name: string): string {
+		if (name == 'fade') {
+			return 'opacity:1;'
+		}
+		// 其余结束态统一
+		if (name == 'zoom') {
+			return 'opacity:1;transform:scale(1);'
+		}
+		if (name == 'fade-up' || name == 'slide-up' || name == 'slide-down') {
+			return 'opacity:1;transform:translateY(0);'
+		}
+		if (name == 'slide-left' || name == 'slide-right') {
+			return 'opacity:1;transform:translateX(0);'
+		}
+		return 'opacity:1;'
+	}
+
+	function hmTransitionProperty(name: string): string {
+		if (name == 'fade') {
+			return 'opacity'
+		}
+		return 'opacity,transform'
+	}
 
 	const rootStyle = computed((): string => {
 		const d = resolveDuration()
 		const tf = props.timingFunction.length > 0 ? props.timingFunction : 'ease-out'
+		// #ifdef APP-HARMONY
+		const name = animName.value
+		let style = ''
+		if (animShow.value) {
+			style += hmToStyle(name)
+		} else {
+			style += hmFromStyle(name)
+		}
+		if (hmAnimReady.value && d > 0) {
+			style += 'transition-property:' + hmTransitionProperty(name) + ';'
+			style += 'transition-duration:' + d.toString() + 'ms;'
+			style += 'transition-timing-function:' + tf + ';'
+		} else {
+			// 强制无过渡：首帧必须稳在起始态，禁止「先显示再缩」
+			style += 'transition-property:none;transition-duration:0ms;'
+		}
+		return style
+		// #endif
+		// #ifndef APP-HARMONY
 		return 'transition-duration:' + d.toString() + 'ms;transition-timing-function:' + tf + ';'
+		// #endif
 	})
 
 	function clearTimers() {
 		if (openTimer >= 0) {
 			clearTimeout(openTimer)
 			openTimer = -1
+		}
+		if (readyTimer >= 0) {
+			clearTimeout(readyTimer)
+			readyTimer = -1
 		}
 		if (closeTimer >= 0) {
 			clearTimeout(closeTimer)
@@ -130,22 +218,46 @@
 	function doEnter(withAnim: boolean) {
 		clearTimers()
 		emit('before-enter')
-		innerShow.value = true
 		const d = resolveDuration()
+
+		// #ifdef APP-HARMONY
+		// 三阶段：落起始态 → 开 transition → 切结束态
+		hmAnimReady.value = false
+		animShow.value = false
+		innerShow.value = true
+		if (!withAnim || d <= 0) {
+			hmAnimReady.value = true
+			animShow.value = true
+			emit('after-enter')
+			return
+		}
+		// 阶段1：等 DOM 以「无 transition + 起始态」绘制
+		openTimer = setTimeout(() => {
+			openTimer = -1
+			// 阶段2：开启 transition，仍保持起始态
+			hmAnimReady.value = true
+			readyTimer = setTimeout(() => {
+				readyTimer = -1
+				// 阶段3：切结束态
+				animShow.value = true
+				enterDoneTimer = setTimeout(() => {
+					enterDoneTimer = -1
+					emit('after-enter')
+				}, d)
+			}, 32)
+		}, 48)
+		// #endif
+
+		// #ifndef APP-HARMONY
+		innerShow.value = true
 		if (!withAnim || d <= 0) {
 			animShow.value = true
 			emit('after-enter')
 			return
 		}
 		// 先落在起始态，再切到展开态，触发 transition
-		// 鸿蒙：过短 delay 时容易与首帧合并，导致看不到进场
 		animShow.value = false
-		// #ifdef APP-HARMONY
-		const frameDelay = 48
-		// #endif
-		// #ifndef APP-HARMONY
 		const frameDelay = 30
-		// #endif
 		openTimer = setTimeout(() => {
 			openTimer = -1
 			animShow.value = true
@@ -154,11 +266,15 @@
 				emit('after-enter')
 			}, d)
 		}, frameDelay)
+		// #endif
 	}
 
 	function doLeave() {
 		if (!innerShow.value) {
 			animShow.value = false
+			// #ifdef APP-HARMONY
+			hmAnimReady.value = false
+			// #endif
 			return
 		}
 		// 已在退场：忽略重复 leave
@@ -171,15 +287,33 @@
 		if (d <= 0) {
 			animShow.value = false
 			innerShow.value = false
+			// #ifdef APP-HARMONY
+			hmAnimReady.value = false
+			// #endif
 			emit('after-leave')
 			return
 		}
+
+		// #ifdef APP-HARMONY
+		// 退场前确保 transition 已开，再切回起始态
+		hmAnimReady.value = true
+		animShow.value = false
+		closeTimer = setTimeout(() => {
+			closeTimer = -1
+			innerShow.value = false
+			hmAnimReady.value = false
+			emit('after-leave')
+		}, d)
+		// #endif
+
+		// #ifndef APP-HARMONY
 		animShow.value = false
 		closeTimer = setTimeout(() => {
 			closeTimer = -1
 			innerShow.value = false
 			emit('after-leave')
 		}, d)
+		// #endif
 	}
 
 	watch((): boolean => {
@@ -206,6 +340,9 @@
 	.nax-transition {
 		flex-direction: column;
 	}
+
+	/* 以下 class 动画仅非鸿蒙使用；鸿蒙走 inline 三阶段 */
+	/* #ifndef APP-HARMONY */
 
 	/* fade */
 	.nax-transition--fade {
@@ -302,4 +439,6 @@
 		opacity: 1;
 		transform: translateY(0);
 	}
+
+	/* #endif */
 </style>

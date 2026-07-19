@@ -1,0 +1,931 @@
+<template>
+	<view v-if="rootMounted" class="nax-picker" :class="rootClass" :style="rootOverlayStyle">
+		<!-- 遮罩：直挂 root（鸿蒙勿包进 opacity 动画层） -->
+		<view
+			v-if="maskEnabled"
+			class="nax-picker__mask"
+			:class="maskClass"
+			:style="maskStyle"
+			@click="onMaskClick"
+		></view>
+
+		<!-- #ifndef APP-HARMONY -->
+		<!-- 非鸿蒙：底部 / 中间走 nax-transition -->
+		<view
+			v-if="!isDrawer"
+			class="nax-picker__panel-layer"
+			:class="panelLayerClass"
+			:style="panelLayerStyle"
+		>
+			<nax-transition
+				:show="panelShow"
+				:name="transitionName"
+				:duration="animDuration"
+				@after-enter="onPanelAfterEnter"
+				@after-leave="onOverlayLeave"
+			>
+				<view
+					class="nax-picker__panel"
+					:class="panelClass"
+					:style="panelStyle"
+					@click.stop="onPanelClick"
+				>
+					<slot></slot>
+				</view>
+			</nax-transition>
+		</view>
+
+		<!-- 非鸿蒙：左右抽屉 -->
+		<view
+			v-if="isDrawer"
+			class="nax-picker__drawer"
+			:class="drawerClass"
+			:style="drawerStyle"
+			@click.stop="onPanelClick"
+		>
+			<view class="nax-picker__panel" :class="panelClass" :style="panelStyle">
+				<slot></slot>
+			</view>
+		</view>
+		<!-- #endif -->
+
+		<!-- #ifdef APP-HARMONY -->
+		<!-- 鸿蒙：自管三阶段动画（先落起始态 → 开 transition → 切结束态），避免 zoom/fade 首帧闪动 -->
+		<view
+			class="nax-picker__hm-layer"
+			:class="hmLayerClass"
+			:style="hmLayerStyle"
+			@click.stop="onPanelClick"
+		>
+			<view class="nax-picker__panel" :class="panelClass" :style="hmPanelStyle">
+				<slot></slot>
+			</view>
+		</view>
+		<!-- #endif -->
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-picker
+	 * @description 通用弹出容器，支持自定义内容；可从底部 / 中间 / 左侧 / 右侧弹出。
+	 * @property {boolean} show v-model:show 控制显隐
+	 * @property {string} position bottom | center | left | right，默认 bottom
+	 * @property {boolean} round 圆角面板，默认 true
+	 * @property {boolean} mask 是否显示遮罩，默认 true
+	 * @property {boolean} maskClosable 点击遮罩是否关闭，默认 true
+	 * @property {boolean} closeOnMask 同 maskClosable（兼容命名）
+	 * @property {boolean} closeOnClickOverlay 同 maskClosable（兼容命名）
+	 * @property {number} zIndex 层级，默认 10070
+	 * @property {number} duration 动画时长 ms，默认 280
+	 * @property {string} width 面板宽度（center 默认约 86% 屏宽；left/right 抽屉默认约 78%）
+	 * @property {string} height 面板高度（left/right 抽屉默认全屏高；bottom/center 可选）
+	 * @property {boolean} safeAreaInsetBottom 底部安全区（position=bottom 时默认 true）
+	 * @property {string} customClass 根节点扩展 class
+	 * @property {string} customStyle 根节点扩展 style
+	 * @event update:show 显隐变更
+	 * @event open 打开（进场开始）
+	 * @event opened 打开完成（进场结束）
+	 * @event close 关闭完成（退场结束且容器卸载）
+	 * @event click-mask 点击遮罩
+	 * @slot default 自定义面板内容
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		position: {
+			type: String,
+			default: 'bottom'
+		},
+		round: {
+			type: Boolean,
+			default: true
+		},
+		mask: {
+			type: Boolean,
+			default: true
+		},
+		maskClosable: {
+			type: Boolean,
+			default: true
+		},
+		closeOnMask: {
+			type: Boolean,
+			default: true
+		},
+		closeOnClickOverlay: {
+			type: Boolean,
+			default: true
+		},
+		zIndex: {
+			type: Number,
+			default: 10070
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		width: {
+			type: String,
+			default: ''
+		},
+		height: {
+			type: String,
+			default: ''
+		},
+		safeAreaInsetBottom: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		},
+		customStyle: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'open',
+		'opened',
+		'close',
+		'click-mask'
+	])
+
+	const rootMounted = ref(false)
+	/** 面板是否处于「展开结束态」 */
+	const panelShow = ref(false)
+	/** 鸿蒙：是否已启用 transition（必须先 false 落起始态，再 true） */
+	const hmAnimReady = ref(false)
+	/** 鸿蒙：遮罩是否显示（与面板展开同步，瞬时切换不走 opacity 动画） */
+	const hmMaskOn = ref(false)
+
+	const safeBottomPx = ref(0)
+	const windowW = ref(0)
+	const windowH = ref(0)
+	const ANIM_DEFAULT = 280
+	let openDelayTimer: number = -1
+	let leaveTimer: number = -1
+	let enterReadyTimer: number = -1
+	let enterToTimer: number = -1
+	let openedTimer: number = -1
+
+	function normalizePosition(value: string): string {
+		if (value == 'center' || value == 'middle') {
+			return 'center'
+		}
+		if (value == 'left') {
+			return 'left'
+		}
+		if (value == 'right') {
+			return 'right'
+		}
+		return 'bottom'
+	}
+
+	function resolveDuration(): number {
+		const d = props.duration
+		if (d < 0) {
+			return ANIM_DEFAULT
+		}
+		return d
+	}
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		var i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function sizeToCss(value: string, fallback: string): string {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (isDigits(value)) {
+			return value + 'px'
+		}
+		return value
+	}
+
+	function refreshWindowSize() {
+		const info = uni.getWindowInfo()
+		let w = info.windowWidth
+		let h = info.windowHeight
+		if (h <= 0) {
+			h = info.screenHeight
+		}
+		if (w <= 0) {
+			w = info.screenWidth
+		}
+		windowW.value = w
+		windowH.value = h
+	}
+
+	function defaultLayerWidthCss(pos: string): string {
+		const w = windowW.value
+		if (pos == 'center') {
+			if (w > 0) {
+				return Math.floor(w * 0.86).toString() + 'px'
+			}
+			return '86%'
+		}
+		if (w > 0) {
+			return Math.floor(w * 0.78).toString() + 'px'
+		}
+		return '78%'
+	}
+
+	const positionName = computed((): string => {
+		return normalizePosition(props.position)
+	})
+
+	const isDrawer = computed((): boolean => {
+		const pos = positionName.value
+		return pos == 'left' || pos == 'right'
+	})
+
+	const animDuration = computed((): number => {
+		return resolveDuration()
+	})
+
+	const maskEnabled = computed((): boolean => {
+		return props.mask
+	})
+
+	const canCloseByMask = computed((): boolean => {
+		return props.maskClosable && props.closeOnMask && props.closeOnClickOverlay
+	})
+
+	const transitionName = computed((): string => {
+		const pos = positionName.value
+		if (pos == 'center') {
+			return 'zoom'
+		}
+		return 'slide-up'
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-picker--' + positionName.value
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootOverlayStyle = computed((): string => {
+		let style = 'z-index:' + props.zIndex.toString() + ';'
+		if (props.customStyle.length > 0) {
+			style += props.customStyle
+		}
+		return style
+	})
+
+	const maskClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (hmMaskOn.value) {
+			return 'nax-picker__mask--show'
+		}
+		return ''
+		// #endif
+		// #ifndef APP-HARMONY
+		if (panelShow.value) {
+			return 'nax-picker__mask--show'
+		}
+		return ''
+		// #endif
+	})
+
+	const maskStyle = computed((): string => {
+		const d = resolveDuration()
+		// #ifdef APP-HARMONY
+		// 鸿蒙：透明度写进 background，禁止 opacity 过渡（避免闪黑 / 后层慢消）
+		if (hmMaskOn.value) {
+			return 'background-color:rgba(0,0,0,0.45);opacity:1;transition-duration:0ms;transition-property:none;'
+		}
+		return 'background-color:rgba(0,0,0,0);opacity:1;transition-duration:0ms;transition-property:none;'
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'transition-duration:' + d.toString() + 'ms;'
+		// #endif
+	})
+
+	const panelLayerClass = computed((): string => {
+		return 'nax-picker__panel-layer--' + positionName.value
+	})
+
+	const panelLayerStyle = computed((): string => {
+		const pos = positionName.value
+		if (pos == 'center') {
+			const w = props.width.length > 0 ? sizeToCss(props.width, '') : defaultLayerWidthCss('center')
+			return 'width:' + w + ';'
+		}
+		return 'width:100%;'
+	})
+
+	const drawerStyle = computed((): string => {
+		const pos = positionName.value
+		const w = props.width.length > 0 ? sizeToCss(props.width, '') : defaultLayerWidthCss(pos)
+		const d = resolveDuration()
+		let style = 'width:' + w + ';'
+		style += 'transition-duration:' + d.toString() + 'ms;'
+		if (props.height.length > 0) {
+			style += 'height:' + sizeToCss(props.height, '') + ';'
+			style += 'top:0;bottom:auto;'
+		}
+		return style
+	})
+
+	const drawerClass = computed((): string => {
+		const pos = positionName.value
+		let cls = 'nax-picker__drawer--' + pos
+		if (props.round) {
+			cls += ' nax-picker__drawer--round-' + pos
+		}
+		if (panelShow.value) {
+			cls += ' nax-picker__drawer--show'
+		}
+		return cls
+	})
+
+	const panelClass = computed((): string => {
+		const pos = positionName.value
+		let cls = 'nax-picker__panel--' + pos
+		if (props.round) {
+			cls += ' nax-picker__panel--round-' + pos
+		}
+		if (pos == 'bottom' && props.safeAreaInsetBottom) {
+			cls += ' nax-picker__panel--safe'
+		}
+		return cls
+	})
+
+	const panelStyle = computed((): string => {
+		const pos = positionName.value
+		let style = ''
+		if (pos == 'left' || pos == 'right') {
+			style += 'width:100%;height:100%;flex:1;'
+		} else if (pos == 'center') {
+			style += 'width:100%;'
+			if (props.height.length > 0) {
+				style += 'height:' + sizeToCss(props.height, '') + ';'
+			}
+		} else {
+			style += 'width:100%;'
+			if (props.height.length > 0) {
+				style += 'height:' + sizeToCss(props.height, '') + ';'
+			}
+			if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+				style += 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+			}
+		}
+		return style
+	})
+
+	// ---------- 鸿蒙自管层 ----------
+	const hmLayerClass = computed((): string => {
+		const pos = positionName.value
+		let cls = 'nax-picker__hm-layer--' + pos
+		if (props.round && (pos == 'left' || pos == 'right')) {
+			cls += ' nax-picker__hm-layer--round-' + pos
+		}
+		return cls
+	})
+
+	/**
+	 * 鸿蒙：尺寸 + 动画都写在层上（整层位移/缩放，避免抽屉白底不跟手）
+	 * panelShow=false → 起始态；true → 结束态
+	 * hmAnimReady=false → 关闭 transition，保证首帧就在起始态（解决先显示再缩）
+	 */
+	const hmLayerStyle = computed((): string => {
+		const pos = positionName.value
+		const d = resolveDuration()
+		let style = ''
+
+		if (pos == 'center') {
+			const w = props.width.length > 0 ? sizeToCss(props.width, '') : defaultLayerWidthCss('center')
+			style += 'width:' + w + ';'
+		} else if (pos == 'left' || pos == 'right') {
+			const w = props.width.length > 0 ? sizeToCss(props.width, '') : defaultLayerWidthCss(pos)
+			style += 'width:' + w + ';'
+			if (props.height.length > 0) {
+				style += 'height:' + sizeToCss(props.height, '') + ';'
+			}
+		} else {
+			style += 'width:100%;'
+		}
+
+		// 变换态写在层上
+		if (pos == 'center') {
+			if (panelShow.value) {
+				style += 'opacity:1;transform:scale(1);'
+			} else {
+				style += 'opacity:0;transform:scale(0.92);'
+			}
+		} else if (pos == 'bottom') {
+			if (panelShow.value) {
+				style += 'opacity:1;transform:translateY(0);'
+			} else {
+				style += 'opacity:1;transform:translateY(100%);'
+			}
+		} else if (pos == 'left') {
+			if (panelShow.value) {
+				style += 'opacity:1;transform:translateX(0);'
+			} else {
+				style += 'opacity:1;transform:translateX(-100%);'
+			}
+		} else {
+			if (panelShow.value) {
+				style += 'opacity:1;transform:translateX(0);'
+			} else {
+				style += 'opacity:1;transform:translateX(100%);'
+			}
+		}
+
+		if (hmAnimReady.value && d > 0) {
+			style += 'transition-property:opacity,transform;transition-duration:' + d.toString() + 'ms;transition-timing-function:ease-out;'
+		} else {
+			style += 'transition-property:none;transition-duration:0ms;'
+		}
+		return style
+	})
+
+	/** 鸿蒙面板只负责内容尺寸，不做 transform */
+	const hmPanelStyle = computed((): string => {
+		return panelStyle.value
+	})
+
+	function refreshSafeArea() {
+		if (positionName.value != 'bottom' || !props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function clearAnimTimers() {
+		if (leaveTimer >= 0) {
+			clearTimeout(leaveTimer)
+			leaveTimer = -1
+		}
+		if (enterReadyTimer >= 0) {
+			clearTimeout(enterReadyTimer)
+			enterReadyTimer = -1
+		}
+		if (enterToTimer >= 0) {
+			clearTimeout(enterToTimer)
+			enterToTimer = -1
+		}
+		if (openedTimer >= 0) {
+			clearTimeout(openedTimer)
+			openedTimer = -1
+		}
+	}
+
+	function resetHarmonyAnimState() {
+		hmAnimReady.value = false
+		hmMaskOn.value = false
+		panelShow.value = false
+	}
+
+	function openPicker() {
+		// 已完全展开：只同步 v-model
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		// 已在进场排队：勿二次 open
+		if (openDelayTimer >= 0 || enterReadyTimer >= 0 || enterToTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
+		clearAnimTimers()
+		refreshWindowSize()
+		refreshSafeArea()
+
+		// #ifdef APP-HARMONY
+		// 鸿蒙三阶段：挂载起始态(无 transition) → 开 transition → 切结束态
+		resetHarmonyAnimState()
+		rootMounted.value = true
+		// 遮罩与面板同帧准备：先挂透明遮罩层，下一步再点亮，避免「后层慢消」
+		hmMaskOn.value = false
+		panelShow.value = false
+		hmAnimReady.value = false
+
+		// 阶段1：等 DOM 落起始态
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			// 点亮遮罩（瞬时，无动画）
+			hmMaskOn.value = true
+			// 阶段2：开启 transition，仍保持起始态
+			enterReadyTimer = setTimeout(() => {
+				enterReadyTimer = -1
+				hmAnimReady.value = true
+				// 阶段3：切到结束态，触发进场
+				enterToTimer = setTimeout(() => {
+					enterToTimer = -1
+					panelShow.value = true
+					const d = resolveDuration()
+					openedTimer = setTimeout(() => {
+						openedTimer = -1
+						emit('opened')
+					}, d)
+				}, 32)
+			}, 48)
+		}, 32)
+		// #endif
+
+		// #ifndef APP-HARMONY
+		rootMounted.value = true
+		panelShow.value = false
+		const openDelay = 30
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+			if (isDrawer.value) {
+				const d = resolveDuration()
+				openedTimer = setTimeout(() => {
+					openedTimer = -1
+					emit('opened')
+				}, d)
+			}
+		}, openDelay)
+		// #endif
+
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function closePicker(emitUpdate: boolean) {
+		if (!rootMounted.value) {
+			panelShow.value = false
+			// #ifdef APP-HARMONY
+			hmMaskOn.value = false
+			hmAnimReady.value = false
+			// #endif
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		// 已在收起：只同步 v-model
+		if (!panelShow.value) {
+			// #ifdef APP-HARMONY
+			// 可能还在进场前：直接卸
+			clearOpenDelayTimer()
+			clearAnimTimers()
+			hmMaskOn.value = false
+			hmAnimReady.value = false
+			rootMounted.value = false
+			// #endif
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		clearOpenDelayTimer()
+		clearAnimTimers()
+
+		// #ifdef APP-HARMONY
+		// 退场：保持 transition，切回起始态；遮罩瞬时灭
+		hmAnimReady.value = true
+		panelShow.value = false
+		hmMaskOn.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+		const d = resolveDuration()
+		if (d <= 0) {
+			resetHarmonyAnimState()
+			rootMounted.value = false
+			emit('close')
+			return
+		}
+		leaveTimer = setTimeout(() => {
+			leaveTimer = -1
+			if (!panelShow.value) {
+				resetHarmonyAnimState()
+				rootMounted.value = false
+				emit('close')
+			}
+		}, d)
+		// #endif
+
+		// #ifndef APP-HARMONY
+		panelShow.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+		// 抽屉：自行等待退场
+		if (isDrawer.value) {
+			const d2 = resolveDuration()
+			if (d2 <= 0) {
+				rootMounted.value = false
+				emit('close')
+				return
+			}
+			leaveTimer = setTimeout(() => {
+				leaveTimer = -1
+				if (!panelShow.value) {
+					rootMounted.value = false
+					emit('close')
+				}
+			}, d2)
+		}
+		// #endif
+	}
+
+	function onPanelAfterEnter() {
+		emit('opened')
+	}
+
+	/** 非鸿蒙底部/中间：transition after-leave 后再卸 */
+	function onOverlayLeave() {
+		if (panelShow.value) {
+			return
+		}
+		if (isDrawer.value) {
+			return
+		}
+		rootMounted.value = false
+		emit('close')
+	}
+
+	function onMaskClick() {
+		emit('click-mask')
+		if (!canCloseByMask.value) {
+			return
+		}
+		closePicker(true)
+	}
+
+	function onPanelClick() {
+		// 阻止冒泡到遮罩
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val) {
+			if (rootMounted.value && panelShow.value) {
+				return
+			}
+			openPicker()
+		} else {
+			closePicker(false)
+		}
+	})
+
+	if (props.show) {
+		openPicker()
+	}
+</script>
+
+<style>
+	.nax-picker {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+	}
+
+	.nax-picker--bottom {
+		justify-content: flex-end;
+		align-items: stretch;
+	}
+
+	.nax-picker--center {
+		justify-content: center;
+		align-items: center;
+	}
+
+	.nax-picker--left {
+		flex-direction: column;
+	}
+
+	.nax-picker--right {
+		flex-direction: column;
+	}
+
+	.nax-picker__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		/* #ifndef APP-HARMONY */
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		background-color: rgba(0, 0, 0, 0);
+		opacity: 1;
+		transition-property: none;
+		transition-duration: 0ms;
+		/* #endif */
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-picker__mask--show {
+		opacity: 1;
+	}
+	/* #endif */
+
+	.nax-picker__panel-layer {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-picker__panel-layer--bottom {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-picker__panel-layer--center {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	/* 非鸿蒙抽屉 */
+	.nax-picker__drawer {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		height: 100%;
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		opacity: 0;
+		transition-property: transform, opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-picker__drawer--left {
+		left: 0;
+		top: 0;
+		bottom: 0;
+		transform: translateX(-100%);
+	}
+
+	.nax-picker__drawer--right {
+		right: 0;
+		top: 0;
+		bottom: 0;
+		transform: translateX(100%);
+	}
+
+	.nax-picker__drawer--show {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	.nax-picker__drawer--round-left {
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		border-bottom-right-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-picker__drawer--round-right {
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-bottom-left-radius: var(--nax-radius-xl, 12px);
+	}
+
+	/* 鸿蒙统一层 */
+	.nax-picker__hm-layer {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-picker__hm-layer--bottom {
+		width: 100%;
+		flex-direction: column;
+	}
+
+	.nax-picker__hm-layer--center {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.nax-picker__hm-layer--left {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		height: 100%;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-picker__hm-layer--right {
+		position: absolute;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		height: 100%;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-picker__hm-layer--round-left {
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		border-bottom-right-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-picker__hm-layer--round-right {
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-bottom-left-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-picker__panel {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-picker__panel--bottom {
+		width: 100%;
+	}
+
+	.nax-picker__panel--center {
+		width: 100%;
+	}
+
+	.nax-picker__panel--left {
+		width: 100%;
+		height: 100%;
+		flex: 1;
+		background-color: transparent;
+	}
+
+	.nax-picker__panel--right {
+		width: 100%;
+		height: 100%;
+		flex: 1;
+		background-color: transparent;
+	}
+
+	.nax-picker__panel--round-bottom {
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-picker__panel--round-center {
+		border-top-left-radius: var(--nax-radius-lg, 8px);
+		border-top-right-radius: var(--nax-radius-lg, 8px);
+		border-bottom-left-radius: var(--nax-radius-lg, 8px);
+		border-bottom-right-radius: var(--nax-radius-lg, 8px);
+	}
+
+	.nax-picker__panel--round-left {
+	}
+
+	.nax-picker__panel--round-right {
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-picker__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+</style>
