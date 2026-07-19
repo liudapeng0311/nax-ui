@@ -59,6 +59,10 @@
 					<text class="home__card-name">复选框</text>
 					<text class="home__card-tag">nax-checkbox</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goRadio">
+					<text class="home__card-name">单选框</text>
+					<text class="home__card-tag">nax-radio</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goTextarea">
 					<text class="home__card-name">多行输入</text>
 					<text class="home__card-tag">nax-textarea</text>
@@ -178,6 +182,12 @@
 	function goCheckbox() {
 		uni.navigateTo({
 			url: '/pages/components/checkbox/index'
+		})
+	}
+
+	function goRadio() {
+		uni.navigateTo({
+			url: '/pages/components/radio/index'
 		})
 	}
 

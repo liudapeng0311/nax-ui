@@ -1,0 +1,166 @@
+<template>
+	<view class="nax-radio-group" :class="rootClass">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-radio-group
+	 * @description 单选框组。管理多个 nax-radio 的唯一选中值。
+	 * @property {string} modelValue 当前选中项 name/value（v-model）
+	 * @property {boolean} disabled 整组禁用
+	 * @property {string} shape circle | square（默认 circle）
+	 * @property {string} size sm | md | lg
+	 * @property {string} activeColor 选中色；空则主题 primary
+	 * @property {string} iconSize 勾选图标字号（数字字符串 px）
+	 * @property {string} labelSize 文案字号（数字字符串 px）
+	 * @property {boolean} labelDisabled 为 true 时点击文案不切换
+	 * @property {boolean} wrap 是否每个选项独占一行
+	 * @property {string} width 子项宽度（如 50% / 120px）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 选中值变化（string）
+	 * @slot default 放置 nax-radio
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: String,
+			default: ''
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		shape: {
+			type: String,
+			default: 'circle'
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		activeColor: {
+			type: String,
+			default: ''
+		},
+		iconSize: {
+			type: String,
+			default: ''
+		},
+		labelSize: {
+			type: String,
+			default: ''
+		},
+		labelDisabled: {
+			type: Boolean,
+			default: false
+		},
+		wrap: {
+			type: Boolean,
+			default: false
+		},
+		width: {
+			type: String,
+			default: ''
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	const selected = ref('')
+
+	function syncFromProps() {
+		selected.value = props.modelValue
+	}
+
+	syncFromProps()
+
+	watch((): string => {
+		return props.modelValue
+	}, (_ : string) => {
+		syncFromProps()
+	})
+
+	/**
+	 * 选中某项
+	 * @return 是否发生变更
+	 */
+	function selectItem(name : string) : boolean {
+		if (props.disabled) {
+			return false
+		}
+		if (name.length == 0) {
+			return false
+		}
+		if (selected.value == name) {
+			return false
+		}
+		selected.value = name
+		emit('update:modelValue', name)
+		emit('change', name)
+		return true
+	}
+
+	// 向子 radio 注入上下文（字符串 key，避免跨端符号问题）
+	provide('naxRdInGroup', true)
+	provide('naxRdSelected', selected)
+	provide('naxRdSelect', selectItem)
+	provide('naxRdDisabled', computed((): boolean => {
+		return props.disabled
+	}))
+	provide('naxRdShape', computed((): string => {
+		return props.shape
+	}))
+	provide('naxRdSize', computed((): string => {
+		return props.size
+	}))
+	provide('naxRdActiveColor', computed((): string => {
+		return props.activeColor
+	}))
+	provide('naxRdIconSize', computed((): string => {
+		return props.iconSize
+	}))
+	provide('naxRdLabelSize', computed((): string => {
+		return props.labelSize
+	}))
+	provide('naxRdLabelDisabled', computed((): boolean => {
+		return props.labelDisabled
+	}))
+	provide('naxRdWidth', computed((): string => {
+		return props.width
+	}))
+	provide('naxRdWrap', computed((): boolean => {
+		return props.wrap
+	}))
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.wrap) {
+			cls += ' nax-radio-group--wrap'
+		} else {
+			cls += ' nax-radio-group--row'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+</script>
+
+<style>
+	.nax-radio-group--row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.nax-radio-group--wrap {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+</style>
