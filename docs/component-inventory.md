@@ -74,6 +74,7 @@
 | 输入框 | `nax-input` | P0 | 单行输入（对齐 uView Pro Input 主能力；不含 select/textarea） | `v-model` `type(text/password/number/digit/tel/…；不含 idcard/select/textarea)` `placeholder` `clearable` `disabled` `readonly` `maxlength` `border` `inputAlign` `passwordIcon` `size` `prefixIcon` `suffixIcon` / `input` `change` `focus` `blur` `confirm` `clear` `click` **done** |
 | 多行输入 | `nax-textarea` | P1 | 多行文本（对齐 uView Pro Textarea 主能力；不含 formatter） | `v-model` `placeholder` `height` `auto-height` `maxlength` `count` `disabled` `readonly` `border` `borderType` `confirmType` `focus` / `input` `change` `focus` `blur` `confirm` `linechange` `keyboardheightchange` `click` **done** |
 | 列选择器 | `nax-select` | P0 | 底部列选择（对齐 uView Pro Select；单列/多列/联动） | `v-model:show` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` / `confirm` `cancel` `change` **done** |
+| 日历 | `nax-calendar` | P1 | 日期/范围选择（对齐 uView Pro Calendar） | `v-model:show` `mode(date/range)` `isPage` `minDate` `maxDate` `defaultDate` `startDate` `endDate` `readonly` `holidays` `workdays` `festivals` `checkinMode` / `change` `open` `close` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换 | `v-model` `disabled` `loading` / `change` |
 | 复选框 | `nax-checkbox` | P0 | 多选 | `v-model` `value` `disabled` |
 | 复选框组 | `nax-checkbox-group` | P0 | 多选组 | `v-model` / `change` |
@@ -124,6 +125,7 @@
 | `nax-select` | done | 插件包 `uni_modules/nax-select`；对齐 uView Pro Select；单列/多列/联动 + showTrigger；弹层动画复用 `nax-transition` |
 | `nax-tag` | done | 插件包 `uni_modules/nax-tag`；对齐 Naive Tag；type/variant/size/closable/checkable/round/bordered |
 | `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
+| `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；对齐 uView Pro Calendar；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

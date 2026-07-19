@@ -1,0 +1,331 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-calendar</text>
+			<text class="page__desc">日历选择器（对齐 uView Pro Calendar：单选 / 范围 / 页面模式 / 节假日 / 打卡）</text>
+
+			<view class="section">
+				<text class="section__title">单选（弹层）</text>
+				<nax-button type="primary" label="选择日期" @click="openDate"></nax-button>
+				<text class="hint">结果：{{ dateText }}</text>
+				<nax-calendar
+					v-model:show="dateShow"
+					mode="date"
+					tool-tip="选择日期"
+					@change="onDateChange"
+					@close="onClose('date')"
+				></nax-calendar>
+			</view>
+
+			<view class="section">
+				<text class="section__title">范围选择</text>
+				<nax-button label="选择区间" @click="openRange"></nax-button>
+				<text class="hint">结果：{{ rangeText }}</text>
+				<nax-calendar
+					v-model:show="rangeShow"
+					mode="range"
+					tool-tip="选择日期区间"
+					:start-date="rangeStartDefault"
+					:end-date="rangeEndDefault"
+					@change="onRangeChange"
+				></nax-calendar>
+			</view>
+
+			<view class="section">
+				<text class="section__title">默认选中 default-date</text>
+				<text class="hint">预设 {{ customDefault }}（10 天前）。打开后该日应已高亮，底部直接显示，无需再点格子。</text>
+				<nax-button size="sm" label="打开看默认选中" @click="customShow = true"></nax-button>
+				<text class="hint">确认结果：{{ customText }}</text>
+				<nax-calendar
+					v-model:show="customShow"
+					:default-date="customDefault"
+					confirm-text="完成"
+					tool-tip="默认已选中"
+					@change="onCustomChange"
+				></nax-calendar>
+			</view>
+
+			<view class="section">
+				<text class="section__title">只读</text>
+				<nax-button size="sm" label="打开只读" @click="readonlyShow = true"></nax-button>
+				<nax-calendar
+					v-model:show="readonlyShow"
+					readonly
+					:default-date="customDefault"
+					tool-tip="只读预览"
+				></nax-calendar>
+			</view>
+
+			<view class="section">
+				<text class="section__title">节假日 / 加班 / 节日</text>
+				<nax-button size="sm" label="打开" @click="holidayShow = true"></nax-button>
+				<text class="hint">结果：{{ holidayText }}</text>
+				<nax-calendar
+					v-model:show="holidayShow"
+					:holidays="holidayList"
+					:workdays="workdayList"
+					:festivals="festivalMap"
+					show-festival
+					:max-date="holidayMaxDate"
+					@change="onHolidayChange"
+				></nax-calendar>
+			</view>
+
+			<view class="section">
+				<text class="section__title">打卡签到</text>
+				<text class="hint">点任意可选日期会加入已打卡列表并显示对号；已打卡再点可取消（演示逻辑）。</text>
+				<nax-button size="sm" type="warning" label="打开打卡日历" @click="checkinShow = true"></nax-button>
+				<text class="hint">最近操作：{{ checkinText }}</text>
+				<text class="hint">已打卡 {{ checkedList.length }} 天</text>
+				<nax-calendar
+					v-model:show="checkinShow"
+					checkin-mode
+					:checked-dates="checkedList"
+					:today-checked="todayChecked"
+					:max-date="holidayMaxDate"
+					@change="onCheckinChange"
+				></nax-calendar>
+			</view>
+
+			<view class="section">
+				<text class="section__title">页面内联模式 is-page</text>
+				<view class="page-calendar">
+					<nax-calendar
+						is-page
+						mode="date"
+						:default-date="pageDefault"
+						:max-date="holidayMaxDate"
+						@change="onPageChange"
+					></nax-calendar>
+				</view>
+				<text class="hint">结果：{{ pageText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最近事件</text>
+				<text class="hint">{{ lastEvent }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function pad2(n: number): string {
+		if (n < 10) {
+			return '0' + n.toString()
+		}
+		return n.toString()
+	}
+
+	function formatYmd(d: Date): string {
+		return d.getFullYear().toString() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+	}
+
+	const now = new Date()
+	const todayStr = formatYmd(now)
+	// 演示：允许选到今年年底
+	const holidayMaxDate = now.getFullYear().toString() + '-12-31'
+
+	const lastEvent = ref('无')
+	const dateShow = ref(false)
+	const dateText = ref('未选择')
+	const rangeShow = ref(false)
+	const rangeText = ref('未选择')
+	const rangeStartDefault = ''
+	const rangeEndDefault = ''
+
+	const customShow = ref(false)
+	const customText = ref('未确认')
+	// 用「10 天前」而不是今天，和「单选默认圈今天」形成对比，默认高亮更明显
+	const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000)
+	const customDefault = formatYmd(tenDaysAgo)
+
+	const readonlyShow = ref(false)
+
+	const holidayShow = ref(false)
+	const holidayText = ref('未选择')
+	const y = now.getFullYear()
+	const m = pad2(now.getMonth() + 1)
+	const holidayList = [
+		y.toString() + '-' + m + '-01',
+		y.toString() + '-' + m + '-02'
+	] as string[]
+	const workdayList = [
+		y.toString() + '-' + m + '-06'
+	] as string[]
+	const festivalMap = {
+		'2026-01-01': '元旦'
+	} as UTSJSONObject
+
+	const checkinShow = ref(false)
+	const checkinText = ref('未操作')
+	// 必须用 ref，change 后整表替换才能驱动日历重绘
+	const checkedList = ref([
+		y.toString() + '-' + m + '-01',
+		y.toString() + '-' + m + '-03'
+	] as string[])
+	const todayChecked = ref(false)
+
+	const pageDefault = todayStr
+	const pageText = ref('未选择')
+
+	function openDate() {
+		dateShow.value = true
+	}
+
+	function openRange() {
+		rangeShow.value = true
+	}
+
+	function onDateChange(e: UTSJSONObject) {
+		const result = e.getString('result')
+		const week = e.getString('week')
+		dateText.value = (result != null ? result : '') + ' ' + (week != null ? week : '')
+		lastEvent.value = 'date change: ' + dateText.value
+	}
+
+	function onRangeChange(e: UTSJSONObject) {
+		const s = e.getString('startDate')
+		const end = e.getString('endDate')
+		rangeText.value = (s != null ? s : '') + ' ~ ' + (end != null ? end : '')
+		lastEvent.value = 'range change: ' + rangeText.value
+	}
+
+	function onCustomChange(e: UTSJSONObject) {
+		const result = e.getString('result')
+		customText.value = result != null ? result : ''
+		lastEvent.value = 'custom change: ' + customText.value
+	}
+
+	function onHolidayChange(e: UTSJSONObject) {
+		const result = e.getString('result')
+		holidayText.value = result != null ? result : ''
+		lastEvent.value = 'holiday change: ' + holidayText.value
+	}
+
+	function listHasDate(list: string[], date: string): boolean {
+		let i = 0
+		while (i < list.length) {
+			if (list[i] == date) {
+				return true
+			}
+			i++
+		}
+		return false
+	}
+
+	function onCheckinChange(e: UTSJSONObject) {
+		const result = e.getString('result')
+		if (result == null || result.length == 0) {
+			return
+		}
+		const date = result as string
+		const prev = checkedList.value
+		const next = [] as string[]
+		// 已打卡再点：取消；否则加入
+		if (listHasDate(prev, date)) {
+			let i = 0
+			while (i < prev.length) {
+				if (prev[i] != date) {
+					next.push(prev[i])
+				}
+				i++
+			}
+			checkinText.value = '取消打卡 ' + date
+		} else {
+			let i = 0
+			while (i < prev.length) {
+				next.push(prev[i])
+				i++
+			}
+			next.push(date)
+			checkinText.value = '打卡成功 ' + date
+		}
+		checkedList.value = next
+		// 今天是否在列表中（优先于 todayChecked 自动判断，这里同步演示状态）
+		todayChecked.value = listHasDate(next, todayStr)
+		lastEvent.value = 'checkin: ' + checkinText.value
+	}
+
+	function onPageChange(e: UTSJSONObject) {
+		const result = e.getString('result')
+		pageText.value = result != null ? result : ''
+		lastEvent.value = 'page change: ' + pageText.value
+	}
+
+	function onClose(name: string) {
+		lastEvent.value = name + ' close'
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		padding-bottom: 40px;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 16px;
+		padding: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.page-calendar {
+		flex-direction: column;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		border-radius: var(--nax-radius-md, 3px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+</style>

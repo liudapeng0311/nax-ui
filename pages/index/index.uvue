@@ -63,6 +63,10 @@
 					<text class="home__card-name">列选择器</text>
 					<text class="home__card-tag">nax-select</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goCalendar">
+					<text class="home__card-name">日历</text>
+					<text class="home__card-tag">nax-calendar</text>
+				</view>
 			</view>
 
 			<view class="home__section home__section--gap">
@@ -172,6 +176,12 @@
 	function goSelect() {
 		uni.navigateTo({
 			url: '/pages/components/select/index'
+		})
+	}
+
+	function goCalendar() {
+		uni.navigateTo({
+			url: '/pages/components/calendar/index'
 		})
 	}
 
