@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
 	<view class="page-root">
 		<scroll-view class="page-scroll" scroll-y="true">
@@ -91,6 +91,10 @@
 					<text class="home__card-name">日历</text>
 					<text class="home__card-tag">nax-calendar</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goKeyboard">
+					<text class="home__card-name">键盘</text>
+					<text class="home__card-tag">nax-keyboard</text>
+				</view>
 			</view>
 
 			<view class="home__section home__section--gap">
@@ -111,6 +115,7 @@
 					<text class="home__card-name">弹出容器</text>
 					<text class="home__card-tag">nax-picker</text>
 				</view>
+
 			</view>
 			</view>
 		</scroll-view>
@@ -264,6 +269,12 @@
 	function goPicker() {
 		uni.navigateTo({
 			url: '/pages/components/picker/index'
+		})
+	}
+
+	function goKeyboard() {
+		uni.navigateTo({
+			url: '/pages/components/keyboard/index'
 		})
 	}
 </script>

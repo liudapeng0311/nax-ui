@@ -1,0 +1,357 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-keyboard</text>
+			<text class="page__desc">自定义键盘（对齐 uView Pro Keyboard：数字 / 车牌 / 身份证 / 乱序 / 遮罩）</text>
+
+			<view class="section">
+				<text class="section__title">当前输入</text>
+				<view class="display">
+					<text class="display__text">{{ displayValue }}</text>
+				</view>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">数字键盘</text>
+				<view class="row">
+					<nax-button type="primary" label="打开数字键盘" @click="openNumber"></nax-button>
+					<nax-button size="sm" label="清空" @click="clearValue"></nax-button>
+				</view>
+				<nax-keyboard
+					v-model:show="numberShow"
+					mode="number"
+					@change="onChange"
+					@backspace="onBackspace"
+					@confirm="onConfirm('number')"
+					@cancel="onCancel('number')"
+					@close="onClose('number')"
+				></nax-keyboard>
+			</view>
+
+			<view class="section">
+				<text class="section__title">无小数点数字键盘</text>
+				<nax-button label="打开（无 .）" @click="openNoDot"></nax-button>
+				<nax-keyboard
+					v-model:show="noDotShow"
+					mode="number"
+					:dot-enabled="false"
+					tips="支付密码"
+					@change="onChange"
+					@backspace="onBackspace"
+					@confirm="onConfirm('noDot')"
+					@cancel="onCancel('noDot')"
+				></nax-keyboard>
+			</view>
+
+			<view class="section">
+				<text class="section__title">身份证键盘</text>
+				<nax-button label="打开身份证键盘" @click="openCard"></nax-button>
+				<nax-keyboard
+					v-model:show="cardShow"
+					mode="card"
+					@change="onChange"
+					@backspace="onBackspace"
+					@confirm="onConfirm('card')"
+					@cancel="onCancel('card')"
+				></nax-keyboard>
+			</view>
+
+			<view class="section">
+				<text class="section__title">车牌号键盘</text>
+				<text class="hint">首字选中文省份简称，再点「中/英」切换字母数字</text>
+				<nax-button type="warning" label="打开车牌键盘" @click="openCar"></nax-button>
+				<nax-keyboard
+					v-model:show="carShow"
+					mode="car"
+					@change="onChange"
+					@backspace="onBackspace"
+					@confirm="onConfirm('car')"
+					@cancel="onCancel('car')"
+				></nax-keyboard>
+			</view>
+
+			<view class="section">
+				<text class="section__title">乱序键盘</text>
+				<nax-button size="sm" label="打开乱序数字键盘" @click="openRandom"></nax-button>
+				<nax-keyboard
+					v-model:show="randomShow"
+					mode="number"
+					random
+					tips="安全输入"
+					@change="onChange"
+					@backspace="onBackspace"
+					@confirm="onConfirm('random')"
+					@cancel="onCancel('random')"
+				></nax-keyboard>
+			</view>
+
+			<view class="section">
+				<text class="section__title">无遮罩 / 自定义工具条</text>
+				<nax-button size="sm" label="打开（无遮罩）" @click="openNoMask"></nax-button>
+				<nax-keyboard
+					v-model:show="noMaskShow"
+					mode="number"
+					:mask="false"
+					cancel-text="关闭"
+					confirm-text="确定"
+					@change="onChange"
+					@backspace="onBackspace"
+					@confirm="onConfirm('noMask')"
+					@cancel="onCancel('noMask')"
+				></nax-keyboard>
+			</view>
+
+			<view class="section">
+				<text class="section__title">插槽：上方密码预览</text>
+				<nax-button size="sm" type="success" label="打开密码键盘" @click="openSlot"></nax-button>
+				<nax-keyboard
+					v-model:show="slotShow"
+					mode="number"
+					:dot-enabled="false"
+					tips="请输入支付密码"
+					@change="onSlotChange"
+					@backspace="onSlotBackspace"
+					@confirm="onConfirm('slot')"
+					@cancel="onCancel('slot')"
+				>
+					<view class="pwd">
+						<view v-for="(item, index) in pwdBoxes" :key="index" class="pwd__box">
+							<text class="pwd__dot">{{ item }}</text>
+						</view>
+					</view>
+				</nax-keyboard>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const valueText = ref('')
+	const lastEvent = ref('—')
+	const numberShow = ref(false)
+	const noDotShow = ref(false)
+	const cardShow = ref(false)
+	const carShow = ref(false)
+	const randomShow = ref(false)
+	const noMaskShow = ref(false)
+	const slotShow = ref(false)
+	const slotPwd = ref('')
+
+	const displayValue = computed((): string => {
+		if (valueText.value.length == 0) {
+			return '（空）'
+		}
+		return valueText.value
+	})
+
+	const pwdBoxes = computed((): string[] => {
+		const boxes = [] as string[]
+		var i = 0
+		while (i < 6) {
+			if (i < slotPwd.value.length) {
+				boxes.push('•')
+			} else {
+				boxes.push('')
+			}
+			i++
+		}
+		return boxes
+	})
+
+	function openNumber() {
+		numberShow.value = true
+	}
+
+	function openNoDot() {
+		noDotShow.value = true
+	}
+
+	function openCard() {
+		cardShow.value = true
+	}
+
+	function openCar() {
+		carShow.value = true
+	}
+
+	function openRandom() {
+		randomShow.value = true
+	}
+
+	function openNoMask() {
+		noMaskShow.value = true
+	}
+
+	function openSlot() {
+		slotPwd.value = ''
+		slotShow.value = true
+	}
+
+	function clearValue() {
+		valueText.value = ''
+		lastEvent.value = 'clear'
+	}
+
+	function onChange(val: string) {
+		valueText.value = valueText.value + val
+		lastEvent.value = 'change: ' + val
+	}
+
+	function onBackspace() {
+		const s = valueText.value
+		if (s.length == 0) {
+			lastEvent.value = 'backspace (empty)'
+			return
+		}
+		valueText.value = s.substring(0, s.length - 1)
+		lastEvent.value = 'backspace'
+	}
+
+	function onSlotChange(val: string) {
+		if (slotPwd.value.length >= 6) {
+			return
+		}
+		slotPwd.value = slotPwd.value + val
+		valueText.value = slotPwd.value
+		lastEvent.value = 'slot change: ' + val
+		if (slotPwd.value.length >= 6) {
+			slotShow.value = false
+			lastEvent.value = 'slot full: ' + slotPwd.value
+		}
+	}
+
+	function onSlotBackspace() {
+		const s = slotPwd.value
+		if (s.length == 0) {
+			return
+		}
+		slotPwd.value = s.substring(0, s.length - 1)
+		valueText.value = slotPwd.value
+		lastEvent.value = 'slot backspace'
+	}
+
+	function onConfirm(from: string) {
+		lastEvent.value = 'confirm from ' + from
+	}
+
+	function onCancel(from: string) {
+		lastEvent.value = 'cancel from ' + from
+	}
+
+	function onClose(from: string) {
+		lastEvent.value = 'close from ' + from
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		padding-bottom: 40px;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		padding: 14px;
+		margin-bottom: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.display {
+		min-height: 44px;
+		padding: 10px 12px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-bg-secondary, #f5f5f7);
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.display__text {
+		font-size: 18px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+	}
+
+	.pwd {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-top: 18px;
+		padding-bottom: 10px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.pwd__box {
+		width: 40px;
+		height: 40px;
+		margin-left: 6px;
+		margin-right: 6px;
+		border-radius: 6px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.pwd__dot {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+</style>
