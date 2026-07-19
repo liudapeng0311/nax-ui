@@ -1,6 +1,8 @@
 <template>
-	<scroll-view style="flex:1" scroll-y="true">
-		<view class="nax-theme home" :class="themeExtraClass">
+	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme home" :class="themeExtraClass">
 			<view class="home__header">
 				<view class="home__header-text">
 					<text class="home__title">nax-ui</text>
@@ -70,8 +72,17 @@
 					<text class="home__card-tag">nax-swiper</text>
 				</view>
 			</view>
-		</view>
-	</scroll-view>
+
+			<view class="home__section home__section--gap">
+				<text class="home__section-title">反馈组件</text>
+				<view class="home__card" @click="goTransition">
+					<text class="home__card-name">过渡动画</text>
+					<text class="home__card-tag">nax-transition</text>
+				</view>
+			</view>
+			</view>
+		</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -169,13 +180,35 @@
 			url: '/pages/components/swiper/index'
 		})
 	}
+
+	function goTransition() {
+		uni.navigateTo({
+			url: '/pages/components/transition/index'
+		})
+	}
 </script>
 
 <style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		/* App flex 子项默认按内容高度，给 0 才能吃到剩余空间并启用纵向滚动 */
+		height: 0;
+	}
+
 	.home {
 		padding: 20px;
+		/* 不要 flex:1：内容应随列表变高，否则 scroll-view 认为无需滚动 */
+		padding-bottom: 32px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
-		flex: 1;
+		flex-direction: column;
 	}
 
 	.home__header {

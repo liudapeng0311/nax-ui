@@ -87,6 +87,7 @@
 
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
+| 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
 | 加载 | `nax-loading` | P0 | 局部/页面加载 | `size` `vertical` `text` |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `show` `z-index` / `click` |
 | 弹出层 | `nax-popup` | P0 | 底部/中心/侧滑 | `v-model:open` `position` `round` `close-on-mask` |
@@ -120,8 +121,9 @@
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
-| `nax-select` | done | 插件包 `uni_modules/nax-select`；对齐 uView Pro Select；单列/多列/联动 + showTrigger |
+| `nax-select` | done | 插件包 `uni_modules/nax-select`；对齐 uView Pro Select；单列/多列/联动 + showTrigger；弹层动画复用 `nax-transition` |
 | `nax-tag` | done | 插件包 `uni_modules/nax-tag`；对齐 Naive Tag；type/variant/size/closable/checkable/round/bordered |
+| `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

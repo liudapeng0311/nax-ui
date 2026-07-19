@@ -1,0 +1,305 @@
+<template>
+	<view v-if="innerShow" class="nax-transition" :class="rootClass" :style="rootStyle">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-transition
+	 * @description 轻量进退场过渡。预设 fade / slide-up / slide-down / slide-left / slide-right / zoom / fade-up。
+	 * @property {boolean} show 是否显示
+	 * @property {string} name 动画预设
+	 * @property {number} duration 时长（ms），默认 280
+	 * @property {boolean} appear 首次挂载且 show 时是否播放进场动画，默认 false
+	 * @property {string} timingFunction 缓动，默认 ease-out
+	 * @property {string} customClass 根节点扩展 class
+	 * @event before-enter 进场开始
+	 * @event after-enter 进场结束
+	 * @event before-leave 退场开始
+	 * @event after-leave 退场结束（DOM 已卸载）
+	 * @slot default 需要过渡的内容
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		name: {
+			type: String,
+			default: 'fade'
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		appear: {
+			type: Boolean,
+			default: false
+		},
+		timingFunction: {
+			type: String,
+			default: 'ease-out'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'before-enter',
+		'after-enter',
+		'before-leave',
+		'after-leave'
+	])
+
+	const innerShow = ref(false)
+	const animShow = ref(false)
+	let openTimer: number = -1
+	let closeTimer: number = -1
+	let enterDoneTimer: number = -1
+
+	function normalizeName(value: string): string {
+		if (value == 'slide-up' || value == 'slideUp' || value == 'slideup' || value == 'up') {
+			return 'slide-up'
+		}
+		if (value == 'slide-down' || value == 'slideDown' || value == 'slidedown' || value == 'down') {
+			return 'slide-down'
+		}
+		if (value == 'slide-left' || value == 'slideLeft' || value == 'slideleft' || value == 'left') {
+			return 'slide-left'
+		}
+		if (value == 'slide-right' || value == 'slideRight' || value == 'slideright' || value == 'right') {
+			return 'slide-right'
+		}
+		if (value == 'zoom' || value == 'scale') {
+			return 'zoom'
+		}
+		if (value == 'fade-up' || value == 'fadeUp' || value == 'fadeup') {
+			return 'fade-up'
+		}
+		return 'fade'
+	}
+
+	function resolveDuration(): number {
+		const d = props.duration
+		if (d <= 0) {
+			return 0
+		}
+		return d
+	}
+
+	const animName = computed((): string => {
+		return normalizeName(props.name)
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-transition--' + animName.value
+		// 展开态用独立 class，避免复合选择器在 App 端兼容性差异
+		if (animShow.value) {
+			cls += ' nax-transition--' + animName.value + '-show'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		const d = resolveDuration()
+		const tf = props.timingFunction.length > 0 ? props.timingFunction : 'ease-out'
+		return 'transition-duration:' + d.toString() + 'ms;transition-timing-function:' + tf + ';'
+	})
+
+	function clearTimers() {
+		if (openTimer >= 0) {
+			clearTimeout(openTimer)
+			openTimer = -1
+		}
+		if (closeTimer >= 0) {
+			clearTimeout(closeTimer)
+			closeTimer = -1
+		}
+		if (enterDoneTimer >= 0) {
+			clearTimeout(enterDoneTimer)
+			enterDoneTimer = -1
+		}
+	}
+
+	function doEnter(withAnim: boolean) {
+		clearTimers()
+		emit('before-enter')
+		innerShow.value = true
+		const d = resolveDuration()
+		if (!withAnim || d <= 0) {
+			animShow.value = true
+			emit('after-enter')
+			return
+		}
+		// 先落在起始态，再切到展开态，触发 transition
+		// 鸿蒙：过短 delay 时容易与首帧合并，导致看不到进场
+		animShow.value = false
+		// #ifdef APP-HARMONY
+		const frameDelay = 48
+		// #endif
+		// #ifndef APP-HARMONY
+		const frameDelay = 30
+		// #endif
+		openTimer = setTimeout(() => {
+			openTimer = -1
+			animShow.value = true
+			enterDoneTimer = setTimeout(() => {
+				enterDoneTimer = -1
+				emit('after-enter')
+			}, d)
+		}, frameDelay)
+	}
+
+	function doLeave() {
+		if (!innerShow.value) {
+			animShow.value = false
+			return
+		}
+		// 已在退场：忽略重复 leave
+		if (closeTimer >= 0) {
+			return
+		}
+		clearTimers()
+		emit('before-leave')
+		const d = resolveDuration()
+		if (d <= 0) {
+			animShow.value = false
+			innerShow.value = false
+			emit('after-leave')
+			return
+		}
+		animShow.value = false
+		closeTimer = setTimeout(() => {
+			closeTimer = -1
+			innerShow.value = false
+			emit('after-leave')
+		}, d)
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val) {
+			// 已完全展开则忽略
+			if (innerShow.value && animShow.value && closeTimer < 0) {
+				return
+			}
+			doEnter(true)
+		} else {
+			doLeave()
+		}
+	})
+
+	// 首次：show=true 时按 appear 决定是否进场动画
+	if (props.show) {
+		doEnter(props.appear)
+	}
+</script>
+
+<style>
+	.nax-transition {
+		flex-direction: column;
+	}
+
+	/* fade */
+	.nax-transition--fade {
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--fade-show {
+		opacity: 1;
+	}
+
+	/* slide-up：自下而上 */
+	.nax-transition--slide-up {
+		opacity: 0;
+		transform: translateY(100%);
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--slide-up-show {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	/* slide-down：自上而下 */
+	.nax-transition--slide-down {
+		opacity: 0;
+		transform: translateY(-100%);
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--slide-down-show {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	/* slide-left：自左向右入 */
+	.nax-transition--slide-left {
+		opacity: 0;
+		transform: translateX(-100%);
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--slide-left-show {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	/* slide-right：自右向左入 */
+	.nax-transition--slide-right {
+		opacity: 0;
+		transform: translateX(100%);
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--slide-right-show {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	/* zoom：缩放 */
+	.nax-transition--zoom {
+		opacity: 0;
+		transform: scale(0.8);
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--zoom-show {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	/* fade-up：轻微上移淡入 */
+	.nax-transition--fade-up {
+		opacity: 0;
+		transform: translateY(16px);
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	.nax-transition--fade-up-show {
+		opacity: 1;
+		transform: translateY(0);
+	}
+</style>

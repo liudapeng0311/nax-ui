@@ -5,6 +5,7 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能主要对齐 [u
 ## 依赖
 
 - `nax-icon`（触发条箭头）
+- `nax-transition`（弹层进退场动画）
 - `nax-ui-theme`（CSS 变量 `--nax-*`，安装时依赖 / 运行时弱依赖）
 
 ## 与 uView 的差异（优化点）

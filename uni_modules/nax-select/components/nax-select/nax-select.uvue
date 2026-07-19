@@ -18,11 +18,24 @@
 			</slot>
 		</view>
 
-		<!-- 弹层：自包含遮罩 + 底部面板（不依赖尚未完成的 nax-popup） -->
-		<view v-if="innerShow" class="nax-select__root" :style="rootOverlayStyle">
-			<!-- 遮罩单独一层，z-index 低于面板，避免鸿蒙点不到确认/取消 -->
-			<view class="nax-select__mask" @click="onMaskClick"></view>
-			<view class="nax-select__panel" :class="panelClass" :style="panelStyle">
+		<!-- 弹层：遮罩独立全屏（鸿蒙勿包在 fade opacity 外壳里，否则易透明/零尺寸）；面板 slide-up 走 nax-transition -->
+		<view v-if="rootMounted" class="nax-select__root" :style="rootOverlayStyle">
+			<!-- 遮罩：直挂 root，保证全屏可点；z-index 低于面板 -->
+			<view
+				class="nax-select__mask"
+				:class="maskClass"
+				:style="maskStyle"
+				@click="onMaskClick"
+			></view>
+			<!-- 面板层必须在父组件样式作用域内设 z-index，避免样式隔离后被遮罩盖住 -->
+			<view class="nax-select__panel-layer">
+				<nax-transition
+					:show="panelShow"
+					name="slide-up"
+					:duration="ANIM_DURATION"
+					@after-leave="onOverlayLeave"
+				>
+					<view class="nax-select__panel" :class="panelClass" :style="panelStyle">
 				<view class="nax-select__header">
 					<!-- 鸿蒙：text 不冒泡，按钮与文字都绑定点击 -->
 					<view
@@ -149,6 +162,8 @@
 						<!-- #endif -->
 					</picker-view>
 				</view>
+				</view>
+				</nax-transition>
 			</view>
 		</view>
 	</view>
@@ -298,7 +313,10 @@
 		'close'
 	])
 
-	const innerShow = ref(false)
+	/** 弹层容器是否挂载（退场动画结束后再卸） */
+	const rootMounted = ref(false)
+	/** 交给 nax-transition 的显隐 */
+	const panelShow = ref(false)
 	const readyToRender = ref(false)
 	const pickerRenderKey = ref(0)
 	const moving = ref(false)
@@ -310,6 +328,8 @@
 	const selectResult = ref([] as UTSJSONObject[])
 	const confirmedResult = ref([] as UTSJSONObject[])
 	const safeBottomPx = ref(0)
+	const ANIM_DURATION = 280
+	let openDelayTimer: number = -1
 
 	/** 最多 4 列，覆盖省市区等常见联动 */
 	const column0 = ref([] as any[])
@@ -454,6 +474,26 @@
 
 	const rootOverlayStyle = computed((): string => {
 		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const maskClass = computed((): string => {
+		if (panelShow.value) {
+			return 'nax-select__mask--show'
+		}
+		return ''
+	})
+
+	/** 鸿蒙：背景色 + opacity 走 inline，避免 class/var 不生效导致看不见遮罩 */
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (panelShow.value) {
+			return 'background-color:rgba(0,0,0,0.45);opacity:1;'
+		}
+		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	const panelClass = computed((): string => {
@@ -913,27 +953,81 @@
 		// #endif
 	}
 
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
 	function openPicker() {
 		if (props.disabled) {
 			return
 		}
+		// 已完全展开：只同步 v-model
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		// 已在进场排队：勿二次 open（触发条会 emit 导致 watch 再进一次，冲掉 delay 后无动画）
+		if (openDelayTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
 		refreshSafeArea()
-		innerShow.value = true
+		rootMounted.value = true
 		readyToRender.value = false
 		initPicker()
 		// 等数据就绪再挂载 picker-view，避免首帧空列
 		readyToRender.value = true
+		// 始终先 false 再 true：保证 nax-transition 先以 show=false 挂载，再进场
+		// （若首挂即 show=true 且 appear=false，会直接展开无动画；鸿蒙上触发条路径尤其容易踩中）
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		// 鸿蒙：DOM 就绪偏慢，延迟略加长
+		const openDelay = 50
+		// #endif
+		// #ifndef APP-HARMONY
+		const openDelay = 30
+		// #endif
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+		}, openDelay)
 		emit('update:show', true)
 		emit('open')
 	}
 
 	function closePicker(emitUpdate: boolean) {
-		innerShow.value = false
-		readyToRender.value = false
-		moving.value = false
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		// 已在收起：只同步 v-model
+		if (!panelShow.value) {
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
 		if (emitUpdate) {
 			emit('update:show', false)
 		}
+	}
+
+	/** 面板 transition after-leave 后再卸容器 */
+	function onOverlayLeave() {
+		if (panelShow.value) {
+			return
+		}
+		rootMounted.value = false
+		readyToRender.value = false
+		moving.value = false
 		emit('close')
 	}
 
@@ -941,7 +1035,8 @@
 		if (props.disabled) {
 			return
 		}
-		if (innerShow.value) {
+		// 完全展开时忽略；收起动画中允许再次打开
+		if (rootMounted.value && panelShow.value) {
 			return
 		}
 		openPicker()
@@ -1099,10 +1194,10 @@
 	watch((): boolean => {
 		return props.show
 	}, (val: boolean) => {
-		if (val == innerShow.value) {
-			return
-		}
 		if (val) {
+			if (rootMounted.value && panelShow.value) {
+				return
+			}
 			openPicker()
 		} else {
 			closePicker(false)
@@ -1112,7 +1207,7 @@
 	watch((): any[] => {
 		return props.list as any[]
 	}, (_val: any[]) => {
-		if (innerShow.value) {
+		if (rootMounted.value) {
 			initPicker()
 		}
 	})
@@ -1219,15 +1314,37 @@
 		justify-content: flex-end;
 	}
 
+	/* 面板层：父作用域 z-index，保证压在遮罩之上（勿写在子组件 custom-class 上） */
+	.nax-select__panel-layer {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+	}
+
 	.nax-select__mask {
 		position: absolute;
 		left: 0;
 		top: 0;
 		right: 0;
 		bottom: 0;
-		/* 必须低于面板，否则鸿蒙上会吃掉确认/取消点击 */
+		/* 低于面板层；遮罩勿盖住确认/取消 */
 		z-index: 1;
+		/* 默认半透明黑；鸿蒙另有 inline 兜底 */
+		background-color: rgba(0, 0, 0, 0.45);
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-select__mask {
 		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+	/* #endif */
+
+	.nax-select__mask--show {
+		opacity: 1;
 	}
 
 	.nax-select__panel {
