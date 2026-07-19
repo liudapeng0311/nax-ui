@@ -1,0 +1,461 @@
+<template>
+	<view class="nax-form" :class="rootClass">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-form
+	 * @description 表单容器。管理 model / rules，提供校验与重置。功能主要对齐 uView Pro Form。
+	 * @property {Object} model 表单数据对象（必填，配合 form-item prop）
+	 * @property {Object} rules 校验规则（字段 -> 规则数组）
+	 * @property {string} errorType 错误提示：message | toast | border-bottom | none
+	 * @property {boolean} borderBottom 是否显示表单项下边框，默认 true
+	 * @property {string} labelPosition left | top
+	 * @property {string|number} labelWidth 标签宽度（px），默认 80
+	 * @property {string} labelAlign left | center | right
+	 * @property {string} customClass 根节点扩展 class
+	 * @method validate 校验全部字段，Promise<boolean>
+	 * @method validateField 校验指定字段
+	 * @method resetFields 重置为初始快照并清空错误
+	 * @method clearValidate 清空校验结果
+	 * @method setRules 手动设置规则（小程序函数规则场景）
+	 * @slot default 放置 nax-form-item
+	 */
+	import {
+		validateRules,
+		getModelValue,
+		setModelValue,
+		rulesOfProp
+	} from './form-validator.uts'
+
+	const props = defineProps({
+		model: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		rules: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		errorType: {
+			type: String,
+			default: 'message'
+		},
+		borderBottom: {
+			type: Boolean,
+			default: true
+		},
+		labelPosition: {
+			type: String,
+			default: 'left'
+		},
+		labelWidth: {
+			type: [String, Number],
+			default: 80
+		},
+		labelAlign: {
+			type: String,
+			default: 'left'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['validate'])
+
+	// 内置规则（可 setRules 覆盖）
+	const formRules = ref({} as UTSJSONObject)
+	// 已注册 form-item prop
+	const itemProps = ref([] as string[])
+	// 字段级 rules（form-item 自带）
+	const itemRulesMap = ref({} as UTSJSONObject)
+	// 错误文案并行存储（保证响应）
+	const errorProps = ref([] as string[])
+	const errorTexts = ref([] as string[])
+	const errorVersion = ref(0)
+	// 初始值快照
+	const snapshotProps = ref([] as string[])
+	const snapshotValues = ref([] as any[])
+	var snapshotReady = false
+
+	function syncRulesFromProps() {
+		formRules.value = props.rules as UTSJSONObject
+	}
+	syncRulesFromProps()
+
+	watch((): any => {
+		return props.rules
+	}, (_: any) => {
+		syncRulesFromProps()
+	})
+
+	function listIndexOf(list: string[], key: string): number {
+		var i = 0
+		while (i < list.length) {
+			if (list[i] == key) {
+				return i
+			}
+			i++
+		}
+		return -1
+	}
+
+	function setFieldError(prop: string, message: string) {
+		if (prop.length == 0) {
+			return
+		}
+		const idx = listIndexOf(errorProps.value, prop)
+		if (message.length == 0) {
+			if (idx >= 0) {
+				const nextP = [] as string[]
+				const nextT = [] as string[]
+				var i = 0
+				while (i < errorProps.value.length) {
+					if (i != idx) {
+						nextP.push(errorProps.value[i])
+						nextT.push(errorTexts.value[i])
+					}
+					i++
+				}
+				errorProps.value = nextP
+				errorTexts.value = nextT
+				errorVersion.value = errorVersion.value + 1
+			}
+			return
+		}
+		if (idx >= 0) {
+			const nextT = [] as string[]
+			var j = 0
+			while (j < errorTexts.value.length) {
+				if (j == idx) {
+					nextT.push(message)
+				} else {
+					nextT.push(errorTexts.value[j])
+				}
+				j++
+			}
+			errorTexts.value = nextT
+		} else {
+			const nextP = [] as string[]
+			const nextT = [] as string[]
+			var k = 0
+			while (k < errorProps.value.length) {
+				nextP.push(errorProps.value[k])
+				nextT.push(errorTexts.value[k])
+				k++
+			}
+			nextP.push(prop)
+			nextT.push(message)
+			errorProps.value = nextP
+			errorTexts.value = nextT
+		}
+		errorVersion.value = errorVersion.value + 1
+	}
+
+	function getFieldError(prop: string): string {
+		const idx = listIndexOf(errorProps.value, prop)
+		if (idx < 0) {
+			return ''
+		}
+		return errorTexts.value[idx]
+	}
+
+	function clearAllErrors() {
+		errorProps.value = [] as string[]
+		errorTexts.value = [] as string[]
+		errorVersion.value = errorVersion.value + 1
+	}
+
+	function ensureSnapshot() {
+		if (snapshotReady) {
+			return
+		}
+		const model = props.model as UTSJSONObject
+		const propsList = itemProps.value
+		const sp = [] as string[]
+		const sv = [] as any[]
+		var i = 0
+		while (i < propsList.length) {
+			const p = propsList[i]
+			if (p.length > 0) {
+				sp.push(p)
+				sv.push(getModelValue(model, p))
+			}
+			i++
+		}
+		// 若尚未注册 item，尝试从 rules 键无法枚举时仅等 item 注册
+		if (sp.length > 0) {
+			snapshotProps.value = sp
+			snapshotValues.value = sv
+			snapshotReady = true
+		}
+	}
+
+	function registerItem(prop: string) {
+		if (prop.length == 0) {
+			return
+		}
+		if (listIndexOf(itemProps.value, prop) >= 0) {
+			return
+		}
+		const next = [] as string[]
+		var i = 0
+		while (i < itemProps.value.length) {
+			next.push(itemProps.value[i])
+			i++
+		}
+		next.push(prop)
+		itemProps.value = next
+		// 首次注册时建立快照
+		if (!snapshotReady) {
+			ensureSnapshot()
+		} else {
+			// 新字段补进快照
+			const model = props.model as UTSJSONObject
+			const sp = [] as string[]
+			const sv = [] as any[]
+			var j = 0
+			while (j < snapshotProps.value.length) {
+				sp.push(snapshotProps.value[j])
+				sv.push(snapshotValues.value[j])
+				j++
+			}
+			sp.push(prop)
+			sv.push(getModelValue(model, prop))
+			snapshotProps.value = sp
+			snapshotValues.value = sv
+		}
+	}
+
+	function unregisterItem(prop: string) {
+		if (prop.length == 0) {
+			return
+		}
+		const next = [] as string[]
+		var i = 0
+		while (i < itemProps.value.length) {
+			if (itemProps.value[i] != prop) {
+				next.push(itemProps.value[i])
+			}
+			i++
+		}
+		itemProps.value = next
+		setFieldError(prop, '')
+		// 清理 item rules
+		const map = itemRulesMap.value
+		map.set(prop, [] as any[])
+		itemRulesMap.value = map
+	}
+
+	function setItemRules(prop: string, rules: any[]) {
+		if (prop.length == 0) {
+			return
+		}
+		const map = itemRulesMap.value
+		map.set(prop, rules)
+		itemRulesMap.value = map
+	}
+
+	function getItemRules(prop: string): any[] {
+		const raw = itemRulesMap.value.getAny(prop)
+		if (raw == null) {
+			return [] as any[]
+		}
+		const arr = raw as any[]
+		if (arr != null && typeof arr.length == 'number') {
+			return arr
+		}
+		return [] as any[]
+	}
+
+	function resolveRules(prop: string): any[] {
+		const local = getItemRules(prop)
+		if (local.length > 0) {
+			return local
+		}
+		return rulesOfProp(formRules.value, prop)
+	}
+
+	/**
+	 * 校验一个字段，返回错误文案（空串表示通过）
+	 */
+	function validateOne(prop: string, event: string): string {
+		if (prop.length == 0) {
+			return ''
+		}
+		const rules = resolveRules(prop)
+		if (rules.length == 0) {
+			setFieldError(prop, '')
+			return ''
+		}
+		const model = props.model as UTSJSONObject
+		const value = getModelValue(model, prop)
+		const msg = validateRules(rules, value, event)
+		setFieldError(prop, msg)
+		return msg
+	}
+
+	/**
+	 * 校验指定字段；props 为空则校验全部已注册项
+	 * @return 错误列表 { prop, message }[]
+	 */
+	function validateField(fieldProps: any | null = null, event: string = ''): UTSJSONObject[] {
+		const targets = [] as string[]
+		if (fieldProps == null) {
+			var i = 0
+			while (i < itemProps.value.length) {
+				targets.push(itemProps.value[i])
+				i++
+			}
+		} else if (typeof fieldProps == 'string') {
+			const s = fieldProps as string
+			if (s.length > 0) {
+				targets.push(s)
+			}
+		} else {
+			const arr = fieldProps as any[]
+			if (arr != null) {
+				var j = 0
+				while (j < arr.length) {
+					const p = '' + arr[j]
+					if (p.length > 0) {
+						targets.push(p)
+					}
+					j++
+				}
+			}
+		}
+
+		const errors = [] as UTSJSONObject[]
+		var k = 0
+		while (k < targets.length) {
+			const prop = targets[k]
+			const msg = validateOne(prop, event)
+			if (msg.length > 0) {
+				errors.push({
+					prop: prop,
+					message: msg
+				} as UTSJSONObject)
+			}
+			k++
+		}
+		return errors
+	}
+
+	/**
+	 * 校验全部
+	 */
+	function validate(): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const errors = validateField(null, '')
+			const ok = errors.length == 0
+			emit('validate', ok)
+			if (!ok) {
+				const et = props.errorType
+				if (et == 'toast' || et == 'message-toast') {
+					const first = errors[0]
+					const tip = first.getString('message')
+					uni.showToast({
+						title: tip != null ? tip : '校验失败',
+						icon: 'none'
+					})
+				}
+				reject(errors)
+				return
+			}
+			resolve(true)
+		})
+	}
+
+	function clearValidate(fieldProps: any | null = null) {
+		if (fieldProps == null) {
+			clearAllErrors()
+			return
+		}
+		if (typeof fieldProps == 'string') {
+			setFieldError(fieldProps as string, '')
+			return
+		}
+		const arr = fieldProps as any[]
+		if (arr != null) {
+			var i = 0
+			while (i < arr.length) {
+				setFieldError('' + arr[i], '')
+				i++
+			}
+		}
+	}
+
+	function resetFields() {
+		ensureSnapshot()
+		const model = props.model as UTSJSONObject
+		var i = 0
+		while (i < snapshotProps.value.length) {
+			const p = snapshotProps.value[i]
+			const v = snapshotValues.value[i]
+			setModelValue(model, p, v)
+			i++
+		}
+		clearAllErrors()
+	}
+
+	function setRules(rules: UTSJSONObject) {
+		formRules.value = rules
+	}
+
+	// —— provide 给 form-item ——
+	provide('naxFormInForm', true)
+	provide('naxFormErrorType', computed((): string => {
+		return props.errorType
+	}))
+	provide('naxFormBorderBottom', computed((): boolean => {
+		return props.borderBottom
+	}))
+	provide('naxFormLabelPosition', computed((): string => {
+		return props.labelPosition
+	}))
+	provide('naxFormLabelWidth', computed((): string => {
+		return '' + props.labelWidth
+	}))
+	provide('naxFormLabelAlign', computed((): string => {
+		return props.labelAlign
+	}))
+	provide('naxFormErrorVersion', errorVersion)
+	provide('naxFormGetError', getFieldError)
+	provide('naxFormRegister', registerItem)
+	provide('naxFormUnregister', unregisterItem)
+	provide('naxFormSetItemRules', setItemRules)
+	provide('naxFormValidateField', (prop: string, event: string): string => {
+		return validateOne(prop, event)
+	})
+
+	defineExpose({
+		validate,
+		validateField,
+		resetFields,
+		clearValidate,
+		setRules
+	})
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+</script>
+
+<style>
+	.nax-form {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+</style>
+
+

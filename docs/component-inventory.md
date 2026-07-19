@@ -84,8 +84,8 @@
 | 单选组 | `nax-radio-group` | P0 | 单选组 | `v-model` `shape` `size` `wrap` `width` `labelDisabled` `activeColor` / `change` **done** |
 | 步进器 | `nax-number-box` | P1 | 数量调节（对齐 uView Pro NumberBox） | `v-model` `min` `max` `step` `integer` `disabled` `disabledInput` `disablePlus`/`disableMinus` `asyncChange` `longPress` `size` / `change` `focus` `blur` `overlimit` `plus` `minus` **done** |
 | 评分 | `nax-rate` | P1 | 星型评分（对齐 uView Pro Rate） | `v-model` `count` `disabled` `readonly` `size` `activeColor` `inactiveColor` `gutter` `minCount` `allowHalf` `touchable` `activeIcon` `inactiveIcon` / `change` **done** |
-| 表单项 | `nax-form-item` | P1 | 标签+控件+错误 | `label` `required` `status` `error-message` |
-| 表单 | `nax-form` | P2 | 校验容器（可后置） | `model` `rules` / `submit` `validate` |
+| 表单项 | `nax-form-item` | P1 | 标签+控件+错误（对齐 uView Pro FormItem） | `label` `prop` `rules` `required` `status` `error-message` `labelPosition` `labelWidth` / **done** |
+| 表单 | `nax-form` | P1 | 校验容器（对齐 uView Pro Form） | `model` `rules` `errorType` `labelPosition` `labelWidth` / `validate` `validateField` `resetFields` `clearValidate` `setRules` **done** |
 
 ### 3.2 反馈 Feedback
 
@@ -137,6 +137,7 @@
 | `nax-slider` | done | 插件包 `uni_modules/nax-slider`；对齐 uView Pro Slider；v-model/min/max/step/showValue/useSlot；start/moving/end/change |
 | `nax-number-box` | done | 插件包 `uni_modules/nax-number-box`；对齐 uView Pro NumberBox；加减/输入/长按/asyncChange/overlimit |
 | `nax-rate` | done | 插件包 `uni_modules/nax-rate`；对齐 uView Pro Rate；v-model/count/allowHalf/minCount/滑动打分/readonly |
+| `nax-form` / `nax-form-item` | done | 插件包 `uni_modules/nax-form`；对齐 uView Pro Form；轻量 rules 校验 + provide/inject |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

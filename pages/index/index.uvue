@@ -55,6 +55,10 @@
 					<text class="home__card-name">输入框</text>
 					<text class="home__card-tag">nax-input</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goForm">
+					<text class="home__card-name">表单</text>
+					<text class="home__card-tag">nax-form</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goCheckbox">
 					<text class="home__card-name">复选框</text>
 					<text class="home__card-tag">nax-checkbox</text>
@@ -194,6 +198,12 @@
 		})
 	}
 
+	
+	function goForm() {
+		uni.navigateTo({
+			url: '/pages/components/form/index'
+		})
+	}
 	function goInput() {
 		uni.navigateTo({
 			url: '/pages/components/input/index'

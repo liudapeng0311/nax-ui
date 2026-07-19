@@ -437,11 +437,13 @@
 		flex-direction: row;
 		align-items: center;
 		margin-right: 16px;
-		margin-bottom: 8px;
+		/* 行内不留底边距，避免 form-item 内相对标签偏高/不居中 */
+		margin-bottom: 0;
 	}
 
 	.nax-radio--block {
 		margin-right: 0;
+		margin-bottom: 8px;
 		width: 100%;
 	}
 
