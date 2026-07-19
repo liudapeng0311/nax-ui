@@ -1,0 +1,347 @@
+<template>
+	<view class="nax-switch" :class="rootClass" :style="trackStyle" @click="onClick">
+		<view class="nax-switch__node" :style="nodeStyle">
+			<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
+			<view
+				v-if="loading"
+				class="nax-switch__loading"
+				:style="loadingSpinStyle"
+			>
+				<nax-icon name="loading" :size="iconSizePx" :color="loadingIconColor"></nax-icon>
+			</view>
+			<!-- #endif -->
+			<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+			<view v-if="loading" class="nax-switch__loading nax-switch__loading--css">
+				<nax-icon name="loading" :size="iconSizePx" :color="loadingIconColor"></nax-icon>
+			</view>
+			<!-- #endif -->
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-switch
+	 * @description 开关。用于二选一场景；对齐 uView Pro Switch 主能力。
+	 * @property {boolean} modelValue 开关状态（v-model）
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} loading 加载中（阻止切换）
+	 * @property {string} size sm | md | lg
+	 * @property {string} activeColor 打开时轨道色；空则主题 primary
+	 * @property {string} inactiveColor 关闭时轨道色；空则边框灰
+	 * @property {boolean} vibrateShort 切换时短震动（支持端生效）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 状态变化（boolean）
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: Boolean,
+			default: false
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		loading: {
+			type: Boolean,
+			default: false
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		activeColor: {
+			type: String,
+			default: ''
+		},
+		inactiveColor: {
+			type: String,
+			default: ''
+		},
+		vibrateShort: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	// 滑块位移动画时长（ms）
+	const ANIM_MS = 280
+
+	const normalizedSize = computed((): string => {
+		if (props.size == 'sm' || props.size == 'lg') {
+			return props.size
+		}
+		return 'md'
+	})
+
+	const isChecked = computed((): boolean => {
+		return props.modelValue
+	})
+
+	const isDisabled = computed((): boolean => {
+		return props.disabled
+	})
+
+	const isLoading = computed((): boolean => {
+		return props.loading
+	})
+
+	function trackHeightPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 22
+		}
+		if (s == 'lg') {
+			return 30
+		}
+		return 26
+	}
+
+	function trackWidthPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 40
+		}
+		if (s == 'lg') {
+			return 54
+		}
+		return 46
+	}
+
+	function nodeSizePx() : number {
+		// 轨道内边距约 2px * 2，节点贴近轨道高度
+		return trackHeightPx() - 4
+	}
+
+	/** 滑块从左到右可移动距离（扣除左右 padding 2px） */
+	function travelPx() : number {
+		return trackWidthPx() - nodeSizePx() - 4
+	}
+
+	function iconDefaultPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 10
+		}
+		if (s == 'lg') {
+			return 14
+		}
+		return 12
+	}
+
+	const iconSizePx = computed((): string => {
+		return '' + iconDefaultPx()
+	})
+
+	const activeColorValue = computed((): string => {
+		if (props.activeColor.length > 0) {
+			return props.activeColor
+		}
+		return 'var(--nax-color-primary, #18a058)'
+	})
+
+	const inactiveColorValue = computed((): string => {
+		if (props.inactiveColor.length > 0) {
+			return props.inactiveColor
+		}
+		return 'var(--nax-color-border, #e0e0e6)'
+	})
+
+	const loadingIconColor = computed((): string => {
+		if (isChecked.value) {
+			return activeColorValue.value
+		}
+		return 'var(--nax-color-text-secondary, #767c82)'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-switch--' + normalizedSize.value
+		if (isChecked.value) {
+			cls += ' nax-switch--on'
+		}
+		if (isDisabled.value) {
+			cls += ' nax-switch--disabled'
+		}
+		if (isLoading.value) {
+			cls += ' nax-switch--loading'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const trackStyle = computed((): string => {
+		const h = trackHeightPx()
+		const w = trackWidthPx()
+		var style = ''
+		style += 'width:' + w + 'px;'
+		style += 'height:' + h + 'px;'
+		if (isChecked.value) {
+			style += 'background-color:' + activeColorValue.value + ';'
+			style += 'border-color:' + activeColorValue.value + ';'
+		} else {
+			style += 'background-color:' + inactiveColorValue.value + ';'
+			style += 'border-color:' + inactiveColorValue.value + ';'
+		}
+		// 轨道变色过渡
+		style += 'transition-property:background-color,border-color;'
+		style += 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+		style += 'transition-timing-function:ease;'
+		return style
+	})
+
+	const nodeStyle = computed((): string => {
+		const n = nodeSizePx()
+		const x = isChecked.value ? travelPx() : 0
+		var style = ''
+		style += 'width:' + n + 'px;'
+		style += 'height:' + n + 'px;'
+		// 用 transform 位移，可配合 transition 做滑动（justify-content 无法插值）
+		style += 'transform:translateX(' + x.toString() + 'px);'
+		style += 'transition-property:transform;'
+		style += 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+		// 轻微回弹，观感更接近系统开关
+		style += 'transition-timing-function:cubic-bezier(0.3,1.05,0.4,1.05);'
+		return style
+	})
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App uvue 不支持 @keyframes：定时 transform 兜底旋转
+	const loadingAngle = ref(0)
+	let loadingTimerId = -1
+
+	const loadingSpinStyle = computed((): string => {
+		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
+	})
+
+	function stopLoadingSpin() {
+		if (loadingTimerId >= 0) {
+			clearInterval(loadingTimerId)
+			loadingTimerId = -1
+		}
+		loadingAngle.value = 0
+	}
+
+	function startLoadingSpin() {
+		stopLoadingSpin()
+		loadingAngle.value = 0
+		loadingTimerId = setInterval(() => {
+			let next = loadingAngle.value + 30
+			if (next >= 360) {
+				next = 0
+			}
+			loadingAngle.value = next
+		}, 50)
+	}
+
+	watch((): boolean => {
+		return props.loading
+	}, (val : boolean) => {
+		if (val) {
+			startLoadingSpin()
+		} else {
+			stopLoadingSpin()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopLoadingSpin()
+	})
+	// #endif
+
+	function tryVibrate() {
+		if (!props.vibrateShort) {
+			return
+		}
+		// 短震动：App / 微信小程序等端支持，Web 忽略
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		uni.vibrateShort({})
+		// #endif
+	}
+
+	function onClick() {
+		if (isDisabled.value || isLoading.value) {
+			return
+		}
+		tryVibrate()
+		const next = !props.modelValue
+		emit('update:modelValue', next)
+		emit('change', next)
+	}
+</script>
+
+<style>
+	.nax-switch {
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		padding-left: 2px;
+		padding-right: 2px;
+		border-width: 1px;
+		border-style: solid;
+		border-radius: var(--nax-radius-full, 999px);
+		/* 默认关闭色由 inline style 覆盖；此处兜底 */
+		background-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #e0e0e6);
+		flex-shrink: 0;
+		/* 防止滑块动画时溢出直角裁切感 */
+		overflow: hidden;
+	}
+
+	.nax-switch--on {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-switch--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-switch__node {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		border-radius: var(--nax-radius-full, 999px);
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-shrink: 0;
+		/* App 阴影能力弱，轻阴影增强层次 */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+		/* #endif */
+	}
+
+	.nax-switch__loading {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-switch__loading--css {
+		transform-origin: center center;
+		animation-name: nax-switch-spin;
+		animation-duration: 0.8s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-switch-spin {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	/* #endif */
+</style>

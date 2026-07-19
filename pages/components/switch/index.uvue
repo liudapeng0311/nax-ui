@@ -1,0 +1,211 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-switch</text>
+			<text class="page__desc">开关（对齐 uView Pro Switch 主能力）</text>
+
+			<view class="section">
+				<text class="section__title">基础用法</text>
+				<view class="row">
+					<nax-switch v-model="basic" @change="onBasicChange"></nax-switch>
+					<text class="row__text">{{ basicText }} · {{ lastEvent }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="row">
+					<nax-switch v-model="sizeSm" size="sm"></nax-switch>
+					<text class="row__text">sm</text>
+				</view>
+				<view class="row row--gap">
+					<nax-switch v-model="sizeMd" size="md"></nax-switch>
+					<text class="row__text">md</text>
+				</view>
+				<view class="row row--gap">
+					<nax-switch v-model="sizeLg" size="lg"></nax-switch>
+					<text class="row__text">lg</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 disabled</text>
+				<view class="row">
+					<nax-switch v-model="disabledOff" disabled></nax-switch>
+					<text class="row__text">关 · 禁用</text>
+				</view>
+				<view class="row row--gap">
+					<nax-switch v-model="disabledOn" disabled></nax-switch>
+					<text class="row__text">开 · 禁用</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">加载 loading</text>
+				<view class="row">
+					<nax-switch v-model="loadingOff" loading></nax-switch>
+					<text class="row__text">关 · loading</text>
+				</view>
+				<view class="row row--gap">
+					<nax-switch v-model="loadingOn" loading></nax-switch>
+					<text class="row__text">开 · loading</text>
+				</view>
+				<view class="row row--gap">
+					<nax-switch v-model="asyncVal" :loading="asyncBusy" @change="onAsyncChange"></nax-switch>
+					<text class="row__text">模拟异步：{{ asyncText }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义颜色</text>
+				<view class="row">
+					<nax-switch v-model="colorA" active-color="#2080f0"></nax-switch>
+					<text class="row__text">activeColor 信息蓝</text>
+				</view>
+				<view class="row row--gap">
+					<nax-switch
+						v-model="colorB"
+						active-color="#d03050"
+						inactive-color="#f3f3f5"
+					></nax-switch>
+					<text class="row__text">自定义开/关色</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">切换震动 vibrateShort</text>
+				<view class="row">
+					<nax-switch v-model="vibrateVal" vibrate-short></nax-switch>
+					<text class="row__text">支持端会短震动</text>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basic = ref(true)
+	const basicText = computed((): string => {
+		if (basic.value) {
+			return 'true'
+		}
+		return 'false'
+	})
+
+	const sizeSm = ref(true)
+	const sizeMd = ref(true)
+	const sizeLg = ref(true)
+	const disabledOff = ref(false)
+	const disabledOn = ref(true)
+	const loadingOff = ref(false)
+	const loadingOn = ref(true)
+	const asyncVal = ref(false)
+	const asyncBusy = ref(false)
+	const colorA = ref(true)
+	const colorB = ref(false)
+	const vibrateVal = ref(false)
+
+	const lastEvent = ref('—')
+	const asyncText = computed((): string => {
+		if (asyncBusy.value) {
+			return '请求中…'
+		}
+		if (asyncVal.value) {
+			return '已开启'
+		}
+		return '已关闭'
+	})
+
+	function onBasicChange(v : boolean) {
+		if (v) {
+			lastEvent.value = 'change: true'
+		} else {
+			lastEvent.value = 'change: false'
+		}
+	}
+
+	/**
+	 * 模拟异步提交：
+	 * switch 已先切换到目标值，这里立刻回滚并进入 loading，成功后再写入。
+	 */
+	function onAsyncChange(v : boolean) {
+		if (asyncBusy.value) {
+			return
+		}
+		const target = v
+		// 回滚到切换前
+		asyncVal.value = !target
+		asyncBusy.value = true
+		setTimeout(() => {
+			asyncVal.value = target
+			asyncBusy.value = false
+		}, 1200)
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		margin-left: 12px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>

@@ -63,6 +63,10 @@
 					<text class="home__card-name">单选框</text>
 					<text class="home__card-tag">nax-radio</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goSwitch">
+					<text class="home__card-name">开关</text>
+					<text class="home__card-tag">nax-switch</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goTextarea">
 					<text class="home__card-name">多行输入</text>
 					<text class="home__card-tag">nax-textarea</text>
@@ -188,6 +192,12 @@
 	function goRadio() {
 		uni.navigateTo({
 			url: '/pages/components/radio/index'
+		})
+	}
+
+	function goSwitch() {
+		uni.navigateTo({
+			url: '/pages/components/switch/index'
 		})
 	}
 
