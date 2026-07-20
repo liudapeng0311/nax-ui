@@ -1,0 +1,636 @@
+<template>
+	<nax-picker
+		:show="show"
+		position="bottom"
+		:round="round"
+		:mask="mask"
+		:mask-closable="maskClosable"
+		:close-on-mask="maskClosable"
+		:close-on-click-overlay="maskClosable"
+		:z-index="zIndex"
+		:duration="duration"
+		:safe-area-inset-bottom="safeAreaInsetBottom"
+		:custom-class="pickerRootClass"
+		@update:show="onUpdateShow"
+		@open="onOpen"
+		@opened="onOpened"
+		@close="onClose"
+		@click-mask="onClickMask"
+	>
+		<view class="nax-action-sheet" :class="rootClass">
+			<!-- 顶部提示 -->
+			<view v-if="hasHeader" class="nax-action-sheet__header">
+				<slot name="header">
+					<text v-if="titleText.length > 0" class="nax-action-sheet__title" :lines="2">{{ titleText }}</text>
+					<text v-if="descText.length > 0" class="nax-action-sheet__desc" :lines="3">{{ descText }}</text>
+				</slot>
+			</view>
+
+			<!-- 操作列表 -->
+			<view class="nax-action-sheet__list">
+				<slot>
+					<view
+						v-for="(item, index) in actionItems"
+						:key="actionKey(item, index)"
+						class="nax-action-sheet__item"
+						:class="itemClass(item, index)"
+						:hover-class="itemHoverClass(item)"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onActionClick(index)"
+					>
+						<text
+							class="nax-action-sheet__item-name"
+							:class="itemNameClass(item)"
+							:style="itemNameStyle(item)"
+							:lines="1"
+							@click.stop="onActionClick(index)"
+						>{{ resolveName(item) }}</text>
+						<text
+							v-if="resolveSubName(item).length > 0"
+							class="nax-action-sheet__item-sub"
+							:class="itemSubClass(item)"
+							:lines="2"
+							@click.stop="onActionClick(index)"
+						>{{ resolveSubName(item) }}</text>
+					</view>
+				</slot>
+			</view>
+
+			<!-- 取消 -->
+			<view v-if="showCancel" class="nax-action-sheet__gap"></view>
+			<view
+				v-if="showCancel"
+				class="nax-action-sheet__cancel"
+				hover-class="nax-action-sheet__item--hover"
+				:hover-start-time="20"
+				:hover-stay-time="70"
+				@click="onCancelClick"
+			>
+				<slot name="cancel">
+					<text class="nax-action-sheet__cancel-text" :lines="1" @click.stop="onCancelClick">{{ cancelLabel }}</text>
+				</slot>
+			</view>
+		</view>
+	</nax-picker>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-action-sheet
+	 * @description 底部动作面板：标准操作列表 + 取消。薄封装 nax-picker。
+	 * @property {boolean} show v-model:show 控制显隐
+	 * @property {Array} actions 操作项列表（name/text、subname、disabled、type、color）
+	 * @property {Array} list 兼容别名；actions 为空时使用
+	 * @property {string} title 顶部标题
+	 * @property {string} description 顶部描述
+	 * @property {string} tips 同 description（兼容）
+	 * @property {boolean} showCancel 是否显示取消，默认 true
+	 * @property {string} cancelText 取消文案，默认 取消
+	 * @property {boolean} closeOnSelect 点选项后是否关闭，默认 true
+	 * @property {boolean} asyncClose 为 true 时点选项不自动关闭
+	 * @property {boolean} round 圆角，默认 true
+	 * @property {boolean} mask 遮罩，默认 true
+	 * @property {boolean} maskClosable 点遮罩关闭，默认 true
+	 * @property {number} zIndex 层级，默认 10080
+	 * @property {number} duration 动画 ms，默认 280
+	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true
+	 * @property {string} customClass 根扩展 class
+	 * @event update:show 显隐变更
+	 * @event select 选中项，参数 UTSJSONObject（index/name/...）
+	 * @event cancel 点取消
+	 * @event open 打开开始
+	 * @event opened 打开完成
+	 * @event close 关闭完成
+	 * @event click-mask 点遮罩
+	 * @slot default 自定义整表操作区
+	 * @slot header 自定义顶部
+	 * @slot cancel 自定义取消区
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		actions: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		description: {
+			type: String,
+			default: ''
+		},
+		tips: {
+			type: String,
+			default: ''
+		},
+		showCancel: {
+			type: Boolean,
+			default: true
+		},
+		cancelText: {
+			type: String,
+			default: '取消'
+		},
+		closeOnSelect: {
+			type: Boolean,
+			default: true
+		},
+		asyncClose: {
+			type: Boolean,
+			default: false
+		},
+		round: {
+			type: Boolean,
+			default: true
+		},
+		mask: {
+			type: Boolean,
+			default: true
+		},
+		maskClosable: {
+			type: Boolean,
+			default: true
+		},
+		zIndex: {
+			type: Number,
+			default: 10080
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		safeAreaInsetBottom: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'select',
+		'cancel',
+		'open',
+		'opened',
+		'close',
+		'click-mask'
+	])
+
+	function isArrayValue(val: any | null): boolean {
+		if (val == null) {
+			return false
+		}
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		if (typeof len != 'number') {
+			return false
+		}
+		return true
+	}
+
+	function asAnyArray(val: any | null): any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		if (!isArrayValue(val)) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function asObject(item: any | null): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function readString(obj: UTSJSONObject, key: string): string {
+		const s = obj.getString(key)
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'string') {
+			const str = anyVal as string
+			if (str.length > 0) {
+				return str
+			}
+		}
+		return ''
+	}
+
+	function readBoolean(obj: UTSJSONObject, key: string): boolean {
+		const b = obj.getBoolean(key)
+		if (b != null) {
+			return b as boolean
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'boolean') {
+			return anyVal as boolean
+		}
+		return false
+	}
+
+	const actionItems = computed((): any[] => {
+		const primary = asAnyArray(props.actions as any)
+		if (primary.length > 0) {
+			return primary
+		}
+		return asAnyArray(props.list as any)
+	})
+
+	const titleText = computed((): string => {
+		return props.title
+	})
+
+	const descText = computed((): string => {
+		if (props.description.length > 0) {
+			return props.description
+		}
+		return props.tips
+	})
+
+	const hasHeader = computed((): boolean => {
+		return titleText.value.length > 0 || descText.value.length > 0
+	})
+
+	const cancelLabel = computed((): string => {
+		if (props.cancelText.length > 0) {
+			return props.cancelText
+		}
+		return '取消'
+	})
+
+	const rootClass = computed((): string => {
+		const list = [] as string[]
+		if (props.customClass.length > 0) {
+			list.push(props.customClass)
+		}
+		return list.join(' ')
+	})
+
+	const pickerRootClass = computed((): string => {
+		return 'nax-action-sheet-host'
+	})
+
+	function resolveName(item: any | null): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		if (typeof item == 'number') {
+			return (item as number).toString()
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const name = readString(obj, 'name')
+		if (name.length > 0) {
+			return name
+		}
+		const text = readString(obj, 'text')
+		if (text.length > 0) {
+			return text
+		}
+		const label = readString(obj, 'label')
+		if (label.length > 0) {
+			return label
+		}
+		return ''
+	}
+
+	function resolveSubName(item: any | null): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const subname = readString(obj, 'subname')
+		if (subname.length > 0) {
+			return subname
+		}
+		const subText = readString(obj, 'subText')
+		if (subText.length > 0) {
+			return subText
+		}
+		const description = readString(obj, 'description')
+		if (description.length > 0) {
+			return description
+		}
+		return ''
+	}
+
+	function resolveDisabled(item: any | null): boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		return readBoolean(obj, 'disabled')
+	}
+
+	function resolveType(item: any | null): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return 'default'
+		}
+		const t = readString(obj, 'type')
+		if (t == 'danger' || t == 'error') {
+			return 'error'
+		}
+		if (t == 'primary' || t == 'info' || t == 'success' || t == 'warning') {
+			return t
+		}
+		return 'default'
+	}
+
+	function resolveColor(item: any | null): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		return readString(obj, 'color')
+	}
+
+	function actionKey(item: any | null, index: number): string {
+		const name = resolveName(item)
+		return index.toString() + '-' + name
+	}
+
+	function itemClass(item: any | null, index: number): string {
+		const list = [] as string[]
+		if (index == 0) {
+			list.push('nax-action-sheet__item--first')
+		}
+		if (resolveDisabled(item)) {
+			list.push('nax-action-sheet__item--disabled')
+		}
+		const t = resolveType(item)
+		if (t == 'error') {
+			list.push('nax-action-sheet__item--error')
+		} else if (t == 'primary') {
+			list.push('nax-action-sheet__item--primary')
+		} else if (t == 'warning') {
+			list.push('nax-action-sheet__item--warning')
+		}
+		return list.join(' ')
+	}
+
+	function itemHoverClass(item: any | null): string {
+		if (resolveDisabled(item)) {
+			return 'none'
+		}
+		return 'nax-action-sheet__item--hover'
+	}
+
+	function itemNameClass(item: any | null): string {
+		const list = [] as string[]
+		if (resolveDisabled(item)) {
+			list.push('nax-action-sheet__item-name--disabled')
+		}
+		const t = resolveType(item)
+		if (t == 'error') {
+			list.push('nax-action-sheet__item-name--error')
+		} else if (t == 'primary') {
+			list.push('nax-action-sheet__item-name--primary')
+		} else if (t == 'warning') {
+			list.push('nax-action-sheet__item-name--warning')
+		}
+		return list.join(' ')
+	}
+
+	function itemSubClass(item: any | null): string {
+		if (resolveDisabled(item)) {
+			return 'nax-action-sheet__item-sub--disabled'
+		}
+		return ''
+	}
+
+	function itemNameStyle(item: any | null): string {
+		const color = resolveColor(item)
+		if (color.length > 0) {
+			return 'color:' + color + ';'
+		}
+		return ''
+	}
+
+	function buildSelectPayload(item: any | null, index: number): UTSJSONObject {
+		const name = resolveName(item)
+		const subname = resolveSubName(item)
+		const disabled = resolveDisabled(item)
+		const typeName = resolveType(item)
+		const color = resolveColor(item)
+		// value 透传（若 actions 项带 value）
+		let valueText = ''
+		const obj = asObject(item)
+		if (obj != null) {
+			const vs = obj.getString('value')
+			if (vs != null) {
+				valueText = vs
+			} else {
+				const vn = obj.getNumber('value')
+				if (vn != null) {
+					valueText = vn.toString()
+				}
+			}
+		}
+		return {
+			index: index,
+			name: name,
+			subname: subname,
+			disabled: disabled,
+			type: typeName,
+			color: color,
+			value: valueText
+		} as UTSJSONObject
+	}
+
+	function shouldAutoClose(): boolean {
+		if (props.asyncClose) {
+			return false
+		}
+		return props.closeOnSelect
+	}
+
+	function onUpdateShow(v: boolean) {
+		emit('update:show', v)
+	}
+
+	function onOpen() {
+		emit('open')
+	}
+
+	function onOpened() {
+		emit('opened')
+	}
+
+	function onClose() {
+		emit('close')
+	}
+
+	function onClickMask() {
+		emit('click-mask')
+	}
+
+	function onActionClick(index: number) {
+		const items = actionItems.value
+		if (index < 0 || index >= items.length) {
+			return
+		}
+		const item = items[index]
+		if (resolveDisabled(item)) {
+			return
+		}
+		emit('select', buildSelectPayload(item, index))
+		if (shouldAutoClose()) {
+			emit('update:show', false)
+		}
+	}
+
+	function onCancelClick() {
+		emit('cancel')
+		emit('update:show', false)
+	}
+</script>
+
+<style>
+	.nax-action-sheet {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: hidden;
+	}
+
+	.nax-action-sheet__header {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 16px;
+		padding-bottom: 16px;
+		padding-left: 20px;
+		padding-right: 20px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-action-sheet__title {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	.nax-action-sheet__desc {
+		margin-top: 6px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-action-sheet__list {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-action-sheet__item {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 54px;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 20px;
+		padding-right: 20px;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-border, #e0e0e6);
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-action-sheet__item--first {
+		border-top-width: 0px;
+	}
+
+	.nax-action-sheet__item--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-action-sheet__item-name {
+		font-size: 16px;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	.nax-action-sheet__item-name--primary {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-action-sheet__item-name--warning {
+		color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-action-sheet__item-name--error {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-action-sheet__item-name--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-action-sheet__item-sub {
+		margin-top: 4px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-action-sheet__item-sub--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-action-sheet__gap {
+		height: 8px;
+		width: 100%;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.nax-action-sheet__cancel {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 54px;
+		padding-top: 14px;
+		padding-bottom: 14px;
+		padding-left: 20px;
+		padding-right: 20px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-action-sheet__cancel-text {
+		font-size: 16px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+</style>

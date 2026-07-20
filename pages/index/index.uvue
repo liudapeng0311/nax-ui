@@ -123,6 +123,10 @@
 					<text class="home__card-name">弹出容器</text>
 					<text class="home__card-tag">nax-picker</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goActionSheet">
+					<text class="home__card-name">动作面板</text>
+					<text class="home__card-tag">nax-action-sheet</text>
+				</view>
 
 			</view>
 			</view>
@@ -289,6 +293,11 @@
 	function goPicker() {
 		uni.navigateTo({
 			url: '/pages/components/picker/index'
+		})
+	}
+	function goActionSheet() {
+		uni.navigateTo({
+			url: '/pages/components/action-sheet/index'
 		})
 	}
 

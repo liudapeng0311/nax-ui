@@ -1,0 +1,228 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-action-sheet</text>
+			<text class="page__desc">底部动作面板：标准操作列表 + 取消。薄封装 nax-picker。</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<view class="row">
+					<nax-button type="primary" label="打开菜单" @click="openBasic"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">标题 / 描述 / 危险项</text>
+				<view class="row">
+					<nax-button label="带标题与删除" @click="openWithTitle"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用项 / 无取消</text>
+				<view class="row">
+					<nax-button size="sm" label="含禁用项" @click="openDisabled"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="隐藏取消" @click="openNoCancel"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">异步关闭</text>
+				<view class="row">
+					<nax-button size="sm" label="点项不自动关" @click="openAsync"></nax-button>
+				</view>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
+
+			<!-- 基础 -->
+			<nax-action-sheet
+				v-model:show="basicShow"
+				:actions="basicActions"
+				@select="onSelect"
+				@cancel="onCancel"
+				@open="onEvent('open')"
+				@close="onEvent('close')"
+			></nax-action-sheet>
+
+			<!-- 标题 + 危险 -->
+			<nax-action-sheet
+				v-model:show="titleShow"
+				title="对当前内容"
+				description="请选择要执行的操作"
+				:actions="titleActions"
+				@select="onSelect"
+				@cancel="onCancel"
+			></nax-action-sheet>
+
+			<!-- 禁用 -->
+			<nax-action-sheet
+				v-model:show="disabledShow"
+				:actions="disabledActions"
+				@select="onSelect"
+				@cancel="onCancel"
+			></nax-action-sheet>
+
+			<!-- 无取消 -->
+			<nax-action-sheet
+				v-model:show="noCancelShow"
+				:show-cancel="false"
+				:actions="basicActions"
+				@select="onSelect"
+			></nax-action-sheet>
+
+			<!-- 异步关闭 -->
+			<nax-action-sheet
+				v-model:show="asyncShow"
+				title="异步关闭示例"
+				description="选中后不会自动关闭，请点取消或遮罩"
+				:actions="basicActions"
+				:async-close="true"
+				@select="onAsyncSelect"
+				@cancel="onCancel"
+			></nax-action-sheet>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basicShow = ref(false)
+	const titleShow = ref(false)
+	const disabledShow = ref(false)
+	const noCancelShow = ref(false)
+	const asyncShow = ref(false)
+	const lastEvent = ref('无')
+
+	const basicActions = [
+		{ name: '分享给朋友' },
+		{ name: '生成海报', subname: '保存到相册' },
+		{ name: '收藏' }
+	]
+
+	const titleActions = [
+		{ name: '编辑' },
+		{ name: '置顶' },
+		{ name: '删除', type: 'error', subname: '删除后不可恢复' }
+	]
+
+	const disabledActions = [
+		{ name: '可选项 A' },
+		{ name: '已禁用', disabled: true, subname: '当前不可用' },
+		{ name: '可选项 B', type: 'primary' }
+	]
+
+	function openBasic() {
+		basicShow.value = true
+	}
+
+	function openWithTitle() {
+		titleShow.value = true
+	}
+
+	function openDisabled() {
+		disabledShow.value = true
+	}
+
+	function openNoCancel() {
+		noCancelShow.value = true
+	}
+
+	function openAsync() {
+		asyncShow.value = true
+	}
+
+	function onSelect(payload: UTSJSONObject) {
+		const index = payload.getNumber('index')
+		const name = payload.getString('name')
+		const indexText = index != null ? index.toString() : '-'
+		const nameText = name != null ? name : ''
+		lastEvent.value = 'select index=' + indexText + ' name=' + nameText
+		uni.showToast({
+			title: nameText,
+			icon: 'none'
+		})
+	}
+
+	function onAsyncSelect(payload: UTSJSONObject) {
+		const name = payload.getString('name')
+		const nameText = name != null ? name : ''
+		lastEvent.value = 'async-select name=' + nameText + '（未自动关闭）'
+		uni.showToast({
+			title: '已选：' + nameText,
+			icon: 'none'
+		})
+	}
+
+	function onCancel() {
+		lastEvent.value = 'cancel'
+	}
+
+	function onEvent(name: string) {
+		lastEvent.value = name
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 24px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.gap {
+		width: 8px;
+		height: 1px;
+	}
+
+	.hint {
+		margin-top: 10px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>
