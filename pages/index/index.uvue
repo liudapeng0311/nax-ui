@@ -107,7 +107,11 @@
 
 			<view class="home__section home__section--gap">
 				<text class="home__section-title">布局组件</text>
-				<view class="home__card" @click="goSwiper">
+				<view class="home__card" @click="goLine">
+					<text class="home__card-name">线条</text>
+					<text class="home__card-tag">nax-line</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goSwiper">
 					<text class="home__card-name">轮播</text>
 					<text class="home__card-tag">nax-swiper</text>
 				</view>
@@ -287,6 +291,12 @@
 	function goCalendar() {
 		uni.navigateTo({
 			url: '/pages/components/calendar/index'
+		})
+	}
+
+	function goLine() {
+		uni.navigateTo({
+			url: '/pages/components/line/index'
 		})
 	}
 

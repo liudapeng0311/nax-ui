@@ -1,0 +1,229 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-line</text>
+			<text class="page__desc">布局纯线条：横/竖、粗细、虚线、语义色。默认走分割线 token。</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<view class="block">
+					<nax-line></nax-line>
+				</view>
+				<text class="hint">默认 hairline + 100% 宽 + divider 色</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">长度 length</text>
+				<view class="block">
+					<nax-line length="100%" space="8"></nax-line>
+					<nax-line length="200" space="8"></nax-line>
+					<nax-line length="50%" space="8"></nax-line>
+				</view>
+				<text class="hint">纯数字按 px；可写 % / px / rpx</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">粗细 size</text>
+				<view class="block">
+					<view class="size-row">
+						<text class="size-label">hairline</text>
+						<nax-line size="hairline"></nax-line>
+					</view>
+					<view class="size-row size-row--gap">
+						<text class="size-label">sm</text>
+						<nax-line size="sm"></nax-line>
+					</view>
+					<view class="size-row size-row--gap">
+						<text class="size-label">md</text>
+						<nax-line size="md"></nax-line>
+					</view>
+					<view class="size-row size-row--gap">
+						<text class="size-label">lg</text>
+						<nax-line size="lg"></nax-line>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">虚线 dashed</text>
+				<view class="block">
+					<nax-line dashed space="8"></nax-line>
+					<nax-line dashed size="md" type="primary" space="8"></nax-line>
+					<nax-line dashed size="lg" type="warning" space="8"></nax-line>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="block">
+					<nax-line type="default" space="8"></nax-line>
+					<nax-line type="primary" space="8"></nax-line>
+					<nax-line type="info" space="8"></nax-line>
+					<nax-line type="success" space="8"></nax-line>
+					<nax-line type="warning" space="8"></nax-line>
+					<nax-line type="error" space="8"></nax-line>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">内缩 inset</text>
+				<view class="card">
+					<text class="card__text">列表项 A</text>
+					<nax-line inset="16"></nax-line>
+					<text class="card__text">列表项 B</text>
+					<nax-line inset="16"></nax-line>
+					<text class="card__text">列表项 C</text>
+				</view>
+				<text class="hint">左右各内缩 16px，适合 cell 分割</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">竖线 vertical</text>
+				<view class="v-row">
+					<text class="v-text">左侧</text>
+					<nax-line direction="vertical" length="24" space="12"></nax-line>
+					<text class="v-text">中间</text>
+					<nax-line direction="vertical" length="24" space="12" type="primary" size="md"></nax-line>
+					<text class="v-text">右侧</text>
+				</view>
+				<view class="v-box v-box--gap">
+					<text class="v-text">固定高度容器</text>
+					<nax-line direction="vertical" length="100%" space="12"></nax-line>
+					<text class="v-text">height 100%</text>
+				</view>
+				<text class="hint">竖线 length=100% 时父级需要有高度</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义 color</text>
+				<view class="block">
+					<nax-line color="#8a2be2" size="md" space="8"></nax-line>
+					<nax-line color="#8a2be2" dashed size="md" space="8"></nax-line>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.block {
+		flex-direction: column;
+		padding: 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.size-row {
+		flex-direction: column;
+	}
+
+	.size-row--gap {
+		margin-top: 12px;
+	}
+
+	.size-label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 6px;
+	}
+
+	.card {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		border-radius: var(--nax-radius-md, 3px);
+		overflow: hidden;
+	}
+
+	.card__text {
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 16px;
+		padding-right: 16px;
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.v-row {
+		flex-direction: row;
+		align-items: center;
+		padding: 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.v-box {
+		flex-direction: row;
+		align-items: center;
+		height: 64px;
+		padding-left: 12px;
+		padding-right: 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.v-box--gap {
+		margin-top: 12px;
+	}
+
+	.v-text {
+		font-size: 13px;
+		color: var(--nax-color-text, #333639);
+	}
+</style>

@@ -37,7 +37,8 @@
 | 文本 | `nax-text` | P0 | 统一字号/颜色/省略/模式格式化（对齐 uView Pro Text） | `type` `size` `lines` `selectable` `mode` `format` `call` `decoration` `bold` `block` / `click` **done** |
 | 图标 | `nax-icon` | P0 | 字体/图片图标壳 | `name` `size` `color` / `click` |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器 | `direction` `size` `wrap` `align` |
-| 分割线 | `nax-divider` | P1 | 内容分隔 | `direction` `dashed` `text` |
+| 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
+| 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` |
 | 标签 | `nax-tag` | P1 | 状态/分类标记（对齐 Naive Tag） | `type` `variant` `size` `closable` `round` `bordered` `checkable` `checked` / `close` `click` `update:checked` **done** |
 
 ### 2.2 布局与列表单元
@@ -145,6 +146,7 @@
 | `nax-rate` | done | 插件包 `uni_modules/nax-rate`；对齐 uView Pro Rate；v-model/count/allowHalf/minCount/滑动打分/readonly |
 | `nax-form` / `nax-form-item` | done | 插件包 `uni_modules/nax-form`；对齐 uView Pro Form；轻量 rules 校验 + provide/inject |
 | `nax-upload` | done | autoUpload/action/header/formData;  插件包 `uni_modules/nax-upload`；对齐 uView Pro Upload；选图/预览/删除/状态；实际上传在 afterRead |
+| `nax-line` | done | 插件包 `uni_modules/nax-line`；布局纯线条；direction/size/dashed/type/space/inset；默认 `--nax-color-divider` |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

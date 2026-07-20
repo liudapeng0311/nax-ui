@@ -1,0 +1,314 @@
+<template>
+	<view class="nax-line" :class="rootClass" :style="rootStyle"></view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-line
+	 * @description 纯线条（布局分隔）。横/竖、粗细、虚线、语义色；默认走 --nax-color-divider。
+	 * @property {string} direction horizontal | vertical；兼容 row / column
+	 * @property {string} length 长度；横线=宽、竖线=高；纯数字按 px；默认 100%
+	 * @property {string} size hairline | sm | md | lg；粗细，默认 hairline
+	 * @property {boolean} dashed 虚线
+	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
+	 * @property {string} color 自定义颜色（覆盖 type）
+	 * @property {string} space 交叉轴外边距（横线=上下；竖线=左右）
+	 * @property {string} inset 主轴两端内缩（横线=左右；竖线=上下）
+	 * @property {string} customClass 根节点扩展 class
+	 */
+	const props = defineProps({
+		direction: { type: String, default: 'horizontal' },
+		length: { type: String, default: '100%' },
+		size: { type: String, default: 'hairline' },
+		dashed: { type: Boolean, default: false },
+		type: { type: String, default: 'default' },
+		color: { type: String, default: '' },
+		space: { type: String, default: '' },
+		inset: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	function normalizeDirection(value : string) : string {
+		if (value == 'vertical' || value == 'column') {
+			return 'vertical'
+		}
+		// horizontal / row / 其它
+		return 'horizontal'
+	}
+
+	function normalizeSize(value : string) : string {
+		if (value == 'sm' || value == 'small' || value == '1') {
+			return 'sm'
+		}
+		if (value == 'md' || value == 'medium' || value == '2') {
+			return 'md'
+		}
+		if (value == 'lg' || value == 'large' || value == '4') {
+			return 'lg'
+		}
+		// hairline / hair-line / 默认
+		return 'hairline'
+	}
+
+	function normalizeType(value : string) : string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function formatCssSize(value : string) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return ''
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0 ||
+			trimmed.indexOf('em') >= 0 ||
+			trimmed.indexOf('rem') >= 0 ||
+			trimmed.indexOf('vw') >= 0 ||
+			trimmed.indexOf('vh') >= 0
+		) {
+			return trimmed
+		}
+		if (isNaN(parseFloat(trimmed))) {
+			return trimmed
+		}
+		return trimmed + 'px'
+	}
+
+	const isHorizontal = computed((): boolean => {
+		return normalizeDirection(props.direction) == 'horizontal'
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-line--' + (isHorizontal.value ? 'horizontal' : 'vertical')
+		cls += ' nax-line--size-' + sizeName.value
+		if (props.dashed) {
+			cls += ' nax-line--dashed'
+		} else {
+			cls += ' nax-line--solid'
+		}
+		cls += ' nax-line--' + typeName.value
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		const rawLength = props.length.trim().length > 0 ? props.length : '100%'
+		const len = formatCssSize(rawLength)
+		const space = formatCssSize(props.space)
+		const inset = formatCssSize(props.inset)
+
+		if (isHorizontal.value) {
+			style += 'width:' + len + ';'
+			if (space.length > 0) {
+				style += 'margin-top:' + space + ';margin-bottom:' + space + ';'
+			}
+			if (inset.length > 0) {
+				style += 'margin-left:' + inset + ';margin-right:' + inset + ';'
+			}
+		} else {
+			style += 'height:' + len + ';'
+			if (space.length > 0) {
+				style += 'margin-left:' + space + ';margin-right:' + space + ';'
+			}
+			if (inset.length > 0) {
+				style += 'margin-top:' + inset + ';margin-bottom:' + inset + ';'
+			}
+		}
+
+		if (props.color.length > 0) {
+			if (props.dashed) {
+				if (isHorizontal.value) {
+					style += 'border-top-color:' + props.color + ';'
+				} else {
+					style += 'border-left-color:' + props.color + ';'
+				}
+			} else {
+				style += 'background-color:' + props.color + ';'
+			}
+		}
+		return style
+	})
+</script>
+
+<style>
+	.nax-line {
+		flex-shrink: 0;
+		box-sizing: border-box;
+	}
+
+	/* ========== 实线：横 ========== */
+	.nax-line--horizontal.nax-line--solid.nax-line--size-hairline {
+		height: 1px;
+		/* 细线：1px 再压半，布局占位仍接近 1px，视觉更接近 0.5 */
+		transform: scaleY(0.5);
+	}
+
+	.nax-line--horizontal.nax-line--solid.nax-line--size-sm {
+		height: 1px;
+	}
+
+	.nax-line--horizontal.nax-line--solid.nax-line--size-md {
+		height: 2px;
+	}
+
+	.nax-line--horizontal.nax-line--solid.nax-line--size-lg {
+		height: 4px;
+	}
+
+	/* ========== 实线：竖 ========== */
+	.nax-line--vertical.nax-line--solid.nax-line--size-hairline {
+		width: 1px;
+		transform: scaleX(0.5);
+	}
+
+	.nax-line--vertical.nax-line--solid.nax-line--size-sm {
+		width: 1px;
+	}
+
+	.nax-line--vertical.nax-line--solid.nax-line--size-md {
+		width: 2px;
+	}
+
+	.nax-line--vertical.nax-line--solid.nax-line--size-lg {
+		width: 4px;
+	}
+
+	/* ========== 虚线：横（border-top） ========== */
+	.nax-line--horizontal.nax-line--dashed {
+		height: 0;
+		background-color: transparent;
+		border-top-style: dashed;
+	}
+
+	.nax-line--horizontal.nax-line--dashed.nax-line--size-hairline,
+	.nax-line--horizontal.nax-line--dashed.nax-line--size-sm {
+		border-top-width: 1px;
+	}
+
+	.nax-line--horizontal.nax-line--dashed.nax-line--size-md {
+		border-top-width: 2px;
+	}
+
+	.nax-line--horizontal.nax-line--dashed.nax-line--size-lg {
+		border-top-width: 4px;
+	}
+
+	/* ========== 虚线：竖（border-left） ========== */
+	.nax-line--vertical.nax-line--dashed {
+		width: 0;
+		background-color: transparent;
+		border-left-style: dashed;
+	}
+
+	.nax-line--vertical.nax-line--dashed.nax-line--size-hairline,
+	.nax-line--vertical.nax-line--dashed.nax-line--size-sm {
+		border-left-width: 1px;
+	}
+
+	.nax-line--vertical.nax-line--dashed.nax-line--size-md {
+		border-left-width: 2px;
+	}
+
+	.nax-line--vertical.nax-line--dashed.nax-line--size-lg {
+		border-left-width: 4px;
+	}
+
+	/* ========== 语义色：实线背景 ========== */
+	.nax-line--default.nax-line--solid {
+		background-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-line--primary.nax-line--solid {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-line--info.nax-line--solid {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-line--success.nax-line--solid {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-line--warning.nax-line--solid {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-line--error.nax-line--solid {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	/* ========== 语义色：虚线边框 ========== */
+	.nax-line--default.nax-line--dashed.nax-line--horizontal {
+		border-top-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-line--default.nax-line--dashed.nax-line--vertical {
+		border-left-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-line--primary.nax-line--dashed.nax-line--horizontal {
+		border-top-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-line--primary.nax-line--dashed.nax-line--vertical {
+		border-left-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-line--info.nax-line--dashed.nax-line--horizontal {
+		border-top-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-line--info.nax-line--dashed.nax-line--vertical {
+		border-left-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-line--success.nax-line--dashed.nax-line--horizontal {
+		border-top-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-line--success.nax-line--dashed.nax-line--vertical {
+		border-left-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-line--warning.nax-line--dashed.nax-line--horizontal {
+		border-top-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-line--warning.nax-line--dashed.nax-line--vertical {
+		border-left-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-line--error.nax-line--dashed.nax-line--horizontal {
+		border-top-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-line--error.nax-line--dashed.nax-line--vertical {
+		border-left-color: var(--nax-color-error, #d03050);
+	}
+</style>
