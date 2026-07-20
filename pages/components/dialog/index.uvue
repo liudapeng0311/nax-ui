@@ -1,0 +1,343 @@
+<template>
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="page__title">nax-dialog</text>
+				<text class="page__desc">居中对话框：声明式 v-model:show + 命令式 naxDialog()。下方挂一次宿主供函数式演示；自定义复杂弹层请用 nax-picker。</text>
+
+				<view class="section">
+					<text class="section__title">声明式 · 基础确认</text>
+					<view class="row">
+						<nax-button type="primary" label="打开确认框" @click="openBasic"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">声明式 · 告警（仅确定）</text>
+					<view class="row">
+						<nax-button label="打开告警" @click="openAlert"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">声明式 · 危险操作</text>
+					<view class="row">
+						<nax-button type="error" label="删除确认" @click="openDanger"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">声明式 · 自定义内容插槽</text>
+					<view class="row">
+						<nax-button type="info" label="自定义内容" @click="openCustom"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">声明式 · 异步关闭</text>
+					<view class="row">
+						<nax-button label="asyncClose" @click="openAsync"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="手动关闭" @click="closeAsync"></nax-button>
+					</view>
+					<text class="hint">点确定后不会自动关，需业务在请求结束后关 show。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">命令式 · API</text>
+					<view class="row">
+						<nax-button size="sm" type="primary" label="naxDialogConfirm" @click="onApiConfirm"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="naxDialogAlert" @click="onApiAlert"></nax-button>
+					</view>
+					<view class="row row--gap">
+						<nax-button size="sm" type="error" label="危险确认" @click="onApiDanger"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="Promise" @click="onApiPromise"></nax-button>
+					</view>
+					<text class="hint">依赖页面底部 nax-dialog 宿主；生产可挂到根布局。未挂载时回退系统 showModal。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">最近事件</text>
+					<text class="hint">{{ lastEvent }}</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<!-- 声明式实例 -->
+		<nax-dialog
+			v-model:show="basicShow"
+			title="提示"
+			content="确定执行该操作吗？"
+			@confirm="onDeclConfirm('basic')"
+			@cancel="onDeclCancel('basic')"
+		></nax-dialog>
+
+		<nax-dialog
+			v-model:show="alertShow"
+			title="提示"
+			content="操作已完成"
+			:show-cancel="false"
+			confirm-text="我知道了"
+			@confirm="onDeclConfirm('alert')"
+		></nax-dialog>
+
+		<nax-dialog
+			v-model:show="dangerShow"
+			title="删除确认"
+			content="删除后不可恢复，是否继续？"
+			confirm-text="删除"
+			confirm-type="error"
+			@confirm="onDeclConfirm('danger')"
+			@cancel="onDeclCancel('danger')"
+		></nax-dialog>
+
+		<nax-dialog
+			v-model:show="customShow"
+			title="用户协议"
+			confirm-text="同意"
+			cancel-text="拒绝"
+			@confirm="onDeclConfirm('custom')"
+			@cancel="onDeclCancel('custom')"
+		>
+			<view class="custom-box">
+				<text class="custom-box__text" :lines="6">请阅读并同意服务条款与隐私政策。本示例用默认插槽自定义内容区。</text>
+			</view>
+		</nax-dialog>
+
+		<nax-dialog
+			v-model:show="asyncShow"
+			title="提交"
+			content="确认提交当前内容？"
+			:async-close="true"
+			@confirm="onAsyncConfirm"
+			@cancel="onDeclCancel('async')"
+		></nax-dialog>
+
+		<!-- 命令式宿主：与 toast 相同，全局挂一次即可；须放在声明式实例之后，保证成为当前宿主 -->
+		<nax-dialog></nax-dialog>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import {
+		naxDialog,
+		naxDialogAlert,
+		naxDialogConfirm
+	} from '@/uni_modules/nax-dialog/index.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basicShow = ref(false)
+	const alertShow = ref(false)
+	const dangerShow = ref(false)
+	const customShow = ref(false)
+	const asyncShow = ref(false)
+	const lastEvent = ref('无')
+
+	function openBasic() {
+		basicShow.value = true
+	}
+
+	function openAlert() {
+		alertShow.value = true
+	}
+
+	function openDanger() {
+		dangerShow.value = true
+	}
+
+	function openCustom() {
+		customShow.value = true
+	}
+
+	function openAsync() {
+		asyncShow.value = true
+	}
+
+	function closeAsync() {
+		asyncShow.value = false
+		lastEvent.value = 'async 手动关闭'
+	}
+
+	function onDeclConfirm(name: string) {
+		lastEvent.value = name + ' confirm'
+		uni.showToast({
+			title: name + ' · 确定',
+			icon: 'none'
+		})
+	}
+
+	function onDeclCancel(name: string) {
+		lastEvent.value = name + ' cancel'
+	}
+
+	function onAsyncConfirm() {
+		lastEvent.value = 'async confirm（未自动关闭）'
+		uni.showToast({
+			title: '已确认，1.5s 后关闭',
+			icon: 'none'
+		})
+		setTimeout(() => {
+			asyncShow.value = false
+			lastEvent.value = 'async 已关闭'
+		}, 1500)
+	}
+
+	function onApiConfirm() {
+		naxDialogConfirm({
+			title: '确认',
+			content: '使用命令式打开确认框'
+		} as UTSJSONObject).then((res: UTSJSONObject) => {
+			const action = res.getString('action')
+			const a = action != null ? action as string : ''
+			lastEvent.value = 'api confirm result=' + a
+			if (res.getBoolean('confirm') == true) {
+				uni.showToast({
+					title: '已确定',
+					icon: 'success'
+				})
+			}
+		})
+	}
+
+	function onApiAlert() {
+		naxDialogAlert({
+			title: '提示',
+			content: '这是一条告警信息'
+		} as UTSJSONObject).then((res: UTSJSONObject) => {
+			const action = res.getString('action')
+			lastEvent.value = 'api alert result=' + (action != null ? action as string : '')
+		})
+	}
+
+	function onApiDanger() {
+		naxDialogConfirm({
+			title: '删除',
+			content: '删除后不可恢复',
+			confirmText: '删除',
+			confirmType: 'error'
+		} as UTSJSONObject).then((res: UTSJSONObject) => {
+			if (res.getBoolean('confirm') == true) {
+				lastEvent.value = 'api danger confirm'
+				uni.showToast({
+					title: '已删除',
+					icon: 'none'
+				})
+			} else {
+				lastEvent.value = 'api danger cancel'
+			}
+		})
+	}
+
+	function onApiPromise() {
+		naxDialog({
+			title: 'Promise',
+			content: '等待你的选择',
+			showCancel: true
+		} as UTSJSONObject).then((res: UTSJSONObject) => {
+			const action = res.getString('action')
+			const a = action != null ? action as string : ''
+			lastEvent.value = 'api promise action=' + a
+			uni.showToast({
+				title: 'action=' + a,
+				icon: 'none'
+			})
+		})
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+		padding-bottom: 40px;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 24px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.row--gap {
+		margin-top: 8px;
+	}
+
+	.gap {
+		width: 8px;
+		height: 1px;
+	}
+
+	.hint {
+		margin-top: 10px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.custom-box {
+		flex-direction: column;
+		width: 100%;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.custom-box__text {
+		font-size: 14px;
+		line-height: 22px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: left;
+	}
+</style>

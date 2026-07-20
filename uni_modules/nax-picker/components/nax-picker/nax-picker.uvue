@@ -1,6 +1,6 @@
 <template>
 	<view v-if="rootMounted" class="nax-picker" :class="rootClass" :style="rootOverlayStyle">
-		<!-- 遮罩：直挂 root（鸿蒙勿包进 opacity 动画层） -->
+		<!-- 遮罩：直挂 root（鸿蒙单独 opacity 淡入淡出，勿把面板包进遮罩层） -->
 		<view
 			v-if="maskEnabled"
 			class="nax-picker__mask"
@@ -162,7 +162,7 @@
 	const panelShow = ref(false)
 	/** 鸿蒙：是否已启用 transition（必须先 false 落起始态，再 true） */
 	const hmAnimReady = ref(false)
-	/** 鸿蒙：遮罩是否显示（与面板展开同步，瞬时切换不走 opacity 动画） */
+	/** 鸿蒙：遮罩是否点亮（opacity 0→0.4 淡入 / 淡出，与 duration 同步） */
 	const hmMaskOn = ref(false)
 
 	const safeBottomPx = ref(0)
@@ -312,11 +312,23 @@
 	const maskStyle = computed((): string => {
 		const d = resolveDuration()
 		// #ifdef APP-HARMONY
-		// 鸿蒙：透明度写进 background，禁止 opacity 过渡（避免闪黑 / 后层慢消）
-		if (hmMaskOn.value) {
-			return 'background-color:rgba(0,0,0,0.45);opacity:1;transition-duration:0ms;transition-property:none;'
+		// 鸿蒙：实色黑 + opacity；与面板共用 hmAnimReady 三阶段，避免「先闪黑再弹框」
+		let ms = 'background-color:#000000;'
+		if (hmAnimReady.value && d > 0) {
+			ms += 'transition-property:opacity;'
+			ms += 'transition-timing-function:ease-out;'
+			ms += 'transition-duration:' + d.toString() + 'ms;'
+		} else {
+			// 阶段1：无 transition，保证首帧就是透明
+			ms += 'transition-property:none;'
+			ms += 'transition-duration:0ms;'
 		}
-		return 'background-color:rgba(0,0,0,0);opacity:1;transition-duration:0ms;transition-property:none;'
+		if (hmMaskOn.value) {
+			ms += 'opacity:0.4;'
+		} else {
+			ms += 'opacity:0;'
+		}
+		return ms
 		// #endif
 		// #ifndef APP-HARMONY
 		return 'transition-duration:' + d.toString() + 'ms;'
@@ -535,26 +547,25 @@
 		refreshSafeArea()
 
 		// #ifdef APP-HARMONY
-		// 鸿蒙三阶段：挂载起始态(无 transition) → 开 transition → 切结束态
+		// 鸿蒙三阶段：挂载起始态(无 transition) → 开 transition → 遮罩+面板同帧切结束态
+		// 注意：遮罩绝不能比面板更早点亮，否则会「先闪黑，框才弹出来」
 		resetHarmonyAnimState()
 		rootMounted.value = true
-		// 遮罩与面板同帧准备：先挂透明遮罩层，下一步再点亮，避免「后层慢消」
 		hmMaskOn.value = false
 		panelShow.value = false
 		hmAnimReady.value = false
 
-		// 阶段1：等 DOM 落起始态
+		// 阶段1：等 DOM 落起始态（遮罩 opacity=0，面板在 scale/translate 起始态）
 		openDelayTimer = setTimeout(() => {
 			openDelayTimer = -1
-			// 点亮遮罩（瞬时，无动画）
-			hmMaskOn.value = true
-			// 阶段2：开启 transition，仍保持起始态
+			// 阶段2：开启 transition，仍保持起始态（遮罩仍透明）
 			enterReadyTimer = setTimeout(() => {
 				enterReadyTimer = -1
 				hmAnimReady.value = true
-				// 阶段3：切到结束态，触发进场
+				// 阶段3：遮罩与面板同一帧进入结束态，同步淡入/弹出
 				enterToTimer = setTimeout(() => {
 					enterToTimer = -1
+					hmMaskOn.value = true
 					panelShow.value = true
 					const d = resolveDuration()
 					openedTimer = setTimeout(() => {
@@ -618,7 +629,7 @@
 		clearAnimTimers()
 
 		// #ifdef APP-HARMONY
-		// 退场：保持 transition，切回起始态；遮罩瞬时灭
+		// 退场：先保证 transition 开启，再同帧收起遮罩+面板
 		hmAnimReady.value = true
 		panelShow.value = false
 		hmMaskOn.value = false
@@ -755,16 +766,24 @@
 		transition-timing-function: ease-out;
 		/* #endif */
 		/* #ifdef APP-HARMONY */
-		background-color: rgba(0, 0, 0, 0);
-		opacity: 1;
-		transition-property: none;
-		transition-duration: 0ms;
+		/* 实色黑 + opacity，保证淡入淡出可用（inline style 会覆盖 duration/opacity） */
+		background-color: #000000;
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
 		/* #endif */
 	}
 
 	/* #ifndef APP-HARMONY */
 	.nax-picker__mask--show {
 		opacity: 1;
+	}
+	/* #endif */
+
+	/* #ifdef APP-HARMONY */
+	.nax-picker__mask--show {
+		opacity: 0.4;
 	}
 	/* #endif */
 

@@ -1,4 +1,4 @@
-﻿# nax-ui
+# nax-ui
 
 uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不强制单包套装）。
 
@@ -17,6 +17,7 @@ uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不�
 | `nax-number-box` | 步进器（对齐 uView Pro NumberBox） |
 | `nax-rate` | 评分（对齐 uView Pro Rate） |
 | `nax-toast` | 轻提示（函数式 naxToast） |
+| `nax-dialog` | 对话框（声明式 + 函数式 naxDialog） |
 
 ## 推荐接入
 
