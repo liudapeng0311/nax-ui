@@ -110,7 +110,7 @@
 |------|------|--------|------|
 | 导航栏 | `nax-nav-bar` | P1 | 页头 |
 | 标签页 | `nax-tabs` | P1 | 内容切换 |
-| 宫格 | `nax-grid` | P2 | 入口宫格 |
+| 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
 | 列表 | `nax-list` | P2 | 滚动列表壳 |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
 | 图片 | `nax-image` | P2 | 占位/失败态 |
@@ -147,6 +147,7 @@
 | `nax-form` / `nax-form-item` | done | 插件包 `uni_modules/nax-form`；对齐 uView Pro Form；轻量 rules 校验 + provide/inject |
 | `nax-upload` | done | autoUpload/action/header/formData;  插件包 `uni_modules/nax-upload`；对齐 uView Pro Upload；选图/预览/删除/状态；实际上传在 afterRead |
 | `nax-line` | done | 插件包 `uni_modules/nax-line`；布局纯线条；direction/size/dashed/type/space/inset；默认 `--nax-color-divider` |
+| `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

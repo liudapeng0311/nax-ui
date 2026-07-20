@@ -255,7 +255,7 @@
 			style += 'background-color:' + props.color + ';'
 		}
 		if (props.dot) {
-			style += 'width:8px;height:8px;min-width:8px;min-height:8px;padding-left:0;padding-right:0;'
+			style += 'width:8px;height:8px;min-width:8px;max-width:8px;min-height:8px;max-height:8px;padding-left:0;padding-right:0;padding-top:0;padding-bottom:0;flex-grow:0;flex-shrink:0;'
 		} else {
 			style += 'height:18px;min-height:18px;'
 			const text = displayText.value
@@ -415,6 +415,7 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
+		flex-grow: 0;
 		flex-shrink: 0;
 		z-index: 10;
 		background-color: #d03050;
@@ -462,9 +463,15 @@
 		width: 8px;
 		height: 8px;
 		min-width: 8px;
+		max-width: 8px;
 		min-height: 8px;
+		max-height: 8px;
 		padding-left: 0;
 		padding-right: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		flex-grow: 0;
+		flex-shrink: 0;
 	}
 
 	.nax-badge__sup--default,

@@ -1,0 +1,231 @@
+<template>
+	<view
+		class="nax-grid-item"
+		:class="rootClass"
+		:style="rootStyle"
+		:hover-class="hoverClassName"
+		:hover-stay-time="150"
+		@click="onClick"
+	>
+		<view class="nax-grid-item__box" :class="boxClass">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-grid-item
+	 * @description 宫格子项。需放在 nax-grid 内。
+	 * @property {string} index 点击回传值；空则按挂载顺序自动编号
+	 * @property {boolean} disabled 禁用
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击；参数为 index（string）
+	 * @slot default 宫格内容（图标/文案等）
+	 */
+	const props = defineProps({
+		index: {
+			type: String,
+			default: ''
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click'])
+
+	const inGroup = inject('naxGridInGroup', false) as boolean
+	const colRef = inject('naxGridCol', null)
+	const borderRef = inject('naxGridBorder', null)
+	const gapPxRef = inject('naxGridGapPx', null)
+	const hoverRef = inject('naxGridHover', null)
+	const claimRaw = inject('naxGridClaimIndex', null)
+	const onClickRaw = inject('naxGridOnClick', null)
+
+	function readRefNumber(r : any | null, fallback : number) : number {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<number>).value
+	}
+
+	function readRefBool(r : any | null, fallback : boolean) : boolean {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<boolean>).value
+	}
+
+	const autoIndex = ref(-1)
+	if (inGroup && claimRaw != null) {
+		const fn = claimRaw as () => number
+		autoIndex.value = fn()
+	}
+
+	const colValue = computed((): number => {
+		if (!inGroup) {
+			return 1
+		}
+		const n = readRefNumber(colRef, 3)
+		if (n < 1) {
+			return 1
+		}
+		return n
+	})
+
+	const borderValue = computed((): boolean => {
+		if (!inGroup) {
+			return false
+		}
+		return readRefBool(borderRef, true)
+	})
+
+	const gapPxValue = computed((): number => {
+		if (!inGroup) {
+			return 0
+		}
+		return readRefNumber(gapPxRef, 0)
+	})
+
+	const hoverValue = computed((): boolean => {
+		if (!inGroup) {
+			return true
+		}
+		return readRefBool(hoverRef, true)
+	})
+
+	const meshBorder = computed((): boolean => {
+		return borderValue.value && gapPxValue.value <= 0
+	})
+
+	const cardBorder = computed((): boolean => {
+		return borderValue.value && gapPxValue.value > 0
+	})
+
+	function resolveIndex() : string {
+		if (props.index.length > 0) {
+			return props.index
+		}
+		if (autoIndex.value >= 0) {
+			return '' + autoIndex.value
+		}
+		return ''
+	}
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.disabled) {
+			cls += ' nax-grid-item--disabled'
+		}
+		if (meshBorder.value) {
+			cls += ' nax-grid-item--mesh'
+		}
+		if (cardBorder.value) {
+			cls += ' nax-grid-item--card'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const boxClass = computed((): string => {
+		var cls = ''
+		if (meshBorder.value) {
+			cls += ' nax-grid-item__box--mesh'
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		const col = colValue.value
+		const pct = 100.0 / col
+		var style = 'width:' + pct + '%;'
+		const gap = gapPxValue.value
+		if (gap > 0) {
+			const half = gap / 2
+			style += 'padding-left:' + half + 'px;'
+			style += 'padding-right:' + half + 'px;'
+			style += 'padding-top:' + half + 'px;'
+			style += 'padding-bottom:' + half + 'px;'
+		}
+		return style
+	})
+
+	const hoverClassName = computed((): string => {
+		if (props.disabled) {
+			return 'none'
+		}
+		if (!hoverValue.value) {
+			return 'none'
+		}
+		return 'nax-grid-item--hover'
+	})
+
+	function onClick() {
+		if (props.disabled) {
+			return
+		}
+		const idx = resolveIndex()
+		emit('click', idx)
+		if (onClickRaw != null) {
+			const fn = onClickRaw as (i : string) => void
+			fn(idx)
+		}
+	}
+</script>
+
+<style>
+	.nax-grid-item {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: visible;
+	}
+
+	.nax-grid-item--mesh {
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-grid-item--disabled {
+		opacity: var(--nax-opacity-disabled, 0.45);
+	}
+
+	.nax-grid-item--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5) !important;
+	}
+
+	.nax-grid-item__box {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding-top: 16px;
+		padding-bottom: 16px;
+		padding-left: 8px;
+		padding-right: 8px;
+		overflow: visible;
+	}
+
+	.nax-grid-item__box--mesh {
+		border-right-width: 1px;
+		border-right-style: solid;
+		border-right-color: var(--nax-color-divider, #efeff5);
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-grid-item--card .nax-grid-item__box {
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+</style>

@@ -111,6 +111,10 @@
 					<text class="home__card-name">线条</text>
 					<text class="home__card-tag">nax-line</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goGrid">
+					<text class="home__card-name">宫格</text>
+					<text class="home__card-tag">nax-grid</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goSwiper">
 					<text class="home__card-name">轮播</text>
 					<text class="home__card-tag">nax-swiper</text>
@@ -300,6 +304,12 @@
 		})
 	}
 
+
+	function goGrid() {
+		uni.navigateTo({
+			url: '/pages/components/grid/index'
+		})
+	}
 	function goSwiper() {
 		uni.navigateTo({
 			url: '/pages/components/swiper/index'

@@ -1,0 +1,309 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-grid</text>
+			<text class="page__desc">宫格布局：列数、边框、间距、对齐、点击与徽标组合。</text>
+
+			<view class="section">
+				<text class="section__title">基础 · 3 列 + 边框</text>
+				<view class="block">
+					<nax-grid :col="3" @click="onGridClick">
+						<nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'' + i">
+							<nax-icon :name="icon" size="22"></nax-icon>
+							<text class="grid-text">{{ basicLabels[i] }}</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+				<text class="hint">最近点击：{{ lastClick }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">4 列 · 无边框</text>
+				<view class="block">
+					<nax-grid :col="4" :border="false" @click="onGridClick">
+						<nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'noborder-' + i">
+							<nax-icon :name="icon" size="20"></nax-icon>
+							<text class="grid-text">{{ basicLabels[i] }}</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">间距 gap + 卡片描边</text>
+				<view class="block block--plain">
+					<nax-grid :col="3" gap="8" @click="onGridClick">
+						<nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'gap-' + i">
+							<nax-icon :name="icon" size="22"></nax-icon>
+							<text class="grid-text">{{ basicLabels[i] }}</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+				<text class="hint">border 开启且 gap 大于 0 时，子项独立描边</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">对齐 align（仅 2 项）</text>
+				<view class="block">
+					<text class="sub-label">left</text>
+					<nax-grid :col="3" align="left" :border="false" gap="8">
+						<nax-grid-item index="a1">
+							<nax-icon name="home" size="22"></nax-icon>
+							<text class="grid-text">首页</text>
+						</nax-grid-item>
+						<nax-grid-item index="a2">
+							<nax-icon name="user" size="22"></nax-icon>
+							<text class="grid-text">我的</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+				<view class="block block--gap">
+					<text class="sub-label">center</text>
+					<nax-grid :col="3" align="center" :border="false" gap="8">
+						<nax-grid-item index="b1">
+							<nax-icon name="home" size="22"></nax-icon>
+							<text class="grid-text">首页</text>
+						</nax-grid-item>
+						<nax-grid-item index="b2">
+							<nax-icon name="user" size="22"></nax-icon>
+							<text class="grid-text">我的</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+				<view class="block block--gap">
+					<text class="sub-label">right</text>
+					<nax-grid :col="3" align="right" :border="false" gap="8">
+						<nax-grid-item index="c1">
+							<nax-icon name="home" size="22"></nax-icon>
+							<text class="grid-text">首页</text>
+						</nax-grid-item>
+						<nax-grid-item index="c2">
+							<nax-icon name="user" size="22"></nax-icon>
+							<text class="grid-text">我的</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">徽标组合</text>
+				<view class="block block--badge">
+					<nax-grid :col="3" @click="onGridClick">
+						<nax-grid-item index="msg" custom-class="grid-item--badge">
+							<view class="grid-entry">
+								<view class="grid-entry__icon">
+									<nax-badge value="9" offset-x="2" offset-y="-2">
+										<view class="badge-anchor">
+											<nax-icon name="share" size="22"></nax-icon>
+										</view>
+									</nax-badge>
+								</view>
+								<text class="grid-text">消息</text>
+							</view>
+						</nax-grid-item>
+						<nax-grid-item index="dot" custom-class="grid-item--badge">
+							<view class="grid-entry">
+								<view class="grid-entry__icon">
+									<nax-badge dot offset-x="2" offset-y="-2">
+										<view class="badge-anchor">
+											<nax-icon name="heart" size="22"></nax-icon>
+										</view>
+									</nax-badge>
+								</view>
+								<text class="grid-text">喜欢</text>
+							</view>
+						</nax-grid-item>
+						<nax-grid-item index="star" custom-class="grid-item--badge">
+							<view class="grid-entry">
+								<view class="grid-entry__icon">
+									<view class="badge-anchor">
+										<nax-icon name="star" size="22"></nax-icon>
+									</view>
+								</view>
+								<text class="grid-text">收藏</text>
+							</view>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+				<text class="hint">徽标只包住图标，文案在下方；给锚点固定尺寸，避免红点被拉扁</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 · 关闭 hover</text>
+				<view class="block">
+					<nax-grid :col="3" :hover="false" @click="onGridClick">
+						<nax-grid-item index="ok">
+							<nax-icon name="check" size="22"></nax-icon>
+							<text class="grid-text">可用</text>
+						</nax-grid-item>
+						<nax-grid-item index="off" disabled>
+							<nax-icon name="close" size="22"></nax-icon>
+							<text class="grid-text">禁用</text>
+						</nax-grid-item>
+						<nax-grid-item index="set">
+							<nax-icon name="settings" size="22"></nax-icon>
+							<text class="grid-text">设置</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+				<text class="hint">整表 hover=false；单项 disabled 不触发 click</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自动 index（不传 index）</text>
+				<view class="block">
+					<nax-grid :col="3" @click="onGridClick">
+						<nax-grid-item>
+							<nax-icon name="image" size="22"></nax-icon>
+							<text class="grid-text">自动0</text>
+						</nax-grid-item>
+						<nax-grid-item>
+							<nax-icon name="search" size="22"></nax-icon>
+							<text class="grid-text">自动1</text>
+						</nax-grid-item>
+						<nax-grid-item>
+							<nax-icon name="edit" size="22"></nax-icon>
+							<text class="grid-text">自动2</text>
+						</nax-grid-item>
+					</nax-grid>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basicIcons = ['home', 'user', 'image', 'search', 'settings', 'star']
+	const basicLabels = ['首页', '我的', '相册', '搜索', '设置', '收藏']
+
+	const lastClick = ref('无')
+
+	function onGridClick(index : string) {
+		lastClick.value = index
+		uni.showToast({
+			title: '点击 ' + index,
+			icon: 'none'
+		})
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+		padding-bottom: 32px;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.block {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		overflow: hidden;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.block--plain {
+		border-width: 0;
+		background-color: transparent;
+		overflow: visible;
+	}
+
+	.block--gap {
+		margin-top: 10px;
+	}
+
+	.sub-label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		padding-top: 10px;
+		padding-left: 12px;
+		padding-bottom: 4px;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.grid-text {
+		margin-top: 6px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	/* 徽标区：允许角标溢出，且整块居中 */
+	.block--badge {
+		overflow: visible;
+	}
+
+	.grid-entry {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+
+	.grid-entry__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		/* 给角标留出溢出空间，避免贴边裁切/挤压 */
+		padding-top: 4px;
+		padding-right: 4px;
+		overflow: visible;
+	}
+
+	.badge-anchor {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		overflow: visible;
+	}
+</style>
