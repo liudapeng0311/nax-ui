@@ -1,0 +1,414 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-upload</text>
+			<text class="page__desc">上传（对齐 uView Pro Upload 主能力：选图 / 预览 / 删除 / 状态）</text>
+
+			<view class="section">
+				<text class="section__title">基础用法</text>
+				<nax-upload
+					:file-list="basicList"
+					:max-count="6"
+					multiple
+					name="basic"
+					@after-read="onBasicAfterRead"
+					@delete="onBasicDelete"
+					@oversize="onOversize"
+				></nax-upload>
+				<text class="hint">数量：{{ basicCount }} · {{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">限制数量 maxCount=3</text>
+				<nax-upload
+					:file-list="limitList"
+					:max-count="3"
+					multiple
+					upload-text="上传"
+					@after-read="onLimitAfterRead"
+					@delete="onLimitDelete"
+				></nax-upload>
+			</view>
+
+			<view class="section">
+				<text class="section__title">状态展示（uploading / failed / success）</text>
+				<nax-upload
+					:file-list="statusList"
+					:max-count="4"
+					:deletable="true"
+					@delete="onStatusDelete"
+				></nax-upload>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 disabled</text>
+				<nax-upload
+					:file-list="disabledList"
+					disabled
+					:max-count="4"
+				></nax-upload>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义尺寸 / 不可删除</text>
+				<nax-upload
+					:file-list="sizeList"
+					width="100"
+					height="100"
+					:deletable="false"
+					:max-count="4"
+					@after-read="onSizeAfterRead"
+				></nax-upload>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义添加按钮（slot）</text>
+				<nax-upload
+					:file-list="slotList"
+					:max-count="5"
+					@after-read="onSlotAfterRead"
+					@delete="onSlotDelete"
+				>
+					<view class="custom-add">
+						<nax-icon name="image" size="lg" color="#18a058"></nax-icon>
+						<text class="custom-add__text">添加图片</text>
+					</view>
+				</nax-upload>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自动上传 autoUpload</text>
+				<text class="hint">配置 uploadAction 后选图自动 uploadFile；空地址会 toast</text>
+				<nax-upload
+					:file-list="autoList"
+					auto-upload
+					:action="uploadAction"
+					:max-count="4"
+					multiple
+					name="file"
+					@update:file-list="onAutoFileList"
+					@after-read="onAutoAfterRead"
+					@success="onAutoSuccess"
+					@fail="onAutoFail"
+					@delete="onAutoDelete"
+				></nax-upload>
+				<text class="hint">action: {{ uploadActionText }} / {{ autoEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">模拟上传进度</text>
+				<nax-upload
+					:file-list="mockList"
+					:max-count="6"
+					multiple
+					@after-read="onMockAfterRead"
+					@delete="onMockDelete"
+				></nax-upload>
+				<text class="hint">选图后自动模拟 uploading → success</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const lastEvent = ref('等待操作')
+
+	const basicList = ref([] as any[])
+	const limitList = ref([] as any[])
+	const sizeList = ref([] as any[])
+	const slotList = ref([] as any[])
+	const mockList = ref([] as any[])
+	const autoList = ref([] as any[])
+	const uploadAction = ref('')
+	const autoEvent = ref('等待自动上传')
+
+	const uploadActionText = computed((): string => {
+		if (uploadAction.value.length == 0) {
+			return '(空，请在脚本设置 uploadAction)'
+		}
+		return uploadAction.value
+	})
+
+	const disabledList = ref([
+		{
+			url: 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
+			status: 'success',
+			message: '',
+			type: 'image'
+		} as UTSJSONObject
+	] as any[])
+
+	const statusList = ref([
+		{
+			url: 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
+			status: 'uploading',
+			message: '上传中',
+			type: 'image'
+		} as UTSJSONObject,
+		{
+			url: 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
+			status: 'failed',
+			message: '失败',
+			type: 'image'
+		} as UTSJSONObject,
+		{
+			url: 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg',
+			status: 'success',
+			message: '',
+			type: 'image'
+		} as UTSJSONObject
+	] as any[])
+
+	const basicCount = computed((): number => {
+		return basicList.value.length
+	})
+
+	function cloneList(list: any[]): any[] {
+		const next = [] as any[]
+		var i = 0
+		while (i < list.length) {
+			next.push(list[i])
+			i++
+		}
+		return next
+	}
+
+	function appendFiles(listRef: any, e: any) {
+		const payload = e as UTSJSONObject
+		const files = payload.getArray('files')
+		const next = cloneList(listRef.value)
+		if (files != null) {
+			var i = 0
+			while (i < files.length) {
+				next.push(files[i])
+				i++
+			}
+		} else {
+			const file = payload.getAny('file')
+			if (file != null) {
+				next.push(file)
+			}
+		}
+		listRef.value = next
+	}
+
+	function applyDelete(listRef: any, e: any) {
+		const payload = e as UTSJSONObject
+		const nextAny = payload.getArray('fileList')
+		if (nextAny != null) {
+			listRef.value = nextAny as any[]
+			return
+		}
+		const idxAny = payload.getNumber('index')
+		if (idxAny == null) {
+			return
+		}
+		const idx = idxAny as number
+		const next = [] as any[]
+		var i = 0
+		while (i < listRef.value.length) {
+			if (i != idx) {
+				next.push(listRef.value[i])
+			}
+			i++
+		}
+		listRef.value = next
+	}
+
+	function onBasicAfterRead(e: any) {
+		appendFiles(basicList, e)
+		lastEvent.value = 'afterRead: basic'
+	}
+
+	function onBasicDelete(e: any) {
+		applyDelete(basicList, e)
+		lastEvent.value = 'delete: basic'
+	}
+
+	function onLimitAfterRead(e: any) {
+		appendFiles(limitList, e)
+		lastEvent.value = 'afterRead: maxCount'
+	}
+
+	function onLimitDelete(e: any) {
+		applyDelete(limitList, e)
+	}
+
+	function onStatusDelete(e: any) {
+		applyDelete(statusList, e)
+	}
+
+	function onSizeAfterRead(e: any) {
+		appendFiles(sizeList, e)
+	}
+
+	function onSlotAfterRead(e: any) {
+		appendFiles(slotList, e)
+	}
+
+	function onSlotDelete(e: any) {
+		applyDelete(slotList, e)
+	}
+
+	function onOversize(_e: any) {
+		lastEvent.value = 'oversize: 文件过大'
+		uni.showToast({
+			title: '文件过大',
+			icon: 'none'
+		})
+	}
+
+	function onMockAfterRead(e: any) {
+		const payload = e as UTSJSONObject
+		const files = payload.getArray('files')
+		const next = cloneList(mockList.value)
+		const start = next.length
+		if (files != null) {
+			var i = 0
+			while (i < files.length) {
+				const raw = files[i] as UTSJSONObject
+				const url = raw.getString('url')
+				const item = {
+					url: url != null ? url : '',
+					thumb: url != null ? url : '',
+					type: 'image',
+					status: 'uploading',
+					message: '上传中'
+				} as UTSJSONObject
+				next.push(item)
+				i++
+			}
+		}
+		mockList.value = next
+
+		// 模拟异步上传完成
+		const end = next.length
+		setTimeout(() => {
+			const cur = cloneList(mockList.value)
+			var j = start
+			while (j < end && j < cur.length) {
+				const it = cur[j] as UTSJSONObject
+				const u = it.getString('url')
+				cur[j] = {
+					url: u != null ? u : '',
+					thumb: u != null ? u : '',
+					type: 'image',
+					status: 'success',
+					message: ''
+				} as UTSJSONObject
+				j++
+			}
+			mockList.value = cur
+			lastEvent.value = 'mock upload success'
+		}, 1200)
+	}
+
+	function onMockDelete(e: any) {
+		applyDelete(mockList, e)
+	}
+
+	function onAutoFileList(list: any) {
+		if (list == null) {
+			autoList.value = [] as any[]
+			return
+		}
+		autoList.value = list as any[]
+	}
+
+	function onAutoAfterRead(_e: any) {
+		autoEvent.value = 'afterRead（随后自动上传）'
+	}
+
+	function onAutoSuccess(e: any) {
+		const payload = e as UTSJSONObject
+		const url = payload.getString('url')
+		autoEvent.value = 'success: ' + (url != null ? url : '')
+		lastEvent.value = autoEvent.value
+	}
+
+	function onAutoFail(_e: any) {
+		autoEvent.value = 'fail: 上传失败'
+		lastEvent.value = autoEvent.value
+	}
+
+	function onAutoDelete(e: any) {
+		applyDelete(autoList, e)
+		autoEvent.value = 'delete'
+	}
+
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 12px;
+	}
+
+	.hint {
+		margin-top: 10px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.custom-add {
+		width: 80px;
+		height: 80px;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-color-primary-tertiary, #e3f3eb);
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.custom-add__text {
+		margin-top: 4px;
+		font-size: 12px;
+		color: var(--nax-color-primary, #18a058);
+	}
+</style>

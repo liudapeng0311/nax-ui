@@ -1,0 +1,1396 @@
+<template>
+	<view class="nax-upload" :class="rootClass">
+		<!-- 已选文件预览 -->
+		<view
+			v-for="(item, index) in displayList"
+			:key="itemKey(item, index as number)"
+			class="nax-upload__item"
+			:style="itemBoxStyle"
+			@click.stop="onPreviewClick(index as number)"
+		>
+			<!-- 图片 / 视频封面 -->
+			<image
+				v-if="resolveIsImage(item) || resolveThumb(item).length > 0"
+				class="nax-upload__image"
+				:src="resolveThumb(item)"
+				:mode="imageMode"
+			></image>
+			<!-- 非图片占位 -->
+			<view v-else class="nax-upload__file" :style="itemBoxStyle">
+				<nax-icon name="image" size="lg" color="var(--nax-color-text-placeholder, #c2c2c2)"></nax-icon>
+				<text v-if="resolveName(item).length > 0" class="nax-upload__file-name" :lines="1">{{ resolveName(item) }}</text>
+			</view>
+
+			<!-- 状态遮罩 -->
+			<view v-if="showStatusMask(item)" class="nax-upload__mask" :style="itemBoxStyle">
+				<nax-icon
+					v-if="resolveStatus(item) == 'uploading'"
+					name="loading"
+					size="md"
+					color="#ffffff"
+				></nax-icon>
+				<nax-icon
+					v-else-if="resolveStatus(item) == 'failed'"
+					name="error"
+					size="md"
+					color="#ffffff"
+				></nax-icon>
+				<nax-icon
+					v-else-if="resolveStatus(item) == 'success'"
+					name="success"
+					size="md"
+					color="#ffffff"
+				></nax-icon>
+				<text v-if="resolveMessage(item).length > 0" class="nax-upload__mask-text" :lines="2">{{ resolveMessage(item) }}</text>
+			</view>
+
+			<!-- 删除 -->
+			<view
+				v-if="showDeleteBtn"
+				class="nax-upload__delete"
+				@click.stop="onDeleteClick(index as number)"
+			>
+				<nax-icon name="close" size="12" color="#ffffff"></nax-icon>
+			</view>
+		</view>
+
+		<!-- 添加按钮 -->
+		<view
+			v-if="showAdd"
+			class="nax-upload__item nax-upload__item--add"
+			:class="addClass"
+			:style="itemBoxStyle"
+			:hover-class="addHoverClass"
+			:hover-start-time="20"
+			:hover-stay-time="70"
+			@click.stop="onAddClick"
+		>
+			<slot>
+				<view class="nax-upload__add-inner">
+					<nax-icon :name="uploadIconName" size="lg" :color="addIconColor"></nax-icon>
+					<text v-if="uploadTextValue.length > 0" class="nax-upload__add-text">{{ uploadTextValue }}</text>
+				</view>
+			</slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-upload
+	 * @description 上传。对齐 uView Pro Upload 主能力：选图/预览/删除/状态；实际上传在 afterRead 中由业务完成。
+	 * @property {Array} fileList 文件列表（受控）
+	 * @property {string} accept image | video | media
+	 * @property {string} capture 图片来源 album,camera（逗号分隔）
+	 * @property {boolean} compressed 是否压缩图片
+	 * @property {string} camera back | front（按端支持）
+	 * @property {number} maxCount 最多数量
+	 * @property {number} maxSize 单文件最大字节
+	 * @property {boolean} previewFullImage 点击全屏预览
+	 * @property {boolean} multiple 多选
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} deletable 可删除
+	 * @property {string} imageMode image mode
+	 * @property {string} name 标识，透传事件
+	 * @property {string} sizeType original / compressed / original,compressed；空则跟 compressed
+	 * @property {string} uploadText 添加文案
+	 * @property {string} uploadIcon 添加图标
+	 * @property {string} width 预览格宽
+	 * @property {string} height 预览格高
+	 * @property {boolean} previewImage 是否展示预览
+	 * @property {boolean} useBeforeRead 先 beforeRead 再 confirmRead
+	 * @property {boolean} autoUpload 预留
+	 * @property {string} customClass 扩展 class
+	 * @event update:fileList / afterRead / beforeRead / oversize / delete / beforeDelete / clickPreview / success / fail / progress
+	 * @method chooseFile / confirmRead / upload / reupload
+	 * @slot default 自定义添加按钮
+	 */
+	const props = defineProps({
+		fileList: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		accept: {
+			type: String,
+			default: 'image'
+		},
+		capture: {
+			type: String,
+			default: 'album,camera'
+		},
+		compressed: {
+			type: Boolean,
+			default: true
+		},
+		camera: {
+			type: String,
+			default: 'back'
+		},
+		maxCount: {
+			type: Number,
+			default: 52
+		},
+		maxSize: {
+			type: Number,
+			default: 0
+		},
+		previewFullImage: {
+			type: Boolean,
+			default: true
+		},
+		multiple: {
+			type: Boolean,
+			default: false
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		deletable: {
+			type: Boolean,
+			default: true
+		},
+		imageMode: {
+			type: String,
+			default: 'aspectFill'
+		},
+		name: {
+			type: String,
+			default: 'file'
+		},
+		sizeType: {
+			type: String,
+			default: ''
+		},
+		uploadText: {
+			type: String,
+			default: ''
+		},
+		uploadIcon: {
+			type: String,
+			default: 'plus'
+		},
+		width: {
+			type: String,
+			default: '80'
+		},
+		height: {
+			type: String,
+			default: '80'
+		},
+		previewImage: {
+			type: Boolean,
+			default: true
+		},
+		useBeforeRead: {
+			type: Boolean,
+			default: false
+		},
+		autoUpload: {
+			type: Boolean,
+			default: false
+		},
+		action: {
+			type: String,
+			default: ''
+		},
+		header: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		formData: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:fileList',
+		'afterRead',
+		'beforeRead',
+		'oversize',
+		'delete',
+		'beforeDelete',
+		'clickPreview',
+		'success',
+		'fail',
+		'progress'
+	])
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function toCssSize(value: string, fallback: string): string {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (isDigits(value)) {
+			return value + 'px'
+		}
+		return value
+	}
+
+	function asObject(item: any | null): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function resolveUrl(item: any | null): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const url = obj.getString('url')
+		if (url != null && url.length > 0) {
+			return url
+		}
+		const path = obj.getString('path')
+		if (path != null && path.length > 0) {
+			return path
+		}
+		const src = obj.getString('src')
+		if (src != null && src.length > 0) {
+			return src
+		}
+		return ''
+	}
+
+	function resolveThumb(item: any | null): string {
+		const obj = asObject(item)
+		if (obj != null) {
+			const thumb = obj.getString('thumb')
+			if (thumb != null && thumb.length > 0) {
+				return thumb
+			}
+		}
+		return resolveUrl(item)
+	}
+
+	function resolveName(item: any | null): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const name = obj.getString('name')
+		if (name != null && name.length > 0) {
+			return name
+		}
+		return ''
+	}
+
+	function resolveType(item: any | null): string {
+		const obj = asObject(item)
+		if (obj != null) {
+			const t = obj.getString('type')
+			if (t != null && t.length > 0) {
+				return t
+			}
+		}
+		// 默认按图片展示
+		return 'image'
+	}
+
+	function resolveIsImage(item: any | null): boolean {
+		const t = resolveType(item)
+		if (t == 'video' || t == 'file') {
+			return false
+		}
+		return true
+	}
+
+	function resolveStatus(item: any | null): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const s = obj.getString('status')
+		if (s == null) {
+			return ''
+		}
+		return s
+	}
+
+	function resolveMessage(item: any | null): string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const m = obj.getString('message')
+		if (m == null) {
+			return ''
+		}
+		return m
+	}
+
+	function resolveSize(item: any | null): number {
+		const obj = asObject(item)
+		if (obj == null) {
+			return 0
+		}
+		const n = obj.getNumber('size')
+		if (n == null) {
+			return 0
+		}
+		return n
+	}
+
+	function showStatusMask(item: any | null): boolean {
+		const s = resolveStatus(item)
+		// success 默认不遮罩，避免盖住预览图
+		if (s == 'uploading' || s == 'failed') {
+			return true
+		}
+		// 显式 message 时展示（含 success 自定义文案）
+		if (resolveMessage(item).length > 0 && s != '') {
+			return true
+		}
+		return false
+	}
+
+	function itemKey(item: any | null, index: number): string {
+		const url = resolveUrl(item)
+		if (url.length > 0) {
+			return index.toString() + '-' + url
+		}
+		const name = resolveName(item)
+		if (name.length > 0) {
+			return index.toString() + '-' + name
+		}
+		return 'nax-upload-' + index.toString()
+	}
+
+	const listLength = computed((): number => {
+		return props.fileList.length
+	})
+
+	const displayList = computed((): any[] => {
+		if (!props.previewImage) {
+			return [] as any[]
+		}
+		return props.fileList as any[]
+	})
+
+	const remainCount = computed((): number => {
+		const max = props.maxCount
+		if (max <= 0) {
+			return 0
+		}
+		const left = max - listLength.value
+		if (left < 0) {
+			return 0
+		}
+		return left
+	})
+
+	const showAdd = computed((): boolean => {
+		if (props.disabled) {
+			// 禁用时仍可展示已选，但不显示添加
+			return false
+		}
+		return remainCount.value > 0
+	})
+
+	const showDeleteBtn = computed((): boolean => {
+		if (props.disabled) {
+			return false
+		}
+		return props.deletable
+	})
+
+	const widthCss = computed((): string => {
+		return toCssSize(props.width, '80px')
+	})
+
+	const heightCss = computed((): string => {
+		return toCssSize(props.height, '80px')
+	})
+
+	const itemBoxStyle = computed((): string => {
+		return 'width:' + widthCss.value + ';height:' + heightCss.value + ';'
+	})
+
+	const uploadTextValue = computed((): string => {
+		return props.uploadText
+	})
+
+	const uploadIconName = computed((): string => {
+		if (props.uploadIcon.length == 0) {
+			return 'plus'
+		}
+		return props.uploadIcon
+	})
+
+	const addIconColor = computed((): string => {
+		return 'var(--nax-color-text-secondary, #767c82)'
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.disabled) {
+			cls += ' nax-upload--disabled'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const addClass = computed((): string => {
+		if (props.disabled) {
+			return 'nax-upload__item--disabled'
+		}
+		return ''
+	})
+
+	const addHoverClass = computed((): string => {
+		if (props.disabled) {
+			return 'none'
+		}
+		return 'nax-upload__item--hover'
+	})
+
+	function parseCsv(raw: string): string[] {
+		const out = [] as string[]
+		if (raw.length == 0) {
+			return out
+		}
+		const parts = raw.split(',')
+		var i = 0
+		while (i < parts.length) {
+			const p = parts[i].trim()
+			if (p.length > 0) {
+				out.push(p)
+			}
+			i++
+		}
+		return out
+	}
+
+	function resolveSourceType(): string[] {
+		const list = parseCsv(props.capture)
+		if (list.length == 0) {
+			return ['album', 'camera'] as string[]
+		}
+		const out = [] as string[]
+		var i = 0
+		while (i < list.length) {
+			const v = list[i]
+			if (v == 'album' || v == 'camera') {
+				out.push(v)
+			}
+			i++
+		}
+		if (out.length == 0) {
+			return ['album', 'camera'] as string[]
+		}
+		return out
+	}
+
+	function resolveSizeType(): string[] {
+		if (props.sizeType.length > 0) {
+			const list = parseCsv(props.sizeType)
+			if (list.length > 0) {
+				return list
+			}
+		}
+		if (props.compressed) {
+			return ['compressed'] as string[]
+		}
+		return ['original'] as string[]
+	}
+
+	function chooseCount(): number {
+		if (!props.multiple) {
+			return 1
+		}
+		const left = remainCount.value
+		if (left <= 0) {
+			return 0
+		}
+		return left
+	}
+
+	function makeFileItem(path: string, size: number, typeName: string): UTSJSONObject {
+		return {
+			url: path,
+			thumb: path,
+			name: '',
+			type: typeName,
+			size: size,
+			status: 'ready',
+			message: ''
+		} as UTSJSONObject
+	}
+
+	function isOversize(size: number): boolean {
+		// maxSize <= 0 表示不限制
+		if (props.maxSize <= 0) {
+			return false
+		}
+		if (size <= 0) {
+			return false
+		}
+		return size > props.maxSize
+	}
+
+
+	function cloneFileList(): any[] {
+		const next = [] as any[]
+		const list = props.fileList as any[]
+		var i = 0
+		while (i < list.length) {
+			next.push(list[i])
+			i++
+		}
+		return next
+	}
+
+	function setFileList(next: any[]) {
+		emit('update:fileList', next)
+	}
+
+	function buildFileItem(url: string, thumb: string, name: string, typeName: string, size: number, status: string, message: string): UTSJSONObject {
+		return {
+			url: url,
+			thumb: thumb,
+			name: name,
+			type: typeName,
+			size: size,
+			status: status,
+			message: message
+		} as UTSJSONObject
+	}
+
+	function copyFileItem(item: any | null): UTSJSONObject {
+		return buildFileItem(
+			resolveUrl(item),
+			resolveThumb(item),
+			resolveName(item),
+			resolveType(item),
+			resolveSize(item),
+			resolveStatus(item),
+			resolveMessage(item)
+		)
+	}
+
+	function makeUploadingItem(item: any | null): UTSJSONObject {
+		return buildFileItem(
+			resolveUrl(item),
+			resolveThumb(item),
+			resolveName(item),
+			resolveType(item),
+			resolveSize(item),
+			'uploading',
+			'???'
+		)
+	}
+
+	function parseResponseUrl(data: string): string {
+		if (data.length == 0) {
+			return ''
+		}
+		const trimmed = data.trim()
+		if (trimmed.indexOf('http://') == 0 || trimmed.indexOf('https://') == 0) {
+			if (trimmed.length >= 2 && trimmed.charAt(0) == '"' && trimmed.charAt(trimmed.length - 1) == '"') {
+				return trimmed.substring(1, trimmed.length - 1)
+			}
+			return trimmed
+		}
+		try {
+			const parsed = JSON.parse(trimmed)
+			if (parsed == null) {
+				return ''
+			}
+			if (typeof parsed == 'string') {
+				return parsed as string
+			}
+			const obj = parsed as UTSJSONObject
+			const u1 = obj.getString('url')
+			if (u1 != null && u1.length > 0) {
+				return u1
+			}
+			const u2 = obj.getString('path')
+			if (u2 != null && u2.length > 0) {
+				return u2
+			}
+			const u3 = obj.getString('fileUrl')
+			if (u3 != null && u3.length > 0) {
+				return u3
+			}
+			const dataAny = obj.getAny('data')
+			if (dataAny != null) {
+				if (typeof dataAny == 'string') {
+					const ds = dataAny as string
+					if (ds.indexOf('http') == 0) {
+						return ds
+					}
+					if (ds.length > 0 && ds.charAt(0) == '{') {
+						const nestedUrl = parseResponseUrl(ds)
+						if (nestedUrl.length > 0) {
+							return nestedUrl
+						}
+					}
+				} else {
+					const dataObj = dataAny as UTSJSONObject
+					const du1 = dataObj.getString('url')
+					if (du1 != null && du1.length > 0) {
+						return du1
+					}
+					const du2 = dataObj.getString('path')
+					if (du2 != null && du2.length > 0) {
+						return du2
+					}
+					const du3 = dataObj.getString('fileUrl')
+					if (du3 != null && du3.length > 0) {
+						return du3
+					}
+				}
+			}
+		} catch (e) {
+			// ignore
+		}
+		return ''
+	}
+
+	function canAutoUpload(): boolean {
+		if (!props.autoUpload) {
+			return false
+		}
+		if (props.action.length == 0) {
+			return false
+		}
+		return true
+	}
+
+	function resolveUploadHeader(): any {
+		if (props.header == null) {
+			return {} as UTSJSONObject
+		}
+		return props.header
+	}
+
+	function resolveUploadFormData(): any {
+		if (props.formData == null) {
+			return {} as UTSJSONObject
+		}
+		return props.formData
+	}
+
+	function updateItemAt(index: number, status: string, message: string, url: string) {
+		if (index < 0) {
+			return
+		}
+		const next = cloneFileList()
+		if (index >= next.length) {
+			return
+		}
+		const prev = next[index]
+		var nextUrl = resolveUrl(prev)
+		var nextThumb = resolveThumb(prev)
+		if (url.length > 0) {
+			nextUrl = url
+			if (resolveType(prev) != 'video') {
+				nextThumb = url
+			}
+		}
+		next[index] = buildFileItem(
+			nextUrl,
+			nextThumb,
+			resolveName(prev),
+			resolveType(prev),
+			resolveSize(prev),
+			status,
+			message
+		)
+		setFileList(next)
+	}
+
+	function uploadAtIndex(index: number) {
+		if (index < 0 || index >= props.fileList.length) {
+			return
+		}
+		if (props.action.length == 0) {
+			return
+		}
+		const file = (props.fileList as any[])[index]
+		const filePath = resolveUrl(file)
+		if (filePath.length == 0) {
+			updateItemAt(index, 'failed', '?????', '')
+			emit('fail', {
+				index: index,
+				file: file,
+				name: props.name,
+				error: 'empty path'
+			} as UTSJSONObject)
+			return
+		}
+
+		updateItemAt(index, 'uploading', '???', '')
+
+		const fieldName = props.name.length > 0 ? props.name : 'file'
+		const captureIndex = index
+		const captureFile = file
+		uni.uploadFile({
+			url: props.action,
+			filePath: filePath,
+			name: fieldName,
+			header: resolveUploadHeader(),
+			formData: resolveUploadFormData(),
+			success: (res) => {
+				const statusCode = (res as any).statusCode as number
+				const data = '' + ((res as any).data as string)
+				const ok = statusCode >= 200 && statusCode < 300
+				if (!ok) {
+					updateItemAt(captureIndex, 'failed', '????', '')
+					emit('fail', {
+						index: captureIndex,
+						file: captureFile,
+						name: props.name,
+						error: data,
+						statusCode: statusCode
+					} as UTSJSONObject)
+					return
+				}
+				const remoteUrl = parseResponseUrl(data)
+				const finalUrl = remoteUrl.length > 0 ? remoteUrl : filePath
+				updateItemAt(captureIndex, 'success', '', finalUrl)
+				const list = props.fileList as any[]
+				const latest = captureIndex < list.length ? list[captureIndex] : captureFile
+				emit('success', {
+					index: captureIndex,
+					file: latest,
+					name: props.name,
+					data: data,
+					url: finalUrl
+				} as UTSJSONObject)
+			},
+			fail: (err) => {
+				updateItemAt(captureIndex, 'failed', '????', '')
+				emit('fail', {
+					index: captureIndex,
+					file: captureFile,
+					name: props.name,
+					error: err
+				} as UTSJSONObject)
+			}
+		})
+	}
+
+	function startAutoUpload(files: any[]) {
+		if (files.length == 0) {
+			return
+		}
+		if (props.action.length == 0) {
+			uni.showToast({
+				title: '??? action',
+				icon: 'none'
+			})
+			return
+		}
+
+		const next = cloneFileList()
+		const start = next.length
+		var i = 0
+		while (i < files.length) {
+			next.push(makeUploadingItem(files[i]))
+			i++
+		}
+		setFileList(next)
+
+		var j = 0
+		while (j < files.length) {
+			const captureIndex = start + j
+			const capturePath = resolveUrl(files[j])
+			setTimeout(() => {
+				if (captureIndex < props.fileList.length) {
+					uploadAtIndex(captureIndex)
+					return
+				}
+				// ?????? fileList ??????
+				if (capturePath.length == 0) {
+					return
+				}
+				const fieldName = props.name.length > 0 ? props.name : 'file'
+				uni.uploadFile({
+					url: props.action,
+					filePath: capturePath,
+					name: fieldName,
+					header: resolveUploadHeader(),
+					formData: resolveUploadFormData(),
+					success: (res) => {
+						const statusCode = (res as any).statusCode as number
+						const data = '' + ((res as any).data as string)
+						const ok = statusCode >= 200 && statusCode < 300
+						const list2 = cloneFileList()
+						if (ok) {
+							const remoteUrl = parseResponseUrl(data)
+							const finalUrl = remoteUrl.length > 0 ? remoteUrl : capturePath
+							const item = buildFileItem(finalUrl, finalUrl, '', 'image', 0, 'success', '')
+							list2.push(item)
+							setFileList(list2)
+							emit('success', {
+								index: list2.length - 1,
+								file: item,
+								name: props.name,
+								data: data,
+								url: finalUrl
+							} as UTSJSONObject)
+						} else {
+							const item = buildFileItem(capturePath, capturePath, '', 'image', 0, 'failed', '????')
+							list2.push(item)
+							setFileList(list2)
+							emit('fail', {
+								index: list2.length - 1,
+								file: item,
+								name: props.name,
+								error: data,
+								statusCode: statusCode
+							} as UTSJSONObject)
+						}
+					},
+					fail: (err) => {
+						const list2 = cloneFileList()
+						const item = buildFileItem(capturePath, capturePath, '', 'image', 0, 'failed', '????')
+						list2.push(item)
+						setFileList(list2)
+						emit('fail', {
+							index: list2.length - 1,
+							file: item,
+							name: props.name,
+							error: err
+						} as UTSJSONObject)
+					}
+				})
+			}, 0)
+			j++
+		}
+	}
+
+	function uploadAll() {
+		if (props.action.length == 0) {
+			uni.showToast({
+				title: '??? action',
+				icon: 'none'
+			})
+			return
+		}
+		const list = props.fileList as any[]
+		var i = 0
+		while (i < list.length) {
+			const st = resolveStatus(list[i])
+			if (st == '' || st == 'ready' || st == 'failed') {
+				uploadAtIndex(i)
+			}
+			i++
+		}
+	}
+
+	function upload(index: number) {
+		if (props.action.length == 0) {
+			uni.showToast({
+				title: '??? action',
+				icon: 'none'
+			})
+			return
+		}
+		uploadAtIndex(index)
+	}
+
+	function reupload(index: number) {
+		upload(index)
+	}
+
+	function emitReadPayload(files: any[], isBefore: boolean) {
+		const first = files.length > 0 ? files[0] : null
+		const payload = {
+			file: first,
+			files: files,
+			name: props.name,
+			index: listLength.value
+		} as UTSJSONObject
+		if (isBefore) {
+			emit('beforeRead', payload)
+		} else {
+			emit('afterRead', payload)
+			if (canAutoUpload()) {
+				startAutoUpload(files)
+			}
+		}
+	}
+
+	function processPickedFiles(rawFiles: any[], typeName: string) {
+		const okFiles = [] as any[]
+		const overFiles = [] as any[]
+		var i = 0
+		while (i < rawFiles.length) {
+			const raw = rawFiles[i]
+			var path = ''
+			var size = 0
+			if (typeof raw == 'string') {
+				path = raw as string
+			} else {
+				// native tempFile from chooseImage (not UTSJSONObject)
+				const f = raw as any
+				const pn = f.path as string
+				if (pn != null && pn.length > 0) {
+					path = pn
+				} else {
+					const p2n = f.tempFilePath as string
+					if (p2n != null && p2n.length > 0) {
+						path = p2n
+					} else {
+						const p3n = f.url as string
+						if (p3n != null && p3n.length > 0) {
+							path = p3n
+						}
+					}
+				}
+				const sn = f.size as number
+				if (sn != null) {
+					size = sn
+				}
+				// business UTSJSONObject fallback
+				if (path.length == 0) {
+					const obj = asObject(raw)
+					if (obj != null) {
+						const p1 = obj.getString('path')
+						if (p1 != null && p1.length > 0) {
+							path = p1
+						} else {
+							const p2 = obj.getString('tempFilePath')
+							if (p2 != null && p2.length > 0) {
+								path = p2
+							} else {
+								const p3 = obj.getString('url')
+								if (p3 != null) {
+									path = p3
+								}
+							}
+						}
+						if (size <= 0) {
+							const sz = obj.getNumber('size')
+							if (sz != null) {
+								size = sz
+							}
+						}
+					}
+				}
+			}
+			if (path.length == 0) {
+				i++
+				continue
+			}
+			const item = makeFileItem(path, size, typeName)
+			if (isOversize(size)) {
+				overFiles.push(item)
+			} else {
+				okFiles.push(item)
+			}
+			i++
+		}
+
+		if (overFiles.length > 0) {
+			const first = overFiles[0]
+			emit('oversize', {
+				file: first,
+				files: overFiles,
+				name: props.name
+			} as UTSJSONObject)
+		}
+
+		if (okFiles.length == 0) {
+			return
+		}
+
+		if (props.useBeforeRead) {
+			emitReadPayload(okFiles, true)
+			return
+		}
+		emitReadPayload(okFiles, false)
+	}
+
+	function pickFromImageSuccess(res: any) {
+		const files = [] as any[]
+		const tempFiles = (res as any).tempFiles
+		if (tempFiles != null && tempFiles.length > 0) {
+			var i = 0
+			while (i < tempFiles.length) {
+				files.push(tempFiles[i])
+				i++
+			}
+			processPickedFiles(files, 'image')
+			return
+		}
+		const pathsAny = (res as any).tempFilePaths
+		if (pathsAny != null && pathsAny.length > 0) {
+			var j = 0
+			while (j < pathsAny.length) {
+				const p = pathsAny[j]
+				if (typeof p == 'string') {
+					files.push(p as string)
+				}
+				j++
+			}
+			processPickedFiles(files, 'image')
+			return
+		}
+		processPickedFiles(files, 'image')
+	}
+
+	function pickFromVideoSuccess(res: any) {
+		var path = ''
+		const tp = (res as any).tempFilePath as string
+		if (tp != null) {
+			path = tp
+		}
+		var size = 0
+		const sz = (res as any).size as number
+		if (sz != null) {
+			size = sz
+		}
+		var thumb = path
+		const th = (res as any).thumbTempFilePath as string
+		if (th != null && th.length > 0) {
+			thumb = th
+		}
+		const item = {
+			url: path,
+			thumb: thumb,
+			name: '',
+			type: 'video',
+			size: size,
+			status: 'ready',
+			message: ''
+		} as UTSJSONObject
+		processPickedFiles([item] as any[], 'video')
+	}
+
+	function chooseImageInternal() {
+		const count = chooseCount()
+		if (count <= 0) {
+			return
+		}
+		uni.chooseImage({
+			count: count,
+			sizeType: resolveSizeType(),
+			sourceType: resolveSourceType(),
+			success: (res) => {
+				pickFromImageSuccess(res)
+			},
+			fail: (_err) => {
+				// 用户取消等：静默
+			}
+		})
+	}
+
+	function chooseVideoInternal() {
+		if (remainCount.value <= 0) {
+			return
+		}
+		const sourceType = resolveSourceType()
+		uni.chooseVideo({
+			sourceType: sourceType,
+			compressed: props.compressed,
+			camera: props.camera == 'front' ? 'front' : 'back',
+			success: (res) => {
+				pickFromVideoSuccess(res)
+			},
+			fail: (_err) => {
+				// 用户取消等：静默
+			}
+		})
+	}
+
+	function chooseMediaMixed() {
+		// 蒸汽模式/多端：优先图片；视频场景请单独 accept=video
+		// media：先选图（更稳）；业务若需视频可把 accept 设为 video
+		chooseImageInternal()
+	}
+
+	function chooseFile() {
+		if (props.disabled) {
+			return
+		}
+		if (remainCount.value <= 0) {
+			return
+		}
+		const acc = props.accept
+		if (acc == 'video') {
+			chooseVideoInternal()
+			return
+		}
+		if (acc == 'media') {
+			chooseMediaMixed()
+			return
+		}
+		// image 默认
+		chooseImageInternal()
+	}
+
+	function confirmRead(payload: UTSJSONObject | null) {
+		if (payload == null) {
+			return
+		}
+		emit('afterRead', payload)
+		if (!canAutoUpload()) {
+			return
+		}
+		const filesAny = payload.getArray('files')
+		const files = [] as any[]
+		if (filesAny != null) {
+			var i = 0
+			while (i < filesAny.length) {
+				files.push(filesAny[i])
+				i++
+			}
+		} else {
+			const one = payload.getAny('file')
+			if (one != null) {
+				files.push(one)
+			}
+		}
+		startAutoUpload(files)
+	}
+
+	function onAddClick() {
+		chooseFile()
+	}
+
+	function collectImageUrls(): string[] {
+		const urls = [] as string[]
+		const list = props.fileList as any[]
+		var i = 0
+		while (i < list.length) {
+			const item = list[i]
+			if (resolveIsImage(item)) {
+				const u = resolveUrl(item)
+				if (u.length > 0) {
+					urls.push(u)
+				}
+			}
+			i++
+		}
+		return urls
+	}
+
+	function onPreviewClick(index: number) {
+		if (index < 0 || index >= props.fileList.length) {
+			return
+		}
+		const item = (props.fileList as any[])[index]
+		const url = resolveUrl(item)
+		emit('clickPreview', {
+			index: index,
+			file: item,
+			name: props.name,
+			url: url
+		} as UTSJSONObject)
+
+		if (!props.previewFullImage) {
+			return
+		}
+		if (!resolveIsImage(item)) {
+			return
+		}
+		if (url.length == 0) {
+			return
+		}
+		const urls = collectImageUrls()
+		if (urls.length == 0) {
+			return
+		}
+		uni.previewImage({
+			urls: urls,
+			current: url
+		})
+	}
+
+	function cloneListWithout(index: number): any[] {
+		const next = [] as any[]
+		const list = props.fileList as any[]
+		var i = 0
+		while (i < list.length) {
+			if (i != index) {
+				next.push(list[i])
+			}
+			i++
+		}
+		return next
+	}
+
+	function onDeleteClick(index: number) {
+		if (props.disabled || !props.deletable) {
+			return
+		}
+		if (index < 0 || index >= props.fileList.length) {
+			return
+		}
+		const item = (props.fileList as any[])[index]
+		emit('beforeDelete', {
+			index: index,
+			file: item,
+			name: props.name
+		} as UTSJSONObject)
+
+		const next = cloneListWithout(index)
+		emit('update:fileList', next)
+		emit('delete', {
+			index: index,
+			file: item,
+			name: props.name,
+			fileList: next
+		} as UTSJSONObject)
+	}
+
+	defineExpose({
+		chooseFile,
+		confirmRead,
+		upload,
+		uploadAll,
+		reupload
+	})
+</script>
+
+<style>
+	.nax-upload {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		/* 负边距由 item margin 承担间距 */
+	}
+
+	.nax-upload__item {
+		position: relative;
+		overflow: hidden;
+		margin-right: 8px;
+		margin-bottom: 8px;
+		border-radius: var(--nax-upload-item-radius, var(--nax-radius-md, 3px));
+		background-color: var(--nax-upload-item-bg, var(--nax-color-bg-secondary, #fafafc));
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: center;
+	}
+
+	.nax-upload__item--add {
+		border-width: 1px;
+		border-style: dashed;
+		border-color: var(--nax-upload-border-color, var(--nax-color-border, #e0e0e6));
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-upload__item--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-upload__item--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-upload--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-upload__image {
+		width: 100%;
+		height: 100%;
+	}
+
+	.nax-upload__file {
+		width: 100%;
+		height: 100%;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 6px;
+	}
+
+	.nax-upload__file-name {
+		margin-top: 4px;
+		font-size: var(--nax-font-size-xs, 12px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-upload__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: rgba(0, 0, 0, 0.45);
+	}
+
+	.nax-upload__mask-text {
+		margin-top: 4px;
+		padding-left: 4px;
+		padding-right: 4px;
+		font-size: var(--nax-font-size-xs, 12px);
+		color: #ffffff;
+		text-align: center;
+	}
+
+	.nax-upload__delete {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 18px;
+		height: 18px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		background-color: rgba(0, 0, 0, 0.55);
+		border-bottom-left-radius: var(--nax-radius-md, 3px);
+	}
+
+	.nax-upload__add-inner {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-upload__add-text {
+		margin-top: 4px;
+		font-size: var(--nax-font-size-xs, 12px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	/* #ifdef APP-HARMONY */
+	.nax-upload__item {
+		background-color: #fafafc;
+	}
+	.nax-upload__item--add {
+		border-color: #e0e0e6;
+	}
+	/* #endif */
+</style>

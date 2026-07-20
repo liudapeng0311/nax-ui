@@ -47,6 +47,10 @@
 					<text class="home__card-name">图片</text>
 					<text class="home__card-tag">nax-image</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goUpload">
+					<text class="home__card-name">上传</text>
+					<text class="home__card-tag">nax-upload</text>
+				</view>
 			</view>
 
 			<view class="home__section home__section--gap">
@@ -195,6 +199,12 @@
 	function goImage() {
 		uni.navigateTo({
 			url: '/pages/image/index'
+		})
+	}
+
+	function goUpload() {
+		uni.navigateTo({
+			url: '/pages/upload/index'
 		})
 	}
 
