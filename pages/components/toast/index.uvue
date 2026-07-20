@@ -1,0 +1,264 @@
+<template>
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="page__title">nax-toast</text>
+				<text class="page__desc">函数式轻提示：业务代码只 import 并调用 naxToast()，不必为每条提示写 DOM。下方仅挂一次宿主组件（生产可放到根布局）。</text>
+
+				<view class="section">
+					<text class="section__title">基础（纯文案）</text>
+					<view class="row">
+						<nax-button type="primary" label="naxToast('你好')" @click="onText"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">类型 type</text>
+					<view class="row">
+						<nax-button size="sm" type="success" label="success" @click="onSuccess"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" type="error" label="error" @click="onError"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" type="warning" label="warning" @click="onWarning"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" type="info" label="info" @click="onInfo"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">位置 position</text>
+					<view class="row">
+						<nax-button size="sm" label="top" @click="onPos('top')"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="center" @click="onPos('center')"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="bottom" @click="onPos('bottom')"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">Loading + 手动关闭</text>
+					<view class="row">
+						<nax-button size="sm" type="primary" label="显示 loading" @click="onLoading"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="hideNaxToast()" @click="onHide"></nax-button>
+					</view>
+					<text class="hint">loading 默认 duration=0 且带遮罩，需手动关闭或稍后再调 hide。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">自定义图标 / 时长</text>
+					<view class="row">
+						<nax-button size="sm" label="自定义 icon" @click="onCustomIcon"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="4 秒后关闭" @click="onLong"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">自定义背景 bg（请用 hex）</text>
+					<view class="row">
+						<nax-button size="sm" label="纯黑" @click="onCustomBg('#000000')"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="品牌绿" @click="onCustomBg('#18a058')"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="浅灰底" @click="onCustomBg('#f5f5f5')"></nax-button>
+					</view>
+					<text class="hint">鸿蒙/App 请优先 hex（如 #18a058）；rgba 在端上可能失效。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">快捷方法</text>
+					<view class="row">
+						<nax-button size="sm" type="success" label="naxToastSuccess" @click="onQuickSuccess"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" type="error" label="naxToastError" @click="onQuickError"></nax-button>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+		<!-- 宿主：生产建议根布局挂一次；演示页本地挂载保证可展示 -->
+		<nax-toast></nax-toast>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import {
+		naxToast,
+		hideNaxToast,
+		naxToastSuccess,
+		naxToastError,
+		naxToastWarning,
+		naxToastInfo,
+		naxToastLoading
+	} from '@/uni_modules/nax-toast/index.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function onText() {
+		naxToast('你好，这是一条轻提示')
+	}
+
+	function onSuccess() {
+		naxToast({
+			title: '保存成功',
+			type: 'success'
+		} as UTSJSONObject)
+	}
+
+	function onError() {
+		naxToast({
+			title: '提交失败',
+			type: 'error'
+		} as UTSJSONObject)
+	}
+
+	function onWarning() {
+		naxToast({
+			title: '请注意风险',
+			type: 'warning'
+		} as UTSJSONObject)
+	}
+
+	function onInfo() {
+		naxToast({
+			title: '已为你更新内容',
+			type: 'info'
+		} as UTSJSONObject)
+	}
+
+	function onPos(pos: string) {
+		naxToast({
+			title: '位置：' + pos,
+			type: 'text',
+			position: pos
+		} as UTSJSONObject)
+	}
+
+	function onLoading() {
+		naxToastLoading('提交中…', true)
+		// 演示 2.5s 后自动关，业务也可只调 hideNaxToast
+		setTimeout(() => {
+			hideNaxToast()
+			naxToastSuccess('提交完成')
+		}, 2500)
+	}
+
+	function onHide() {
+		hideNaxToast()
+	}
+
+	function onCustomIcon() {
+		naxToast({
+			title: '收藏成功',
+			type: 'text',
+			icon: 'star',
+			showIcon: true
+		} as UTSJSONObject)
+	}
+
+	function onLong() {
+		naxToast({
+			title: '这条会停留 4 秒',
+			type: 'info',
+			duration: 4000
+		} as UTSJSONObject)
+	}
+
+	function onCustomBg(color: string) {
+		const low = color.toLowerCase()
+		const light = low == '#f5f5f5' || low == '#ffffff' || low == '#fff' || low == '#eeeeee' || low == '#fafafc'
+		naxToast({
+			title: light ? '浅色背景提示' : '自定义背景色',
+			type: 'text',
+			bg: color,
+			color: light ? '#333639' : '#ffffff',
+			showIcon: false
+		} as UTSJSONObject)
+	}
+
+	function onQuickSuccess() {
+		naxToastSuccess('快捷成功')
+	}
+
+	function onQuickError() {
+		naxToastError('快捷错误')
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+		padding-bottom: 40px;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 24px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.gap {
+		width: 8px;
+		height: 8px;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>

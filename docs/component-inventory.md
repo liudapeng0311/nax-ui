@@ -96,9 +96,10 @@
 | 加载 | `nax-loading` | P0 | 局部/页面加载 | `size` `vertical` `text` |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `show` `z-index` / `click` |
 | 弹出层 | `nax-picker` | P0 | 自定义内容弹出；底部/中心/左/右（原规划 nax-popup） | `v-model:show` `position(bottom/center/left/right)` `round` `mask` `maskClosable` `width` `height` / `open` `opened` `close` `click-mask` **done** |
-| 轻提示 | `nax-toast` | P1 | 短反馈（函数式后置） | API 型 |
+| 轻提示 | `nax-toast` | P1 | 函数式短反馈：`naxToast()` / `hideNaxToast()`；全局挂一次宿主 | `naxToast(title|options)` `type(text/success/error/warning/info/loading)` `position` `duration` `overlay` / `hideNaxToast` **done** |
 | 对话框 | `nax-dialog` | P1 | 确认/告警 | `title` `content` / `confirm` `cancel` |
 | 动作面板 | `nax-action-sheet` | P1 | 底部操作列表；薄封装 nax-picker | `v-model:show` `actions` `title` `description` `showCancel` / `select` `cancel` **done** |
+| 警告提示 | `nax-alert` | P1 | 页面内常驻提示（对齐 uView Pro AlertTips） | `type` `title` `description` `closable` `showIcon` `variant(light/solid)` `center` `show` / `close` `click` `update:show` **done** |
 
 ---
 
@@ -131,6 +132,8 @@
 | `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
 | `nax-picker` | done | 插件包 `uni_modules/nax-picker`；通用弹出容器；position bottom/center/left/right；动画复用 `nax-transition` |
 | `nax-action-sheet` | done | 插件包 `uni_modules/nax-action-sheet`；底部操作菜单；薄封装 `nax-picker`；`actions` / `select` / `cancel` |
+| `nax-alert` | done | 插件包 `uni_modules/nax-alert`；对齐 uView Pro AlertTips；type/title/description/showIcon/closable/variant/center/show |
+| `nax-toast` | done | 插件包 `uni_modules/nax-toast`；函数式 `naxToast()`；全局挂一次 `<nax-toast />` 宿主；未挂载回退 `uni.showToast` |
 | `nax-keyboard` | done | 插件包 `uni_modules/nax-keyboard`；对齐 uView Pro Keyboard；number/car/card、乱序、遮罩弹层、长按退格 |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；对齐 uView Pro Calendar；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
 | `nax-checkbox` / `nax-checkbox-group` | done | 插件包 `uni_modules/nax-checkbox`；单独布尔 v-model / 组 string[]；provide-inject |

@@ -279,7 +279,7 @@ MVP 只做必要过渡；复杂动画后置。
 
 | 约定 | 说明 |
 |------|------|
-| 命令式 | Toast / Loading 可提供 `naxToast()` 等函数（后置） |
+| 命令式 | Toast 使用 `naxToast()` / `hideNaxToast()`（全局挂一次 `<nax-toast />` 宿主；业务页不写 DOM）。Loading 全局态后续同模式 |
 | 声明式 | Dialog / Popup 用 `open` / `v-model:open` |
 | 蒙层 | 统一使用遮罩 token；点击蒙层是否关闭由 prop 控制 |
 | 无障碍 | 关键操作保留文案，不只依赖颜色 |

@@ -127,6 +127,14 @@
 					<text class="home__card-name">动作面板</text>
 					<text class="home__card-tag">nax-action-sheet</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goAlert">
+					<text class="home__card-name">警告提示</text>
+					<text class="home__card-tag">nax-alert</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goToast">
+					<text class="home__card-name">轻提示</text>
+					<text class="home__card-tag">nax-toast</text>
+				</view>
 
 			</view>
 			</view>
@@ -301,6 +309,17 @@
 		})
 	}
 
+
+	function goAlert() {
+		uni.navigateTo({
+			url: '/pages/components/alert/index'
+		})
+	}
+	function goToast() {
+		uni.navigateTo({
+			url: '/pages/components/toast/index'
+		})
+	}
 	function goKeyboard() {
 		uni.navigateTo({
 			url: '/pages/components/keyboard/index'

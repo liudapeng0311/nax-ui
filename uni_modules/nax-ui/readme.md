@@ -16,6 +16,7 @@ uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不�
 | `nax-tag` | 标签（对齐 Naive Tag） |
 | `nax-number-box` | 步进器（对齐 uView Pro NumberBox） |
 | `nax-rate` | 评分（对齐 uView Pro Rate） |
+| `nax-toast` | 轻提示（函数式 naxToast） |
 
 ## 推荐接入
 

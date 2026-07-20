@@ -1,0 +1,459 @@
+<template>
+	<!-- 有遮罩：全屏层（loading 防误触） -->
+	<view
+		v-if="visible && overlay"
+		class="nax-toast nax-toast--block"
+		:class="rootClass"
+		:style="rootStyle"
+	>
+		<view class="nax-toast__mask"></view>
+		<view class="nax-toast__stage" :class="stageClass">
+			<view class="nax-toast__panel" :class="panelClass" :style="panelStyle">
+				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
+				<view v-if="showIcon && iconName.length > 0" class="nax-toast__icon" :style="loadingStyle">
+					<nax-icon :name="iconName" size="28" :color="iconColor"></nax-icon>
+				</view>
+				<!-- #endif -->
+				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+				<view v-if="showIcon && iconName.length > 0" class="nax-toast__icon" :class="loadingWebClass">
+					<nax-icon :name="iconName" size="28" :color="iconColor"></nax-icon>
+				</view>
+				<!-- #endif -->
+				<text v-if="titleText.length > 0" class="nax-toast__text" :style="textStyle">{{ titleText }}</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 无遮罩：仅悬浮条，不铺满全屏，避免挡住页面点击 -->
+	<view
+		v-else-if="visible"
+		class="nax-toast nax-toast--float"
+		:class="floatClass"
+		:style="rootStyle"
+	>
+		<view class="nax-toast__panel" :class="panelClass" :style="panelStyle">
+			<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
+			<view v-if="showIcon && iconName.length > 0" class="nax-toast__icon" :style="loadingStyle">
+				<nax-icon :name="iconName" size="28" :color="iconColor"></nax-icon>
+			</view>
+			<!-- #endif -->
+			<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+			<view v-if="showIcon && iconName.length > 0" class="nax-toast__icon" :class="loadingWebClass">
+				<nax-icon :name="iconName" size="28" :color="iconColor"></nax-icon>
+			</view>
+			<!-- #endif -->
+			<text v-if="titleText.length > 0" class="nax-toast__text" :style="textStyle">{{ titleText }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-toast
+	 * @description 轻提示宿主。全局挂载一次后，业务通过 naxToast() 命令式调用。
+	 * @property {number} zIndex 层级，默认 10090
+	 * @property {string} customClass 根节点扩展 class
+	 *
+	 * 背景色（鸿蒙注意）：
+	 * - App/鸿蒙 ucss 对 rgba、嵌套 var() 支持差，面板背景统一用 inline + 实色 hex
+	 * - 单次：naxToast({ title, bg: '#18a058', color: '#ffffff' })
+	 */
+	import {
+		bindNaxToastHost,
+		unbindNaxToastHost
+	} from '../../index.uts'
+
+	const props = defineProps({
+		zIndex: {
+			type: Number,
+			default: 10090
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const visible = ref(false)
+	const titleText = ref('')
+	const typeName = ref('text')
+	const iconName = ref('')
+	const positionName = ref('center')
+	const overlay = ref(false)
+	const showIcon = ref(false)
+	const bgColor = ref('')
+	const textColor = ref('')
+
+	let hideTimer: number = -1
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	const loadingAngle = ref(0)
+	let loadingTimerId: number = -1
+	// #endif
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+
+	const rootStyle = computed((): string => {
+		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const stageClass = computed((): string => {
+		return 'nax-toast__stage--' + positionName.value
+	})
+
+	const floatClass = computed((): string => {
+		let cls = 'nax-toast--float-' + positionName.value
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const panelClass = computed((): string => {
+		if (showIcon.value && iconName.value.length > 0) {
+			return 'nax-toast__panel--with-icon'
+		}
+		return 'nax-toast__panel--text'
+	})
+
+	/** type 默认实色（鸿蒙不用 rgba / 嵌套 var） */
+	function resolveTypeBg(type: string): string {
+		if (type == 'success') {
+			return '#18a058'
+		}
+		if (type == 'error') {
+			return '#d03050'
+		}
+		if (type == 'warning') {
+			return '#f0a020'
+		}
+		if (type == 'info') {
+			return '#2080f0'
+		}
+		// text / loading：实色深灰，替代 rgba(0,0,0,0.78)
+		return '#4c4c4c'
+	}
+
+	/**
+	 * 规范化背景色：
+	 * - 优先自定义 bg
+	 * - 鸿蒙/App：rgba 在 ucss 下易失效，尽量落到 hex
+	 */
+	function normalizeBg(raw: string, type: string): string {
+		const s = raw.trim()
+		if (s.length == 0) {
+			return resolveTypeBg(type)
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// 常见半透明黑 → 实色深灰
+		if (s.indexOf('rgba') >= 0 || s.indexOf('RGBA') >= 0) {
+			const low = s.toLowerCase()
+			if (low.indexOf('0,0,0') >= 0 || low.indexOf('0, 0, 0') >= 0) {
+				return '#4c4c4c'
+			}
+			if (low.indexOf('255,255,255') >= 0 || low.indexOf('255, 255, 255') >= 0) {
+				return '#f5f5f5'
+			}
+			// 其它 rgba：无法稳定解析时回退 type 色，避免透明底
+			return resolveTypeBg(type)
+		}
+		// #endif
+		return s
+	}
+
+	function resolveTextColor(rawColor: string, bg: string): string {
+		if (rawColor.trim().length > 0) {
+			return rawColor.trim()
+		}
+		// 浅底用深字
+		const b = bg.toLowerCase()
+		if (b == '#ffffff' || b == '#fff' || b == '#f5f5f5' || b == '#fafafc' || b == '#eeeeee') {
+			return '#333639'
+		}
+		return '#ffffff'
+	}
+
+	const panelStyle = computed((): string => {
+		// 始终 inline 写 background-color，避免鸿蒙 class + rgba/嵌套 var 失效
+		const bg = normalizeBg(bgColor.value, typeName.value)
+		return 'background-color:' + bg + ';'
+	})
+
+	const textStyle = computed((): string => {
+		const bg = normalizeBg(bgColor.value, typeName.value)
+		const c = resolveTextColor(textColor.value, bg)
+		return 'color:' + c + ';'
+	})
+
+	const iconColor = computed((): string => {
+		const bg = normalizeBg(bgColor.value, typeName.value)
+		return resolveTextColor(textColor.value, bg)
+	})
+
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	const loadingWebClass = computed((): string => {
+		if (typeName.value == 'loading') {
+			return 'nax-toast__icon--spin'
+		}
+		return ''
+	})
+	// #endif
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	const loadingStyle = computed((): string => {
+		if (typeName.value != 'loading') {
+			return ''
+		}
+		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg);'
+	})
+
+	function stopLoadingSpin() {
+		if (loadingTimerId >= 0) {
+			clearInterval(loadingTimerId)
+			loadingTimerId = -1
+		}
+		loadingAngle.value = 0
+	}
+
+	function startLoadingSpin() {
+		stopLoadingSpin()
+		loadingAngle.value = 0
+		loadingTimerId = setInterval(() => {
+			let next = loadingAngle.value + 30
+			if (next >= 360) {
+				next = 0
+			}
+			loadingAngle.value = next
+		}, 50)
+	}
+	// #endif
+
+	function clearHideTimer() {
+		if (hideTimer >= 0) {
+			clearTimeout(hideTimer)
+			hideTimer = -1
+		}
+	}
+
+	function mapTypeIcon(type: string, customIcon: string): string {
+		if (customIcon.length > 0) {
+			return customIcon
+		}
+		if (type == 'success') {
+			return 'check'
+		}
+		if (type == 'error') {
+			return 'error'
+		}
+		if (type == 'warning') {
+			return 'warning'
+		}
+		if (type == 'info') {
+			return 'info'
+		}
+		if (type == 'loading') {
+			return 'loading'
+		}
+		return ''
+	}
+
+	function hostHide() {
+		clearHideTimer()
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		stopLoadingSpin()
+		// #endif
+		visible.value = false
+	}
+
+	function hostShow(title: string, type: string, icon: string, duration: number, position: string, ov: boolean, withIcon: boolean, bg: string, color: string) {
+		clearHideTimer()
+		titleText.value = title
+		typeName.value = type
+		positionName.value = position
+		overlay.value = ov
+		showIcon.value = withIcon
+		iconName.value = mapTypeIcon(type, icon)
+		bgColor.value = bg
+		textColor.value = color
+
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (type == 'loading' && withIcon) {
+			startLoadingSpin()
+		} else {
+			stopLoadingSpin()
+		}
+		// #endif
+
+		visible.value = true
+
+		if (duration > 0) {
+			hideTimer = setTimeout(() => {
+				hostHide()
+			}, duration)
+		}
+	}
+
+	let boundHostId: number = 0
+
+	onMounted(() => {
+		boundHostId = bindNaxToastHost(hostShow, hostHide)
+	})
+
+	onUnmounted(() => {
+		clearHideTimer()
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		stopLoadingSpin()
+		// #endif
+		unbindNaxToastHost(boundHostId)
+		boundHostId = 0
+	})
+</script>
+
+<style>
+	.nax-toast--block {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+	}
+
+	.nax-toast__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		/* 鸿蒙：避免依赖 rgba 作为唯一值；实色 + 透明度更稳时再调 */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: #000000;
+		opacity: 0.4;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+		/* #endif */
+	}
+
+	.nax-toast__stage {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.nax-toast__stage--center {
+		justify-content: center;
+	}
+
+	.nax-toast__stage--top {
+		justify-content: flex-start;
+		padding-top: 80px;
+	}
+
+	.nax-toast__stage--bottom {
+		justify-content: flex-end;
+		padding-bottom: 80px;
+	}
+
+	.nax-toast--float {
+		position: fixed;
+		left: 0;
+		right: 0;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+
+	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-toast--float-center {
+		top: 280px;
+	}
+	/* #endif */
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-toast--float-center {
+		top: 42%;
+	}
+	/* #endif */
+
+	.nax-toast--float-top {
+		top: 80px;
+	}
+
+	.nax-toast--float-bottom {
+		bottom: 80px;
+	}
+
+	.nax-toast__panel {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		max-width: 280px;
+		/* 底色由 inline style 写入（hex），避免 rgba / 嵌套 var 失效 */
+		background-color: #4c4c4c;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		max-width: 70%;
+		background-color: #4c4c4c;
+		/* #endif */
+		border-radius: 8px;
+	}
+
+	.nax-toast__panel--text {
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 18px;
+		padding-right: 18px;
+	}
+
+	.nax-toast__panel--with-icon {
+		min-width: 96px;
+		padding-top: 16px;
+		padding-bottom: 16px;
+		padding-left: 18px;
+		padding-right: 18px;
+	}
+
+	.nax-toast__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		margin-bottom: 8px;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-toast__icon--spin {
+		animation-name: nax-toast-spin;
+		animation-duration: 0.8s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-toast-spin {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	/* #endif */
+
+	.nax-toast__text {
+		font-size: 15px;
+		color: #ffffff;
+		font-weight: 400;
+		text-align: center;
+	}
+</style>
