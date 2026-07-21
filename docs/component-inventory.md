@@ -35,7 +35,7 @@
 |------|------|--------|------|------------------|
 | 按钮 | `nax-button` | P0 | 主操作入口；层级参考 Naive：基础/次要/次次要/次次次要/虚线/禁用 | `type(default/primary/info/success/warning/error)` `variant(solid/secondary/tertiary/quaternary/dashed/outline)` `size` `disabled` `loading` `block` `label` `icon` `iconPosition` / `click` |
 | 文本 | `nax-text` | P0 | 统一字号/颜色/省略/模式格式化（对齐 uView Pro Text） | `type` `size` `lines` `selectable` `mode` `format` `call` `decoration` `bold` `block` / `click` **done** |
-| 图标 | `nax-icon` | P0 | 字体/图片图标壳 | `name` `size` `color` / `click` |
+| 图标 | `nax-icon` | P0 | 字体图标壳（Tabler Icons 语义子集） | `name` `size` `color` / `click` |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器；子项 `nax-space-item` | `direction` `size` `wrap` `align` `justify` `fill` **done** |
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
 | 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` |
@@ -126,7 +126,7 @@
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
 | `nax-text` | done | 插件包 `uni_modules/nax-text`；对齐 uView Pro Text；鸿蒙省略用 `#ifdef APP-HARMONY` 双写 lines/宽度约束 |
-| `nax-icon` | mvp | 插件包已有骨架 |
+| `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（40）；含 file/notes/database/message-off |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
@@ -153,7 +153,7 @@
 | `nax-line` | done | 插件包 `uni_modules/nax-line`；布局纯线条；direction/size/dashed/type/space/inset；默认 `--nax-color-divider` |
 | `nax-cell` / `nax-cell-group` | done | 插件包 `uni_modules/nax-cell`；对齐 uView Pro CellItem/CellGroup；icon/is-link/inset/provide-inject |
 | `nax-space` / `nax-space-item` | done | 插件包 `uni_modules/nax-space`；横向/纵向间距；item 吃 margin 兼容隔离 2.0 |
-| `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 image-off |
+| `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 database-off（暂无数据）；列表空建议 notes-off |
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | 其余 MVP | planned | 按依赖自底向上 |
 

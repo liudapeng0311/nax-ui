@@ -16,7 +16,8 @@
 </nax-empty>
 
 <!-- 图标语义 -->
-<nax-empty icon="search" description="未找到相关结果"></nax-empty>
+<nax-empty icon="file-off" description="暂无相关文件"></nax-empty>
+<nax-empty icon="message-off" description="消息箱是空的"></nax-empty>
 
 <!-- 自定义图片 -->
 <nax-empty image="/static/empty.png" description="网络异常"></nax-empty>
@@ -32,7 +33,7 @@
 | image | string | `''` | 插图地址（优先于 icon） |
 | image-size | string | `120` | 插图边长；数字 px 或 `sm`/`md`/`lg` |
 | image-mode | string | `aspectFit` | 图片 mode |
-| icon | string | `''` | 无图时图标名；默认 `image-off` |
+| icon | string | `''` | 无图时图标名；默认 `database-off` |
 | icon-size | string | `48` | 图标尺寸 |
 | icon-color | string | `''` | 图标颜色 |
 | show-image | boolean | `true` | 是否展示插图区 |

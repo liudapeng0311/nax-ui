@@ -46,7 +46,7 @@
 	 * @property {string} image 插图地址；有值时优先于 icon
 	 * @property {string} imageSize 插图边长；纯数字按 px，或 sm/md/lg；默认 120
 	 * @property {string} imageMode 图片 mode，默认 aspectFit
-	 * @property {string} icon 无图时的 nax-icon 名；空则 image-off
+	 * @property {string} icon 无图时的 nax-icon 名；空则 database-off（暂无数据）
 	 * @property {string} iconSize 图标尺寸；纯数字 px 或 sm/md/lg；默认 48
 	 * @property {string} iconColor 图标颜色
 	 * @property {boolean} showImage 是否展示插图区，默认 true
@@ -91,7 +91,7 @@
 		if (props.icon.length > 0) {
 			return props.icon
 		}
-		return 'image-off'
+		return 'database-off'
 	})
 
 	const showMedia = computed((): boolean => {

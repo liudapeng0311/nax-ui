@@ -14,27 +14,30 @@
 			<view class="section">
 				<text class="section__title">标题 + 描述</text>
 				<view class="panel">
-					<nax-empty title="暂无订单" description="下单后，订单会出现在这里"></nax-empty>
+					<nax-empty icon="notes-off" title="暂无订单" description="下单后，订单会出现在这里"></nax-empty>
 				</view>
 			</view>
 
 			<view class="section">
 				<text class="section__title">图标语义</text>
 				<view class="panel">
-					<nax-empty icon="search" description="未找到相关结果"></nax-empty>
+					<nax-empty icon="file-off" description="暂无相关文件"></nax-empty>
 				</view>
 				<view class="panel panel--gap">
-					<nax-empty icon="error" icon-color="#d03050" title="加载失败" description="请检查网络后重试"></nax-empty>
+					<nax-empty icon="notes-off" description="暂无列表"></nax-empty>
 				</view>
 				<view class="panel panel--gap">
-					<nax-empty icon="more" description="消息箱是空的"></nax-empty>
+					<nax-empty icon="database-off" description="暂无数据"></nax-empty>
+				</view>
+				<view class="panel panel--gap">
+					<nax-empty icon="message-off" description="消息箱是空的"></nax-empty>
 				</view>
 			</view>
 
 			<view class="section">
 				<text class="section__title">操作按钮</text>
 				<view class="panel">
-					<nax-empty title="列表为空" description="试着新建一条数据吧">
+					<nax-empty icon="notes-off" title="列表为空" description="试着新建一条数据吧">
 						<template #action>
 							<nax-button type="primary" size="sm" label="新建" @click="onCreate"></nax-button>
 						</template>
