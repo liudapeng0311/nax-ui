@@ -1,0 +1,1351 @@
+<template>
+	<view class="nax-tabs" :class="rootClass" :style="rootStyle">
+		<!-- 可滚动 -->
+		<!-- direction=horizontal：uni-app x 官方横向滚动；scroll-x 已废弃且与默认 scroll-y 冲突 -->
+		<scroll-view
+			v-if="scrollable"
+			:id="scrollDomId"
+			class="nax-tabs__scroll"
+			direction="horizontal"
+			:show-scrollbar="false"
+			:scroll-with-animation="true"
+			:scroll-left="scrollLeftPx"
+			@scroll="onScrollViewScroll"
+		>
+			<view :id="listDomId" class="nax-tabs__list nax-tabs__list--scroll" :style="scrollListStyle">
+				<view
+					v-for="(item, index) in tabItems"
+					:id="itemDomId(index)"
+					:key="index"
+					class="nax-tabs__item nax-tabs__item--scroll"
+					:class="itemClass(index, item)"
+					@click="onItemClick(index)"
+				>
+					<view class="nax-tabs__label">
+						<text class="nax-tabs__text" :class="textClass(index, item)" :lines="1">{{ resolveText(item) }}</text>
+						<view v-if="resolveShowDot(item)" class="nax-tabs__dot"></view>
+						<view v-else-if="resolveBadgeText(item).length > 0" class="nax-tabs__badge">
+							<text class="nax-tabs__badge-text">{{ resolveBadgeText(item) }}</text>
+						</view>
+					</view>
+				</view>
+				<view
+					v-if="showLine && tabItems.length > 0"
+					class="nax-tabs__line"
+					:class="lineReadyClass"
+					:style="lineStyle"
+				></view>
+			</view>
+		</scroll-view>
+
+		<!-- 均分宽度 -->
+		<view
+			v-else
+			:id="listDomId"
+			class="nax-tabs__list nax-tabs__list--equal"
+		>
+			<view
+				v-for="(item, index) in tabItems"
+				:id="itemDomId(index)"
+				:key="index"
+				class="nax-tabs__item nax-tabs__item--equal"
+				:class="itemClass(index, item)"
+				@click="onItemClick(index)"
+			>
+				<view class="nax-tabs__label">
+					<text class="nax-tabs__text" :class="textClass(index, item)" :lines="1">{{ resolveText(item) }}</text>
+					<view v-if="resolveShowDot(item)" class="nax-tabs__dot"></view>
+					<view v-else-if="resolveBadgeText(item).length > 0" class="nax-tabs__badge">
+						<text class="nax-tabs__badge-text">{{ resolveBadgeText(item) }}</text>
+					</view>
+				</view>
+			</view>
+			<view
+				v-if="showLine && tabItems.length > 0"
+				class="nax-tabs__line"
+				:class="lineReadyClass"
+				:style="lineStyle"
+			></view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-tabs
+	 * @description 顶部标签导航。list + v-model；可滚动/均分；指示条；徽标/红点/禁用。内容区由业务自管。
+	 * @property {number} modelValue 当前选中下标（v-model）
+	 * @property {Array} list 项列表（name/text/label/title、badge/count、dot、disabled；支持字符串项）
+	 * @property {string} keyName 文案优先字段，默认 name
+	 * @property {boolean} scrollable 横向滚动，默认 true；false 均分
+	 * @property {string} scrollAlign 激活项滚动对齐 left | center，默认 center
+	 * @property {boolean} showLine 指示条，默认 true
+	 * @property {string} lineWidth 指示条宽，默认 20（px）
+	 * @property {string} lineHeight 指示条高，默认 3（px）
+	 * @property {string} size sm | md | lg，默认 md
+	 * @property {boolean} border 底部分割线，默认 true
+	 * @property {number} duration 指示条过渡 ms，默认 300
+	 * @property {boolean} sticky CSS sticky 吸顶，默认 false
+	 * @property {string} offsetTop sticky top，默认 0
+	 * @property {number} badgeMax 徽标数字上限，默认 99
+	 * @property {string} customClass 根扩展 class
+	 * @event update:modelValue / change / click
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: Number,
+			default: 0
+		},
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		keyName: {
+			type: String,
+			default: 'name'
+		},
+		scrollable: {
+			type: Boolean,
+			default: true
+		},
+		scrollAlign: {
+			type: String,
+			default: 'center'
+		},
+		showLine: {
+			type: Boolean,
+			default: true
+		},
+		lineWidth: {
+			type: String,
+			default: '20'
+		},
+		lineHeight: {
+			type: String,
+			default: '3'
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		duration: {
+			type: Number,
+			default: 350
+		},
+		sticky: {
+			type: Boolean,
+			default: false
+		},
+		offsetTop: {
+			type: String,
+			default: '0'
+		},
+		badgeMax: {
+			type: Number,
+			default: 99
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change', 'click'])
+
+	const instance = getCurrentInstance()
+	const uid = Math.floor(Math.random() * 10000000).toString()
+	const listDomId = 'nax-tabs-list-' + uid
+	const scrollDomId = 'nax-tabs-scroll-' + uid
+
+	const lineLeftPx = ref(0)
+	const lineWidthPx = ref(20)
+	const lineMeasured = ref(false)
+	const scrollLeftPx = ref(0.0)
+	// 用户手势滚动后的真实位置（官方：改 scroll-left 前先同步 view 层）
+	const actualScrollLeft = ref(0.0)
+	// 测量中间态（避免 createSelectorQuery 回调顺序不确定）
+	const measureItemLeft = ref(-1.0)
+	const measureItemWidth = ref(-1.0)
+	const measureListLeft = ref(0.0)
+	const measureGotItem = ref(false)
+	const measureGotList = ref(false)
+	const measureIndex = ref(0)
+	const measureLineW = ref(20.0)
+	const measureToken = ref(0)
+	const listContentWidth = ref(0)
+	// 各项内容坐标缓存：选中时同步移动指示条，避免等测量导致滑块慢半拍
+	const itemLayoutLefts = ref([] as number[])
+	const itemLayoutWidths = ref([] as number[])
+	// scroll-left 测量中间态
+	const scrollItemLeft = ref(-1.0)
+	const scrollItemWidth = ref(0.0)
+	const scrollViewLeft = ref(0.0)
+	const scrollViewWidth = ref(0.0)
+	const scrollGotItem = ref(false)
+	const scrollGotView = ref(false)
+	const scrollMeasureToken = ref(0)
+	// 选中动画锁：期间禁止改内容宽/重定位指示条，避免滚动中途卡顿一下
+	const selectionAnimLock = ref(false)
+	const selectionAnimToken = ref(0)
+
+	function isArrayValue(val : any | null) : boolean {
+		if (val == null) {
+			return false
+		}
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		if (typeof len != 'number') {
+			return false
+		}
+		return true
+	}
+
+	function asAnyArray(val : any | null) : any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		if (!isArrayValue(val)) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function asObject(item : any | null) : UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function readString(obj : UTSJSONObject, key : string) : string {
+		const s = obj.getString(key)
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'string') {
+			const str = anyVal as string
+			if (str.length > 0) {
+				return str
+			}
+		}
+		return ''
+	}
+
+	function readBoolean(obj : UTSJSONObject, key : string) : boolean {
+		const b = obj.getBoolean(key)
+		if (b != null) {
+			return b as boolean
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'boolean') {
+			return anyVal as boolean
+		}
+		return false
+	}
+
+	function readNumberLike(obj : UTSJSONObject, key : string) : number {
+		const n = obj.getNumber(key)
+		if (n != null) {
+			return n as number
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null) {
+			if (typeof anyVal == 'number') {
+				return anyVal as number
+			}
+			if (typeof anyVal == 'string') {
+				const s = (anyVal as string).trim()
+				if (s.length == 0) {
+					return NaN
+				}
+				return parseFloat(s)
+			}
+		}
+		return NaN
+	}
+
+	function parsePx(value : string, fallback : number) : number {
+		if (value.length == 0) {
+			return fallback
+		}
+		const n = parseFloat(value)
+		if (isNaN(n) || n < 0) {
+			return fallback
+		}
+		return n
+	}
+
+	function formatCssSize(value : string, fallbackPx : number) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return fallbackPx.toString() + 'px'
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0 ||
+			trimmed.indexOf('em') >= 0 ||
+			trimmed.indexOf('rem') >= 0
+		) {
+			return trimmed
+		}
+		const n = parseFloat(trimmed)
+		if (isNaN(n)) {
+			return fallbackPx.toString() + 'px'
+		}
+		return n.toString() + 'px'
+	}
+
+	function normalizeSize(value : string) : string {
+		if (value == 'sm' || value == 'small') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeScrollAlign(value : string) : string {
+		if (value == 'left' || value == 'start') {
+			return 'left'
+		}
+		// center / middle 均视为居中
+		return 'center'
+	}
+
+	const tabItems = computed((): any[] => {
+		return asAnyArray(props.list as any)
+	})
+
+	const activeIndex = computed((): number => {
+		const len = tabItems.value.length
+		if (len == 0) {
+			return 0
+		}
+		var idx = props.modelValue
+		if (idx < 0) {
+			idx = 0
+		}
+		if (idx >= len) {
+			idx = len - 1
+		}
+		return idx
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-tabs--' + sizeName.value
+		if (props.border) {
+			cls += ' nax-tabs--border'
+		}
+		if (props.sticky) {
+			cls += ' nax-tabs--sticky'
+		}
+		if (!props.scrollable) {
+			cls += ' nax-tabs--equal'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		if (!props.sticky) {
+			return ''
+		}
+		return 'top:' + formatCssSize(props.offsetTop, 0) + ';'
+	})
+
+	const lineReadyClass = computed((): string => {
+		if (lineMeasured.value) {
+			return 'nax-tabs__line--ready'
+		}
+		return ''
+	})
+
+	const lineStyle = computed((): string => {
+		const h = formatCssSize(props.lineHeight, 3)
+		const w = lineWidthPx.value
+		const left = lineLeftPx.value
+		// 对齐 uView：始终用 duration 做滑块过渡，横滑时滑块会略慢半拍跟随
+		const ms = props.duration
+		var style = 'height:' + h + ';'
+		style += 'width:' + w.toString() + 'px;'
+		style += 'transform:translateX(' + left.toString() + 'px);'
+		if (ms > 0 && lineMeasured.value) {
+			style += 'transition-duration:' + ms.toString() + 'ms;'
+		} else {
+			style += 'transition-duration:0ms;'
+		}
+		return style
+	})
+
+	// 显式设置 list 宽度，否则 App/鸿蒙端 scroll-view 内容宽被限制为视口宽，无法横向滚动
+	const scrollListStyle = computed((): string => {
+		if (!props.scrollable) {
+			return ''
+		}
+		if (listContentWidth.value <= 0) {
+			return ''
+		}
+		return 'width:' + listContentWidth.value.toString() + 'px;'
+	})
+
+	function itemDomId(index : number) : string {
+		return 'nax-tabs-item-' + uid + '-' + index.toString()
+	}
+
+	function itemClass(index : number, item : any | null) : string {
+		var cls = ''
+		if (index == activeIndex.value) {
+			cls += ' nax-tabs__item--active'
+		}
+		if (resolveDisabled(item)) {
+			cls += ' nax-tabs__item--disabled'
+		}
+		return cls.trim()
+	}
+
+	function textClass(index : number, item : any | null) : string {
+		var cls = ''
+		if (index == activeIndex.value) {
+			cls += ' nax-tabs__text--active'
+		}
+		if (resolveDisabled(item)) {
+			cls += ' nax-tabs__text--disabled'
+		}
+		return cls.trim()
+	}
+
+	function resolveText(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		if (typeof item == 'number') {
+			return '' + (item as number)
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const preferred = props.keyName
+		if (preferred.length > 0) {
+			const byKey = readString(obj, preferred)
+			if (byKey.length > 0) {
+				return byKey
+			}
+		}
+		const name = readString(obj, 'name')
+		if (name.length > 0) {
+			return name
+		}
+		const text = readString(obj, 'text')
+		if (text.length > 0) {
+			return text
+		}
+		const label = readString(obj, 'label')
+		if (label.length > 0) {
+			return label
+		}
+		const title = readString(obj, 'title')
+		if (title.length > 0) {
+			return title
+		}
+		return ''
+	}
+
+	function resolveDisabled(item : any | null) : boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		return readBoolean(obj, 'disabled')
+	}
+
+	function resolveShowDot(item : any | null) : boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		if (readBoolean(obj, 'dot')) {
+			return true
+		}
+		return readBoolean(obj, 'isDot')
+	}
+
+	function formatBadgeNumber(num : number) : string {
+		if (num <= 0) {
+			return ''
+		}
+		if (props.badgeMax > 0 && num > props.badgeMax) {
+			return '' + props.badgeMax + '+'
+		}
+		if (num == Math.floor(num)) {
+			return '' + Math.floor(num)
+		}
+		return '' + num
+	}
+
+	function resolveBadgeText(item : any | null) : string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const badgeStr = readString(obj, 'badge')
+		if (badgeStr.length > 0) {
+			const n = parseFloat(badgeStr)
+			if (!isNaN(n)) {
+				return formatBadgeNumber(n)
+			}
+			return badgeStr
+		}
+		const countStr = readString(obj, 'count')
+		if (countStr.length > 0) {
+			const n = parseFloat(countStr)
+			if (!isNaN(n)) {
+				return formatBadgeNumber(n)
+			}
+			return countStr
+		}
+		const badgeNum = readNumberLike(obj, 'badge')
+		if (!isNaN(badgeNum)) {
+			return formatBadgeNumber(badgeNum)
+		}
+		const countNum = readNumberLike(obj, 'count')
+		if (!isNaN(countNum)) {
+			return formatBadgeNumber(countNum)
+		}
+		return ''
+	}
+
+	function rebuildEstimatedLayouts() {
+		const items = tabItems.value
+		const len = items.length
+		const lefts = [] as number[]
+		const widths = [] as number[]
+		if (len == 0) {
+			itemLayoutLefts.value = lefts
+			itemLayoutWidths.value = widths
+			return
+		}
+		if (!props.scrollable) {
+			// 均分模式先用等宽占位，真实宽度等测量后校正
+			const approx = 100.0
+			var i = 0
+			var x = 0.0
+			while (i < len) {
+				lefts.push(x)
+				widths.push(approx)
+				x = x + approx
+				i++
+			}
+			itemLayoutLefts.value = lefts
+			itemLayoutWidths.value = widths
+			return
+		}
+		const charW = charWidthBySize()
+		const padX = 28.0
+		var x2 = 0.0
+		var j = 0
+		while (j < len) {
+			const text = resolveText(items[j])
+			var tw = text.length * charW
+			if (resolveShowDot(items[j]) || resolveBadgeText(items[j]).length > 0) {
+				tw = tw + 10.0
+			}
+			if (tw < 20.0) {
+				tw = 20.0
+			}
+			const w = padX + tw
+			lefts.push(x2)
+			widths.push(w)
+			x2 = x2 + w
+			j++
+		}
+		itemLayoutLefts.value = lefts
+		itemLayoutWidths.value = widths
+		if (x2 > 0) {
+			listContentWidth.value = x2 + 1.0
+		}
+	}
+
+	function setItemLayouts(lefts : number[], widths : number[], updateContentWidth : boolean) {
+		itemLayoutLefts.value = lefts
+		itemLayoutWidths.value = widths
+		// 滚动动画中改 content 宽度会整段卡一下，动画锁内只更新缓存
+		if (!updateContentWidth || selectionAnimLock.value) {
+			return
+		}
+		if (props.scrollable) {
+			var total = 0.0
+			var i = 0
+			while (i < widths.length) {
+				total = total + widths[i]
+				i++
+			}
+			if (total > 0) {
+				const nextW = total + 1.0
+				// 变化很小时不写回，减少无重布局
+				if (Math.abs(listContentWidth.value - nextW) > 1.0) {
+					listContentWidth.value = nextW
+				}
+			}
+		}
+	}
+
+	function applyLineFromLayout(index : number) {
+		if (!props.showLine) {
+			return
+		}
+		const lefts = itemLayoutLefts.value
+		const widths = itemLayoutWidths.value
+		const len = lefts.length
+		if (len == 0 || index < 0 || index >= len || index >= widths.length) {
+			return
+		}
+		const itemLeft = lefts[index]
+		const itemW = widths[index]
+		if (itemW <= 0) {
+			return
+		}
+		const w = parsePx(props.lineWidth, 20)
+		var left = itemLeft + (itemW - w) / 2.0
+		if (left < 0) {
+			left = 0
+		}
+		// 目标几乎不变则不写，避免打断进行中的 transition
+		if (lineMeasured.value && Math.abs(lineLeftPx.value - left) < 0.5 && Math.abs(lineWidthPx.value - w) < 0.5) {
+			return
+		}
+		lineWidthPx.value = w
+		lineLeftPx.value = left
+		lineMeasured.value = true
+	}
+
+	function beginSelectionAnimLock() {
+		selectionAnimLock.value = true
+		const token = selectionAnimToken.value + 1
+		selectionAnimToken.value = token
+		var lockMs = props.duration
+		if (lockMs < 280) {
+			lockMs = 280
+		}
+		// 略长于指示条 + 滚动动画，防止中途二次校正
+		lockMs = lockMs + 120
+		setTimeout(() => {
+			if (token != selectionAnimToken.value) {
+				return
+			}
+			selectionAnimLock.value = false
+		}, lockMs)
+	}
+
+	// 点击切换：对齐 uView —— 先设滑块目标（CSS transition 慢半拍跟随），再滚动 tabs
+	function onActiveIndexChange() {
+		if (itemLayoutLefts.value.length == 0) {
+			rebuildEstimatedLayouts()
+		}
+		// 动画期间禁止改 content 宽度，避免打断滚动；滑块本身保留 duration 过渡
+		beginSelectionAnimLock()
+		applyLineFromLayout(activeIndex.value)
+		if (props.scrollable) {
+			nextTick(() => {
+				syncScrollToActive()
+			})
+		}
+	}
+
+	function applyLineFallback(index : number) {
+		const w = parsePx(props.lineWidth, 20)
+		lineWidthPx.value = w
+		if (!props.scrollable) {
+			lineLeftPx.value = 0
+			return
+		}
+		const approxItem = 72.0
+		const left = approxItem * index + (approxItem - w) / 2
+		if (left < 0) {
+			lineLeftPx.value = 0
+		} else {
+			lineLeftPx.value = left
+		}
+	}
+
+	function applyLineFromRects(itemLeft : number, itemWidth : number, listLeft : number, fixedLineW : number, index : number) {
+		// itemLeft 可为负（左侧屏外），用相对 list 的内容坐标
+		if (itemWidth > 0) {
+			const relLeft = itemLeft - listLeft
+			const w = fixedLineW
+			var left = relLeft + (itemWidth - w) / 2
+			if (left < 0) {
+				left = 0
+			}
+			lineWidthPx.value = w
+			lineLeftPx.value = left
+			lineMeasured.value = true
+		} else {
+			applyLineFallback(index)
+		}
+	}
+
+	function tryApplyMeasure(token : number) {
+		if (token != measureToken.value) {
+			return
+		}
+		if (!measureGotItem.value || !measureGotList.value) {
+			return
+		}
+		applyLineFromRects(
+			measureItemLeft.value,
+			measureItemWidth.value,
+			measureListLeft.value,
+			measureLineW.value,
+			measureIndex.value
+		)
+	}
+
+	// 仅在缓存缺失或需要校正时测量当前项
+	function updateLinePosition() {
+		if (!props.showLine) {
+			return
+		}
+		const items = tabItems.value
+		const len = items.length
+		if (len == 0) {
+			lineMeasured.value = false
+			return
+		}
+		const index = activeIndex.value
+		// 优先走缓存：避免异步测量导致滑块滞后
+		if (itemLayoutLefts.value.length > index) {
+			applyLineFromLayout(index)
+			return
+		}
+		const itemId = itemDomId(index)
+		const fixedLineW = parsePx(props.lineWidth, 20)
+		const token = measureToken.value + 1
+		measureToken.value = token
+		measureIndex.value = index
+		measureLineW.value = fixedLineW
+		measureItemLeft.value = -1.0
+		measureItemWidth.value = -1.0
+		measureListLeft.value = 0.0
+		measureGotItem.value = false
+		measureGotList.value = false
+
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+
+		query
+			.select('#' + itemId)
+			.boundingClientRect((rect : NodeInfo) => {
+				if (token != measureToken.value) {
+					return
+				}
+				if (rect != null) {
+					if (rect.left != null) {
+						measureItemLeft.value = rect.left as number
+					}
+					if (rect.width != null) {
+						measureItemWidth.value = rect.width as number
+					}
+				}
+				measureGotItem.value = true
+				tryApplyMeasure(token)
+			})
+		query
+			.select('#' + listDomId)
+			.boundingClientRect((rect2 : NodeInfo) => {
+				if (token != measureToken.value) {
+					return
+				}
+				if (rect2 != null && rect2.left != null) {
+					measureListLeft.value = rect2.left as number
+				}
+				measureGotList.value = true
+				tryApplyMeasure(token)
+			})
+		query.exec()
+	}
+
+	function onScrollViewScroll(e : UniScrollEvent) {
+		const detail = e.detail
+		if (detail != null && detail.scrollLeft != null) {
+			actualScrollLeft.value = detail.scrollLeft as number
+		}
+	}
+
+	// 官方：view 不同步时先对齐当前再 nextTick 设目标；已接近目标则跳过，避免滚动中二次触发卡顿
+	function applyScrollLeft(target : number) {
+		var next = target
+		if (next < 0) {
+			next = 0
+		}
+		const current = actualScrollLeft.value
+		if (Math.abs(current - next) < 0.5) {
+			return
+		}
+		// prop 已与真实滚动对齐时直接设目标，少一次无效赋值
+		if (Math.abs(scrollLeftPx.value - current) < 0.5) {
+			scrollLeftPx.value = next
+			actualScrollLeft.value = next
+			return
+		}
+		scrollLeftPx.value = current
+		nextTick(() => {
+			scrollLeftPx.value = next
+			actualScrollLeft.value = next
+		})
+	}
+
+	function tryApplyScrollMeasure(token : number) {
+		if (token != scrollMeasureToken.value) {
+			return
+		}
+		if (!scrollGotItem.value || !scrollGotView.value) {
+			return
+		}
+		const itemLeft = scrollItemLeft.value
+		const itemWidth = scrollItemWidth.value
+		const viewLeft = scrollViewLeft.value
+		const viewWidth = scrollViewWidth.value
+		// itemLeft 在左侧屏外时可能为负，不能当失败处理
+		if (itemWidth <= 0 || viewWidth <= 0) {
+			return
+		}
+		// 内容坐标 = 视口相对位置 + 当前滚动偏移（比依赖 list.left 更稳）
+		const itemRel = itemLeft - viewLeft + actualScrollLeft.value
+		// left：激活项贴左侧；center：尽量居中
+		var target = 0.0
+		const align = normalizeScrollAlign(props.scrollAlign)
+		if (align == 'left') {
+			target = itemRel
+		} else {
+			target = itemRel - (viewWidth - itemWidth) / 2.0
+		}
+		if (target < 0) {
+			target = 0
+		}
+		const contentW = listContentWidth.value
+		if (contentW > viewWidth) {
+			const maxScroll = contentW - viewWidth
+			if (target > maxScroll) {
+				target = maxScroll
+			}
+		} else {
+			target = 0
+		}
+		applyScrollLeft(target)
+	}
+
+	// 用 scroll-left 把激活项滚入可视区（left 贴左 / center 居中）
+	function syncScrollToActive() {
+		if (!props.scrollable) {
+			scrollLeftPx.value = 0
+			actualScrollLeft.value = 0
+			return
+		}
+		const items = tabItems.value
+		if (items.length == 0) {
+			scrollLeftPx.value = 0
+			actualScrollLeft.value = 0
+			return
+		}
+
+		const index = activeIndex.value
+		const itemId = itemDomId(index)
+		const token = scrollMeasureToken.value + 1
+		scrollMeasureToken.value = token
+		scrollItemLeft.value = -1.0
+		scrollItemWidth.value = 0.0
+		scrollViewLeft.value = 0.0
+		scrollViewWidth.value = 0.0
+		scrollGotItem.value = false
+		scrollGotView.value = false
+
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+
+		query
+			.select('#' + itemId)
+			.boundingClientRect((rect : NodeInfo) => {
+				if (token != scrollMeasureToken.value) {
+					return
+				}
+				if (rect != null) {
+					if (rect.left != null) {
+						scrollItemLeft.value = rect.left as number
+					}
+					if (rect.width != null) {
+						scrollItemWidth.value = rect.width as number
+					}
+				}
+				scrollGotItem.value = true
+				tryApplyScrollMeasure(token)
+			})
+		query
+			.select('#' + scrollDomId)
+			.boundingClientRect((rect3 : NodeInfo) => {
+				if (token != scrollMeasureToken.value) {
+					return
+				}
+				if (rect3 != null) {
+					if (rect3.left != null) {
+						scrollViewLeft.value = rect3.left as number
+					}
+					if (rect3.width != null) {
+						scrollViewWidth.value = rect3.width as number
+					}
+				}
+				scrollGotView.value = true
+				tryApplyScrollMeasure(token)
+			})
+		query.exec()
+	}
+
+	function charWidthBySize() : number {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return 14.0
+		}
+		if (s == 'lg') {
+			return 18.0
+		}
+		return 16.0
+	}
+
+	// 文案估算：避免测量前/受挤压时总宽约等于视口导致无法溢出滚动
+	function estimateScrollContentWidth() : number {
+		const items = tabItems.value
+		const len = items.length
+		if (len == 0) {
+			return 0
+		}
+		const charW = charWidthBySize()
+		// item 左右 padding 14+14
+		const padX = 28.0
+		var total = 0.0
+		var i = 0
+		while (i < len) {
+			const text = resolveText(items[i])
+			var tw = text.length * charW
+			// 徽标/红点预留一点空间
+			if (resolveShowDot(items[i]) || resolveBadgeText(items[i]).length > 0) {
+				tw = tw + 10.0
+			}
+			if (tw < 20.0) {
+				tw = 20.0
+			}
+			total = total + padX + tw
+			i++
+		}
+		// +1 保证略大于视口即可滚
+		return total + 1.0
+	}
+
+	function updateScrollContentWidth() {
+		if (!props.scrollable) {
+			listContentWidth.value = 0
+			return
+		}
+		const items = tabItems.value
+		const len = items.length
+		if (len == 0) {
+			listContentWidth.value = 0
+			return
+		}
+
+		// 先用估算撑开，保证首帧就能横向滚动
+		const estimated = estimateScrollContentWidth()
+		if (listContentWidth.value <= 0 || estimated > listContentWidth.value) {
+			listContentWidth.value = estimated
+		}
+
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+
+		const widths = [] as number[]
+		var i = 0
+		while (i < len) {
+			widths.push(0)
+			i++
+		}
+		var remain = len
+		var k = 0
+		while (k < len) {
+			const idx = k
+			const id = itemDomId(idx)
+			query
+				.select('#' + id)
+				.boundingClientRect((rect : NodeInfo) => {
+					if (rect != null && rect.width != null) {
+						widths[idx] = rect.width as number
+					}
+					remain = remain - 1
+					if (remain <= 0) {
+						var total = 0.0
+						var j = 0
+						while (j < widths.length) {
+							total = total + widths[j]
+							j++
+						}
+						// 测量值若明显偏小（被视口挤压），保留估算
+						if (total > estimated) {
+							const lefts = [] as number[]
+							var acc = 0.0
+							var m = 0
+							while (m < widths.length) {
+								lefts.push(acc)
+								acc = acc + widths[m]
+								m++
+							}
+							// 动画锁内只写缓存，不改 content 宽、不重定位滑块
+							setItemLayouts(lefts, widths, !selectionAnimLock.value)
+							if (!selectionAnimLock.value) {
+								applyLineFromLayout(activeIndex.value)
+							}
+						} else if (estimated > 0) {
+							if (!selectionAnimLock.value) {
+								listContentWidth.value = estimated
+							}
+						} else if (total > 0) {
+							if (!selectionAnimLock.value) {
+								listContentWidth.value = total + 1
+							}
+						}
+					}
+				})
+			k++
+		}
+		query.exec()
+	}
+
+	function scheduleLayout() {
+		// 先同步估算布局并立刻画指示条；只滚动一次，避免二次 scroll 打断动画
+		rebuildEstimatedLayouts()
+		if (props.scrollable) {
+			beginSelectionAnimLock()
+		}
+		applyLineFromLayout(activeIndex.value)
+		nextTick(() => {
+			if (props.scrollable) {
+				syncScrollToActive()
+			}
+			// 后台精修真实宽度（动画锁内不会改宽/滑块）
+			setTimeout(() => {
+				updateScrollContentWidth()
+				if (!props.scrollable) {
+					measureEqualLayouts()
+				}
+			}, 40)
+		})
+	}
+
+	function measureEqualLayouts() {
+		if (props.scrollable) {
+			return
+		}
+		const items = tabItems.value
+		const len = items.length
+		if (len == 0) {
+			return
+		}
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+		const widths = [] as number[]
+		var i = 0
+		while (i < len) {
+			widths.push(0)
+			i++
+		}
+		var remain = len
+		var k = 0
+		while (k < len) {
+			const idx = k
+			const id = itemDomId(idx)
+			query
+				.select('#' + id)
+				.boundingClientRect((rect : NodeInfo) => {
+					if (rect != null && rect.width != null) {
+						widths[idx] = rect.width as number
+					}
+					remain = remain - 1
+					if (remain <= 0) {
+						const lefts = [] as number[]
+						var acc = 0.0
+						var m = 0
+						while (m < widths.length) {
+							lefts.push(acc)
+							acc = acc + widths[m]
+							m++
+						}
+						setItemLayouts(lefts, widths, true)
+						if (!selectionAnimLock.value) {
+							applyLineFromLayout(activeIndex.value)
+						}
+					}
+				})
+			k++
+		}
+		query.exec()
+	}
+
+	function onItemClick(index : number) {
+		const items = tabItems.value
+		if (index < 0 || index >= items.length) {
+			return
+		}
+		const item = items[index]
+		if (resolveDisabled(item)) {
+			return
+		}
+		emit('click', index)
+		if (index == props.modelValue) {
+			return
+		}
+		emit('update:modelValue', index)
+		emit('change', index)
+	}
+
+	// 仅下标变化：同步动指示条，不走全量测量
+	watch((): number => props.modelValue, (_v : number) => {
+		onActiveIndexChange()
+	})
+
+	watch((): boolean => props.scrollable, (_v : boolean) => {
+		lineMeasured.value = false
+		scheduleLayout()
+	})
+
+	watch((): string => props.scrollAlign, (_v : string) => {
+		syncScrollToActive()
+	})
+
+	watch((): number => tabItems.value.length, (_v : number) => {
+		lineMeasured.value = false
+		scheduleLayout()
+	})
+
+	watch((): string => props.lineWidth, (_v : string) => {
+		applyLineFromLayout(activeIndex.value)
+	})
+
+	onMounted(() => {
+		lineWidthPx.value = parsePx(props.lineWidth, 20)
+		scheduleLayout()
+	})
+</script>
+
+<style>
+	.nax-tabs {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-tabs--sticky {
+		/* sticky：Web/部分端可用；不支持时退化为普通块级 */
+		position: sticky;
+		z-index: 90;
+	}
+
+	.nax-tabs--border {
+		border-bottom-width: 0.5px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-tabs__scroll {
+		width: 100%;
+		/* 官方：横向滚动时 scroll-view 需 flex-direction:row */
+		flex-direction: row;
+		/* 避免被父级竖向 flex 撑乱 */
+		flex-shrink: 0;
+	}
+
+	.nax-tabs__list {
+		position: relative;
+		flex-direction: row;
+		align-items: stretch;
+	}
+
+	.nax-tabs__list--scroll {
+		flex-direction: row;
+		flex-wrap: nowrap;
+		/* 宽度由 scrollListStyle 显式设置，避免 App 端内容宽被压成视口宽 */
+		flex-shrink: 0;
+		align-items: center;
+	}
+
+	.nax-tabs__list--equal {
+		width: 100%;
+		flex-direction: row;
+	}
+
+	.nax-tabs__item {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		/* 点击热区 */
+	}
+
+	.nax-tabs__item--scroll {
+		flex-grow: 0;
+		flex-shrink: 0;
+		flex-basis: auto;
+		padding-left: 14px;
+		padding-right: 14px;
+	}
+
+	.nax-tabs__item--equal {
+		flex: 1;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.nax-tabs--sm .nax-tabs__scroll {
+		height: 36px;
+	}
+
+	.nax-tabs--md .nax-tabs__scroll {
+		height: 44px;
+	}
+
+	.nax-tabs--lg .nax-tabs__scroll {
+		height: 50px;
+	}
+
+	.nax-tabs--sm .nax-tabs__item {
+		height: 36px;
+	}
+
+	.nax-tabs--md .nax-tabs__item {
+		height: 44px;
+	}
+
+	.nax-tabs--lg .nax-tabs__item {
+		height: 50px;
+	}
+
+	.nax-tabs__item--disabled {
+		opacity: 0.45;
+	}
+
+	.nax-tabs__label {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-tabs__text {
+		color: var(--nax-color-text-secondary, #909399);
+		text-overflow: ellipsis;
+	}
+
+	.nax-tabs--sm .nax-tabs__text {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-tabs--md .nax-tabs__text {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+
+	.nax-tabs--lg .nax-tabs__text {
+		font-size: var(--nax-font-size-lg, 18px);
+		line-height: 24px;
+	}
+
+	.nax-tabs__text--active {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: var(--nax-font-weight-medium, 500);
+	}
+
+	.nax-tabs__text--disabled {
+		color: var(--nax-color-text-secondary, #909399);
+	}
+
+	.nax-tabs__dot {
+		position: absolute;
+		top: -2px;
+		right: -8px;
+		width: 8px;
+		height: 8px;
+		border-radius: 4px;
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-tabs__badge {
+		position: absolute;
+		top: -8px;
+		right: -16px;
+		min-width: 16px;
+		height: 16px;
+		padding-left: 4px;
+		padding-right: 4px;
+		border-radius: 8px;
+		background-color: var(--nax-color-error, #d03050);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-tabs__badge-text {
+		font-size: 10px;
+		line-height: 14px;
+		color: #ffffff;
+		text-align: center;
+	}
+
+	.nax-tabs__line {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		border-radius: 2px;
+		background-color: var(--nax-color-primary, #18a058);
+		/* 测量完成前隐藏，避免从 0 闪跳 */
+		opacity: 0;
+		transition-property: transform, width, opacity;
+		/* 对齐 uView：ease，滑块略慢半拍跟随 tabs */
+		transition-timing-function: ease;
+	}
+
+	.nax-tabs__line--ready {
+		opacity: 1;
+	}
+</style>

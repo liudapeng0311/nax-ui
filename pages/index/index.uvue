@@ -135,6 +135,10 @@
 					<text class="home__card-name">底部标签栏</text>
 					<text class="home__card-tag">nax-tabbar</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goTabs">
+					<text class="home__card-name">标签页</text>
+					<text class="home__card-tag">nax-tabs</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goNavBar">
 					<text class="home__card-name">导航栏</text>
 					<text class="home__card-tag">nax-nav-bar</text>
@@ -369,6 +373,13 @@
 	function goTabbar() {
 		uni.navigateTo({
 			url: '/pages/components/tabbar/index'
+		})
+	}
+
+	
+	function goTabs() {
+		uni.navigateTo({
+			url: '/pages/components/tabs/index'
 		})
 	}
 

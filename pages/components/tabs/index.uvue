@@ -1,0 +1,284 @@
+<template>
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="page__title">nax-tabs</text>
+				<text class="page__desc">顶部标签导航：数据驱动、可滚动/均分、指示条、徽标/红点/禁用。内容区由业务自管。</text>
+
+				<view class="section">
+					<text class="section__title">基础 + 内容联动</text>
+					<nax-tabs v-model="basicCurrent" :list="basicList" @change="onBasicChange" @click="onBasicClick"></nax-tabs>
+					<view class="panel">
+						<text class="panel__text">当前：{{ basicLabel }}（index={{ basicCurrent }}）</text>
+						<text class="hint">最近事件：{{ lastEvent }}</text>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">可滚动（多项）· 居中 scrollAlign=center</text>
+					<nax-tabs v-model="scrollCurrent" :list="scrollList" :scrollable="true" scroll-align="center"></nax-tabs>
+					<view class="panel">
+						<text class="panel__text">选中 index = {{ scrollCurrent }}</text>
+						<text class="hint">激活项尽量滚到可视区中间</text>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">可滚动 · 贴左 scrollAlign=left</text>
+					<nax-tabs v-model="scrollLeftCurrent" :list="scrollList" :scrollable="true" scroll-align="left"></nax-tabs>
+					<view class="panel">
+						<text class="panel__text">选中 index = {{ scrollLeftCurrent }}</text>
+						<text class="hint">激活项滚到可视区最左侧</text>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">均分宽度</text>
+					<nax-tabs v-model="equalCurrent" :list="equalList" :scrollable="false"></nax-tabs>
+					<view class="row">
+						<nax-button size="sm" label="选中 0" @click="setEqual(0)"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="选中 1" @click="setEqual(1)"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="选中 2" @click="setEqual(2)"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">徽标 / 红点 / 禁用</text>
+					<nax-tabs v-model="badgeCurrent" :list="badgeList" :scrollable="false"></nax-tabs>
+					<view class="row">
+						<nax-button size="sm" label="消息+1" @click="incBadge"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="重置徽标" @click="resetBadge"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">尺寸 size</text>
+					<text class="hint">sm</text>
+					<nax-tabs v-model="sizeCurrent" :list="sizeList" size="sm" :scrollable="false"></nax-tabs>
+					<text class="hint hint--gap">md（默认）</text>
+					<nax-tabs v-model="sizeCurrent" :list="sizeList" size="md" :scrollable="false"></nax-tabs>
+					<text class="hint hint--gap">lg</text>
+					<nax-tabs v-model="sizeCurrent" :list="sizeList" size="lg" :scrollable="false"></nax-tabs>
+				</view>
+
+				<view class="section">
+					<text class="section__title">指示条宽度 / 无指示条</text>
+					<nax-tabs v-model="lineCurrent" :list="equalList" :scrollable="false" line-width="40"></nax-tabs>
+					<view class="block-gap"></view>
+					<nax-tabs v-model="lineCurrent" :list="equalList" :scrollable="false" :show-line="false"></nax-tabs>
+					<text class="hint">上：lineWidth=40；下：showLine=false</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">字符串 list + keyName</text>
+					<nax-tabs v-model="strCurrent" :list="strList" :scrollable="false"></nax-tabs>
+					<view class="block-gap"></view>
+					<nax-tabs v-model="keyCurrent" :list="keyList" key-name="title" :scrollable="false"></nax-tabs>
+					<text class="hint">下：keyName=title，读取 title 字段</text>
+				</view>
+
+				<view class="section section--end">
+					<text class="section__title">无底部分割线</text>
+					<nax-tabs v-model="basicCurrent" :list="basicList" :border="false"></nax-tabs>
+					<text class="hint">与 nax-tabbar 不同：本组件是页内内容导航，不是应用底栏。</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const lastEvent = ref('—')
+	const basicCurrent = ref(0)
+	const scrollCurrent = ref(1)
+	const scrollLeftCurrent = ref(4)
+	const equalCurrent = ref(0)
+	const badgeCurrent = ref(0)
+	const sizeCurrent = ref(0)
+	const lineCurrent = ref(1)
+	const strCurrent = ref(0)
+	const keyCurrent = ref(0)
+	const msgBadge = ref(5)
+
+	const basicList = [
+		{ name: '关注' },
+		{ name: '推荐' },
+		{ name: '热榜' }
+	]
+
+	const scrollList = [
+		{ name: '关注' },
+		{ name: '推荐' },
+		{ name: '热榜' },
+		{ name: '同城' },
+		{ name: '直播' },
+		{ name: '影视' },
+		{ name: '游戏' },
+		{ name: '音乐' },
+		{ name: '科技' },
+		{ name: '更多' }
+	]
+
+	const equalList = [
+		{ name: '全部' },
+		{ name: '待付款' },
+		{ name: '已完成' }
+	]
+
+	const badgeList = computed((): any[] => {
+		return [
+			{ name: '消息', badge: msgBadge.value },
+			{ name: '动态', dot: true },
+			{ name: '下线', disabled: true },
+			{ name: '我的' }
+		] as any[]
+	})
+
+	const sizeList = [
+		{ name: '选项A' },
+		{ name: '选项B' },
+		{ name: '选项C' }
+	]
+
+	const strList = ['早报', '午报', '晚报']
+
+	const keyList = [
+		{ title: '标题一', name: '忽略' },
+		{ title: '标题二', name: '忽略' },
+		{ title: '标题三', name: '忽略' }
+	]
+
+	const basicLabel = computed((): string => {
+		const idx = basicCurrent.value
+		if (idx < 0 || idx >= basicList.length) {
+			return ''
+		}
+		const item = basicList[idx] as UTSJSONObject
+		const name = item.getString('name')
+		if (name != null) {
+			return name
+		}
+		return ''
+	})
+
+	function onBasicChange(index : number) {
+		lastEvent.value = 'change → ' + index.toString()
+	}
+
+	function onBasicClick(index : number) {
+		lastEvent.value = 'click → ' + index.toString()
+	}
+
+	function incBadge() {
+		msgBadge.value = msgBadge.value + 1
+	}
+
+	function resetBadge() {
+		msgBadge.value = 5
+	}
+
+	function setEqual(index : number) {
+		equalCurrent.value = index
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px;
+		padding-bottom: 40px;
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 20px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 22px;
+	}
+
+	.section--end {
+		margin-bottom: 8px;
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		margin-top: 10px;
+		padding: 12px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.panel__text {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.hint {
+		margin-top: 6px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.hint--gap {
+		margin-top: 12px;
+		margin-bottom: 6px;
+	}
+
+	.row {
+		margin-top: 10px;
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.block-gap {
+		height: 10px;
+	}
+</style>
