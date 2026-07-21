@@ -102,6 +102,7 @@
 | 对话框 | `nax-dialog` | P1 | 确认/告警；声明式 `v-model:show` + 命令式 `naxDialog()`/`Alert`/`Confirm`；薄封装 nax-picker | `v-model:show` `title` `content` `showCancel` `confirmType` `asyncClose` `maskClosable` / `confirm` `cancel`；API：`naxDialog` `naxDialogAlert` `naxDialogConfirm` `hideNaxDialog` **done** |
 | 动作面板 | `nax-action-sheet` | P1 | 底部操作列表；薄封装 nax-picker | `v-model:show` `actions` `title` `description` `showCancel` / `select` `cancel` **done** |
 | 警告提示 | `nax-alert` | P1 | 页面内常驻提示（对齐 uView Pro AlertTips） | `type` `title` `description` `closable` `showIcon` `variant(light/solid)` `center` `show` / `close` `click` `update:show` **done** |
+| 滚动通告 | `nax-notice-bar` | P1 | 滚动通知条（对齐 uView Pro NoticeBar） | `list` `type` `mode(horizontal/vertical)` `scroll(seamless/step)` `isCircular` `showIcon` `showMore` `closable` `autoplay` `paused` `duration` `speed` `show` / `click` `close` `getMore` `end` `update:show` **done** |
 
 ---
 
@@ -135,6 +136,7 @@
 | `nax-picker` | done | 插件包 `uni_modules/nax-picker`；通用弹出容器；position bottom/center/left/right；动画复用 `nax-transition` |
 | `nax-action-sheet` | done | 插件包 `uni_modules/nax-action-sheet`；底部操作菜单；薄封装 `nax-picker`；`actions` / `select` / `cancel` |
 | `nax-alert` | done | 插件包 `uni_modules/nax-alert`；对齐 uView Pro AlertTips；type/title/description/showIcon/closable/variant/center/show |
+| `nax-notice-bar` | done | 插件包 `uni_modules/nax-notice-bar`；对齐 uView Pro NoticeBar；seamless/step/vertical；App 跑马灯 JS 兜底 |
 | `nax-toast` | done | 插件包 `uni_modules/nax-toast`；函数式 `naxToast()`；全局挂一次 `<nax-toast />` 宿主；未挂载回退 `uni.showToast` |
 | `nax-dialog` | done | 插件包 `uni_modules/nax-dialog`；声明式 `v-model:show` + 命令式 `naxDialog()`/`naxDialogAlert()`/`naxDialogConfirm()`；薄封装 `nax-picker`；未挂载回退 `uni.showModal` |
 | `nax-popup` | done | 插件包 `uni_modules/nax-popup`；压窗屏：App/Web `openDialogPage`；小程序页面级降级；详见 `docs/popup-window.md` |

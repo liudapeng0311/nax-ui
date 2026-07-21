@@ -139,6 +139,10 @@
 					<text class="home__card-name">警告提示</text>
 					<text class="home__card-tag">nax-alert</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goNoticeBar">
+					<text class="home__card-name">滚动通告</text>
+					<text class="home__card-tag">nax-notice-bar</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goToast">
 					<text class="home__card-name">轻提示</text>
 					<text class="home__card-tag">nax-toast</text>
@@ -146,10 +150,14 @@
 				<view class="home__card home__card--gap" @click="goDialog">
 					<text class="home__card-name">对话框</text>
 					<text class="home__card-tag">nax-dialog</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goPopup">
-					<text class="home__card-name">压窗屏</text>
-					<text class="home__card-tag">nax-popup</text>
+				</view>
+
+				<view class="home__card home__card--gap" @click="goPopup">
+
+					<text class="home__card-name">压窗屏</text>
+
+					<text class="home__card-tag">nax-popup</text>
+
 				</view>
 
 			</view>
@@ -343,6 +351,11 @@
 			url: '/pages/components/alert/index'
 		})
 	}
+	function goNoticeBar() {
+		uni.navigateTo({
+			url: '/pages/components/notice-bar/index'
+		})
+	}
 	function goToast() {
 		uni.navigateTo({
 			url: '/pages/components/toast/index'
@@ -352,11 +365,16 @@
 		uni.navigateTo({
 			url: '/pages/components/dialog/index'
 		})
-	}
-	function goPopup() {
-		uni.navigateTo({
-			url: '/pages/components/popup/index'
-		})
+	}
+
+	function goPopup() {
+
+		uni.navigateTo({
+
+			url: '/pages/components/popup/index'
+
+		})
+
 	}
 	function goKeyboard() {
 		uni.navigateTo({

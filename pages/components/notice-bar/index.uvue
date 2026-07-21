@@ -1,0 +1,240 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-notice-bar</text>
+			<text class="page__desc">滚动通告栏。对齐 uView Pro NoticeBar：衔接 / 步进 / 垂直 + 主题 / 关闭。</text>
+
+			<view class="section">
+				<text class="section__title">水平衔接（默认）</text>
+				<text class="hint">默认水平衔接：双段文案连续从右向左滚动（鸿蒙 UniElement.animate / rAF 模回绕；Android/iOS timer；Web/小程序 CSS 动画）。</text>
+				<view class="item">
+					<nax-notice-bar :list="list" @click="onClick"></nax-notice-bar>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">水平步进 scroll=step</text>
+				<view class="item">
+					<nax-notice-bar
+						scroll="step"
+						:list="list"
+						:duration="2500"
+						@click="onClick"
+						@end="onEnd"
+					></nax-notice-bar>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">垂直滚动 mode=vertical</text>
+				<view class="item">
+					<nax-notice-bar
+						mode="vertical"
+						type="info"
+						:list="list"
+						:duration="2000"
+						@click="onClick"
+					></nax-notice-bar>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="item">
+					<nax-notice-bar type="primary" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar type="info" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar type="success" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar type="warning" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar type="error" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar type="none" :list="shortList"></nax-notice-bar>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">图标 / 更多 / 关闭</text>
+				<view class="item">
+					<nax-notice-bar :show-icon="false" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar icon="star" type="primary" :list="shortList"></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-notice-bar
+						show-more
+						type="info"
+						:list="shortList"
+						@get-more="onGetMore"
+					></nax-notice-bar>
+				</view>
+				<view class="item" v-if="showClose">
+					<nax-notice-bar
+						closable
+						type="error"
+						:list="shortList"
+						@close="onClose"
+					></nax-notice-bar>
+				</view>
+				<view class="item">
+					<nax-button size="sm" label="重置关闭示例" @click="resetClose"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">暂停 / 播放</text>
+				<view class="item">
+					<nax-notice-bar
+						:list="list"
+						:paused="paused"
+						:speed="40"
+					></nax-notice-bar>
+				</view>
+				<view class="row">
+					<view class="item item--row">
+						<nax-button size="sm" label="暂停" @click="paused = true"></nax-button>
+					</view>
+					<view class="item item--row">
+						<nax-button size="sm" type="primary" label="播放" @click="paused = false"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">兼容 is-circular=false</text>
+				<view class="item">
+					<nax-notice-bar
+						:is-circular="false"
+						type="success"
+						:list="list"
+						:duration="2200"
+					></nax-notice-bar>
+				</view>
+			</view>
+
+			<text class="hint">最近事件：{{ lastEvent }}</text>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const list = ref([
+		'寒雨连江夜入吴',
+		'平明送客楚山孤',
+		'洛阳亲友如相问',
+		'一片冰心在玉壶'
+	] as string[])
+
+	const shortList = ref([
+		'系统将于今晚 23:00 进行维护升级，请提前保存数据。'
+	] as string[])
+
+	const showClose = ref(true)
+	const paused = ref(false)
+	const lastEvent = ref('无')
+
+	function onClick(index : number) {
+		lastEvent.value = 'click index=' + index.toString()
+	}
+
+	function onEnd() {
+		lastEvent.value = 'end'
+	}
+
+	function onGetMore() {
+		lastEvent.value = 'getMore'
+		uni.showToast({
+			title: 'getMore',
+			icon: 'none'
+		})
+	}
+
+	function onClose() {
+		showClose.value = false
+		lastEvent.value = 'close'
+	}
+
+	function resetClose() {
+		showClose.value = true
+		lastEvent.value = 'reset'
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 24px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.item {
+		margin-bottom: 10px;
+		flex-direction: column;
+	}
+
+	.item--row {
+		margin-right: 8px;
+		margin-bottom: 0;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 4px;
+	}
+
+	.hint {
+		margin-top: 4px;
+		margin-bottom: 24px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>
