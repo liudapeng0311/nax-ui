@@ -1,0 +1,242 @@
+<template>
+	<view v-if="visible" class="nax-empty" :class="rootClass">
+		<!-- 插图：image 槽 > 图片地址 > 图标 -->
+		<view v-if="showMedia" class="nax-empty__media">
+			<slot name="image">
+				<image
+					v-if="hasImage"
+					class="nax-empty__img"
+					:src="image"
+					:mode="imageMode"
+					:style="imgStyle"
+				></image>
+				<view v-else class="nax-empty__icon-wrap" :style="iconWrapStyle">
+					<nax-icon :name="iconName" :size="iconSizePx" :color="iconColorValue"></nax-icon>
+				</view>
+			</slot>
+		</view>
+
+		<!-- 标题（可选） -->
+		<text v-if="hasTitle" class="nax-empty__title" :lines="2">{{ title }}</text>
+		<slot name="title"></slot>
+
+		<!-- 描述 -->
+		<text v-if="hasDescription" class="nax-empty__desc" :lines="4">{{ description }}</text>
+		<slot name="description"></slot>
+
+		<!-- 操作区 -->
+		<view class="nax-empty__action">
+			<slot name="action"></slot>
+		</view>
+
+		<!-- 额外内容 -->
+		<view class="nax-empty__extra">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-empty
+	 * @description 空状态。无数据 / 失败 / 搜索无结果等占位。
+	 * @property {boolean} show 是否显示，默认 true
+	 * @property {string} title 主标题（可选）
+	 * @property {string} description 描述文案，默认「暂无数据」
+	 * @property {string} image 插图地址；有值时优先于 icon
+	 * @property {string} imageSize 插图边长；纯数字按 px，或 sm/md/lg；默认 120
+	 * @property {string} imageMode 图片 mode，默认 aspectFit
+	 * @property {string} icon 无图时的 nax-icon 名；空则 image-off
+	 * @property {string} iconSize 图标尺寸；纯数字 px 或 sm/md/lg；默认 48
+	 * @property {string} iconColor 图标颜色
+	 * @property {boolean} showImage 是否展示插图区，默认 true
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot image 自定义插图
+	 * @slot title 自定义标题
+	 * @slot description 自定义描述
+	 * @slot action 操作区（按钮等）
+	 * @slot default 额外内容
+	 */
+	const props = defineProps({
+		show: { type: Boolean, default: true },
+		title: { type: String, default: '' },
+		description: { type: String, default: '暂无数据' },
+		image: { type: String, default: '' },
+		imageSize: { type: String, default: '120' },
+		imageMode: { type: String, default: 'aspectFit' },
+		icon: { type: String, default: '' },
+		iconSize: { type: String, default: '48' },
+		iconColor: { type: String, default: '' },
+		showImage: { type: Boolean, default: true },
+		customClass: { type: String, default: '' }
+	})
+
+	const visible = computed((): boolean => {
+		return props.show
+	})
+
+	const hasTitle = computed((): boolean => {
+		return props.title.length > 0
+	})
+
+	const hasDescription = computed((): boolean => {
+		return props.description.length > 0
+	})
+
+	const hasImage = computed((): boolean => {
+		return props.image.length > 0
+	})
+
+	const iconName = computed((): string => {
+		if (props.icon.length > 0) {
+			return props.icon
+		}
+		return 'image-off'
+	})
+
+	const showMedia = computed((): boolean => {
+		return props.showImage
+	})
+
+	function formatCssSize(value : string, fallback : number) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return fallback.toString() + 'px'
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0
+		) {
+			return trimmed
+		}
+		if (trimmed == 'sm') {
+			return '80px'
+		}
+		if (trimmed == 'md') {
+			return '120px'
+		}
+		if (trimmed == 'lg') {
+			return '160px'
+		}
+		const n = parseFloat(trimmed)
+		if (isNaN(n) || n <= 0) {
+			return fallback.toString() + 'px'
+		}
+		return n.toString() + 'px'
+	}
+
+	function parseIconSizePx(value : string) : string {
+		const trimmed = value.trim()
+		if (trimmed == 'sm') {
+			return '32'
+		}
+		if (trimmed == 'md') {
+			return '48'
+		}
+		if (trimmed == 'lg') {
+			return '64'
+		}
+		if (trimmed.length == 0) {
+			return '48'
+		}
+		const n = parseInt(trimmed)
+		if (n > 0) {
+			return n.toString()
+		}
+		return '48'
+	}
+
+	const imgStyle = computed((): string => {
+		const side = formatCssSize(props.imageSize, 120)
+		return 'width:' + side + ';height:' + side + ';'
+	})
+
+	const iconSizePx = computed((): string => {
+		return parseIconSizePx(props.iconSize)
+	})
+
+	const iconColorValue = computed((): string => {
+		if (props.iconColor.length > 0) {
+			return props.iconColor
+		}
+		return '#c2c2c2'
+	})
+
+	const iconWrapStyle = computed((): string => {
+		const side = formatCssSize(props.imageSize, 120)
+		return 'width:' + side + ';height:' + side + ';'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+</script>
+
+<style>
+	.nax-empty {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding-top: 32px;
+		padding-bottom: 32px;
+		padding-left: 24px;
+		padding-right: 24px;
+	}
+
+	.nax-empty__media {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 16px;
+	}
+
+	.nax-empty__img {
+		flex-shrink: 0;
+	}
+
+	.nax-empty__icon-wrap {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-empty__title {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		text-align: center;
+		margin-bottom: 6px;
+		line-height: 22px;
+	}
+
+	.nax-empty__desc {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		line-height: 20px;
+		max-width: 280px;
+	}
+
+	.nax-empty__action {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-top: 16px;
+		flex-wrap: wrap;
+	}
+
+	.nax-empty__extra {
+		flex-direction: column;
+		align-items: center;
+		margin-top: 0;
+	}
+</style>

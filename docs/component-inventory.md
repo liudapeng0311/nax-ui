@@ -36,7 +36,7 @@
 | 按钮 | `nax-button` | P0 | 主操作入口；层级参考 Naive：基础/次要/次次要/次次次要/虚线/禁用 | `type(default/primary/info/success/warning/error)` `variant(solid/secondary/tertiary/quaternary/dashed/outline)` `size` `disabled` `loading` `block` `label` `icon` `iconPosition` / `click` |
 | 文本 | `nax-text` | P0 | 统一字号/颜色/省略/模式格式化（对齐 uView Pro Text） | `type` `size` `lines` `selectable` `mode` `format` `call` `decoration` `bold` `block` / `click` **done** |
 | 图标 | `nax-icon` | P0 | 字体/图片图标壳 | `name` `size` `color` / `click` |
-| 间距 | `nax-space` | P0 | 横向/纵向间距容器 | `direction` `size` `wrap` `align` |
+| 间距 | `nax-space` | P0 | 横向/纵向间距容器；子项 `nax-space-item` | `direction` `size` `wrap` `align` `justify` `fill` **done** |
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
 | 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` |
 | 标签 | `nax-tag` | P1 | 状态/分类标记（对齐 Naive Tag） | `type` `variant` `size` `closable` `round` `bordered` `checkable` `checked` / `close` `click` `update:checked` **done** |
@@ -45,8 +45,8 @@
 
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
-| 单元格 | `nax-cell` | P0 | 设置项/列表行基础 | `title` `label` `value` `is-link` `border` / `click` |
-| 单元格组 | `nax-cell-group` | P0 | Cell 分组容器 | `title` `inset` |
+| 单元格 | `nax-cell` | P0 | 设置项/列表行基础 | `title` `label` `value` `is-link` `border` / `click` **done** |
+| 单元格组 | `nax-cell-group` | P0 | Cell 分组容器 | `title` `inset` `border` **done** |
 | 卡片 | `nax-card` | P1 | 内容承载 | `title` `extra` 插槽 `header` `footer` |
 
 ### 2.3 展示 / 状态
@@ -55,7 +55,7 @@
 |------|------|--------|------|------------------|
 | 徽标 | `nax-badge` | P1 | 数字/红点（对齐 Naive Badge） | `value` `max` `dot` `show-zero` `show` `processing` `type` `color` `offsetX/Y` `alone` / 插槽 `value` **done** |
 | 头像 | `nax-avatar` | P1 | 图/文字头像（对齐 Naive Avatar） | `src` `text` `size` `shape` `bordered` `color` `fallback-src` / `click` `load` `error` **done** |
-| 空状态 | `nax-empty` | P1 | 无数据占位 | `description` `image` 插槽 `action` |
+| 空状态 | `nax-empty` | P1 | 无数据占位 | `description` `image` `icon` `title` 插槽 `action` **done** |
 
 ### 2.4 MVP 验收标准
 
@@ -151,6 +151,9 @@
 | `nax-form` / `nax-form-item` | done | 插件包 `uni_modules/nax-form`；对齐 uView Pro Form；轻量 rules 校验 + provide/inject |
 | `nax-upload` | done | autoUpload/action/header/formData;  插件包 `uni_modules/nax-upload`；对齐 uView Pro Upload；选图/预览/删除/状态；实际上传在 afterRead |
 | `nax-line` | done | 插件包 `uni_modules/nax-line`；布局纯线条；direction/size/dashed/type/space/inset；默认 `--nax-color-divider` |
+| `nax-cell` / `nax-cell-group` | done | 插件包 `uni_modules/nax-cell`；对齐 uView Pro CellItem/CellGroup；icon/is-link/inset/provide-inject |
+| `nax-space` / `nax-space-item` | done | 插件包 `uni_modules/nax-space`；横向/纵向间距；item 吃 margin 兼容隔离 2.0 |
+| `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 image-off |
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | 其余 MVP | planned | 按依赖自底向上 |
 

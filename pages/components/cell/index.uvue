@@ -1,0 +1,171 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-cell</text>
+			<text class="page__desc">单元格 / 单元格组。设置项与列表行基础，对齐 uView Pro Cell。</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<nax-cell-group>
+					<nax-cell title="单元格" value="内容"></nax-cell>
+					<nax-cell title="单元格" label="描述信息" value="内容"></nax-cell>
+					<nax-cell title="单元格" value="详情" is-link @click="onCellClick('基础链接')"></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">分组标题</text>
+				<nax-cell-group title="个人信息">
+					<nax-cell title="昵称" value="Nax" is-link @click="onCellClick('昵称')"></nax-cell>
+					<nax-cell title="手机号" value="138****0000"></nax-cell>
+					<nax-cell title="个性签名" label="一句话介绍自己" value="写点什么" is-link></nax-cell>
+				</nax-cell-group>
+				<nax-cell-group title="其他设置">
+					<nax-cell title="消息通知" is-link></nax-cell>
+					<nax-cell title="关于我们" is-link></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">图标</text>
+				<nax-cell-group>
+					<nax-cell icon="user" title="个人中心" is-link @click="onCellClick('个人中心')"></nax-cell>
+					<nax-cell icon="settings" title="系统设置" value="通用" is-link></nax-cell>
+					<nax-cell icon="search" title="搜索" label="全局搜索入口" is-link></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">inset 圆角卡片</text>
+				<nax-cell-group title="账户" inset>
+					<nax-cell title="账号安全" is-link></nax-cell>
+					<nax-cell title="支付设置" is-link></nax-cell>
+					<nax-cell title="隐私" value="已保护" is-link></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<nax-cell-group>
+					<nax-cell size="sm" title="小号 sm" value="紧凑" is-link></nax-cell>
+					<nax-cell size="md" title="中号 md" value="默认" is-link></nax-cell>
+					<nax-cell size="lg" title="大号 lg" value="宽松" is-link></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">状态</text>
+				<nax-cell-group>
+					<nax-cell title="必填项" required value="请填写" is-link></nax-cell>
+					<nax-cell title="禁用" value="不可点" disabled is-link></nax-cell>
+					<nax-cell title="无箭头可点" clickable @click="onCellClick('可点')"></nax-cell>
+					<nax-cell title="无分割线" value="border=false" :border="false"></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">右侧插槽（开关）</text>
+				<nax-cell-group>
+					<nax-cell title="消息推送" center>
+						<template #right>
+							<nax-switch v-model="pushOn"></nax-switch>
+						</template>
+					</nax-cell>
+					<nax-cell title="深色模式" label="仅演示绑定" center>
+						<template #right>
+							<nax-switch v-model="darkSwitch"></nax-switch>
+						</template>
+					</nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义颜色</text>
+				<nax-cell-group>
+					<nax-cell title="标题色" title-color="#18a058" value="主色" value-color="#18a058" is-link></nax-cell>
+					<nax-cell icon="user" icon-color="#2080f0" title="图标色" value="info" is-link></nax-cell>
+				</nax-cell-group>
+			</view>
+
+			<view class="section">
+				<text class="section__title">事件</text>
+				<text class="hint">最近点击：{{ lastEvent }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const pushOn = ref(true)
+	const darkSwitch = ref(false)
+	const lastEvent = ref('无')
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function onCellClick(name : string) {
+		lastEvent.value = name
+		uni.showToast({
+			title: name,
+			icon: 'none'
+		})
+	}
+</script>
+
+<style>
+	.page {
+		padding-top: 16px;
+		padding-bottom: 24px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.hint {
+		padding-left: 16px;
+		padding-right: 16px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>

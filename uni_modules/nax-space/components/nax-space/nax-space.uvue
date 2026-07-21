@@ -1,0 +1,237 @@
+<template>
+	<view class="nax-space" :class="rootClass" :style="rootStyle">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-space
+	 * @description 间距容器。横向/纵向排列子项并统一间距。配合 nax-space-item 使用（样式隔离下由 item 吃 margin）。
+	 * @property {string} direction horizontal | vertical；兼容 row / column
+	 * @property {string} size 间距：xs|sm|md|lg|xl 或 1~10（token 档）或纯数字 px / 带单位
+	 * @property {boolean} wrap 是否换行（横向有效）
+	 * @property {string} align 交叉轴：start|center|end|baseline|stretch；兼容 flex 原值
+	 * @property {string} justify 主轴：start|center|end|between|around|evenly
+	 * @property {boolean} fill 子项在主轴方向拉伸占满（vertical 时 item 宽 100%）
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 放置 nax-space-item（或任意子节点；无 item 时仅布局不保证间距）
+	 */
+	const props = defineProps({
+		direction: { type: String, default: 'horizontal' },
+		size: { type: String, default: 'md' },
+		wrap: { type: Boolean, default: false },
+		align: { type: String, default: 'center' },
+		justify: { type: String, default: 'start' },
+		fill: { type: Boolean, default: false },
+		customClass: { type: String, default: '' }
+	})
+
+	function normalizeDirection(value : string) : string {
+		if (value == 'vertical' || value == 'column') {
+			return 'vertical'
+		}
+		// horizontal / row / 其它
+		return 'horizontal'
+	}
+
+	/**
+	 * 解析间距为 px 数值
+	 * xs/1 → 4；sm/2 → 8；md/3 → 12；lg/4 → 16；xl/5 → 20；6→24；8→32；10→40
+	 * 纯数字按 px；可带 px/rpx
+	 */
+	function parseSizePx(value : string) : number {
+		const raw = value.trim()
+		if (raw.length == 0) {
+			return 12
+		}
+		// 语义档
+		if (raw == 'xs' || raw == 'mini' || raw == '1') {
+			return 4
+		}
+		if (raw == 'sm' || raw == 'small' || raw == '2') {
+			return 8
+		}
+		if (raw == 'md' || raw == 'medium' || raw == '3') {
+			return 12
+		}
+		if (raw == 'lg' || raw == 'large' || raw == '4') {
+			return 16
+		}
+		if (raw == 'xl' || raw == '5') {
+			return 20
+		}
+		if (raw == '6') {
+			return 24
+		}
+		if (raw == '8') {
+			return 32
+		}
+		if (raw == '10') {
+			return 40
+		}
+		// 去单位
+		var numPart = raw
+		if (raw.indexOf('px') >= 0) {
+			numPart = raw.replace('px', '')
+		} else if (raw.indexOf('rpx') >= 0) {
+			// rpx 按约 0.5 转 px 不够稳，直接取数字当 px 使用
+			numPart = raw.replace('rpx', '')
+		}
+		const n = parseFloat(numPart)
+		if (isNaN(n) || n < 0) {
+			return 12
+		}
+		return n
+	}
+
+	function normalizeAlign(value : string) : string {
+		if (value == 'center' || value == 'middle') {
+			return 'center'
+		}
+		if (value == 'end' || value == 'flex-end' || value == 'right' || value == 'bottom') {
+			return 'end'
+		}
+		if (value == 'baseline') {
+			return 'baseline'
+		}
+		if (value == 'stretch') {
+			return 'stretch'
+		}
+		// start / flex-start / left / top
+		return 'start'
+	}
+
+	function normalizeJustify(value : string) : string {
+		if (value == 'center') {
+			return 'center'
+		}
+		if (value == 'end' || value == 'flex-end' || value == 'right') {
+			return 'end'
+		}
+		if (value == 'between' || value == 'space-between') {
+			return 'between'
+		}
+		if (value == 'around' || value == 'space-around') {
+			return 'around'
+		}
+		if (value == 'evenly' || value == 'space-evenly') {
+			return 'evenly'
+		}
+		return 'start'
+	}
+
+	const directionName = computed((): string => {
+		return normalizeDirection(props.direction)
+	})
+
+	const gapPx = computed((): number => {
+		return parseSizePx(props.size)
+	})
+
+	const alignName = computed((): string => {
+		return normalizeAlign(props.align)
+	})
+
+	const justifyName = computed((): string => {
+		return normalizeJustify(props.justify)
+	})
+
+	const isHorizontal = computed((): boolean => {
+		return directionName.value == 'horizontal'
+	})
+
+	// provide 给 space-item
+	provide('naxSpaceInGroup', true)
+	provide('naxSpaceGapPx', gapPx)
+	provide('naxSpaceDirection', directionName)
+	provide('naxSpaceWrap', computed((): boolean => {
+		return props.wrap
+	}))
+	provide('naxSpaceFill', computed((): boolean => {
+		return props.fill
+	}))
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-space--' + directionName.value
+		if (props.wrap && isHorizontal.value) {
+			cls += ' nax-space--wrap'
+		}
+		if (props.fill) {
+			cls += ' nax-space--fill'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		// 交叉轴
+		const align = alignName.value
+		if (align == 'center') {
+			style += 'align-items:center;'
+		} else if (align == 'end') {
+			style += 'align-items:flex-end;'
+		} else if (align == 'baseline') {
+			style += 'align-items:baseline;'
+		} else if (align == 'stretch') {
+			style += 'align-items:stretch;'
+		} else {
+			style += 'align-items:flex-start;'
+		}
+		// 主轴
+		const justify = justifyName.value
+		if (justify == 'center') {
+			style += 'justify-content:center;'
+		} else if (justify == 'end') {
+			style += 'justify-content:flex-end;'
+		} else if (justify == 'between') {
+			style += 'justify-content:space-between;'
+		} else if (justify == 'around') {
+			style += 'justify-content:space-around;'
+		} else if (justify == 'evenly') {
+			style += 'justify-content:space-evenly;'
+		} else {
+			style += 'justify-content:flex-start;'
+		}
+		// 抵消末项外侧间距（item 统一加 margin）
+		const gap = gapPx.value
+		if (gap > 0) {
+			if (isHorizontal.value) {
+				style += 'margin-right:-' + gap + 'px;'
+				if (props.wrap) {
+					style += 'margin-bottom:-' + gap + 'px;'
+				}
+			} else {
+				style += 'margin-bottom:-' + gap + 'px;'
+			}
+		}
+		return style
+	})
+</script>
+
+<style>
+	.nax-space {
+		/* 默认横向；vertical 用修饰类覆盖 */
+		flex-direction: row;
+		flex-wrap: nowrap;
+	}
+
+	.nax-space--horizontal {
+		flex-direction: row;
+	}
+
+	.nax-space--vertical {
+		flex-direction: column;
+	}
+
+	.nax-space--wrap {
+		flex-wrap: wrap;
+	}
+
+	.nax-space--fill {
+		width: 100%;
+	}
+</style>

@@ -1,0 +1,254 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-space</text>
+			<text class="page__desc">间距容器。横向/纵向排列，统一间距。子项请用 nax-space-item 包裹。</text>
+
+			<view class="section">
+				<text class="section__title">基础横向</text>
+				<view class="block">
+					<nax-space size="md">
+						<nax-space-item>
+							<nax-button type="primary" size="sm" label="主要"></nax-button>
+						</nax-space-item>
+						<nax-space-item>
+							<nax-button size="sm" label="默认"></nax-button>
+						</nax-space-item>
+						<nax-space-item>
+							<nax-button variant="tertiary" size="sm" label="次要"></nax-button>
+						</nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">间距 size</text>
+				<view class="block">
+					<text class="block__label">xs (4)</text>
+					<nax-space size="xs">
+						<nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">sm (8)</text>
+					<nax-space size="sm">
+						<nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">md (12)</text>
+					<nax-space size="md">
+						<nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">lg (16)</text>
+					<nax-space size="lg">
+						<nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">自定义 24</text>
+					<nax-space size="24">
+						<nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">纵向 vertical</text>
+				<view class="block">
+					<nax-space direction="vertical" size="sm">
+						<nax-space-item>
+							<nax-button size="sm" label="第一行"></nax-button>
+						</nax-space-item>
+						<nax-space-item>
+							<nax-button size="sm" type="primary" label="第二行"></nax-button>
+						</nax-space-item>
+						<nax-space-item>
+							<nax-button size="sm" type="success" label="第三行"></nax-button>
+						</nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">换行 wrap</text>
+				<view class="block">
+					<nax-space size="sm" wrap>
+						<nax-space-item><nax-tag type="primary" label="标签1"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag type="info" label="标签2"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag type="success" label="标签3"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag type="warning" label="标签4"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag type="error" label="标签5"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="标签6"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="标签7"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="标签8"></nax-tag></nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">对齐 align</text>
+				<view class="block">
+					<text class="block__label">start</text>
+					<nax-space align="start" size="md">
+						<nax-space-item>
+							<view class="box box--sm"></view>
+						</nax-space-item>
+						<nax-space-item>
+							<view class="box box--lg"></view>
+						</nax-space-item>
+						<nax-space-item>
+							<view class="box box--md"></view>
+						</nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">center（默认）</text>
+					<nax-space align="center" size="md">
+						<nax-space-item>
+							<view class="box box--sm"></view>
+						</nax-space-item>
+						<nax-space-item>
+							<view class="box box--lg"></view>
+						</nax-space-item>
+						<nax-space-item>
+							<view class="box box--md"></view>
+						</nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">end</text>
+					<nax-space align="end" size="md">
+						<nax-space-item>
+							<view class="box box--sm"></view>
+						</nax-space-item>
+						<nax-space-item>
+							<view class="box box--lg"></view>
+						</nax-space-item>
+						<nax-space-item>
+							<view class="box box--md"></view>
+						</nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">主轴 justify</text>
+				<view class="block">
+					<text class="block__label">between</text>
+					<nax-space justify="between" size="0" fill>
+						<nax-space-item><nax-tag label="左"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="中"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="右"></nax-tag></nax-space-item>
+					</nax-space>
+					<text class="block__label block__label--gap">center</text>
+					<nax-space justify="center" size="sm" fill>
+						<nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+						<nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">fill 纵向撑满</text>
+				<view class="block">
+					<nax-space direction="vertical" size="sm" fill>
+						<nax-space-item>
+							<nax-button block type="primary" label="通栏按钮 A"></nax-button>
+						</nax-space-item>
+						<nax-space-item>
+							<nax-button block label="通栏按钮 B"></nax-button>
+						</nax-space-item>
+					</nax-space>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.block {
+		flex-direction: column;
+		padding: 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.block__label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 8px;
+	}
+
+	.block__label--gap {
+		margin-top: 14px;
+	}
+
+	.box {
+		background-color: var(--nax-color-primary, #18a058);
+		border-radius: 3px;
+	}
+
+	.box--sm {
+		width: 24px;
+		height: 24px;
+	}
+
+	.box--md {
+		width: 36px;
+		height: 36px;
+	}
+
+	.box--lg {
+		width: 48px;
+		height: 48px;
+	}
+</style>

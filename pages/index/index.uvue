@@ -111,6 +111,18 @@
 					<text class="home__card-name">线条</text>
 					<text class="home__card-tag">nax-line</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goCell">
+					<text class="home__card-name">单元格</text>
+					<text class="home__card-tag">nax-cell</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goSpace">
+					<text class="home__card-name">间距</text>
+					<text class="home__card-tag">nax-space</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goEmpty">
+					<text class="home__card-name">空状态</text>
+					<text class="home__card-tag">nax-empty</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goGrid">
 					<text class="home__card-name">宫格</text>
 					<text class="home__card-tag">nax-grid</text>
@@ -313,6 +325,24 @@
 	function goLine() {
 		uni.navigateTo({
 			url: '/pages/components/line/index'
+		})
+	}
+
+	function goCell() {
+		uni.navigateTo({
+			url: '/pages/components/cell/index'
+		})
+	}
+
+	function goSpace() {
+		uni.navigateTo({
+			url: '/pages/components/space/index'
+		})
+	}
+
+	function goEmpty() {
+		uni.navigateTo({
+			url: '/pages/components/empty/index'
 		})
 	}
 

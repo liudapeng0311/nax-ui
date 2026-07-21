@@ -1,0 +1,133 @@
+<template>
+	<view class="nax-cell-group" :class="rootClass">
+		<!-- 分组标题 -->
+		<view v-if="hasTitle" class="nax-cell-group__header">
+			<text class="nax-cell-group__title">{{ title }}</text>
+		</view>
+		<slot name="title"></slot>
+
+		<!-- 列表容器 -->
+		<view class="nax-cell-group__body" :class="bodyClass">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-cell-group
+	 * @description 单元格分组容器。包裹 nax-cell，统一边框/圆角/内嵌样式。对齐 uView Pro CellGroup。
+	 * @property {string} title 分组标题
+	 * @property {boolean} inset 圆角卡片内嵌（左右留白）
+	 * @property {boolean} border 是否显示子 cell 底部分割线，默认 true
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 放置 nax-cell
+	 * @slot title 自定义分组标题区域
+	 */
+	const props = defineProps({
+		title: {
+			type: String,
+			default: ''
+		},
+		inset: {
+			type: Boolean,
+			default: false
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const hasTitle = computed((): boolean => {
+		return props.title.length > 0
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.inset) {
+			cls += ' nax-cell-group--inset'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const bodyClass = computed((): string => {
+		let cls = ''
+		if (props.inset) {
+			cls += ' nax-cell-group__body--inset'
+		}
+		if (props.border) {
+			cls += ' nax-cell-group__body--border'
+		}
+		return cls.trim()
+	})
+
+	// 向子 cell 注入上下文（字符串 key，避免跨端符号问题）
+	provide('naxCellInGroup', true)
+	provide('naxCellBorder', computed((): boolean => {
+		return props.border
+	}))
+	provide('naxCellInset', computed((): boolean => {
+		return props.inset
+	}))
+</script>
+
+<style>
+	.nax-cell-group {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-cell-group--inset {
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-cell-group__header {
+		flex-direction: row;
+		align-items: center;
+		padding-top: 12px;
+		padding-bottom: 8px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-cell-group--inset .nax-cell-group__header {
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.nax-cell-group__title {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 20px;
+	}
+
+	.nax-cell-group__body {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: hidden;
+	}
+
+	.nax-cell-group__body--inset {
+		border-radius: var(--nax-radius-md, 8px);
+		/* 内嵌时略强调卡片边界 */
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-cell-group__body--border {
+		/* 外层顶/底线：子项内部再画分隔 */
+		border-top-width: 0;
+		border-bottom-width: 0;
+	}
+</style>
