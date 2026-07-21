@@ -1,0 +1,307 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<!-- 顶部标签：只负责导航 -->
+		<view class="tabs-host">
+			<nax-tabs
+				v-model="current"
+				:list="tabList"
+				:scrollable="false"
+				@change="onTabsChange"
+			></nax-tabs>
+		</view>
+
+		<!-- 内容区：原生 swiper 填满剩余高度；与 tabs 共享 current -->
+		<swiper
+			class="content-swiper"
+			:style="swiperStyle"
+			:current="current"
+			:circular="false"
+			:duration="300"
+			:indicator-dots="false"
+			@change="onSwiperChange"
+		>
+			<swiper-item>
+				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+					<view class="pane">
+						<text class="pane__tip">点 Tab 或左右滑动切换 · 当前「关注」</text>
+						<view class="card" v-for="(title, index) in followTitles" :key="index">
+							<text class="card__title">{{ title }}</text>
+							<text class="card__desc">{{ followDescs[index] }}</text>
+						</view>
+					</view>
+				</scroll-view>
+			</swiper-item>
+
+			<swiper-item>
+				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+					<view class="pane">
+						<text class="pane__tip">点 Tab 或左右滑动切换 · 当前「推荐」</text>
+						<view class="card" v-for="(title, index) in recommendTitles" :key="index">
+							<text class="card__title">{{ title }}</text>
+							<text class="card__desc">{{ recommendDescs[index] }}</text>
+						</view>
+					</view>
+				</scroll-view>
+			</swiper-item>
+
+			<swiper-item>
+				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+					<view class="pane">
+						<text class="pane__tip">点 Tab 或左右滑动切换 · 当前「热榜」</text>
+						<view class="rank" v-for="(title, index) in hotTitles" :key="index">
+							<view class="rank__index-wrap">
+								<text class="rank__index">{{ hotRanks[index] }}</text>
+							</view>
+							<view class="rank__body">
+								<text class="rank__title">{{ title }}</text>
+								<text class="rank__heat">热度 {{ hotHeats[index] }}</text>
+							</view>
+						</view>
+					</view>
+				</scroll-view>
+			</swiper-item>
+
+			<swiper-item>
+				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+					<view class="pane pane--empty">
+						<nax-empty
+							title="暂无同城动态"
+							description="切换到其它 Tab 或左右滑动查看配方"
+							icon="notes-off"
+						></nax-empty>
+					</view>
+				</scroll-view>
+			</swiper-item>
+		</swiper>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	/**
+	 * 配方：全屏选项卡（Tabs + Swiper）
+	 * - 不新增 nax-tabs-swiper 组件
+	 * - nax-tabs 管导航，原生 swiper 管内容，共享 current
+	 * - circular=false，避免与 Tab 下标错位
+	 */
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const current = ref(0)
+	/** tabs 区域估算高度；onReady 后再用测量校正 */
+	const tabsHeightPx = ref(44)
+	const contentHeightPx = ref(400)
+
+	const swiperStyle = computed((): string => {
+		return 'height:' + contentHeightPx.value.toString() + 'px'
+	})
+
+	const tabList = [
+		{ name: '关注' },
+		{ name: '推荐' },
+		{ name: '热榜' },
+		{ name: '同城' }
+	]
+
+	const followTitles = [
+		'小明 发布了动态',
+		'小红 赞了你',
+		'组件库周报',
+		'设计走查',
+		'联调记录'
+	]
+	const followDescs = [
+		'今天把 nax-tabs 和 swiper 拼成了全屏选项卡。',
+		'推荐页的信息流滚动互不干扰。',
+		'导航只做导航，内容区业务自管。',
+		'指示条与主题色来自 nax-tabs token。',
+		'App / Web / 小程序均可沿用同一配方。'
+	]
+
+	const recommendTitles = [
+		'为什么不做 tabsSwiper 组件？',
+		'联动只需要一个 current',
+		'关闭 circular',
+		'高度怎么算？',
+		'嵌套滚动'
+	]
+	const recommendDescs = [
+		'组合比捆绑更灵活：懒加载、嵌套列表、高度策略都留给业务。',
+		'tabs 用 v-model，swiper 用 :current + @change。',
+		'循环轮播会让下标与 Tab 语义错位。',
+		'内容区高度 = 窗口高度 − tabs 实测高度。',
+		'每一页单独 scroll-view，避免整页和外层抢手势。'
+	]
+
+	const hotRanks = ['1', '2', '3', '4', '5']
+	const hotTitles = [
+		'nax-tabs 配方上线',
+		'uni-app x 手势联动',
+		'组件库原子优先',
+		'主题 token 统一',
+		'demo 可复制到业务'
+	]
+	const hotHeats = ['12.8w', '9.4w', '7.1w', '5.6w', '3.2w']
+
+	function applyContentHeight(winH: number, tabsH: number) {
+		var next = winH - tabsH
+		if (next < 200) {
+			next = 200
+		}
+		contentHeightPx.value = next
+	}
+
+	function measureAndLayout() {
+		const info = uni.getSystemInfoSync()
+		const winH = info.windowHeight as number
+		// 先用估算高度保证首帧有高度
+		applyContentHeight(winH, tabsHeightPx.value)
+
+		nextTick(() => {
+			uni.createSelectorQuery()
+				.select('.tabs-host')
+				.boundingClientRect((rect: NodeInfo) => {
+					if (rect != null && rect.height != null) {
+						const h = rect.height as number
+						if (h > 0) {
+							tabsHeightPx.value = Math.floor(h)
+							applyContentHeight(winH, tabsHeightPx.value)
+						}
+					}
+				})
+				.exec()
+		})
+	}
+
+	function onTabsChange(index: number) {
+		// v-model 已更新 current；保留钩子便于业务扩展（埋点等）
+		if (index != current.value) {
+			current.value = index
+		}
+	}
+
+	function onSwiperChange(e: UniSwiperChangeEvent) {
+		const detail = e.detail
+		const next = detail.current
+		if (next != current.value) {
+			current.value = next
+		}
+	}
+
+	onReady(() => {
+		measureAndLayout()
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+		// 从其它页返回时窗口高度可能变化
+		measureAndLayout()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.tabs-host {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.content-swiper {
+		width: 100%;
+	}
+
+	.pane-scroll {
+		width: 100%;
+	}
+
+	.pane {
+		flex-direction: column;
+		padding: 12px 16px 24px 16px;
+	}
+
+	.pane--empty {
+		padding-top: 48px;
+		align-items: center;
+	}
+
+	.pane__tip {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 12px;
+	}
+
+	.card {
+		flex-direction: column;
+		padding: 14px;
+		margin-bottom: 10px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #efeff5);
+	}
+
+	.card__title {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.card__desc {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.rank {
+		flex-direction: row;
+		align-items: center;
+		padding: 12px 0;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #efeff5);
+	}
+
+	.rank__index-wrap {
+		width: 28px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.rank__index {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.rank__body {
+		flex: 1;
+		flex-direction: column;
+		margin-left: 8px;
+	}
+
+	.rank__title {
+		font-size: 15px;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 4px;
+	}
+
+	.rank__heat {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>

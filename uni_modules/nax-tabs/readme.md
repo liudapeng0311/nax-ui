@@ -1,4 +1,4 @@
-﻿# nax-tabs
+# nax-tabs
 
 顶部标签导航（内容切换条）。面向 uni-app x：数据驱动、可横向滚动/均分宽度、主题色指示条、轻量徽标。**只负责导航 UI**，内容区由页面自管。
 
@@ -80,6 +80,52 @@ function onChange(index: number) {
 ## 依赖
 
 - `nax-ui-theme`（可选，提供统一 token）
+
+## 与内容区联动（全屏选项卡配方）
+
+**不提供**独立的 `nax-tabs-swiper` 组件。全屏选项卡 = `nax-tabs` + 原生 `swiper` 组合：
+
+1. 共用一个 `current`（tabs 用 `v-model`，swiper 用 `:current` + `@change`）
+2. swiper 关闭 `circular`，避免下标与 Tab 语义错位
+3. 内容区高度 = 窗口高度 − tabs 高度；每页内用 `scroll-view` 单独滚动
+4. 业务负责懒加载、嵌套列表、空状态等，不要塞进导航组件
+
+演示页：`pages/components/tabs-swiper/index`（首页「布局组件 → 全屏选项卡配方」）。
+
+```uvue
+<template>
+  <view class="page">
+    <nax-tabs v-model="current" :list="tabs" />
+    <swiper
+      :current="current"
+      :circular="false"
+      :style="'height:' + contentH + 'px'"
+      @change="onSwiperChange"
+    >
+      <swiper-item>
+        <scroll-view scroll-y :style="'height:' + contentH + 'px'">
+          <!-- 面板 0 -->
+        </scroll-view>
+      </swiper-item>
+      <swiper-item>
+        <scroll-view scroll-y :style="'height:' + contentH + 'px'">
+          <!-- 面板 1 -->
+        </scroll-view>
+      </swiper-item>
+    </swiper>
+  </view>
+</template>
+
+<script setup lang="uts">
+const current = ref(0)
+const contentH = ref(400)
+const tabs = [{ name: '关注' }, { name: '推荐' }]
+
+function onSwiperChange(e: UniSwiperChangeEvent) {
+  current.value = e.detail.current
+}
+</script>
+```
 
 ## 与 nax-tabbar
 

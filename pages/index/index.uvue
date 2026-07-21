@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
 	<view class="page-root">
 		<scroll-view class="page-scroll" scroll-y="true">
@@ -138,6 +138,10 @@
 				<view class="home__card home__card--gap" @click="goTabs">
 					<text class="home__card-name">标签页</text>
 					<text class="home__card-tag">nax-tabs</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goTabsSwiper">
+					<text class="home__card-name">全屏选项卡配方</text>
+					<text class="home__card-tag">tabs + swiper</text>
 				</view>
 				<view class="home__card home__card--gap" @click="goNavBar">
 					<text class="home__card-name">导航栏</text>
@@ -380,6 +384,12 @@
 	function goTabs() {
 		uni.navigateTo({
 			url: '/pages/components/tabs/index'
+		})
+	}
+
+	function goTabsSwiper() {
+		uni.navigateTo({
+			url: '/pages/components/tabs-swiper/index'
 		})
 	}
 

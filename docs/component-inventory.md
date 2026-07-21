@@ -130,7 +130,7 @@
 | `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（40）；含 file/notes/database/message-off |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区（App JS / Web·MP CSS env） |
-| `nax-tabs` | done | 插件包 `uni_modules/nax-tabs`；list+v-model；可滚动/均分；`scrollAlign` left/center；指示条测量；徽标/红点/禁用；CSS sticky 可选 |
+| `nax-tabs` | done | 插件包 `uni_modules/nax-tabs`；list+v-model；可滚动/均分；`scrollAlign` left/center；指示条测量；徽标/红点/禁用；CSS sticky 可选；**不做**独立 tabsSwiper，全屏联动见 demo `pages/components/tabs-swiper` |
 | `nax-nav-bar` | done | 插件包 `uni_modules/nax-nav-bar`；状态栏安全区 + fixed 占位 + 返回栈兜底 + 微信胶囊预留；`type` default/primary |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
