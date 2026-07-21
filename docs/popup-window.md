@@ -1,4 +1,4 @@
-﻿# 压窗屏（nax-popup）跨端说明
+# 压窗屏（nax-popup）跨端说明
 
 > 对应插件：`uni_modules/nax-popup`  
 > 官方能力：uni-app x [dialogPage](https://doc.dcloud.net.cn/uni-app-x/api/dialog-page.html)
@@ -39,7 +39,7 @@ openNaxPopup({ url: '/pages/xxx/my-dialog', animationType: 'fade-in' })
 `pages.json` 必须注册：
 
 - `uni_modules/nax-popup/pages/host/index`（用内置简易面板时）
-- 以及你的自定义 dialog 页（`navigationStyle: custom`，背景透明）
+- 以及你的自定义 dialog 页（`navigationStyle: custom`；`backgroundColor: transparent` 仅放在 `app-plus` / `app-harmony` / `h5`，微信小程序不支持 transparent，须用 hex）
 
 ### 不需要盖原生栏 / 需要插槽
 

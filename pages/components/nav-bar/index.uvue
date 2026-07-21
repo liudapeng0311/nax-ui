@@ -1,0 +1,235 @@
+<template>
+	<view class="page-root">
+		<!-- 本页自身顶栏（页面已 navigationStyle: custom） -->
+		<nax-nav-bar
+			title="nax-nav-bar"
+			home-url="/pages/index/index"
+			:border="true"
+		>
+			<template #right>
+				<view class="nav-right" @click="onRightTip">
+					<text class="nav-right__text">说明</text>
+				</view>
+			</template>
+		</nax-nav-bar>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="page__desc">自定义顶栏：状态栏安全区、fixed 占位、返回栈兜底、小程序胶囊预留。下列为非 fixed 预览块。</text>
+
+				<view class="section">
+					<text class="section__title">默认 default</text>
+					<nax-nav-bar
+						title="默认标题"
+						:fixed="false"
+						:safe-area-inset-top="false"
+						:auto-back="false"
+						@back="onDemoBack('default')"
+					></nax-nav-bar>
+				</view>
+
+				<view class="section">
+					<text class="section__title">主色 primary</text>
+					<nax-nav-bar
+						type="primary"
+						title="主色导航"
+						:fixed="false"
+						:safe-area-inset-top="false"
+						:auto-back="false"
+						@back="onDemoBack('primary')"
+					></nax-nav-bar>
+				</view>
+
+				<view class="section">
+					<text class="section__title">返回文案 + 无图标</text>
+					<nax-nav-bar
+						title="设置"
+						back-text="关闭"
+						back-icon=""
+						:fixed="false"
+						:safe-area-inset-top="false"
+						:auto-back="false"
+						@back="onDemoBack('text')"
+					></nax-nav-bar>
+				</view>
+
+				<view class="section">
+					<text class="section__title">左对齐标题 + 无返回</text>
+					<nax-nav-bar
+						title="首页风格"
+						title-align="left"
+						:show-back="false"
+						:fixed="false"
+						:safe-area-inset-top="false"
+					>
+						<template #right>
+							<nax-icon name="search" size="22"></nax-icon>
+						</template>
+					</nax-nav-bar>
+				</view>
+
+				<view class="section">
+					<text class="section__title">自定义中间（插槽）</text>
+					<nax-nav-bar
+						:fixed="false"
+						:safe-area-inset-top="false"
+						:auto-back="false"
+						@back="onDemoBack('slot')"
+					>
+						<view class="mid-tabs">
+							<text class="mid-tabs__item mid-tabs__item--on">关注</text>
+							<text class="mid-tabs__item">推荐</text>
+						</view>
+						<template #right>
+							<nax-icon name="plus" size="22"></nax-icon>
+						</template>
+					</nax-nav-bar>
+				</view>
+
+				<view class="section">
+					<text class="section__title">沉浸 immersive（预览）</text>
+					<view class="immersive-box">
+						<nax-nav-bar
+							title="沉浸标题"
+							type="primary"
+							immersive
+							:fixed="false"
+							:safe-area-inset-top="false"
+							:auto-back="false"
+							@back="onDemoBack('immersive')"
+						></nax-nav-bar>
+					</view>
+					<text class="demo-note">说明（仅 demo）：开启 immersive 后导航栏透明底、无底边；若同时 fixed，组件不插入占位，内容可从顶栏下方透出。</text>
+				</view>
+
+				<view class="section section--end">
+					<text class="hint">最近返回事件：{{ lastBack }}</text>
+					<text class="hint">页面须 navigationStyle: custom；首页/tab 建议 show-back=false 或配置 home-url。</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const lastBack = ref('—')
+
+	function onDemoBack(name : string) {
+		lastBack.value = name
+	}
+
+	function onRightTip() {
+		uni.showToast({
+			title: '右侧插槽',
+			icon: 'none'
+		})
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page-scroll {
+		flex: 1;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 0;
+		/* #endif */
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px;
+		padding-bottom: 40px;
+	}
+
+	.page__desc {
+		font-size: 14px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 22px;
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 20px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: 12px;
+		overflow: hidden;
+		padding-bottom: 12px;
+	}
+
+	.section--end {
+		padding: 12px 16px 16px 16px;
+	}
+
+	.section__title {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		padding: 12px 16px 8px 16px;
+	}
+
+	.hint {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 20px;
+		margin-top: 6px;
+	}
+
+	.nav-right {
+		flex-direction: row;
+		align-items: center;
+		padding-left: 8px;
+		padding-right: 4px;
+		height: 100%;
+	}
+
+	.nav-right__text {
+		font-size: 14px;
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.mid-tabs {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.mid-tabs__item {
+		font-size: 16px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-left: 12px;
+		margin-right: 12px;
+	}
+
+	.mid-tabs__item--on {
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+	}
+
+	.immersive-box {
+		flex-direction: column;
+		/* 仅作预览底色，衬托 immersive 透明栏 */
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.demo-note {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+		padding: 10px 16px 0 16px;
+	}
+</style>

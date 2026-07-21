@@ -110,7 +110,7 @@
 
 | 组件 | 标签 | 优先级 | 说明 |
 |------|------|--------|------|
-| 导航栏 | `nax-nav-bar` | P1 | 页头 |
+| 导航栏 | `nax-nav-bar` | P1 | 自定义页头；状态栏安全区 / fixed 占位 / 胶囊预留 | `title` `showBack` `autoBack` `homeUrl` `fixed` `placeholder` `immersive` `type` / `back` **done** |
 | 底部标签栏 | `nax-tabbar` | P1 | 自定义底栏；图标/徽标/中间凸起/安全区 |
 | 标签页 | `nax-tabs` | P1 | 内容切换 |
 | 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
@@ -130,6 +130,7 @@
 | `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（40）；含 file/notes/database/message-off |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区（App JS / Web·MP CSS env） |
+| `nax-nav-bar` | done | 插件包 `uni_modules/nax-nav-bar`；状态栏安全区 + fixed 占位 + 返回栈兜底 + 微信胶囊预留；`type` default/primary |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
 | `nax-select` | done | 插件包 `uni_modules/nax-select`；对齐 uView Pro Select；单列/多列/联动 + showTrigger；弹层动画复用 `nax-transition` |

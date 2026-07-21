@@ -61,7 +61,16 @@ if (naxPopupSupportsWindowCover()) {
   "style": {
     "navigationStyle": "custom",
     "navigationBarTitleText": "",
-    "backgroundColor": "transparent"
+    "app-plus": {
+      "backgroundColor": "transparent",
+      "background": "transparent"
+    },
+    "app-harmony": {
+      "backgroundColor": "transparent"
+    },
+    "h5": {
+      "backgroundColor": "transparent"
+    }
   }
 }
 ```

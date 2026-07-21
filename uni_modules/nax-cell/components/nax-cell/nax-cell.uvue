@@ -369,7 +369,13 @@
 		align-items: center;
 		flex-shrink: 0;
 		margin-left: 12px;
+		/* App ucss: max-width 仅支持 number|pixel，不支持 % */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		max-width: 200px;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		max-width: 55%;
+		/* #endif */
 	}
 
 	.nax-cell__value {
