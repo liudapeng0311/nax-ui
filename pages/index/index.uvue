@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
 	<view class="page-root">
 		<scroll-view class="page-scroll" scroll-y="true">
@@ -107,9 +107,17 @@
 
 			<view class="home__section home__section--gap">
 				<text class="home__section-title">布局组件</text>
-				<view class="home__card" @click="goLine">
+								<view class="home__card" @click="goLine">
 					<text class="home__card-name">线条</text>
 					<text class="home__card-tag">nax-line</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goDivider">
+					<text class="home__card-name">分割线</text>
+					<text class="home__card-tag">nax-divider</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goCard">
+					<text class="home__card-name">卡片</text>
+					<text class="home__card-tag">nax-card</text>
 				</view>
 				<view class="home__card home__card--gap" @click="goCell">
 					<text class="home__card-name">单元格</text>
@@ -170,6 +178,10 @@
 				<view class="home__card home__card--gap" @click="goNoticeBar">
 					<text class="home__card-name">滚动通告</text>
 					<text class="home__card-tag">nax-notice-bar</text>
+				</view>
+								<view class="home__card home__card--gap" @click="goLoading">
+					<text class="home__card-name">加载</text>
+					<text class="home__card-tag">nax-loading</text>
 				</view>
 				<view class="home__card home__card--gap" @click="goToast">
 					<text class="home__card-name">轻提示</text>
@@ -344,6 +356,18 @@
 		})
 	}
 
+	function goDivider() {
+		uni.navigateTo({
+			url: '/pages/components/divider/index'
+		})
+	}
+
+	function goCard() {
+		uni.navigateTo({
+			url: '/pages/components/card/index'
+		})
+	}
+
 	function goCell() {
 		uni.navigateTo({
 			url: '/pages/components/cell/index'
@@ -427,6 +451,12 @@
 			url: '/pages/components/notice-bar/index'
 		})
 	}
+	function goLoading() {
+		uni.navigateTo({
+			url: '/pages/components/loading/index'
+		})
+	}
+
 	function goToast() {
 		uni.navigateTo({
 			url: '/pages/components/toast/index'

@@ -1,0 +1,196 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-card</text>
+			<text class="page__desc">内容卡片：标题、额外区、页脚与分割线。</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<nax-card title="基础卡片" extra="更多">
+					<text class="body-text">用卡片承载一段说明、列表摘要或操作入口。</text>
+				</nax-card>
+			</view>
+
+			<view class="section">
+				<text class="section__title">仅正文</text>
+				<nax-card>
+					<text class="body-text">没有标题时，正文自动吃掉上下内边距，适合纯内容块。</text>
+				</nax-card>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<nax-card size="sm" title="小号 sm" extra="sm">
+					<text class="muted">更紧凑的内边距</text>
+				</nax-card>
+				<view class="panel-gap">
+					<nax-card size="md" title="中号 md" extra="md">
+						<text class="muted">默认档</text>
+					</nax-card>
+				</view>
+				<view class="panel-gap">
+					<nax-card size="lg" title="大号 lg" extra="lg">
+						<text class="muted">更宽松</text>
+					</nax-card>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">分割线 segmented</text>
+				<nax-card title="订单摘要" extra="详情" segmented :show-footer="true">
+					<text class="body-text">商品合计 ¥128.00</text>
+					<text class="muted">含运费 ¥8.00</text>
+					<template #footer>
+						<nax-button type="primary" size="sm" label="去支付" @click="onPay"></nax-button>
+					</template>
+				</nax-card>
+			</view>
+
+			<view class="section">
+				<text class="section__title">封面 cover</text>
+				<nax-card title="风景推荐" extra="2.3k" :show-cover="true" :show-footer="true" segmented>
+					<template #cover>
+						<view class="cover">
+							<text class="cover__text">Cover</text>
+						</view>
+					</template>
+					<text class="body-text">周末短途：湖边步道与日落观景点。</text>
+					<template #footer>
+						<nax-space size="sm">
+							<nax-space-item>
+								<nax-button size="sm" label="收藏" @click="onStar"></nax-button>
+							</nax-space-item>
+							<nax-space-item>
+								<nax-button type="primary" size="sm" label="查看" @click="onView"></nax-button>
+							</nax-space-item>
+						</nax-space>
+					</template>
+				</nax-card>
+			</view>
+
+			<view class="section">
+				<text class="section__title">可点击 hoverable</text>
+				<nax-card title="设置项入口" extra=">" hoverable @click="onCardClick">
+					<text class="muted">开启 hoverable 后有按压反馈</text>
+				</nax-card>
+				<text class="hint">最近操作：{{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">无边框</text>
+				<nax-card title="无边框" :bordered="false">
+					<text class="muted">bordered=false，适合嵌在已有面板里</text>
+				</nax-card>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const lastEvent = ref('无')
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function onPay() {
+		lastEvent.value = '去支付'
+		uni.showToast({ title: '去支付', icon: 'none' })
+	}
+
+	function onStar() {
+		lastEvent.value = '收藏'
+		uni.showToast({ title: '已收藏', icon: 'none' })
+	}
+
+	function onView() {
+		lastEvent.value = '查看'
+		uni.showToast({ title: '查看', icon: 'none' })
+	}
+
+	function onCardClick() {
+		lastEvent.value = '点击卡片'
+		uni.showToast({ title: '卡片点击', icon: 'none' })
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.panel-gap {
+		margin-top: 12px;
+		flex-direction: column;
+	}
+
+	.body-text {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		line-height: 20px;
+		margin-bottom: 4px;
+	}
+
+	.muted {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 8px;
+	}
+
+	.cover {
+		height: 120px;
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.cover__text {
+		font-size: 16px;
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 600;
+	}
+</style>

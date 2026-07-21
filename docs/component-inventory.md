@@ -38,7 +38,7 @@
 | 图标 | `nax-icon` | P0 | 字体图标壳（Tabler Icons 语义子集） | `name` `size` `color` / `click` |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器；子项 `nax-space-item` | `direction` `size` `wrap` `align` `justify` `fill` **done** |
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
-| 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` |
+| 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` `contentPosition` `size` `type` / **done** |
 | 标签 | `nax-tag` | P1 | 状态/分类标记（对齐 Naive Tag） | `type` `variant` `size` `closable` `round` `bordered` `checkable` `checked` / `close` `click` `update:checked` **done** |
 
 ### 2.2 布局与列表单元
@@ -47,7 +47,7 @@
 |------|------|--------|------|------------------|
 | 单元格 | `nax-cell` | P0 | 设置项/列表行基础 | `title` `label` `value` `is-link` `border` / `click` **done** |
 | 单元格组 | `nax-cell-group` | P0 | Cell 分组容器 | `title` `inset` `border` **done** |
-| 卡片 | `nax-card` | P1 | 内容承载 | `title` `extra` 插槽 `header` `footer` |
+| 卡片 | `nax-card` | P1 | 内容承载 | `title` `extra` `bordered` `size` `segmented` 插槽 `header` `footer` `cover` / **done** |
 
 ### 2.3 展示 / 状态
 
@@ -94,7 +94,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
-| 加载 | `nax-loading` | P0 | 局部/页面加载 | `size` `vertical` `text` |
+| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` / **done** |
 | 压窗屏 | `nax-popup` | P0 | App/Web dialogPage 盖导航栏+tabBar；小程序降级 | `openNaxPopup` `mode` `url` / 声明式 `v-model:show` **done** |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `show` `z-index` / `click` |
 | 弹出层 | `nax-picker` | P0 | 自定义内容弹出；底部/中心/左/右（原规划 nax-popup） | `v-model:show` `position(bottom/center/left/right)` `round` `mask` `maskClosable` `width` `height` / `open` `opened` `close` `click-mask` **done** |
@@ -159,6 +159,9 @@
 | `nax-space` / `nax-space-item` | done | 插件包 `uni_modules/nax-space`；横向/纵向间距；item 吃 margin 兼容隔离 2.0 |
 | `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 database-off（暂无数据）；列表空建议 notes-off |
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
+| `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size |
+| `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
+| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；App 定时旋转 + Web/MP CSS 动画；size/text/vertical/type |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

@@ -1,0 +1,162 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-divider</text>
+			<text class="page__desc">内容分割线，可带文字。纯线条请用 nax-line。</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<view class="panel">
+					<nax-divider></nax-divider>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">带文字</text>
+				<view class="panel">
+					<nax-divider text="或者" space="8"></nax-divider>
+					<nax-divider text="更多内容" space="8"></nax-divider>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">位置 content-position</text>
+				<view class="panel">
+					<nax-divider text="居中" content-position="center" space="8"></nax-divider>
+					<nax-divider text="左侧" content-position="left" space="8"></nax-divider>
+					<nax-divider text="右侧" content-position="right" space="8"></nax-divider>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">虚线 / 类型</text>
+				<view class="panel">
+					<nax-divider dashed text="虚线" space="8"></nax-divider>
+					<nax-divider text="主色" type="primary" space="8"></nax-divider>
+					<nax-divider text="警告" type="warning" space="8"></nax-divider>
+					<nax-divider text="错误" type="error" space="8"></nax-divider>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">粗细 size</text>
+				<view class="panel">
+					<nax-divider text="hairline" size="hairline" space="8"></nax-divider>
+					<nax-divider text="sm" size="sm" space="8"></nax-divider>
+					<nax-divider text="md" size="md" space="8"></nax-divider>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">竖向</text>
+				<view class="panel">
+					<view class="v-box">
+						<text class="body-text">左</text>
+						<nax-divider direction="vertical" space="12"></nax-divider>
+						<text class="body-text">中</text>
+						<nax-divider direction="vertical" text="|" space="12"></nax-divider>
+						<text class="body-text">右</text>
+					</view>
+				</view>
+				<text class="hint">竖线父容器需要明确高度</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		padding: 16px;
+	}
+
+	.panel--gap {
+		margin-top: 12px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 8px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.row--gap > .item {
+		margin-right: 16px;
+		margin-bottom: 12px;
+	}
+
+	.body-text {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		line-height: 20px;
+	}
+
+	.muted {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+
+	.v-box {
+		height: 120px;
+		flex-direction: row;
+		align-items: stretch;
+		justify-content: center;
+	}
+</style>

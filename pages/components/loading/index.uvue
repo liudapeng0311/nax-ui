@@ -1,0 +1,230 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-loading</text>
+			<text class="page__desc">局部加载指示。按钮内加载请用 nax-button 的 loading。</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<view class="panel center">
+					<nax-loading></nax-loading>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">带文案</text>
+				<view class="panel center">
+					<nax-loading text="加载中"></nax-loading>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">纵向 vertical</text>
+				<view class="panel center">
+					<nax-loading vertical text="请稍候"></nax-loading>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="panel">
+					<view class="row">
+						<view class="item center">
+							<nax-loading size="sm" text="sm"></nax-loading>
+						</view>
+						<view class="item center">
+							<nax-loading size="md" text="md"></nax-loading>
+						</view>
+						<view class="item center">
+							<nax-loading size="lg" text="lg"></nax-loading>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="panel">
+					<view class="row">
+						<view class="item center">
+							<nax-loading type="default" text="默认"></nax-loading>
+						</view>
+						<view class="item center">
+							<nax-loading type="primary" text="主色"></nax-loading>
+						</view>
+						<view class="item center">
+							<nax-loading type="info" text="信息"></nax-loading>
+						</view>
+						<view class="item center">
+							<nax-loading type="warning" text="警告"></nax-loading>
+						</view>
+						<view class="item center">
+							<nax-loading type="error" text="错误"></nax-loading>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">区块占位</text>
+				<view class="panel block">
+					<nax-loading v-if="blockLoading" vertical text="内容加载中" type="primary"></nax-loading>
+					<view v-else class="block__body">
+						<text class="body-text">数据已就绪</text>
+						<text class="muted">点击下方按钮重新模拟加载</text>
+					</view>
+				</view>
+				<view class="actions">
+					<nax-button type="primary" size="sm" label="模拟加载 1.5s" @click="simulate"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">show 控制</text>
+				<view class="panel center">
+					<nax-loading :show="toggled" text="可开关"></nax-loading>
+					<text v-if="!toggled" class="muted">已隐藏</text>
+				</view>
+				<view class="actions">
+					<nax-button size="sm" :label="toggled ? '隐藏' : '显示'" @click="toggleShow"></nax-button>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const blockLoading = ref(true)
+	const toggled = ref(true)
+	let timerId = -1
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	onUnmounted(() => {
+		if (timerId >= 0) {
+			clearTimeout(timerId)
+			timerId = -1
+		}
+	})
+
+	function simulate() {
+		blockLoading.value = true
+		if (timerId >= 0) {
+			clearTimeout(timerId)
+		}
+		timerId = setTimeout(() => {
+			blockLoading.value = false
+			timerId = -1
+		}, 1500)
+	}
+
+	function toggleShow() {
+		toggled.value = !toggled.value
+	}
+
+	// 首屏也演示一次结束
+	onMounted(() => {
+		timerId = setTimeout(() => {
+			blockLoading.value = false
+			timerId = -1
+		}, 1200)
+	})
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		padding: 16px;
+	}
+
+	.center {
+		align-items: center;
+		justify-content: center;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.item {
+		margin-right: 16px;
+		margin-bottom: 12px;
+		min-width: 72px;
+	}
+
+	.block {
+		min-height: 120px;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.block__body {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.body-text {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		line-height: 20px;
+		margin-bottom: 4px;
+	}
+
+	.muted {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+
+	.actions {
+		margin-top: 12px;
+		flex-direction: row;
+	}
+</style>

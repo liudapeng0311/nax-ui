@@ -1,0 +1,342 @@
+<template>
+	<view
+		class="nax-card"
+		:class="rootClass"
+		:hover-class="hoverClassName"
+		:hover-start-time="20"
+		:hover-stay-time="70"
+		@click="onClick"
+	>
+		<!-- 封面 -->
+		<view v-if="hasCoverSlot" class="nax-card__cover">
+			<slot name="cover"></slot>
+		</view>
+
+		<!-- 页头：自定义 header 优先 -->
+		<view v-if="headerVisible" class="nax-card__header" :class="headerClass">
+			<slot name="header">
+				<view class="nax-card__header-main">
+					<slot name="title">
+						<text v-if="hasTitle" class="nax-card__title" :class="titleClass" :lines="2">{{ title }}</text>
+					</slot>
+					<slot name="extra">
+						<text v-if="hasExtra" class="nax-card__extra" :class="extraClass">{{ extra }}</text>
+					</slot>
+				</view>
+			</slot>
+		</view>
+
+		<!-- 正文 -->
+		<view class="nax-card__body" :class="bodyClass">
+			<slot></slot>
+		</view>
+
+		<!-- 页脚 -->
+		<view v-if="hasFooterSlot" class="nax-card__footer" :class="footerClass">
+			<slot name="footer"></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-card
+	 * @description 内容卡片。标题 / 额外操作 / 封面 / 页脚插槽，主题 token 背景与边框。
+	 * @property {string} title 标题
+	 * @property {string} extra 右侧额外文案
+	 * @property {boolean} bordered 是否显示边框，默认 true
+	 * @property {boolean} hoverable 是否开启按压反馈
+	 * @property {string} size sm | md | lg；内边距档位，默认 md
+	 * @property {boolean} segmented 页头/页脚与正文间是否画分割线，默认 false
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击卡片
+	 * @slot default 正文
+	 * @slot header 自定义整块页头（覆盖 title/extra）
+	 * @slot title 自定义标题
+	 * @slot extra 自定义右侧区
+	 * @slot cover 封面（页头上方）
+	 * @slot footer 页脚
+	 */
+	const props = defineProps({
+		title: { type: String, default: '' },
+		extra: { type: String, default: '' },
+		bordered: { type: Boolean, default: true },
+		hoverable: { type: Boolean, default: false },
+		size: { type: String, default: 'md' },
+		segmented: { type: Boolean, default: false },
+		// 显式控制区段：有具名插槽时调用方传 true 开启（uvue 不便可靠探测插槽）
+		showCover: { type: Boolean, default: false },
+		showFooter: { type: Boolean, default: false },
+		// 无 title/extra 时仍显示默认页头结构（仅当用了 title/extra 插槽）
+		showHeader: { type: Boolean, default: false },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['click'])
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const hasTitle = computed((): boolean => {
+		return props.title.trim().length > 0
+	})
+
+	const hasExtra = computed((): boolean => {
+		return props.extra.trim().length > 0
+	})
+
+	// 页头：有 title/extra，或显式 showHeader
+	const headerVisible = computed((): boolean => {
+		return props.showHeader || hasTitle.value || hasExtra.value
+	})
+
+	const hasCoverSlot = computed((): boolean => {
+		return props.showCover
+	})
+
+	const hasFooterSlot = computed((): boolean => {
+		return props.showFooter
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-card--size-' + sizeName.value
+		if (props.bordered) {
+			cls += ' nax-card--bordered'
+		}
+		if (props.hoverable) {
+			cls += ' nax-card--hoverable'
+		}
+		if (props.segmented) {
+			cls += ' nax-card--segmented'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const headerClass = computed((): string => {
+		return 'nax-card__header--size-' + sizeName.value
+	})
+
+	const bodyClass = computed((): string => {
+		var cls = 'nax-card__body--size-' + sizeName.value
+		if (!headerVisible.value && !hasCoverSlot.value) {
+			cls += ' nax-card__body--alone-top'
+		}
+		if (!hasFooterSlot.value) {
+			cls += ' nax-card__body--alone-bottom'
+		}
+		return cls
+	})
+
+	const footerClass = computed((): string => {
+		return 'nax-card__footer--size-' + sizeName.value
+	})
+
+	const titleClass = computed((): string => {
+		return 'nax-card__title--size-' + sizeName.value
+	})
+
+	const extraClass = computed((): string => {
+		return 'nax-card__extra--size-' + sizeName.value
+	})
+
+	const hoverClassName = computed((): string => {
+		if (!props.hoverable) {
+			return 'none'
+		}
+		return 'nax-card--hover'
+	})
+
+	function onClick() {
+		emit('click')
+	}
+</script>
+
+<style>
+	.nax-card {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		overflow: hidden;
+		box-sizing: border-box;
+	}
+
+	.nax-card--bordered {
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-card--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-card__cover {
+		flex-direction: column;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.nax-card__header {
+		flex-direction: column;
+	}
+
+	.nax-card__header--size-sm {
+		padding-top: 10px;
+		padding-bottom: 8px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-card__header--size-md {
+		padding-top: 14px;
+		padding-bottom: 10px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-card__header--size-lg {
+		padding-top: 16px;
+		padding-bottom: 12px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.nax-card--segmented .nax-card__header {
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-card__header-main {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.nax-card__title {
+		flex-grow: 1;
+		flex-shrink: 1;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+	}
+
+	.nax-card__title--size-sm {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-card__title--size-md {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+
+	.nax-card__title--size-lg {
+		font-size: 18px;
+		line-height: 24px;
+	}
+
+	.nax-card__extra {
+		flex-shrink: 0;
+		margin-left: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-card__extra--size-sm {
+		font-size: 12px;
+		line-height: 18px;
+	}
+
+	.nax-card__extra--size-md {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-card__extra--size-lg {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+
+	.nax-card__body {
+		flex-direction: column;
+	}
+
+	.nax-card__body--size-sm {
+		padding-top: 8px;
+		padding-bottom: 10px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-card__body--size-md {
+		padding-top: 10px;
+		padding-bottom: 14px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-card__body--size-lg {
+		padding-top: 12px;
+		padding-bottom: 16px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	/* 无页头时顶部内边距与 size 一致（已含 padding-top） */
+	.nax-card__body--alone-top.nax-card__body--size-sm {
+		padding-top: 10px;
+	}
+
+	.nax-card__body--alone-top.nax-card__body--size-md {
+		padding-top: 14px;
+	}
+
+	.nax-card__body--alone-top.nax-card__body--size-lg {
+		padding-top: 16px;
+	}
+
+	.nax-card__footer {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-card__footer--size-sm {
+		padding-top: 8px;
+		padding-bottom: 10px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-card__footer--size-md {
+		padding-top: 10px;
+		padding-bottom: 14px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-card__footer--size-lg {
+		padding-top: 12px;
+		padding-bottom: 16px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.nax-card--segmented .nax-card__footer {
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-divider, #efeff5);
+	}
+</style>
