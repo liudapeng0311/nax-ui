@@ -1,0 +1,499 @@
+<template>
+	<!-- dialogPage 内置宿主：透明全屏；鸿蒙遮罩动画对齐 nax-picker 三阶段 -->
+	<view class="nax-popup-host nax-theme">
+		<view
+			v-if="maskEnabled"
+			class="nax-popup-host__mask"
+			:class="maskClass"
+			:style="maskStyle"
+			@click="onMaskClick"
+		></view>
+		<view
+			class="nax-popup-host__layer"
+			:class="layerClass"
+			:style="layerStyle"
+			@click.stop="onPanelClick"
+		>
+			<view class="nax-popup-host__panel" :class="panelClass" :style="panelStyle">
+				<text v-if="titleText.length > 0" class="nax-popup-host__title" :lines="2">{{ titleText }}</text>
+				<text v-if="contentText.length > 0" class="nax-popup-host__content" :lines="20">{{ contentText }}</text>
+				<view class="nax-popup-host__actions">
+					<view
+						class="nax-popup-host__btn"
+						hover-class="nax-popup-host__btn--hover"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onCloseClick"
+					>
+						<text class="nax-popup-host__btn-text" :lines="1">关闭</text>
+					</view>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-popup 内置 dialogPage 宿主
+	 * 鸿蒙：遮罩三阶段（先落透明起始态 → 开 transition → 与面板同帧点亮），对齐 nax-picker / nax-dialog
+	 */
+	import {
+		getNaxPopupSession,
+		notifyNaxPopupAction
+	} from '../../index.uts'
+
+	const titleText = ref('')
+	const contentText = ref('')
+	const position = ref('center')
+	/** 是否渲染遮罩（会话配置） */
+	const maskEnabled = ref(true)
+	const maskClosable = ref(true)
+	const roundOn = ref(true)
+	const widthText = ref('')
+	const heightText = ref('')
+	const animDuration = ref(280)
+	/** 面板是否处于结束态 */
+	const panelShow = ref(false)
+	/** 鸿蒙：遮罩是否点亮（opacity 0→0.4） */
+	const hmMaskOn = ref(false)
+	/** 鸿蒙：是否已启用 transition（阶段2 后才 true） */
+	const hmAnimReady = ref(false)
+	/** 关闭中，避免重复 */
+	const closing = ref(false)
+
+	let openDelayTimer: number = -1
+	let enterReadyTimer: number = -1
+	let enterToTimer: number = -1
+	let leaveTimer: number = -1
+
+	function clearOpenTimers() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+		if (enterReadyTimer >= 0) {
+			clearTimeout(enterReadyTimer)
+			enterReadyTimer = -1
+		}
+		if (enterToTimer >= 0) {
+			clearTimeout(enterToTimer)
+			enterToTimer = -1
+		}
+	}
+
+	function clearLeaveTimer() {
+		if (leaveTimer >= 0) {
+			clearTimeout(leaveTimer)
+			leaveTimer = -1
+		}
+	}
+
+	function resolveDuration(): number {
+		const d = animDuration.value
+		if (d > 0) {
+			return d
+		}
+		return 280
+	}
+
+	const maskClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (hmMaskOn.value) {
+			return 'nax-popup-host__mask--show'
+		}
+		return ''
+		// #endif
+		// #ifndef APP-HARMONY
+		if (panelShow.value) {
+			return 'nax-popup-host__mask--show'
+		}
+		return ''
+		// #endif
+	})
+
+	const maskStyle = computed((): string => {
+		const d = resolveDuration()
+		// #ifdef APP-HARMONY
+		// 实色黑 + opacity；阶段1 无 transition，避免首帧闪黑
+		var ms = 'background-color:#000000;'
+		if (hmAnimReady.value && d > 0) {
+			ms += 'transition-property:opacity;'
+			ms += 'transition-timing-function:ease-out;'
+			ms += 'transition-duration:' + d.toString() + 'ms;'
+		} else {
+			ms += 'transition-property:none;'
+			ms += 'transition-duration:0ms;'
+		}
+		if (hmMaskOn.value) {
+			ms += 'opacity:0.4;'
+		} else {
+			ms += 'opacity:0;'
+		}
+		return ms
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'transition-duration:' + d.toString() + 'ms;'
+		// #endif
+	})
+
+	const layerClass = computed((): string => {
+		var cls = 'nax-popup-host__layer--' + position.value
+		if (panelShow.value) {
+			cls = cls + ' nax-popup-host__layer--show'
+		}
+		return cls
+	})
+
+	const layerStyle = computed((): string => {
+		const d = resolveDuration()
+		// #ifdef APP-HARMONY
+		var ls = ''
+		if (hmAnimReady.value && d > 0) {
+			ls += 'transition-property:opacity,transform;'
+			ls += 'transition-timing-function:ease-out;'
+			ls += 'transition-duration:' + d.toString() + 'ms;'
+		} else {
+			// 阶段1：无 transition，先钉死起始态
+			ls += 'transition-property:none;'
+			ls += 'transition-duration:0ms;'
+		}
+		return ls
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'transition-duration:' + d.toString() + 'ms;'
+		// #endif
+	})
+
+	const panelClass = computed((): string => {
+		var cls = 'nax-popup-host__panel--' + position.value
+		if (roundOn.value) {
+			cls = cls + ' nax-popup-host__panel--round-' + position.value
+		}
+		return cls
+	})
+
+	const panelStyle = computed((): string => {
+		var s = ''
+		if (widthText.value.length > 0) {
+			s = s + 'width:' + widthText.value + ';'
+		}
+		if (heightText.value.length > 0) {
+			s = s + 'height:' + heightText.value + ';'
+		}
+		return s
+	})
+
+	function loadSession() {
+		const s = getNaxPopupSession()
+		const t = s.getString('title')
+		if (t != null) {
+			titleText.value = t as string
+		}
+		const c = s.getString('content')
+		if (c != null) {
+			contentText.value = c as string
+		}
+		const p = s.getString('position')
+		if (p != null && (p as string).length > 0) {
+			position.value = p as string
+		}
+		const m = s.getBoolean('mask')
+		if (m != null) {
+			maskEnabled.value = m as boolean
+		}
+		const mc = s.getBoolean('maskClosable')
+		if (mc != null) {
+			maskClosable.value = mc as boolean
+		}
+		const r = s.getBoolean('round')
+		if (r != null) {
+			roundOn.value = r as boolean
+		}
+		const w = s.getString('width')
+		if (w != null) {
+			widthText.value = w as string
+		}
+		const h = s.getString('height')
+		if (h != null) {
+			heightText.value = h as string
+		}
+		const d = s.getNumber('duration')
+		if (d != null) {
+			const dv = d as number
+			if (dv > 0) {
+				animDuration.value = dv
+			}
+		}
+	}
+
+	function startOpenAnim() {
+		clearOpenTimers()
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		// 三阶段：挂载起始态(无 transition) → 开 transition → 遮罩+面板同帧结束态
+		// 遮罩绝不能比面板更早点亮，否则先闪黑
+		hmMaskOn.value = false
+		hmAnimReady.value = false
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			enterReadyTimer = setTimeout(() => {
+				enterReadyTimer = -1
+				hmAnimReady.value = true
+				enterToTimer = setTimeout(() => {
+					enterToTimer = -1
+					hmMaskOn.value = true
+					panelShow.value = true
+				}, 32)
+			}, 48)
+		}, 32)
+		// #endif
+		// #ifndef APP-HARMONY
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+		}, 30)
+		// #endif
+	}
+
+	function finishClose(action: string) {
+		notifyNaxPopupAction(action)
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+		uni.closeDialogPage({})
+		// #endif
+	}
+
+	function startClose(action: string) {
+		if (closing.value) {
+			return
+		}
+		closing.value = true
+		clearOpenTimers()
+		clearLeaveTimer()
+		// 先退场再关 dialogPage
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		hmMaskOn.value = false
+		// #endif
+		const d = resolveDuration()
+		leaveTimer = setTimeout(() => {
+			leaveTimer = -1
+			finishClose(action)
+		}, d)
+	}
+
+	function onMaskClick() {
+		if (!maskClosable.value) {
+			return
+		}
+		if (closing.value) {
+			return
+		}
+		startClose('mask')
+	}
+
+	function onCloseClick() {
+		if (closing.value) {
+			return
+		}
+		startClose('close')
+	}
+
+	function onPanelClick() {
+		// stop bubble
+	}
+
+	onLoad(() => {
+		loadSession()
+		startOpenAnim()
+	})
+
+	onUnload(() => {
+		clearOpenTimers()
+		clearLeaveTimer()
+		notifyNaxPopupAction('dismiss')
+	})
+</script>
+
+<style>
+	.nax-popup-host {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+	}
+
+	.nax-popup-host__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		/* #ifndef APP-HARMONY */
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		/* 实色黑 + opacity；时长/开关由 inline style 控制（对齐 nax-picker） */
+		background-color: #000000;
+		opacity: 0;
+		/* #endif */
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-popup-host__mask--show {
+		opacity: 1;
+	}
+	/* #endif */
+
+	/* #ifdef APP-HARMONY */
+	.nax-popup-host__mask--show {
+		opacity: 0.4;
+	}
+	/* #endif */
+
+	.nax-popup-host__layer {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 2;
+		flex-direction: column;
+		opacity: 0;
+		/* #ifndef APP-HARMONY */
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+	}
+
+	.nax-popup-host__layer--center {
+		justify-content: center;
+		align-items: center;
+		transform: scale(0.92);
+	}
+
+	.nax-popup-host__layer--bottom {
+		justify-content: flex-end;
+		align-items: stretch;
+		transform: translateY(24px);
+	}
+
+	.nax-popup-host__layer--left {
+		justify-content: flex-start;
+		align-items: flex-start;
+		transform: translateX(-24px);
+	}
+
+	.nax-popup-host__layer--right {
+		justify-content: flex-start;
+		align-items: flex-end;
+		transform: translateX(24px);
+	}
+
+	.nax-popup-host__layer--show {
+		opacity: 1;
+		transform: scale(1) translateX(0) translateY(0);
+	}
+
+	.nax-popup-host__panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		padding-top: 20px;
+		padding-bottom: 16px;
+		padding-left: 20px;
+		padding-right: 20px;
+		overflow: hidden;
+	}
+
+	.nax-popup-host__panel--center {
+		width: 300px;
+	}
+
+	.nax-popup-host__panel--bottom {
+		width: 100%;
+	}
+
+	.nax-popup-host__panel--left {
+		width: 78%;
+		height: 100%;
+	}
+
+	.nax-popup-host__panel--right {
+		width: 78%;
+		height: 100%;
+	}
+
+	.nax-popup-host__panel--round-center {
+		border-top-left-radius: var(--nax-radius-lg, 8px);
+		border-top-right-radius: var(--nax-radius-lg, 8px);
+		border-bottom-left-radius: var(--nax-radius-lg, 8px);
+		border-bottom-right-radius: var(--nax-radius-lg, 8px);
+	}
+
+	.nax-popup-host__panel--round-bottom {
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-popup-host__panel--round-left {
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		border-bottom-right-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-popup-host__panel--round-right {
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-bottom-left-radius: var(--nax-radius-xl, 12px);
+	}
+
+	.nax-popup-host__title {
+		font-size: 17px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+		margin-bottom: 10px;
+	}
+
+	.nax-popup-host__content {
+		font-size: 14px;
+		line-height: 21px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		margin-bottom: 16px;
+	}
+
+	.nax-popup-host__actions {
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.nax-popup-host__btn {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 40px;
+		padding-left: 20px;
+		padding-right: 20px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-popup-host__btn--hover {
+		opacity: 0.88;
+	}
+
+	.nax-popup-host__btn-text {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text-inverse, #ffffff);
+		text-align: center;
+	}
+</style>

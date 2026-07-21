@@ -146,6 +146,10 @@
 				<view class="home__card home__card--gap" @click="goDialog">
 					<text class="home__card-name">对话框</text>
 					<text class="home__card-tag">nax-dialog</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goPopup">
+					<text class="home__card-name">压窗屏</text>
+					<text class="home__card-tag">nax-popup</text>
 				</view>
 
 			</view>
@@ -348,6 +352,11 @@
 		uni.navigateTo({
 			url: '/pages/components/dialog/index'
 		})
+	}
+	function goPopup() {
+		uni.navigateTo({
+			url: '/pages/components/popup/index'
+		})
 	}
 	function goKeyboard() {
 		uni.navigateTo({

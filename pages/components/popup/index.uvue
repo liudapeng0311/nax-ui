@@ -1,0 +1,248 @@
+<template>
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="page__title">nax-popup</text>
+				<text class="page__desc">压窗屏：App/Web 用 dialogPage 盖住原生导航栏与 tabBar；小程序降级页面级并说明限制。</text>
+
+				<view class="section">
+					<text class="section__title">当前端能力</text>
+					<text class="hint">{{ capabilityText }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">压窗 · 内置 host（title/content）</text>
+					<view class="row">
+						<nax-button type="primary" label="居中压窗" @click="openWindowCenter"></nax-button>
+					</view>
+					<view class="row row--gap">
+						<nax-button size="sm" label="底部" @click="openWindowBottom"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="mode=window" @click="openForceWindow"></nax-button>
+					</view>
+					<text class="hint">App/Web：应盖住本页导航栏。小程序：降级到页面宿主（本页底部已挂）。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">压窗 · 自定义 dialog 页</text>
+					<view class="row">
+						<nax-button type="info" label="打开 demo-dialog 页" @click="openCustomDialog"></nax-button>
+					</view>
+					<text class="hint">复杂 UI 推荐自建透明页 + openNaxPopup({ url })；animationType 建议 none，进退场动画写在 dialog 页内（本 demo 已示例）。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">页面级 · 不压窗（全端一致）</text>
+					<view class="row">
+						<nax-button label="mode=page API" @click="openPageMode"></nax-button>
+						<view class="gap"></view>
+						<nax-button label="声明式插槽" @click="openDeclarative"></nax-button>
+					</view>
+					<text class="hint">与 nax-picker 相同层级：盖不住原生导航栏/tabBar。</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">关闭</text>
+					<view class="row">
+						<nax-button size="sm" label="closeNaxPopup()" @click="onCloseApi"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">平台说明摘要</text>
+					<text class="hint">• App/Web：真压窗 ✅（dialogPage）</text>
+					<text class="hint">• 微信小程序：真压窗 ❌，需自定义导航/tabBar 或接受页面级遮罩</text>
+					<text class="hint">• 详见 uni_modules/nax-popup/readme.md 与 docs/popup-window.md</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<!-- 声明式 -->
+		<nax-popup v-model:show="declShow" position="bottom">
+			<view class="demo-panel">
+				<text class="demo-panel__title">声明式 nax-popup</text>
+				<text class="demo-panel__desc">页面级插槽，不盖原生导航栏。</text>
+				<nax-button size="sm" type="primary" label="关闭" @click="declShow = false"></nax-button>
+			</view>
+		</nax-popup>
+
+		<!-- 命令式页面级 / 小程序降级宿主（可空） -->
+		<nax-popup />
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+	import {
+		openNaxPopup,
+		closeNaxPopup,
+		naxPopupSupportsWindowCover
+	} from '@/uni_modules/nax-popup/index.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const declShow = ref(false)
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const capabilityText = computed((): string => {
+		if (naxPopupSupportsWindowCover()) {
+			return '支持真·压窗（dialogPage）：可盖住原生导航栏与 tabBar'
+		}
+		return '不支持 dialogPage：已降级页面级弹层，无法盖住原生导航栏/tabBar'
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function openWindowCenter() {
+		openNaxPopup({
+			title: '压窗屏',
+			content: 'App/Web 下遮罩应盖住导航栏。点遮罩或关闭按钮退出。',
+			position: 'center',
+			maskClosable: true
+		})
+	}
+
+	function openWindowBottom() {
+		openNaxPopup({
+			title: '底部压窗',
+			content: 'position=bottom 的内置 host 面板。',
+			position: 'bottom',
+			maskClosable: true
+		})
+	}
+
+	function openForceWindow() {
+		openNaxPopup({
+			mode: 'window',
+			title: '强制 window',
+			content: 'mode=window：不支持的端会 warn 并尝试页面宿主降级。',
+			position: 'center'
+		})
+	}
+
+	function openCustomDialog() {
+		openNaxPopup({
+			url: '/pages/components/popup/demo-dialog',
+			animationType: 'none'
+		})
+	}
+
+	function openPageMode() {
+		openNaxPopup({
+			mode: 'page',
+			title: '页面级 API',
+			content: 'mode=page：全端走页面宿主，不盖原生栏。',
+			position: 'center'
+		})
+	}
+
+	function openDeclarative() {
+		declShow.value = true
+	}
+
+	function onCloseApi() {
+		closeNaxPopup()
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 20px;
+		padding-bottom: 40px;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 16px;
+		padding: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 8px;
+	}
+
+	.gap {
+		width: 8px;
+		height: 1px;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+
+	.demo-panel {
+		flex-direction: column;
+		padding: 20px;
+		align-items: center;
+	}
+
+	.demo-panel__title {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 8px;
+	}
+
+	.demo-panel__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+		text-align: center;
+	}
+</style>

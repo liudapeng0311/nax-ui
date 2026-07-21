@@ -281,6 +281,7 @@ MVP 只做必要过渡；复杂动画后置。
 |------|------|
 | 命令式 | Toast：`naxToast()` / `hideNaxToast()`（全局挂一次 `<nax-toast />`）。Dialog 快捷确认：`naxDialog()` / `naxDialogAlert()` / `naxDialogConfirm()` / `hideNaxDialog()`（全局挂一次 `<nax-dialog />`；未挂载回退 `uni.showModal`）。Loading 全局态后续同模式 |
 | 声明式 | Dialog / Popup 用 `v-model:show`（自定义内容、插槽、复杂布局优先声明式；复杂弹层用 `nax-picker`） |
+| 压窗屏 | 需盖住原生导航栏/tabBar 时用 `nax-popup` / `openNaxPopup`（App/Web = dialogPage；小程序不支持真压窗，见 `docs/popup-window.md`） |
 | 蒙层 | 统一使用遮罩 token；点击蒙层是否关闭由 prop 控制 |
 | 无障碍 | 关键操作保留文案，不只依赖颜色 |
 

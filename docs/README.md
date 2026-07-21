@@ -9,6 +9,7 @@
 | [design-system.md](./design-system.md) | 设计规范：定位、命名、Token、API、样式、主题、质量门槛 | 设计与开发 |
 | [component-inventory.md](./component-inventory.md) | 组件清单：分期、依赖、兼容策略、状态看板 | 开发与排期 |
 | [theme.md](./theme.md) | 主题接入：L0 默认色 / L1 启动配置 / L2 运行时切换 | 业务接入与组件作者 |
+| [popup-window.md](./popup-window.md) | 压窗屏跨端能力与小程序限制 | 弹层 / 反馈组件作者与业务 |
 | [../AGENTS.md](../AGENTS.md) | 给 Codex / 协作者的仓库约束（实现时强制遵守） | 所有 AI/贡献者 |
 
 ## 推荐阅读顺序

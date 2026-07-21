@@ -1,0 +1,525 @@
+/**
+ * nax-popup 压窗屏
+ * App/Web：优先 uni.openDialogPage，可盖住原生导航栏与 tabBar
+ * 小程序：官方无 dialogPage，降级为页面级宿主（nax-picker），无法盖原生栏
+ *
+ * 业务：import { openNaxPopup, closeNaxPopup, naxPopupSupportsWindowCover } from '@/uni_modules/nax-popup/index.uts'
+ * 宿主：小程序或页面级模式需挂一次 <nax-popup />；App/Web 内置简易内容用 pages/host
+ */
+
+type NaxPopupShowHandler = (
+	title: string,
+	content: string,
+	position: string,
+	mask: boolean,
+	maskClosable: boolean,
+	round: boolean,
+	width: string,
+	height: string,
+	zIndex: number,
+	duration: number
+) => void
+type NaxPopupHideHandler = () => void
+type NaxPopupActionFn = (action: string) => void
+
+var pageShowHandler: NaxPopupShowHandler | null = null
+var pageHideHandler: NaxPopupHideHandler | null = null
+var pageHostBound: boolean = false
+var pageHostSeq: number = 0
+var pageActiveHostId: number = 0
+
+/** 当前会话状态（内置 host 页 / 页面宿主共用） */
+var sessionActive: boolean = false
+var sessionTitle: string = ''
+var sessionContent: string = ''
+var sessionPosition: string = 'center'
+var sessionMask: boolean = true
+var sessionMaskClosable: boolean = true
+var sessionRound: boolean = true
+var sessionWidth: string = ''
+var sessionHeight: string = ''
+var sessionZIndex: number = 10090
+var sessionDuration: number = 280
+var sessionUrl: string = ''
+var sessionMode: string = 'auto'
+var sessionViaDialogPage: boolean = false
+var sessionActionFn: NaxPopupActionFn | null = null
+
+const DEFAULT_HOST_URL = '/uni_modules/nax-popup/pages/host/index'
+
+/**
+ * 是否支持真正压窗（盖住 pages.json 原生导航栏 + tabBar）
+ * App / Web：true；微信小程序等：false
+ */
+export function naxPopupSupportsWindowCover(): boolean {
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+	return true
+	// #endif
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+	return false
+	// #endif
+}
+
+/**
+ * 宿主挂载（页面级 / 小程序降级）
+ */
+export function bindNaxPopupHost(show: NaxPopupShowHandler, hide: NaxPopupHideHandler): number {
+	pageHostSeq = pageHostSeq + 1
+	const id = pageHostSeq
+	pageActiveHostId = id
+	pageShowHandler = show
+	pageHideHandler = hide
+	pageHostBound = true
+	return id
+}
+
+export function unbindNaxPopupHost(hostId: number = 0) {
+	if (hostId > 0 && hostId != pageActiveHostId) {
+		return
+	}
+	pageShowHandler = null
+	pageHideHandler = null
+	pageHostBound = false
+	pageActiveHostId = 0
+	if (sessionActive && !sessionViaDialogPage) {
+		clearSession('dismiss')
+	}
+}
+
+export function isNaxPopupHostBound(): boolean {
+	return pageHostBound
+}
+
+/**
+ * 内置 host 页 onLoad 时读取会话
+ */
+export function getNaxPopupSession(): UTSJSONObject {
+	return {
+		active: sessionActive,
+		title: sessionTitle,
+		content: sessionContent,
+		position: sessionPosition,
+		mask: sessionMask,
+		maskClosable: sessionMaskClosable,
+		round: sessionRound,
+		width: sessionWidth,
+		height: sessionHeight,
+		zIndex: sessionZIndex,
+		duration: sessionDuration,
+		viaDialogPage: sessionViaDialogPage
+	} as UTSJSONObject
+}
+
+/**
+ * host / 组件关闭时回调 action: close | mask | confirm | cancel | dismiss
+ */
+export function notifyNaxPopupAction(action: string) {
+	if (!sessionActive) {
+		return
+	}
+	const fn = sessionActionFn
+	clearSession(action)
+	if (fn != null) {
+		fn!(action)
+	}
+}
+
+function clearSession(_action: string) {
+	sessionActive = false
+	sessionTitle = ''
+	sessionContent = ''
+	sessionPosition = 'center'
+	sessionMask = true
+	sessionMaskClosable = true
+	sessionRound = true
+	sessionWidth = ''
+	sessionHeight = ''
+	sessionZIndex = 10090
+	sessionDuration = 280
+	sessionUrl = ''
+	sessionMode = 'auto'
+	sessionViaDialogPage = false
+	sessionActionFn = null
+}
+
+function readString(obj: UTSJSONObject, key: string, fallback: string): string {
+	const v = obj.getString(key)
+	if (v != null) {
+		return v as string
+	}
+	return fallback
+}
+
+function readBool(obj: UTSJSONObject, key: string, fallback: boolean): boolean {
+	const v = obj.getBoolean(key)
+	if (v != null) {
+		return v as boolean
+	}
+	return fallback
+}
+
+function readNumber(obj: UTSJSONObject, key: string, fallback: number): number {
+	const v = obj.getNumber(key)
+	if (v != null) {
+		return v as number
+	}
+	return fallback
+}
+
+function normalizePosition(raw: string): string {
+	if (raw == 'bottom') {
+		return 'bottom'
+	}
+	if (raw == 'left') {
+		return 'left'
+	}
+	if (raw == 'right') {
+		return 'right'
+	}
+	if (raw == 'middle') {
+		return 'center'
+	}
+	return 'center'
+}
+
+function normalizeMode(raw: string): string {
+	if (raw == 'window' || raw == 'page' || raw == 'auto') {
+		return raw
+	}
+	return 'auto'
+}
+
+function parseOptions(input: any | null): UTSJSONObject {
+	var title = ''
+	var content = ''
+	var position = 'center'
+	var mask = true
+	var maskClosable = true
+	var round = true
+	var width = ''
+	var height = ''
+	var zIndex = 10090
+	var duration = 280
+	var url = ''
+	var mode = 'auto'
+	var animationType = 'none'
+	var animationDuration = 280
+	var disableEscBack = false
+	var triggerParentHide = false
+
+	if (input == null) {
+		return {
+			title: title,
+			content: content,
+			position: position,
+			mask: mask,
+			maskClosable: maskClosable,
+			round: round,
+			width: width,
+			height: height,
+			zIndex: zIndex,
+			duration: duration,
+			url: url,
+			mode: mode,
+			animationType: animationType,
+			animationDuration: animationDuration,
+			disableEscBack: disableEscBack,
+			triggerParentHide: triggerParentHide
+		} as UTSJSONObject
+	}
+
+	if (typeof input == 'string') {
+		content = input as string
+		return {
+			title: title,
+			content: content,
+			position: position,
+			mask: mask,
+			maskClosable: maskClosable,
+			round: round,
+			width: width,
+			height: height,
+			zIndex: zIndex,
+			duration: duration,
+			url: url,
+			mode: mode,
+			animationType: animationType,
+			animationDuration: animationDuration,
+			disableEscBack: disableEscBack,
+			triggerParentHide: triggerParentHide
+		} as UTSJSONObject
+	}
+
+	const obj = input as UTSJSONObject
+	title = readString(obj, 'title', '')
+	content = readString(obj, 'content', '')
+	if (content.length == 0) {
+		content = readString(obj, 'message', '')
+	}
+	position = normalizePosition(readString(obj, 'position', 'center'))
+	mask = readBool(obj, 'mask', true)
+	maskClosable = readBool(obj, 'maskClosable', true)
+	const closeOverlay = obj.getBoolean('closeOnClickOverlay')
+	if (closeOverlay != null) {
+		maskClosable = closeOverlay as boolean
+	}
+	const closeMask = obj.getBoolean('closeOnMask')
+	if (closeMask != null) {
+		maskClosable = closeMask as boolean
+	}
+	round = readBool(obj, 'round', true)
+	width = readString(obj, 'width', '')
+	height = readString(obj, 'height', '')
+	zIndex = readNumber(obj, 'zIndex', 10090)
+	duration = readNumber(obj, 'duration', 280)
+	url = readString(obj, 'url', '')
+	mode = normalizeMode(readString(obj, 'mode', 'auto'))
+	animationType = readString(obj, 'animationType', 'none')
+	if (animationType.length == 0) {
+		animationType = 'none'
+	}
+	animationDuration = readNumber(obj, 'animationDuration', duration)
+	disableEscBack = readBool(obj, 'disableEscBack', false)
+	triggerParentHide = readBool(obj, 'triggerParentHide', false)
+
+	return {
+		title: title,
+		content: content,
+		position: position,
+		mask: mask,
+		maskClosable: maskClosable,
+		round: round,
+		width: width,
+		height: height,
+		zIndex: zIndex,
+		duration: duration,
+		url: url,
+		mode: mode,
+		animationType: animationType,
+		animationDuration: animationDuration,
+		disableEscBack: disableEscBack,
+		triggerParentHide: triggerParentHide
+	} as UTSJSONObject
+}
+
+function applySession(opts: UTSJSONObject, viaDialog: boolean) {
+	sessionActive = true
+	sessionTitle = readString(opts, 'title', '')
+	sessionContent = readString(opts, 'content', '')
+	sessionPosition = normalizePosition(readString(opts, 'position', 'center'))
+	sessionMask = readBool(opts, 'mask', true)
+	sessionMaskClosable = readBool(opts, 'maskClosable', true)
+	sessionRound = readBool(opts, 'round', true)
+	sessionWidth = readString(opts, 'width', '')
+	sessionHeight = readString(opts, 'height', '')
+	sessionZIndex = readNumber(opts, 'zIndex', 10090)
+	sessionDuration = readNumber(opts, 'duration', 280)
+	sessionUrl = readString(opts, 'url', '')
+	sessionMode = normalizeMode(readString(opts, 'mode', 'auto'))
+	sessionViaDialogPage = viaDialog
+}
+
+function openPageHost(opts: UTSJSONObject): boolean {
+	if (!pageHostBound || pageShowHandler == null) {
+		return false
+	}
+	applySession(opts, false)
+	pageShowHandler!(
+		sessionTitle,
+		sessionContent,
+		sessionPosition,
+		sessionMask,
+		sessionMaskClosable,
+		sessionRound,
+		sessionWidth,
+		sessionHeight,
+		sessionZIndex,
+		sessionDuration
+	)
+	return true
+}
+
+// openDialogPage.animationType 仅接受字面量联合，不能直接传 string
+type NaxDialogPageAnimationType = 'auto' | 'none' | 'fade-in' | 'slide-in-right' | 'slide-in-left' | 'slide-in-top' | 'slide-in-bottom' | 'zoom-out' | 'zoom-fade-out'
+
+function resolveDialogAnimationType(raw: string): NaxDialogPageAnimationType {
+	if (raw == 'auto') {
+		return 'auto' as NaxDialogPageAnimationType
+	}
+	if (raw == 'none') {
+		return 'none' as NaxDialogPageAnimationType
+	}
+	if (raw == 'slide-in-right') {
+		return 'slide-in-right' as NaxDialogPageAnimationType
+	}
+	if (raw == 'slide-in-left') {
+		return 'slide-in-left' as NaxDialogPageAnimationType
+	}
+	if (raw == 'slide-in-top') {
+		return 'slide-in-top' as NaxDialogPageAnimationType
+	}
+	if (raw == 'slide-in-bottom') {
+		return 'slide-in-bottom' as NaxDialogPageAnimationType
+	}
+	if (raw == 'zoom-out') {
+		return 'zoom-out' as NaxDialogPageAnimationType
+	}
+	if (raw == 'zoom-fade-out') {
+		return 'zoom-fade-out' as NaxDialogPageAnimationType
+	}
+	return 'fade-in' as NaxDialogPageAnimationType
+}
+
+function openDialogPageCore(url: string, opts: UTSJSONObject): boolean {
+	const animationType = resolveDialogAnimationType(readString(opts, 'animationType', 'none'))
+	const animationDuration = readNumber(opts, 'animationDuration', 280)
+	const disableEscBack = readBool(opts, 'disableEscBack', false)
+	const triggerParentHide = readBool(opts, 'triggerParentHide', false)
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+	uni.openDialogPage({
+		url: url,
+		animationType: animationType,
+		animationDuration: animationDuration,
+		disableEscBack: disableEscBack,
+		triggerParentHide: triggerParentHide,
+		fail: (err) => {
+			console.warn('openNaxPopup openDialogPage fail', err)
+			if (pageHostBound) {
+				openPageHost(opts)
+			}
+		}
+	})
+	return true
+	// #endif
+
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+	return false
+	// #endif
+}
+
+function warnMpNoWindowCover() {
+	console.warn(
+		'[nax-popup] 当前端不支持 dialogPage 压窗屏（无法盖住原生导航栏/tabBar）。已降级为页面级弹层；详见 uni_modules/nax-popup/readme.md'
+	)
+}
+
+/**
+ * 打开压窗屏 / 页面级弹层
+ *
+ * options:
+ * - url: 自定义 dialog 页面路径（推荐复杂 UI）
+ * - title / content: 使用内置 host 简易面板
+ * - position: center | bottom | left | right
+ * - mode: auto | window | page
+ *   - auto：能压窗则 window，否则 page
+ *   - window：强制 dialogPage（不支持则降级 page 并 warn）
+ *   - page：强制页面宿主 nax-picker（全端）
+ * - mask / maskClosable / round / width / height / zIndex / duration
+ * - animationType / animationDuration / disableEscBack / triggerParentHide
+ */
+export function openNaxPopup(input: any | null = null) {
+	const opts = parseOptions(input)
+	const mode = normalizeMode(readString(opts, 'mode', 'auto'))
+	var url = readString(opts, 'url', '')
+	const hasCustomUrl = url.length > 0
+	const hasSimpleBody =
+		readString(opts, 'title', '').length > 0 || readString(opts, 'content', '').length > 0
+
+	// 覆盖旧会话
+	if (sessionActive) {
+		closeNaxPopup()
+	}
+
+	const wantWindow =
+		mode == 'window' || (mode == 'auto' && naxPopupSupportsWindowCover())
+	const forcePage = mode == 'page'
+
+	// 1) 页面级模式：只走宿主
+	if (forcePage || !wantWindow) {
+		if (openPageHost(opts)) {
+			return
+		}
+		// 无宿主时，App/Web 仍可用内置 host 页（非真·页面级，但是可用）
+		if (naxPopupSupportsWindowCover()) {
+			if (!hasCustomUrl) {
+				url = DEFAULT_HOST_URL
+			}
+			applySession(opts, true)
+			openDialogPageCore(url, opts)
+			return
+		}
+		warnMpNoWindowCover()
+		console.warn('[nax-popup] 页面级模式需要挂载 <nax-popup /> 宿主')
+		return
+	}
+
+	// 2) 压窗 window：dialogPage
+	if (!hasCustomUrl) {
+		// 无自定义页：有简易文案用内置 host；否则也开 host 空面板
+		url = DEFAULT_HOST_URL
+	}
+
+	if (naxPopupSupportsWindowCover()) {
+		// 自定义 url 不依赖 session 内容，但内置 host 需要
+		if (!hasCustomUrl || url == DEFAULT_HOST_URL) {
+			applySession(opts, true)
+		} else {
+			// 业务自定义页：仍记 session 供 close 状态
+			applySession(opts, true)
+			sessionUrl = url
+		}
+		const ok = openDialogPageCore(url, opts)
+		if (ok) {
+			return
+		}
+	}
+
+	// 3) 不支持压窗：降级
+	warnMpNoWindowCover()
+	if (openPageHost(opts)) {
+		return
+	}
+	console.warn('[nax-popup] 小程序降级失败：请在页面挂载 <nax-popup /> 宿主，或改用 nax-picker 声明式插槽')
+}
+
+/**
+ * 关闭当前弹层（dialogPage 或页面宿主）
+ */
+export function closeNaxPopup() {
+	if (sessionViaDialogPage) {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+		uni.closeDialogPage({})
+		// #endif
+		// session 由 host 页 unload 时 notify，或这里直接清
+		if (sessionActive) {
+			const fn = sessionActionFn
+			clearSession('close')
+			if (fn != null) {
+				fn!('close')
+			}
+		}
+		return
+	}
+	if (pageHostBound && pageHideHandler != null) {
+		pageHideHandler!()
+		return
+	}
+	if (sessionActive) {
+		clearSession('close')
+	}
+}
+
+/**
+ * closeNaxPopup 别名
+ */
+export function hideNaxPopup() {
+	closeNaxPopup()
+}
+
+/**
+ * 默认内置 host 路径（可给业务对照 pages.json 注册）
+ */
+export function getNaxPopupHostPageUrl(): string {
+	return DEFAULT_HOST_URL
+}

@@ -1,0 +1,312 @@
+﻿<template>
+	<!-- 自定义 dialog 页：dialogPage animationType=none，页内自管进退场（对齐 nax-popup host / nax-picker） -->
+	<view class="demo-dialog nax-theme">
+		<view
+			class="demo-dialog__mask"
+			:class="maskClass"
+			:style="maskStyle"
+			@click="onClose"
+		></view>
+		<view
+			class="demo-dialog__layer"
+			:class="layerClass"
+			:style="layerStyle"
+			@click.stop="onPanel"
+		>
+			<view class="demo-dialog__panel">
+				<text class="demo-dialog__title" :lines="1">自定义 dialog 页</text>
+				<text class="demo-dialog__desc" :lines="8">这是业务自建透明页。App/Web 下作为 dialogPage 打开时可盖住原生导航栏与 tabBar。显示/隐藏动画在本页内部实现。</text>
+				<view
+					class="demo-dialog__btn"
+					hover-class="demo-dialog__btn--hover"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onClose"
+				>
+					<text class="demo-dialog__btn-text" :lines="1">关闭</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	const ANIM_MS = 280
+	const panelShow = ref(false)
+	const hmMaskOn = ref(false)
+	const hmAnimReady = ref(false)
+	const closing = ref(false)
+
+	let openDelayTimer: number = -1
+	let enterReadyTimer: number = -1
+	let enterToTimer: number = -1
+	let leaveTimer: number = -1
+
+	function clearOpenTimers() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+		if (enterReadyTimer >= 0) {
+			clearTimeout(enterReadyTimer)
+			enterReadyTimer = -1
+		}
+		if (enterToTimer >= 0) {
+			clearTimeout(enterToTimer)
+			enterToTimer = -1
+		}
+	}
+
+	function clearLeaveTimer() {
+		if (leaveTimer >= 0) {
+			clearTimeout(leaveTimer)
+			leaveTimer = -1
+		}
+	}
+
+	const maskClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (hmMaskOn.value) {
+			return 'demo-dialog__mask--show'
+		}
+		return ''
+		// #endif
+		// #ifndef APP-HARMONY
+		if (panelShow.value) {
+			return 'demo-dialog__mask--show'
+		}
+		return ''
+		// #endif
+	})
+
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		var ms = 'background-color:#000000;'
+		if (hmAnimReady.value) {
+			ms += 'transition-property:opacity;'
+			ms += 'transition-timing-function:ease-out;'
+			ms += 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+		} else {
+			ms += 'transition-property:none;'
+			ms += 'transition-duration:0ms;'
+		}
+		if (hmMaskOn.value) {
+			ms += 'opacity:0.45;'
+		} else {
+			ms += 'opacity:0;'
+		}
+		return ms
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+		// #endif
+	})
+
+	const layerClass = computed((): string => {
+		if (panelShow.value) {
+			return 'demo-dialog__layer--show'
+		}
+		return ''
+	})
+
+	const layerStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		var ls = ''
+		if (hmAnimReady.value) {
+			ls += 'transition-property:opacity,transform;'
+			ls += 'transition-timing-function:ease-out;'
+			ls += 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+		} else {
+			ls += 'transition-property:none;'
+			ls += 'transition-duration:0ms;'
+		}
+		return ls
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+		// #endif
+	})
+
+	function startOpenAnim() {
+		clearOpenTimers()
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		// 三阶段：对齐 nax-picker / 内置 host，避免遮罩闪动
+		hmMaskOn.value = false
+		hmAnimReady.value = false
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			enterReadyTimer = setTimeout(() => {
+				enterReadyTimer = -1
+				hmAnimReady.value = true
+				enterToTimer = setTimeout(() => {
+					enterToTimer = -1
+					hmMaskOn.value = true
+					panelShow.value = true
+				}, 32)
+			}, 48)
+		}, 32)
+		// #endif
+		// #ifndef APP-HARMONY
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+		}, 30)
+		// #endif
+	}
+
+	function finishClose() {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+		uni.closeDialogPage({})
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || H5
+		uni.navigateBack({})
+		// #endif
+	}
+
+	function onClose() {
+		if (closing.value) {
+			return
+		}
+		closing.value = true
+		clearOpenTimers()
+		clearLeaveTimer()
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		hmMaskOn.value = false
+		// #endif
+		leaveTimer = setTimeout(() => {
+			leaveTimer = -1
+			finishClose()
+		}, ANIM_MS)
+	}
+
+	function onPanel() {
+		// stop bubble
+	}
+
+	onLoad(() => {
+		startOpenAnim()
+	})
+
+	onUnload(() => {
+		clearOpenTimers()
+		clearLeaveTimer()
+	})
+</script>
+
+<style>
+	.demo-dialog {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+	}
+
+	.demo-dialog__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		/* #ifndef APP-HARMONY */
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.45));
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		background-color: #000000;
+		opacity: 0;
+		/* #endif */
+	}
+
+	/* #ifndef APP-HARMONY */
+	.demo-dialog__mask--show {
+		opacity: 1;
+	}
+	/* #endif */
+	/* #ifdef APP-HARMONY */
+	.demo-dialog__mask--show {
+		opacity: 0.45;
+	}
+	/* #endif */
+
+	.demo-dialog__layer {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 2;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		opacity: 0;
+		transform: scale(0.92);
+		/* #ifndef APP-HARMONY */
+		transition-property: opacity, transform;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+	}
+
+	.demo-dialog__layer--show {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.demo-dialog__panel {
+		position: relative;
+		flex-direction: column;
+		align-items: center;
+		width: 300px;
+		padding-top: 22px;
+		padding-bottom: 18px;
+		padding-left: 18px;
+		padding-right: 18px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-lg, 8px);
+	}
+
+	.demo-dialog__title {
+		font-size: 17px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+		text-align: center;
+	}
+
+	.demo-dialog__desc {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		margin-bottom: 18px;
+	}
+
+	.demo-dialog__btn {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 40px;
+		padding-left: 22px;
+		padding-right: 22px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.demo-dialog__btn--hover {
+		opacity: 0.88;
+	}
+
+	.demo-dialog__btn-text {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+</style>
