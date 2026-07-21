@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<view class="nax-tabs" :class="rootClass" :style="rootStyle">
 		<!-- 可滚动 -->
 		<!-- direction=horizontal：uni-app x 官方横向滚动；scroll-x 已废弃且与默认 scroll-y 冲突 -->
@@ -78,14 +78,14 @@
 	 * @property {Array} list 项列表（name/text/label/title、badge/count、dot、disabled；支持字符串项）
 	 * @property {string} keyName 文案优先字段，默认 name
 	 * @property {boolean} scrollable 横向滚动，默认 true；false 均分
-	 * @property {string} scrollAlign 激活项滚动对齐 left | center，默认 center
+	 * @property {string} scrollAlign 激活项滚动对齐 left | center，默认 center；left 为必要时贴左并露出前一项
 	 * @property {boolean} showLine 指示条，默认 true
 	 * @property {string} lineWidth 指示条宽，默认 20（px）
 	 * @property {string} lineHeight 指示条高，默认 3（px）
 	 * @property {string} size sm | md | lg，默认 md
 	 * @property {boolean} border 底部分割线，默认 true
 	 * @property {number} duration 指示条过渡 ms，默认 300
-	 * @property {boolean} sticky CSS sticky 吸顶，默认 false
+	 * @property {boolean} sticky CSS sticky 吸顶（Web/小程序；App 端不支持），默认 false
 	 * @property {string} offsetTop sticky top，默认 0
 	 * @property {number} badgeMax 徽标数字上限，默认 99
 	 * @property {string} customClass 根扩展 class
@@ -134,7 +134,7 @@
 		},
 		duration: {
 			type: Number,
-			default: 350
+			default: 300
 		},
 		sticky: {
 			type: Boolean,
@@ -191,6 +191,10 @@
 	// 选中动画锁：期间禁止改内容宽/重定位指示条，避免滚动中途卡顿一下
 	const selectionAnimLock = ref(false)
 	const selectionAnimToken = ref(0)
+	// 首次定位完成后再开滑动动画（对齐 uView firstTime）
+	const lineAnimEnabled = ref(false)
+	// 需要横滑时强制滑块 0ms，避免与 scroll-view 双重动画抖动
+	const lineSnapNoTransition = ref(false)
 
 	function isArrayValue(val : any | null) : boolean {
 		if (val == null) {
@@ -383,16 +387,16 @@
 		const h = formatCssSize(props.lineHeight, 3)
 		const w = lineWidthPx.value
 		const left = lineLeftPx.value
-		// 对齐 uView：始终用 duration 做滑块过渡，横滑时滑块会略慢半拍跟随
-		const ms = props.duration
+		// 仅 transform 过渡；首次落点 0ms，之后 duration（对齐 uView）
+		var ms = 0
+		// 横滑瞬时：duration=0；否则用 props.duration
+		if (!lineSnapNoTransition.value && lineAnimEnabled.value && lineMeasured.value && props.duration > 0) {
+			ms = props.duration
+		}
 		var style = 'height:' + h + ';'
 		style += 'width:' + w.toString() + 'px;'
 		style += 'transform:translateX(' + left.toString() + 'px);'
-		if (ms > 0 && lineMeasured.value) {
-			style += 'transition-duration:' + ms.toString() + 'ms;'
-		} else {
-			style += 'transition-duration:0ms;'
-		}
+		style += 'transition-duration:' + ms.toString() + 'ms;'
 		return style
 	})
 
@@ -612,6 +616,18 @@
 		}
 	}
 
+	function enableLineAnimAfterFirstPaint() {
+		if (lineAnimEnabled.value) {
+			return
+		}
+		// 下一帧再开 transition，避免首次从 0 滑到目标
+		nextTick(() => {
+			setTimeout(() => {
+				lineAnimEnabled.value = true
+			}, 16)
+		})
+	}
+
 	function applyLineFromLayout(index : number) {
 		if (!props.showLine) {
 			return
@@ -639,6 +655,7 @@
 		lineWidthPx.value = w
 		lineLeftPx.value = left
 		lineMeasured.value = true
+		enableLineAnimAfterFirstPaint()
 	}
 
 	function beginSelectionAnimLock() {
@@ -656,16 +673,69 @@
 				return
 			}
 			selectionAnimLock.value = false
+			lineSnapNoTransition.value = false
 		}, lockMs)
 	}
 
-	// 点击切换：对齐 uView —— 先设滑块目标（CSS transition 慢半拍跟随），再滚动 tabs
+	// 预估激活切换是否会触发横向滚动（用于决定滑块瞬切还是过渡）
+	function estimateNeedScrollForActive() : boolean {
+		if (!props.scrollable) {
+			return false
+		}
+		const index = activeIndex.value
+		const lefts = itemLayoutLefts.value
+		const widths = itemLayoutWidths.value
+		if (index < 0 || index >= lefts.length || index >= widths.length) {
+			return true
+		}
+		const itemRel = lefts[index]
+		const itemW = widths[index]
+		if (itemW <= 0) {
+			return true
+		}
+		var viewW = scrollViewWidth.value
+		if (viewW <= 0) {
+			// 尚未测到视口：用常见屏宽粗估，避免一律瞬切丢掉可动画场景
+			viewW = 375.0
+		}
+		const current = actualScrollLeft.value
+		const itemEnd = itemRel + itemW
+		const viewEnd = current + viewW
+		const align = normalizeScrollAlign(props.scrollAlign)
+		if (align == 'left') {
+			// 与 tryApplyScrollMeasure 一致：完整可见则不滚
+			if (itemRel >= current - 1.0 && itemEnd <= viewEnd + 1.0) {
+				return false
+			}
+			return true
+		}
+		// center：目标滚动与当前差超过 1px 则需要滚动
+		var target = itemRel - (viewW - itemW) / 2.0
+		if (target < 0) {
+			target = 0
+		}
+		const contentW = listContentWidth.value
+		if (contentW > viewW) {
+			const maxScroll = contentW - viewW
+			if (target > maxScroll) {
+				target = maxScroll
+			}
+		} else {
+			target = 0
+		}
+		return Math.abs(target - current) > 1.0
+	}
+
+	// 点击切换：有横滑时滑块瞬切只滚 scroll-view；无横滑时滑块 CSS 过渡
 	function onActiveIndexChange() {
 		if (itemLayoutLefts.value.length == 0) {
 			rebuildEstimatedLayouts()
 		}
-		// 动画期间禁止改 content 宽度，避免打断滚动；滑块本身保留 duration 过渡
+		// 动画期间禁止改 content 宽度，避免打断滚动
 		beginSelectionAnimLock()
+		const needScroll = estimateNeedScrollForActive()
+		// 双重动画（scroll + transform）在 App/鸿蒙易抖动：需要滚动时滑块 0ms
+		lineSnapNoTransition.value = needScroll
 		applyLineFromLayout(activeIndex.value)
 		if (props.scrollable) {
 			nextTick(() => {
@@ -702,6 +772,7 @@
 			lineWidthPx.value = w
 			lineLeftPx.value = left
 			lineMeasured.value = true
+			enableLineAnimAfterFirstPaint()
 		} else {
 			applyLineFallback(index)
 		}
@@ -837,11 +908,37 @@
 		}
 		// 内容坐标 = 视口相对位置 + 当前滚动偏移（比依赖 list.left 更稳）
 		const itemRel = itemLeft - viewLeft + actualScrollLeft.value
-		// left：激活项贴左侧；center：尽量居中
+		const itemEnd = itemRel + itemWidth
+		const currentScroll = actualScrollLeft.value
+		const viewEnd = currentScroll + viewWidth
+		// left：需要时贴左并露出前一项；center：尽量居中
 		var target = 0.0
 		const align = normalizeScrollAlign(props.scrollAlign)
 		if (align == 'left') {
+			// 已完整可见则不强制贴左，避免把前面的 tab 挤出无法点击
+			if (itemRel >= currentScroll - 1.0 && itemEnd <= viewEnd + 1.0) {
+				return
+			}
 			target = itemRel
+			// 非首项：留出前一项一部分宽度，便于回点前序 tab
+			const idx = activeIndex.value
+			if (idx > 0) {
+				var peek = 32.0
+				const widths = itemLayoutWidths.value
+				if (idx - 1 < widths.length) {
+					const pw = widths[idx - 1]
+					if (pw > 0) {
+						peek = pw * 0.5
+						if (peek < 24.0) {
+							peek = 24.0
+						}
+						if (peek > 56.0) {
+							peek = 56.0
+						}
+					}
+				}
+				target = itemRel - peek
+			}
 		} else {
 			target = itemRel - (viewWidth - itemWidth) / 2.0
 		}
@@ -860,7 +957,7 @@
 		applyScrollLeft(target)
 	}
 
-	// 用 scroll-left 把激活项滚入可视区（left 贴左 / center 居中）
+	// 用 scroll-left 把激活项滚入可视区（left：必要时贴左并露前项 / center 居中）
 	function syncScrollToActive() {
 		if (!props.scrollable) {
 			scrollLeftPx.value = 0
@@ -1175,11 +1272,13 @@
 		background-color: var(--nax-color-bg, #ffffff);
 	}
 
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* sticky：Web/小程序可用；App uvue 不支持 position:sticky */
 	.nax-tabs--sticky {
-		/* sticky：Web/部分端可用；不支持时退化为普通块级 */
 		position: sticky;
 		z-index: 90;
 	}
+	/* #endif */
 
 	.nax-tabs--border {
 		border-bottom-width: 0.5px;
@@ -1293,7 +1392,7 @@
 
 	.nax-tabs__text--active {
 		color: var(--nax-color-primary, #18a058);
-		font-weight: var(--nax-font-weight-medium, 500);
+		/* 不改 font-weight，避免选中字重变化引起项宽抖动 */
 	}
 
 	.nax-tabs__text--disabled {
@@ -1335,12 +1434,13 @@
 	.nax-tabs__line {
 		position: absolute;
 		left: 0;
-		bottom: 0;
-		border-radius: 2px;
+		bottom: 2px;
+		border-radius: 100px;
 		background-color: var(--nax-color-primary, #18a058);
 		/* 测量完成前隐藏，避免从 0 闪跳 */
 		opacity: 0;
-		transition-property: transform, width, opacity;
+		/* 仅过渡 transform，避免 width/opacity 抢动画导致卡顿 */
+		transition-property: transform;
 		/* 对齐 uView：ease，滑块略慢半拍跟随 tabs */
 		transition-timing-function: ease;
 	}

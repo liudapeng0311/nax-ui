@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<view class="page-root">
 		<scroll-view class="page-scroll" scroll-y="true">
 			<view class="nax-theme page" :class="themeExtraClass">
@@ -28,7 +28,7 @@
 					<nax-tabs v-model="scrollLeftCurrent" :list="scrollList" :scrollable="true" scroll-align="left"></nax-tabs>
 					<view class="panel">
 						<text class="panel__text">选中 index = {{ scrollLeftCurrent }}</text>
-						<text class="hint">激活项滚到可视区最左侧</text>
+						<text class="hint">激活项必要时贴左，并露出前一项便于回点</text>
 					</view>
 				</view>
 

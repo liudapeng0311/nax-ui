@@ -37,14 +37,14 @@ function onChange(index: number) {
 | list | array | `[]` | 标签项列表 |
 | keyName | string | `'name'` | 文案优先字段名 |
 | scrollable | boolean | `true` | 横向滚动；`false` 时均分宽度 |
-| scrollAlign | string | `'center'` | 可滚动时激活项对齐：`left` 贴左 / `center` 居中 |
+| scrollAlign | string | 'center' | 可滚动时激活项对齐：left 必要时贴左并露出前一项 / center 居中 |
 | showLine | boolean | `true` | 底部指示条 |
 | lineWidth | string | `'20'` | 指示条宽度（纯数字按 px） |
 | lineHeight | string | `'3'` | 指示条高度（纯数字按 px） |
 | size | string | `'md'` | `sm` / `md` / `lg` |
 | border | boolean | `true` | 底部分割线 |
 | duration | number | `300` | 指示条过渡 ms |
-| sticky | boolean | `false` | CSS sticky 吸顶 |
+| sticky | boolean | `false` | CSS sticky 吸顶（Web/小程序；App 不支持） |
 | offsetTop | string | `'0'` | sticky 时 `top`（纯数字按 px） |
 | badgeMax | number | `99` | 数字徽标上限 |
 | customClass | string | `''` | 根扩展 class |
