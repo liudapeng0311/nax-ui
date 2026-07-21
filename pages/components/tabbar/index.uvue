@@ -1,0 +1,246 @@
+<template>
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="page__title">nax-tabbar</text>
+				<text class="page__desc">自定义底部标签栏：字体图标优先、徽标/红点、中间凸起、fixed 占位与安全区。路由由业务自行处理。</text>
+
+				<view class="section">
+					<text class="section__title">当前选中</text>
+					<text class="hint">index = {{ current }} · 最近事件：{{ lastEvent }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">基础（4 项）</text>
+					<text class="hint">下方固定底栏即为本示例；切换后看选中态与徽标。</text>
+					<view class="row">
+						<nax-button size="sm" label="选中 0" @click="setTab(0)"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="选中 1" @click="setTab(1)"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="消息+1" @click="incBadge"></nax-button>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">非固定 / 无安全区预览</text>
+					<nax-tabbar
+						:model-value="inlineTab"
+						:list="inlineList"
+						:fixed="false"
+						:placeholder="false"
+						:safe-area-inset-bottom="false"
+						@update:model-value="onInlineUpdate"
+						@change="onInlineChange"
+					></nax-tabbar>
+				</view>
+
+				<view class="section section--mid">
+					<text class="section__title">中间凸起 + 禁用项</text>
+					<nax-tabbar
+						:model-value="midTab"
+						:list="midList"
+						:fixed="false"
+						:placeholder="false"
+						:safe-area-inset-bottom="false"
+						@update:model-value="onMidUpdate"
+						@change="onMidChange"
+					></nax-tabbar>
+				</view>
+
+				<view class="section">
+					<text class="section__title">自定义选中色</text>
+					<nax-tabbar
+						:model-value="colorTab"
+						:list="colorList"
+						:fixed="false"
+						:placeholder="false"
+						:safe-area-inset-bottom="false"
+						active-color="#2080f0"
+						inactive-color="#a0a0a8"
+						@update:model-value="onColorUpdate"
+					></nax-tabbar>
+				</view>
+
+				<view class="section section--end">
+					<text class="hint">提示：重复点击同一 tab 会触发 click 但不触发 change，可做「回顶」。</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<!-- 主示例：fixed 贴底 -->
+		<nax-tabbar
+			v-model="current"
+			:list="mainList"
+			@change="onMainChange"
+			@click="onMainClick"
+		></nax-tabbar>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const current = ref(0)
+	const inlineTab = ref(0)
+	const midTab = ref(2)
+	const colorTab = ref(0)
+	const lastEvent = ref('—')
+	const msgBadge = ref(5)
+
+	const mainList = computed((): any[] => {
+		return [
+			{ text: '首页', icon: 'home' },
+			{ text: '发现', icon: 'search' },
+			{ text: '消息', icon: 'heart', badge: msgBadge.value },
+			{ text: '我的', icon: 'user', dot: true }
+		] as any[]
+	})
+
+	const inlineList = [
+		{ text: '首页', icon: 'home' },
+		{ text: '分类', icon: 'more' },
+		{ text: '购物', icon: 'star' },
+		{ text: '我的', icon: 'user' }
+	]
+
+	const midList = [
+		{ text: '首页', icon: 'home' },
+		{ text: '动态', icon: 'image' },
+		{ text: '发布', icon: 'plus', midButton: true },
+		{ text: '收藏', icon: 'star', disabled: true },
+		{ text: '我的', icon: 'user' }
+	]
+
+	const colorList = [
+		{ text: '首页', icon: 'home' },
+		{ text: '搜索', icon: 'search', badge: 3 },
+		{ text: '设置', icon: 'settings' }
+	]
+
+	function setTab(index : number) {
+		current.value = index
+	}
+
+	function incBadge() {
+		msgBadge.value = msgBadge.value + 1
+	}
+
+	function onMainChange(index : number) {
+		lastEvent.value = 'change → ' + index.toString()
+	}
+
+	function onMainClick(index : number) {
+		lastEvent.value = 'click → ' + index.toString()
+	}
+
+	function onInlineUpdate(index : number) {
+		inlineTab.value = index
+	}
+
+	function onInlineChange(index : number) {
+		lastEvent.value = 'inline change → ' + index.toString()
+	}
+
+	function onMidUpdate(index : number) {
+		midTab.value = index
+	}
+
+	function onMidChange(index : number) {
+		lastEvent.value = 'mid change → ' + index.toString()
+	}
+
+	function onColorUpdate(index : number) {
+		colorTab.value = index
+	}
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		padding-bottom: 24px;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #909399);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 20px;
+		padding: 12px;
+		border-radius: 8px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.section--end {
+		margin-bottom: 8px;
+	}
+
+	.section--mid {
+		overflow: visible;
+	}
+
+	.section__title {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.hint {
+		font-size: 12px;
+		line-height: 18px;
+		color: var(--nax-color-text-secondary, #909399);
+		margin-bottom: 8px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.gap {
+		width: 8px;
+		height: 8px;
+	}
+</style>
