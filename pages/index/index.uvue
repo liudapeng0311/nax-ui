@@ -179,7 +179,11 @@
 					<text class="home__card-name">滚动通告</text>
 					<text class="home__card-tag">nax-notice-bar</text>
 				</view>
-								<view class="home__card home__card--gap" @click="goLoading">
+				<view class="home__card home__card--gap" @click="goOverlay">
+					<text class="home__card-name">遮罩</text>
+					<text class="home__card-tag">nax-overlay</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goLoading">
 					<text class="home__card-name">加载</text>
 					<text class="home__card-tag">nax-loading</text>
 				</view>
@@ -449,6 +453,11 @@
 	function goNoticeBar() {
 		uni.navigateTo({
 			url: '/pages/components/notice-bar/index'
+		})
+	}
+	function goOverlay() {
+		uni.navigateTo({
+			url: '/pages/components/overlay/index'
 		})
 	}
 	function goLoading() {

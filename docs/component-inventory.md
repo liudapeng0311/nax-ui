@@ -96,7 +96,7 @@
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
 | 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
 | 压窗屏 | `nax-popup` | P0 | App/Web dialogPage 盖导航栏+tabBar；小程序降级 | `openNaxPopup` `mode` `url` / 声明式 `v-model:show` **done** |
-| 遮罩 | `nax-overlay` | P0 | 弹层底层 | `show` `z-index` / `click` |
+| 遮罩 | `nax-overlay` | P0 | 弹层底层 | `v-model:show` `zIndex` `duration` `color` `closeOnClick` / `click` `open` `opened` `close` **done** |
 | 弹出层 | `nax-picker` | P0 | 自定义内容弹出；底部/中心/左/右（原规划 nax-popup） | `v-model:show` `position(bottom/center/left/right)` `round` `mask` `maskClosable` `width` `height` / `open` `opened` `close` `click-mask` **done** |
 | 轻提示 | `nax-toast` | P1 | 函数式短反馈：`naxToast()` / `hideNaxToast()`；全局挂一次宿主 | `naxToast(title|options)` `type(text/success/error/warning/info/loading)` `position` `duration` `overlay` / `hideNaxToast` **done** |
 | 对话框 | `nax-dialog` | P1 | 确认/告警；声明式 `v-model:show` + 命令式 `naxDialog()`/`Alert`/`Confirm`；薄封装 nax-picker | `v-model:show` `title` `content` `showCancel` `confirmType` `asyncClose` `maskClosable` / `confirm` `cancel`；API：`naxDialog` `naxDialogAlert` `naxDialogConfirm` `hideNaxDialog` **done** |
@@ -162,6 +162,7 @@
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
 | `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+| `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

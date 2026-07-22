@@ -1,0 +1,233 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-overlay</text>
+			<text class="page__desc">全屏遮罩层。用于压暗页面、拦截点击；可叠 loading 等内容。</text>
+
+			<view class="section">
+				<text class="section__title">基础遮罩</text>
+				<text class="section__hint">点遮罩关闭（close-on-click）</text>
+				<view class="actions">
+					<nax-button type="primary" size="sm" label="打开遮罩" @click="openBasic"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">遮罩 + Loading</text>
+				<text class="section__hint">插槽内放 nax-loading；点内容不关闭，点空白关闭</text>
+				<view class="actions">
+					<nax-button type="primary" size="sm" label="全屏加载 2s" @click="openLoading"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义颜色</text>
+				<view class="actions">
+					<nax-button size="sm" label="深蓝遮罩" @click="openColor"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">无动画 duration=0</text>
+				<view class="actions">
+					<nax-button size="sm" label="立即显示" @click="openInstant"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">事件日志</text>
+				<view class="panel">
+					<text class="log-text">{{ logText }}</text>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+
+	<nax-overlay
+		v-model:show="basicShow"
+		close-on-click
+		@click="onOverlayClick"
+		@open="onOpen('basic')"
+		@opened="onOpened('basic')"
+		@close="onClose('basic')"
+	></nax-overlay>
+
+	<nax-overlay
+		:show="loadingShow"
+		:close-on-click="true"
+		@update:show="onLoadingShowUpdate"
+		@click="onOverlayClick"
+		@open="onOpen('loading')"
+		@opened="onOpened('loading')"
+		@close="onClose('loading')"
+	>
+		<view class="loading-box">
+			<nax-loading vertical text="加载中" type="primary"></nax-loading>
+		</view>
+	</nax-overlay>
+
+	<nax-overlay
+		v-model:show="colorShow"
+		close-on-click
+		color="rgba(8, 40, 90, 0.55)"
+		@click="onOverlayClick"
+		@open="onOpen('color')"
+		@close="onClose('color')"
+	></nax-overlay>
+
+	<nax-overlay
+		v-model:show="instantShow"
+		:duration="0"
+		close-on-click
+		@click="onOverlayClick"
+		@open="onOpen('instant')"
+		@close="onClose('instant')"
+	></nax-overlay>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const basicShow = ref(false)
+	const loadingShow = ref(false)
+	const colorShow = ref(false)
+	const instantShow = ref(false)
+	const logText = ref('暂无事件')
+	let loadingTimer: number = -1
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	onUnmounted(() => {
+		if (loadingTimer >= 0) {
+			clearTimeout(loadingTimer)
+			loadingTimer = -1
+		}
+	})
+
+	function pushLog(msg: string) {
+		logText.value = msg
+	}
+
+	function openBasic() {
+		basicShow.value = true
+	}
+
+	function openLoading() {
+		loadingShow.value = true
+		if (loadingTimer >= 0) {
+			clearTimeout(loadingTimer)
+		}
+		loadingTimer = setTimeout(() => {
+			loadingShow.value = false
+			loadingTimer = -1
+		}, 2000)
+	}
+
+	function openColor() {
+		colorShow.value = true
+	}
+
+	function openInstant() {
+		instantShow.value = true
+	}
+
+	function onLoadingShowUpdate(val: boolean) {
+		loadingShow.value = val
+		if (!val && loadingTimer >= 0) {
+			clearTimeout(loadingTimer)
+			loadingTimer = -1
+		}
+	}
+
+	function onOverlayClick() {
+		pushLog('click 遮罩')
+	}
+
+	function onOpen(name: string) {
+		pushLog(name + ' open')
+	}
+
+	function onOpened(name: string) {
+		pushLog(name + ' opened')
+	}
+
+	function onClose(name: string) {
+		pushLog(name + ' close')
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 6px;
+	}
+
+	.section__hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 10px;
+		line-height: 18px;
+	}
+
+	.actions {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		padding: 16px;
+	}
+
+	.log-text {
+		font-size: 13px;
+		color: var(--nax-color-text, #333639);
+		line-height: 20px;
+	}
+
+	.loading-box {
+		padding: 20px 24px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		flex-direction: column;
+		align-items: center;
+	}
+</style>
