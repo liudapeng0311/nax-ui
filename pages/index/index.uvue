@@ -131,6 +131,10 @@
 					<text class="home__card-name">空状态</text>
 					<text class="home__card-tag">nax-empty</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goList">
+					<text class="home__card-name">列表</text>
+					<text class="home__card-tag">nax-list</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goGrid">
 					<text class="home__card-name">宫格</text>
 					<text class="home__card-tag">nax-grid</text>
@@ -390,6 +394,11 @@
 		})
 	}
 
+	function goList() {
+		uni.navigateTo({
+			url: '/pages/components/list/index'
+		})
+	}
 
 	function goGrid() {
 		uni.navigateTo({

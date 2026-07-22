@@ -1,0 +1,552 @@
+<template>
+	<view class="nax-list" :class="rootClass" :style="rootStyle">
+		<!-- 内部滚动 -->
+		<scroll-view
+			v-if="!usePageScroll"
+			:id="scrollDomId"
+			class="nax-list__scroll"
+			direction="vertical"
+			:show-scrollbar="showScrollbar"
+			:lower-threshold="offset"
+			:refresher-enabled="enableRefresh"
+			:refresher-triggered="refresherTriggered"
+			:refresher-threshold="refresherThreshold"
+			:refresher-background="refresherBackground"
+			:refresher-default-style="refresherDefaultStyle"
+			:style="scrollStyle"
+			@scrolltolower="onScrollToLower"
+			@refresherrefresh="onRefresherRefresh"
+			@refresherrestore="onRefresherRestore"
+			@refresherabort="onRefresherAbort"
+		>
+			<view :id="bodyDomId" class="nax-list__body">
+				<view class="nax-list__header">
+					<slot name="header"></slot>
+				</view>
+
+				<view v-if="empty" class="nax-list__empty">
+					<slot name="empty">
+						<nax-empty :description="emptyText" :icon="emptyIcon"></nax-empty>
+					</slot>
+				</view>
+				<view v-else class="nax-list__content">
+					<slot></slot>
+				</view>
+
+				<view v-if="!empty" class="nax-list__footer">
+					<slot name="footer">
+						<view v-if="loading" class="nax-list__status nax-list__status--loading">
+							<slot name="loading">
+								<nax-loading size="sm" :text="loadingText"></nax-loading>
+							</slot>
+						</view>
+						<view
+							v-else-if="error"
+							class="nax-list__status nax-list__status--error"
+							@click="onErrorClick"
+						>
+							<slot name="error">
+								<text class="nax-list__status-text nax-list__status-text--error" :lines="1">{{ errorText }}</text>
+							</slot>
+						</view>
+						<view v-else-if="finished" class="nax-list__status nax-list__status--finished">
+							<slot name="finished">
+								<text class="nax-list__status-text" :lines="1">{{ finishedText }}</text>
+							</slot>
+						</view>
+					</slot>
+				</view>
+			</view>
+		</scroll-view>
+
+		<!-- 页面滚动：壳只负责状态区；下拉刷新请用页面 onPullDownRefresh，enableRefresh 仅内部滚动有效 -->
+		<view v-else :id="bodyDomId" class="nax-list__body nax-list__body--page">
+			<view class="nax-list__header">
+				<slot name="header"></slot>
+			</view>
+
+			<view v-if="empty" class="nax-list__empty">
+				<slot name="empty">
+					<nax-empty :description="emptyText" :icon="emptyIcon"></nax-empty>
+				</slot>
+			</view>
+			<view v-else class="nax-list__content">
+				<slot></slot>
+			</view>
+
+			<view v-if="!empty" class="nax-list__footer">
+				<slot name="footer">
+					<view v-if="loading" class="nax-list__status nax-list__status--loading">
+						<slot name="loading">
+							<nax-loading size="sm" :text="loadingText"></nax-loading>
+						</slot>
+					</view>
+					<view
+						v-else-if="error"
+						class="nax-list__status nax-list__status--error"
+						@click="onErrorClick"
+					>
+						<slot name="error">
+							<text class="nax-list__status-text nax-list__status-text--error" :lines="1">{{ errorText }}</text>
+						</slot>
+					</view>
+					<view v-else-if="finished" class="nax-list__status nax-list__status--finished">
+						<slot name="finished">
+							<text class="nax-list__status-text" :lines="1">{{ finishedText }}</text>
+						</slot>
+					</view>
+				</slot>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-list
+	 * @description 滚动列表壳：内部 scroll-view 触底加载 + 下拉刷新 + 空/错/底态。不做虚拟列表。
+	 * @property {boolean} loading 加载更多中（受控）
+	 * @property {boolean} finished 没有更多
+	 * @property {boolean} error 加载失败；点击重试再触发 load
+	 * @property {boolean} empty 空列表（展示空态，隐藏底部状态）
+	 * @property {boolean} disabled 禁用触底加载
+	 * @property {boolean} immediateCheck 挂载/加载结束后检查是否需继续 load，默认 true
+	 * @property {number} offset 距底触发距离（px），映射 lower-threshold
+	 * @property {string} height 内部滚动高度；空则 flex:1 由父级撑开
+	 * @property {boolean} usePageScroll true 时不包 scroll-view，配合页面滚动 + check()
+	 * @property {boolean} showScrollbar 是否显示滚动条
+	 * @property {boolean} enableRefresh 是否启用下拉刷新（仅内部 scroll-view）
+	 * @property {boolean} refreshing 下拉刷新中（受控，映射 refresher-triggered）
+	 * @property {number} refresherThreshold 下拉触发阈值（px）
+	 * @property {string} refresherBackground 刷新区背景色
+	 * @property {string} refresherDefaultStyle black | white | none
+	 * @property {string} loadingText 加载文案
+	 * @property {string} finishedText 结束文案
+	 * @property {string} errorText 失败文案
+	 * @property {string} emptyText 空态描述
+	 * @property {string} emptyIcon 空态图标，默认 notes-off
+	 * @property {string} customClass 根节点扩展 class
+	 * @event {Function} load 需要加载更多
+	 * @event {Function} refresh 下拉刷新触发
+	 * @event {Function} update:refreshing 刷新状态同步（可 v-model:refreshing）
+	 * @event {Function} click-error 点击错误区
+	 * @slot default 列表内容
+	 * @slot header 顶部区
+	 * @slot footer 自定义底部（覆盖默认状态）
+	 * @slot empty / loading / finished / error 状态覆盖
+	 */
+	const props = defineProps({
+		loading: { type: Boolean, default: false },
+		finished: { type: Boolean, default: false },
+		error: { type: Boolean, default: false },
+		empty: { type: Boolean, default: false },
+		disabled: { type: Boolean, default: false },
+		immediateCheck: { type: Boolean, default: true },
+		offset: { type: Number, default: 50 },
+		height: { type: String, default: '' },
+		usePageScroll: { type: Boolean, default: false },
+		showScrollbar: { type: Boolean, default: true },
+		enableRefresh: { type: Boolean, default: false },
+		refreshing: { type: Boolean, default: false },
+		refresherThreshold: { type: Number, default: 45 },
+		refresherBackground: { type: String, default: 'transparent' },
+		refresherDefaultStyle: { type: String, default: 'black' },
+		loadingText: { type: String, default: '加载中...' },
+		finishedText: { type: String, default: '没有更多了' },
+		errorText: { type: String, default: '加载失败，点击重试' },
+		emptyText: { type: String, default: '暂无数据' },
+		emptyIcon: { type: String, default: 'notes-off' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['load', 'refresh', 'update:refreshing', 'click-error'])
+
+	const instance = getCurrentInstance()
+	const uid = Math.floor(Math.random() * 10000000).toString()
+	const scrollDomId = 'nax-list-scroll-' + uid
+	const bodyDomId = 'nax-list-body-' + uid
+
+	let checkTimerId = -1
+	let checkToken = 0
+
+	// 本地触发态：保证 refresherrefresh 当下立刻保持转圈，再与 props.refreshing 同步
+	const localTriggered = ref(false)
+
+	const refresherTriggered = computed((): boolean => {
+		if (props.refreshing) {
+			return true
+		}
+		return localTriggered.value
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.usePageScroll) {
+			cls += ' nax-list--page'
+		}
+		if (props.enableRefresh) {
+			cls += ' nax-list--refresh'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	function formatHeight(value : string) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return ''
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0 ||
+			trimmed.indexOf('vh') >= 0
+		) {
+			return trimmed
+		}
+		const n = parseFloat(trimmed)
+		if (isNaN(n) || n <= 0) {
+			return trimmed
+		}
+		return n.toString() + 'px'
+	}
+
+	const rootStyle = computed((): string => {
+		const h = formatHeight(props.height)
+		if (h.length > 0 && !props.usePageScroll) {
+			return 'height:' + h + ';'
+		}
+		return ''
+	})
+
+	const scrollStyle = computed((): string => {
+		const h = formatHeight(props.height)
+		if (h.length > 0) {
+			return 'height:' + h + ';'
+		}
+		return 'flex:1;'
+	})
+
+	function canLoad() : boolean {
+		if (props.disabled) {
+			return false
+		}
+		if (props.loading) {
+			return false
+		}
+		if (props.finished) {
+			return false
+		}
+		if (props.error) {
+			return false
+		}
+		if (props.empty) {
+			return false
+		}
+		// 刷新中不叠加触底加载
+		if (props.refreshing || localTriggered.value) {
+			return false
+		}
+		return true
+	}
+
+	function tryLoad() {
+		if (!canLoad()) {
+			return
+		}
+		emit('load')
+	}
+
+	function onScrollToLower() {
+		tryLoad()
+	}
+
+	function onErrorClick() {
+		emit('click-error')
+		// 业务在 load 里清 error 并重新请求
+		emit('load')
+	}
+
+	function endRefreshLocal() {
+		localTriggered.value = false
+	}
+
+	function onRefresherRefresh() {
+		if (!props.enableRefresh) {
+			return
+		}
+		// 刷新进行中不重复触发
+		if (props.refreshing || localTriggered.value) {
+			return
+		}
+		localTriggered.value = true
+		emit('update:refreshing', true)
+		emit('refresh')
+	}
+
+	function onRefresherRestore() {
+		// 原生复位时若业务已结束，同步本地态
+		if (!props.refreshing) {
+			endRefreshLocal()
+		}
+	}
+
+	function onRefresherAbort() {
+		if (!props.refreshing) {
+			endRefreshLocal()
+			emit('update:refreshing', false)
+		}
+	}
+
+	function clearCheckTimer() {
+		if (checkTimerId >= 0) {
+			clearTimeout(checkTimerId)
+			checkTimerId = -1
+		}
+	}
+
+	/**
+	 * 检查是否仍需加载（内容高度未超过滚动区时继续 load）。
+	 * 页面滚动模式仅做 canLoad 判断，触底请页面 onReachBottom 调 check()。
+	 */
+	function check() {
+		if (!canLoad()) {
+			return
+		}
+		if (props.usePageScroll) {
+			tryLoad()
+			return
+		}
+		const token = checkToken + 1
+		checkToken = token
+
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+
+		var scrollH = 0.0
+		var bodyH = 0.0
+		var gotScroll = false
+		var gotBody = false
+
+		function maybeApply() {
+			if (token != checkToken) {
+				return
+			}
+			if (!gotScroll || !gotBody) {
+				return
+			}
+			if (!canLoad()) {
+				return
+			}
+			// 内容不足以产生滚动，或已接近底部余量 → 继续加载
+			const threshold = props.offset * 1.0
+			if (bodyH <= scrollH + threshold) {
+				tryLoad()
+			}
+		}
+
+		query
+			.select('#' + scrollDomId)
+			.boundingClientRect((rect : NodeInfo) => {
+				if (token != checkToken) {
+					return
+				}
+				if (rect != null && rect.height != null) {
+					scrollH = rect.height as number
+				}
+				gotScroll = true
+				maybeApply()
+			})
+		query
+			.select('#' + bodyDomId)
+			.boundingClientRect((rect2 : NodeInfo) => {
+				if (token != checkToken) {
+					return
+				}
+				if (rect2 != null && rect2.height != null) {
+					bodyH = rect2.height as number
+				}
+				gotBody = true
+				maybeApply()
+			})
+		query.exec()
+	}
+
+	function scheduleCheck() {
+		if (!props.immediateCheck) {
+			return
+		}
+		clearCheckTimer()
+		checkTimerId = setTimeout(() => {
+			checkTimerId = -1
+			check()
+		}, 50)
+	}
+
+	const wasLoading = ref(false)
+
+	watch((): boolean => {
+		return props.loading
+	}, (val : boolean) => {
+		// 一次加载结束 → 检查是否仍需补页
+		if (wasLoading.value == true && val == false) {
+			scheduleCheck()
+		}
+		wasLoading.value = val
+	})
+
+	watch((): boolean => {
+		return props.finished
+	}, (val : boolean) => {
+		if (!val) {
+			scheduleCheck()
+		}
+	})
+
+	watch((): boolean => {
+		return props.error
+	}, (val : boolean) => {
+		if (!val) {
+			scheduleCheck()
+		}
+	})
+
+	watch((): boolean => {
+		return props.empty
+	}, (val : boolean) => {
+		if (!val) {
+			scheduleCheck()
+		}
+	})
+
+	watch((): boolean => {
+		return props.disabled
+	}, (val : boolean) => {
+		if (!val) {
+			scheduleCheck()
+		}
+	})
+
+	// 业务把 refreshing 置 false 时收起刷新头；true 时保持触发
+	watch((): boolean => {
+		return props.refreshing
+	}, (val : boolean) => {
+		if (val) {
+			localTriggered.value = true
+		} else {
+			// 延迟一帧再关，避免部分端闪断
+			setTimeout(() => {
+				if (!props.refreshing) {
+					endRefreshLocal()
+				}
+			}, 50)
+			// 刷新结束后可能内容变短，补一次触底检查
+			scheduleCheck()
+		}
+	})
+
+	onMounted(() => {
+		if (props.refreshing) {
+			localTriggered.value = true
+		}
+		scheduleCheck()
+	})
+
+	onUnmounted(() => {
+		clearCheckTimer()
+		checkToken = checkToken + 1
+	})
+
+	defineExpose({
+		check,
+		tryLoad
+	})
+</script>
+
+<style>
+	.nax-list {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+		flex: 1;
+		min-height: 0;
+	}
+
+	.nax-list--page {
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+
+	.nax-list__scroll {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+		flex: 1;
+		min-height: 0;
+	}
+
+	.nax-list__body {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-list__body--page {
+		flex-direction: column;
+	}
+
+	.nax-list__header {
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+
+	.nax-list__content {
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+
+	.nax-list__empty {
+		flex-direction: column;
+		flex-shrink: 0;
+		padding-top: 24px;
+		padding-bottom: 24px;
+		align-items: center;
+	}
+
+	.nax-list__footer {
+		flex-direction: column;
+		flex-shrink: 0;
+		align-items: center;
+	}
+
+	.nax-list__status {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-list__status--error {
+		/* 可点重试 */
+	}
+
+	.nax-list__status-text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-list__status-text--error {
+		color: var(--nax-color-error, #d03050);
+	}
+</style>

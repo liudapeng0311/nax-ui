@@ -1,0 +1,474 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-list</text>
+			<text class="page__desc">滚动列表壳：触底加载、下拉刷新、空/错/底态。行内容用插槽自管（示例用 nax-cell）。</text>
+
+			<view class="section">
+				<text class="section__title">基础分页加载</text>
+				<text class="hint">固定高度 360px · 每页 10 条 · 共 35 条后 finished</text>
+				<view class="list-panel">
+					<nax-list
+						:key="basicKey"
+						height="360px"
+						:loading="basicLoading"
+						:finished="basicFinished"
+						:error="basicError"
+						:empty="basicEmpty"
+						@load="onBasicLoad"
+						@click-error="onBasicErrorClick"
+					>
+						<template #header>
+							<view class="list-header">
+								<text class="list-header__text">已加载 {{ basicList.length }} 条 · 页码 {{ basicPage }}</text>
+							</view>
+						</template>
+						<nax-cell
+							v-for="(title, index) in basicList"
+							:key="index"
+							:title="title"
+							:value="'' + (index + 1)"
+							is-link
+							@click="onItemClick(title)"
+						></nax-cell>
+					</nax-list>
+				</view>
+				<view class="row">
+					<nax-button size="sm" label="重置列表" @click="resetBasic"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" type="warning" label="下次失败" @click="armBasicFail"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">下拉刷新 + 加载更多</text>
+				<text class="hint">列表内下拉刷新（非页面级）· enable-refresh · 刷新后序号前缀会变</text>
+				<view class="list-panel">
+					<nax-list
+						:key="rfKey"
+						height="320px"
+						:enable-refresh="true"
+						:refreshing="rfRefreshing"
+						:loading="rfLoading"
+						:finished="rfFinished"
+						:error="rfError"
+						:empty="rfEmpty"
+						@refresh="onRfRefresh"
+						@update:refreshing="onRfRefreshing"
+						@load="onRfLoad"
+					>
+						<template #header>
+							<view class="list-header">
+								<text class="list-header__text">刷新批次 #{{ rfBatch }} · {{ rfList.length }} 条</text>
+							</view>
+						</template>
+						<nax-cell
+							v-for="(title, index) in rfList"
+							:key="index"
+							:title="title"
+							:label="index == 0 ? '下拉可刷新' : ''"
+						></nax-cell>
+					</nax-list>
+				</view>
+				<view class="row">
+					<nax-button size="sm" label="重置刷新示例" @click="resetRf"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">空状态</text>
+				<text class="hint">empty=true 时展示 nax-empty（默认 notes-off）</text>
+				<view class="list-panel list-panel--short">
+					<nax-list height="220px" :empty="true" empty-text="暂无订单" empty-icon="notes-off">
+					</nax-list>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">错误重试</text>
+				<text class="hint">点底栏「加载失败，点击重试」重新 load</text>
+				<view class="list-panel list-panel--short">
+					<nax-list
+						:key="errKey"
+						height="220px"
+						:loading="errLoading"
+						:finished="errFinished"
+						:error="errError"
+						:empty="false"
+						@load="onErrLoad"
+					>
+						<nax-cell
+							v-for="(title, index) in errList"
+							:key="index"
+							:title="title"
+						></nax-cell>
+					</nax-list>
+				</view>
+				<view class="row">
+					<nax-button size="sm" label="重置为失败流" @click="resetErr"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义空态 / 底态</text>
+				<view class="list-panel list-panel--short">
+					<nax-list height="200px" :empty="true">
+						<template #empty>
+							<nax-empty icon="search" description="换个关键词试试">
+								<template #action>
+									<nax-button size="sm" type="primary" label="清空筛选" @click="onClearFilter"></nax-button>
+								</template>
+							</nax-empty>
+						</template>
+					</nax-list>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">事件反馈</text>
+				<text class="hint">最近：{{ lastEvent }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const lastEvent = ref('无')
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	// —— 基础分页 ——
+	const basicList = ref([] as string[])
+	const basicLoading = ref(false)
+	const basicFinished = ref(false)
+	const basicError = ref(false)
+	const basicLoaded = ref(false)
+	const basicPage = ref(0)
+	const basicFailNext = ref(false)
+	const basicKey = ref(0)
+	const PAGE_SIZE = 10
+	const TOTAL = 35
+
+	const basicEmpty = computed((): boolean => {
+		return basicLoaded.value && basicList.value.length == 0 && !basicLoading.value
+	})
+
+	function onBasicLoad() {
+		if (basicLoading.value || basicFinished.value) {
+			return
+		}
+		basicLoading.value = true
+		basicError.value = false
+		lastEvent.value = 'basic load p' + (basicPage.value + 1).toString()
+
+		const fail = basicFailNext.value
+		basicFailNext.value = false
+
+		setTimeout(() => {
+			if (fail) {
+				basicLoading.value = false
+				basicError.value = true
+				basicLoaded.value = true
+				lastEvent.value = 'basic error'
+				return
+			}
+
+			const start = basicList.value.length
+			const next = [] as string[]
+			var i = 0
+			while (i < PAGE_SIZE && start + i < TOTAL) {
+				const n = start + i + 1
+				next.push('列表项 ' + n.toString())
+				i++
+			}
+
+			const merged = [] as string[]
+			var j = 0
+			while (j < basicList.value.length) {
+				merged.push(basicList.value[j])
+				j++
+			}
+			var k = 0
+			while (k < next.length) {
+				merged.push(next[k])
+				k++
+			}
+			basicList.value = merged
+			basicPage.value = basicPage.value + 1
+			basicLoaded.value = true
+			basicLoading.value = false
+
+			if (basicList.value.length >= TOTAL || next.length == 0) {
+				basicFinished.value = true
+			}
+			lastEvent.value = 'basic ok · ' + basicList.value.length.toString() + ' 条'
+		}, 600)
+	}
+
+	function resetBasic() {
+		basicList.value = [] as string[]
+		basicLoading.value = false
+		basicFinished.value = false
+		basicError.value = false
+		basicLoaded.value = false
+		basicPage.value = 0
+		basicFailNext.value = false
+		basicKey.value = basicKey.value + 1
+		lastEvent.value = 'basic reset'
+	}
+
+	function armBasicFail() {
+		basicFailNext.value = true
+		lastEvent.value = '下次 load 将失败'
+		uni.showToast({ title: '已标记下次失败', icon: 'none' })
+	}
+
+	function onBasicErrorClick() {
+		lastEvent.value = 'basic click-error'
+	}
+
+	function onItemClick(title : string) {
+		lastEvent.value = 'click ' + title
+		uni.showToast({ title: title, icon: 'none' })
+	}
+
+	// —— 下拉刷新 + 分页 ——
+	const rfList = ref([] as string[])
+	const rfLoading = ref(false)
+	const rfFinished = ref(false)
+	const rfError = ref(false)
+	const rfRefreshing = ref(false)
+	const rfLoaded = ref(false)
+	const rfPage = ref(0)
+	const rfBatch = ref(1)
+	const rfKey = ref(0)
+	const RF_TOTAL = 28
+
+	const rfEmpty = computed((): boolean => {
+		return rfLoaded.value && rfList.value.length == 0 && !rfLoading.value && !rfRefreshing.value
+	})
+
+	function buildRfTitle(batch : number, n : number) : string {
+		return 'B' + batch.toString() + ' · 条目 ' + n.toString()
+	}
+
+	function onRfRefreshing(val : boolean) {
+		rfRefreshing.value = val
+	}
+
+	function onRfRefresh() {
+		if (rfLoading.value) {
+			// 加载更多进行中时也允许刷新：先打断 load 态由业务决定；此处直接重拉
+		}
+		rfRefreshing.value = true
+		rfError.value = false
+		lastEvent.value = 'refresh start'
+
+		setTimeout(() => {
+			const nextBatch = rfBatch.value + 1
+			rfBatch.value = nextBatch
+			const first = [] as string[]
+			var i = 0
+			while (i < PAGE_SIZE && i < RF_TOTAL) {
+				first.push(buildRfTitle(nextBatch, i + 1))
+				i++
+			}
+			rfList.value = first
+			rfPage.value = 1
+			rfFinished.value = first.length >= RF_TOTAL
+			rfLoaded.value = true
+			rfLoading.value = false
+			rfRefreshing.value = false
+			lastEvent.value = 'refresh ok · batch ' + nextBatch.toString()
+		}, 800)
+	}
+
+	function onRfLoad() {
+		if (rfLoading.value || rfFinished.value || rfRefreshing.value) {
+			return
+		}
+		rfLoading.value = true
+		rfError.value = false
+		lastEvent.value = 'rf load p' + (rfPage.value + 1).toString()
+
+		setTimeout(() => {
+			const start = rfList.value.length
+			const next = [] as string[]
+			var i = 0
+			while (i < PAGE_SIZE && start + i < RF_TOTAL) {
+				next.push(buildRfTitle(rfBatch.value, start + i + 1))
+				i++
+			}
+			const merged = [] as string[]
+			var j = 0
+			while (j < rfList.value.length) {
+				merged.push(rfList.value[j])
+				j++
+			}
+			var k = 0
+			while (k < next.length) {
+				merged.push(next[k])
+				k++
+			}
+			rfList.value = merged
+			rfPage.value = rfPage.value + 1
+			rfLoaded.value = true
+			rfLoading.value = false
+			if (rfList.value.length >= RF_TOTAL || next.length == 0) {
+				rfFinished.value = true
+			}
+			lastEvent.value = 'rf ok · ' + rfList.value.length.toString() + ' 条'
+		}, 500)
+	}
+
+	function resetRf() {
+		rfList.value = [] as string[]
+		rfLoading.value = false
+		rfFinished.value = false
+		rfError.value = false
+		rfRefreshing.value = false
+		rfLoaded.value = false
+		rfPage.value = 0
+		rfBatch.value = 1
+		rfKey.value = rfKey.value + 1
+		lastEvent.value = 'rf reset'
+	}
+
+	// —— 错误流：首屏直接失败 ——
+	const errList = ref([] as string[])
+	const errLoading = ref(false)
+	const errFinished = ref(false)
+	const errError = ref(false)
+	const errAttempt = ref(0)
+	const errKey = ref(0)
+
+	function onErrLoad() {
+		if (errLoading.value || errFinished.value) {
+			return
+		}
+		errLoading.value = true
+		errError.value = false
+		errAttempt.value = errAttempt.value + 1
+		const attempt = errAttempt.value
+		lastEvent.value = 'err load #' + attempt.toString()
+
+		setTimeout(() => {
+			// 前两次失败，第三次成功并 finished
+			if (attempt < 3) {
+				errLoading.value = false
+				errError.value = true
+				lastEvent.value = 'err fail #' + attempt.toString()
+				return
+			}
+			errList.value = ['恢复后的条目 A', '恢复后的条目 B'] as string[]
+			errLoading.value = false
+			errFinished.value = true
+			errError.value = false
+			lastEvent.value = 'err ok'
+		}, 500)
+	}
+
+	function resetErr() {
+		errList.value = [] as string[]
+		errLoading.value = false
+		errFinished.value = false
+		errError.value = false
+		errAttempt.value = 0
+		errKey.value = errKey.value + 1
+		lastEvent.value = 'err reset'
+	}
+
+	function onClearFilter() {
+		lastEvent.value = 'clear filter'
+		uni.showToast({ title: '已清空筛选', icon: 'none' })
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 20px;
+	}
+
+	.section__title {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 8px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 8px;
+	}
+
+	.list-panel {
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: 8px;
+		overflow: hidden;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.list-panel--short {
+		margin-bottom: 0;
+	}
+
+	.list-header {
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 16px;
+		padding-right: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.list-header__text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 10px;
+	}
+
+	.gap {
+		width: 8px;
+	}
+</style>

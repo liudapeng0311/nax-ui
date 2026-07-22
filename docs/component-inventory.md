@@ -114,7 +114,7 @@
 | 底部标签栏 | `nax-tabbar` | P1 | 自定义底栏；图标/徽标/中间凸起/安全区 |
 | 标签页 | `nax-tabs` | P1 | 顶部内容切换导航（对齐 uView Pro Tabs 主能力） | `list` `v-model` `scrollable` `scrollAlign` `showLine` `size` `sticky` / `change` `click` **done** |
 | 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
-| 列表 | `nax-list` | P2 | 滚动列表壳 |
+| 列表 | `nax-list` | P2 | 滚动列表壳：触底加载 + 下拉刷新；受控 loading/finished/error/empty/refreshing；**不做**虚拟列表 | `loading` `finished` `error` `empty` `enableRefresh` `refreshing` `immediateCheck` `offset` `height` `usePageScroll` / `load` `refresh` `update:refreshing` `click-error`；方法 `check` **done** |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
 | 图片 | `nax-image` | P2 | 占位/失败态 |
 | 业务卡片等 | — | later | 不进 MVP |
@@ -158,6 +158,7 @@
 | `nax-cell` / `nax-cell-group` | done | 插件包 `uni_modules/nax-cell`；对齐 uView Pro CellItem/CellGroup；icon/is-link/inset/provide-inject |
 | `nax-space` / `nax-space-item` | done | 插件包 `uni_modules/nax-space`；横向/纵向间距；item 吃 margin 兼容隔离 2.0 |
 | `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 database-off（暂无数据）；列表空建议 notes-off |
+| `nax-list` | done | 插件包 `uni_modules/nax-list`；触底 load + 下拉刷新（scroll-view refresher）；受控 loading/finished/error/empty/refreshing；immediateCheck；usePageScroll+check；默认 nax-loading/nax-empty；**不做**虚拟列表 |
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
