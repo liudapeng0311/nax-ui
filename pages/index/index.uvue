@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
 	<view class="page-root">
 		<scroll-view class="page-scroll" scroll-y="true">
@@ -206,6 +206,10 @@
 				<view class="home__card home__card--gap" @click="goProgress">
 					<text class="home__card-name">进度条</text>
 					<text class="home__card-tag">nax-progress</text>
+				</view>
+				<view class="home__card home__card--gap" @click="goSteps">
+					<text class="home__card-name">步骤条</text>
+					<text class="home__card-tag">nax-steps</text>
 				</view>
 				<view class="home__card home__card--gap" @click="goSkeleton">
 					<text class="home__card-name">骨架屏</text>
@@ -515,6 +519,12 @@
 	function goProgress() {
 		uni.navigateTo({
 			url: '/pages/components/progress/index'
+		})
+	}
+
+	function goSteps() {
+		uni.navigateTo({
+			url: '/pages/components/steps/index'
 		})
 	}
 

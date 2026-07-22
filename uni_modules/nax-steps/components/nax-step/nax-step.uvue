@@ -1,0 +1,730 @@
+<template>
+	<view class="nax-step" :class="rootClass" @click="onClick">
+		<!-- 横向：半线 + 指示器 + 半线 -->
+		<template v-if="isHorizontal">
+			<view class="nax-step__head nax-step__head--h">
+				<view class="nax-step__line nax-step__line--h" :class="leftLineClass"></view>
+				<view class="nax-step__indicator" :class="indicatorClass">
+					<nax-icon
+						v-if="showStatusIcon"
+						:name="statusIconName"
+						:size="iconSizePx"
+						:color="statusIconColor"
+					></nax-icon>
+					<text v-else-if="isNumberMode" class="nax-step__num" :class="numClass">{{ displayIndex }}</text>
+				</view>
+				<view class="nax-step__line nax-step__line--h" :class="rightLineClass"></view>
+			</view>
+			<view class="nax-step__body nax-step__body--h">
+				<slot name="title">
+					<text v-if="titleText.length > 0" class="nax-step__title" :class="titleClass" :lines="2">{{ titleText }}</text>
+				</slot>
+				<slot name="desc">
+					<text v-if="descText.length > 0" class="nax-step__desc" :class="descClass" :lines="3">{{ descText }}</text>
+				</slot>
+				<slot></slot>
+			</view>
+		</template>
+
+		<!-- 纵向：轨道 + 内容 -->
+		<template v-else>
+			<view class="nax-step__rail">
+				<view class="nax-step__indicator" :class="indicatorClass">
+					<nax-icon
+						v-if="showStatusIcon"
+						:name="statusIconName"
+						:size="iconSizePx"
+						:color="statusIconColor"
+					></nax-icon>
+					<text v-else-if="isNumberMode" class="nax-step__num" :class="numClass">{{ displayIndex }}</text>
+				</view>
+				<view v-if="!isLast" class="nax-step__line nax-step__line--v" :class="verticalLineClass"></view>
+			</view>
+			<view class="nax-step__body nax-step__body--v" :class="bodyVClass">
+				<slot name="title">
+					<text v-if="titleText.length > 0" class="nax-step__title" :class="titleClass" :lines="2">{{ titleText }}</text>
+				</slot>
+				<slot name="desc">
+					<text v-if="descText.length > 0" class="nax-step__desc" :class="descClass" :lines="3">{{ descText }}</text>
+				</slot>
+				<slot></slot>
+			</view>
+		</template>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-step
+	 * @description 步骤条单步。需放在 nax-steps 内；list 模式由容器自动生成。
+	 * @property {string} title 标题（优先于 name）
+	 * @property {string} name 标题别名
+	 * @property {string} desc 描述
+	 * @property {string} description 描述别名
+	 * @property {string} status wait | process | finish | error；空则按 current 推导
+	 * @property {string} icon 本步完成态图标覆盖
+	 * @property {number} index 显式下标；-1 自动注册
+	 * @property {number} total 显式总数；0 跟随容器
+	 * @property {boolean} disabled 禁用
+	 * @property {string} customClass 根扩展 class
+	 * @slot title 自定义标题
+	 * @slot desc 自定义描述
+	 * @slot default 标题区下方扩展内容
+	 */
+	const props = defineProps({
+		title: {
+			type: String,
+			default: ''
+		},
+		name: {
+			type: String,
+			default: ''
+		},
+		desc: {
+			type: String,
+			default: ''
+		},
+		description: {
+			type: String,
+			default: ''
+		},
+		status: {
+			type: String,
+			default: ''
+		},
+		icon: {
+			type: String,
+			default: ''
+		},
+		index: {
+			type: Number,
+			default: -1
+		},
+		total: {
+			type: Number,
+			default: 0
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const stepId = 'nax-step-' + Math.floor(Math.random() * 10000000).toString()
+
+	const inGroup = inject('naxStepsInGroup', false) as boolean
+	const currentRef = inject('naxStepsCurrent', null)
+	const directionRef = inject('naxStepsDirection', null)
+	const modeRef = inject('naxStepsMode', null)
+	const typeRef = inject('naxStepsType', null)
+	const sizeRef = inject('naxStepsSize', null)
+	const iconRef = inject('naxStepsIcon', null)
+	const errorIconRef = inject('naxStepsErrorIcon', null)
+	const clickableRef = inject('naxStepsClickable', null)
+	const totalRef = inject('naxStepsTotal', null)
+	const registerRaw = inject('naxStepsRegister', null)
+	const unregisterRaw = inject('naxStepsUnregister', null)
+	const onClickRaw = inject('naxStepsOnClick', null)
+
+	const autoIndex = ref(-1)
+
+	function readRefNumber(r : any | null, fallback : number) : number {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<number>).value
+	}
+
+	function readRefString(r : any | null, fallback : string) : string {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<string>).value
+	}
+
+	function readRefBool(r : any | null, fallback : boolean) : boolean {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<boolean>).value
+	}
+
+	function normalizeStatus(value : string) : string {
+		if (value == 'danger' || value == 'fail' || value == 'failed') {
+			return 'error'
+		}
+		if (value == 'done' || value == 'finished' || value == 'complete' || value == 'completed') {
+			return 'finish'
+		}
+		if (value == 'active' || value == 'doing' || value == 'current') {
+			return 'process'
+		}
+		if (value == 'pending' || value == 'todo') {
+			return 'wait'
+		}
+		if (value == 'wait' || value == 'process' || value == 'finish' || value == 'error') {
+			return value
+		}
+		return ''
+	}
+
+	if (inGroup && props.index < 0 && registerRaw != null) {
+		const fn = registerRaw as (id : string) => number
+		autoIndex.value = fn(stepId)
+	}
+
+	onUnmounted(() => {
+		if (inGroup && props.index < 0 && unregisterRaw != null) {
+			const fn = unregisterRaw as (id : string) => void
+			fn(stepId)
+		}
+	})
+
+	const stepIndex = computed((): number => {
+		if (props.index >= 0) {
+			return Math.floor(props.index as number)
+		}
+		if (autoIndex.value >= 0) {
+			return autoIndex.value
+		}
+		return 0
+	})
+
+	const stepTotal = computed((): number => {
+		if (props.total > 0) {
+			return Math.floor(props.total as number)
+		}
+		return readRefNumber(totalRef, 1)
+	})
+
+	const isLast = computed((): boolean => {
+		const total = stepTotal.value
+		if (total <= 1) {
+			return true
+		}
+		return stepIndex.value >= total - 1
+	})
+
+	const isFirst = computed((): boolean => {
+		return stepIndex.value <= 0
+	})
+
+	const directionName = computed((): string => {
+		return readRefString(directionRef, 'horizontal')
+	})
+
+	const isHorizontal = computed((): boolean => {
+		return directionName.value != 'vertical'
+	})
+
+	const modeName = computed((): string => {
+		return readRefString(modeRef, 'number')
+	})
+
+	const isNumberMode = computed((): boolean => {
+		return modeName.value != 'dot'
+	})
+
+	const typeName = computed((): string => {
+		return readRefString(typeRef, 'primary')
+	})
+
+	const sizeName = computed((): string => {
+		return readRefString(sizeRef, 'md')
+	})
+
+	const parentCurrent = computed((): number => {
+		return readRefNumber(currentRef, 0)
+	})
+
+	const statusName = computed((): string => {
+		const explicit = normalizeStatus(props.status)
+		if (explicit.length > 0) {
+			return explicit
+		}
+		const idx = stepIndex.value
+		const cur = parentCurrent.value
+		const total = stepTotal.value
+		// current 超出最后一步：全部完成
+		if (total > 0 && cur >= total) {
+			return 'finish'
+		}
+		if (idx < cur) {
+			return 'finish'
+		}
+		if (idx == cur) {
+			// 到达最后一步即视为完成（显示对号，而不是序号）
+			if (total > 0 && idx >= total - 1) {
+				return 'finish'
+			}
+			return 'process'
+		}
+		return 'wait'
+	})
+
+	const titleText = computed((): string => {
+		if (props.title.length > 0) {
+			return props.title
+		}
+		return props.name
+	})
+
+	const descText = computed((): string => {
+		if (props.desc.length > 0) {
+			return props.desc
+		}
+		return props.description
+	})
+
+	const displayIndex = computed((): string => {
+		return (stepIndex.value + 1).toString()
+	})
+
+	const finishIconFallback = computed((): string => {
+		return readRefString(iconRef, 'check')
+	})
+
+	const errorIconFallback = computed((): string => {
+		return readRefString(errorIconRef, 'close')
+	})
+
+	const showStatusIcon = computed((): boolean => {
+		// dot 模式保持圆点填充，不塞图标
+		if (!isNumberMode.value) {
+			return false
+		}
+		const st = statusName.value
+		if (st == 'finish' || st == 'error') {
+			return true
+		}
+		return false
+	})
+
+	const statusIconName = computed((): string => {
+		if (statusName.value == 'error') {
+			return errorIconFallback.value
+		}
+		if (props.icon.length > 0) {
+			return props.icon
+		}
+		return finishIconFallback.value
+	})
+
+	const statusIconColor = computed((): string => {
+		const st = statusName.value
+		if (st == 'error') {
+			return 'var(--nax-color-error, #d03050)'
+		}
+		// 完成图标落在激活底上，固定白色以保证对比
+		return '#ffffff'
+	})
+
+	const iconSizePx = computed((): string => {
+		if (sizeName.value == 'sm') {
+			return '12'
+		}
+		if (sizeName.value == 'lg') {
+			return '16'
+		}
+		return '14'
+	})
+
+	const isClickable = computed((): boolean => {
+		if (props.disabled) {
+			return false
+		}
+		return readRefBool(clickableRef, false)
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-step--' + directionName.value
+		cls += ' nax-step--' + sizeName.value
+		cls += ' nax-step--' + typeName.value
+		cls += ' nax-step--' + statusName.value
+		cls += ' nax-step--mode-' + modeName.value
+		if (isFirst.value) {
+			cls += ' nax-step--first'
+		}
+		if (isLast.value) {
+			cls += ' nax-step--last'
+		}
+		if (props.disabled) {
+			cls += ' nax-step--disabled'
+		}
+		if (isClickable.value) {
+			cls += ' nax-step--clickable'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const indicatorClass = computed((): string => {
+		var cls = 'nax-step__indicator--' + statusName.value
+		cls += ' nax-step__indicator--' + typeName.value
+		if (!isNumberMode.value) {
+			cls += ' nax-step__indicator--dot'
+		}
+		return cls
+	})
+
+	const numClass = computed((): string => {
+		return 'nax-step__num--' + statusName.value
+	})
+
+	const titleClass = computed((): string => {
+		return 'nax-step__title--' + statusName.value
+	})
+
+	const descClass = computed((): string => {
+		return 'nax-step__desc--' + statusName.value
+	})
+
+	const leftLineClass = computed((): string => {
+		var cls = ''
+		if (isFirst.value) {
+			cls += ' nax-step__line--ghost'
+		} else {
+			// 左侧线：前一步若已完成则激活
+			if (stepIndex.value <= parentCurrent.value) {
+				cls += ' nax-step__line--active'
+				cls += ' nax-step__line--' + typeName.value
+			} else {
+				cls += ' nax-step__line--wait'
+			}
+		}
+		return cls.trim()
+	})
+
+	const rightLineClass = computed((): string => {
+		var cls = ''
+		if (isLast.value) {
+			cls += ' nax-step__line--ghost'
+		} else {
+			// 右侧线：当前步已完成（index < current）才激活
+			if (stepIndex.value < parentCurrent.value) {
+				cls += ' nax-step__line--active'
+				cls += ' nax-step__line--' + typeName.value
+			} else {
+				cls += ' nax-step__line--wait'
+			}
+		}
+		return cls.trim()
+	})
+
+	const verticalLineClass = computed((): string => {
+		var cls = ''
+		if (stepIndex.value < parentCurrent.value) {
+			cls += ' nax-step__line--active'
+			cls += ' nax-step__line--' + typeName.value
+		} else {
+			cls += ' nax-step__line--wait'
+		}
+		return cls.trim()
+	})
+
+	const bodyVClass = computed((): string => {
+		if (isLast.value) {
+			return 'nax-step__body--v-last'
+		}
+		return ''
+	})
+
+	function onClick() {
+		if (!isClickable.value) {
+			return
+		}
+		if (onClickRaw != null) {
+			const fn = onClickRaw as (index : number) => void
+			fn(stepIndex.value)
+		}
+	}
+</script>
+
+<style>
+	.nax-step {
+		flex: 1;
+		flex-direction: column;
+		align-items: stretch;
+		min-width: 0;
+	}
+
+	.nax-step--vertical {
+		flex: 0 0 auto;
+		flex-direction: row;
+		width: 100%;
+		align-items: stretch;
+	}
+
+	.nax-step--disabled {
+		opacity: var(--nax-opacity-disabled, 0.45);
+	}
+
+	.nax-step__head--h {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+		height: 24px;
+	}
+
+	.nax-step--sm .nax-step__head--h {
+		height: 20px;
+	}
+
+	.nax-step--lg .nax-step__head--h {
+		height: 28px;
+	}
+
+	.nax-step__rail {
+		flex-direction: column;
+		align-items: center;
+		width: 24px;
+		flex-shrink: 0;
+	}
+
+	.nax-step--sm .nax-step__rail {
+		width: 20px;
+	}
+
+	.nax-step--lg .nax-step__rail {
+		width: 28px;
+	}
+
+	.nax-step__indicator {
+		width: 24px;
+		height: 24px;
+		border-radius: 12px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-step--sm .nax-step__indicator {
+		width: 20px;
+		height: 20px;
+		border-radius: 10px;
+	}
+
+	.nax-step--lg .nax-step__indicator {
+		width: 28px;
+		height: 28px;
+		border-radius: 14px;
+	}
+
+	.nax-step__indicator--dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 5px;
+		border-width: 0;
+	}
+
+	.nax-step--sm .nax-step__indicator--dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 4px;
+	}
+
+	.nax-step--lg .nax-step__indicator--dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 6px;
+	}
+
+	.nax-step__indicator--wait {
+		background-color: var(--nax-color-bg, #ffffff);
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-step__indicator--process.nax-step__indicator--primary,
+	.nax-step__indicator--finish.nax-step__indicator--primary {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-step__indicator--process.nax-step__indicator--info,
+	.nax-step__indicator--finish.nax-step__indicator--info {
+		background-color: var(--nax-color-info, #2080f0);
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-step__indicator--process.nax-step__indicator--success,
+	.nax-step__indicator--finish.nax-step__indicator--success {
+		background-color: var(--nax-color-success, #18a058);
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-step__indicator--process.nax-step__indicator--warning,
+	.nax-step__indicator--finish.nax-step__indicator--warning {
+		background-color: var(--nax-color-warning, #f0a020);
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-step__indicator--process.nax-step__indicator--error,
+	.nax-step__indicator--finish.nax-step__indicator--error {
+		background-color: var(--nax-color-error, #d03050);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-step__indicator--error {
+		background-color: var(--nax-color-error, #d03050);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-step__num {
+		font-size: 12px;
+		line-height: 16px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-step--sm .nax-step__num {
+		font-size: 10px;
+		line-height: 14px;
+	}
+
+	.nax-step--lg .nax-step__num {
+		font-size: 13px;
+		line-height: 18px;
+	}
+
+	.nax-step__num--process,
+	.nax-step__num--finish {
+		color: #ffffff;
+	}
+
+	.nax-step__num--error {
+		color: #ffffff;
+	}
+
+	.nax-step__line--h {
+		flex: 1;
+		height: 1px;
+		background-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-step__line--v {
+		flex: 1;
+		width: 1px;
+		/* App max-height 用像素；给竖线最小高度保证视觉连贯 */
+		min-height: 28px;
+		background-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-step__line--ghost {
+		opacity: 0;
+	}
+
+	.nax-step__line--wait {
+		background-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-step__line--active.nax-step__line--primary {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-step__line--active.nax-step__line--info {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-step__line--active.nax-step__line--success {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-step__line--active.nax-step__line--warning {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-step__line--active.nax-step__line--error {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-step__body--h {
+		flex-direction: column;
+		align-items: center;
+		padding-top: 8px;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.nax-step__body--v {
+		flex: 1;
+		flex-direction: column;
+		align-items: flex-start;
+		padding-left: 12px;
+		padding-bottom: 20px;
+		min-width: 0;
+	}
+
+	.nax-step__body--v-last {
+		padding-bottom: 0;
+	}
+
+	.nax-step__title {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+		color: var(--nax-color-text, #303133);
+		text-align: center;
+	}
+
+	.nax-step--vertical .nax-step__title {
+		text-align: left;
+	}
+
+	.nax-step--sm .nax-step__title {
+		font-size: var(--nax-font-size-xs, 12px);
+		line-height: 18px;
+	}
+
+	.nax-step--lg .nax-step__title {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+
+	.nax-step__title--wait {
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-step__title--process {
+		color: var(--nax-color-text, #303133);
+		font-weight: var(--nax-font-weight-semibold, 600);
+	}
+
+	.nax-step__title--finish {
+		color: var(--nax-color-text, #303133);
+	}
+
+	.nax-step__title--error {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-step__desc {
+		margin-top: 4px;
+		font-size: var(--nax-font-size-xs, 12px);
+		line-height: 18px;
+		color: var(--nax-color-text-tertiary, #c2c2c2);
+		text-align: center;
+	}
+
+	.nax-step--vertical .nax-step__desc {
+		text-align: left;
+	}
+
+	.nax-step__desc--process,
+	.nax-step__desc--finish {
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-step__desc--error {
+		color: var(--nax-color-error, #d03050);
+	}
+</style>

@@ -1,0 +1,235 @@
+<template>
+	<view class="page-root">
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page">
+				<text class="page__title">nax-steps</text>
+				<text class="page__desc">步骤条：横向/纵向进度；number / dot；list 或组合式；单步 status</text>
+
+				<view class="section">
+					<text class="section__title">基础（list + current）</text>
+					<view class="panel">
+						<nax-steps :list="basicList" :current="basicCurrent"></nax-steps>
+						<view class="actions">
+							<nax-button size="sm" label="上一步" :disabled="basicCurrent <= 0" @click="prevBasic"></nax-button>
+							<view class="btn-gap"></view>
+							<nax-button size="sm" type="primary" label="下一步" :disabled="basicCurrent >= basicList.length - 1" @click="nextBasic"></nax-button>
+						</view>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">点状 mode=dot</text>
+					<view class="panel">
+						<nax-steps :list="basicList" :current="1" mode="dot"></nax-steps>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">语义色 type</text>
+					<view class="panel">
+						<nax-steps :list="typeList" :current="2" type="info"></nax-steps>
+						<view class="gap"></view>
+						<nax-steps :list="typeList" :current="2" type="warning"></nax-steps>
+						<view class="gap"></view>
+						<nax-steps :list="typeList" :current="2" type="error"></nax-steps>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">尺寸 size</text>
+					<view class="panel">
+						<text class="muted">sm</text>
+						<nax-steps :list="sizeList" :current="1" size="sm"></nax-steps>
+						<view class="gap"></view>
+						<text class="muted">md</text>
+						<nax-steps :list="sizeList" :current="1" size="md"></nax-steps>
+						<view class="gap"></view>
+						<text class="muted">lg</text>
+						<nax-steps :list="sizeList" :current="1" size="lg"></nax-steps>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">纵向 + 描述</text>
+					<view class="panel">
+						<nax-steps :list="verticalList" :current="verticalCurrent" direction="vertical"></nax-steps>
+						<view class="actions">
+							<nax-button size="sm" type="primary" label="推进进度" @click="nextVertical"></nax-button>
+						</view>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">单步 status（含失败）</text>
+					<view class="panel">
+						<nax-steps :list="statusList" :current="1"></nax-steps>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">组合式 nax-step</text>
+					<view class="panel">
+						<nax-steps :current="1" direction="vertical" type="success">
+							<nax-step title="提交资料" desc="已完成"></nax-step>
+							<nax-step title="人工审核" desc="进行中"></nax-step>
+							<nax-step title="开通成功" desc="等待中"></nax-step>
+						</nax-steps>
+					</view>
+				</view>
+
+				<view class="section">
+					<text class="section__title">可点击 clickable</text>
+					<view class="panel">
+						<nax-steps
+							:list="clickList"
+							:current="clickCurrent"
+							clickable
+							@click="onStepClick"
+						></nax-steps>
+						<text class="muted">当前：第 {{ clickCurrent + 1 }} 步（点标题可跳转）</text>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	const basicList = [
+		{ name: '下单' },
+		{ name: '出库' },
+		{ name: '运输' },
+		{ name: '签收' }
+	]
+
+	const typeList = [
+		{ name: '步骤一' },
+		{ name: '步骤二' },
+		{ name: '步骤三' },
+		{ name: '步骤四' }
+	]
+
+	const sizeList = [
+		{ name: '选购' },
+		{ name: '确认' },
+		{ name: '支付' }
+	]
+
+	const verticalList = [
+		{ name: '买家下单', desc: '2026-07-01 10:00' },
+		{ name: '商家发货', desc: '2026-07-01 18:20' },
+		{ name: '运输中', desc: '快递已揽收' },
+		{ name: '已签收', desc: '待更新' }
+	]
+
+	const statusList = [
+		{ name: '填写信息', status: 'finish' },
+		{ name: '身份核验', status: 'error', desc: '证件模糊，请重传' },
+		{ name: '人工复核', status: 'wait' },
+		{ name: '开通完成', status: 'wait' }
+	]
+
+	const clickList = [
+		{ name: '基本信息' },
+		{ name: '上传材料' },
+		{ name: '确认提交' }
+	]
+
+	const basicCurrent = ref(1)
+	const verticalCurrent = ref(1)
+	const clickCurrent = ref(0)
+
+	function prevBasic() {
+		if (basicCurrent.value > 0) {
+			basicCurrent.value = basicCurrent.value - 1
+		}
+	}
+
+	function nextBasic() {
+		if (basicCurrent.value < basicList.length - 1) {
+			basicCurrent.value = basicCurrent.value + 1
+		}
+	}
+
+	function nextVertical() {
+		if (verticalCurrent.value < verticalList.length - 1) {
+			verticalCurrent.value = verticalCurrent.value + 1
+		} else {
+			verticalCurrent.value = 0
+		}
+	}
+
+	function onStepClick(index : number) {
+		clickCurrent.value = index
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		background-color: var(--nax-color-bg-page, #f5f6f7);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px;
+		padding-bottom: 40px;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #303133);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		padding: 16px;
+	}
+
+	.gap {
+		height: 16px;
+	}
+
+	.btn-gap {
+		width: 8px;
+	}
+
+	.actions {
+		margin-top: 14px;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.muted {
+		margin-top: 10px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>

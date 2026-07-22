@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="nax-dropdown" :class="rootClass">
 		<!-- fixed 菜单栏占位 -->
 		<view
@@ -798,7 +798,13 @@
 		line-height: 22px;
 		color: var(--nax-color-text, #303133);
 		text-overflow: ellipsis;
+		/* App ucss: max-width 仅支持 number|pixel，不支持 % */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		max-width: 120px;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		max-width: 80%;
+		/* #endif */
 	}
 
 	.nax-dropdown--sm .nax-dropdown__title-text {

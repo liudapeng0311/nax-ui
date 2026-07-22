@@ -1,4 +1,4 @@
-﻿# nax-ui 组件清单
+# nax-ui 组件清单
 
 > 状态说明：
 > - `planned`：规划中
@@ -122,6 +122,7 @@
 | 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
 | 列表 | `nax-list` | P2 | 滚动列表壳：触底加载 + 下拉刷新；受控 loading/finished/error/empty/refreshing；**不做**虚拟列表 | `loading` `finished` `error` `empty` `enableRefresh` `refreshing` `immediateCheck` `offset` `height` `usePageScroll` / `load` `refresh` `update:refreshing` `click-error`；方法 `check` **done** |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
+| 步骤条 | `nax-steps` / `nax-step` | P1 | 多步进度展示（对齐 uView Pro Steps，增强 status） | `list`/`nax-step` `current` `direction` `mode` `type` `size` `clickable` / `click` **done** |
 | 图片 | `nax-image` | P2 | 占位/失败态 |
 | 业务卡片等 | — | later | 不进 MVP |
 
@@ -174,6 +175,7 @@
 | `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
 
 | `nax-progress` | done | 插件包 `uni_modules/nax-progress`；shape line/circle；type/status/size/showInfo/textInside/useSlot；双半环圆形 |
+| `nax-steps` | done | 插件包 `uni_modules/nax-steps`；`nax-steps`+`nax-step`；list/组合；horizontal/vertical；number/dot；type；单步 status；clickable；demo `pages/components/steps` |
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | 其余 MVP | planned | 按依赖自底向上 |
