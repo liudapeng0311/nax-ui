@@ -77,6 +77,7 @@
 | 多行输入 | `nax-textarea` | P1 | 多行文本（对齐 uView Pro Textarea 主能力；不含 formatter） | `v-model` `placeholder` `height` `auto-height` `maxlength` `count` `disabled` `readonly` `border` `borderType` `confirmType` `focus` / `input` `change` `focus` `blur` `confirm` `linechange` `keyboardheightchange` `click` **done** |
 | 列选择器 | `nax-select` | P0 | 底部列选择（对齐 uView Pro Select；单列/多列/联动） | `v-model:show` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` / `confirm` `cancel` `change` **done** |
 | 日历 | `nax-calendar` | P1 | 日期/范围选择（对齐 uView Pro Calendar） | `v-model:show` `mode(date/range)` `isPage` `minDate` `maxDate` `defaultDate` `startDate` `endDate` `readonly` `holidays` `workdays` `festivals` `checkinMode` / `change` `open` `close` **done** |
+| 时间选择 | `nax-datetime-picker` | P1 | 日期时间滚轮选择（对齐 uView Pro DatetimePicker） | `v-model:show` `v-model` `mode(datetime/date/time/year-month/year/month-day)` `minDate` `maxDate` `showSecond` `showTrigger` / `confirm` `cancel` `change` **done** |
 | 键盘 | `nax-keyboard` | P1 | 自定义键盘（对齐 uView Pro Keyboard：数字/车牌/身份证） | `v-model:show` `mode(number/car/card)` `dotEnabled` `tooltip` `tips` `random` `mask` / `change` `backspace` `confirm` `cancel` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换（对齐 uView Pro Switch） | `v-model` `disabled` `loading` `size` `activeColor` `inactiveColor` `vibrateShort` / `change` **done** |
 | 滑动选择器 | `nax-slider` | P1 | 区间滑动选择（对齐 uView Pro Slider） | `v-model` `start` `end` `min` `max` `step` `size` `blockWidth` `height` `activeColor` `inactiveColor` `blockColor` `disabled` `useSlot` `showValue` `valuePosition` `showEdgeValue` `edgeValuePosition` / `change` `start` `moving` `end` **done** |
@@ -95,7 +96,8 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
-| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
+| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
+
 | 进度条 | `nax-progress` | P1 | 线形/圆形进度；shape 切换 | `percent` `shape(line/circle)` `type` `status` `size` `showInfo` `textInside` `useSlot` `strokeWidth` `width` `color` `trackColor` `pivotText` **done** |
 | 骨架屏 | `nax-skeleton` | P1 | 内容占位骨架；头像/标题/段落；loading 切换真实内容 | `loading` `animate` `title` `avatar` `avatarSize` `avatarShape` `rows` `titleWidth` `titleHeight` `rowsWidth` `rowsHeight` `count` `gap` / 插槽 `skeleton` **done** |
 | 压窗屏 | `nax-popup` | P0 | App/Web dialogPage 盖导航栏+tabBar；小程序降级 | `openNaxPopup` `mode` `url` / 声明式 `v-model:show` **done** |
@@ -149,6 +151,7 @@
 | `nax-popup` | done | 插件包 `uni_modules/nax-popup`；压窗屏：App/Web `openDialogPage`；小程序页面级降级；详见 `docs/popup-window.md` |
 | `nax-keyboard` | done | 插件包 `uni_modules/nax-keyboard`；对齐 uView Pro Keyboard；number/car/card、乱序、遮罩弹层、长按退格 |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；对齐 uView Pro Calendar；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
+| `nax-datetime-picker` | done | 插件包 `uni_modules/nax-datetime-picker`；mode datetime/date/time/year-month/year/month-day；v-model 时间戳；showSecond；minDate/maxDate；弹层复用 nax-transition |
 | `nax-checkbox` / `nax-checkbox-group` | done | 插件包 `uni_modules/nax-checkbox`；单独布尔 v-model / 组 string[]；provide-inject |
 | `nax-radio` / `nax-radio-group` | done | 插件包 `uni_modules/nax-radio`；单独布尔 v-model / 组 string；provide-inject |
 | `nax-switch` | done | 插件包 `uni_modules/nax-switch`；布尔 v-model；loading 分端旋转；transform 滑动 + 轨道变色过渡 |
@@ -166,7 +169,8 @@
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
-| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+
 | `nax-progress` | done | 插件包 `uni_modules/nax-progress`；shape line/circle；type/status/size/showInfo/textInside/useSlot；双半环圆形 |
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |

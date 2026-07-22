@@ -1,0 +1,1391 @@
+<template>
+	<view class="nax-datetime-picker" :class="rootClass">
+		<view
+			v-if="showTrigger"
+			class="nax-datetime-picker__trigger"
+			:class="triggerClass"
+			:hover-class="triggerHoverClass"
+			:hover-start-time="20"
+			:hover-stay-time="70"
+			@click="onTriggerClick"
+		>
+			<slot name="trigger">
+				<text class="nax-datetime-picker__trigger-text" :class="triggerTextClass" :lines="1" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+				<view class="nax-datetime-picker__trigger-arrow">
+					<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
+				</view>
+			</slot>
+		</view>
+
+		<view v-if="rootMounted" class="nax-datetime-picker__root" :style="rootOverlayStyle">
+			<view
+				class="nax-datetime-picker__mask"
+				:class="maskClass"
+				:style="maskStyle"
+				@click="onMaskClick"
+			></view>
+			<view class="nax-datetime-picker__panel-layer">
+				<nax-transition
+					:show="panelShow"
+					name="slide-up"
+					:duration="ANIM_DURATION"
+					@after-leave="onOverlayLeave"
+				>
+					<view class="nax-datetime-picker__panel" :class="panelClass" :style="panelStyle">
+						<view class="nax-datetime-picker__header">
+							<view
+								class="nax-datetime-picker__btn nax-datetime-picker__btn--cancel"
+								:hover-class="btnHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click.stop="onCancel"
+							>
+								<text class="nax-datetime-picker__btn-text" :style="cancelTextStyle" @click.stop="onCancel">{{ cancelTextValue }}</text>
+							</view>
+							<view class="nax-datetime-picker__title-wrap">
+								<text v-if="title.length > 0" class="nax-datetime-picker__title" :lines="1">{{ title }}</text>
+							</view>
+							<view
+								class="nax-datetime-picker__btn nax-datetime-picker__btn--confirm"
+								:hover-class="btnHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click.stop="onConfirm"
+							>
+								<text class="nax-datetime-picker__btn-text nax-datetime-picker__btn-text--confirm" :style="confirmTextStyle" @click.stop="onConfirm">{{ confirmTextValue }}</text>
+							</view>
+						</view>
+
+						<view class="nax-datetime-picker__body">
+							<picker-view
+								v-if="readyToRender"
+								:key="pickerRenderKey"
+								class="nax-datetime-picker__picker"
+								:class="pickerClass"
+								:value="pickerValue"
+								:indicator-style="indicatorStyle"
+								@change="onColumnChange"
+								@pickstart="onPickStart"
+								@pickend="onPickEnd"
+							>
+								<!-- #ifdef APP-HARMONY -->
+								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column0"
+										:key="'h0-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(0, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column1"
+										:key="'h1-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(1, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column2"
+										:key="'h2-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(2, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column3"
+										:key="'h3-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(3, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column4"
+										:key="'h4-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(4, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column5"
+										:key="'h5-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(5, item) }}</text>
+									</view>
+								</picker-view-column>
+								<!-- #endif -->
+
+								<!-- #ifndef APP-HARMONY -->
+								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column0" :key="'c0-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(0, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column1" :key="'c1-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(1, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column2" :key="'c2-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(2, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column3" :key="'c3-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(3, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column4" :key="'c4-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(4, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column5" :key="'c5-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(5, item) }}</text>
+									</view>
+								</picker-view-column>
+								<!-- #endif -->
+							</picker-view>
+						</view>
+					</view>
+				</nax-transition>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-datetime-picker
+	 * @description 时间选择器（底部弹层 + picker-view）。对齐 uView Pro DatetimePicker 主能力。
+	 * @property {boolean} show v-model:show 弹层显隐
+	 * @property {number|string} modelValue v-model 选中值（时间戳 ms，或日期时间字符串）
+	 * @property {string} mode datetime | date | time | year-month | year | month-day
+	 * @property {number|string} minDate / maxDate 可选范围（时间戳或 YYYY-MM-DD[ HH:mm:ss]）
+	 * @property {number} minHour maxHour minMinute maxMinute minSecond maxSecond 时分秒范围
+	 * @property {boolean} showSecond 是否显示秒列（datetime / time）
+	 * @property {boolean} showUnit 列文案是否带单位（年/月/日…）
+	 * @property {string} format 触发条/回传 formatted 自定义格式；空则按 mode 默认
+	 * @property {boolean} showTrigger 内置触发条
+	 * @event update:show / update:modelValue / confirm / cancel / change / open / close
+	 * @slot trigger 自定义触发区（需 showTrigger）
+	 */
+	const props = defineProps({
+		show: { type: Boolean, default: false },
+		modelValue: { type: [Number, String], default: 0 as any },
+		mode: { type: String, default: 'datetime' },
+		minDate: { type: [Number, String], default: '' as any },
+		maxDate: { type: [Number, String], default: '' as any },
+		minHour: { type: Number, default: 0 },
+		maxHour: { type: Number, default: 23 },
+		minMinute: { type: Number, default: 0 },
+		maxMinute: { type: Number, default: 59 },
+		minSecond: { type: Number, default: 0 },
+		maxSecond: { type: Number, default: 59 },
+		showSecond: { type: Boolean, default: false },
+		showUnit: { type: Boolean, default: true },
+		title: { type: String, default: '' },
+		confirmText: { type: String, default: '确认' },
+		cancelText: { type: String, default: '取消' },
+		confirmColor: { type: String, default: '' },
+		cancelColor: { type: String, default: '' },
+		maskClosable: { type: Boolean, default: true },
+		maskCloseAble: { type: Boolean, default: true },
+		safeAreaInsetBottom: { type: Boolean, default: true },
+		zIndex: { type: Number, default: 10076 },
+		preserveSelection: { type: Boolean, default: true },
+		showTrigger: { type: Boolean, default: false },
+		placeholder: { type: String, default: '请选择' },
+		disabled: { type: Boolean, default: false },
+		border: { type: Boolean, default: true },
+		size: { type: String, default: 'md' },
+		format: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'update:modelValue',
+		'confirm',
+		'cancel',
+		'change',
+		'open',
+		'close'
+	])
+
+	const rootMounted = ref(false)
+	const panelShow = ref(false)
+	const readyToRender = ref(false)
+	const pickerRenderKey = ref(0)
+	const moving = ref(false)
+	const columnNum = ref(0)
+	const pickerValue = ref([] as number[])
+	const lastSelectIndex = ref([] as number[])
+	const hasConfirmed = ref(false)
+	const confirmedTimestamp = ref(0)
+	const confirmedFormatted = ref('')
+	const currentParts = ref([0, 0, 0, 0, 0, 0] as number[])
+	const safeBottomPx = ref(0)
+	const ANIM_DURATION = 280
+	let openDelayTimer: number = -1
+	/** 程序化改列/下标时忽略 change，避免鸿蒙 remount 死循环 */
+	let suppressPickerEvent: boolean = false
+	let suppressTimer: number = -1
+
+	const column0 = ref([] as number[])
+	const column1 = ref([] as number[])
+	const column2 = ref([] as number[])
+	const column3 = ref([] as number[])
+	const column4 = ref([] as number[])
+	const column5 = ref([] as number[])
+	const fieldTypes = ref([] as string[])
+
+	function normalizeMode(value: string): string {
+		if (value == 'date') return 'date'
+		if (value == 'time') return 'time'
+		if (value == 'year-month' || value == 'yearmonth') return 'year-month'
+		if (value == 'year') return 'year'
+		if (value == 'month-day' || value == 'monthday') return 'month-day'
+		return 'datetime'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') return 'sm'
+		if (value == 'lg' || value == 'large') return 'lg'
+		return 'md'
+	}
+
+	const modeName = computed((): string => normalizeMode(props.mode))
+	const sizeName = computed((): string => normalizeSize(props.size))
+
+	const cancelTextValue = computed((): string => {
+		if (props.cancelText.length > 0) return props.cancelText
+		return '取消'
+	})
+
+	const confirmTextValue = computed((): string => {
+		if (props.confirmText.length > 0) return props.confirmText
+		return '确认'
+	})
+
+	const canCloseByMask = computed((): boolean => props.maskClosable && props.maskCloseAble)
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.customClass.length > 0) cls += ' ' + props.customClass
+		return cls.trim()
+	})
+
+	const triggerClass = computed((): string => {
+		let cls = 'nax-datetime-picker__trigger--' + sizeName.value
+		if (props.border) cls += ' nax-datetime-picker__trigger--border'
+		if (props.disabled) cls += ' nax-datetime-picker__trigger--disabled'
+		return cls
+	})
+
+	const triggerHoverClass = computed((): string => {
+		if (props.disabled) return ''
+		return 'nax-datetime-picker__trigger--hover'
+	})
+
+	const btnHoverClass = computed((): string => 'nax-datetime-picker__btn--hover')
+
+	const triggerTextClass = computed((): string => {
+		if (!hasConfirmed.value || confirmedFormatted.value.length == 0) {
+			return 'nax-datetime-picker__trigger-text--placeholder'
+		}
+		if (props.disabled) return 'nax-datetime-picker__trigger-text--disabled'
+		return ''
+	})
+
+	const triggerDisplayText = computed((): string => {
+		if (!hasConfirmed.value || confirmedFormatted.value.length == 0) return props.placeholder
+		return confirmedFormatted.value
+	})
+
+	const arrowColor = computed((): string => {
+		if (props.disabled) return 'var(--nax-color-text-disabled, #c2c2c2)'
+		return 'var(--nax-color-text-secondary, #767c82)'
+	})
+
+	const cancelTextStyle = computed((): string => {
+		if (props.cancelColor.length > 0) return 'color:' + props.cancelColor + ';'
+		return ''
+	})
+
+	const confirmTextStyle = computed((): string => {
+		if (moving.value) {
+			if (props.cancelColor.length > 0) return 'color:' + props.cancelColor + ';'
+			return 'color:var(--nax-color-text-disabled, #c2c2c2);'
+		}
+		if (props.confirmColor.length > 0) return 'color:' + props.confirmColor + ';'
+		return 'color:var(--nax-color-primary, #18a058);'
+	})
+
+	const rootOverlayStyle = computed((): string => 'z-index:' + props.zIndex.toString() + ';')
+
+	const maskClass = computed((): string => {
+		if (panelShow.value) return 'nax-datetime-picker__mask--show'
+		return ''
+	})
+
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (panelShow.value) return 'background-color:rgba(0,0,0,0.45);opacity:1;'
+		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	const panelClass = computed((): string => {
+		if (props.safeAreaInsetBottom) return 'nax-datetime-picker__panel--safe'
+		return ''
+	})
+
+	const panelStyle = computed((): string => {
+		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+			return 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+		}
+		return ''
+	})
+
+	const indicatorStyle = computed((): string => 'height: 40px;')
+
+	const pickerClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		return 'nax-datetime-picker__picker--harmony'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	function pad2(n: number): string {
+		if (n < 10) return '0' + n.toString()
+		return n.toString()
+	}
+
+	function clamp(n: number, min: number, max: number): number {
+		if (n < min) return min
+		if (n > max) return max
+		return n
+	}
+
+	function daysInMonth(y: number, m: number): number {
+		return new Date(y, m, 0).getDate()
+	}
+
+	function makeRange(from: number, to: number): number[] {
+		const arr = [] as number[]
+		let i = from
+		while (i <= to) {
+			arr.push(i)
+			i++
+		}
+		return arr
+	}
+
+	function copyParts(src: number[]): number[] {
+		const out = [] as number[]
+		let i = 0
+		while (i < 6) {
+			out.push(i < src.length ? src[i] : 0)
+			i++
+		}
+		return out
+	}
+
+	function nowParts(): number[] {
+		const d = new Date()
+		const out = [] as number[]
+		out.push(d.getFullYear())
+		out.push(d.getMonth() + 1)
+		out.push(d.getDate())
+		out.push(d.getHours())
+		out.push(d.getMinutes())
+		out.push(d.getSeconds())
+		return out
+	}
+
+	function partsFromDate(d: Date): number[] {
+		const out = [] as number[]
+		out.push(d.getFullYear())
+		out.push(d.getMonth() + 1)
+		out.push(d.getDate())
+		out.push(d.getHours())
+		out.push(d.getMinutes())
+		out.push(d.getSeconds())
+		return out
+	}
+
+	function parseAnyToParts(value: any | null, fallback: number[]): number[] {
+		if (value == null) return copyParts(fallback)
+		if (typeof value == 'number') {
+			const n = value as number
+			if (n > 0) {
+				const d = new Date(n)
+				const t = d.getTime()
+				if (t == t) return partsFromDate(d)
+			}
+			return copyParts(fallback)
+		}
+		if (typeof value == 'string') {
+			const s = (value as string).trim()
+			if (s.length == 0) return copyParts(fallback)
+			const asNum = parseFloat(s)
+			if (asNum.toString() != 'NaN' && asNum == asNum && asNum > 100000) {
+				const d2 = new Date(asNum)
+				if (d2.getTime() == d2.getTime()) return partsFromDate(d2)
+			}
+			const normalized = s.replace(/-/g, '/')
+			const d3 = new Date(normalized)
+			if (d3.getTime() == d3.getTime()) return partsFromDate(d3)
+			// HH:mm[:ss]
+			const segs = s.split(':')
+			if (segs.length >= 2) {
+				const h = parseInt(segs[0])
+				const mi = parseInt(segs[1])
+				const sec = segs.length >= 3 ? parseInt(segs[2]) : 0
+				if (h == h && mi == mi) {
+					const base = nowParts()
+					base[3] = h
+					base[4] = mi
+					base[5] = sec == sec ? sec : 0
+					return base
+				}
+			}
+		}
+		return copyParts(fallback)
+	}
+
+	/** 未传 minDate 时默认近 30 年，缩短鸿蒙打开时年列滚动距离（原生动画时长不可控） */
+	function defaultMinParts(): number[] {
+		const now = nowParts()
+		const out = [] as number[]
+		let y = now[0] - 30
+		if (y < 1970) {
+			y = 1970
+		}
+		out.push(y)
+		out.push(1)
+		out.push(1)
+		out.push(0)
+		out.push(0)
+		out.push(0)
+		return out
+	}
+
+	function defaultMaxParts(): number[] {
+		const now = nowParts()
+		const out = [] as number[]
+		out.push(now[0] + 10)
+		out.push(12)
+		out.push(31)
+		out.push(23)
+		out.push(59)
+		out.push(59)
+		return out
+	}
+
+	function minBoundParts(): number[] {
+		if (props.minDate == null || props.minDate == '' || props.minDate == 0) {
+			const base = defaultMinParts()
+			if (modeName.value == 'time') {
+				base[3] = clamp(props.minHour, 0, 23)
+				base[4] = clamp(props.minMinute, 0, 59)
+				base[5] = clamp(props.minSecond, 0, 59)
+			}
+			return base
+		}
+		const p = parseAnyToParts(props.minDate, defaultMinParts())
+		if (modeName.value == 'time') {
+			p[3] = clamp(props.minHour, 0, 23)
+			p[4] = clamp(props.minMinute, 0, 59)
+			p[5] = clamp(props.minSecond, 0, 59)
+		}
+		return p
+	}
+
+	function maxBoundParts(): number[] {
+		if (props.maxDate == null || props.maxDate == '' || props.maxDate == 0) {
+			const base = defaultMaxParts()
+			if (modeName.value == 'time') {
+				base[3] = clamp(props.maxHour, 0, 23)
+				base[4] = clamp(props.maxMinute, 0, 59)
+				base[5] = clamp(props.maxSecond, 0, 59)
+			}
+			return base
+		}
+		const p = parseAnyToParts(props.maxDate, defaultMaxParts())
+		if (modeName.value == 'time') {
+			p[3] = clamp(props.maxHour, 0, 23)
+			p[4] = clamp(props.maxMinute, 0, 59)
+			p[5] = clamp(props.maxSecond, 0, 59)
+		}
+		return p
+	}
+
+	function getFieldList(mode: string): string[] {
+		const list = [] as string[]
+		if (mode == 'datetime') {
+			list.push('year'); list.push('month'); list.push('day'); list.push('hour'); list.push('minute')
+			if (props.showSecond) list.push('second')
+		} else if (mode == 'date') {
+			list.push('year'); list.push('month'); list.push('day')
+		} else if (mode == 'time') {
+			list.push('hour'); list.push('minute')
+			if (props.showSecond) list.push('second')
+		} else if (mode == 'year-month') {
+			list.push('year'); list.push('month')
+		} else if (mode == 'year') {
+			list.push('year')
+		} else if (mode == 'month-day') {
+			list.push('month'); list.push('day')
+		} else {
+			list.push('year'); list.push('month'); list.push('day'); list.push('hour'); list.push('minute')
+		}
+		return list
+	}
+
+	function partsToTimestamp(parts: number[]): number {
+		const y = parts[0]
+		const m = parts[1]
+		const d = parts[2]
+		const h = parts[3]
+		const mi = parts[4]
+		const s = parts[5]
+		const date = new Date(y, m - 1, d, h, mi, s)
+		const t = date.getTime()
+		if (t != t) return 0
+		return t
+	}
+
+	function compareParts(a: number[], b: number[]): number {
+		let i = 0
+		while (i < 6) {
+			if (a[i] < b[i]) return -1
+			if (a[i] > b[i]) return 1
+			i++
+		}
+		return 0
+	}
+
+	function clampParts(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let out = copyParts(parts)
+		if (out[1] < 1) out[1] = 1
+		if (out[1] > 12) out[1] = 12
+		const dim = daysInMonth(out[0], out[1])
+		if (out[2] < 1) out[2] = 1
+		if (out[2] > dim) out[2] = dim
+		out[3] = clamp(out[3], 0, 23)
+		out[4] = clamp(out[4], 0, 59)
+		out[5] = clamp(out[5], 0, 59)
+		if (compareParts(out, minP) < 0) out = copyParts(minP)
+		if (compareParts(out, maxP) > 0) out = copyParts(maxP)
+		const dim2 = daysInMonth(out[0], out[1])
+		if (out[2] > dim2) out[2] = dim2
+		return out
+	}
+
+	function yearRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		return makeRange(minP[0], maxP[0])
+	}
+
+	function monthRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = 1
+		let end = 12
+		if (parts[0] == minP[0]) start = minP[1]
+		if (parts[0] == maxP[0]) end = maxP[1]
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function dayRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		const dim = daysInMonth(parts[0], parts[1])
+		let start = 1
+		let end = dim
+		if (parts[0] == minP[0] && parts[1] == minP[1]) start = minP[2]
+		if (parts[0] == maxP[0] && parts[1] == maxP[1]) {
+			if (maxP[2] < end) end = maxP[2]
+		}
+		if (start > end) start = end
+		if (start < 1) start = 1
+		if (end > dim) end = dim
+		return makeRange(start, end)
+	}
+
+	function hourRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = clamp(props.minHour, 0, 23)
+		let end = clamp(props.maxHour, 0, 23)
+		if (modeName.value != 'time') {
+			start = 0
+			end = 23
+			const sameMinDay = parts[0] == minP[0] && parts[1] == minP[1] && parts[2] == minP[2]
+			const sameMaxDay = parts[0] == maxP[0] && parts[1] == maxP[1] && parts[2] == maxP[2]
+			if (sameMinDay) start = minP[3]
+			if (sameMaxDay) end = maxP[3]
+		}
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function minuteRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = clamp(props.minMinute, 0, 59)
+		let end = clamp(props.maxMinute, 0, 59)
+		if (modeName.value != 'time') {
+			start = 0
+			end = 59
+			const sameMinHour = parts[0] == minP[0] && parts[1] == minP[1] && parts[2] == minP[2] && parts[3] == minP[3]
+			const sameMaxHour = parts[0] == maxP[0] && parts[1] == maxP[1] && parts[2] == maxP[2] && parts[3] == maxP[3]
+			if (sameMinHour) start = minP[4]
+			if (sameMaxHour) end = maxP[4]
+		}
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function secondRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = clamp(props.minSecond, 0, 59)
+		let end = clamp(props.maxSecond, 0, 59)
+		if (modeName.value != 'time') {
+			start = 0
+			end = 59
+			const sameMinMin = parts[0] == minP[0] && parts[1] == minP[1] && parts[2] == minP[2] && parts[3] == minP[3] && parts[4] == minP[4]
+			const sameMaxMin = parts[0] == maxP[0] && parts[1] == maxP[1] && parts[2] == maxP[2] && parts[3] == maxP[3] && parts[4] == maxP[4]
+			if (sameMinMin) start = minP[5]
+			if (sameMaxMin) end = maxP[5]
+		}
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function setColumnList(colIndex: number, list: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < list.length) {
+			next.push(list[i])
+			i++
+		}
+		if (colIndex == 0) column0.value = next
+		else if (colIndex == 1) column1.value = next
+		else if (colIndex == 2) column2.value = next
+		else if (colIndex == 3) column3.value = next
+		else if (colIndex == 4) column4.value = next
+		else if (colIndex == 5) column5.value = next
+	}
+
+	function getColumnList(colIndex: number): number[] {
+		if (colIndex == 0) return column0.value
+		if (colIndex == 1) return column1.value
+		if (colIndex == 2) return column2.value
+		if (colIndex == 3) return column3.value
+		if (colIndex == 4) return column4.value
+		if (colIndex == 5) return column5.value
+		return [] as number[]
+	}
+
+	function clearExtraColumns(from: number) {
+		let i = from
+		while (i < 6) {
+			setColumnList(i, [] as number[])
+			i++
+		}
+	}
+
+	function rangeForField(field: string, parts: number[]): number[] {
+		if (field == 'year') return yearRange(parts)
+		if (field == 'month') return monthRange(parts)
+		if (field == 'day') return dayRange(parts)
+		if (field == 'hour') return hourRange(parts)
+		if (field == 'minute') return minuteRange(parts)
+		if (field == 'second') return secondRange(parts)
+		return [] as number[]
+	}
+
+	function fieldIndex(field: string): number {
+		if (field == 'year') return 0
+		if (field == 'month') return 1
+		if (field == 'day') return 2
+		if (field == 'hour') return 3
+		if (field == 'minute') return 4
+		if (field == 'second') return 5
+		return 0
+	}
+
+	function indexOfValue(list: number[], value: number): number {
+		let i = 0
+		while (i < list.length) {
+			if (list[i] == value) return i
+			i++
+		}
+		if (list.length == 0) return 0
+		return 0
+	}
+
+	function unitOf(field: string): string {
+		if (!props.showUnit) return ''
+		if (field == 'year') return '年'
+		if (field == 'month') return '月'
+		if (field == 'day') return '日'
+		if (field == 'hour') return '时'
+		if (field == 'minute') return '分'
+		if (field == 'second') return '秒'
+		return ''
+	}
+
+	function formatColLabel(colIndex: number, value: number): string {
+		if (colIndex < 0 || colIndex >= fieldTypes.value.length) return value.toString()
+		const field = fieldTypes.value[colIndex]
+		const unit = unitOf(field)
+		if (field == 'year') return value.toString() + unit
+		if (field == 'month' || field == 'day') return value.toString() + unit
+		return pad2(value) + unit
+	}
+
+	function defaultFormatByMode(mode: string): string {
+		if (mode == 'datetime') {
+			if (props.showSecond) return 'YYYY-MM-DD HH:mm:ss'
+			return 'YYYY-MM-DD HH:mm'
+		}
+		if (mode == 'date') return 'YYYY-MM-DD'
+		if (mode == 'time') {
+			if (props.showSecond) return 'HH:mm:ss'
+			return 'HH:mm'
+		}
+		if (mode == 'year-month') return 'YYYY-MM'
+		if (mode == 'year') return 'YYYY'
+		if (mode == 'month-day') return 'MM-DD'
+		return 'YYYY-MM-DD HH:mm'
+	}
+
+	function formatParts(parts: number[], pattern: string): string {
+		let out = pattern
+		out = out.replace('YYYY', parts[0].toString())
+		out = out.replace('MM', pad2(parts[1]))
+		out = out.replace('DD', pad2(parts[2]))
+		out = out.replace('HH', pad2(parts[3]))
+		out = out.replace('mm', pad2(parts[4]))
+		out = out.replace('ss', pad2(parts[5]))
+		// single tokens without pad for rare cases
+		out = out.replace('M', parts[1].toString())
+		out = out.replace('D', parts[2].toString())
+		return out
+	}
+
+	function formatCurrent(parts: number[]): string {
+		const pattern = props.format.length > 0 ? props.format : defaultFormatByMode(modeName.value)
+		return formatParts(parts, pattern)
+	}
+
+	function clearSuppressTimer() {
+		if (suppressTimer >= 0) {
+			clearTimeout(suppressTimer)
+			suppressTimer = -1
+		}
+	}
+
+	function armSuppressPickerEvent() {
+		suppressPickerEvent = true
+		clearSuppressTimer()
+		// #ifdef APP-HARMONY
+		// 鸿蒙：原生 picker 异步回抛 change，抑制窗口略长
+		const delay = 80
+		// #endif
+		// #ifndef APP-HARMONY
+		const delay = 32
+		// #endif
+		suppressTimer = setTimeout(() => {
+			suppressTimer = -1
+			suppressPickerEvent = false
+		}, delay)
+	}
+
+	/**
+	 * 重建列数据（不改 picker key）。
+	 * 滚动 change 中禁止 remount：与 nax-select 一致，避免鸿蒙闪 0 再跳目标 / 死循环。
+	 */
+	function rebuildColumns(partsIn: number[], remount: boolean) {
+		const mode = modeName.value
+		const fields = getFieldList(mode)
+		fieldTypes.value = fields
+		columnNum.value = fields.length
+		let parts = clampParts(partsIn)
+
+		let c = 0
+		while (c < fields.length) {
+			const field = fields[c]
+			const range = rangeForField(field, parts)
+			const fi = fieldIndex(field)
+			if (range.length > 0) {
+				const idx = indexOfValue(range, parts[fi])
+				const picked = range[idx]
+				parts[fi] = picked
+			}
+			setColumnList(c, range)
+			c++
+		}
+		clearExtraColumns(fields.length)
+
+		const selector = [] as number[]
+		c = 0
+		while (c < fields.length) {
+			const field = fields[c]
+			const range = getColumnList(c)
+			const fi = fieldIndex(field)
+			selector.push(indexOfValue(range, parts[fi]))
+			c++
+		}
+
+		currentParts.value = parts
+		// 对齐 nax-select：若 remount，先换 key，再写入 value，避免挂载后二次改 value 触发滚动画
+		if (remount) {
+			pickerRenderKey.value = pickerRenderKey.value + 1
+		}
+		syncPickerValue(selector)
+	}
+
+	/** 对齐 nax-select.syncPickerValue：只在列数据就绪后写一次下标 */
+	function syncPickerValue(selector: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			let idx = i < selector.length ? selector[i] : 0
+			if (idx < 0) {
+				idx = 0
+			}
+			if (col.length > 0 && idx >= col.length) {
+				idx = col.length - 1
+			}
+			next.push(idx)
+			i++
+		}
+		armSuppressPickerEvent()
+		pickerValue.value = next
+		lastSelectIndex.value = next.slice()
+	}
+
+	function buildResult(parts: number[]): UTSJSONObject {
+		const ts = partsToTimestamp(parts)
+		const formatted = formatCurrent(parts)
+		const row = {
+			value: ts,
+			timestamp: ts,
+			formatted: formatted,
+			year: parts[0],
+			month: parts[1],
+			day: parts[2],
+			hour: parts[3],
+			minute: parts[4],
+			second: parts[5],
+			mode: modeName.value
+		} as UTSJSONObject
+		return row
+	}
+
+	function resolveOpenParts(): number[] {
+		if (props.preserveSelection && hasConfirmed.value && confirmedTimestamp.value > 0) {
+			return clampParts(parseAnyToParts(confirmedTimestamp.value, nowParts()))
+		}
+		const fromModel = parseAnyToParts(props.modelValue, nowParts())
+		return clampParts(fromModel)
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function initPicker() {
+		const parts = resolveOpenParts()
+		// open 时 remount，与 nax-select.initPicker 一致
+		rebuildColumns(parts, true)
+	}
+
+	function openPicker() {
+		if (props.disabled) {
+			return
+		}
+		// 已完全展开：只同步 v-model
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		// 已在进场排队：勿二次 open
+		if (openDelayTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
+		refreshSafeArea()
+		rootMounted.value = true
+		// 先卸再挂：首帧即带正确 value，对齐 nax-select（避免挂载后改 value 的滚动动画）
+		readyToRender.value = false
+		initPicker()
+		// 等列数据与 value 就绪再挂载 picker-view
+		readyToRender.value = true
+		// 始终先 false 再 true：保证 nax-transition 进场
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		const openDelay = 50
+		// #endif
+		// #ifndef APP-HARMONY
+		const openDelay = 30
+		// #endif
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+		}, openDelay)
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function closePicker(emitUpdate: boolean) {
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) emit('update:show', false)
+			return
+		}
+		if (!panelShow.value) {
+			if (emitUpdate) emit('update:show', false)
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) emit('update:show', false)
+	}
+
+	function onOverlayLeave() {
+		if (panelShow.value) return
+		clearSuppressTimer()
+		suppressPickerEvent = false
+		rootMounted.value = false
+		readyToRender.value = false
+		moving.value = false
+		emit('close')
+	}
+
+	function onTriggerClick() {
+		if (props.disabled) return
+		if (rootMounted.value && panelShow.value) return
+		openPicker()
+	}
+
+	function onMaskClick() {
+		if (!canCloseByMask.value) return
+		emit('cancel', buildResult(currentParts.value))
+		closePicker(true)
+	}
+
+	function onCancel() {
+		emit('cancel', buildResult(currentParts.value))
+		closePicker(true)
+	}
+
+	function onConfirm() {
+		// #ifdef MP-WEIXIN
+		if (moving.value) return
+		// #endif
+		const parts = clampParts(currentParts.value)
+		const result = buildResult(parts)
+		const ts = partsToTimestamp(parts)
+		const formatted = formatCurrent(parts)
+		hasConfirmed.value = true
+		confirmedTimestamp.value = ts
+		confirmedFormatted.value = formatted
+		emit('update:modelValue', ts)
+		emit('confirm', result)
+		closePicker(true)
+	}
+
+	function onWheelItemClickBlock() {
+		// 鸿蒙：吞掉滚轮选项点击
+	}
+
+	function onPickStart() {
+		// #ifdef MP-WEIXIN
+		moving.value = true
+		// #endif
+	}
+
+	function onPickEnd() {
+		// #ifdef MP-WEIXIN
+		moving.value = false
+		// #endif
+	}
+
+	function findChangedColumn(prev: number[], next: number[]): number {
+		const len = prev.length < next.length ? prev.length : next.length
+		let i = 0
+		while (i < len) {
+			if (prev[i] != next[i]) return i
+			i++
+		}
+		if (prev.length != next.length) return 0
+		return -1
+	}
+
+	function onColumnChange(e: UniPickerViewChangeEvent) {
+		if (suppressPickerEvent) {
+			return
+		}
+		const detail = e.detail
+		const columnIndex = detail.value
+		const next = [] as number[]
+		let n = 0
+		// 兼容鸿蒙 value 项可能为 string
+		while (n < columnIndex.length) {
+			const raw = columnIndex[n]
+			if (typeof raw == 'number') {
+				next.push(raw as number)
+			} else if (typeof raw == 'string') {
+				const parsed = parseInt(raw as string)
+				next.push(parsed >= 0 ? parsed : 0)
+			} else {
+				next.push(0)
+			}
+			n++
+		}
+		if (next.length == 0) {
+			return
+		}
+
+		// 夹紧到当前列长度
+		const fixed = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			let idx = i < next.length ? next[i] : 0
+			if (idx < 0) {
+				idx = 0
+			}
+			if (col.length > 0 && idx >= col.length) {
+				idx = col.length - 1
+			}
+			fixed.push(idx)
+			i++
+		}
+
+		const fields = fieldTypes.value
+		const parts = copyParts(currentParts.value)
+		i = 0
+		while (i < fields.length) {
+			const field = fields[i]
+			const col = getColumnList(i)
+			const idx = fixed[i]
+			if (col.length > 0) {
+				parts[fieldIndex(field)] = col[idx]
+			}
+			i++
+		}
+
+		const changed = findChangedColumn(lastSelectIndex.value, fixed)
+		// 上级变化：只刷新列数据，禁止 remount（鸿蒙滚动中 remount 会卡死/崩溃）
+		if (changed >= 0 && changed < fields.length - 1) {
+			rebuildColumns(parts, false)
+		} else {
+			const clamped = clampParts(parts)
+			armSuppressPickerEvent()
+			currentParts.value = clamped
+			pickerValue.value = fixed.slice()
+			lastSelectIndex.value = fixed.slice()
+		}
+		emit('change', buildResult(currentParts.value))
+	}
+
+		function syncConfirmedFromModel() {
+		const raw = props.modelValue
+		if (raw == null || raw == '' || raw == 0) return
+		const parts = clampParts(parseAnyToParts(raw, nowParts()))
+		const ts = partsToTimestamp(parts)
+		if (ts <= 0) return
+		hasConfirmed.value = true
+		confirmedTimestamp.value = ts
+		confirmedFormatted.value = formatCurrent(parts)
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val) {
+			// 已完全展开：忽略，避免 v-model 回写二次 open
+			if (rootMounted.value && panelShow.value) {
+				return
+			}
+			openPicker()
+		} else {
+			closePicker(false)
+		}
+	})
+
+	watch((): any => {
+		return props.modelValue
+	}, (_: any) => {
+		syncConfirmedFromModel()
+	})
+
+	watch((): string => {
+		return modeName.value
+	}, (_: string) => {
+		if (rootMounted.value && panelShow.value) {
+			// 展示中切 mode：刷新列数据，不 remount
+			rebuildColumns(currentParts.value, false)
+		}
+	})
+
+	// 初始化触发条文案
+	syncConfirmedFromModel()
+	if (props.show) {
+		openPicker()
+	}
+</script>
+
+<style>
+	.nax-datetime-picker {
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__trigger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+	}
+
+	.nax-datetime-picker__trigger--sm { height: 32px; }
+	.nax-datetime-picker__trigger--md { height: 40px; }
+	.nax-datetime-picker__trigger--lg { height: 48px; }
+
+	.nax-datetime-picker__trigger--border {
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-datetime-picker__trigger--disabled { opacity: 0.5; }
+	.nax-datetime-picker__trigger--hover { background-color: var(--nax-color-bg-hover, #f3f3f5); }
+
+	.nax-datetime-picker__trigger-text {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		/* #endif */
+	}
+
+	.nax-datetime-picker__trigger--sm .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-sm, 14px); }
+	.nax-datetime-picker__trigger--lg .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-lg, 18px); }
+	.nax-datetime-picker__trigger-text--placeholder { color: var(--nax-color-text-placeholder, #c2c2c2); }
+	.nax-datetime-picker__trigger-text--disabled { color: var(--nax-color-text-disabled, #c2c2c2); }
+
+	.nax-datetime-picker__trigger-arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: var(--nax-space-2, 8px);
+		flex-shrink: 0;
+	}
+
+	.nax-datetime-picker__root {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	.nax-datetime-picker__panel-layer {
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		background-color: rgba(0, 0, 0, 0.45);
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-datetime-picker__mask {
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+	/* #endif */
+
+	.nax-datetime-picker__mask--show { opacity: 1; }
+
+	.nax-datetime-picker__panel {
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-datetime-picker__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-datetime-picker__header {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 48px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-datetime-picker__btn {
+		min-width: 72px;
+		height: 48px;
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-datetime-picker__btn--hover { opacity: 0.7; }
+
+	.nax-datetime-picker__btn-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-datetime-picker__btn-text--confirm {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+	}
+
+	.nax-datetime-picker__title-wrap {
+		flex: 1;
+		min-width: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-datetime-picker__title {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		text-align: center;
+	}
+
+	.nax-datetime-picker__body {
+		height: 240px;
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__picker {
+		flex: 1;
+		height: 240px;
+	}
+
+	.nax-datetime-picker__column { flex: 1; }
+
+	.nax-datetime-picker__item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-datetime-picker__item-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	/* #ifdef APP-HARMONY */
+	.nax-datetime-picker__item--no-tap {}
+	.nax-datetime-picker__picker--harmony {}
+	/* #endif */
+</style>

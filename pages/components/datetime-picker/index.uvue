@@ -1,0 +1,294 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-datetime-picker</text>
+			<text class="page__desc">时间选择器。底部弹层 + picker-view，支持日期/时间多种 mode。</text>
+
+			<view class="section">
+				<text class="section__title">日期时间 datetime</text>
+				<nax-button label="选择日期时间" type="primary" @click="dtShow = true"></nax-button>
+				<text class="hint">结果：{{ dtText }}</text>
+				<nax-datetime-picker
+					v-model:show="dtShow"
+					v-model="dtValue"
+					mode="datetime"
+					title="选择日期时间"
+					@confirm="onDtConfirm"
+					@cancel="onCancel('datetime')"
+				></nax-datetime-picker>
+			</view>
+
+			<view class="section">
+				<text class="section__title">内置触发条 + 日期 date</text>
+				<nax-datetime-picker
+					v-model:show="dateShow"
+					v-model="dateValue"
+					mode="date"
+					show-trigger
+					title="选择日期"
+					placeholder="请选择日期"
+					@confirm="onDateConfirm"
+				></nax-datetime-picker>
+				<text class="hint">结果：{{ dateText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">时间 time + 秒</text>
+				<nax-button label="选择时间" @click="timeShow = true"></nax-button>
+				<text class="hint">结果：{{ timeText }}</text>
+				<nax-datetime-picker
+					v-model:show="timeShow"
+					v-model="timeValue"
+					mode="time"
+					show-second
+					title="选择时间"
+					@confirm="onTimeConfirm"
+				></nax-datetime-picker>
+			</view>
+
+			<view class="section">
+				<text class="section__title">年月 year-month</text>
+				<nax-datetime-picker
+					v-model:show="ymShow"
+					v-model="ymValue"
+					mode="year-month"
+					show-trigger
+					title="选择年月"
+					placeholder="请选择年月"
+					@confirm="onYmConfirm"
+				></nax-datetime-picker>
+				<text class="hint">结果：{{ ymText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">年 year / 月日 month-day</text>
+				<view class="row">
+					<nax-button size="sm" label="选择年" @click="yearShow = true"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="选择月日" @click="mdShow = true"></nax-button>
+				</view>
+				<text class="hint">年：{{ yearText }}</text>
+				<text class="hint">月日：{{ mdText }}</text>
+				<nax-datetime-picker
+					v-model:show="yearShow"
+					v-model="yearValue"
+					mode="year"
+					title="选择年份"
+					@confirm="onYearConfirm"
+				></nax-datetime-picker>
+				<nax-datetime-picker
+					v-model:show="mdShow"
+					v-model="mdValue"
+					mode="month-day"
+					title="选择月日"
+					@confirm="onMdConfirm"
+				></nax-datetime-picker>
+			</view>
+
+			<view class="section">
+				<text class="section__title">范围限制 minDate / maxDate</text>
+				<nax-button label="2020-01-01 ~ 2026-12-31" @click="rangeShow = true"></nax-button>
+				<text class="hint">结果：{{ rangeText }}</text>
+				<nax-datetime-picker
+					v-model:show="rangeShow"
+					v-model="rangeValue"
+					mode="date"
+					min-date="2020-01-01"
+					max-date="2026-12-31"
+					title="限定范围"
+					@confirm="onRangeConfirm"
+				></nax-datetime-picker>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义 format / 无单位</text>
+				<nax-datetime-picker
+					v-model:show="fmtShow"
+					v-model="fmtValue"
+					mode="datetime"
+					show-trigger
+					:show-unit="false"
+					format="YYYY/MM/DD HH:mm"
+					placeholder="自定义格式"
+					title="自定义"
+					@confirm="onFmtConfirm"
+				></nax-datetime-picker>
+				<text class="hint">结果：{{ fmtText }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用触发条</text>
+				<nax-datetime-picker
+					show-trigger
+					disabled
+					placeholder="已禁用"
+					mode="date"
+				></nax-datetime-picker>
+			</view>
+
+			<view class="section">
+				<text class="section__title">最近事件</text>
+				<text class="hint">{{ lastEvent }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'page--dark'
+		}
+		return ''
+	})
+
+	const lastEvent = ref('无')
+
+	const dtShow = ref(false)
+	const dtValue = ref(0)
+	const dtText = ref('未选择')
+
+	const dateShow = ref(false)
+	const dateValue = ref(0)
+	const dateText = ref('未选择')
+
+	const timeShow = ref(false)
+	const timeValue = ref(0)
+	const timeText = ref('未选择')
+
+	const ymShow = ref(false)
+	const ymValue = ref(0)
+	const ymText = ref('未选择')
+
+	const yearShow = ref(false)
+	const yearValue = ref(0)
+	const yearText = ref('未选择')
+
+	const mdShow = ref(false)
+	const mdValue = ref(0)
+	const mdText = ref('未选择')
+
+	const rangeShow = ref(false)
+	const rangeValue = ref(0)
+	const rangeText = ref('未选择')
+
+	const fmtShow = ref(false)
+	const fmtValue = ref(0)
+	const fmtText = ref('未选择')
+
+	function readFormatted(e: UTSJSONObject): string {
+		const s = e.getString('formatted')
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const ts = e.getNumber('timestamp')
+		if (ts != null) {
+			return ts.toString()
+		}
+		return ''
+	}
+
+	function onDtConfirm(e: UTSJSONObject) {
+		dtText.value = readFormatted(e)
+		lastEvent.value = 'confirm datetime → ' + dtText.value
+	}
+
+	function onDateConfirm(e: UTSJSONObject) {
+		dateText.value = readFormatted(e)
+		lastEvent.value = 'confirm date → ' + dateText.value
+	}
+
+	function onTimeConfirm(e: UTSJSONObject) {
+		timeText.value = readFormatted(e)
+		lastEvent.value = 'confirm time → ' + timeText.value
+	}
+
+	function onYmConfirm(e: UTSJSONObject) {
+		ymText.value = readFormatted(e)
+		lastEvent.value = 'confirm year-month → ' + ymText.value
+	}
+
+	function onYearConfirm(e: UTSJSONObject) {
+		yearText.value = readFormatted(e)
+		lastEvent.value = 'confirm year → ' + yearText.value
+	}
+
+	function onMdConfirm(e: UTSJSONObject) {
+		mdText.value = readFormatted(e)
+		lastEvent.value = 'confirm month-day → ' + mdText.value
+	}
+
+	function onRangeConfirm(e: UTSJSONObject) {
+		rangeText.value = readFormatted(e)
+		lastEvent.value = 'confirm range → ' + rangeText.value
+	}
+
+	function onFmtConfirm(e: UTSJSONObject) {
+		fmtText.value = readFormatted(e)
+		lastEvent.value = 'confirm format → ' + fmtText.value
+	}
+
+	function onCancel(name: string) {
+		lastEvent.value = 'cancel ' + name
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		padding-bottom: 40px;
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+		line-height: 20px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 20px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: 8px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.section__title {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.gap {
+		width: 10px;
+	}
+</style>

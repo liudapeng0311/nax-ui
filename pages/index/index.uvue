@@ -103,6 +103,10 @@
 					<text class="home__card-name">日历</text>
 					<text class="home__card-tag">nax-calendar</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goDatetimePicker">
+					<text class="home__card-name">时间选择</text>
+					<text class="home__card-tag">nax-datetime-picker</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goKeyboard">
 					<text class="home__card-name">键盘</text>
 					<text class="home__card-tag">nax-keyboard</text>
@@ -373,6 +377,12 @@
 	function goCalendar() {
 		uni.navigateTo({
 			url: '/pages/components/calendar/index'
+		})
+	}
+
+	function goDatetimePicker() {
+		uni.navigateTo({
+			url: '/pages/components/datetime-picker/index'
 		})
 	}
 
