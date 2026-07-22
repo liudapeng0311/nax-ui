@@ -159,7 +159,7 @@
 | `nax-space` / `nax-space-item` | done | 插件包 `uni_modules/nax-space`；横向/纵向间距；item 吃 margin 兼容隔离 2.0 |
 | `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 database-off（暂无数据）；列表空建议 notes-off |
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
-| `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size |
+| `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
 | `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
 | 其余 MVP | planned | 按依赖自底向上 |

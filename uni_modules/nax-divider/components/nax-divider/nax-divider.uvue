@@ -19,14 +19,15 @@
 				:style="lineColorStyle"
 			></view>
 		</template>
-		<template v-else>
+		<!-- 竖向带文案：上下线段 + 中间内容 -->
+		<template v-else-if="hasContent">
 			<view
 				v-if="showStartLine"
 				class="nax-divider__line nax-divider__line--v"
 				:class="lineClass"
 				:style="lineColorStyle"
 			></view>
-			<view v-if="hasContent" class="nax-divider__content nax-divider__content--v">
+			<view class="nax-divider__content nax-divider__content--v">
 				<slot>
 					<text v-if="hasText" class="nax-divider__text" :class="textClass" :style="textColorStyle">{{ text }}</text>
 				</slot>
@@ -38,6 +39,7 @@
 				:style="lineColorStyle"
 			></view>
 		</template>
+		<!-- 纯竖线：根节点自身即线条（对齐 nax-line，避免子节点 height:0 塌缩） -->
 	</view>
 </template>
 
@@ -54,6 +56,7 @@
 	 * @property {string} color 自定义线色（覆盖 type）
 	 * @property {string} textColor 自定义文案色
 	 * @property {string} space 外边距：横=上下，竖=左右
+	 * @property {string} length 竖向高度（纯竖线默认 100%；与文字并排建议传如 16）
 	 * @property {string} customClass 根节点扩展 class
 	 * @slot default 自定义中间内容
 	 */
@@ -67,6 +70,7 @@
 		color: { type: String, default: '' },
 		textColor: { type: String, default: '' },
 		space: { type: String, default: '' },
+		length: { type: String, default: '' },
 		customClass: { type: String, default: '' }
 	})
 
@@ -184,6 +188,17 @@
 		if (hasContent.value) {
 			cls += ' nax-divider--with-content'
 			cls += ' nax-divider--pos-' + positionName.value
+		} else {
+			cls += ' nax-divider--plain'
+			// 纯竖线：固定高度与文字居中；百分比/默认 100% 则 stretch 拉满父高
+			if (!isHorizontal.value) {
+				const rawLen = props.length.trim()
+				if (rawLen.length > 0 && rawLen.indexOf('%') < 0) {
+					cls += ' nax-divider--v-center'
+				} else {
+					cls += ' nax-divider--v-stretch'
+				}
+			}
 		}
 		if (props.customClass.length > 0) {
 			cls += ' ' + props.customClass
@@ -199,6 +214,30 @@
 				style += 'margin-top:' + space + ';margin-bottom:' + space + ';'
 			} else {
 				style += 'margin-left:' + space + ';margin-right:' + space + ';'
+			}
+		}
+
+		// 纯竖线：高度默认 100%（父级需有明确高度），可用 length 覆盖
+		if (!isHorizontal.value && !hasContent.value) {
+			const rawLen = props.length.trim().length > 0 ? props.length : '100%'
+			const len = formatCssSize(rawLen)
+			if (len.length > 0) {
+				style += 'height:' + len + ';'
+			}
+		} else if (!isHorizontal.value && props.length.trim().length > 0) {
+			// 竖向带文案时也可指定总高
+			const len = formatCssSize(props.length)
+			if (len.length > 0) {
+				style += 'height:' + len + ';'
+			}
+		}
+
+		// 自定义色：纯竖线画在根节点上
+		if (!isHorizontal.value && !hasContent.value && props.color.length > 0) {
+			if (props.dashed) {
+				style += 'border-left-color:' + props.color + ';'
+			} else {
+				style += 'background-color:' + props.color + ';'
 			}
 		}
 		return style
@@ -255,10 +294,104 @@
 		width: 100%;
 	}
 
-	.nax-divider--vertical {
+	/* 竖向带文案：column + stretch */
+	.nax-divider--vertical.nax-divider--with-content {
 		flex-direction: column;
 		align-self: stretch;
-		height: 100%;
+		align-items: center;
+		justify-content: center;
+		min-height: 14px;
+	}
+
+	/* 纯竖线：根节点即线条 */
+	.nax-divider--vertical.nax-divider--plain {
+		flex-direction: column;
+	}
+
+	/* 固定 length（如 16）与文字垂直居中 */
+	.nax-divider--vertical.nax-divider--plain.nax-divider--v-center {
+		align-self: center;
+	}
+
+	/* length 为 % 或默认 100%：拉满父级交叉轴 */
+	.nax-divider--vertical.nax-divider--plain.nax-divider--v-stretch {
+		align-self: stretch;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--solid.nax-divider--size-hairline {
+		width: 1px;
+		transform: scaleX(0.5);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--solid.nax-divider--size-sm {
+		width: 1px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--solid.nax-divider--size-md {
+		width: 2px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed {
+		width: 0;
+		background-color: transparent;
+		border-left-style: dashed;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed.nax-divider--size-hairline,
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed.nax-divider--size-sm {
+		border-left-width: 1px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed.nax-divider--size-md {
+		border-left-width: 2px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--default.nax-divider--solid {
+		background-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--primary.nax-divider--solid {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--info.nax-divider--solid {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--success.nax-divider--solid {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--warning.nax-divider--solid {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--error.nax-divider--solid {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--default.nax-divider--dashed {
+		border-left-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--primary.nax-divider--dashed {
+		border-left-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--info.nax-divider--dashed {
+		border-left-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--success.nax-divider--dashed {
+		border-left-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--warning.nax-divider--dashed {
+		border-left-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--error.nax-divider--dashed {
+		border-left-color: var(--nax-color-error, #d03050);
 	}
 
 	.nax-divider__line {
@@ -273,11 +406,12 @@
 		min-width: 12px;
 	}
 
+	/* 竖向带文案时上下线段均分剩余高度 */
 	.nax-divider__line--v {
 		flex-grow: 1;
 		flex-shrink: 1;
-		height: 0;
-		min-height: 12px;
+		flex-basis: 0;
+		min-height: 8px;
 		align-self: center;
 	}
 

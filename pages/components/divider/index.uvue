@@ -54,11 +54,22 @@
 						<text class="body-text">左</text>
 						<nax-divider direction="vertical" space="12"></nax-divider>
 						<text class="body-text">中</text>
-						<nax-divider direction="vertical" text="|" space="12"></nax-divider>
+						<nax-divider direction="vertical" space="12" type="primary" size="sm"></nax-divider>
 						<text class="body-text">右</text>
 					</view>
 				</view>
-				<text class="hint">竖线父容器需要明确高度</text>
+				<text class="hint">父容器固定高度 + align-items:stretch，竖线自动拉满</text>
+
+				<view class="panel panel--gap">
+					<view class="v-inline">
+						<text class="body-text">左</text>
+						<nax-divider direction="vertical" length="16" space="10"></nax-divider>
+						<text class="body-text">中</text>
+						<nax-divider direction="vertical" length="16" space="10" type="warning"></nax-divider>
+						<text class="body-text">右</text>
+					</view>
+				</view>
+				<text class="hint">与文字并排时可用 length 指定高度（如 16）</text>
 			</view>
 		</view>
 	</scroll-view>
@@ -157,6 +168,12 @@
 		height: 120px;
 		flex-direction: row;
 		align-items: stretch;
+		justify-content: center;
+	}
+
+	.v-inline {
+		flex-direction: row;
+		align-items: center;
 		justify-content: center;
 	}
 </style>

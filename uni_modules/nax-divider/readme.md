@@ -9,6 +9,20 @@
 <nax-divider text="或者"></nax-divider>
 <nax-divider text="左侧" content-position="left"></nax-divider>
 <nax-divider dashed text="虚线" type="primary"></nax-divider>
+
+<!-- 竖向：父级固定高度时默认 height 100% 拉满 -->
+<view style="height:120px;flex-direction:row;align-items:stretch;">
+  <text>左</text>
+  <nax-divider direction="vertical" space="12"></nax-divider>
+  <text>右</text>
+</view>
+
+<!-- 与文字并排：用 length 指定高度 -->
+<view style="flex-direction:row;align-items:center;">
+  <text>左</text>
+  <nax-divider direction="vertical" length="16" space="10"></nax-divider>
+  <text>右</text>
+</view>
 ```
 
 ## Props
@@ -23,7 +37,8 @@
 | type | string | `default` | 语义色 |
 | color | string | `''` | 自定义线色 |
 | text-color | string | `''` | 自定义文案色 |
-| space | string | `''` | 外边距（横=上下） |
+| space | string | `''` | 外边距（横=上下，竖=左右） |
+| length | string | 竖向纯线默认 `100%` | 竖向高度；纯数字按 px |
 | custom-class | string | `''` | 根节点扩展 class |
 
 ## 插槽
