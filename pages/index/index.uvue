@@ -167,6 +167,10 @@
 					<text class="home__card-name">导航栏</text>
 					<text class="home__card-tag">nax-nav-bar</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goDropdown">
+					<text class="home__card-name">下拉菜单</text>
+					<text class="home__card-tag">nax-dropdown</text>
+				</view>
 			</view>
 
 			<view class="home__section home__section--gap">
@@ -464,6 +468,12 @@
 		})
 	}
 
+	function goDropdown() {
+		uni.navigateTo({
+			url: '/pages/components/dropdown/index'
+		})
+	}
+
 	function goTransition() {
 		uni.navigateTo({
 			url: '/pages/components/transition/index'
@@ -634,6 +644,7 @@
 		color: var(--nax-color-text-secondary, #767c82);
 	}
 </style>
+
 
 
 

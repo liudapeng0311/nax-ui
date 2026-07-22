@@ -118,6 +118,7 @@
 | 导航栏 | `nax-nav-bar` | P1 | 自定义页头；状态栏安全区 / fixed 占位 / 胶囊预留 | `title` `showBack` `autoBack` `homeUrl` `fixed` `placeholder` `immersive` `type` / `back` **done** |
 | 底部标签栏 | `nax-tabbar` | P1 | 自定义底栏；图标/徽标/中间凸起/安全区 |
 | 标签页 | `nax-tabs` | P1 | 顶部内容切换导航（对齐 uView Pro Tabs 主能力） | `list` `v-model` `scrollable` `scrollAlign` `showLine` `size` `sticky` / `change` `click` **done** |
+| 下拉菜单 | `nax-dropdown` | P1 | 筛选栏式多 Tab 下拉（对齐 uView Pro Dropdown 主场景） | `nax-dropdown` + `nax-dropdown-item`；`options` 单选 / slot 自定义；`fixed`；选中自动高亮 / `highlighted` / `displaySelected` / `open` `close` `change` **done** |
 | 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
 | 列表 | `nax-list` | P2 | 滚动列表壳：触底加载 + 下拉刷新；受控 loading/finished/error/empty/refreshing；**不做**虚拟列表 | `loading` `finished` `error` `empty` `enableRefresh` `refreshing` `immediateCheck` `offset` `height` `usePageScroll` / `load` `refresh` `update:refreshing` `click-error`；方法 `check` **done** |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
@@ -136,6 +137,7 @@
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区（App JS / Web·MP CSS env） |
 | `nax-tabs` | done | 插件包 `uni_modules/nax-tabs`；list+v-model；可滚动/均分；`scrollAlign` left/center；指示条测量；徽标/红点/禁用；CSS sticky 可选；**不做**独立 tabsSwiper，全屏联动见 demo `pages/components/tabs-swiper` |
+| `nax-dropdown` | done | 插件包 `uni_modules/nax-dropdown`；`nax-dropdown` + `nax-dropdown-item`；默认 options 单选；slot 自定义面板；遮罩关闭；fixed 吸顶；选中自动高亮；`displaySelected`；demo `pages/components/dropdown` |
 | `nax-nav-bar` | done | 插件包 `uni_modules/nax-nav-bar`；状态栏安全区 + fixed 占位 + 返回栈兜底 + 微信胶囊预留；`type` default/primary |
 | `nax-ui-theme` | done | 默认色参考 Naive light |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；对齐 Naive Avatar；图片/文字/尺寸/形状/描边/fallback |
@@ -190,5 +192,6 @@
 | 禁用 | `disabled` | 整体 opacity ≈ 0.5，不触发 click |
 
 兼容：`light`→`secondary`，`text`→`quaternary`，`type="tertiary"`→`default`+`tertiary`。
+
 
 

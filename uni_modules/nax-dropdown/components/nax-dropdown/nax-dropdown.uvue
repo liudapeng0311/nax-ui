@@ -1,0 +1,876 @@
+﻿<template>
+	<view class="nax-dropdown" :class="rootClass">
+		<!-- fixed 菜单栏占位 -->
+		<view
+			v-if="showPlaceholder"
+			class="nax-dropdown__placeholder"
+			:style="placeholderStyle"
+		></view>
+
+		<view class="nax-dropdown__shell" :class="shellClass" :style="shellStyle">
+			<!-- 菜单栏 -->
+			<view :id="menuDomId" class="nax-dropdown__menu" :class="menuClass" :style="menuStyle">
+				<view
+					v-for="(item, index) in renderMenus"
+					:key="index"
+					class="nax-dropdown__title"
+					:class="titleClassAt(item)"
+					@click="onTitleClick(item)"
+				>
+					<text class="nax-dropdown__title-text" :class="titleTextClassAt(item)" :lines="1">{{ titleTextAt(item) }}</text>
+					<view class="nax-dropdown__title-icon">
+						<nax-icon :name="iconNameAt(item)" :size="menuIconSizePx"></nax-icon>
+					</view>
+				</view>
+			</view>
+
+			<!--
+				展开层：
+				- 关闭时 absolute 且无高度，不挡点击
+				- 打开时 fixed 到菜单下方，避免被页面 scroll-view 裁剪
+			-->
+			<view class="nax-dropdown__layer" :class="layerClass" :style="layerStyle">
+				<view
+					v-if="popupMounted"
+					class="nax-dropdown__mask"
+					:class="maskClass"
+					:style="maskStyle"
+					@click="onMaskClick"
+				></view>
+				<view class="nax-dropdown__content" :class="contentClass" :style="contentStyle">
+					<slot></slot>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-dropdown
+	 * @description 筛选栏式下拉菜单容器。配合 nax-dropdown-item；默认单选列表 + 自定义插槽面板。
+	 * @property {string} size sm | md | lg，菜单栏高度，默认 md
+	 * @property {string} menuIcon 收起图标，默认 chevron-down
+	 * @property {string} menuIconOpen 展开图标，默认 chevron-up
+	 * @property {string} menuIconSize 图标尺寸，默认 14
+	 * @property {boolean} borderBottom 菜单底部分割线，默认 false
+	 * @property {boolean} closeOnClickMask 点遮罩关闭，默认 true
+	 * @property {boolean} closeOnClickSelf 点默认选项后关闭，默认 true
+	 * @property {number} duration 遮罩动画 ms，默认 280
+	 * @property {string} borderRadius 内容区底部圆角 px，默认 0
+	 * @property {number} zIndex 层级，默认 1000
+	 * @property {boolean} fixed 菜单栏吸顶 fixed，默认 false
+	 * @property {string} offsetTop fixed 额外 top 偏移 px，默认 0
+	 * @property {boolean} immersive 沉浸导航：fixed top 叠加状态栏+导航栏高度
+	 * @property {string} navbarHeight 沉浸时导航栏高度，默认 44
+	 * @property {boolean} placeholder fixed 时是否占位，默认 true
+	 * @property {string} customClass 根扩展 class
+	 * @event open 打开（index）
+	 * @event close 关闭（index）
+	 * @event change 切换菜单项（index）
+	 * @slot default 放置 nax-dropdown-item
+	 */
+	const props = defineProps({
+		size: {
+			type: String,
+			default: 'md'
+		},
+		menuIcon: {
+			type: String,
+			default: 'chevron-down'
+		},
+		menuIconOpen: {
+			type: String,
+			default: 'chevron-up'
+		},
+		menuIconSize: {
+			type: String,
+			default: '14'
+		},
+		borderBottom: {
+			type: Boolean,
+			default: false
+		},
+		closeOnClickMask: {
+			type: Boolean,
+			default: true
+		},
+		closeOnClickSelf: {
+			type: Boolean,
+			default: true
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		borderRadius: {
+			type: String,
+			default: '0'
+		},
+		zIndex: {
+			type: Number,
+			default: 1000
+		},
+		fixed: {
+			type: Boolean,
+			default: false
+		},
+		offsetTop: {
+			type: String,
+			default: '0'
+		},
+		immersive: {
+			type: Boolean,
+			default: false
+		},
+		navbarHeight: {
+			type: String,
+			default: '44'
+		},
+		placeholder: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['open', 'close', 'change'])
+
+	const instance = getCurrentInstance()
+	const uid = Math.floor(Math.random() * 10000000).toString()
+	const menuDomId = 'nax-dd-menu-' + uid
+
+	const menus = ref([] as UTSJSONObject[])
+	/** 当前展开项 id；空字符串表示收起（子项用 id 判断，避免 index 无响应式） */
+	const activeId = ref('')
+	const activeIndex = ref(-1)
+	const popupMounted = ref(false)
+	const maskOn = ref(false)
+	/** 展开层 fixed top（菜单底边） */
+	const layerTopPx = ref(0)
+	const statusBarPx = ref(0)
+	const windowHeightPx = ref(600)
+
+	let leaveTimer : number = -1
+	let openDelayTimer : number = -1
+	let measureToken : number = 0
+
+	function parsePx(value : string, fallback : number) : number {
+		if (value.length == 0) {
+			return fallback
+		}
+		var numPart = value
+		if (value.indexOf('px') >= 0) {
+			numPart = value.replace('px', '')
+		}
+		const n = parseFloat(numPart)
+		if (isNaN(n) || n < 0) {
+			return fallback
+		}
+		return n
+	}
+
+	function resolveDuration() : number {
+		if (props.duration < 0) {
+			return 0
+		}
+		return props.duration
+	}
+
+	function menuHeightPx() : number {
+		const s = props.size
+		if (s == 'sm') {
+			return 36
+		}
+		if (s == 'lg') {
+			return 50
+		}
+		return 44
+	}
+
+	function readStatusBarHeight() : number {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		const win = uni.getWindowInfo()
+		if (win.statusBarHeight != null && win.statusBarHeight > 0) {
+			return win.statusBarHeight as number
+		}
+		// #endif
+		const sys = uni.getSystemInfoSync()
+		if (sys.statusBarHeight != null && sys.statusBarHeight > 0) {
+			return sys.statusBarHeight as number
+		}
+		return 0
+	}
+
+	function readWindowHeight() : number {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		const win = uni.getWindowInfo()
+		if (win.windowHeight != null && win.windowHeight > 0) {
+			return win.windowHeight as number
+		}
+		// #endif
+		const sys = uni.getSystemInfoSync()
+		if (sys.windowHeight != null && sys.windowHeight > 0) {
+			return sys.windowHeight as number
+		}
+		if (sys.screenHeight != null && sys.screenHeight > 0) {
+			return sys.screenHeight as number
+		}
+		return 600
+	}
+
+	function refreshMetrics() {
+		statusBarPx.value = readStatusBarHeight()
+		windowHeightPx.value = readWindowHeight()
+	}
+
+	function fixedTopPx() : number {
+		var top = parsePx(props.offsetTop, 0)
+		if (props.immersive) {
+			top = top + statusBarPx.value + parsePx(props.navbarHeight, 44)
+		}
+		return top
+	}
+
+	function findIndexById(id : string) : number {
+		var i = 0
+		while (i < menus.value.length) {
+			const m = menus.value[i]
+			const mid = m['id']
+			if (mid != null && ('' + mid) == id) {
+				return i
+			}
+			i++
+		}
+		return -1
+	}
+
+	function makeMenu(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) : UTSJSONObject {
+		return {
+			id: id,
+			title: title,
+			disabled: disabled,
+			visible: visible,
+			highlighted: highlighted
+		} as UTSJSONObject
+	}
+
+	function registerItem(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) : number {
+		const idx = findIndexById(id)
+		if (idx >= 0) {
+			updateItem(id, title, disabled, visible, highlighted)
+			return idx
+		}
+		const next = [] as UTSJSONObject[]
+		var i = 0
+		while (i < menus.value.length) {
+			next.push(menus.value[i])
+			i++
+		}
+		next.push(makeMenu(id, title, disabled, visible, highlighted))
+		menus.value = next
+		return next.length - 1
+	}
+
+	function updateItem(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) {
+		const next = [] as UTSJSONObject[]
+		var i = 0
+		while (i < menus.value.length) {
+			const cur = menus.value[i]
+			const mid = cur['id']
+			if (mid != null && ('' + mid) == id) {
+				next.push(makeMenu(id, title, disabled, visible, highlighted))
+			} else {
+				next.push(cur)
+			}
+			i++
+		}
+		menus.value = next
+	}
+
+	function unregisterItem(id : string) {
+		const next = [] as UTSJSONObject[]
+		var i = 0
+		var removedIndex = -1
+		while (i < menus.value.length) {
+			const cur = menus.value[i]
+			const mid = cur['id']
+			if (mid != null && ('' + mid) == id) {
+				removedIndex = i
+			} else {
+				next.push(cur)
+			}
+			i++
+		}
+		menus.value = next
+		if (id == activeId.value) {
+			forceClose()
+		} else if (removedIndex >= 0 && activeIndex.value > removedIndex) {
+			activeIndex.value = activeIndex.value - 1
+		}
+	}
+
+	function clearTimers() {
+		if (leaveTimer >= 0) {
+			clearTimeout(leaveTimer)
+			leaveTimer = -1
+		}
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function forceClose() {
+		clearTimers()
+		const idx = activeIndex.value
+		activeId.value = ''
+		activeIndex.value = -1
+		maskOn.value = false
+		popupMounted.value = false
+		if (idx >= 0) {
+			emit('close', idx)
+		}
+	}
+
+	function close() {
+		if (activeId.value.length == 0 && !popupMounted.value) {
+			return
+		}
+		clearTimers()
+		const idx = activeIndex.value
+		maskOn.value = false
+		const d = resolveDuration()
+		if (d <= 0) {
+			activeId.value = ''
+			activeIndex.value = -1
+			popupMounted.value = false
+			if (idx >= 0) {
+				emit('close', idx)
+			}
+			return
+		}
+		// 先收内容 id，避免选项仍可点；遮罩淡出后再卸
+		activeId.value = ''
+		leaveTimer = setTimeout(() => {
+			leaveTimer = -1
+			activeIndex.value = -1
+			popupMounted.value = false
+			if (idx >= 0) {
+				emit('close', idx)
+			}
+		}, d)
+	}
+
+	function applyOpen(index : number, id : string) {
+		const prev = activeIndex.value
+		clearTimers()
+		if (prev >= 0 && prev != index) {
+			emit('change', index)
+		}
+		activeId.value = id
+		activeIndex.value = index
+		popupMounted.value = true
+		maskOn.value = false
+		emit('open', index)
+
+		const d = resolveDuration()
+		if (d <= 0) {
+			maskOn.value = true
+			return
+		}
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			maskOn.value = true
+		}, 16)
+	}
+
+	function measureMenuBottom(callback : (top : number) => void) {
+		refreshMetrics()
+		measureToken = measureToken + 1
+		const token = measureToken
+		const fallback = menuHeightPx()
+
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+		query
+			.select('#' + menuDomId)
+			.boundingClientRect((rect : NodeInfo) => {
+				if (token != measureToken) {
+					return
+				}
+				var top = fallback
+				if (rect != null) {
+					const t = rect.top
+					const h = rect.height
+					if (t != null && h != null) {
+						top = (t as number) + (h as number)
+					} else if (t != null) {
+						top = (t as number) + menuHeightPx()
+					}
+				}
+				if (top < 0) {
+					top = menuHeightPx()
+				}
+				callback(top)
+			})
+		query.exec()
+	}
+
+	function open(index : number) {
+		if (index < 0 || index >= menus.value.length) {
+			return
+		}
+		const m = menus.value[index]
+		const dis = m['disabled']
+		if (dis != null && (dis as boolean) == true) {
+			return
+		}
+		const vis = m['visible']
+		if (vis != null && (vis as boolean) == false) {
+			return
+		}
+		const idRaw = m['id']
+		if (idRaw == null) {
+			return
+		}
+		const id = '' + idRaw
+
+		// 再次点击当前标题：收起
+		if (activeId.value == id) {
+			close()
+			return
+		}
+
+		// 先立即展开（避免测量回调失败导致完全打不开），再校正 fixed top
+		refreshMetrics()
+		if (props.fixed) {
+			layerTopPx.value = fixedTopPx() + menuHeightPx()
+		} else {
+			// 无测量结果前用状态栏+导航估算，测量成功后覆盖
+			layerTopPx.value = statusBarPx.value + 44 + menuHeightPx()
+		}
+		applyOpen(index, id)
+		measureMenuBottom((top : number) => {
+			layerTopPx.value = top
+		})
+	}
+
+	function highlight(index : number) {
+		if (index < 0) {
+			return
+		}
+		const next = [] as UTSJSONObject[]
+		var i = 0
+		while (i < menus.value.length) {
+			const cur = menus.value[i]
+			const id = '' + cur['id']
+			const title = '' + cur['title']
+			const disabled = cur['disabled'] != null ? (cur['disabled'] as boolean) : false
+			const visible = cur['visible'] != null ? (cur['visible'] as boolean) : true
+			const highlighted = i == index
+			next.push(makeMenu(id, title, disabled, visible, highlighted))
+			i++
+		}
+		menus.value = next
+	}
+
+	function onTitleClick(item : any) {
+		const raw = item as UTSJSONObject
+		const idxVal = raw['index']
+		if (idxVal == null) {
+			return
+		}
+		open(idxVal as number)
+	}
+
+	function onMaskClick() {
+		if (!props.closeOnClickMask) {
+			return
+		}
+		close()
+	}
+
+	const renderMenus = computed((): UTSJSONObject[] => {
+		const out = [] as UTSJSONObject[]
+		var i = 0
+		while (i < menus.value.length) {
+			const m = menus.value[i]
+			const vis = m['visible']
+			var visible = true
+			if (vis != null) {
+				visible = vis as boolean
+			}
+			if (visible) {
+				out.push({
+					id: '' + m['id'],
+					title: '' + m['title'],
+					disabled: m['disabled'] != null ? (m['disabled'] as boolean) : false,
+					highlighted: m['highlighted'] != null ? (m['highlighted'] as boolean) : false,
+					index: i
+				} as UTSJSONObject)
+			}
+			i++
+		}
+		return out
+	})
+
+	function titleTextAt(item : any) : string {
+		const raw = item as UTSJSONObject
+		const t = raw['title']
+		if (t == null) {
+			return ''
+		}
+		return '' + t
+	}
+
+	function isItemActive(item : any) : boolean {
+		const raw = item as UTSJSONObject
+		const idVal = raw['id']
+		if (idVal != null && activeId.value == ('' + idVal)) {
+			return true
+		}
+		const hi = raw['highlighted']
+		if (hi != null && (hi as boolean) == true) {
+			return true
+		}
+		return false
+	}
+
+	function isItemDisabled(item : any) : boolean {
+		const raw = item as UTSJSONObject
+		const d = raw['disabled']
+		if (d != null && (d as boolean) == true) {
+			return true
+		}
+		return false
+	}
+
+	function titleClassAt(item : any) : string {
+		var cls = ''
+		if (isItemDisabled(item)) {
+			cls += ' nax-dropdown__title--disabled'
+		}
+		if (isItemActive(item)) {
+			cls += ' nax-dropdown__title--active'
+		}
+		return cls.trim()
+	}
+
+	function titleTextClassAt(item : any) : string {
+		if (isItemActive(item)) {
+			return 'nax-dropdown__title-text--active'
+		}
+		return ''
+	}
+
+	function iconNameAt(item : any) : string {
+		const raw = item as UTSJSONObject
+		const idVal = raw['id']
+		if (idVal != null && activeId.value == ('' + idVal)) {
+			if (props.menuIconOpen.length > 0) {
+				return props.menuIconOpen
+			}
+			return 'chevron-up'
+		}
+		if (props.menuIcon.length > 0) {
+			return props.menuIcon
+		}
+		return 'chevron-down'
+	}
+
+	const menuIconSizePx = computed((): string => {
+		return props.menuIconSize
+	})
+
+	const showPlaceholder = computed((): boolean => {
+		if (!props.fixed) {
+			return false
+		}
+		return props.placeholder
+	})
+
+	const placeholderStyle = computed((): string => {
+		return 'height:' + menuHeightPx().toString() + 'px;'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.fixed) {
+			cls += ' nax-dropdown--fixed'
+		}
+		if (popupMounted.value) {
+			cls += ' nax-dropdown--open'
+		}
+		if (props.size == 'sm') {
+			cls += ' nax-dropdown--sm'
+		} else if (props.size == 'lg') {
+			cls += ' nax-dropdown--lg'
+		} else {
+			cls += ' nax-dropdown--md'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const shellClass = computed((): string => {
+		if (props.fixed) {
+			return 'nax-dropdown__shell--fixed'
+		}
+		return ''
+	})
+
+	const shellStyle = computed((): string => {
+		var style = ''
+		if (props.fixed) {
+			style += 'top:' + fixedTopPx().toString() + 'px;'
+			style += 'z-index:' + props.zIndex.toString() + ';'
+		} else if (popupMounted.value) {
+			// 非 fixed 菜单栏也抬高层级，避免被后续列表盖住
+			style += 'z-index:' + props.zIndex.toString() + ';'
+		}
+		return style
+	})
+
+	const menuClass = computed((): string => {
+		if (props.borderBottom) {
+			return 'nax-dropdown__menu--border'
+		}
+		return ''
+	})
+
+	const menuStyle = computed((): string => {
+		return 'height:' + menuHeightPx().toString() + 'px;'
+	})
+
+	const layerClass = computed((): string => {
+		if (popupMounted.value) {
+			return 'nax-dropdown__layer--open'
+		}
+		return ''
+	})
+
+	const layerStyle = computed((): string => {
+		var style = 'z-index:' + (props.zIndex + 1).toString() + ';'
+		if (popupMounted.value) {
+			// 关键写 position:fixed，避免仅靠 class 在部分 App 端不生效
+			style += 'position:fixed;'
+			style += 'top:' + layerTopPx.value.toString() + 'px;'
+			style += 'left:0px;'
+			style += 'right:0px;'
+			style += 'bottom:0px;'
+			style += 'width:100%;'
+		}
+		return style
+	})
+
+	const maskClass = computed((): string => {
+		if (maskOn.value) {
+			return 'nax-dropdown__mask--show'
+		}
+		return ''
+	})
+
+	const maskStyle = computed((): string => {
+		var style = 'position:absolute;left:0px;right:0px;top:0px;bottom:0px;z-index:1;'
+		const d = resolveDuration()
+		if (d > 0) {
+			style += 'transition-property:opacity;'
+			style += 'transition-duration:' + d.toString() + 'ms;'
+			style += 'transition-timing-function:ease-out;'
+		} else {
+			style += 'transition-duration:0ms;'
+		}
+		return style
+	})
+
+	const contentClass = computed((): string => {
+		if (popupMounted.value && activeId.value.length > 0) {
+			return 'nax-dropdown__content--open'
+		}
+		return ''
+	})
+
+	const contentStyle = computed((): string => {
+		// z-index 写在父作用域 inline，避免样式隔离后被遮罩盖住
+		var style = 'position:relative;z-index:2;width:100%;'
+		const r = parsePx(props.borderRadius, 0)
+		if (r > 0) {
+			style += 'border-bottom-left-radius:' + r.toString() + 'px;'
+			style += 'border-bottom-right-radius:' + r.toString() + 'px;'
+		}
+		return style
+	})
+
+	// 注入子 item：用 activeId 判断展开，避免 index 无响应式依赖
+	provide('naxDdInGroup', true)
+	provide('naxDdActiveId', activeId)
+	provide('naxDdActiveIndex', activeIndex)
+	provide('naxDdRegister', registerItem)
+	provide('naxDdUpdate', updateItem)
+	provide('naxDdUnregister', unregisterItem)
+	provide('naxDdFindIndex', findIndexById)
+	provide('naxDdClose', close)
+	provide('naxDdCloseOnClickSelf', computed((): boolean => {
+		return props.closeOnClickSelf
+	}))
+
+	defineExpose({
+		open,
+		close,
+		highlight
+	})
+
+	onMounted(() => {
+		refreshMetrics()
+	})
+
+	onUnmounted(() => {
+		clearTimers()
+	})
+</script>
+
+<style>
+	.nax-dropdown {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-dropdown__placeholder {
+		width: 100%;
+		flex-direction: column;
+	}
+
+	.nax-dropdown__shell {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-dropdown__shell--fixed {
+		position: fixed;
+		left: 0;
+		right: 0;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-dropdown__menu {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		z-index: 2;
+	}
+
+	.nax-dropdown__menu--border {
+		border-bottom-width: 0.5px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #e0e0e6);
+	}
+
+	.nax-dropdown__title {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.nax-dropdown__title--disabled {
+		opacity: 0.45;
+	}
+
+	.nax-dropdown__title-text {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+		color: var(--nax-color-text, #303133);
+		text-overflow: ellipsis;
+		max-width: 80%;
+	}
+
+	.nax-dropdown--sm .nax-dropdown__title-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-dropdown--lg .nax-dropdown__title-text {
+		font-size: var(--nax-font-size-lg, 18px);
+		line-height: 24px;
+	}
+
+	.nax-dropdown__title-text--active {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-dropdown__title-icon {
+		margin-left: 2px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* 关闭：贴在菜单下，高度随内容（空时为 0） */
+	.nax-dropdown__layer {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 100%;
+		flex-direction: column;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	/* 打开：fixed 铺满菜单下方，避免被 scroll-view 裁剪 */
+	.nax-dropdown__layer--open {
+		position: fixed;
+		/* top/left/right/bottom 由 layerStyle 写入 */
+		flex-direction: column;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.nax-dropdown__mask {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+		opacity: 0;
+		z-index: 1;
+	}
+
+	.nax-dropdown__mask--show {
+		opacity: 1;
+	}
+
+	.nax-dropdown__content {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+		flex-shrink: 0;
+		background-color: var(--nax-color-bg, #ffffff);
+		z-index: 2;
+		overflow: hidden;
+	}
+
+	.nax-dropdown__content--open {
+		/* 占位，便于扩展进场动画 */
+	}
+</style>
+
+
+
