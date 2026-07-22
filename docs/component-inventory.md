@@ -121,6 +121,7 @@
 | 下拉菜单 | `nax-dropdown` | P1 | 筛选栏式多 Tab 下拉（对齐 uView Pro Dropdown 主场景） | `nax-dropdown` + `nax-dropdown-item`；`options` 单选 / slot 自定义；`fixed`；选中自动高亮 / `highlighted` / `displaySelected` / `open` `close` `change` **done** |
 | 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
 | 列表 | `nax-list` | P2 | 滚动列表壳：触底加载 + 下拉刷新；受控 loading/finished/error/empty/refreshing；**不做**虚拟列表 | `loading` `finished` `error` `empty` `enableRefresh` `refreshing` `immediateCheck` `offset` `height` `usePageScroll` / `load` `refresh` `update:refreshing` `click-error`；方法 `check` **done** |
+| 滑动操作 | `nax-swipe-action` / `nax-swipe-action-group` | P2 | 左滑操作菜单（对齐 uView Pro SwipeAction）；group 互斥；options type token | `show` `options` `name` `disabled` `btnWidth` `rightWidth` / `click` `open` `close` `update:show`；插槽 `right` **done** |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
 | 步骤条 | `nax-steps` / `nax-step` | P1 | 多步进度展示（对齐 uView Pro Steps，增强 status） | `list`/`nax-step` `current` `direction` `mode` `type` `size` `clickable` / `click` **done** |
 | 图片 | `nax-image` | P2 | 占位/失败态 |
@@ -169,6 +170,7 @@
 | `nax-space` / `nax-space-item` | done | 插件包 `uni_modules/nax-space`；横向/纵向间距；item 吃 margin 兼容隔离 2.0 |
 | `nax-empty` | done | 插件包 `uni_modules/nax-empty`；description/title/image/icon/action 槽；默认 database-off（暂无数据）；列表空建议 notes-off |
 | `nax-list` | done | 插件包 `uni_modules/nax-list`；触底 load + 下拉刷新（scroll-view refresher）；受控 loading/finished/error/empty/refreshing；immediateCheck；usePageScroll+check；默认 nax-loading/nax-empty；**不做**虚拟列表 |
+| `nax-swipe-action` / `nax-swipe-action-group` | done | 插件包 `uni_modules/nax-swipe-action`；左滑菜单；group 互斥；options type/width；right 插槽；demo `pages/components/swipe-action` |
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |

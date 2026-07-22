@@ -1,0 +1,403 @@
+<template>
+	<scroll-view class="page-scroll" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-swipe-action</text>
+			<text class="page__desc">左滑操作菜单 · 对齐 uView Pro SwipeAction，增强 group 互斥与 type token</text>
+
+			<view class="section">
+				<text class="section__title">基础用法</text>
+				<text class="section__hint">左滑露出删除</text>
+				<view class="panel">
+					<nax-swipe-action :options="singleOptions" @click="onSingleClick">
+						<nax-cell title="左滑删除" label="options 单按钮"></nax-cell>
+					</nax-swipe-action>
+				</view>
+				<text class="section__meta">{{ singleLog }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">多按钮 + type</text>
+				<text class="section__hint">收藏(info) / 删除(error)；可单独设 width</text>
+				<view class="panel">
+					<nax-swipe-action :options="multiOptions" @click="onMultiClick">
+						<nax-cell title="多操作" value="左滑试试" is-link></nax-cell>
+					</nax-swipe-action>
+				</view>
+				<text class="section__meta">{{ multiLog }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">组内互斥（推荐）</text>
+				<text class="section__hint">nax-swipe-action-group · 同时只展开一项 · key/name 用稳定 id</text>
+				<view class="panel">
+					<nax-swipe-action-group>
+						<nax-swipe-action
+							v-for="(id, index) in groupIds"
+							:key="id"
+							:name="id"
+							:options="groupOptions"
+							@click="onGroupClick"
+						>
+							<nax-cell :title="groupTitleAt(index)" :label="groupLabelAt(index)"></nax-cell>
+						</nax-swipe-action>
+					</nax-swipe-action-group>
+				</view>
+				<text class="section__meta">{{ groupLog }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">受控 show</text>
+				<text class="section__hint">外部按钮开关 + v-model:show</text>
+				<view class="row">
+					<nax-button size="sm" label="展开" @click="openControlled"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" variant="secondary" label="收起" @click="closeControlled"></nax-button>
+				</view>
+				<view class="panel panel--gap">
+					<nax-swipe-action v-model:show="controlledShow" :options="singleOptions" @open="onCtrlOpen" @close="onCtrlClose">
+						<nax-cell title="受控项" :value="controlledValueText"></nax-cell>
+					</nax-swipe-action>
+				</view>
+				<text class="section__meta">{{ ctrlLog }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用 disabled</text>
+				<view class="panel">
+					<nax-swipe-action disabled :options="singleOptions">
+						<nax-cell title="不可滑动" label="disabled=true"></nax-cell>
+					</nax-swipe-action>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义右侧 right 插槽</text>
+				<text class="section__hint">rightWidth 指定操作区宽度</text>
+				<view class="panel">
+					<nax-swipe-action :right-width="88">
+						<template #right>
+							<view class="custom-right" @click.stop="onCustomDelete">
+								<text class="custom-right__text">删除</text>
+							</view>
+						</template>
+						<nax-cell title="自定义按钮区" label="slot right"></nax-cell>
+					</nax-swipe-action>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">列表删除示例</text>
+				<text class="section__hint">删除后用 id 当 key，避免错乱</text>
+				<view class="panel">
+					<nax-swipe-action-group>
+						<nax-swipe-action
+							v-for="(id, index) in deleteIds"
+							:key="id"
+							:name="id"
+							:options="deleteOptions"
+							@click="onDeleteClick"
+						>
+							<nax-cell :title="deleteTitleAt(index)" :value="id"></nax-cell>
+						</nax-swipe-action>
+					</nax-swipe-action-group>
+				</view>
+				<view class="row row--gap">
+					<nax-button size="sm" label="重置列表" @click="resetDeletable"></nax-button>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const singleOptions = [
+		{
+			text: '删除',
+			type: 'error',
+			name: 'delete'
+		}
+	]
+
+	const multiOptions = [
+		{
+			text: '收藏',
+			type: 'info',
+			name: 'fav',
+			width: 72
+		},
+		{
+			text: '删除',
+			type: 'error',
+			name: 'delete',
+			width: 80
+		}
+	]
+
+	const groupOptions = [
+		{
+			text: '标为已读',
+			type: 'primary',
+			name: 'read',
+			width: 88
+		},
+		{
+			text: '删除',
+			type: 'error',
+			name: 'delete',
+			width: 72
+		}
+	]
+
+	const deleteOptions = [
+		{
+			text: '删除',
+			type: 'error',
+			name: 'delete'
+		}
+	]
+
+	const singleLog = ref('等待操作')
+	const multiLog = ref('等待操作')
+	const groupLog = ref('等待操作')
+	const ctrlLog = ref('show=false')
+	const controlledShow = ref(false)
+
+	const groupIds = ref(['g1', 'g2', 'g3'] as string[])
+	const groupTitles = ref(['张三', '李四', '王五'] as string[])
+	const groupLabels = ref(['今天 10:20', '昨天', '周一'] as string[])
+
+	const deleteIds = ref(['d1', 'd2', 'd3'] as string[])
+	const deleteTitles = ref(['待办 A', '待办 B', '待办 C'] as string[])
+
+	const controlledValueText = computed((): string => {
+		if (controlledShow.value) {
+			return '已展开'
+		}
+		return '已收起'
+	})
+
+	function groupTitleAt(index: number): string {
+		const list = groupTitles.value
+		if (index < 0 || index >= list.length) {
+			return ''
+		}
+		return list[index]
+	}
+
+	function groupLabelAt(index: number): string {
+		const list = groupLabels.value
+		if (index < 0 || index >= list.length) {
+			return ''
+		}
+		return list[index]
+	}
+
+	function deleteTitleAt(index: number): string {
+		const list = deleteTitles.value
+		if (index < 0 || index >= list.length) {
+			return ''
+		}
+		return list[index]
+	}
+
+	function payloadText(e: any | null): string {
+		if (e == null) {
+			return 'click'
+		}
+		const obj = e as UTSJSONObject
+		const name = obj.getString('name')
+		const text = obj.getString('text')
+		const itemName = obj.getString('itemName')
+		var s = ''
+		if (name != null && name.length > 0) {
+			s += 'name=' + name
+		}
+		if (text != null && text.length > 0) {
+			if (s.length > 0) {
+				s += ' · '
+			}
+			s += 'text=' + text
+		}
+		if (itemName != null && itemName.length > 0) {
+			if (s.length > 0) {
+				s += ' · '
+			}
+			s += 'item=' + itemName
+		}
+		if (s.length == 0) {
+			return 'click'
+		}
+		return s
+	}
+
+	function onSingleClick(e: any) {
+		singleLog.value = payloadText(e)
+	}
+
+	function onMultiClick(e: any) {
+		multiLog.value = payloadText(e)
+	}
+
+	function onGroupClick(e: any) {
+		groupLog.value = payloadText(e)
+	}
+
+	function openControlled() {
+		controlledShow.value = true
+	}
+
+	function closeControlled() {
+		controlledShow.value = false
+	}
+
+	function onCtrlOpen() {
+		ctrlLog.value = 'open · show=true'
+	}
+
+	function onCtrlClose() {
+		ctrlLog.value = 'close · show=false'
+	}
+
+	function onCustomDelete() {
+		singleLog.value = '自定义 right 点击删除'
+		uni.showToast({
+			title: '自定义删除',
+			icon: 'none'
+		})
+	}
+
+	function onDeleteClick(e: any) {
+		const obj = e as UTSJSONObject
+		const itemName = obj.getString('itemName')
+		if (itemName == null || itemName.length == 0) {
+			return
+		}
+		const nextIds = [] as string[]
+		const nextTitles = [] as string[]
+		const ids = deleteIds.value
+		const titles = deleteTitles.value
+		for (var i = 0; i < ids.length; i++) {
+			if (ids[i] != itemName) {
+				nextIds.push(ids[i])
+				if (i < titles.length) {
+					nextTitles.push(titles[i])
+				}
+			}
+		}
+		deleteIds.value = nextIds
+		deleteTitles.value = nextTitles
+		uni.showToast({
+			title: '已删除 ' + itemName,
+			icon: 'none'
+		})
+	}
+
+	function resetDeletable() {
+		deleteIds.value = ['d1', 'd2', 'd3'] as string[]
+		deleteTitles.value = ['待办 A', '待办 B', '待办 C'] as string[]
+	}
+</script>
+
+<style>
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		padding-bottom: 40px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 22px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 15px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.section__hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 10px;
+	}
+
+	.section__meta {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.panel {
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		overflow: hidden;
+		flex-direction: column;
+	}
+
+	.panel--gap {
+		margin-top: 10px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 10px;
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.custom-right {
+		width: 88px;
+		height: 100%;
+		background-color: var(--nax-color-error, #d03050);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.custom-right__text {
+		font-size: 14px;
+		color: #ffffff;
+	}
+</style>

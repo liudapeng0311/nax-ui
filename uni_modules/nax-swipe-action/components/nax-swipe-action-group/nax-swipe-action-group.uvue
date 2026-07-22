@@ -1,0 +1,64 @@
+<template>
+	<view class="nax-swipe-action-group" :class="rootClass">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-swipe-action-group
+	 * @description 滑动操作组。包裹多个 nax-swipe-action，保证同时仅展开一项。
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 放置 nax-swipe-action
+	 * @method closeAll 收起全部
+	 */
+	const props = defineProps({
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const activeName = ref('')
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+
+	function openItem(name: string) {
+		if (name.length == 0) {
+			return
+		}
+		activeName.value = name
+	}
+
+	function closeItem(name: string) {
+		if (activeName.value == name) {
+			activeName.value = ''
+		}
+	}
+
+	function closeAll() {
+		activeName.value = ''
+	}
+
+	provide('naxSaInGroup', true)
+	provide('naxSaActiveName', activeName)
+	provide('naxSaOpenItem', openItem)
+	provide('naxSaCloseItem', closeItem)
+	provide('naxSaCloseAll', closeAll)
+
+	defineExpose({
+		closeAll
+	})
+</script>
+
+<style>
+	.nax-swipe-action-group {
+		flex-direction: column;
+		width: 100%;
+	}
+</style>

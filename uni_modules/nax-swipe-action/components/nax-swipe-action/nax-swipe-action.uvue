@@ -1,0 +1,814 @@
+<template>
+	<view class="nax-swipe-action" :class="rootClass">
+		<!-- 右侧操作区：默认在内容下方，左滑后露出 -->
+		<view :id="actionsDomId" class="nax-swipe-action__actions" :style="actionsWrapStyle">
+			<slot name="right">
+				<view
+					v-for="(btn, index) in renderButtons"
+					:key="btnKey(btn, index)"
+					class="nax-swipe-action__btn"
+					:class="btnClassOf(btn)"
+					:style="btnStyleOf(btn)"
+					@click.stop="onBtnClick(index)"
+				>
+					<text class="nax-swipe-action__btn-text" :style="btnTextStyleOf(btn)" :lines="1">{{ btnTextOf(btn) }}</text>
+				</view>
+			</slot>
+		</view>
+
+		<!-- 内容区：跟手平移 -->
+		<view
+			class="nax-swipe-action__content"
+			:class="contentClass"
+			:style="contentStyle"
+			@touchstart="onTouchStart"
+			@touchmove="onTouchMove"
+			@touchend="onTouchEnd"
+			@touchcancel="onTouchEnd"
+			@click="onContentClick"
+		>
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-swipe-action
+	 * @description 滑动操作。左滑露出右侧操作按钮；可与 nax-swipe-action-group 互斥展开。
+	 * @property {boolean} show 是否展开（受控；v-model:show）
+	 * @property {boolean} disabled 禁用滑动与按钮
+	 * @property {string} name 项标识；组内互斥推荐传稳定 id（不要用 index）
+	 * @property {number} index 业务序号（兼容 uView；写入 click 载荷）
+	 * @property {Array} options 按钮列表：text/name/type/color/bgColor/backgroundColor/width/disabled
+	 * @property {number} btnWidth 默认按钮宽度（px）
+	 * @property {number} rightWidth 自定义 right 插槽宽度（px）；>0 时优先使用
+	 * @property {number} threshold 展开阈值（px）；0 表示操作区宽度的一半
+	 * @property {boolean} autoClose 点击按钮后自动收起
+	 * @property {boolean} closeOnClickContent 点击内容区收起（仅已展开时）
+	 * @property {boolean} vibrateShort 展开时短震动（支持端生效）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:show v-model:show
+	 * @event open 展开
+	 * @event close 收起
+	 * @event click 点击操作按钮（UTSJSONObject：index/name/text/itemName/itemIndex）
+	 * @event content-click 点击内容区
+	 * @slot default 内容（如 nax-cell）
+	 * @slot right 自定义右侧操作区（需配合 rightWidth）
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		name: {
+			type: String,
+			default: ''
+		},
+		index: {
+			type: Number,
+			default: -1
+		},
+		options: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		btnWidth: {
+			type: Number,
+			default: 72
+		},
+		rightWidth: {
+			type: Number,
+			default: 0
+		},
+		threshold: {
+			type: Number,
+			default: 0
+		},
+		autoClose: {
+			type: Boolean,
+			default: true
+		},
+		closeOnClickContent: {
+			type: Boolean,
+			default: true
+		},
+		vibrateShort: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:show', 'open', 'close', 'click', 'content-click'])
+
+	const ANIM_MS = 220
+	const DIR_LOCK = 8.0
+
+	const autoUid = 'sa-' + Math.floor(Math.random() * 10000000).toString()
+	const actionsDomId = 'nax-sa-act-' + autoUid
+
+	const offsetX = ref(0.0)
+	const opened = ref(false)
+	const dragging = ref(false)
+	const noTransition = ref(false)
+	const startX = ref(0.0)
+	const startY = ref(0.0)
+	const startOffset = ref(0.0)
+	const direction = ref('')
+	const ignoreContentClick = ref(false)
+	const syncingFromProp = ref(false)
+
+	const inGroup = inject('naxSaInGroup', false) as boolean
+	const activeNameRef = inject('naxSaActiveName', null)
+	const openItemRaw = inject('naxSaOpenItem', null)
+	const closeItemRaw = inject('naxSaCloseItem', null)
+
+	const itemName = computed((): string => {
+		if (props.name.length > 0) {
+			return props.name
+		}
+		return autoUid
+	})
+
+	function asAnyArray(val: any | null): any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function asObject(item: any | null): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function readString(obj: UTSJSONObject, key: string): string {
+		const s = obj.getString(key)
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'string') {
+			const str = anyVal as string
+			if (str.length > 0) {
+				return str
+			}
+		}
+		return ''
+	}
+
+	function readBoolean(obj: UTSJSONObject, key: string): boolean {
+		const b = obj.getBoolean(key)
+		if (b != null) {
+			return b as boolean
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'boolean') {
+			return anyVal as boolean
+		}
+		return false
+	}
+
+	function readNumber(obj: UTSJSONObject, key: string): number {
+		const n = obj.getNumber(key)
+		if (n != null) {
+			return n as number
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'number') {
+			return anyVal as number
+		}
+		return 0
+	}
+
+	function objStr(obj: any | null, key: string): string {
+		const o = asObject(obj)
+		if (o == null) {
+			return ''
+		}
+		return readString(o, key)
+	}
+
+	function resolveOptionText(item: any | null): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		const text = objStr(item, 'text')
+		if (text.length > 0) {
+			return text
+		}
+		const label = objStr(item, 'label')
+		if (label.length > 0) {
+			return label
+		}
+		return objStr(item, 'name')
+	}
+
+	function resolveOptionName(item: any | null, index: number): string {
+		const name = objStr(item, 'name')
+		if (name.length > 0) {
+			return name
+		}
+		const text = resolveOptionText(item)
+		if (text.length > 0) {
+			return text
+		}
+		return '' + index
+	}
+
+	function resolveOptionType(item: any | null): string {
+		const t = objStr(item, 'type')
+		if (t == 'primary' || t == 'info' || t == 'success' || t == 'warning' || t == 'error') {
+			return t
+		}
+		if (t == 'danger') {
+			return 'error'
+		}
+		return 'default'
+	}
+
+	function resolveOptionWidth(item: any | null): number {
+		const obj = asObject(item)
+		if (obj != null) {
+			const w = readNumber(obj, 'width')
+			if (w > 0) {
+				return w
+			}
+		}
+		const bw = props.btnWidth as number
+		if (bw > 0) {
+			return bw
+		}
+		return 72
+	}
+
+	function typeBgColor(typeName: string): string {
+		if (typeName == 'primary') {
+			return 'var(--nax-color-primary, #18a058)'
+		}
+		if (typeName == 'info') {
+			return 'var(--nax-color-info, #2080f0)'
+		}
+		if (typeName == 'success') {
+			return 'var(--nax-color-success, #18a058)'
+		}
+		if (typeName == 'warning') {
+			return 'var(--nax-color-warning, #f0a020)'
+		}
+		if (typeName == 'error') {
+			return 'var(--nax-color-error, #d03050)'
+		}
+		return 'var(--nax-color-text-secondary, #767c82)'
+	}
+
+	const renderButtons = computed((): UTSJSONObject[] => {
+		const list = asAnyArray(props.options as any)
+		const out = [] as UTSJSONObject[]
+		for (var i = 0; i < list.length; i++) {
+			const item = list[i]
+			const obj = asObject(item)
+			const typeName = resolveOptionType(item)
+			const width = resolveOptionWidth(item)
+			const text = resolveOptionText(item)
+			const name = resolveOptionName(item, i)
+			var disabled = false
+			var bg = typeBgColor(typeName)
+			var color = '#ffffff'
+			if (obj != null) {
+				disabled = readBoolean(obj, 'disabled')
+				const bg1 = readString(obj, 'bgColor')
+				if (bg1.length > 0) {
+					bg = bg1
+				}
+				const bg2 = readString(obj, 'backgroundColor')
+				if (bg2.length > 0) {
+					bg = bg2
+				}
+				const styleAny = obj.getAny('style')
+				if (styleAny != null && typeof styleAny != 'string' && typeof styleAny != 'number' && typeof styleAny != 'boolean') {
+					const styleObj = styleAny as UTSJSONObject
+					const sbg = readString(styleObj, 'backgroundColor')
+					if (sbg.length > 0) {
+						bg = sbg
+					}
+					const sc = readString(styleObj, 'color')
+					if (sc.length > 0) {
+						color = sc
+					}
+				}
+				const c1 = readString(obj, 'color')
+				if (c1.length > 0) {
+					color = c1
+				}
+			}
+			var btnClass = 'nax-swipe-action__btn--' + typeName
+			if (disabled) {
+				btnClass += ' nax-swipe-action__btn--disabled'
+			}
+			var btnStyle = 'width:' + width.toString() + 'px;background-color:' + bg + ';'
+			var textStyle = 'color:' + color + ';'
+			const row = {
+				key: name + '-' + i.toString(),
+				text: text,
+				name: name,
+				disabled: disabled,
+				btnClass: btnClass,
+				btnStyle: btnStyle,
+				textStyle: textStyle
+			} as UTSJSONObject
+			out.push(row)
+		}
+		return out
+	})
+
+	function btnKey(btn: any | null, index: number): string {
+		const k = objStr(btn, 'key')
+		if (k.length > 0) {
+			return k
+		}
+		return '' + index
+	}
+
+	function btnClassOf(btn: any | null): string {
+		return objStr(btn, 'btnClass')
+	}
+
+	function btnStyleOf(btn: any | null): string {
+		return objStr(btn, 'btnStyle')
+	}
+
+	function btnTextStyleOf(btn: any | null): string {
+		return objStr(btn, 'textStyle')
+	}
+
+	function btnTextOf(btn: any | null): string {
+		return objStr(btn, 'text')
+	}
+
+	const optionsWidth = computed((): number => {
+		const list = asAnyArray(props.options as any)
+		if (list.length == 0) {
+			return 0
+		}
+		var total = 0.0
+		for (var i = 0; i < list.length; i++) {
+			total += resolveOptionWidth(list[i])
+		}
+		return total
+	})
+
+	const actionsWidth = computed((): number => {
+		const rw = props.rightWidth as number
+		if (rw > 0) {
+			return rw
+		}
+		return optionsWidth.value
+	})
+
+	const thresholdPx = computed((): number => {
+		const t = props.threshold as number
+		if (t > 0) {
+			return t
+		}
+		const w = actionsWidth.value
+		if (w <= 0) {
+			return 36
+		}
+		return w * 0.5
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.disabled) {
+			cls += ' nax-swipe-action--disabled'
+		}
+		if (opened.value) {
+			cls += ' nax-swipe-action--open'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const contentClass = computed((): string => {
+		if (dragging.value) {
+			return 'nax-swipe-action__content--dragging'
+		}
+		return ''
+	})
+
+	const contentStyle = computed((): string => {
+		var style = ''
+		style += 'transform:translateX(' + offsetX.value.toString() + 'px);'
+		if (noTransition.value || dragging.value) {
+			style += 'transition-duration:0ms;'
+		} else {
+			style += 'transition-property:transform;'
+			style += 'transition-duration:' + ANIM_MS.toString() + 'ms;'
+			style += 'transition-timing-function:ease-out;'
+		}
+		return style
+	})
+
+	const actionsWrapStyle = computed((): string => {
+		const w = actionsWidth.value
+		if (w > 0) {
+			return 'width:' + w.toString() + 'px;'
+		}
+		return ''
+	})
+
+	function clampOffset(v: number): number {
+		const min = -actionsWidth.value
+		if (v > 0) {
+			return 0
+		}
+		if (min >= 0) {
+			return 0
+		}
+		if (v < min) {
+			return min
+		}
+		return v
+	}
+
+	function readActiveName(): string {
+		if (activeNameRef == null) {
+			return ''
+		}
+		// provide 注入的是 ref
+		const anyRef = activeNameRef as any
+		const v = anyRef.value
+		if (v == null) {
+			return ''
+		}
+		return '' + v
+	}
+
+	function notifyGroupOpen() {
+		if (!inGroup) {
+			return
+		}
+		if (openItemRaw == null) {
+			return
+		}
+		const fn = openItemRaw as (n: string) => void
+		fn(itemName.value)
+	}
+
+	function notifyGroupClose() {
+		if (!inGroup) {
+			return
+		}
+		if (closeItemRaw == null) {
+			return
+		}
+		const fn = closeItemRaw as (n: string) => void
+		fn(itemName.value)
+	}
+
+	function tryVibrate() {
+		if (!props.vibrateShort) {
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		try {
+			uni.vibrateShort({})
+		} catch (e) {
+			// ignore unsupported
+		}
+		// #endif
+	}
+
+	function applyOpenState(next: boolean, fromProp: boolean) {
+		const w = actionsWidth.value
+		if (next) {
+			if (w <= 0) {
+				return
+			}
+			const wasOpen = opened.value
+			opened.value = true
+			offsetX.value = -w
+			if (!wasOpen) {
+				if (!fromProp) {
+					emit('update:show', true)
+				}
+				emit('open')
+				notifyGroupOpen()
+				tryVibrate()
+			} else if (inGroup) {
+				notifyGroupOpen()
+			}
+		} else {
+			const wasOpen = opened.value
+			opened.value = false
+			offsetX.value = 0
+			if (wasOpen) {
+				if (!fromProp) {
+					emit('update:show', false)
+				}
+				emit('close')
+				notifyGroupClose()
+			}
+		}
+	}
+
+	function open() {
+		if (props.disabled) {
+			return
+		}
+		noTransition.value = false
+		applyOpenState(true, false)
+	}
+
+	function close() {
+		noTransition.value = false
+		applyOpenState(false, false)
+	}
+
+	function openFromProp() {
+		if (props.disabled) {
+			return
+		}
+		syncingFromProp.value = true
+		noTransition.value = false
+		applyOpenState(true, true)
+		syncingFromProp.value = false
+	}
+
+	function closeFromProp() {
+		syncingFromProp.value = true
+		noTransition.value = false
+		applyOpenState(false, true)
+		notifyGroupClose()
+		syncingFromProp.value = false
+	}
+
+	function readTouchPoint(e: UniTouchEvent): number[] {
+		var x = 0.0
+		var y = 0.0
+		if (e.touches.length > 0) {
+			x = e.touches[0].clientX
+			y = e.touches[0].clientY
+		} else if (e.changedTouches.length > 0) {
+			x = e.changedTouches[0].clientX
+			y = e.changedTouches[0].clientY
+		}
+		return [x, y]
+	}
+
+	function onTouchStart(e: UniTouchEvent) {
+		if (props.disabled) {
+			return
+		}
+		if (actionsWidth.value <= 0) {
+			return
+		}
+		const pt = readTouchPoint(e)
+		startX.value = pt[0]
+		startY.value = pt[1]
+		startOffset.value = offsetX.value
+		direction.value = ''
+		dragging.value = false
+		noTransition.value = true
+	}
+
+	function onTouchMove(e: UniTouchEvent) {
+		if (props.disabled) {
+			return
+		}
+		if (actionsWidth.value <= 0) {
+			return
+		}
+		const pt = readTouchPoint(e)
+		const dx = pt[0] - startX.value
+		const dy = pt[1] - startY.value
+		const adx = dx >= 0 ? dx : -dx
+		const ady = dy >= 0 ? dy : -dy
+
+		if (direction.value.length == 0) {
+			if (adx < DIR_LOCK && ady < DIR_LOCK) {
+				return
+			}
+			if (adx >= ady) {
+				direction.value = 'h'
+			} else {
+				direction.value = 'v'
+			}
+		}
+		if (direction.value != 'h') {
+			return
+		}
+
+		// Web/小程序：横向滑动时尽量阻止页面滚动抢手势
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		try {
+			e.preventDefault()
+		} catch (err) {
+			// ignore
+		}
+		// #endif
+
+		dragging.value = true
+		ignoreContentClick.value = true
+		const next = clampOffset(startOffset.value + dx)
+		offsetX.value = next
+	}
+
+	function onTouchEnd(_e: UniTouchEvent) {
+		if (props.disabled) {
+			return
+		}
+		if (direction.value != 'h') {
+			dragging.value = false
+			noTransition.value = false
+			direction.value = ''
+			return
+		}
+		dragging.value = false
+		noTransition.value = false
+		direction.value = ''
+
+		const x = offsetX.value
+		const thr = thresholdPx.value
+		if (x <= -thr) {
+			applyOpenState(true, false)
+		} else {
+			applyOpenState(false, false)
+		}
+
+		setTimeout(() => {
+			ignoreContentClick.value = false
+		}, 80)
+	}
+
+	function onContentClick() {
+		if (ignoreContentClick.value) {
+			return
+		}
+		if (opened.value && props.closeOnClickContent) {
+			close()
+			return
+		}
+		emit('content-click')
+	}
+
+	function onBtnClick(index: number) {
+		if (props.disabled) {
+			return
+		}
+		const btns = renderButtons.value
+		if (index < 0 || index >= btns.length) {
+			return
+		}
+		const btn = btns[index]
+		if (readBoolean(btn, 'disabled')) {
+			return
+		}
+		const payload = {
+			index: index,
+			name: readString(btn, 'name'),
+			text: readString(btn, 'text'),
+			itemName: itemName.value,
+			itemIndex: props.index
+		} as UTSJSONObject
+		emit('click', payload)
+		if (props.autoClose) {
+			close()
+		}
+	}
+
+	watch(
+		(): boolean => {
+			return props.show
+		},
+		(v: boolean) => {
+			if (syncingFromProp.value) {
+				return
+			}
+			if (v == opened.value) {
+				if (v) {
+					offsetX.value = -actionsWidth.value
+				} else {
+					offsetX.value = 0
+				}
+				return
+			}
+			if (v) {
+				openFromProp()
+			} else {
+				closeFromProp()
+			}
+		}
+	)
+
+	watch(
+		(): string => {
+			return readActiveName()
+		},
+		(v: string) => {
+			if (!inGroup) {
+				return
+			}
+			if (v != itemName.value && opened.value) {
+				opened.value = false
+				offsetX.value = 0
+				emit('update:show', false)
+				emit('close')
+			}
+		}
+	)
+
+	watch(
+		(): number => {
+			return actionsWidth.value
+		},
+		(w: number) => {
+			if (opened.value) {
+				if (w <= 0) {
+					opened.value = false
+					offsetX.value = 0
+				} else {
+					offsetX.value = -w
+				}
+			}
+		}
+	)
+
+	onMounted(() => {
+		if (props.show) {
+			openFromProp()
+		}
+	})
+
+	defineExpose({
+		open,
+		close
+	})
+</script>
+
+<style>
+	.nax-swipe-action {
+		position: relative;
+		overflow: hidden;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-swipe-action--disabled {
+		opacity: 0.7;
+	}
+
+	.nax-swipe-action__actions {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: row;
+		align-items: stretch;
+		justify-content: flex-end;
+	}
+
+	.nax-swipe-action__btn {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: 8px;
+		padding-right: 8px;
+		height: 100%;
+	}
+
+	.nax-swipe-action__btn--disabled {
+		opacity: 0.5;
+	}
+
+	.nax-swipe-action__btn-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: #ffffff;
+		text-align: center;
+	}
+
+	.nax-swipe-action__content {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+</style>
