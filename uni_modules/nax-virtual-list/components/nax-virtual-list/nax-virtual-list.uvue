@@ -1,0 +1,820 @@
+<template>
+	<view class="nax-virtual-list" :class="rootClass" :style="rootStyle">
+		<scroll-view
+			:id="scrollDomId"
+			class="nax-virtual-list__scroll"
+			direction="vertical"
+			:scroll-top="scrollTopBind"
+			:show-scrollbar="showScrollbar"
+			:lower-threshold="offset"
+			:refresher-enabled="enableRefresh"
+			:refresher-triggered="refresherTriggered"
+			:refresher-threshold="refresherThreshold"
+			:refresher-background="refresherBackground"
+			:refresher-default-style="refresherDefaultStyle"
+			:style="scrollStyle"
+			@scroll="onScroll"
+			@scrolltolower="onScrollToLower"
+			@refresherrefresh="onRefresherRefresh"
+			@refresherrestore="onRefresherRestore"
+			@refresherabort="onRefresherAbort"
+		>
+			<view class="nax-virtual-list__body">
+				<view class="nax-virtual-list__header">
+					<slot name="header"></slot>
+				</view>
+
+				<view v-if="empty" class="nax-virtual-list__empty">
+					<slot name="empty">
+						<nax-empty :description="emptyText" :icon="emptyIcon"></nax-empty>
+					</slot>
+				</view>
+
+				<view v-else class="nax-virtual-list__window">
+					<!-- 顶部占位：撑开滚动高度，只渲染可视区节点 -->
+					<view class="nax-virtual-list__spacer" :style="topSpacerStyle"></view>
+
+					<view
+						v-for="(row, rowIndex) in visibleRows"
+						:key="rowKey(row, rowIndex)"
+						class="nax-virtual-list__item"
+						:class="itemClass"
+						:style="itemStyle"
+						@click="onItemClick(row)"
+					>
+						<slot :item="row.item" :index="row.index">
+							<view class="nax-virtual-list__fallback">
+								<text class="nax-virtual-list__fallback-text" :lines="1">{{ fallbackText(row) }}</text>
+							</view>
+						</slot>
+					</view>
+
+					<view class="nax-virtual-list__spacer" :style="bottomSpacerStyle"></view>
+				</view>
+
+				<view v-if="!empty" class="nax-virtual-list__footer">
+					<slot name="footer">
+						<view v-if="loading" class="nax-virtual-list__status nax-virtual-list__status--loading">
+							<slot name="loading">
+								<nax-loading size="sm" :text="loadingText"></nax-loading>
+							</slot>
+						</view>
+						<view
+							v-else-if="error"
+							class="nax-virtual-list__status nax-virtual-list__status--error"
+							@click="onErrorClick"
+						>
+							<slot name="error">
+								<text class="nax-virtual-list__status-text nax-virtual-list__status-text--error" :lines="1">{{ errorText }}</text>
+							</slot>
+						</view>
+						<view v-else-if="finished" class="nax-virtual-list__status nax-virtual-list__status--finished">
+							<slot name="finished">
+								<text class="nax-virtual-list__status-text" :lines="1">{{ finishedText }}</text>
+							</slot>
+						</view>
+					</slot>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	type NaxVirtualRow = {
+		index : number
+		item : any | null
+	}
+
+	/**
+	 * nax-virtual-list
+	 * @description 固定行高虚拟列表。上下 spacer + 可视区窗口裁剪，大数据量只挂载少量节点。
+	 * @property {any[]} list 完整数据源（不切片传参；内部按滚动窗口渲染）
+	 * @property {number} itemHeight 行高 px（固定等高）
+	 * @property {number} buffer 上下额外缓冲行数，默认 6
+	 * @property {string} keyField 对象项唯一键字段；空则用 index
+	 * @property {string} height 滚动区高度；空则 flex:1
+	 * @property {boolean} showScrollbar 是否显示滚动条
+	 * @property {boolean} loading / finished / error / empty 底栏状态（对齐 nax-list）
+	 * @property {boolean} enableRefresh 下拉刷新
+	 * @property {boolean} refreshing 刷新中（受控）
+	 * @property {number} offset 触底阈值 px
+	 * @property {string} customClass 根扩展 class
+	 * @property {string} itemClass 行容器扩展 class
+	 * @event load 触底需要加载更多
+	 * @event refresh 下拉刷新
+	 * @event update:refreshing
+	 * @event click-error
+	 * @event click 点击行，payload: { index, item }
+	 * @event visible-change 可视窗口变化，payload: { start, end }
+	 * @event scroll 滚动，payload: { scrollTop, start, end }
+	 * @slot default 作用域插槽 { item, index }
+	 * @slot header / footer / empty / loading / finished / error
+	 */
+	const props = defineProps({
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		itemHeight: {
+			type: Number,
+			default: 48
+		},
+		buffer: {
+			type: Number,
+			default: 6
+		},
+		keyField: {
+			type: String,
+			default: ''
+		},
+		height: {
+			type: String,
+			default: ''
+		},
+		showScrollbar: {
+			type: Boolean,
+			default: true
+		},
+		loading: {
+			type: Boolean,
+			default: false
+		},
+		finished: {
+			type: Boolean,
+			default: false
+		},
+		error: {
+			type: Boolean,
+			default: false
+		},
+		empty: {
+			type: Boolean,
+			default: false
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		offset: {
+			type: Number,
+			default: 80
+		},
+		enableRefresh: {
+			type: Boolean,
+			default: false
+		},
+		refreshing: {
+			type: Boolean,
+			default: false
+		},
+		refresherThreshold: {
+			type: Number,
+			default: 45
+		},
+		refresherBackground: {
+			type: String,
+			default: 'transparent'
+		},
+		refresherDefaultStyle: {
+			type: String,
+			default: 'black'
+		},
+		loadingText: {
+			type: String,
+			default: '加载中...'
+		},
+		finishedText: {
+			type: String,
+			default: '没有更多了'
+		},
+		errorText: {
+			type: String,
+			default: '加载失败，点击重试'
+		},
+		emptyText: {
+			type: String,
+			default: '暂无数据'
+		},
+		emptyIcon: {
+			type: String,
+			default: 'notes-off'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		},
+		itemClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'load',
+		'refresh',
+		'update:refreshing',
+		'click-error',
+		'click',
+		'visible-change',
+		'scroll'
+	])
+
+	const uid = Math.floor(Math.random() * 10000000).toString()
+	const scrollDomId = 'nax-vl-scroll-' + uid
+
+	const startIndex = ref(0)
+	const endIndex = ref(0)
+	const scrollTopValue = ref(0.0)
+	const scrollTopBind = ref(0.0)
+	const viewportPx = ref(0.0)
+	const localTriggered = ref(false)
+	const visibleRows = ref([] as NaxVirtualRow[])
+
+	let lastEmittedStart = -1
+	let lastEmittedEnd = -1
+	let measureToken = 0
+
+	const instance = getCurrentInstance()
+
+	function dataList() : any[] {
+		const val = props.list
+		if (val == null) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function listLength() : number {
+		return dataList().length
+	}
+
+	function rowHeight() : number {
+		const h = props.itemHeight
+		if (h == null || h <= 0) {
+			return 48.0
+		}
+		return h * 1.0
+	}
+
+	function bufferCount() : number {
+		const b = props.buffer
+		if (b == null || b < 0) {
+			return 0
+		}
+		return Math.floor(b)
+	}
+
+	function formatHeight(value : string) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return ''
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0 ||
+			trimmed.indexOf('vh') >= 0
+		) {
+			return trimmed
+		}
+		const n = parseFloat(trimmed)
+		if (isNaN(n) || n <= 0) {
+			return trimmed
+		}
+		return n.toString() + 'px'
+	}
+
+	function parseHeightPx(value : string) : number {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return 0.0
+		}
+		if (trimmed.indexOf('%') >= 0 || trimmed.indexOf('rpx') >= 0 || trimmed.indexOf('vh') >= 0) {
+			return 0.0
+		}
+		var numText = trimmed
+		const pxAt = trimmed.indexOf('px')
+		if (pxAt > 0) {
+			numText = trimmed.substring(0, pxAt)
+		}
+		const n = parseFloat(numText)
+		if (isNaN(n) || n <= 0) {
+			return 0.0
+		}
+		return n
+	}
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.enableRefresh) {
+			cls += ' nax-virtual-list--refresh'
+		}
+		if (props.empty) {
+			cls += ' nax-virtual-list--empty'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		const h = formatHeight(props.height)
+		if (h.length > 0) {
+			return 'height:' + h + ';'
+		}
+		return ''
+	})
+
+	const scrollStyle = computed((): string => {
+		const h = formatHeight(props.height)
+		if (h.length > 0) {
+			return 'height:' + h + ';'
+		}
+		return 'flex:1;'
+	})
+
+	const itemStyle = computed((): string => {
+		return 'height:' + rowHeight().toString() + 'px;'
+	})
+
+	const topSpacerStyle = computed((): string => {
+		const h = startIndex.value * rowHeight()
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const bottomSpacerStyle = computed((): string => {
+		const total = listLength()
+		const end = endIndex.value
+		var remain = total - end
+		if (remain < 0) {
+			remain = 0
+		}
+		const h = remain * rowHeight()
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const refresherTriggered = computed((): boolean => {
+		if (props.refreshing) {
+			return true
+		}
+		return localTriggered.value
+	})
+
+	function resolveViewport() : number {
+		if (viewportPx.value > 0) {
+			return viewportPx.value
+		}
+		const parsed = parseHeightPx(props.height)
+		if (parsed > 0) {
+			return parsed
+		}
+		return rowHeight() * 10
+	}
+
+	function buildVisibleRows(start : number, end : number) : NaxVirtualRow[] {
+		const source = dataList()
+		const rows = [] as NaxVirtualRow[]
+		var i = start
+		while (i < end) {
+			var item : any | null = null
+			if (i >= 0 && i < source.length) {
+				item = source[i]
+			}
+			const row = {
+				index: i,
+				item: item
+			} as NaxVirtualRow
+			rows.push(row)
+			i++
+		}
+		return rows
+	}
+
+	function emitVisible(start : number, end : number) {
+		const payload = {
+			start: start,
+			end: end
+		} as UTSJSONObject
+		emit('visible-change', payload)
+	}
+
+	function updateRange(scrollTop : number, forceEmit : boolean) {
+		const total = listLength()
+		const ih = rowHeight()
+		if (total <= 0 || ih <= 0) {
+			startIndex.value = 0
+			endIndex.value = 0
+			visibleRows.value = [] as NaxVirtualRow[]
+			if (forceEmit || lastEmittedStart != 0 || lastEmittedEnd != 0) {
+				lastEmittedStart = 0
+				lastEmittedEnd = 0
+				emitVisible(0, 0)
+			}
+			return
+		}
+
+		const viewH = resolveViewport()
+		const buf = bufferCount()
+		var start = Math.floor(scrollTop / ih) - buf
+		if (start < 0) {
+			start = 0
+		}
+		var end = Math.ceil((scrollTop + viewH) / ih) + buf
+		if (end > total) {
+			end = total
+		}
+		if (end < start) {
+			end = start
+		}
+
+		if (!forceEmit && start == startIndex.value && end == endIndex.value) {
+			return
+		}
+
+		startIndex.value = start
+		endIndex.value = end
+		visibleRows.value = buildVisibleRows(start, end)
+
+		if (forceEmit || start != lastEmittedStart || end != lastEmittedEnd) {
+			lastEmittedStart = start
+			lastEmittedEnd = end
+			emitVisible(start, end)
+		}
+	}
+
+	function rowKey(row : NaxVirtualRow, rowIndex : number) : string {
+		const field = props.keyField.trim()
+		if (field.length > 0 && row.item != null) {
+			const obj = row.item as UTSJSONObject
+			const raw = obj[field]
+			if (raw != null) {
+				return '' + raw
+			}
+		}
+		return 'i-' + row.index.toString() + '-' + rowIndex.toString()
+	}
+
+	function fallbackText(row : NaxVirtualRow) : string {
+		if (row.item == null) {
+			return '#' + row.index.toString()
+		}
+		if (typeof row.item == 'string') {
+			return row.item as string
+		}
+		if (typeof row.item == 'number') {
+			return (row.item as number).toString()
+		}
+		const obj = row.item as UTSJSONObject
+		const title = obj['title']
+		if (title != null) {
+			return '' + title
+		}
+		const label = obj['label']
+		if (label != null) {
+			return '' + label
+		}
+		const name = obj['name']
+		if (name != null) {
+			return '' + name
+		}
+		const text = obj['text']
+		if (text != null) {
+			return '' + text
+		}
+		return '#' + row.index.toString()
+	}
+
+	function onScroll(e : UniScrollEvent) {
+		const top = e.detail.scrollTop
+		scrollTopValue.value = top
+		updateRange(top, false)
+		const payload = {
+			scrollTop: top,
+			start: startIndex.value,
+			end: endIndex.value
+		} as UTSJSONObject
+		emit('scroll', payload)
+	}
+
+	function canLoad() : boolean {
+		if (props.disabled) {
+			return false
+		}
+		if (props.loading) {
+			return false
+		}
+		if (props.finished) {
+			return false
+		}
+		if (props.error) {
+			return false
+		}
+		if (props.empty) {
+			return false
+		}
+		if (props.refreshing || localTriggered.value) {
+			return false
+		}
+		return true
+	}
+
+	function tryLoad() {
+		if (!canLoad()) {
+			return
+		}
+		emit('load')
+	}
+
+	function onScrollToLower() {
+		tryLoad()
+	}
+
+	function onErrorClick() {
+		emit('click-error')
+		emit('load')
+	}
+
+	function onItemClick(row : NaxVirtualRow) {
+		const payload = {
+			index: row.index,
+			item: row.item
+		} as UTSJSONObject
+		emit('click', payload)
+	}
+
+	function endRefreshLocal() {
+		localTriggered.value = false
+	}
+
+	function onRefresherRefresh() {
+		if (!props.enableRefresh) {
+			return
+		}
+		if (props.refreshing || localTriggered.value) {
+			return
+		}
+		localTriggered.value = true
+		emit('update:refreshing', true)
+		emit('refresh')
+	}
+
+	function onRefresherRestore() {
+		if (!props.refreshing) {
+			endRefreshLocal()
+		}
+	}
+
+	function onRefresherAbort() {
+		if (!props.refreshing) {
+			endRefreshLocal()
+			emit('update:refreshing', false)
+		}
+	}
+
+	/** 滚动到指定索引（尽量置顶） */
+	function scrollToIndex(index : number) {
+		const total = listLength()
+		var i = index
+		if (i < 0) {
+			i = 0
+		}
+		if (total > 0 && i > total - 1) {
+			i = total - 1
+		}
+		const top = i * rowHeight()
+		scrollToOffset(top)
+	}
+
+	/** 滚动到指定 offset（px） */
+	function scrollToOffset(offsetY : number) {
+		var top = offsetY
+		if (top < 0) {
+			top = 0
+		}
+		// 部分端相同值不刷新，需二次赋值
+		const current = scrollTopBind.value
+		if (Math.abs(current - top) < 0.5) {
+			scrollTopBind.value = top + 0.01
+			nextTick(() => {
+				scrollTopBind.value = top
+				scrollTopValue.value = top
+				updateRange(top, true)
+			})
+		} else {
+			scrollTopBind.value = top
+			scrollTopValue.value = top
+			updateRange(top, true)
+		}
+	}
+
+	function getVisibleRange() : UTSJSONObject {
+		return {
+			start: startIndex.value,
+			end: endIndex.value,
+			scrollTop: scrollTopValue.value
+		} as UTSJSONObject
+	}
+
+	function measureViewport() {
+		const parsed = parseHeightPx(props.height)
+		if (parsed > 0) {
+			viewportPx.value = parsed
+			updateRange(scrollTopValue.value, true)
+			return
+		}
+		const token = measureToken + 1
+		measureToken = token
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+		query
+			.select('#' + scrollDomId)
+			.boundingClientRect((rect : NodeInfo) => {
+				if (token != measureToken) {
+					return
+				}
+				if (rect != null && rect.height != null) {
+					const h = rect.height as number
+					if (h > 0) {
+						viewportPx.value = h
+					}
+				}
+				updateRange(scrollTopValue.value, true)
+			})
+		query.exec()
+	}
+
+	function rebuildFromProps() {
+		const total = listLength()
+		const maxTop = total * rowHeight()
+		var top = scrollTopValue.value
+		if (top > maxTop) {
+			top = maxTop
+			scrollTopValue.value = top
+			scrollTopBind.value = top
+		}
+		updateRange(top, true)
+	}
+
+	watch((): number => {
+		return listLength()
+	}, (_ : number) => {
+		rebuildFromProps()
+	})
+
+	watch((): number => {
+		return props.itemHeight
+	}, (_ : number) => {
+		rebuildFromProps()
+	})
+
+	watch((): number => {
+		return props.buffer
+	}, (_ : number) => {
+		rebuildFromProps()
+	})
+
+	watch((): string => {
+		return props.height
+	}, (_ : string) => {
+		measureViewport()
+	})
+
+	watch((): boolean => {
+		return props.refreshing
+	}, (val : boolean) => {
+		if (val) {
+			localTriggered.value = true
+		} else {
+			setTimeout(() => {
+				if (!props.refreshing) {
+					endRefreshLocal()
+				}
+			}, 50)
+		}
+	})
+
+	watch((): boolean => {
+		return props.empty
+	}, (val : boolean) => {
+		if (!val) {
+			nextTick(() => {
+				measureViewport()
+			})
+		}
+	})
+
+	onMounted(() => {
+		nextTick(() => {
+			measureViewport()
+			updateRange(0, true)
+		})
+	})
+
+	defineExpose({
+		scrollToIndex,
+		scrollToOffset,
+		getVisibleRange,
+		tryLoad
+	})
+</script>
+
+<style>
+	.nax-virtual-list {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+		overflow: hidden;
+	}
+
+	.nax-virtual-list__scroll {
+		flex: 1;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-virtual-list__body {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-virtual-list__header {
+		flex-direction: column;
+	}
+
+	.nax-virtual-list__empty {
+		flex-direction: column;
+		padding-top: 24px;
+		padding-bottom: 24px;
+	}
+
+	.nax-virtual-list__window {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-virtual-list__spacer {
+		/* 高度由 inline style 控制 */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-virtual-list__item {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+		overflow: hidden;
+	}
+
+	.nax-virtual-list__fallback {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		padding-left: 16px;
+		padding-right: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.nax-virtual-list__fallback-text {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.nax-virtual-list__footer {
+		flex-direction: column;
+	}
+
+	.nax-virtual-list__status {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-virtual-list__status-text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-virtual-list__status-text--error {
+		color: var(--nax-color-error, #d03050);
+	}
+</style>

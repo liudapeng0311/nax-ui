@@ -2,7 +2,7 @@
 
 滚动列表壳。负责内部滚动触底加载、下拉刷新与空 / 加载 / 结束 / 错误状态；**行内容由业务在默认插槽自行 `v-for`**（可配合 `nax-cell`）。
 
-> 不做虚拟列表（后期独立 `nax-virtual-list`）。
+> 虚拟长列表请用独立组件 `nax-virtual-list`（固定行高窗口裁剪）。
 
 ## 用法
 
@@ -120,4 +120,4 @@ function onRefresh() {
 2. `empty == true` 时不会继续自动 load；首屏请先请求再决定是否 empty。
 3. **下拉刷新只在 `usePageScroll=false` 时生效**；页面滚动请用页面 `onPullDownRefresh` + `uni.stopPullDownRefresh`。
 4. 刷新中会暂停触底 `load`，避免并发；业务在 `@refresh` 里重置数据与 `finished`。
-5. 虚拟长列表请后续使用独立组件，勿与本壳混为 `virtual` 开关。
+5. 虚拟长列表请使用 `nax-virtual-list`，勿与本壳混为 `virtual` 开关。

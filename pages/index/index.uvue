@@ -143,6 +143,10 @@
 					<text class="home__card-name">列表</text>
 					<text class="home__card-tag">nax-list</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goVirtualList">
+					<text class="home__card-name">虚拟列表</text>
+					<text class="home__card-tag">nax-virtual-list</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goSwipeAction">
 					<text class="home__card-name">滑动操作</text>
 					<text class="home__card-tag">nax-swipe-action</text>
@@ -437,6 +441,12 @@
 	function goList() {
 		uni.navigateTo({
 			url: '/pages/components/list/index'
+		})
+	}
+
+	function goVirtualList() {
+		uni.navigateTo({
+			url: '/pages/components/virtual-list/index'
 		})
 	}
 

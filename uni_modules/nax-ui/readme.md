@@ -20,6 +20,7 @@ uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不�
 | `nax-dialog` | 对话框（声明式 + 函数式 naxDialog） |
 | `nax-nav-bar` | 自定义顶部导航栏（状态栏 / fixed 占位 / 返回栈） |
 | `nax-list` | 滚动列表壳（触底加载 / 空错底态） |
+| `nax-virtual-list` | 固定行高虚拟列表（窗口裁剪） |
 
 ## 推荐接入
 
@@ -28,4 +29,3 @@ uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不�
 3. 安装需要的 `nax-*` 组件插件
 
 详见：`docs/theme.md`、`docs/component-inventory.md`。
-

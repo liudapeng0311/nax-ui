@@ -1,0 +1,535 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-virtual-list</text>
+			<text class="page__desc">固定行高虚拟列表：只渲染可视区 + 缓冲行，适合一次挂大量数据。</text>
+
+			<view class="section">
+				<text class="section__title">5000 条 · 窗口裁剪</text>
+				<text class="hint">itemHeight=52 · buffer=8 · 可见 {{ visStart }} ~ {{ visEnd }}（约 {{ visCount }} 行节点）</text>
+				<view class="list-panel">
+					<nax-virtual-list
+						ref="basicRef"
+						:key="basicKey"
+						height="420px"
+						:list="basicList"
+						:item-height="52"
+						:buffer="8"
+						key-field="id"
+						@visible-change="onVisibleChange"
+						@click="onRowClick"
+					>
+						<template #default="{ item, index }">
+							<view class="row-item" :class="rowAltClass(index)">
+								<view class="row-item__main">
+									<text class="row-item__title" :lines="1">{{ readTitle(item) }}</text>
+									<text class="row-item__sub" :lines="1">{{ readSub(item) }}</text>
+								</view>
+								<text class="row-item__index">{{ index + 1 }}</text>
+							</view>
+						</template>
+					</nax-virtual-list>
+				</view>
+				<view class="row">
+					<nax-button size="sm" label="滚到 #0" @click="goIndex(0)"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="滚到 #2500" @click="goIndex(2500)"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" type="primary" label="滚到末尾" @click="goIndex(4999)"></nax-button>
+				</view>
+				<text class="event">事件：{{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">触底分页追加</text>
+				<text class="hint">初始自动 load · 每次 +30 · 到 300 条 finished</text>
+				<view class="list-panel">
+					<nax-virtual-list
+						:key="pageKey"
+						height="360px"
+						:list="pageList"
+						:item-height="48"
+						:buffer="6"
+						key-field="id"
+						:loading="pageLoading"
+						:finished="pageFinished"
+						:error="pageError"
+						@load="onPageLoad"
+						@click-error="onPageErrorClick"
+					>
+						<template #header>
+							<view class="list-header">
+								<text class="list-header__text">已加载 {{ pageList.length }} 条</text>
+							</view>
+						</template>
+						<template #default="{ item, index }">
+							<nax-cell
+								:title="readTitle(item)"
+								:value="'' + (index + 1)"
+								:label="readSub(item)"
+								is-link
+							></nax-cell>
+						</template>
+					</nax-virtual-list>
+				</view>
+				<view class="row">
+					<nax-button size="sm" label="重置分页" @click="resetPage"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" type="warning" label="下次失败" @click="armPageFail"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">下拉刷新</text>
+				<text class="hint">列表内下拉 · enable-refresh · 刷新后批次号 +1</text>
+				<view class="list-panel">
+					<nax-virtual-list
+						:key="rfKey"
+						height="320px"
+						:list="rfList"
+						:item-height="48"
+						:buffer="6"
+						key-field="id"
+						:enable-refresh="true"
+						:refreshing="rfRefreshing"
+						:loading="rfLoading"
+						:finished="rfFinished"
+						@refresh="onRfRefresh"
+						@update:refreshing="onRfRefreshing"
+						@load="onRfLoad"
+					>
+						<template #header>
+							<view class="list-header">
+								<text class="list-header__text">批次 #{{ rfBatch }} · {{ rfList.length }} 条</text>
+							</view>
+						</template>
+						<template #default="{ item, index }">
+							<nax-cell :title="readTitle(item)" :value="'' + (index + 1)"></nax-cell>
+						</template>
+					</nax-virtual-list>
+				</view>
+				<view class="row">
+					<nax-button size="sm" label="重置刷新示例" @click="resetRf"></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">空状态</text>
+				<view class="list-panel list-panel--short">
+					<nax-virtual-list
+						height="200px"
+						:list="emptyList"
+						:item-height="48"
+						:empty="true"
+						empty-text="还没有虚拟列表数据"
+					></nax-virtual-list>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const lastEvent = ref('—')
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const visStart = ref(0)
+	const visEnd = ref(0)
+	const visCount = computed((): number => {
+		const n = visEnd.value - visStart.value
+		if (n < 0) {
+			return 0
+		}
+		return n
+	})
+
+	const basicRef = ref(null)
+	const basicKey = ref(0)
+	const basicList = ref([] as UTSJSONObject[])
+
+	function makeItem(id : number, prefix : string) : UTSJSONObject {
+		return {
+			id: id,
+			title: prefix + ' 行 #' + id.toString(),
+			sub: '固定行高虚拟渲染 · id=' + id.toString()
+		} as UTSJSONObject
+	}
+
+	function buildBasic(count : number) {
+		const rows = [] as UTSJSONObject[]
+		var i = 0
+		while (i < count) {
+			rows.push(makeItem(i, 'Item'))
+			i++
+		}
+		basicList.value = rows
+	}
+
+	function readTitle(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		const obj = item as UTSJSONObject
+		const t = obj['title']
+		if (t != null) {
+			return '' + t
+		}
+		return ''
+	}
+
+	function readSub(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		const obj = item as UTSJSONObject
+		const t = obj['sub']
+		if (t != null) {
+			return '' + t
+		}
+		return ''
+	}
+
+	function rowAltClass(index : number) : string {
+		if (index % 2 == 1) {
+			return 'row-item--alt'
+		}
+		return ''
+	}
+
+	function onVisibleChange(e : UTSJSONObject) {
+		const s = e['start']
+		const ed = e['end']
+		if (s != null) {
+			visStart.value = s as number
+		}
+		if (ed != null) {
+			visEnd.value = ed as number
+		}
+	}
+
+	function onRowClick(e : UTSJSONObject) {
+		const idx = e['index']
+		var i = -1
+		if (idx != null) {
+			i = idx as number
+		}
+		lastEvent.value = 'click #' + i.toString()
+		uni.showToast({
+			title: '点击 #' + i.toString(),
+			icon: 'none'
+		})
+	}
+
+	function callVlScrollToIndex(target : any | null, index : number) {
+		if (target == null) {
+			return false
+		}
+		target.scrollToIndex(index)
+		return true
+	}
+
+	function goIndex(index : number) {
+		const ok = callVlScrollToIndex(basicRef.value, index)
+		if (ok) {
+			lastEvent.value = 'scrollToIndex(' + index.toString() + ')'
+		} else {
+			lastEvent.value = '组件未就绪'
+		}
+	}
+
+	// —— 分页 ——
+	const pageKey = ref(0)
+	const pageList = ref([] as UTSJSONObject[])
+	const pageLoading = ref(false)
+	const pageFinished = ref(false)
+	const pageError = ref(false)
+	const pageFailNext = ref(false)
+	const PAGE_SIZE = 30
+	const PAGE_MAX = 300
+	let pageSeed = 0
+
+	function onPageLoad() {
+		if (pageLoading.value || pageFinished.value) {
+			return
+		}
+		pageLoading.value = true
+		pageError.value = false
+		setTimeout(() => {
+			if (pageFailNext.value) {
+				pageFailNext.value = false
+				pageLoading.value = false
+				pageError.value = true
+				return
+			}
+			const next = [] as UTSJSONObject[]
+			var n = 0
+			while (n < PAGE_SIZE) {
+				const id = pageSeed
+				pageSeed++
+				next.push(makeItem(id, 'Page'))
+				n++
+			}
+			const merged = [] as UTSJSONObject[]
+			var j = 0
+			const cur = pageList.value
+			while (j < cur.length) {
+				merged.push(cur[j])
+				j++
+			}
+			var k = 0
+			while (k < next.length) {
+				merged.push(next[k])
+				k++
+			}
+			pageList.value = merged
+			pageLoading.value = false
+			if (pageList.value.length >= PAGE_MAX) {
+				pageFinished.value = true
+			}
+		}, 450)
+	}
+
+	function onPageErrorClick() {
+		pageError.value = false
+	}
+
+	function resetPage() {
+		pageList.value = [] as UTSJSONObject[]
+		pageLoading.value = false
+		pageFinished.value = false
+		pageError.value = false
+		pageFailNext.value = false
+		pageSeed = 0
+		pageKey.value = pageKey.value + 1
+		// remount 后需再次触底；短列表会自动 scrolltolower 不一定触发，手动补一页
+		setTimeout(() => {
+			onPageLoad()
+		}, 80)
+	}
+
+	function armPageFail() {
+		pageFailNext.value = true
+	}
+
+	// —— 刷新 ——
+	const rfKey = ref(0)
+	const rfList = ref([] as UTSJSONObject[])
+	const rfLoading = ref(false)
+	const rfFinished = ref(false)
+	const rfRefreshing = ref(false)
+	const rfBatch = ref(1)
+	let rfSeed = 0
+
+	function onRfRefreshing(v : boolean) {
+		rfRefreshing.value = v
+	}
+
+	function appendRf(count : number) {
+		const next = [] as UTSJSONObject[]
+		var n = 0
+		while (n < count) {
+			const id = rfSeed
+			rfSeed++
+			next.push(makeItem(id, 'B' + rfBatch.value.toString()))
+			n++
+		}
+		const merged = [] as UTSJSONObject[]
+		var j = 0
+		const cur = rfList.value
+		while (j < cur.length) {
+			merged.push(cur[j])
+			j++
+		}
+		var k = 0
+		while (k < next.length) {
+			merged.push(next[k])
+			k++
+		}
+		rfList.value = merged
+	}
+
+	function onRfLoad() {
+		if (rfLoading.value || rfFinished.value || rfRefreshing.value) {
+			return
+		}
+		rfLoading.value = true
+		setTimeout(() => {
+			appendRf(25)
+			rfLoading.value = false
+			if (rfList.value.length >= 120) {
+				rfFinished.value = true
+			}
+		}, 400)
+	}
+
+	function onRfRefresh() {
+		rfRefreshing.value = true
+		rfFinished.value = false
+		setTimeout(() => {
+			rfBatch.value = rfBatch.value + 1
+			rfSeed = 0
+			rfList.value = [] as UTSJSONObject[]
+			appendRf(30)
+			rfRefreshing.value = false
+			rfLoading.value = false
+		}, 500)
+	}
+
+	function resetRf() {
+		rfBatch.value = 1
+		rfSeed = 0
+		rfList.value = [] as UTSJSONObject[]
+		rfLoading.value = false
+		rfFinished.value = false
+		rfRefreshing.value = false
+		rfKey.value = rfKey.value + 1
+		setTimeout(() => {
+			onRfLoad()
+		}, 80)
+	}
+
+	const emptyList = ref([] as UTSJSONObject[])
+
+	onMounted(() => {
+		buildBasic(5000)
+		// 分页 / 刷新示例首屏灌入
+		onPageLoad()
+		onRfLoad()
+	})
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 20px;
+	}
+
+	.section__title {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 8px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 8px;
+	}
+
+	.event {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.list-panel {
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: 8px;
+		overflow: hidden;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.list-panel--short {
+		margin-bottom: 0;
+	}
+
+	.list-header {
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 16px;
+		padding-right: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.list-header__text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 10px;
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.row-item {
+		flex: 1;
+		height: 52px;
+		flex-direction: row;
+		align-items: center;
+		padding-left: 14px;
+		padding-right: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #efeff5);
+	}
+
+	.row-item--alt {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.row-item__main {
+		flex: 1;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	.row-item__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.row-item__sub {
+		margin-top: 2px;
+		font-size: 11px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.row-item__index {
+		font-size: 12px;
+		color: var(--nax-color-text-tertiary, #c2c2c2);
+		margin-left: 8px;
+	}
+</style>
