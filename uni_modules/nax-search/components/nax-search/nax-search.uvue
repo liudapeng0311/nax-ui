@@ -1,0 +1,763 @@
+<template>
+	<view class="nax-search" :class="rootClass" :style="rootStyle" @click="onRootClick">
+		<view class="nax-search__content" :class="contentClass" :style="contentStyle">
+			<!-- 左侧 label -->
+			<text v-if="hasLabel" class="nax-search__label" :style="labelStyle">{{ labelText }}</text>
+			<slot name="label"></slot>
+
+			<!-- 搜索图标 -->
+			<view
+				v-if="hasSearchIcon"
+				class="nax-search__icon nax-search__icon--search"
+				@click.stop="onSearchIconClick"
+			>
+				<nax-icon
+					:name="searchIcon"
+					:size="resolvedSearchIconSize"
+					:color="resolvedSearchIconColor"
+				></nax-icon>
+			</view>
+
+			<input
+				class="nax-search__field"
+				:class="fieldClass"
+				:style="fieldStyle"
+				:value="innerValue"
+				type="text"
+				confirm-type="search"
+				:placeholder="placeholder"
+				:placeholder-style="resolvedPlaceholderStyle"
+				:disabled="disabled"
+				:maxlength="maxlength"
+				:focus="focus"
+				:adjust-position="adjustPosition"
+				@input="onInput"
+				@focus="onFocus"
+				@blur="onBlur"
+				@confirm="onConfirm"
+				@click="onFieldClick"
+			/>
+
+			<!-- 清除：touchstart 优先，避免 Web 先 blur 卸载节点导致 click 丢失 -->
+			<view
+				v-if="showClear"
+				class="nax-search__clear"
+				@touchstart.stop.prevent="onClear"
+				@click.stop.prevent="onClear"
+			>
+				<nax-icon name="close" :size="clearIconSizePx" color="#ffffff"></nax-icon>
+			</view>
+		</view>
+
+		<!-- 右侧操作（搜索/取消等） -->
+		<view
+			v-if="actionVisible"
+			class="nax-search__action"
+			@click.stop.prevent="onActionClick"
+		>
+			<slot name="action">
+				<text class="nax-search__action-text" :style="actionTextStyle">{{ actionText }}</text>
+			</slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-search
+	 * @description 搜索框。功能主要对齐 uView Pro / uView Plus Search。
+	 * @property {string} modelValue v-model 绑定值
+	 * @property {string} shape round 圆形 | square 方形（默认 round）
+	 * @property {string} background 输入区背景色；空则用 token
+	 * @property {string} placeholder 占位文案
+	 * @property {boolean} clearable 是否显示清除按钮，默认 true（对齐 uView clearabled）
+	 * @property {boolean} focus 是否自动聚焦
+	 * @property {boolean} showAction 是否显示右侧操作按钮，默认 true
+	 * @property {string} actionText 右侧按钮文案，默认「搜索」
+	 * @property {string} actionColor 右侧按钮文字色
+	 * @property {string} inputAlign left | center | right
+	 * @property {boolean} disabled 禁用（禁用时点击根节点触发 click，便于跳转搜索页）
+	 * @property {string} borderColor 边框色；有值才显示边框
+	 * @property {string} searchIcon 左侧搜索图标名，默认 search；空字符串隐藏
+	 * @property {string} searchIconColor 搜索图标色
+	 * @property {string} searchIconSize 搜索图标尺寸（数字字符串按 px）
+	 * @property {string} color 输入文字颜色
+	 * @property {string} placeholderColor placeholder 颜色
+	 * @property {string} placeholderStyle placeholder 完整样式字符串（优先于 placeholderColor）
+	 * @property {number} maxlength 最大长度；-1 不限制
+	 * @property {string} height 输入区高度；数字字符串按 px；空则跟随 size
+	 * @property {string} label 搜索框左侧文案
+	 * @property {boolean} animation 为 true 时，右侧按钮仅在聚焦时显示
+	 * @property {boolean} adjustPosition 键盘弹起是否上推页面
+	 * @property {string} size sm | md | lg
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event input 输入变化
+	 * @event change 输入变化（与 input 同步）
+	 * @event search 键盘搜索/完成（当前值）
+	 * @event custom 点击右侧操作按钮（当前值）
+	 * @event focus 聚焦（当前值）
+	 * @event blur 失焦（当前值）
+	 * @event clear 点击清除
+	 * @event click 禁用态点击根节点
+	 * @event clickIcon 点击搜索图标
+	 * @slot label 自定义左侧 label
+	 * @slot action 自定义右侧操作区
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: String,
+			default: ''
+		},
+		shape: {
+			type: String,
+			default: 'round'
+		},
+		background: {
+			type: String,
+			default: ''
+		},
+		// 兼容 uView bgColor 命名
+		bgColor: {
+			type: String,
+			default: ''
+		},
+		placeholder: {
+			type: String,
+			default: '请输入关键字'
+		},
+		clearable: {
+			type: Boolean,
+			default: true
+		},
+		// 兼容 uView 拼写 clearabled
+		clearabled: {
+			type: Boolean,
+			default: true
+		},
+		focus: {
+			type: Boolean,
+			default: false
+		},
+		showAction: {
+			type: Boolean,
+			default: true
+		},
+		actionText: {
+			type: String,
+			default: '搜索'
+		},
+		actionColor: {
+			type: String,
+			default: ''
+		},
+		inputAlign: {
+			type: String,
+			default: 'left'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		borderColor: {
+			type: String,
+			default: ''
+		},
+		searchIcon: {
+			type: String,
+			default: 'search'
+		},
+		searchIconColor: {
+			type: String,
+			default: ''
+		},
+		searchIconSize: {
+			type: String,
+			default: ''
+		},
+		color: {
+			type: String,
+			default: ''
+		},
+		placeholderColor: {
+			type: String,
+			default: ''
+		},
+		placeholderStyle: {
+			type: String,
+			default: ''
+		},
+		maxlength: {
+			type: Number,
+			default: -1
+		},
+		height: {
+			type: String,
+			default: ''
+		},
+		label: {
+			type: String,
+			default: ''
+		},
+		animation: {
+			type: Boolean,
+			default: false
+		},
+		adjustPosition: {
+			type: Boolean,
+			default: true
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:modelValue',
+		'input',
+		'change',
+		'search',
+		'custom',
+		'focus',
+		'blur',
+		'clear',
+		'click',
+		'clickIcon'
+	])
+
+	const innerValue = ref(props.modelValue)
+	const isFocused = ref(false)
+
+	watch((): string => {
+		return props.modelValue
+	}, (val: string) => {
+		if (val != innerValue.value) {
+			innerValue.value = val
+		}
+	})
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeAlign(value: string): string {
+		if (value == 'center' || value == 'right') {
+			return value
+		}
+		return 'left'
+	}
+
+	function normalizeShape(value: string): string {
+		if (value == 'square' || value == 'rect') {
+			return 'square'
+		}
+		return 'round'
+	}
+
+	function isDigitHeight(value: string): boolean {
+		if (value.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < value.length) {
+			const c = value.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const alignName = computed((): string => {
+		return normalizeAlign(props.inputAlign)
+	})
+
+	const shapeName = computed((): string => {
+		return normalizeShape(props.shape)
+	})
+
+	/** clearable 与 uView clearabled 任一为 false 则关闭 */
+	const clearEnabled = computed((): boolean => {
+		return props.clearable && props.clearabled
+	})
+
+	const resolvedBackground = computed((): string => {
+		if (props.background.length > 0) {
+			return props.background
+		}
+		if (props.bgColor.length > 0) {
+			return props.bgColor
+		}
+		return ''
+	})
+
+	const hasLabel = computed((): boolean => {
+		return props.label.length > 0
+	})
+
+	const labelText = computed((): string => {
+		return props.label
+	})
+
+	const hasSearchIcon = computed((): boolean => {
+		return props.searchIcon.length > 0
+	})
+
+	/**
+	 * 有内容即显示清除，不依赖 focus。
+	 * 原因：鸿蒙等端 input @focus 可能不触发；Web 点击清除会先 blur 卸载按钮导致 click 丢失。
+	 */
+	const showClear = computed((): boolean => {
+		if (!clearEnabled.value) {
+			return false
+		}
+		if (props.disabled) {
+			return false
+		}
+		return innerValue.value.length > 0
+	})
+
+	/** 右侧按钮是否显示 */
+	const actionVisible = computed((): boolean => {
+		if (!props.showAction) {
+			return false
+		}
+		if (props.animation) {
+			return isFocused.value
+		}
+		return true
+	})
+
+	const heightCss = computed((): string => {
+		const h = props.height
+		if (h.length > 0) {
+			if (isDigitHeight(h)) {
+				return h + 'px'
+			}
+			return h
+		}
+		const s = sizeName.value
+		if (s == 'sm') {
+			// #ifdef APP-HARMONY
+			return '36px'
+			// #endif
+			// #ifndef APP-HARMONY
+			return '32px'
+			// #endif
+		}
+		if (s == 'lg') {
+			// #ifdef APP-HARMONY
+			return '48px'
+			// #endif
+			// #ifndef APP-HARMONY
+			return '40px'
+			// #endif
+		}
+		// #ifdef APP-HARMONY
+		return '40px'
+		// #endif
+		// #ifndef APP-HARMONY
+		return '36px'
+		// #endif
+	})
+
+	const fontSizeCss = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '13px'
+		}
+		if (s == 'lg') {
+			return '16px'
+		}
+		return '14px'
+	})
+
+	const resolvedSearchIconSize = computed((): string => {
+		if (props.searchIconSize.length > 0) {
+			return props.searchIconSize
+		}
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '16'
+		}
+		if (s == 'lg') {
+			return '20'
+		}
+		return '18'
+	})
+
+	const clearIconSizePx = computed((): string => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return '10'
+		}
+		if (s == 'lg') {
+			return '12'
+		}
+		return '11'
+	})
+
+	const resolvedSearchIconColor = computed((): string => {
+		if (props.searchIconColor.length > 0) {
+			return props.searchIconColor
+		}
+		if (props.disabled) {
+			return '#c2c2c2'
+		}
+		return '#909399'
+	})
+
+	const resolvedPlaceholderStyle = computed((): string => {
+		if (props.placeholderStyle.length > 0) {
+			return props.placeholderStyle
+		}
+		const c = props.placeholderColor.length > 0 ? props.placeholderColor : '#c2c2c2'
+		return 'color: ' + c + ';'
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-search--' + sizeName.value
+		cls += ' nax-search--' + shapeName.value
+		cls += ' nax-search--align-' + alignName.value
+		if (props.disabled) {
+			cls += ' nax-search--disabled'
+		}
+		if (isFocused.value) {
+			cls += ' nax-search--focus'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		return ''
+	})
+
+	const contentClass = computed((): string => {
+		let cls = 'nax-search__content--' + shapeName.value
+		if (props.borderColor.length > 0) {
+			cls += ' nax-search__content--bordered'
+		}
+		return cls
+	})
+
+	const contentStyle = computed((): string => {
+		let style = 'height:' + heightCss.value + ';'
+		// #ifdef APP-HARMONY
+		// 鸿蒙：嵌套 CSS 变量 background 常失效，内联实色兜底
+		const bgHarmony = resolvedBackground.value.length > 0 ? resolvedBackground.value : '#f3f3f5'
+		style += 'background-color:' + bgHarmony + ';'
+		// #endif
+		// #ifndef APP-HARMONY
+		if (resolvedBackground.value.length > 0) {
+			style += 'background-color:' + resolvedBackground.value + ';'
+		}
+		// #endif
+		if (props.borderColor.length > 0) {
+			style += 'border-color:' + props.borderColor + ';'
+		}
+		return style
+	})
+
+	const fieldClass = computed((): string => {
+		let cls = 'nax-search__field--align-' + alignName.value
+		if (props.disabled) {
+			cls += ' nax-search__field--disabled'
+		}
+		return cls
+	})
+
+	const fieldStyle = computed((): string => {
+		let style = ''
+		style += 'font-size:' + fontSizeCss.value + ';'
+		style += 'text-align:' + alignName.value + ';'
+		if (props.color.length > 0) {
+			style += 'color:' + props.color + ';'
+		}
+		// #ifdef APP-HARMONY
+		// 鸿蒙原生 input：固定高度 + 等值 line-height 垂直居中
+		style += 'height:' + heightCss.value + ';'
+		style += 'line-height:' + heightCss.value + ';'
+		// #endif
+		return style
+	})
+
+	const labelStyle = computed((): string => {
+		return 'font-size:' + fontSizeCss.value + ';'
+	})
+
+	const actionTextStyle = computed((): string => {
+		let style = 'font-size:' + fontSizeCss.value + ';'
+		if (props.actionColor.length > 0) {
+			style += 'color:' + props.actionColor + ';'
+		}
+		return style
+	})
+
+	function setValue(val: string) {
+		if (innerValue.value == val) {
+			return
+		}
+		innerValue.value = val
+		emit('update:modelValue', val)
+		emit('input', val)
+		emit('change', val)
+	}
+
+	function hideKeyboardSafe() {
+		uni.hideKeyboard()
+	}
+
+	function onInput(e: UniInputEvent) {
+		if (props.disabled) {
+			return
+		}
+		isFocused.value = true
+		const val = e.detail.value
+		setValue(val)
+	}
+
+	function onFocus(e: UniInputFocusEvent) {
+		isFocused.value = true
+		const val = e.detail.value
+		emit('focus', val)
+	}
+
+	function onBlur(e: UniInputBlurEvent) {
+		const val = e.detail.value
+		// 延迟失焦：给清除按钮 touch/click 留窗口
+		setTimeout(() => {
+			isFocused.value = false
+		}, 150)
+		emit('blur', val)
+	}
+
+	function onConfirm(e: UniInputConfirmEvent) {
+		const val = e.detail.value
+		emit('search', val)
+		hideKeyboardSafe()
+	}
+
+	function onClear() {
+		if (props.disabled) {
+			return
+		}
+		if (innerValue.value.length == 0) {
+			return
+		}
+		setValue('')
+		isFocused.value = true
+		emit('clear')
+	}
+
+	function onActionClick() {
+		emit('custom', innerValue.value)
+		hideKeyboardSafe()
+	}
+
+	function onSearchIconClick() {
+		emit('clickIcon', innerValue.value)
+		hideKeyboardSafe()
+	}
+
+	function onRootClick() {
+		// 对齐 uView：仅 disabled 时发出 click（用于跳转独立搜索页）
+		if (props.disabled) {
+			emit('click')
+		}
+	}
+
+	function onFieldClick() {
+		if (props.disabled) {
+			return
+		}
+		isFocused.value = true
+	}
+</script>
+
+<style>
+	.nax-search {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-sizing: border-box;
+		/* #endif */
+	}
+
+	.nax-search--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-search__content {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		min-width: 0;
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+		/* 单层 var 回退；嵌套自定义 token 在鸿蒙易失效 */
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+		border-width: 0;
+		border-style: solid;
+		border-color: transparent;
+		overflow: hidden;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-sizing: border-box;
+		/* #endif */
+	}
+
+	/* #ifdef APP-HARMONY */
+	/* 鸿蒙：CSS 变量 background 不可靠，实色兜底（props 背景仍走内联） */
+	.nax-search__content {
+		background-color: #f3f3f5;
+	}
+	/* #endif */
+
+	.nax-search__content--round {
+		border-radius: 100px;
+	}
+
+	.nax-search__content--square {
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.nax-search__content--bordered {
+		border-width: var(--nax-border-width, 1px);
+	}
+
+	.nax-search--sm .nax-search__content {
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-search--lg .nax-search__content {
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+	}
+
+	.nax-search__label {
+		flex-shrink: 0;
+		margin-right: var(--nax-space-1, 4px);
+		color: var(--nax-color-text, #333639);
+		font-size: var(--nax-font-size-sm, 14px);
+	}
+
+	.nax-search__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.nax-search__icon--search {
+		margin-right: var(--nax-space-1, 4px);
+	}
+
+	.nax-search__field {
+		flex: 1;
+		width: 0;
+		height: 100%;
+		min-width: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		margin-left: 2px;
+		margin-right: 2px;
+		color: var(--nax-color-text, #333639);
+		background-color: transparent;
+		border-width: 0;
+		border-color: transparent;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		outline: none;
+		box-shadow: none;
+		-webkit-appearance: none;
+		appearance: none;
+		/* #endif */
+	}
+
+	/* #ifdef APP-HARMONY */
+	.nax-search__content {
+		overflow: visible;
+	}
+
+	.nax-search__field {
+		height: auto;
+		overflow: visible;
+	}
+	/* #endif */
+
+	.nax-search__field--disabled {
+		color: var(--nax-color-text-disabled, #c2c2c2);
+	}
+
+	.nax-search__field--align-left {
+		text-align: left;
+	}
+
+	.nax-search__field--align-center {
+		text-align: center;
+	}
+
+	.nax-search__field--align-right {
+		text-align: right;
+	}
+
+	.nax-search__clear {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 18px;
+		height: 18px;
+		margin-left: 4px;
+		border-radius: 100px;
+		background-color: #c6c7cb;
+	}
+
+	.nax-search--sm .nax-search__clear {
+		width: 16px;
+		height: 16px;
+	}
+
+	.nax-search--lg .nax-search__clear {
+		width: 20px;
+		height: 20px;
+	}
+
+	.nax-search__action {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: var(--nax-space-2, 8px);
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+
+	.nax-search__action-text {
+		color: var(--nax-color-text, #333639);
+		font-size: var(--nax-font-size-sm, 14px);
+		lines: 1;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		white-space: nowrap;
+		/* #endif */
+	}
+</style>

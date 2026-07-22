@@ -73,6 +73,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 输入框 | `nax-input` | P0 | 单行输入（对齐 uView Pro Input 主能力；不含 select/textarea） | `v-model` `type(text/password/number/digit/tel/…；不含 idcard/select/textarea)` `placeholder` `clearable` `disabled` `readonly` `maxlength` `border` `inputAlign` `passwordIcon` `size` `prefixIcon` `suffixIcon` / `input` `change` `focus` `blur` `confirm` `clear` `click` **done** |
+| 搜索框 | `nax-search` | P0 | 搜索输入（对齐 uView Pro / Plus Search） | `v-model` `shape(round/square)` `placeholder` `clearable` `showAction` `actionText` `animation` `inputAlign` `disabled` `label` `searchIcon` `size` / `search` `custom` `change` `focus` `blur` `clear` `click` `clickIcon` **done** |
 | 多行输入 | `nax-textarea` | P1 | 多行文本（对齐 uView Pro Textarea 主能力；不含 formatter） | `v-model` `placeholder` `height` `auto-height` `maxlength` `count` `disabled` `readonly` `border` `borderType` `confirmType` `focus` / `input` `change` `focus` `blur` `confirm` `linechange` `keyboardheightchange` `click` **done** |
 | 列选择器 | `nax-select` | P0 | 底部列选择（对齐 uView Pro Select；单列/多列/联动） | `v-model:show` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` / `confirm` `cancel` `change` **done** |
 | 日历 | `nax-calendar` | P1 | 日期/范围选择（对齐 uView Pro Calendar） | `v-model:show` `mode(date/range)` `isPage` `minDate` `maxDate` `defaultDate` `startDate` `endDate` `readonly` `holidays` `workdays` `festivals` `checkinMode` / `change` `open` `close` **done** |
@@ -94,7 +95,8 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
-| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
+| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
+| 骨架屏 | `nax-skeleton` | P1 | 内容占位骨架；头像/标题/段落；loading 切换真实内容 | `loading` `animate` `title` `avatar` `avatarSize` `avatarShape` `rows` `titleWidth` `titleHeight` `rowsWidth` `rowsHeight` `count` `gap` / 插槽 `skeleton` **done** |
 | 压窗屏 | `nax-popup` | P0 | App/Web dialogPage 盖导航栏+tabBar；小程序降级 | `openNaxPopup` `mode` `url` / 声明式 `v-model:show` **done** |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `v-model:show` `zIndex` `duration` `color` `closeOnClick` / `click` `open` `opened` `close` **done** |
 | 弹出层 | `nax-picker` | P0 | 自定义内容弹出；底部/中心/左/右（原规划 nax-popup） | `v-model:show` `position(bottom/center/left/right)` `round` `mask` `maskClosable` `width` `height` / `open` `opened` `close` `click-mask` **done** |
@@ -151,6 +153,7 @@
 | `nax-switch` | done | 插件包 `uni_modules/nax-switch`；布尔 v-model；loading 分端旋转；transform 滑动 + 轨道变色过渡 |
 | `nax-slider` | done | 插件包 `uni_modules/nax-slider`；对齐 uView Pro Slider；v-model/min/max/step/showValue/useSlot；start/moving/end/change |
 | `nax-number-box` | done | 插件包 `uni_modules/nax-number-box`；对齐 uView Pro NumberBox；加减/输入/长按/asyncChange/overlimit |
+| `nax-search` | done | 插件包 `uni_modules/nax-search`；对齐 uView Search；shape/showAction/animation/search/custom；清除不依赖 focus |
 | `nax-rate` | done | 插件包 `uni_modules/nax-rate`；对齐 uView Pro Rate；v-model/count/allowHalf/minCount/滑动打分/readonly |
 | `nax-form` / `nax-form-item` | done | 插件包 `uni_modules/nax-form`；对齐 uView Pro Form；轻量 rules 校验 + provide/inject |
 | `nax-upload` | done | autoUpload/action/header/formData;  插件包 `uni_modules/nax-upload`；对齐 uView Pro Upload；选图/预览/删除/状态；实际上传在 afterRead |
@@ -162,7 +165,8 @@
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
-| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+| `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | 其余 MVP | planned | 按依赖自底向上 |
 

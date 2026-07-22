@@ -59,6 +59,10 @@
 					<text class="home__card-name">输入框</text>
 					<text class="home__card-tag">nax-input</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goSearch">
+					<text class="home__card-name">搜索框</text>
+					<text class="home__card-tag">nax-search</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goForm">
 					<text class="home__card-name">表单</text>
 					<text class="home__card-tag">nax-form</text>
@@ -191,6 +195,10 @@
 					<text class="home__card-name">加载</text>
 					<text class="home__card-tag">nax-loading</text>
 				</view>
+				<view class="home__card home__card--gap" @click="goSkeleton">
+					<text class="home__card-name">骨架屏</text>
+					<text class="home__card-tag">nax-skeleton</text>
+				</view>
 				<view class="home__card home__card--gap" @click="goToast">
 					<text class="home__card-name">轻提示</text>
 					<text class="home__card-tag">nax-toast</text>
@@ -301,6 +309,12 @@
 	function goInput() {
 		uni.navigateTo({
 			url: '/pages/components/input/index'
+		})
+	}
+
+	function goSearch() {
+		uni.navigateTo({
+			url: '/pages/components/search/index'
 		})
 	}
 
@@ -472,6 +486,12 @@
 	function goLoading() {
 		uni.navigateTo({
 			url: '/pages/components/loading/index'
+		})
+	}
+
+	function goSkeleton() {
+		uni.navigateTo({
+			url: '/pages/components/skeleton/index'
 		})
 	}
 

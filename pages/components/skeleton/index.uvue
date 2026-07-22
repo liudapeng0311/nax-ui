@@ -1,0 +1,316 @@
+<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-skeleton</text>
+			<text class="page__desc">骨架屏。loading 控制占位与真实内容切换；支持头像/标题/段落与列表重复。</text>
+
+			<view class="section">
+				<text class="section__title">基础（标题 + 段落）</text>
+				<view class="panel">
+					<nax-skeleton></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">头像 + 标题 + 段落</text>
+				<view class="panel">
+					<nax-skeleton avatar :rows="2"></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">方形头像 avatar-shape</text>
+				<view class="panel">
+					<nax-skeleton avatar avatar-shape="square" avatar-size="40" :rows="2"></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义行宽 rows-width</text>
+				<view class="panel">
+					<nax-skeleton :rows="3" rows-width="100%,88%,52%" title-width="50%"></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">列表重复 count</text>
+				<view class="panel">
+					<nax-skeleton avatar :rows="2" :count="3" gap="20"></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">关闭动画 animate=false</text>
+				<view class="panel">
+					<nax-skeleton :animate="false" avatar :rows="2"></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">仅段落（无标题）</text>
+				<view class="panel">
+					<nax-skeleton :title="false" :rows="4" rows-width="100%,100%,90%,40%"></nax-skeleton>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">loading 切换真实内容</text>
+				<view class="panel">
+					<nax-skeleton :loading="demoLoading" avatar :rows="2">
+						<view class="real">
+							<view class="real__row">
+								<view class="real__avatar"></view>
+								<view class="real__body">
+									<text class="real__title">张三 · 前端工程师</text>
+									<text class="real__desc">骨架结束后展示真实列表项内容。</text>
+								</view>
+							</view>
+						</view>
+					</nax-skeleton>
+				</view>
+				<view class="actions">
+					<nax-button
+						type="primary"
+						size="sm"
+						:label="demoLoading ? '结束加载' : '重新加载 1.5s'"
+						@click="toggleDemo"
+					></nax-button>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义骨架 #skeleton</text>
+				<view class="panel">
+					<nax-skeleton :loading="cardLoading">
+						<template #skeleton>
+							<view class="card-sk">
+								<view class="card-sk__cover nax-sk-bone"></view>
+								<view class="card-sk__line nax-sk-bone"></view>
+								<view class="card-sk__line nax-sk-bone card-sk__line--short"></view>
+							</view>
+						</template>
+						<view class="card-real">
+							<view class="card-real__cover"></view>
+							<text class="card-real__title">自定义卡片内容</text>
+							<text class="card-real__desc">封面 + 两行文案已加载完成</text>
+						</view>
+					</nax-skeleton>
+				</view>
+				<view class="actions">
+					<nax-button type="primary" size="sm" label="模拟卡片加载" @click="reloadCard"></nax-button>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const demoLoading = ref(true)
+	const cardLoading = ref(true)
+	let demoTimer = -1
+	let cardTimer = -1
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function clearDemoTimer() {
+		if (demoTimer >= 0) {
+			clearTimeout(demoTimer)
+			demoTimer = -1
+		}
+	}
+
+	function clearCardTimer() {
+		if (cardTimer >= 0) {
+			clearTimeout(cardTimer)
+			cardTimer = -1
+		}
+	}
+
+	function toggleDemo() {
+		if (demoLoading.value) {
+			demoLoading.value = false
+			clearDemoTimer()
+			return
+		}
+		demoLoading.value = true
+		clearDemoTimer()
+		demoTimer = setTimeout(() => {
+			demoTimer = -1
+			demoLoading.value = false
+		}, 1500)
+	}
+
+	function reloadCard() {
+		cardLoading.value = true
+		clearCardTimer()
+		cardTimer = setTimeout(() => {
+			cardTimer = -1
+			cardLoading.value = false
+		}, 1500)
+	}
+
+	onMounted(() => {
+		// 进页 1.2s 后自动切出真实内容，便于演示
+		demoTimer = setTimeout(() => {
+			demoTimer = -1
+			demoLoading.value = false
+		}, 1200)
+		cardTimer = setTimeout(() => {
+			cardTimer = -1
+			cardLoading.value = false
+		}, 1200)
+	})
+
+	onUnmounted(() => {
+		clearDemoTimer()
+		clearCardTimer()
+	})
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		padding: 16px;
+	}
+
+	.actions {
+		margin-top: 12px;
+		flex-direction: row;
+	}
+
+	.real {
+		flex-direction: column;
+	}
+
+	.real__row {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+
+	.real__avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 999px;
+		background-color: var(--nax-color-primary, #18a058);
+		margin-right: 12px;
+		flex-shrink: 0;
+	}
+
+	.real__body {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.real__title {
+		font-size: 15px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		line-height: 22px;
+		margin-bottom: 4px;
+	}
+
+	.real__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+
+	.card-sk {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-sk-bone {
+		background-color: var(--nax-color-skeleton, #f2f3f5);
+		border-radius: var(--nax-skeleton-radius, var(--nax-radius-md, 3px));
+	}
+
+	.card-sk__cover {
+		width: 100%;
+		height: 120px;
+		margin-bottom: 12px;
+	}
+
+	.card-sk__line {
+		width: 100%;
+		height: 16px;
+		margin-bottom: 10px;
+	}
+
+	.card-sk__line--short {
+		width: 45%;
+		margin-bottom: 0;
+	}
+
+	.card-real {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.card-real__cover {
+		width: 100%;
+		height: 120px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+		margin-bottom: 12px;
+	}
+
+	.card-real__title {
+		font-size: 15px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		line-height: 22px;
+		margin-bottom: 4px;
+	}
+
+	.card-real__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+	}
+</style>

@@ -1,0 +1,208 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-search</text>
+			<text class="page__desc">搜索框（对齐 uView Search 主能力）</text>
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<nax-search
+					v-model="basic"
+					@search="onSearch"
+					@custom="onCustom"
+					@change="onChange"
+				></nax-search>
+				<text class="hint">值：{{ basic }} · {{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">形状 shape</text>
+				<view class="item">
+					<nax-search v-model="shapeRound" shape="round" placeholder="round 胶囊"></nax-search>
+				</view>
+				<view class="item">
+					<nax-search v-model="shapeSquare" shape="square" placeholder="square 方角"></nax-search>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="item">
+					<nax-search v-model="sizeSm" size="sm" placeholder="sm"></nax-search>
+				</view>
+				<view class="item">
+					<nax-search v-model="sizeMd" size="md" placeholder="md"></nax-search>
+				</view>
+				<view class="item">
+					<nax-search v-model="sizeLg" size="lg" placeholder="lg"></nax-search>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">无右侧按钮</text>
+				<nax-search v-model="noAction" :show-action="false" placeholder="show-action=false"></nax-search>
+			</view>
+
+			<view class="section">
+				<text class="section__title">animation（聚焦才显示操作）</text>
+				<nax-search
+					v-model="anim"
+					animation
+					action-text="取消"
+					placeholder="聚焦后出现取消"
+					@custom="onCustom"
+				></nax-search>
+			</view>
+
+			<view class="section">
+				<text class="section__title">label + 边框色</text>
+				<nax-search
+					v-model="withLabel"
+					label="地址"
+					border-color="#18a058"
+					placeholder="请输入地址"
+				></nax-search>
+			</view>
+
+			<view class="section">
+				<text class="section__title">对齐 input-align</text>
+				<view class="item">
+					<nax-search v-model="alignCenter" input-align="center" :show-action="false" placeholder="居中"></nax-search>
+				</view>
+				<view class="item">
+					<nax-search v-model="alignRight" input-align="right" :show-action="false" placeholder="右对齐"></nax-search>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义背景 / 图标色</text>
+				<nax-search
+					v-model="customBg"
+					background="#e8f5ee"
+					search-icon-color="#18a058"
+					action-color="#18a058"
+					placeholder="浅绿背景"
+				></nax-search>
+			</view>
+
+			<view class="section">
+				<text class="section__title">禁用（点击跳转场景）</text>
+				<nax-search
+					v-model="disabledVal"
+					disabled
+					placeholder="点击整条触发 click"
+					@click="onDisabledClick"
+				></nax-search>
+				<text class="hint">{{ lastEvent }}</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">清除 clearable</text>
+				<nax-search
+					v-model="clearable"
+					:show-action="false"
+					@clear="onClear"
+				></nax-search>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basic = ref('')
+	const shapeRound = ref('')
+	const shapeSquare = ref('')
+	const sizeSm = ref('')
+	const sizeMd = ref('')
+	const sizeLg = ref('')
+	const noAction = ref('')
+	const anim = ref('')
+	const withLabel = ref('')
+	const alignCenter = ref('')
+	const alignRight = ref('')
+	const customBg = ref('')
+	const disabledVal = ref('')
+	const clearable = ref('可清除示例')
+	const lastEvent = ref('无')
+
+	function onSearch(val: string) {
+		lastEvent.value = 'search: ' + val
+	}
+
+	function onCustom(val: string) {
+		lastEvent.value = 'custom: ' + val
+	}
+
+	function onChange() {
+		lastEvent.value = 'change'
+	}
+
+	function onClear() {
+		lastEvent.value = 'clear'
+	}
+
+	function onDisabledClick() {
+		lastEvent.value = 'click (disabled)'
+		uni.showToast({
+			title: 'disabled click',
+			icon: 'none'
+		})
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.item {
+		margin-bottom: 10px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 6px;
+	}
+</style>

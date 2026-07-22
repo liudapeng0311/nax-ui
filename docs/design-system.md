@@ -106,6 +106,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-color-bg` | `#ffffff` | 页面/卡片底 |
 | `--nax-color-bg-secondary` | `#fafafc` | 次级背景（actionColor） |
 | `--nax-color-bg-hover` | `#f3f3f5` | 点击态（hoverColor） |
+| `--nax-color-skeleton` | `#f2f3f5` | 骨架屏占位块底色 |
 | `--nax-color-border` | `#e0e0e6` | 默认边框（borderColor） |
 | `--nax-color-border-strong` | `#c2c2c2` | 强调边框 |
 | `--nax-color-mask` | `rgba(0, 0, 0, 0.4)` | 弹层遮罩 |
@@ -176,6 +177,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-radius-lg` | `3px` | 卡片等（默认同 button；需要更大圆角可业务覆盖） |
 | `--nax-radius-xl` | `3px` | 弹层/大卡片（默认同 button；可覆盖） |
 | `--nax-radius-full` | `999px` | 胶囊/圆形 |
+| `--nax-skeleton-radius` | `3px` | 骨架块圆角（默认同 radius-md） |
 | `--nax-border-width` | `1px` | 默认描边 |
 | `--nax-shadow-sm` | `0 1px 2px rgba(0,0,0,.06)` | 轻浮层 |
 | `--nax-shadow-md` | `0 4px 12px rgba(0,0,0,.08)` | 卡片/弹层 |
