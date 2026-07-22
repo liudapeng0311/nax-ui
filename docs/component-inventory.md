@@ -1,4 +1,4 @@
-# nax-ui 组件清单
+﻿# nax-ui 组件清单
 
 > 状态说明：
 > - `planned`：规划中
@@ -96,6 +96,7 @@
 |------|------|--------|------|------------------|
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
 | 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
+| 进度条 | `nax-progress` | P1 | 线形/圆形进度；shape 切换 | `percent` `shape(line/circle)` `type` `status` `size` `showInfo` `textInside` `useSlot` `strokeWidth` `width` `color` `trackColor` `pivotText` **done** |
 | 骨架屏 | `nax-skeleton` | P1 | 内容占位骨架；头像/标题/段落；loading 切换真实内容 | `loading` `animate` `title` `avatar` `avatarSize` `avatarShape` `rows` `titleWidth` `titleHeight` `rowsWidth` `rowsHeight` `count` `gap` / 插槽 `skeleton` **done** |
 | 压窗屏 | `nax-popup` | P0 | App/Web dialogPage 盖导航栏+tabBar；小程序降级 | `openNaxPopup` `mode` `url` / 声明式 `v-model:show` **done** |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `v-model:show` `zIndex` `duration` `color` `closeOnClick` / `click` `open` `opened` `close` **done** |
@@ -166,6 +167,7 @@
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
 | `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+| `nax-progress` | done | 插件包 `uni_modules/nax-progress`；shape line/circle；type/status/size/showInfo/textInside/useSlot；双半环圆形 |
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | 其余 MVP | planned | 按依赖自底向上 |

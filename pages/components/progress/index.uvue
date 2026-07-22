@@ -1,0 +1,273 @@
+﻿<template>
+	<scroll-view style="flex:1" scroll-y="true">
+		<view class="nax-theme page" :class="themeExtraClass">
+			<text class="page__title">nax-progress</text>
+			<text class="page__desc">进度条。线形 / 圆形统一入口，shape 切换。</text>
+
+			<view class="section">
+				<text class="section__title">基础线形</text>
+				<view class="panel">
+					<nax-progress :percent="30"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress :percent="60"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress :percent="100"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">动态 percent</text>
+				<view class="panel">
+					<nax-progress :percent="dynamicPercent" type="primary"></nax-progress>
+					<view class="actions">
+						<nax-button size="sm" label="-10" @click="dec"></nax-button>
+						<view class="btn-gap"></view>
+						<nax-button size="sm" type="primary" label="+10" @click="inc"></nax-button>
+						<view class="btn-gap"></view>
+						<nax-button size="sm" variant="secondary" label="随机" @click="rand"></nax-button>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">类型 type</text>
+				<view class="panel">
+					<nax-progress type="primary" :percent="70"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress type="info" :percent="70"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress type="success" :percent="70"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress type="warning" :percent="70"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress type="error" :percent="70"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">尺寸 size</text>
+				<view class="panel">
+					<text class="muted">sm</text>
+					<nax-progress size="sm" :percent="50"></nax-progress>
+					<view class="gap"></view>
+					<text class="muted">md</text>
+					<nax-progress size="md" :percent="50"></nax-progress>
+					<view class="gap"></view>
+					<text class="muted">lg</text>
+					<nax-progress size="lg" :percent="50"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">条内文案 textInside</text>
+				<view class="panel">
+					<nax-progress :percent="55" text-inside></nax-progress>
+					<view class="gap"></view>
+					<nax-progress :percent="88" text-inside type="success"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">隐藏文案 / 自定义 pivotText</text>
+				<view class="panel">
+					<nax-progress :percent="40" :show-info="false"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress :percent="40" pivot-text="上传中"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">status 覆盖色</text>
+				<view class="panel">
+					<nax-progress :percent="100" status="success"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress :percent="60" status="warning"></nax-progress>
+					<view class="gap"></view>
+					<nax-progress :percent="30" status="error"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">圆形 shape=circle</text>
+				<view class="panel row">
+					<view class="circle-item">
+						<nax-progress shape="circle" :percent="25" size="sm"></nax-progress>
+						<text class="muted">25%</text>
+					</view>
+					<view class="circle-item">
+						<nax-progress shape="circle" :percent="60"></nax-progress>
+						<text class="muted">60%</text>
+					</view>
+					<view class="circle-item">
+						<nax-progress shape="circle" :percent="100" type="success" size="lg"></nax-progress>
+						<text class="muted">100%</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">圆形类型</text>
+				<view class="panel row">
+					<view class="circle-item">
+						<nax-progress shape="circle" type="primary" :percent="70" size="sm"></nax-progress>
+					</view>
+					<view class="circle-item">
+						<nax-progress shape="circle" type="info" :percent="70" size="sm"></nax-progress>
+					</view>
+					<view class="circle-item">
+						<nax-progress shape="circle" type="warning" :percent="70" size="sm"></nax-progress>
+					</view>
+					<view class="circle-item">
+						<nax-progress shape="circle" type="error" :percent="70" size="sm"></nax-progress>
+					</view>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">圆形动态</text>
+				<view class="panel center">
+					<nax-progress shape="circle" :percent="dynamicPercent" type="info" :width="112" :stroke-width="8"></nax-progress>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">插槽 useSlot</text>
+				<view class="panel">
+					<nax-progress :percent="50" use-slot>
+						<text class="slot-text">一半啦</text>
+					</nax-progress>
+					<view class="gap"></view>
+					<view class="center">
+						<nax-progress shape="circle" :percent="75" use-slot size="md">
+							<text class="slot-text">3/4</text>
+						</nax-progress>
+					</view>
+				</view>
+			</view>
+		</view>
+	</scroll-view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+	const dynamicPercent = ref(42)
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function clamp(v: number): number {
+		if (v < 0) {
+			return 0
+		}
+		if (v > 100) {
+			return 100
+		}
+		return v
+	}
+
+	function inc() {
+		dynamicPercent.value = clamp(dynamicPercent.value + 10)
+	}
+
+	function dec() {
+		dynamicPercent.value = clamp(dynamicPercent.value - 10)
+	}
+
+	function rand() {
+		dynamicPercent.value = Math.floor(Math.random() * 101)
+	}
+</script>
+
+<style>
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+	}
+
+	.page__title {
+		font-size: 20px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		margin-bottom: 6px;
+	}
+
+	.page__desc {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 16px;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.panel {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 8px);
+		padding: 16px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-start;
+	}
+
+	.center {
+		align-items: center;
+		justify-content: center;
+	}
+
+	.gap {
+		height: 12px;
+	}
+
+	.btn-gap {
+		width: 8px;
+	}
+
+	.actions {
+		margin-top: 12px;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.circle-item {
+		flex-direction: column;
+		align-items: center;
+		margin-right: 16px;
+		margin-bottom: 12px;
+	}
+
+	.muted {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 6px;
+		margin-bottom: 4px;
+	}
+
+	.slot-text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+</style>
