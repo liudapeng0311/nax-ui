@@ -82,7 +82,7 @@ arrow-left, arrow-right, arrow-up, arrow-down
 chevron-left, chevron-right, chevron-up, chevron-down
 search, loading, info, warning, success, error
 user, home, more, edit, delete, star, heart
-settings, eye, eye-off, copy, share, image, image-off, loader, square, circle, square-check,
+settings, eye, eye-off, copy, share, image, image-off, loader, loader-4, square, circle, square-check,
 file-off, notes-off, database-off, message-off
 ```
 
@@ -113,7 +113,7 @@ node scripts/build-icons.mjs
 
 ## 说明
 
-- 当前分发字体为 **40 图标子集**（约 16KB），不是完整 Tabler font。
+- 当前分发字体为 **41 图标子集**（约 16KB），不是完整 Tabler font。
 - 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序。
 - 组件 API 只暴露语义化 `name`。
 - 图标源：[Tabler Icons](https://tabler.io/icons)（MIT License）。

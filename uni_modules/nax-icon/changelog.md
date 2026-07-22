@@ -1,3 +1,6 @@
+## 0.2.2（2026-07-22）
+- 新增内置图标：loader-4（loader 已有，一并保留）
+
 ## 0.2.1（2026-07-21）
 - 新增内置图标：file-off / notes-off / database-off / message-off
 

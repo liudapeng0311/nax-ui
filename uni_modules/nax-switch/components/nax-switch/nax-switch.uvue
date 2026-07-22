@@ -4,6 +4,7 @@
 			<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
 			<view
 				v-if="loading"
+				:id="loadingDomId"
 				class="nax-switch__loading"
 				:style="loadingSpinStyle"
 			>
@@ -213,13 +214,159 @@
 		return style
 	})
 
-	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App uvue 不支持 @keyframes：定时 transform 兜底旋转
+	const loadingDomId = 'nax-sw-ld-' + Math.floor(Math.random() * 10000000).toString()
+
+	// #ifdef APP-HARMONY
+	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	let spinToken = 0
+	let usingNativeSpin = false
+	let cachedSpinEl : UniElement | null = null
+	let spinFallbackTimerId = -1
+	let spinRetryTimerId = -1
+
+	const loadingSpinStyle = computed((): string => {
+		// transform 交由 animate / setProperty 驱动，避免 style 绑定覆盖
+		return ''
+	})
+
+	function getSpinElement() : UniElement | null {
+		if (cachedSpinEl != null) {
+			return cachedSpinEl
+		}
+		const el = uni.getElementById(loadingDomId)
+		if (el != null) {
+			cachedSpinEl = el
+		}
+		return el
+	}
+
+	function clearSpinTimers() {
+		if (spinFallbackTimerId >= 0) {
+			clearInterval(spinFallbackTimerId)
+			spinFallbackTimerId = -1
+		}
+		if (spinRetryTimerId >= 0) {
+			clearTimeout(spinRetryTimerId)
+			spinRetryTimerId = -1
+		}
+	}
+
+	function stopNativeSpin() {
+		const el = getSpinElement()
+		if (el == null) {
+			return
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 0,
+			fill: 'forwards',
+			iterations: 1,
+			easing: 'linear'
+		} as UniAnimationOption)
+	}
+
+	function startNativeSpin() : boolean {
+		const el = getSpinElement()
+		if (el == null) {
+			return false
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe,
+			{
+				transform: 'rotate(360deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 800,
+			easing: 'linear',
+			iterations: 1000000,
+			fill: 'forwards'
+		} as UniAnimationOption)
+		usingNativeSpin = true
+		return true
+	}
+
+	function startFallbackSpin() {
+		clearSpinTimers()
+		let angle = 0
+		spinFallbackTimerId = setInterval(() => {
+			let next = angle + 45
+			if (next >= 360) {
+				next = next - 360
+			}
+			angle = next
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(' + angle.toString() + 'deg)')
+			}
+		}, 120)
+	}
+
+	function stopLoadingSpin() {
+		spinToken = spinToken + 1
+		clearSpinTimers()
+		if (usingNativeSpin) {
+			stopNativeSpin()
+		} else {
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(0deg)')
+			}
+		}
+		usingNativeSpin = false
+		cachedSpinEl = null
+	}
+
+	function startLoadingSpin() {
+		stopLoadingSpin()
+		const token = spinToken
+		function tryStart(attempt : number) {
+			if (token != spinToken) {
+				return
+			}
+			if (!(props.loading)) {
+				return
+			}
+			if (startNativeSpin()) {
+				return
+			}
+			if (attempt < 10) {
+				spinRetryTimerId = setTimeout(() => {
+					spinRetryTimerId = -1
+					tryStart(attempt + 1)
+				}, 32)
+				return
+			}
+			startFallbackSpin()
+		}
+		tryStart(0)
+	}
+
+	watch((): boolean => {
+		return props.loading
+	}, (val: boolean) => {
+		if (val) {
+			startLoadingSpin()
+		} else {
+			stopLoadingSpin()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopLoadingSpin()
+	})
+	// #endif
+
+	// #ifdef APP-ANDROID || APP-IOS
 	const loadingAngle = ref(0)
 	let loadingTimerId = -1
 
 	const loadingSpinStyle = computed((): string => {
-		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
+		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg')
 	})
 
 	function stopLoadingSpin() {
@@ -244,7 +391,7 @@
 
 	watch((): boolean => {
 		return props.loading
-	}, (val : boolean) => {
+	}, (val: boolean) => {
 		if (val) {
 			startLoadingSpin()
 		} else {

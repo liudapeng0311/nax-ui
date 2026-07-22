@@ -74,7 +74,14 @@ function loadTablerCodepoints() {
 }
 
 function toUtsGlyph(codepoint) {
-  return `\\u${codepoint.toString(16).toLowerCase().padStart(4, '0')}`
+  // UTS/JS \uXXXX is 4 hex digits only; non-BMP uses UTF-16 surrogate pairs
+  if (codepoint <= 0xffff) {
+    return `\\u${codepoint.toString(16).toLowerCase().padStart(4, '0')}`
+  }
+  const cp = codepoint - 0x10000
+  const high = 0xd800 + (cp >> 10)
+  const low = 0xdc00 + (cp & 0x3ff)
+  return `\\u${high.toString(16).toLowerCase().padStart(4, '0')}\\u${low.toString(16).toLowerCase().padStart(4, '0')}`
 }
 
 function writeGlyphsUts(mapping) {

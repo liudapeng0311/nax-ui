@@ -94,7 +94,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 过渡 | `nax-transition` | P0 | 轻量进退场（弹层底座） | `show` `name(fade/slide-up/slide-down/slide-left/slide-right/zoom/fade-up)` `duration` `appear` / `before-enter` `after-enter` `before-leave` `after-leave` **done** |
-| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` / **done** |
+| 加载 | `nax-loading` | P0 | 局部/区块加载 | `show` `size` `vertical` `text` `type` `color` `icon(loading/loader/loader-4)` / **done** |
 | 压窗屏 | `nax-popup` | P0 | App/Web dialogPage 盖导航栏+tabBar；小程序降级 | `openNaxPopup` `mode` `url` / 声明式 `v-model:show` **done** |
 | 遮罩 | `nax-overlay` | P0 | 弹层底层 | `show` `z-index` / `click` |
 | 弹出层 | `nax-picker` | P0 | 自定义内容弹出；底部/中心/左/右（原规划 nax-popup） | `v-model:show` `position(bottom/center/left/right)` `round` `mask` `maskClosable` `width` `height` / `open` `opened` `close` `click-mask` **done** |
@@ -161,7 +161,7 @@
 | `nax-grid` / `nax-grid-item` | done | 插件包 `uni_modules/nax-grid`；全端 flex；col/border/align/gap/hover；index 可自动；内置按压态 |
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
-| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；App 定时旋转 + Web/MP CSS 动画；size/text/vertical/type |
+| `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

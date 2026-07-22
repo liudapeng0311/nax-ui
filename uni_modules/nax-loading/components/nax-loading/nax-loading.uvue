@@ -1,12 +1,13 @@
 <template>
 	<view v-if="visible" class="nax-loading" :class="rootClass" :style="rootStyle">
 		<view
+			:id="spinnerDomId"
 			class="nax-loading__spinner"
 			:class="spinnerClass"
 			:style="spinnerStyle"
 		>
 			<slot name="icon">
-				<nax-icon name="loading" :size="iconSizePx" :color="resolvedColor"></nax-icon>
+				<nax-icon :name="iconName" :size="iconSizePx" :color="resolvedColor"></nax-icon>
 			</slot>
 		</view>
 		<slot>
@@ -23,13 +24,14 @@
 <script setup lang="uts">
 	/**
 	 * nax-loading
-	 * @description 局部/区块加载指示。App 端用定时 transform 旋转；Web/小程序用 CSS 动画。
+	 * @description 局部/区块加载指示。鸿蒙用原生 animate 旋转；Android/iOS 定时 transform；Web/小程序用 CSS 动画。
 	 * @property {boolean} show 是否显示，默认 true
 	 * @property {string} size sm | md | lg
 	 * @property {string} text 文案；也可用默认插槽
 	 * @property {boolean} vertical 纵向：图标在上、文案在下；默认 false（横向）
 	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
 	 * @property {string} color 自定义颜色（覆盖 type）
+	 * @property {string} icon 旋转图标：loading | loader | loader-4，默认 loading
 	 * @property {string} customClass 根节点扩展 class
 	 * @slot default 自定义文案区
 	 * @slot icon 自定义图标
@@ -41,8 +43,22 @@
 		vertical: { type: Boolean, default: false },
 		type: { type: String, default: 'default' },
 		color: { type: String, default: '' },
+		icon: { type: String, default: 'loading' },
 		customClass: { type: String, default: '' }
 	})
+
+
+	function normalizeIcon(value: string): string {
+		const name = value.trim()
+		if (name == 'loader' || name == 'loader-4' || name == 'loading') {
+			return name
+		}
+		// 兼容别名
+		if (name == 'loader-2' || name == 'spinner') {
+			return 'loading'
+		}
+		return 'loading'
+	}
 
 	function normalizeSize(value: string): string {
 		if (value == 'sm' || value == 'small' || value == 'tiny') {
@@ -103,14 +119,18 @@
 		return props.text.trim().length > 0
 	})
 
-	const iconSizePx = computed((): number => {
+	const iconName = computed((): string => {
+		return normalizeIcon(props.icon)
+	})
+
+	const iconSizePx = computed((): string => {
 		if (sizeName.value == 'sm') {
-			return 16
+			return '16'
 		}
 		if (sizeName.value == 'lg') {
-			return 32
+			return '32'
 		}
-		return 24
+		return '24'
 	})
 
 	// nax-icon 的 color 需要可解析色值；CSS 变量在部分端可能原样传递，提供兜底实色
@@ -172,8 +192,159 @@
 		return 'color:' + typeColor(typeName.value) + ';'
 	})
 
-	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App uvue CSS 不支持 @keyframes，定时 transform 兜底旋转
+	const spinnerDomId = 'nax-ld-' + Math.floor(Math.random() * 10000000).toString()
+
+	// #ifdef APP-HARMONY
+	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	let spinToken = 0
+	let usingNativeSpin = false
+	let cachedSpinEl : UniElement | null = null
+	let spinFallbackTimerId = -1
+	let spinRetryTimerId = -1
+
+	const spinnerStyle = computed((): string => {
+		// transform 交由 animate / setProperty 驱动，避免 style 绑定覆盖
+		return ''
+	})
+
+	function getSpinElement() : UniElement | null {
+		if (cachedSpinEl != null) {
+			return cachedSpinEl
+		}
+		const el = uni.getElementById(spinnerDomId)
+		if (el != null) {
+			cachedSpinEl = el
+		}
+		return el
+	}
+
+	function clearSpinTimers() {
+		if (spinFallbackTimerId >= 0) {
+			clearInterval(spinFallbackTimerId)
+			spinFallbackTimerId = -1
+		}
+		if (spinRetryTimerId >= 0) {
+			clearTimeout(spinRetryTimerId)
+			spinRetryTimerId = -1
+		}
+	}
+
+	function stopNativeSpin() {
+		const el = getSpinElement()
+		if (el == null) {
+			return
+		}
+		// 鸿蒙不返回动画实例：0 时长 forwards 复位并顶掉循环
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 0,
+			fill: 'forwards',
+			iterations: 1,
+			easing: 'linear'
+		} as UniAnimationOption)
+	}
+
+	function startNativeSpin() : boolean {
+		const el = getSpinElement()
+		if (el == null) {
+			return false
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe,
+			{
+				transform: 'rotate(360deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 800,
+			easing: 'linear',
+			// 部分 UTS 端 Infinity 不稳定，用足够大的有限次数
+			iterations: 1000000,
+			fill: 'forwards'
+		} as UniAnimationOption)
+		usingNativeSpin = true
+		return true
+	}
+
+	function startFallbackSpin() {
+		clearSpinTimers()
+		let angle = 0
+		// 元素级 setProperty，不走 Vue 响应式
+		spinFallbackTimerId = setInterval(() => {
+			let next = angle + 45
+			if (next >= 360) {
+				next = next - 360
+			}
+			angle = next
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(' + angle.toString() + 'deg)')
+			}
+		}, 120)
+	}
+
+	function stopSpin() {
+		spinToken = spinToken + 1
+		clearSpinTimers()
+		if (usingNativeSpin) {
+			stopNativeSpin()
+		} else {
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(0deg)')
+			}
+		}
+		usingNativeSpin = false
+		cachedSpinEl = null
+	}
+
+	function startSpin() {
+		stopSpin()
+		const token = spinToken
+		function tryStart(attempt : number) {
+			if (token != spinToken) {
+				return
+			}
+			if (!props.show) {
+				return
+			}
+			if (startNativeSpin()) {
+				return
+			}
+			if (attempt < 10) {
+				spinRetryTimerId = setTimeout(() => {
+					spinRetryTimerId = -1
+					tryStart(attempt + 1)
+				}, 32)
+				return
+			}
+			// 原生 animate 不可用时的低频兜底
+			startFallbackSpin()
+		}
+		tryStart(0)
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val) {
+			startSpin()
+		} else {
+			stopSpin()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopSpin()
+	})
+	// #endif
+
+	// #ifdef APP-ANDROID || APP-IOS
+	// Android / iOS：定时 transform 兜底（uvue CSS 不支持 @keyframes）
 	const spinAngle = ref(0)
 	let spinTimerId = -1
 

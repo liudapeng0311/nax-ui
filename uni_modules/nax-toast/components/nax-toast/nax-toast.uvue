@@ -10,7 +10,7 @@
 		<view class="nax-toast__stage" :class="stageClass">
 			<view class="nax-toast__panel" :class="panelClass" :style="panelStyle">
 				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
-				<view v-if="showIcon && iconName.length > 0" class="nax-toast__icon" :style="loadingStyle">
+				<view v-if="showIcon && iconName.length > 0" :id="loadingDomId" class="nax-toast__icon" :style="loadingStyle">
 					<nax-icon :name="iconName" size="28" :color="iconColor"></nax-icon>
 				</view>
 				<!-- #endif -->
@@ -33,7 +33,7 @@
 	>
 		<view class="nax-toast__panel" :class="panelClass" :style="panelStyle">
 			<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
-			<view v-if="showIcon && iconName.length > 0" class="nax-toast__icon" :style="loadingStyle">
+			<view v-if="showIcon && iconName.length > 0" :id="loadingDomId" class="nax-toast__icon" :style="loadingStyle">
 				<nax-icon :name="iconName" size="28" :color="iconColor"></nax-icon>
 			</view>
 			<!-- #endif -->
@@ -203,7 +203,132 @@
 	})
 	// #endif
 
-	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// #ifdef APP-HARMONY
+	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	const loadingStyle = computed((): string => {
+		// transform 交由 animate / setProperty 驱动
+		return ''
+	})
+
+	function getSpinElement() : UniElement | null {
+		if (cachedSpinEl != null) {
+			return cachedSpinEl
+		}
+		const el = uni.getElementById(loadingDomId)
+		if (el != null) {
+			cachedSpinEl = el
+		}
+		return el
+	}
+
+	function clearSpinTimers() {
+		if (spinFallbackTimerId >= 0) {
+			clearInterval(spinFallbackTimerId)
+			spinFallbackTimerId = -1
+		}
+		if (spinRetryTimerId >= 0) {
+			clearTimeout(spinRetryTimerId)
+			spinRetryTimerId = -1
+		}
+	}
+
+	function stopNativeSpin() {
+		const el = getSpinElement()
+		if (el == null) {
+			return
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 0,
+			fill: 'forwards',
+			iterations: 1,
+			easing: 'linear'
+		} as UniAnimationOption)
+	}
+
+	function startNativeSpin() : boolean {
+		const el = getSpinElement()
+		if (el == null) {
+			return false
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe,
+			{
+				transform: 'rotate(360deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 800,
+			easing: 'linear',
+			iterations: 1000000,
+			fill: 'forwards'
+		} as UniAnimationOption)
+		usingNativeSpin = true
+		return true
+	}
+
+	function startFallbackSpin() {
+		clearSpinTimers()
+		let angle = 0
+		spinFallbackTimerId = setInterval(() => {
+			let next = angle + 45
+			if (next >= 360) {
+				next = next - 360
+			}
+			angle = next
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(' + angle.toString() + 'deg)')
+			}
+		}, 120)
+	}
+
+	function stopLoadingSpin() {
+		spinToken = spinToken + 1
+		clearSpinTimers()
+		if (usingNativeSpin) {
+			stopNativeSpin()
+		} else {
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(0deg)')
+			}
+		}
+		usingNativeSpin = false
+		cachedSpinEl = null
+	}
+
+	function startLoadingSpin() {
+		stopLoadingSpin()
+		const token = spinToken
+		function tryStart(attempt : number) {
+			if (token != spinToken) {
+				return
+			}
+			if (typeName.value != 'loading') {
+				return
+			}
+			if (startNativeSpin()) {
+				return
+			}
+			if (attempt < 12) {
+				spinRetryTimerId = setTimeout(() => {
+					spinRetryTimerId = -1
+					tryStart(attempt + 1)
+				}, 32)
+				return
+			}
+			startFallbackSpin()
+		}
+		tryStart(0)
+	}
+	// #endif
+
+	// #ifdef APP-ANDROID || APP-IOS
 	const loadingStyle = computed((): string => {
 		if (typeName.value != 'loading') {
 			return ''
@@ -281,14 +406,19 @@
 		textColor.value = color
 
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-		if (type == 'loading' && withIcon) {
-			startLoadingSpin()
-		} else {
+		if (!(type == 'loading' && withIcon)) {
 			stopLoadingSpin()
 		}
 		// #endif
 
 		visible.value = true
+
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// 先挂载再开启动画，便于 getElementById 命中
+		if (type == 'loading' && withIcon) {
+			startLoadingSpin()
+		}
+		// #endif
 
 		if (duration > 0) {
 			hideTimer = setTimeout(() => {
