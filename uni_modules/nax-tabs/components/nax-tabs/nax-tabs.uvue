@@ -541,6 +541,17 @@
 		return ''
 	}
 
+	function charWidthBySize() : number {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return 14.0
+		}
+		if (s == 'lg') {
+			return 18.0
+		}
+		return 16.0
+	}
+
 	function rebuildEstimatedLayouts() {
 		const items = tabItems.value
 		const len = items.length
@@ -727,23 +738,6 @@
 	}
 
 	// 点击切换：有横滑时滑块瞬切只滚 scroll-view；无横滑时滑块 CSS 过渡
-	function onActiveIndexChange() {
-		if (itemLayoutLefts.value.length == 0) {
-			rebuildEstimatedLayouts()
-		}
-		// 动画期间禁止改 content 宽度，避免打断滚动
-		beginSelectionAnimLock()
-		const needScroll = estimateNeedScrollForActive()
-		// 双重动画（scroll + transform）在 App/鸿蒙易抖动：需要滚动时滑块 0ms
-		lineSnapNoTransition.value = needScroll
-		applyLineFromLayout(activeIndex.value)
-		if (props.scrollable) {
-			nextTick(() => {
-				syncScrollToActive()
-			})
-		}
-	}
-
 	function applyLineFallback(index : number) {
 		const w = parsePx(props.lineWidth, 20)
 		lineWidthPx.value = w
@@ -1030,17 +1024,23 @@
 			})
 		query.exec()
 	}
-
-	function charWidthBySize() : number {
-		const s = sizeName.value
-		if (s == 'sm') {
-			return 14.0
+	function onActiveIndexChange() {
+		if (itemLayoutLefts.value.length == 0) {
+			rebuildEstimatedLayouts()
 		}
-		if (s == 'lg') {
-			return 18.0
+		// 动画期间禁止改 content 宽度，避免打断滚动
+		beginSelectionAnimLock()
+		const needScroll = estimateNeedScrollForActive()
+		// 双重动画（scroll + transform）在 App/鸿蒙易抖动：需要滚动时滑块 0ms
+		lineSnapNoTransition.value = needScroll
+		applyLineFromLayout(activeIndex.value)
+		if (props.scrollable) {
+			nextTick(() => {
+				syncScrollToActive()
+			})
 		}
-		return 16.0
 	}
+
 
 	// 文案估算：避免测量前/受挤压时总宽约等于视口导致无法溢出滚动
 	function estimateScrollContentWidth() : number {
@@ -1154,27 +1154,6 @@
 		query.exec()
 	}
 
-	function scheduleLayout() {
-		// 先同步估算布局并立刻画指示条；只滚动一次，避免二次 scroll 打断动画
-		rebuildEstimatedLayouts()
-		if (props.scrollable) {
-			beginSelectionAnimLock()
-		}
-		applyLineFromLayout(activeIndex.value)
-		nextTick(() => {
-			if (props.scrollable) {
-				syncScrollToActive()
-			}
-			// 后台精修真实宽度（动画锁内不会改宽/滑块）
-			setTimeout(() => {
-				updateScrollContentWidth()
-				if (!props.scrollable) {
-					measureEqualLayouts()
-				}
-			}, 40)
-		})
-	}
-
 	function measureEqualLayouts() {
 		if (props.scrollable) {
 			return
@@ -1228,6 +1207,27 @@
 			k++
 		}
 		query.exec()
+	}
+
+	function scheduleLayout() {
+		// 先同步估算布局并立刻画指示条；只滚动一次，避免二次 scroll 打断动画
+		rebuildEstimatedLayouts()
+		if (props.scrollable) {
+			beginSelectionAnimLock()
+		}
+		applyLineFromLayout(activeIndex.value)
+		nextTick(() => {
+			if (props.scrollable) {
+				syncScrollToActive()
+			}
+			// 后台精修真实宽度（动画锁内不会改宽/滑块）
+			setTimeout(() => {
+				updateScrollContentWidth()
+				if (!props.scrollable) {
+					measureEqualLayouts()
+				}
+			}, 40)
+		})
 	}
 
 	function onItemClick(index : number) {
@@ -1461,3 +1461,4 @@
 		opacity: 1;
 	}
 </style>
+

@@ -93,14 +93,15 @@
 	const emit = defineEmits(['click'])
 
 	const inGroup = inject('naxCellInGroup', false) as boolean
-	const groupBorderRef = inject('naxCellBorder', null)
-	const groupInsetRef = inject('naxCellInset', null)
+	// 默认值必须是同类型 Ref，不能用 null（安卓会收成 Void，再注入 ComputedRef/Ref 即 ClassCastException）
+	const groupBorderRef = inject('naxCellBorder', ref(true)) as Ref<boolean>
+	const groupInsetRef = inject('naxCellInset', ref(false)) as Ref<boolean>
 
-	function readRefBool(r : any | null, fallback : boolean) : boolean {
+	function readRefBool(r : Ref<boolean>, fallback : boolean) : boolean {
 		if (r == null) {
 			return fallback
 		}
-		return (r as Ref<boolean>).value
+		return r.value
 	}
 
 	function normalizeSize(value : string) : string {

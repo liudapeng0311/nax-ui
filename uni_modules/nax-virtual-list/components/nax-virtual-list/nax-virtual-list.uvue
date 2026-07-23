@@ -716,20 +716,6 @@
 		}
 	}
 
-	/** 滚动到指定索引（尽量置顶） */
-	function scrollToIndex(index : number) {
-		const total = listLength()
-		var i = index
-		if (i < 0) {
-			i = 0
-		}
-		if (total > 0 && i > total - 1) {
-			i = total - 1
-		}
-		const top = i * rowHeight()
-		scrollToOffset(top)
-	}
-
 	/** 滚动到指定 offset（px） */
 	function scrollToOffset(offsetY : number) {
 		var top = offsetY
@@ -750,6 +736,20 @@
 			scrollTopValue.value = top
 			updateRange(top, true)
 		}
+	}
+
+	/** 滚动到指定索引（尽量置顶） */
+	function scrollToIndex(index : number) {
+		const total = listLength()
+		var i = index
+		if (i < 0) {
+			i = 0
+		}
+		if (total > 0 && i > total - 1) {
+			i = total - 1
+		}
+		const top = i * rowHeight()
+		scrollToOffset(top)
 	}
 
 	function getVisibleRange() : UTSJSONObject {

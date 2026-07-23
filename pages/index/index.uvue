@@ -1,5 +1,5 @@
 <template>
-	<view class="page-root nax-theme" :class="themeExtraClass">
+	<view class="page-root nax-theme" :class="themeExtraClass" :style="pageRootStyle">
 		<nax-nav-bar
 			title="nax-ui"
 			:show-back="false"
@@ -14,7 +14,7 @@
 			</template>
 		</nax-nav-bar>
 
-		<scroll-view class="page-scroll" scroll-y="true">
+		<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
 			<view class="nax-theme page" :class="themeExtraClass">
 				<!-- Hero -->
 				<view class="hero">
@@ -127,6 +127,52 @@
 		return ''
 	})
 
+	// App 中间 scroll-view 需要父级确定高度；用窗口高度兜底
+	const pageRootStyle = ref('')
+	const pageScrollStyle = ref('')
+	function refreshPageRootStyle() {
+		// 安卓 scroll-view 必须有明确高度；height:0 在部分机型不会被 flex 撑开
+		const info = uni.getSystemInfoSync()
+		var winH = info.windowHeight
+		if (winH <= 0) {
+			winH = info.screenHeight
+		}
+		var status = 0
+		if (info.statusBarHeight > 0) {
+			status = info.statusBarHeight
+		}
+		var safeBottom = 0
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			const win = uni.getWindowInfo()
+			if (win.safeAreaInsets != null && win.safeAreaInsets.bottom > 0) {
+				safeBottom = win.safeAreaInsets.bottom
+			} else if (win.safeArea != null) {
+				const gap = win.screenHeight - win.safeArea.bottom
+				if (gap > 0) {
+					safeBottom = gap
+				}
+			}
+			if (winH <= 0 && win.windowHeight > 0) {
+				winH = win.windowHeight
+			}
+			if (status <= 0 && win.statusBarHeight > 0) {
+				status = win.statusBarHeight
+			}
+		// #endif
+		if (winH <= 0) {
+			winH = 700
+		}
+		const navH = status + 44
+		const tabH = 50 + safeBottom
+		var scrollH = winH - navH - tabH
+		if (scrollH < 200) {
+			scrollH = 200
+		}
+		pageRootStyle.value = 'width:100%;height:' + winH.toString() + 'px;flex-direction:column;'
+		pageScrollStyle.value = 'width:100%;height:' + scrollH.toString() + 'px;'
+	}
+	refreshPageRootStyle()
+
 	const tabList = demoTabList()
 	// 鸿蒙：text 节点必须是 string；number 直接插值在部分机型会异常
 	const totalCountText = demoCountByGroup('all').toString()
@@ -222,28 +268,30 @@
 	onShow(() => {
 		hideDemoNativeTabBar()
 		darkMode.value = bindDemoThemePage()
+		refreshPageRootStyle()
 	})
 </script>
 
 <style>
 	.page-root {
-		flex: 1;
 		flex-direction: column;
-		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
-		height: 100%;
-		/* #endif */
-		background-color: var(--nax-color-bg-secondary, #fafafc);
+		width: 100%;
+		/* 高度由 pageRootStyle 写入，避免 App 上 height:0/absolute 把中间区塌掉 */
+		background-color: #fafafc;
 	}
 
 	.page-scroll {
-		flex: 1;
-		height: 0;
+		/* 高度由 pageScrollStyle 写入；勿写 height:0 */
+		width: 100%;
+		flex-direction: column;
+		background-color: #fafafc;
 	}
 
 	.page {
 		flex-direction: column;
+		width: 100%;
 		padding: 12px 16px 24px 16px;
-		background-color: var(--nax-color-bg-secondary, #fafafc);
+		background-color: #fafafc;
 	}
 
 	.nav-action {
@@ -257,9 +305,10 @@
 
 	.hero {
 		flex-direction: column;
+		width: 100%;
 		padding: 18px 16px 16px 16px;
 		border-radius: 5px;
-		background-color: var(--nax-color-bg, #ffffff);
+		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #f0f0f3);
@@ -335,9 +384,10 @@
 	.stats {
 		flex-direction: row;
 		align-items: center;
+		width: 100%;
 		padding: 14px 8px;
 		border-radius: 5px;
-		background-color: var(--nax-color-bg, #ffffff);
+		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #f0f0f3);
@@ -413,10 +463,11 @@
 	.scene-card {
 		flex-direction: row;
 		align-items: center;
+		width: 100%;
 		padding: 14px 12px;
 		margin-bottom: 10px;
 		border-radius: 5px;
-		background-color: var(--nax-color-bg, #ffffff);
+		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
 		border-color: var(--nax-color-border, #f0f0f3);

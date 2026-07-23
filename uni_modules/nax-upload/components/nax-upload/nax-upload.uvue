@@ -689,18 +689,41 @@
 		return true
 	}
 
-	function resolveUploadHeader(): any {
+	type NaxUploadFileSuccess = {
+		statusCode: number
+		data: string
+	}
+
+	type NaxImageTempFile = {
+		path: string
+		tempFilePath: string
+		url: string
+		size: number
+	}
+
+	type NaxChooseImageSuccess = {
+		tempFiles: any[]
+		tempFilePaths: string[]
+	}
+
+	type NaxChooseVideoSuccess = {
+		tempFilePath: string
+		size: number
+		thumbTempFilePath: string
+	}
+
+	function resolveUploadHeader(): UTSJSONObject {
 		if (props.header == null) {
 			return {} as UTSJSONObject
 		}
-		return props.header
+		return props.header as UTSJSONObject
 	}
 
-	function resolveUploadFormData(): any {
+	function resolveUploadFormData(): UTSJSONObject {
 		if (props.formData == null) {
 			return {} as UTSJSONObject
 		}
-		return props.formData
+		return props.formData as UTSJSONObject
 	}
 
 	function updateItemAt(index: number, status: string, message: string, url: string) {
@@ -764,8 +787,9 @@
 			header: resolveUploadHeader(),
 			formData: resolveUploadFormData(),
 			success: (res) => {
-				const statusCode = (res as any).statusCode as number
-				const data = '' + ((res as any).data as string)
+				const uploadRes = res as NaxUploadFileSuccess
+				const statusCode = uploadRes.statusCode
+				const data = uploadRes.data
 				const ok = statusCode >= 200 && statusCode < 300
 				if (!ok) {
 					updateItemAt(captureIndex, 'failed', '????', '')
@@ -845,8 +869,9 @@
 					header: resolveUploadHeader(),
 					formData: resolveUploadFormData(),
 					success: (res) => {
-						const statusCode = (res as any).statusCode as number
-						const data = '' + ((res as any).data as string)
+						const uploadRes = res as NaxUploadFileSuccess
+						const statusCode = uploadRes.statusCode
+						const data = uploadRes.data
 						const ok = statusCode >= 200 && statusCode < 300
 						const list2 = cloneFileList()
 						if (ok) {
@@ -956,41 +981,43 @@
 			if (typeof raw == 'string') {
 				path = raw as string
 			} else {
-				// native tempFile from chooseImage (not UTSJSONObject)
-				const f = raw as any
-				const pn = f.path as string
+				// 安卓 UTS：禁止 (x as any).field，改用具体类型 / UTSJSONObject
+				const f = raw as NaxImageTempFile
+				const pn = f.path
 				if (pn != null && pn.length > 0) {
 					path = pn
 				} else {
-					const p2n = f.tempFilePath as string
+					const p2n = f.tempFilePath
 					if (p2n != null && p2n.length > 0) {
 						path = p2n
 					} else {
-						const p3n = f.url as string
+						const p3n = f.url
 						if (p3n != null && p3n.length > 0) {
 							path = p3n
 						}
 					}
 				}
-				const sn = f.size as number
+				const sn = f.size
 				if (sn != null) {
 					size = sn
 				}
-				// business UTSJSONObject fallback
-				if (path.length == 0) {
+				// 业务 UTSJSONObject 兜底
+				if (path.length == 0 || size <= 0) {
 					const obj = asObject(raw)
 					if (obj != null) {
-						const p1 = obj.getString('path')
-						if (p1 != null && p1.length > 0) {
-							path = p1
-						} else {
-							const p2 = obj.getString('tempFilePath')
-							if (p2 != null && p2.length > 0) {
-								path = p2
+						if (path.length == 0) {
+							const p1 = obj.getString('path')
+							if (p1 != null && p1.length > 0) {
+								path = p1
 							} else {
-								const p3 = obj.getString('url')
-								if (p3 != null) {
-									path = p3
+								const p2 = obj.getString('tempFilePath')
+								if (p2 != null && p2.length > 0) {
+									path = p2
+								} else {
+									const p3 = obj.getString('url')
+									if (p3 != null) {
+										path = p3
+									}
 								}
 							}
 						}
@@ -1038,7 +1065,8 @@
 
 	function pickFromImageSuccess(res: any) {
 		const files = [] as any[]
-		const tempFiles = (res as any).tempFiles
+		const result = res as NaxChooseImageSuccess
+		const tempFiles = result.tempFiles
 		if (tempFiles != null && tempFiles.length > 0) {
 			var i = 0
 			while (i < tempFiles.length) {
@@ -1048,7 +1076,7 @@
 			processPickedFiles(files, 'image')
 			return
 		}
-		const pathsAny = (res as any).tempFilePaths
+		const pathsAny = result.tempFilePaths
 		if (pathsAny != null && pathsAny.length > 0) {
 			var j = 0
 			while (j < pathsAny.length) {
@@ -1066,17 +1094,18 @@
 
 	function pickFromVideoSuccess(res: any) {
 		var path = ''
-		const tp = (res as any).tempFilePath as string
+		const result = res as NaxChooseVideoSuccess
+		const tp = result.tempFilePath
 		if (tp != null) {
 			path = tp
 		}
 		var size = 0
-		const sz = (res as any).size as number
+		const sz = result.size
 		if (sz != null) {
 			size = sz
 		}
 		var thumb = path
-		const th = (res as any).thumbTempFilePath as string
+		const th = result.thumbTempFilePath
 		if (th != null && th.length > 0) {
 			thumb = th
 		}
@@ -1167,7 +1196,8 @@
 		if (filesAny != null) {
 			var i = 0
 			while (i < filesAny.length) {
-				files.push(filesAny[i])
+				// 安卓 UTS：getArray 元素为 CapturedType，需显式转为 any
+				files.push(filesAny[i] as any)
 				i++
 			}
 		} else {

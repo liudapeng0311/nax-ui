@@ -334,7 +334,11 @@
 					return false
 				}
 			} else {
-				const code = ch.charCodeAt(0)
+				const codeMaybe = ch.charCodeAt(0)
+				if (codeMaybe == null) {
+					return false
+				}
+				const code = codeMaybe as number
 				if (code < 48 || code > 57) {
 					return false
 				}
@@ -663,9 +667,9 @@
 		if (url.length == 0) {
 			return
 		}
-		// App：系统浏览器打开（click 已先 emit，此处失败不影响事件）
+		// App：uni-app x 无 plus.runtime；外链由业务监听 click 自行处理
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-		plus.runtime.openURL(url)
+		// no-op（避免 5+ Runtime API）
 		// #endif
 		// 小程序：复制链接
 		// #ifdef MP-WEIXIN

@@ -98,13 +98,18 @@
 	})
 
 	// 向子 cell 注入上下文（字符串 key，避免跨端符号问题）
+	// 安卓 UTS：provide 用 Ref，避免 ComputedRef；inject 端勿用 null 默认（会收成 Void 导致 ClassCastException）
+	const groupBorderState = ref(props.border)
+	const groupInsetState = ref(props.inset)
+	watch((): boolean => props.border, (v : boolean) => {
+		groupBorderState.value = v
+	})
+	watch((): boolean => props.inset, (v : boolean) => {
+		groupInsetState.value = v
+	})
 	provide('naxCellInGroup', true)
-	provide('naxCellBorder', computed((): boolean => {
-		return props.border
-	}))
-	provide('naxCellInset', computed((): boolean => {
-		return props.inset
-	}))
+	provide('naxCellBorder', groupBorderState)
+	provide('naxCellInset', groupInsetState)
 </script>
 
 <style>

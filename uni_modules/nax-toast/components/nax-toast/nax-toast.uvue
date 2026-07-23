@@ -88,6 +88,7 @@
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 	const loadingAngle = ref(0)
 	let loadingTimerId: number = -1
+	const loadingDomId = 'nax-toast-ld-' + Math.floor(Math.random() * 10000000).toString()
 	// #endif
 
 	const rootClass = computed((): string => {
@@ -205,6 +206,12 @@
 
 	// #ifdef APP-HARMONY
 	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	let spinToken = 0
+	let usingNativeSpin = false
+	let cachedSpinEl : UniElement | null = null
+	let spinFallbackTimerId = -1
+	let spinRetryTimerId = -1
+
 	const loadingStyle = computed((): string => {
 		// transform 交由 animate / setProperty 驱动
 		return ''
