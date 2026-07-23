@@ -170,14 +170,18 @@
 		applyContentHeight(winH, tabsHeightPx.value)
 
 		nextTick(() => {
+			// App：boundingClientRect 回调参数类型为 Any，不能写成 NodeInfo
 			uni.createSelectorQuery()
 				.select('.tabs-host')
-				.boundingClientRect((rect: NodeInfo) => {
-					if (rect != null && rect.height != null) {
-						const h = rect.height as number
-						if (h > 0) {
-							tabsHeightPx.value = Math.floor(h)
-							applyContentHeight(winH, tabsHeightPx.value)
+				.boundingClientRect((rect: any | null) => {
+					if (rect != null) {
+						const info = rect as NodeInfo
+						if (info.height != null) {
+							const h = info.height as number
+							if (h > 0) {
+								tabsHeightPx.value = Math.floor(h)
+								applyContentHeight(winH, tabsHeightPx.value)
+							}
 						}
 					}
 				})

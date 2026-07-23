@@ -183,7 +183,7 @@
 			const p = propsList[i]
 			if (p.length > 0) {
 				sp.push(p)
-				sv.push(getModelValue(model, p))
+				sv.push(getModelValue(model, p) as any)
 			}
 			i++
 		}
@@ -225,7 +225,7 @@
 				j++
 			}
 			sp.push(prop)
-			sv.push(getModelValue(model, prop))
+			sv.push(getModelValue(model, prop) as any)
 			snapshotProps.value = sp
 			snapshotValues.value = sv
 		}

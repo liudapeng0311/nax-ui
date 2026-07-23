@@ -19,7 +19,7 @@ function isEmptyValue(value: any | null): boolean {
 	}
 	// 数组
 	const arr = value as any[]
-	if (arr != null && typeof arr.length == 'number' && typeof (value as any).push == 'function') {
+	if (arr != null && typeof arr.length == 'number') {
 		return arr.length == 0
 	}
 	return false
@@ -116,7 +116,7 @@ function matchType(value: any | null, typeName: string): boolean {
 	}
 	if (typeName == 'array') {
 		const arr = value as any[]
-		return arr != null && typeof arr.length == 'number' && typeof (value as any).push == 'function'
+		return arr != null && typeof arr.length == 'number'
 	}
 	if (typeName == 'object') {
 		return value != null && typeof value == 'object'
@@ -412,16 +412,16 @@ export function rulesOfProp(rules: UTSJSONObject | null, prop: string): any[] {
 	if (rules == null || prop.length == 0) {
 		return empty
 	}
+	// 优先 getArray，避免 any 上探测 .push（App 编译失败）
+	const list = rules.getArray(prop)
+	if (list != null) {
+		return list as any[]
+	}
 	const raw = rules.getAny(prop)
 	if (raw == null) {
 		return empty
 	}
-	// 单对象规则
-	const arr = raw as any[]
-	if (arr != null && typeof arr.length == 'number' && typeof (raw as any).push == 'function') {
-		return arr
-	}
-	// 单条对象
+	// 单条对象规则
 	return [raw] as any[]
 }
 

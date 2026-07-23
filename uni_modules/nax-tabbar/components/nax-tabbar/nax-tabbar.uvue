@@ -304,158 +304,6 @@
 		return props.fixed && props.placeholder
 	})
 
-	const hasMidButton = computed((): boolean => {
-		const items = tabItems.value
-		var i = 0
-		while (i < items.length) {
-			if (resolveMidButton(items[i])) {
-				return true
-			}
-			i++
-		}
-		return false
-	})
-
-	// 中间凸起相对栏顶多出的高度，给圆钮预留，避免被裁切
-	const midLiftPx = computed((): number => {
-		if (!hasMidButton.value) {
-			return 0
-		}
-		// 圆钮约一半探出底栏顶边（48/2）+ 白描边，形成贴合凸起的视觉
-		return 28
-	})
-
-	const hostClass = computed((): string => {
-		var cls = ''
-		if (!props.show) {
-			cls += ' nax-tabbar-host--hidden'
-		}
-		if (hasMidButton.value) {
-			cls += ' nax-tabbar-host--mid'
-		}
-		return cls.trim()
-	})
-
-	const rootClass = computed((): string => {
-		var cls = ''
-		if (props.fixed) {
-			cls += ' nax-tabbar--fixed'
-		}
-		// 顶边框统一由 bar-bg 绘制（凸起时不会穿过空区）
-		if (props.safeAreaInsetBottom) {
-			cls += ' nax-tabbar--safe'
-		}
-		if (hasMidButton.value) {
-			cls += ' nax-tabbar--mid'
-		}
-		if (props.customClass.length > 0) {
-			cls += ' ' + props.customClass
-		}
-		return cls.trim()
-	})
-
-	const showSafeArea = computed((): boolean => {
-		return props.safeAreaInsetBottom
-	})
-
-	const barBgClass = computed((): string => {
-		var cls = ''
-		if (props.border) {
-			cls += ' nax-tabbar__bar-bg--border'
-		}
-		if (hasMidButton.value) {
-			cls += ' nax-tabbar__bar-bg--mid'
-		}
-		return cls.trim()
-	})
-
-	const barBgStyle = computed((): string => {
-		// 只铺主内容栏高，安全区由下方 nax-tabbar__safe 承担
-		return 'height:' + barHeightPx.value.toString() + 'px;'
-	})
-
-	const rootStyle = computed((): string => {
-		var style = ''
-		if (props.fixed) {
-			style += 'z-index:' + props.zIndex.toString() + ';'
-		}
-		return style
-	})
-
-	const mainStyle = computed((): string => {
-		const h = barHeightPx.value + midLiftPx.value
-		return 'height:' + h.toString() + 'px;'
-	})
-
-	const innerStyle = computed((): string => {
-		const h = barHeightPx.value + midLiftPx.value
-		return 'height:' + h.toString() + 'px;'
-	})
-
-	const safeClass = computed((): string => {
-		var cls = ''
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
-		cls += ' nax-tabbar__safe--css'
-		// #endif
-		return cls.trim()
-	})
-
-	// App 实测安全区高度；Web 为 0（走 CSS env）
-	const effectiveSafeBottomPx = computed((): number => {
-		if (!props.safeAreaInsetBottom) {
-			return 0
-		}
-		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-		if (safeBottomPx.value > 0) {
-			return safeBottomPx.value
-		}
-		// #ifdef APP-HARMONY
-		// 鸿蒙 insets 暂为 0 时最小兜底，避免文案贴系统手势条
-		return 16
-		// #endif
-		// #ifndef APP-HARMONY
-		return 0
-		// #endif
-		// #endif
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
-		return 0
-		// #endif
-	})
-
-	const safeSpacerStyle = computed((): string => {
-		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-		const h = effectiveSafeBottomPx.value
-		return 'height:' + h.toString() + 'px;'
-		// #endif
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
-		// Web/小程序高度由 .nax-tabbar__safe--css 的 env 控制
-		return ''
-		// #endif
-	})
-
-	const placeholderClass = computed((): string => {
-		if (props.safeAreaInsetBottom) {
-			return 'nax-tabbar__placeholder--safe'
-		}
-		return ''
-	})
-
-	const placeholderStyle = computed((): string => {
-		// 内容高(+凸起) + 安全区，与 fixed 底栏总高一致
-		var h = barHeightPx.value + midLiftPx.value
-		if (props.safeAreaInsetBottom) {
-			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-			h = h + effectiveSafeBottomPx.value
-			// #endif
-		}
-		return 'height:' + h.toString() + 'px;'
-	})
-
-	const imageStyle = computed((): string => {
-		const px = iconSizePx.value.toString() + 'px'
-		return 'width:' + px + ';height:' + px + ';'
-	})
-
 	function resolveText(item : any | null) : string {
 		if (item == null) {
 			return ''
@@ -663,6 +511,158 @@
 		}
 		return '#909399'
 	}
+
+	const hasMidButton = computed((): boolean => {
+		const items = tabItems.value
+		var i = 0
+		while (i < items.length) {
+			if (resolveMidButton(items[i])) {
+				return true
+			}
+			i++
+		}
+		return false
+	})
+
+	// 中间凸起相对栏顶多出的高度，给圆钮预留，避免被裁切
+	const midLiftPx = computed((): number => {
+		if (!hasMidButton.value) {
+			return 0
+		}
+		// 圆钮约一半探出底栏顶边（48/2）+ 白描边，形成贴合凸起的视觉
+		return 28
+	})
+
+	const hostClass = computed((): string => {
+		var cls = ''
+		if (!props.show) {
+			cls += ' nax-tabbar-host--hidden'
+		}
+		if (hasMidButton.value) {
+			cls += ' nax-tabbar-host--mid'
+		}
+		return cls.trim()
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.fixed) {
+			cls += ' nax-tabbar--fixed'
+		}
+		// 顶边框统一由 bar-bg 绘制（凸起时不会穿过空区）
+		if (props.safeAreaInsetBottom) {
+			cls += ' nax-tabbar--safe'
+		}
+		if (hasMidButton.value) {
+			cls += ' nax-tabbar--mid'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const showSafeArea = computed((): boolean => {
+		return props.safeAreaInsetBottom
+	})
+
+	const barBgClass = computed((): string => {
+		var cls = ''
+		if (props.border) {
+			cls += ' nax-tabbar__bar-bg--border'
+		}
+		if (hasMidButton.value) {
+			cls += ' nax-tabbar__bar-bg--mid'
+		}
+		return cls.trim()
+	})
+
+	const barBgStyle = computed((): string => {
+		// 只铺主内容栏高，安全区由下方 nax-tabbar__safe 承担
+		return 'height:' + barHeightPx.value.toString() + 'px;'
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		if (props.fixed) {
+			style += 'z-index:' + props.zIndex.toString() + ';'
+		}
+		return style
+	})
+
+	const mainStyle = computed((): string => {
+		const h = barHeightPx.value + midLiftPx.value
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const innerStyle = computed((): string => {
+		const h = barHeightPx.value + midLiftPx.value
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const safeClass = computed((): string => {
+		var cls = ''
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		cls += ' nax-tabbar__safe--css'
+		// #endif
+		return cls.trim()
+	})
+
+	// App 实测安全区高度；Web 为 0（走 CSS env）
+	const effectiveSafeBottomPx = computed((): number => {
+		if (!props.safeAreaInsetBottom) {
+			return 0
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (safeBottomPx.value > 0) {
+			return safeBottomPx.value
+		}
+		// #ifdef APP-HARMONY
+		// 鸿蒙 insets 暂为 0 时最小兜底，避免文案贴系统手势条
+		return 16
+		// #endif
+		// #ifndef APP-HARMONY
+		return 0
+		// #endif
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return 0
+		// #endif
+	})
+
+	const safeSpacerStyle = computed((): string => {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const h = effectiveSafeBottomPx.value
+		return 'height:' + h.toString() + 'px;'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// Web/小程序高度由 .nax-tabbar__safe--css 的 env 控制
+		return ''
+		// #endif
+	})
+
+	const placeholderClass = computed((): string => {
+		if (props.safeAreaInsetBottom) {
+			return 'nax-tabbar__placeholder--safe'
+		}
+		return ''
+	})
+
+	const placeholderStyle = computed((): string => {
+		// 内容高(+凸起) + 安全区，与 fixed 底栏总高一致
+		var h = barHeightPx.value + midLiftPx.value
+		if (props.safeAreaInsetBottom) {
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			h = h + effectiveSafeBottomPx.value
+			// #endif
+		}
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const imageStyle = computed((): string => {
+		const px = iconSizePx.value.toString() + 'px'
+		return 'width:' + px + ';height:' + px + ';'
+	})
 
 	function itemBoxStyle(item : any | null) : string {
 		if (resolveMidButton(item)) {

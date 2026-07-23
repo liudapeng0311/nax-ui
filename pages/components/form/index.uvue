@@ -131,8 +131,14 @@
 		darkMode.value = bindDemoThemePage()
 	})
 
-	const formRef = ref(null)
-	const formTopRef = ref(null)
+	// App UTS：组件 ref 不能按 any 调方法，需声明 expose 类型
+	type NaxFormExpose = {
+		validate : () => Promise<boolean>
+		resetFields : () => void
+		clearValidate : () => void
+	}
+	const formRef = ref(null as NaxFormExpose | null)
+	const formTopRef = ref(null as NaxFormExpose | null)
 	const resultText = ref('—')
 	const manualError = ref('')
 
@@ -266,7 +272,7 @@
 		] as any[]
 	} as UTSJSONObject
 
-	function callFormMethod(target: any | null, methodName: string): any | null {
+	function callFormMethod(target: NaxFormExpose | null, methodName: string): any | null {
 		if (target == null) {
 			return null
 		}

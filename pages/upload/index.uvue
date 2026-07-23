@@ -194,14 +194,17 @@
 		return next
 	}
 
-	function appendFiles(listRef: any, e: any) {
+	// App UTS：不能对 any 访问 .value，改为收数组、返回新数组
+	function appendFiles(list: any[], e: any): any[] {
 		const payload = e as UTSJSONObject
 		const files = payload.getArray('files')
-		const next = cloneList(listRef.value)
+		const next = cloneList(list)
 		if (files != null) {
 			var i = 0
 			while (i < files.length) {
-				next.push(files[i])
+				// App：getArray 元素为 CapturedType，push 需 Any
+				const fileItem = files[i] as any
+				next.push(fileItem)
 				i++
 			}
 		} else {
@@ -210,65 +213,64 @@
 				next.push(file)
 			}
 		}
-		listRef.value = next
+		return next
 	}
 
-	function applyDelete(listRef: any, e: any) {
+	function applyDelete(list: any[], e: any): any[] {
 		const payload = e as UTSJSONObject
 		const nextAny = payload.getArray('fileList')
 		if (nextAny != null) {
-			listRef.value = nextAny as any[]
-			return
+			return nextAny as any[]
 		}
 		const idxAny = payload.getNumber('index')
 		if (idxAny == null) {
-			return
+			return list
 		}
 		const idx = idxAny as number
 		const next = [] as any[]
 		var i = 0
-		while (i < listRef.value.length) {
+		while (i < list.length) {
 			if (i != idx) {
-				next.push(listRef.value[i])
+				next.push(list[i])
 			}
 			i++
 		}
-		listRef.value = next
+		return next
 	}
 
 	function onBasicAfterRead(e: any) {
-		appendFiles(basicList, e)
+		basicList.value = appendFiles(basicList.value, e)
 		lastEvent.value = 'afterRead: basic'
 	}
 
 	function onBasicDelete(e: any) {
-		applyDelete(basicList, e)
+		basicList.value = applyDelete(basicList.value, e)
 		lastEvent.value = 'delete: basic'
 	}
 
 	function onLimitAfterRead(e: any) {
-		appendFiles(limitList, e)
+		limitList.value = appendFiles(limitList.value, e)
 		lastEvent.value = 'afterRead: maxCount'
 	}
 
 	function onLimitDelete(e: any) {
-		applyDelete(limitList, e)
+		limitList.value = applyDelete(limitList.value, e)
 	}
 
 	function onStatusDelete(e: any) {
-		applyDelete(statusList, e)
+		statusList.value = applyDelete(statusList.value, e)
 	}
 
 	function onSizeAfterRead(e: any) {
-		appendFiles(sizeList, e)
+		sizeList.value = appendFiles(sizeList.value, e)
 	}
 
 	function onSlotAfterRead(e: any) {
-		appendFiles(slotList, e)
+		slotList.value = appendFiles(slotList.value, e)
 	}
 
 	function onSlotDelete(e: any) {
-		applyDelete(slotList, e)
+		slotList.value = applyDelete(slotList.value, e)
 	}
 
 	function onOversize(_e: any) {
@@ -325,7 +327,7 @@
 	}
 
 	function onMockDelete(e: any) {
-		applyDelete(mockList, e)
+		mockList.value = applyDelete(mockList.value, e)
 	}
 
 	function onAutoFileList(list: any) {
@@ -353,7 +355,7 @@
 	}
 
 	function onAutoDelete(e: any) {
-		applyDelete(autoList, e)
+		autoList.value = applyDelete(autoList.value, e)
 		autoEvent.value = 'delete'
 	}
 

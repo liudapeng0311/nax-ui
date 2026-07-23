@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view
 		v-if="visible"
 		class="nax-alert"
@@ -227,7 +227,9 @@
 		return 'nax-alert__desc--' + tone.value
 	})
 
-	watch(() => props.show, (v : boolean) => {
+	watch((): boolean => {
+		return props.show
+	}, (v : boolean) => {
 		if (v) {
 			closed.value = false
 		}

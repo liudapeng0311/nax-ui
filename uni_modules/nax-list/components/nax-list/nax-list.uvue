@@ -352,24 +352,30 @@
 
 		query
 			.select('#' + scrollDomId)
-			.boundingClientRect((rect : NodeInfo) => {
+			.boundingClientRect((rect : any | null) => {
 				if (token != checkToken) {
 					return
 				}
-				if (rect != null && rect.height != null) {
-					scrollH = rect.height as number
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.height != null) {
+						scrollH = info.height as number
+					}
 				}
 				gotScroll = true
 				maybeApply()
 			})
 		query
 			.select('#' + bodyDomId)
-			.boundingClientRect((rect2 : NodeInfo) => {
+			.boundingClientRect((rect2 : any | null) => {
 				if (token != checkToken) {
 					return
 				}
-				if (rect2 != null && rect2.height != null) {
-					bodyH = rect2.height as number
+				if (rect2 != null) {
+					const info2 = rect2 as NodeInfo
+					if (info2.height != null) {
+						bodyH = info2.height as number
+					}
 				}
 				gotBody = true
 				maybeApply()

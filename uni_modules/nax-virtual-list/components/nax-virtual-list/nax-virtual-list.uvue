@@ -776,14 +776,17 @@
 		}
 		query
 			.select('#' + scrollDomId)
-			.boundingClientRect((rect : NodeInfo) => {
+			.boundingClientRect((rect : any | null) => {
 				if (token != measureToken) {
 					return
 				}
-				if (rect != null && rect.height != null) {
-					const h = rect.height as number
-					if (h > 0) {
-						viewportPx.value = h
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.height != null) {
+						const h = info.height as number
+						if (h > 0) {
+							viewportPx.value = h
+						}
 					}
 				}
 				updateRange(scrollTopValue.value, true)

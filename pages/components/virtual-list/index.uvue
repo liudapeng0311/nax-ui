@@ -30,7 +30,7 @@
 									<text class="row-item__title" :lines="1">{{ readTitle(item) }}</text>
 									<text class="row-item__sub" :lines="1">{{ readSub(item) }}</text>
 								</view>
-								<text class="row-item__index">{{ index + 1 }}</text>
+								<text class="row-item__index">{{ indexLabel(index) }}</text>
 							</view>
 						</template>
 					</nax-virtual-list>
@@ -70,7 +70,7 @@
 						<template #default="{ item, index }">
 							<nax-cell
 								:title="readTitle(item)"
-								:value="'' + (index + 1)"
+								:value="indexLabel(index)"
 								:label="readSub(item)"
 								is-link
 							></nax-cell>
@@ -109,7 +109,7 @@
 							</view>
 						</template>
 						<template #default="{ item, index }">
-							<nax-cell :title="readTitle(item)" :value="'' + (index + 1)"></nax-cell>
+							<nax-cell :title="readTitle(item)" :value="indexLabel(index)"></nax-cell>
 						</template>
 					</nax-virtual-list>
 				</view>
@@ -162,7 +162,11 @@
 		return n
 	})
 
-	const basicRef = ref(null)
+	// App UTS：组件 ref 方法需类型
+	type NaxVirtualListExpose = {
+		scrollToIndex : (index : number) => void
+	}
+	const basicRef = ref(null as NaxVirtualListExpose | null)
 	const basicKey = ref(0)
 	const basicList = ref([] as UTSJSONObject[])
 
@@ -208,8 +212,29 @@
 		return ''
 	}
 
-	function rowAltClass(index : number) : string {
-		if (index % 2 == 1) {
+	// 插槽 index 在 App 上为 Any?，统一转 number
+	function asSlotIndex(index : any | null) : number {
+		if (index == null) {
+			return 0
+		}
+		if (typeof index == 'number') {
+			return index as number
+		}
+		const n = parseFloat('' + index)
+		if (n == n) {
+			return Math.floor(n)
+		}
+		return 0
+	}
+
+	function indexLabel(index : any | null) : string {
+		const i = asSlotIndex(index)
+		return (i + 1).toString()
+	}
+
+	function rowAltClass(index : any | null) : string {
+		const i = asSlotIndex(index)
+		if (i % 2 == 1) {
 			return 'row-item--alt'
 		}
 		return ''
@@ -239,7 +264,7 @@
 		})
 	}
 
-	function callVlScrollToIndex(target : any | null, index : number) {
+	function callVlScrollToIndex(target : NaxVirtualListExpose | null, index : number) {
 		if (target == null) {
 			return false
 		}

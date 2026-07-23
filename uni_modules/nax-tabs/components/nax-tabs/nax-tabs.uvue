@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="nax-tabs" :class="rootClass" :style="rootStyle">
 		<!-- 可滚动 -->
 		<!-- direction=horizontal：uni-app x 官方横向滚动；scroll-x 已废弃且与默认 scroll-y 冲突 -->
@@ -415,6 +415,14 @@
 		return 'nax-tabs-item-' + uid + '-' + index.toString()
 	}
 
+	function resolveDisabled(item : any | null) : boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		return readBoolean(obj, 'disabled')
+	}
+
 	function itemClass(index : number, item : any | null) : string {
 		var cls = ''
 		if (index == activeIndex.value) {
@@ -475,14 +483,6 @@
 			return title
 		}
 		return ''
-	}
-
-	function resolveDisabled(item : any | null) : boolean {
-		const obj = asObject(item)
-		if (obj == null) {
-			return false
-		}
-		return readBoolean(obj, 'disabled')
 	}
 
 	function resolveShowDot(item : any | null) : boolean {
@@ -831,16 +831,17 @@
 
 		query
 			.select('#' + itemId)
-			.boundingClientRect((rect : NodeInfo) => {
+			.boundingClientRect((rect : any | null) => {
 				if (token != measureToken.value) {
 					return
 				}
 				if (rect != null) {
-					if (rect.left != null) {
-						measureItemLeft.value = rect.left as number
+					const info = rect as NodeInfo
+					if (info.left != null) {
+						measureItemLeft.value = info.left as number
 					}
-					if (rect.width != null) {
-						measureItemWidth.value = rect.width as number
+					if (info.width != null) {
+						measureItemWidth.value = info.width as number
 					}
 				}
 				measureGotItem.value = true
@@ -848,12 +849,15 @@
 			})
 		query
 			.select('#' + listDomId)
-			.boundingClientRect((rect2 : NodeInfo) => {
+			.boundingClientRect((rect2 : any | null) => {
 				if (token != measureToken.value) {
 					return
 				}
-				if (rect2 != null && rect2.left != null) {
-					measureListLeft.value = rect2.left as number
+				if (rect2 != null) {
+					const info2 = rect2 as NodeInfo
+					if (info2.left != null) {
+						measureListLeft.value = info2.left as number
+					}
 				}
 				measureGotList.value = true
 				tryApplyMeasure(token)
@@ -990,16 +994,17 @@
 
 		query
 			.select('#' + itemId)
-			.boundingClientRect((rect : NodeInfo) => {
+			.boundingClientRect((rect : any | null) => {
 				if (token != scrollMeasureToken.value) {
 					return
 				}
 				if (rect != null) {
-					if (rect.left != null) {
-						scrollItemLeft.value = rect.left as number
+					const info = rect as NodeInfo
+					if (info.left != null) {
+						scrollItemLeft.value = info.left as number
 					}
-					if (rect.width != null) {
-						scrollItemWidth.value = rect.width as number
+					if (info.width != null) {
+						scrollItemWidth.value = info.width as number
 					}
 				}
 				scrollGotItem.value = true
@@ -1007,16 +1012,17 @@
 			})
 		query
 			.select('#' + scrollDomId)
-			.boundingClientRect((rect3 : NodeInfo) => {
+			.boundingClientRect((rect3 : any | null) => {
 				if (token != scrollMeasureToken.value) {
 					return
 				}
 				if (rect3 != null) {
-					if (rect3.left != null) {
-						scrollViewLeft.value = rect3.left as number
+					const info3 = rect3 as NodeInfo
+					if (info3.left != null) {
+						scrollViewLeft.value = info3.left as number
 					}
-					if (rect3.width != null) {
-						scrollViewWidth.value = rect3.width as number
+					if (info3.width != null) {
+						scrollViewWidth.value = info3.width as number
 					}
 				}
 				scrollGotView.value = true
@@ -1102,9 +1108,12 @@
 			const id = itemDomId(idx)
 			query
 				.select('#' + id)
-				.boundingClientRect((rect : NodeInfo) => {
-					if (rect != null && rect.width != null) {
-						widths[idx] = rect.width as number
+				.boundingClientRect((rect : any | null) => {
+					if (rect != null) {
+						const infoW = rect as NodeInfo
+						if (infoW.width != null) {
+							widths[idx] = infoW.width as number
+						}
 					}
 					remain = remain - 1
 					if (remain <= 0) {
@@ -1193,9 +1202,12 @@
 			const id = itemDomId(idx)
 			query
 				.select('#' + id)
-				.boundingClientRect((rect : NodeInfo) => {
-					if (rect != null && rect.width != null) {
-						widths[idx] = rect.width as number
+				.boundingClientRect((rect : any | null) => {
+					if (rect != null) {
+						const infoW = rect as NodeInfo
+						if (infoW.width != null) {
+							widths[idx] = infoW.width as number
+						}
 					}
 					remain = remain - 1
 					if (remain <= 0) {

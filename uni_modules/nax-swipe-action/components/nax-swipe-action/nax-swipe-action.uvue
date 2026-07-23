@@ -127,9 +127,14 @@
 	const syncingFromProp = ref(false)
 
 	const inGroup = inject('naxSaInGroup', false) as boolean
-	const activeNameRef = inject('naxSaActiveName', null)
-	const openItemRaw = inject('naxSaOpenItem', null)
-	const closeItemRaw = inject('naxSaCloseItem', null)
+	// App UTS：不能对 any 读 .value，注入 ref 用显式类型
+	type NaxSaActiveNameRef = {
+		value : string
+	}
+	type NaxSaNameFn = (n : string) => void
+	const activeNameRef = inject('naxSaActiveName', null) as NaxSaActiveNameRef | null
+	const openItemRaw = inject('naxSaOpenItem', null) as NaxSaNameFn | null
+	const closeItemRaw = inject('naxSaCloseItem', null) as NaxSaNameFn | null
 
 	const itemName = computed((): string => {
 		if (props.name.length > 0) {
@@ -453,9 +458,7 @@
 		if (activeNameRef == null) {
 			return ''
 		}
-		// provide 注入的是 ref
-		const anyRef = activeNameRef as any
-		const v = anyRef.value
+		const v = activeNameRef.value
 		if (v == null) {
 			return ''
 		}
@@ -469,8 +472,7 @@
 		if (openItemRaw == null) {
 			return
 		}
-		const fn = openItemRaw as (n: string) => void
-		fn(itemName.value)
+		openItemRaw(itemName.value)
 	}
 
 	function notifyGroupClose() {
@@ -480,8 +482,7 @@
 		if (closeItemRaw == null) {
 			return
 		}
-		const fn = closeItemRaw as (n: string) => void
-		fn(itemName.value)
+		closeItemRaw(itemName.value)
 	}
 
 	function tryVibrate() {
@@ -489,8 +490,11 @@
 			return
 		}
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		// App：type 为必填（light/medium/heavy）
 		try {
-			uni.vibrateShort({})
+			uni.vibrateShort({
+				type: 'light'
+			})
 		} catch (e) {
 			// ignore unsupported
 		}

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="page-root">
 		<nax-nav-bar
 			title="nax-dropdown"
@@ -178,8 +178,13 @@
 	const onlyInStock = ref(false)
 	const filterActive = ref(false)
 
-	const filterDropdown = ref(null)
-	const cmdDropdown = ref(null)
+	// App UTS：不能对 any 调 open/close，需显式暴露类型
+	type NaxDropdownExpose = {
+		open : (index : number) => void
+		close : () => void
+	}
+	const filterDropdown = ref(null as NaxDropdownExpose | null)
+	const cmdDropdown = ref(null as NaxDropdownExpose | null)
 
 	const fakeList = [
 		'可点击区域 1',
@@ -242,7 +247,7 @@
 	}
 
 
-	function callDropdownMethod(target : any | null, methodName : string, index : number) {
+	function callDropdownMethod(target : NaxDropdownExpose | null, methodName : string, index : number) {
 		if (target == null) {
 			return
 		}

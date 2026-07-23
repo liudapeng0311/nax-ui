@@ -844,6 +844,27 @@
 	 * 重建列数据（不改 picker key）。
 	 * 滚动 change 中禁止 remount：与 nax-select 一致，避免鸿蒙闪 0 再跳目标 / 死循环。
 	 */
+/** 对齐 nax-select.syncPickerValue：只在列数据就绪后写一次下标 */
+	function syncPickerValue(selector: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			let idx = i < selector.length ? selector[i] : 0
+			if (idx < 0) {
+				idx = 0
+			}
+			if (col.length > 0 && idx >= col.length) {
+				idx = col.length - 1
+			}
+			next.push(idx)
+			i++
+		}
+		armSuppressPickerEvent()
+		pickerValue.value = next
+		lastSelectIndex.value = next.slice()
+	}
+
 	function rebuildColumns(partsIn: number[], remount: boolean) {
 		const mode = modeName.value
 		const fields = getFieldList(mode)
@@ -884,28 +905,7 @@
 		syncPickerValue(selector)
 	}
 
-	/** 对齐 nax-select.syncPickerValue：只在列数据就绪后写一次下标 */
-	function syncPickerValue(selector: number[]) {
-		const next = [] as number[]
-		let i = 0
-		while (i < columnNum.value) {
-			const col = getColumnList(i)
-			let idx = i < selector.length ? selector[i] : 0
-			if (idx < 0) {
-				idx = 0
-			}
-			if (col.length > 0 && idx >= col.length) {
-				idx = col.length - 1
-			}
-			next.push(idx)
-			i++
-		}
-		armSuppressPickerEvent()
-		pickerValue.value = next
-		lastSelectIndex.value = next.slice()
-	}
-
-	function buildResult(parts: number[]): UTSJSONObject {
+		function buildResult(parts: number[]): UTSJSONObject {
 		const ts = partsToTimestamp(parts)
 		const formatted = formatCurrent(parts)
 		const row = {

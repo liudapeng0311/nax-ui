@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view
 		:id="rootId"
 		class="nax-rate"
@@ -380,11 +380,14 @@
 		}
 		query
 			.select('#' + rootId)
-			.boundingClientRect((rect : NodeInfo) => {
-				if (rect != null && rect.left != null && rect.width != null) {
-					boxLeft.value = rect.left as number
-					boxWidth.value = rect.width as number
-					applyPendingX()
+			.boundingClientRect((rect : any | null) => {
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.left != null && info.width != null) {
+						boxLeft.value = info.left as number
+						boxWidth.value = info.width as number
+						applyPendingX()
+					}
 				}
 			})
 			.exec()

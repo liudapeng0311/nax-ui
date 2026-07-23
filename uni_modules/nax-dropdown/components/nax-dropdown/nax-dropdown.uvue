@@ -258,23 +258,6 @@
 		} as UTSJSONObject
 	}
 
-	function registerItem(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) : number {
-		const idx = findIndexById(id)
-		if (idx >= 0) {
-			updateItem(id, title, disabled, visible, highlighted)
-			return idx
-		}
-		const next = [] as UTSJSONObject[]
-		var i = 0
-		while (i < menus.value.length) {
-			next.push(menus.value[i])
-			i++
-		}
-		next.push(makeMenu(id, title, disabled, visible, highlighted))
-		menus.value = next
-		return next.length - 1
-	}
-
 	function updateItem(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) {
 		const next = [] as UTSJSONObject[]
 		var i = 0
@@ -291,26 +274,21 @@
 		menus.value = next
 	}
 
-	function unregisterItem(id : string) {
+	function registerItem(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) : number {
+		const idx = findIndexById(id)
+		if (idx >= 0) {
+			updateItem(id, title, disabled, visible, highlighted)
+			return idx
+		}
 		const next = [] as UTSJSONObject[]
 		var i = 0
-		var removedIndex = -1
 		while (i < menus.value.length) {
-			const cur = menus.value[i]
-			const mid = cur['id']
-			if (mid != null && ('' + mid) == id) {
-				removedIndex = i
-			} else {
-				next.push(cur)
-			}
+			next.push(menus.value[i])
 			i++
 		}
+		next.push(makeMenu(id, title, disabled, visible, highlighted))
 		menus.value = next
-		if (id == activeId.value) {
-			forceClose()
-		} else if (removedIndex >= 0 && activeIndex.value > removedIndex) {
-			activeIndex.value = activeIndex.value - 1
-		}
+		return next.length - 1
 	}
 
 	function clearTimers() {
@@ -333,6 +311,28 @@
 		popupMounted.value = false
 		if (idx >= 0) {
 			emit('close', idx)
+		}
+	}
+
+	function unregisterItem(id : string) {
+		const next = [] as UTSJSONObject[]
+		var i = 0
+		var removedIndex = -1
+		while (i < menus.value.length) {
+			const cur = menus.value[i]
+			const mid = cur['id']
+			if (mid != null && ('' + mid) == id) {
+				removedIndex = i
+			} else {
+				next.push(cur)
+			}
+			i++
+		}
+		menus.value = next
+		if (id == activeId.value) {
+			forceClose()
+		} else if (removedIndex >= 0 && activeIndex.value > removedIndex) {
+			activeIndex.value = activeIndex.value - 1
 		}
 	}
 
@@ -401,14 +401,15 @@
 		}
 		query
 			.select('#' + menuDomId)
-			.boundingClientRect((rect : NodeInfo) => {
+			.boundingClientRect((rect : any | null) => {
 				if (token != measureToken) {
 					return
 				}
 				var top = fallback
 				if (rect != null) {
-					const t = rect.top
-					const h = rect.height
+					const info = rect as NodeInfo
+					const t = info.top
+					const h = info.height
 					if (t != null && h != null) {
 						top = (t as number) + (h as number)
 					} else if (t != null) {

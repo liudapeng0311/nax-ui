@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="nax-slider" :class="rootClass" :style="rootStyle">
 		<view v-if="showEdgeValue && edgeValuePosition == 'top'" class="nax-slider__edges nax-slider__edges--top">
 			<text class="nax-slider__edge-text">{{ startLabel }}</text>
@@ -210,6 +210,43 @@
 		return '' + rangeEnd.value
 	})
 
+	function readNum(v : number) : number {
+		return v as number
+	}
+
+	function stepDecimals(step : number) : number {
+		if (step <= 0) {
+			return 0
+		}
+		if (Math.abs(step - Math.round(step)) < 1e-10) {
+			return 0
+		}
+		// 用反复乘 10 探测小数位，避免依赖字符串
+		var x = Math.abs(step)
+		var d = 0
+		while (d < 8) {
+			const nearest = Math.round(x)
+			if (Math.abs(x - nearest) < 1e-8) {
+				break
+			}
+			x = x * 10.0
+			d++
+		}
+		return d
+	}
+
+	function formatDisplay(v : number) : string {
+		const step = readNum(props.step as number)
+		const digits = stepDecimals(step)
+		if (digits > 0) {
+			return v.toFixed(digits)
+		}
+		if (Math.abs(v - Math.round(v)) < 0.000001) {
+			return '' + Math.round(v)
+		}
+		return '' + v
+	}
+
 	const displayText = computed((): string => {
 		return formatDisplay(innerValue.value)
 	})
@@ -311,32 +348,7 @@
 		return style
 	})
 
-	function readNum(v : number) : number {
-		return v as number
-	}
-
 	/** step 小数位数（最多 8） */
-	function stepDecimals(step : number) : number {
-		if (step <= 0) {
-			return 0
-		}
-		if (Math.abs(step - Math.round(step)) < 1e-10) {
-			return 0
-		}
-		// 用反复乘 10 探测小数位，避免依赖字符串
-		var x = Math.abs(step)
-		var d = 0
-		while (d < 8) {
-			const nearest = Math.round(x)
-			if (Math.abs(x - nearest) < 1e-8) {
-				break
-			}
-			x = x * 10.0
-			d++
-		}
-		return d
-	}
-
 	function pow10(digits : number) : number {
 		var factor = 1.0
 		var i = 0
@@ -345,18 +357,6 @@
 			i++
 		}
 		return factor
-	}
-
-	function formatDisplay(v : number) : string {
-		const step = readNum(props.step as number)
-		const digits = stepDecimals(step)
-		if (digits > 0) {
-			return v.toFixed(digits)
-		}
-		if (Math.abs(v - Math.round(v)) < 0.000001) {
-			return '' + Math.round(v)
-		}
-		return '' + v
 	}
 
 	/**
@@ -503,9 +503,12 @@
 		}
 		query
 			.select('#' + railId)
-			.boundingClientRect((rect : NodeInfo) => {
-				if (rect != null && rect.width != null && rect.left != null) {
-					onRect(rect.left as number, rect.width as number)
+			.boundingClientRect((rect : any | null) => {
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.width != null && info.left != null) {
+						onRect(info.left as number, info.width as number)
+					}
 				}
 			})
 			.exec()
@@ -538,10 +541,13 @@
 			}
 			query
 				.select('#' + railId)
-				.boundingClientRect((rect : NodeInfo) => {
-					if (rect != null && rect.width != null && rect.left != null) {
-						trackLeft.value = rect.left as number
-						trackWidth.value = rect.width as number
+				.boundingClientRect((rect : any | null) => {
+					if (rect != null) {
+						const info = rect as NodeInfo
+						if (info.width != null && info.left != null) {
+							trackLeft.value = info.left as number
+							trackWidth.value = info.width as number
+						}
 					}
 				})
 				.exec()

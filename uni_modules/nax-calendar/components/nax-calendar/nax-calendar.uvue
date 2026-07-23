@@ -812,6 +812,85 @@
 		return cellHoverClass(cell)
 	}
 
+	function emitChange(_fromSwitch: boolean) {
+		if (props.mode == 'date') {
+			if (activeDate.value.length == 0) {
+				return
+			}
+			const parts = parseDateParts(activeDate.value)
+			if (parts.length < 3) {
+				return
+			}
+			const y = parts[0]
+			const m = parts[1]
+			const d = parts[2]
+			const days = getMonthDays(y, m)
+			const result = formatDate(y, m, d)
+			const payload = {
+				year: y,
+				month: m,
+				day: d,
+				days: days,
+				result: result,
+				week: getWeekText(result),
+				isToday: result == today.value
+			} as UTSJSONObject
+			emit('change', payload)
+			return
+		}
+		if (rangeStart.value.length == 0 || rangeEnd.value.length == 0) {
+			return
+		}
+		const sp = parseDateParts(rangeStart.value)
+		const ep = parseDateParts(rangeEnd.value)
+		if (sp.length < 3 || ep.length < 3) {
+			return
+		}
+		const payload = {
+			startYear: sp[0],
+			startMonth: sp[1],
+			startDay: sp[2],
+			startDate: rangeStart.value,
+			startWeek: getWeekText(rangeStart.value),
+			endYear: ep[0],
+			endMonth: ep[1],
+			endDay: ep[2],
+			endDate: rangeEnd.value,
+			endWeek: getWeekText(rangeEnd.value)
+		} as UTSJSONObject
+		emit('change', payload)
+	}
+
+	function onDayClick(d: number) {
+		if (props.readonly) {
+			return
+		}
+		if (isDisabledDay(d)) {
+			return
+		}
+		day.value = d
+		const date = buildDate(year.value, month.value, d)
+		if (props.mode == 'date') {
+			activeDate.value = date
+			if (isPageMode.value || props.checkinMode) {
+				emitChange(true)
+			}
+			return
+		}
+		const compareEarlier = rangeStart.value.length > 0 && dateToTime(date) < dateToTime(rangeStart.value)
+		if (isStart.value || compareEarlier || rangeStart.value.length == 0) {
+			rangeStart.value = date
+			rangeEnd.value = ''
+			isStart.value = false
+		} else {
+			rangeEnd.value = date
+			isStart.value = true
+			if (isPageMode.value) {
+				emitChange(true)
+			}
+		}
+	}
+
 	function onGridCellClick(cell: number) {
 		if (cell <= 0) {
 			return
@@ -982,83 +1061,36 @@
 		}
 	}
 
-	function onDayClick(d: number) {
-		if (props.readonly) {
-			return
-		}
-		if (isDisabledDay(d)) {
-			return
-		}
-		day.value = d
-		const date = buildDate(year.value, month.value, d)
-		if (props.mode == 'date') {
-			activeDate.value = date
-			if (isPageMode.value || props.checkinMode) {
-				emitChange(true)
-			}
-			return
-		}
-		const compareEarlier = rangeStart.value.length > 0 && dateToTime(date) < dateToTime(rangeStart.value)
-		if (isStart.value || compareEarlier || rangeStart.value.length == 0) {
-			rangeStart.value = date
-			rangeEnd.value = ''
-			isStart.value = false
-		} else {
-			rangeEnd.value = date
-			isStart.value = true
-			if (isPageMode.value) {
-				emitChange(true)
-			}
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
 		}
 	}
 
-	function emitChange(_fromSwitch: boolean) {
-		if (props.mode == 'date') {
-			if (activeDate.value.length == 0) {
-				return
+	function closePicker(emitUpdate: boolean) {
+		if (isPageMode.value) {
+			return
+		}
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) {
+				emit('update:show', false)
 			}
-			const parts = parseDateParts(activeDate.value)
-			if (parts.length < 3) {
-				return
+			return
+		}
+		if (!panelShow.value) {
+			if (emitUpdate) {
+				emit('update:show', false)
 			}
-			const y = parts[0]
-			const m = parts[1]
-			const d = parts[2]
-			const days = getMonthDays(y, m)
-			const result = formatDate(y, m, d)
-			const payload = {
-				year: y,
-				month: m,
-				day: d,
-				days: days,
-				result: result,
-				week: getWeekText(result),
-				isToday: result == today.value
-			} as UTSJSONObject
-			emit('change', payload)
 			return
 		}
-		if (rangeStart.value.length == 0 || rangeEnd.value.length == 0) {
-			return
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
 		}
-		const sp = parseDateParts(rangeStart.value)
-		const ep = parseDateParts(rangeEnd.value)
-		if (sp.length < 3 || ep.length < 3) {
-			return
-		}
-		const payload = {
-			startYear: sp[0],
-			startMonth: sp[1],
-			startDay: sp[2],
-			startDate: rangeStart.value,
-			startWeek: getWeekText(rangeStart.value),
-			endYear: ep[0],
-			endMonth: ep[1],
-			endDay: ep[2],
-			endDate: rangeEnd.value,
-			endWeek: getWeekText(rangeEnd.value)
-		} as UTSJSONObject
-		emit('change', payload)
+		emit('close')
 	}
 
 	function onConfirm() {
@@ -1106,13 +1138,6 @@
 		// #endif
 	}
 
-	function clearOpenDelayTimer() {
-		if (openDelayTimer >= 0) {
-			clearTimeout(openDelayTimer)
-			openDelayTimer = -1
-		}
-	}
-
 	function openPicker() {
 		if (isPageMode.value) {
 			return
@@ -1141,31 +1166,6 @@
 		}, openDelay)
 		emit('update:show', true)
 		emit('open')
-	}
-
-	function closePicker(emitUpdate: boolean) {
-		if (isPageMode.value) {
-			return
-		}
-		if (!rootMounted.value) {
-			panelShow.value = false
-			if (emitUpdate) {
-				emit('update:show', false)
-			}
-			return
-		}
-		if (!panelShow.value) {
-			if (emitUpdate) {
-				emit('update:show', false)
-			}
-			return
-		}
-		clearOpenDelayTimer()
-		panelShow.value = false
-		if (emitUpdate) {
-			emit('update:show', false)
-		}
-		emit('close')
 	}
 
 	function onOverlayLeave() {

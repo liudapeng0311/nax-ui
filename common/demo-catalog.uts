@@ -182,10 +182,12 @@ export function demoComponentList() : any[] {
 
 
 /**
- * 从任意对象读字段（兼容 App UTSJSONObject 与 小程序/Web 普通对象）。
- * 微信小程序端普通 object 没有 getString，必须走字段访问。
+ * 从任意对象读字段。
+ * - 小程序 / Web：普通 object 无 getString，必须点字段访问
+ * - App（Android/iOS/鸿蒙）：any 点属性会编译失败（找不到名称），此函数在 App 上不编译字段分支
  */
 function demoReadAnyField(item : any, key : string) : any | null {
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 	const o = item as any
 	if (key == 'name') {
 		return o.name
@@ -223,6 +225,7 @@ function demoReadAnyField(item : any, key : string) : any | null {
 	if (key == 'label') {
 		return o.label
 	}
+	// #endif
 	return null
 }
 
@@ -233,7 +236,16 @@ export function demoReadString(item : any | null, key : string) : string {
 	if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
 		return ''
 	}
-	// 1) 普通字段（MP / Web / 多数对象字面量）
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App：对象字面量 / query 多为 UTSJSONObject，用 API 读字段
+	const obj = item as UTSJSONObject
+	const s = obj.getString(key)
+	if (s != null && s.length > 0) {
+		return s
+	}
+	// #endif
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	// 小程序 / Web：普通对象字段访问
 	const field = demoReadAnyField(item, key)
 	if (field != null) {
 		if (typeof field == 'string') {
@@ -242,13 +254,6 @@ export function demoReadString(item : any | null, key : string) : string {
 		if (typeof field == 'number' || typeof field == 'boolean') {
 			return '' + field
 		}
-	}
-	// 2) App：UTSJSONObject API 兜底（事件 payload 等）
-	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	const obj = item as UTSJSONObject
-	const s = obj.getString(key)
-	if (s != null && s.length > 0) {
-		return s
 	}
 	// #endif
 	return ''
@@ -264,6 +269,14 @@ export function demoReadBool(item : any | null, key : string) : boolean {
 	if (typeof item == 'string' || typeof item == 'number') {
 		return false
 	}
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	const obj = item as UTSJSONObject
+	const b = obj.getBoolean(key)
+	if (b != null) {
+		return b as boolean
+	}
+	// #endif
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 	const field = demoReadAnyField(item, key)
 	if (field != null) {
 		if (typeof field == 'boolean') {
@@ -276,12 +289,6 @@ export function demoReadBool(item : any | null, key : string) : boolean {
 		if (typeof field == 'number') {
 			return (field as number) != 0
 		}
-	}
-	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	const obj = item as UTSJSONObject
-	const b = obj.getBoolean(key)
-	if (b != null) {
-		return b as boolean
 	}
 	// #endif
 	return false

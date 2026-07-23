@@ -451,12 +451,15 @@
 			// 闁繑妲戝ù瀣啍閼哄倻鍋?
 			query
 				.select('#' + measureId)
-				.boundingClientRect((rect : NodeInfo) => {
-					if (rect != null && rect.width != null) {
-						const w = rect.width as number
-						if (w > 1) {
-							applyMeasuredWidth(w)
-							return
+				.boundingClientRect((rect : any | null) => {
+					if (rect != null) {
+						const info = rect as NodeInfo
+						if (info.width != null) {
+							const w = info.width as number
+							if (w > 1) {
+								applyMeasuredWidth(w)
+								return
+							}
 						}
 					}
 				})
@@ -464,11 +467,14 @@
 			// 妤﹁儻鎸嬮崶鐐衡偓鈧敍姘ゴ缁楊兛绔村▓闈涘讲鐟欎焦鏋冨?
 			query
 				.select('#' + segMeasureId)
-				.boundingClientRect((rect2 : NodeInfo) => {
-					if (rect2 != null && rect2.width != null) {
-						const w2 = rect2.width as number
-						if (w2 > 1) {
-							applyMeasuredWidth(w2)
+				.boundingClientRect((rect2 : any | null) => {
+					if (rect2 != null) {
+						const info2 = rect2 as NodeInfo
+						if (info2.width != null) {
+							const w2 = info2.width as number
+							if (w2 > 1) {
+								applyMeasuredWidth(w2)
+							}
 						}
 					}
 				})

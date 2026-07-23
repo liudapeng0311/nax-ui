@@ -366,7 +366,7 @@
 	let loadingTimerId = -1
 
 	const loadingSpinStyle = computed((): string => {
-		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg')
+		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
 	})
 
 	function stopLoadingSpin() {
@@ -410,7 +410,9 @@
 		}
 		// 短震动：App / 微信小程序等端支持，Web 忽略
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
-		uni.vibrateShort({})
+		uni.vibrateShort({
+			type: 'light'
+		})
 		// #endif
 	}
 

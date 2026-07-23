@@ -596,6 +596,35 @@
 		return props.mask && props.maskClosable && props.maskCloseAble
 	}
 
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function closeKeyboard(emitUpdate: boolean) {
+		clearBackspaceTimer()
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		if (!panelShow.value) {
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+	}
+
 	function onMaskClick() {
 		if (!canCloseByMask()) {
 			return
@@ -642,13 +671,6 @@
 		// #endif
 	}
 
-	function clearOpenDelayTimer() {
-		if (openDelayTimer >= 0) {
-			clearTimeout(openDelayTimer)
-			openDelayTimer = -1
-		}
-	}
-
 	function openKeyboard() {
 		if (rootMounted.value && panelShow.value) {
 			emit('update:show', true)
@@ -679,28 +701,6 @@
 		}, openDelay)
 		emit('update:show', true)
 		emit('open')
-	}
-
-	function closeKeyboard(emitUpdate: boolean) {
-		clearBackspaceTimer()
-		if (!rootMounted.value) {
-			panelShow.value = false
-			if (emitUpdate) {
-				emit('update:show', false)
-			}
-			return
-		}
-		if (!panelShow.value) {
-			if (emitUpdate) {
-				emit('update:show', false)
-			}
-			return
-		}
-		clearOpenDelayTimer()
-		panelShow.value = false
-		if (emitUpdate) {
-			emit('update:show', false)
-		}
 	}
 
 	function onOverlayLeave() {
