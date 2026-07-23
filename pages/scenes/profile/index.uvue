@@ -1,0 +1,205 @@
+﻿<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="个人中心"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<view class="header">
+					<nax-avatar text="NA" size="64" color="#18a058"></nax-avatar>
+					<view class="header__info">
+						<text class="header__name">演示用户</text>
+						<text class="header__id">ID 10086 · 普通会员</text>
+					</view>
+					<nax-button size="sm" type="primary" variant="secondary" label="编辑" @click="onEdit"></nax-button>
+				</view>
+
+				<view class="stats">
+					<view class="stats__item">
+						<text class="stats__num">12</text>
+						<text class="stats__label">收藏</text>
+					</view>
+					<view class="stats__line"></view>
+					<view class="stats__item">
+						<text class="stats__num">3</text>
+						<text class="stats__label">优惠券</text>
+					</view>
+					<view class="stats__line"></view>
+					<view class="stats__item">
+						<text class="stats__num">98</text>
+						<text class="stats__label">积分</text>
+					</view>
+				</view>
+
+				<nax-cell-group inset title="账户">
+					<nax-cell title="我的订单" icon="star" is-link value="查看全部" @click="goOrder"></nax-cell>
+					<nax-cell title="地址管理" icon="home" is-link @click="onTip('地址管理')"></nax-cell>
+					<nax-cell title="消息通知" icon="info" is-link value="2 条未读" @click="onTip('消息通知')"></nax-cell>
+				</nax-cell-group>
+
+				<view class="gap"></view>
+
+				<nax-cell-group inset title="通用">
+					<nax-cell title="深色模式" icon="settings">
+						<template #right>
+							<nax-switch :model-value="darkMode" @change="onDarkChange"></nax-switch>
+						</template>
+					</nax-cell>
+					<nax-cell title="意见反馈" icon="edit" is-link @click="goFeedback"></nax-cell>
+					<nax-cell title="关于 nax-ui" icon="info" is-link value="v1.0.0" @click="onAbout"></nax-cell>
+				</nax-cell-group>
+
+				<view class="logout">
+					<nax-button block type="error" variant="secondary" label="退出登录（演示）" @click="onLogout"></nax-button>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+	import { openDemoPage } from '@/common/demo-catalog.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	function onDarkChange(val : boolean) {
+		setDemoDarkMode(val)
+		darkMode.value = val
+	}
+
+	function onEdit() {
+		uni.showToast({ title: '编辑资料（演示）', icon: 'none' })
+	}
+
+	function onTip(name : string) {
+		uni.showToast({ title: name + '（演示）', icon: 'none' })
+	}
+
+	function onAbout() {
+		uni.showToast({ title: 'nax-ui 组件演示工程', icon: 'none' })
+	}
+
+	function onLogout() {
+		uni.showToast({ title: '已模拟退出', icon: 'none' })
+	}
+
+	function goOrder() {
+		openDemoPage('/pages/scenes/order/index')
+	}
+
+	function goFeedback() {
+		openDemoPage('/pages/scenes/feedback/index')
+	}
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px 12px 32px 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.header {
+		flex-direction: row;
+		align-items: center;
+		padding: 18px 16px;
+		margin-bottom: 12px;
+		border-radius: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.header__info {
+		flex: 1;
+		flex-direction: column;
+		margin-left: 12px;
+		margin-right: 8px;
+	}
+
+	.header__name {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 4px;
+	}
+
+	.header__id {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.stats {
+		flex-direction: row;
+		align-items: center;
+		padding: 14px 8px;
+		margin-bottom: 14px;
+		border-radius: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.stats__item {
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.stats__num {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--nax-color-primary, #18a058);
+		margin-bottom: 2px;
+	}
+
+	.stats__label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.stats__line {
+		width: 1px;
+		height: 28px;
+		background-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.gap {
+		height: 14px;
+	}
+
+	.logout {
+		margin-top: 24px;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+</style>
+

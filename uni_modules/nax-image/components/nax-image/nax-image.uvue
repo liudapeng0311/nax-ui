@@ -18,7 +18,7 @@
 		<view v-if="showLoadingLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="loading">
 				<view class="nax-image__status-icon">
-					<nax-icon name="image" :size="iconSizeName" color="#c2c2c2"></nax-icon>
+					<nax-icon name="image" :size="iconSizeName" color="#e5e5ea"></nax-icon>
 				</view>
 				<text v-if="loadingText.length > 0" class="nax-image__status-text">{{ loadingText }}</text>
 			</slot>
@@ -27,7 +27,7 @@
 		<view v-if="showErrorLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="error">
 				<view class="nax-image__status-icon">
-					<nax-icon name="image-off" :size="iconSizeName" color="#c2c2c2"></nax-icon>
+					<nax-icon name="image-off" :size="iconSizeName" color="#e5e5ea"></nax-icon>
 				</view>
 				<text v-if="errorText.length > 0" class="nax-image__status-text">{{ errorText }}</text>
 			</slot>
@@ -377,7 +377,7 @@
 	.nax-image__status-text {
 		margin-top: 8px;
 		font-size: var(--nax-font-size-xs, 12px);
-		color: var(--nax-color-text-placeholder, #c2c2c2);
+		color: var(--nax-color-text-placeholder, #e5e5ea);
 		lines: 1;
 	}
 

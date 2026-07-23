@@ -143,7 +143,7 @@
 		},
 		placeholderStyle: {
 			type: String,
-			default: 'color: #c2c2c2;'
+			default: 'color: #e5e5ea;'
 		},
 		confirmType: {
 			type: String,
@@ -398,7 +398,7 @@
 
 	const iconColor = computed((): string => {
 		if (props.disabled) {
-			return '#c2c2c2'
+			return '#e5e5ea'
 		}
 		return '#767c82'
 	})
@@ -416,7 +416,7 @@
 		if (props.placeholderStyle.length > 0) {
 			return props.placeholderStyle
 		}
-		return 'color: #c2c2c2;'
+		return 'color: #e5e5ea;'
 	})
 
 	function isDigitHeight(value: string): boolean {
@@ -662,7 +662,7 @@
 		border-radius: var(--nax-radius-md, 3px);
 		border-width: 0;
 		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #f0f0f3);
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		box-sizing: border-box;
 		/* #endif */
@@ -773,7 +773,7 @@
 	}
 	/* #endif */
 	.nax-input__field--disabled {
-		color: var(--nax-color-text-disabled, #c2c2c2);
+		color: var(--nax-color-text-disabled, #e5e5ea);
 	}
 
 	.nax-input__field--align-left {

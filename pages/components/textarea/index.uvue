@@ -1,13 +1,18 @@
 <template>
-	<scroll-view
-		style="flex:1"
-		scroll-y="true"
-		:scroll-top="scrollTop"
-		:scroll-with-animation="false"
-		@scroll="onPageScroll"
-	>
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-textarea"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view
+			class="page-scroll"
+			scroll-y="true"
+			:scroll-top="scrollTop"
+			:scroll-with-animation="false"
+			@scroll="onPageScroll"
+		>
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-textarea</text>
 			<text class="page__desc">多行输入（对齐 uView Pro Textarea 主能力，不含 formatter）</text>
 
 			<view id="sec-basic" class="section">
@@ -176,6 +181,7 @@
 			<!-- #endif -->
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -435,6 +441,18 @@
 </script>
 
 <style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg, #ffffff);

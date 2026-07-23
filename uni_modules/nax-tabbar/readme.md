@@ -95,6 +95,8 @@ function onClick(index: number) {
 
 ## 与原生 tabBar
 
-- 本组件是 **自定义 tab 栏 UI**，可在任意页面使用。
-- 若需多页原生 tab 栈，仍配置 `pages.json` tabBar；自定义栏可配合隐藏原生栏使用。
-- 官方建议自定义 tab 页内容用 `visibility` 切换保活，而非反复 `v-if` 销毁。
+- 本组件是 **自定义 tab 栏 UI**，可在任意页面使用；**不内置** `switchTab` / `reLaunch`。
+- **多页秒切（推荐）**：`pages.json` 登记原生 `tabBar` → 业务用 `uni.switchTab` 互切 → 各 Tab 页 `uni.hideTabBar` → 底部渲染本组件。
+- **切勿**对主 Tab 页默认 `reLaunch`（整页重建，鸿蒙/App 上可感知数百毫秒～1s 延迟）。
+- 单页方案：同一容器内多区块用 CSS `visibility` 保活，避免反复 `v-if` 销毁。
+- 完整步骤、传参与检查清单：**[docs/tabbar-routing.md](../../docs/tabbar-routing.md)**。

@@ -1,7 +1,12 @@
 ﻿<template>
-	<scroll-view style="flex:1" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-rate"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-rate</text>
 			<text class="page__desc">评分（对齐 uView Pro Rate 主能力）</text>
 
 			<view class="section">
@@ -46,7 +51,7 @@
 					<nax-rate
 						v-model="colorVal"
 						active-color="#d03050"
-						inactive-color="#e0e0e6"
+						inactive-color="#f0f0f3"
 						:gutter="12"
 					></nax-rate>
 					<text class="row__text">error 红 · gutter=12 · {{ colorVal }}</text>
@@ -115,6 +120,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -160,6 +166,19 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
@@ -185,7 +204,7 @@
 		border-radius: var(--nax-radius-md, 3px);
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #f0f0f3);
 	}
 
 	.section__title {

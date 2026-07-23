@@ -1,8 +1,12 @@
 ﻿<template>
 	<view class="page-root">
+		<nax-nav-bar
+			title="nax-dropdown"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
 			<view class="nax-theme page" :class="themeExtraClass">
-				<text class="page__title">nax-dropdown</text>
 				<text class="page__desc">筛选栏式下拉菜单：多 Tab + 默认单选 / 自定义面板；token 主题；选中自动高亮。</text>
 
 				<view class="section">
@@ -365,7 +369,7 @@
 	.filter-panel--gap {
 		border-top-width: 0.5px;
 		border-top-style: solid;
-		border-top-color: var(--nax-color-border, #e0e0e6);
+		border-top-color: var(--nax-color-border, #f0f0f3);
 	}
 
 	.filter-panel__label {
@@ -389,7 +393,7 @@
 		padding: 14px 12px;
 		border-bottom-width: 0.5px;
 		border-bottom-style: solid;
-		border-bottom-color: var(--nax-color-border, #e0e0e6);
+		border-bottom-color: var(--nax-color-border, #f0f0f3);
 		flex-direction: row;
 	}
 

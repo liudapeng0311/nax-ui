@@ -1,7 +1,12 @@
 <template>
-	<scroll-view style="flex:1" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-virtual-list"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-virtual-list</text>
 			<text class="page__desc">固定行高虚拟列表：只渲染可视区 + 缓冲行。适合一次挂大量数据。</text>
 
 			<view class="section">
@@ -127,6 +132,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -416,6 +422,19 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
@@ -507,7 +526,7 @@
 		background-color: var(--nax-color-bg, #ffffff);
 		border-bottom-width: 1px;
 		border-bottom-style: solid;
-		border-bottom-color: var(--nax-color-divider, #efeff5);
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
 	}
 
 	.row-item--alt {
@@ -533,7 +552,7 @@
 
 	.row-item__index {
 		font-size: 12px;
-		color: var(--nax-color-text-tertiary, #c2c2c2);
+		color: var(--nax-color-text-tertiary, #e5e5ea);
 		margin-left: 8px;
 	}
 </style>

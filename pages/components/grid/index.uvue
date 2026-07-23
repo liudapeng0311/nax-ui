@@ -1,7 +1,12 @@
 <template>
-	<scroll-view style="flex:1" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-grid"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-grid</text>
 			<text class="page__desc">宫格布局：列数、边框、间距、对齐、点击与徽标组合。</text>
 
 			<view class="section">
@@ -170,6 +175,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -203,6 +209,19 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
@@ -242,7 +261,7 @@
 		overflow: hidden;
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #f0f0f3);
 	}
 
 	.block--plain {

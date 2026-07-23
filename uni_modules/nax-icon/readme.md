@@ -83,7 +83,8 @@ chevron-left, chevron-right, chevron-up, chevron-down
 search, loading, info, warning, success, error
 user, home, more, edit, delete, star, heart
 settings, eye, eye-off, copy, share, image, image-off, loader, loader-4, square, circle, square-check,
-file-off, notes-off, database-off, message-off
+file-off, notes-off, database-off, message-off,
+category, category-filled, map-pin, map-pin-filled
 ```
 
 完整映射见：`assets/icons/catalog.json`、`icons/mapping.json`。
@@ -98,7 +99,7 @@ file-off, notes-off, database-off, message-off
 
 ## 重新生成图标映射
 
-1. 编辑 `assets/icons/catalog.json`（`name` + `tabler`）
+1. 编辑 `assets/icons/catalog.json`（`name` + `tabler`；实心图标加 `"filled": true`）
 2. 准备 Tabler 完整字体到 `static/nax-icon.source.ttf`（`@tabler/icons-webfont` 的 `dist/fonts/tabler-icons.ttf`）
 3. 确保 `assets/icons/tabler-codepoints.json` 含对应 codepoint
 4. 运行：
@@ -113,7 +114,7 @@ node scripts/build-icons.mjs
 
 ## 说明
 
-- 当前分发字体为 **41 图标子集**（约 16KB），不是完整 Tabler font。
+- 当前分发字体为 **45 图标子集**（约 16KB），不是完整 Tabler font。
 - 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序。
 - 组件 API 只暴露语义化 `name`。
 - 图标源：[Tabler Icons](https://tabler.io/icons)（MIT License）。

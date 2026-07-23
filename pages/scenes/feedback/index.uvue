@@ -1,0 +1,209 @@
+﻿<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="意见反馈"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<nax-alert
+					type="info"
+					title="欢迎反馈"
+					description="你的建议会帮助 nax-ui 变得更好。演示提交不会上传数据。"
+				></nax-alert>
+
+				<view class="block">
+					<text class="label">反馈类型</text>
+					<view class="tags">
+						<view
+							v-for="(item, index) in typeList"
+							:key="index"
+							class="tag-wrap"
+						>
+							<nax-tag
+								:type="typeIndex == index ? 'primary' : 'default'"
+								:variant="typeIndex == index ? 'solid' : 'light'"
+								:label="item"
+								checkable
+								:checked="typeIndex == index"
+								@click="onPickType(index)"
+							></nax-tag>
+						</view>
+					</view>
+				</view>
+
+				<view class="block">
+					<text class="label">联系方式</text>
+					<nax-input
+						v-model="contact"
+						placeholder="手机号 / 邮箱（选填）"
+						clearable
+					></nax-input>
+				</view>
+
+				<view class="block">
+					<text class="label">满意度</text>
+					<view class="rate-row">
+						<nax-rate v-model="score"></nax-rate>
+						<text class="rate-text">{{ scoreText }}</text>
+					</view>
+				</view>
+
+				<view class="block">
+					<text class="label">问题描述</text>
+					<nax-textarea
+						v-model="content"
+						placeholder="请描述你遇到的问题或建议（至少 5 个字）"
+						:maxlength="200"
+						count
+					></nax-textarea>
+				</view>
+
+				<view class="block">
+					<nax-checkbox v-model="agree" label="允许在后续版本中联系我了解更多细节"></nax-checkbox>
+				</view>
+
+				<view class="actions">
+					<nax-button block type="primary" label="提交反馈" :loading="submitting" @click="onSubmit"></nax-button>
+					<view class="actions__gap"></view>
+					<nax-button block variant="secondary" label="重置" @click="onReset"></nax-button>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const typeList = ['功能建议', '体验问题', '缺陷反馈', '其他'] as string[]
+	const typeIndex = ref(0)
+	const contact = ref('')
+	const score = ref(5)
+	const content = ref('')
+	const agree = ref(true)
+	const submitting = ref(false)
+
+	const scoreText = computed((): string => {
+		return score.value.toString() + ' 分'
+	})
+
+	function onPickType(index : number) {
+		typeIndex.value = index
+	}
+
+	function onReset() {
+		typeIndex.value = 0
+		contact.value = ''
+		score.value = 5
+		content.value = ''
+		agree.value = true
+	}
+
+	function onSubmit() {
+		const text = content.value.trim()
+		if (text.length < 5) {
+			uni.showToast({
+				title: '请至少填写 5 个字',
+				icon: 'none'
+			})
+			return
+		}
+		if (submitting.value) {
+			return
+		}
+		submitting.value = true
+		setTimeout(() => {
+			submitting.value = false
+			uni.showToast({
+				title: '提交成功（演示）',
+				icon: 'success'
+			})
+			content.value = ''
+		}, 800)
+	}
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px;
+		padding-bottom: 36px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.block {
+		flex-direction: column;
+		margin-top: 16px;
+		padding: 14px;
+		border-radius: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.label {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.tags {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.tag-wrap {
+		margin-right: 8px;
+		margin-bottom: 8px;
+	}
+
+	.rate-row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.rate-text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-left: 10px;
+	}
+
+	.actions {
+		flex-direction: column;
+		margin-top: 20px;
+	}
+
+	.actions__gap {
+		height: 10px;
+	}
+</style>
+

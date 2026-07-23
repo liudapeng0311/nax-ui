@@ -15,6 +15,11 @@
   <nax-cell title="消息通知" is-link></nax-cell>
   <nax-cell title="隐私" is-link></nax-cell>
 </nax-cell-group>
+
+<!-- inset 外框：none 无边框 / horizontal 仅上下 / vertical 仅左右 -->
+<nax-cell-group title="无左右边框" inset inset-border="horizontal">
+  <nax-cell title="仅上下描边" is-link></nax-cell>
+</nax-cell-group>
 ```
 
 ## nax-cell Props
@@ -62,6 +67,7 @@
 |------|------|------|------|
 | title | string | `''` | 分组标题 |
 | inset | boolean | `false` | 圆角卡片内嵌 |
+| insetBorder | string | `all` | inset 外框：`all` / `none` / `horizontal` / `vertical` |
 | border | boolean | `true` | 子 cell 底部分割线 |
 | custom-class | string | `''` | 根节点扩展 class |
 

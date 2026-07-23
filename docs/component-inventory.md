@@ -46,7 +46,7 @@
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
 | 单元格 | `nax-cell` | P0 | 设置项/列表行基础 | `title` `label` `value` `is-link` `border` / `click` **done** |
-| 单元格组 | `nax-cell-group` | P0 | Cell 分组容器 | `title` `inset` `border` **done** |
+| 单元格组 | `nax-cell-group` | P0 | Cell 分组容器 | `title` `inset` `insetBorder` `border` **done** |
 | 卡片 | `nax-card` | P1 | 内容承载 | `title` `extra` `bordered` `size` `segmented` 插槽 `header` `footer` `cover` / **done** |
 
 ### 2.3 展示 / 状态
@@ -136,9 +136,9 @@
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
 | `nax-text` | done | 插件包 `uni_modules/nax-text`；对齐 uView Pro Text；鸿蒙省略用 `#ifdef APP-HARMONY` 双写 lines/宽度约束 |
-| `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（40）；含 file/notes/database/message-off |
+| `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（45）；含 `category`/`map-pin` 及 filled 变体 |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
-| `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区（App JS / Web·MP CSS env） |
+| `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区；**演示宿主**用原生 tabBar+`switchTab`+`hideTabBar` 保活（见 `docs/tabbar-routing.md`） |
 | `nax-tabs` | done | 插件包 `uni_modules/nax-tabs`；list+v-model；可滚动/均分；`scrollAlign` left/center；指示条测量；徽标/红点/禁用；CSS sticky 可选；**不做**独立 tabsSwiper，全屏联动见 demo `pages/components/tabs-swiper` |
 | `nax-dropdown` | done | 插件包 `uni_modules/nax-dropdown`；`nax-dropdown` + `nax-dropdown-item`；默认 options 单选；slot 自定义面板；遮罩关闭；fixed 吸顶；选中自动高亮；`displaySelected`；demo `pages/components/dropdown` |
 | `nax-nav-bar` | done | 插件包 `uni_modules/nax-nav-bar`；状态栏安全区 + fixed 占位 + 返回栈兜底 + 微信胶囊预留；`type` default/primary |

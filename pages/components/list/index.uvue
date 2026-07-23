@@ -1,7 +1,12 @@
 <template>
-	<scroll-view style="flex:1" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-list"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-list</text>
 			<text class="page__desc">滚动列表壳：触底加载、下拉刷新、空/错/底态。行内容用插槽自管（示例用 nax-cell）。</text>
 
 			<view class="section">
@@ -130,6 +135,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -397,6 +403,19 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);

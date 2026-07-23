@@ -328,7 +328,7 @@
 	})
 
 	const arrowColor = computed((): string => {
-		if (props.disabled) return 'var(--nax-color-text-disabled, #c2c2c2)'
+		if (props.disabled) return 'var(--nax-color-text-disabled, #e5e5ea)'
 		return 'var(--nax-color-text-secondary, #767c82)'
 	})
 
@@ -340,7 +340,7 @@
 	const confirmTextStyle = computed((): string => {
 		if (moving.value) {
 			if (props.cancelColor.length > 0) return 'color:' + props.cancelColor + ';'
-			return 'color:var(--nax-color-text-disabled, #c2c2c2);'
+			return 'color:var(--nax-color-text-disabled, #e5e5ea);'
 		}
 		if (props.confirmColor.length > 0) return 'color:' + props.confirmColor + ';'
 		return 'color:var(--nax-color-primary, #18a058);'
@@ -1222,7 +1222,7 @@
 	.nax-datetime-picker__trigger--border {
 		border-width: var(--nax-border-width, 1px);
 		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #f0f0f3);
 	}
 
 	.nax-datetime-picker__trigger--disabled { opacity: 0.5; }
@@ -1242,8 +1242,8 @@
 
 	.nax-datetime-picker__trigger--sm .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-sm, 14px); }
 	.nax-datetime-picker__trigger--lg .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-lg, 18px); }
-	.nax-datetime-picker__trigger-text--placeholder { color: var(--nax-color-text-placeholder, #c2c2c2); }
-	.nax-datetime-picker__trigger-text--disabled { color: var(--nax-color-text-disabled, #c2c2c2); }
+	.nax-datetime-picker__trigger-text--placeholder { color: var(--nax-color-text-placeholder, #e5e5ea); }
+	.nax-datetime-picker__trigger-text--disabled { color: var(--nax-color-text-disabled, #e5e5ea); }
 
 	.nax-datetime-picker__trigger-arrow {
 		flex-direction: row;
@@ -1315,7 +1315,7 @@
 		height: 48px;
 		border-bottom-width: 1px;
 		border-bottom-style: solid;
-		border-bottom-color: var(--nax-color-divider, #efeff5);
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
 	}
 
 	.nax-datetime-picker__btn {

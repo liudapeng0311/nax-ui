@@ -1,0 +1,367 @@
+/**
+ * 演示工程：组件目录（分组 + 路由）
+ * 仅宿主使用，不进入 nax-ui 组件包。
+ * 图标名需落在 nax-icon 当前子集内。
+ */
+
+export function demoTabPaths() : string[] {
+	return [
+		'/pages/index/index',
+		'/pages/catalog/index',
+		'/pages/scenes/index',
+		'/pages/mine/index'
+	] as string[]
+}
+
+export function demoTabList() : any[] {
+	return [
+		{ text: '首页', icon: 'home' },
+		{ text: '组件', icon: 'category' },
+		{ text: '场景', icon: 'star' },
+		{ text: '我的', icon: 'user' }
+	] as any[]
+}
+
+/**
+ * 演示宿主 Tab 路由（多页 + 自定义 nax-tabbar）
+ *
+ * 性能关键：四个主 Tab 已注册为 pages.json 原生 tabBar 页，互切用 switchTab，
+ * 系统保活页面实例，鸿蒙/App 上接近原生秒切。切勿对 Tab 页 reLaunch/redirectTo。
+ *
+ * 视觉：原生 tabBar 仅作路由容器，业务 UI 用 nax-tabbar；各 Tab 页 onShow 调 hideDemoNativeTabBar。
+ * 方案说明见 docs/tabbar-routing.md
+ */
+
+/** switchTab 不带 query：跨页打开组件分类时用模块暂存，catalog onShow 消费 */
+var pendingCatalogTab = -1
+
+export function setPendingCatalogTab(index : number) {
+	if (index < 0 || index > 4) {
+		pendingCatalogTab = -1
+		return
+	}
+	pendingCatalogTab = index
+}
+
+/** 取出并清空 pending 分类下标；无则 -1 */
+export function takePendingCatalogTab() : number {
+	const v = pendingCatalogTab
+	pendingCatalogTab = -1
+	return v
+}
+
+/** 隐藏原生 tabBar（仅 Tab 页可调；失败忽略，避免非 Tab 页报错刷屏） */
+export function hideDemoNativeTabBar() {
+	uni.hideTabBar({
+		animation: false
+	})
+}
+
+export function switchDemoTab(index : number) {
+	const paths = demoTabPaths()
+	if (index < 0 || index >= paths.length) {
+		return
+	}
+	uni.switchTab({
+		url: paths[index]
+	})
+}
+
+export function openDemoPage(path : string) {
+	if (path.length == 0) {
+		return
+	}
+	uni.navigateTo({
+		url: path
+	})
+}
+
+/** 分类：全部 / 基础 / 表单 / 布局 / 反馈 */
+export function demoCategoryTabs() : any[] {
+	return [
+		{ name: '全部' },
+		{ name: '基础' },
+		{ name: '表单' },
+		{ name: '布局' },
+		{ name: '反馈' }
+	] as any[]
+}
+
+export function demoCategoryKey(index : number) : string {
+	if (index == 1) {
+		return 'base'
+	}
+	if (index == 2) {
+		return 'form'
+	}
+	if (index == 3) {
+		return 'layout'
+	}
+	if (index == 4) {
+		return 'feedback'
+	}
+	return 'all'
+}
+
+/**
+ * 组件条目字段：
+ * name 中文名
+ * tag 组件标签
+ * path 演示页
+ * icon nax-icon 名
+ * group base|form|layout|feedback
+ * hot 是否热门
+ */
+/** 组件目录静态表：缓存避免每次 filter 重建 */
+var cachedDemoComponentList : any[] | null = null
+
+export function demoComponentList() : any[] {
+	if (cachedDemoComponentList != null) {
+		return cachedDemoComponentList as any[]
+	}
+	const list = [
+		// 基础
+		{ name: '文本', tag: 'nax-text', path: '/pages/components/text/index', icon: 'notes-off', group: 'base', hot: true },
+		{ name: '按钮', tag: 'nax-button', path: '/pages/components/button/index', icon: 'square-check', group: 'base', hot: true },
+		{ name: '图标', tag: 'nax-icon', path: '/pages/components/icon/index', icon: 'star', group: 'base', hot: true },
+		{ name: '标签', tag: 'nax-tag', path: '/pages/components/tag/index', icon: 'more', group: 'base', hot: false },
+		{ name: '徽标', tag: 'nax-badge', path: '/pages/components/badge/index', icon: 'warning', group: 'base', hot: false },
+		{ name: '头像', tag: 'nax-avatar', path: '/pages/components/avatar/index', icon: 'user', group: 'base', hot: false },
+		{ name: '图片', tag: 'nax-image', path: '/pages/image/index', icon: 'image', group: 'base', hot: false },
+		{ name: '上传', tag: 'nax-upload', path: '/pages/upload/index', icon: 'share', group: 'base', hot: false },
+		// 表单
+		{ name: '输入框', tag: 'nax-input', path: '/pages/components/input/index', icon: 'edit', group: 'form', hot: true },
+		{ name: '搜索框', tag: 'nax-search', path: '/pages/components/search/index', icon: 'search', group: 'form', hot: true },
+		{ name: '表单', tag: 'nax-form', path: '/pages/components/form/index', icon: 'notes-off', group: 'form', hot: false },
+		{ name: '复选框', tag: 'nax-checkbox', path: '/pages/components/checkbox/index', icon: 'square-check', group: 'form', hot: false },
+		{ name: '单选框', tag: 'nax-radio', path: '/pages/components/radio/index', icon: 'circle', group: 'form', hot: false },
+		{ name: '开关', tag: 'nax-switch', path: '/pages/components/switch/index', icon: 'success', group: 'form', hot: true },
+		{ name: '滑动选择', tag: 'nax-slider', path: '/pages/components/slider/index', icon: 'minus', group: 'form', hot: false },
+		{ name: '步进器', tag: 'nax-number-box', path: '/pages/components/number-box/index', icon: 'plus', group: 'form', hot: false },
+		{ name: '评分', tag: 'nax-rate', path: '/pages/components/rate/index', icon: 'star', group: 'form', hot: false },
+		{ name: '多行输入', tag: 'nax-textarea', path: '/pages/components/textarea/index', icon: 'edit', group: 'form', hot: false },
+		{ name: '列选择器', tag: 'nax-select', path: '/pages/components/select/index', icon: 'chevron-down', group: 'form', hot: false },
+		{ name: '日历', tag: 'nax-calendar', path: '/pages/components/calendar/index', icon: 'notes-off', group: 'form', hot: false },
+		{ name: '时间选择', tag: 'nax-datetime-picker', path: '/pages/components/datetime-picker/index', icon: 'more', group: 'form', hot: false },
+		{ name: '键盘', tag: 'nax-keyboard', path: '/pages/components/keyboard/index', icon: 'edit', group: 'form', hot: false },
+		// 布局
+		{ name: '线条', tag: 'nax-line', path: '/pages/components/line/index', icon: 'minus', group: 'layout', hot: false },
+		{ name: '分割线', tag: 'nax-divider', path: '/pages/components/divider/index', icon: 'minus', group: 'layout', hot: false },
+		{ name: '卡片', tag: 'nax-card', path: '/pages/components/card/index', icon: 'square', group: 'layout', hot: true },
+		{ name: '单元格', tag: 'nax-cell', path: '/pages/components/cell/index', icon: 'more', group: 'layout', hot: true },
+		{ name: '间距', tag: 'nax-space', path: '/pages/components/space/index', icon: 'plus', group: 'layout', hot: false },
+		{ name: '空状态', tag: 'nax-empty', path: '/pages/components/empty/index', icon: 'database-off', group: 'layout', hot: false },
+		{ name: '列表', tag: 'nax-list', path: '/pages/components/list/index', icon: 'more', group: 'layout', hot: false },
+		{ name: '虚拟列表', tag: 'nax-virtual-list', path: '/pages/components/virtual-list/index', icon: 'more', group: 'layout', hot: false },
+		{ name: '滑动操作', tag: 'nax-swipe-action', path: '/pages/components/swipe-action/index', icon: 'arrow-left', group: 'layout', hot: false },
+		{ name: '宫格', tag: 'nax-grid', path: '/pages/components/grid/index', icon: 'square', group: 'layout', hot: true },
+		{ name: '轮播', tag: 'nax-swiper', path: '/pages/components/swiper/index', icon: 'image', group: 'layout', hot: true },
+		{ name: '底部标签栏', tag: 'nax-tabbar', path: '/pages/components/tabbar/index', icon: 'home', group: 'layout', hot: true },
+		{ name: '标签页', tag: 'nax-tabs', path: '/pages/components/tabs/index', icon: 'more', group: 'layout', hot: true },
+		{ name: '全屏选项卡配方', tag: 'tabs + swiper', path: '/pages/components/tabs-swiper/index', icon: 'image', group: 'layout', hot: false },
+		{ name: '导航栏', tag: 'nax-nav-bar', path: '/pages/components/nav-bar/index', icon: 'home', group: 'layout', hot: true },
+		{ name: '下拉菜单', tag: 'nax-dropdown', path: '/pages/components/dropdown/index', icon: 'chevron-down', group: 'layout', hot: false },
+		// 反馈
+		{ name: '过渡动画', tag: 'nax-transition', path: '/pages/components/transition/index', icon: 'arrow-right', group: 'feedback', hot: false },
+		{ name: '弹出容器', tag: 'nax-picker', path: '/pages/components/picker/index', icon: 'more', group: 'feedback', hot: false },
+		{ name: '动作面板', tag: 'nax-action-sheet', path: '/pages/components/action-sheet/index', icon: 'more', group: 'feedback', hot: false },
+		{ name: '警告提示', tag: 'nax-alert', path: '/pages/components/alert/index', icon: 'warning', group: 'feedback', hot: false },
+		{ name: '滚动通告', tag: 'nax-notice-bar', path: '/pages/components/notice-bar/index', icon: 'info', group: 'feedback', hot: true },
+		{ name: '遮罩', tag: 'nax-overlay', path: '/pages/components/overlay/index', icon: 'circle', group: 'feedback', hot: false },
+		{ name: '加载', tag: 'nax-loading', path: '/pages/components/loading/index', icon: 'loading', group: 'feedback', hot: false },
+		{ name: '进度条', tag: 'nax-progress', path: '/pages/components/progress/index', icon: 'success', group: 'feedback', hot: false },
+		{ name: '步骤条', tag: 'nax-steps', path: '/pages/components/steps/index', icon: 'check', group: 'feedback', hot: false },
+		{ name: '骨架屏', tag: 'nax-skeleton', path: '/pages/components/skeleton/index', icon: 'square', group: 'feedback', hot: false },
+		{ name: '轻提示', tag: 'nax-toast', path: '/pages/components/toast/index', icon: 'message-off', group: 'feedback', hot: true },
+		{ name: '对话框', tag: 'nax-dialog', path: '/pages/components/dialog/index', icon: 'info', group: 'feedback', hot: true },
+		{ name: '浮窗层', tag: 'nax-popup', path: '/pages/components/popup/index', icon: 'more', group: 'feedback', hot: true }
+	] as any[]
+	cachedDemoComponentList = list
+	return list
+}
+
+
+/**
+ * 从任意对象读字段（兼容 App UTSJSONObject 与 小程序/Web 普通对象）。
+ * 微信小程序端普通 object 没有 getString，必须走字段访问。
+ */
+function demoReadAnyField(item : any, key : string) : any | null {
+	const o = item as any
+	if (key == 'name') {
+		return o.name
+	}
+	if (key == 'tag') {
+		return o.tag
+	}
+	if (key == 'path') {
+		return o.path
+	}
+	if (key == 'icon') {
+		return o.icon
+	}
+	if (key == 'group') {
+		return o.group
+	}
+	if (key == 'hot') {
+		return o.hot
+	}
+	if (key == 'text') {
+		return o.text
+	}
+	if (key == 'desc') {
+		return o.desc
+	}
+	if (key == 'tab') {
+		return o.tab
+	}
+	if (key == 'url') {
+		return o.url
+	}
+	if (key == 'title') {
+		return o.title
+	}
+	if (key == 'label') {
+		return o.label
+	}
+	return null
+}
+
+export function demoReadString(item : any | null, key : string) : string {
+	if (item == null) {
+		return ''
+	}
+	if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+		return ''
+	}
+	// 1) 普通字段（MP / Web / 多数对象字面量）
+	const field = demoReadAnyField(item, key)
+	if (field != null) {
+		if (typeof field == 'string') {
+			return field as string
+		}
+		if (typeof field == 'number' || typeof field == 'boolean') {
+			return '' + field
+		}
+	}
+	// 2) App：UTSJSONObject API 兜底（事件 payload 等）
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	const obj = item as UTSJSONObject
+	const s = obj.getString(key)
+	if (s != null && s.length > 0) {
+		return s
+	}
+	// #endif
+	return ''
+}
+
+export function demoReadBool(item : any | null, key : string) : boolean {
+	if (item == null) {
+		return false
+	}
+	if (typeof item == 'boolean') {
+		return item as boolean
+	}
+	if (typeof item == 'string' || typeof item == 'number') {
+		return false
+	}
+	const field = demoReadAnyField(item, key)
+	if (field != null) {
+		if (typeof field == 'boolean') {
+			return field as boolean
+		}
+		if (typeof field == 'string') {
+			const fs = field as string
+			return fs == 'true' || fs == '1'
+		}
+		if (typeof field == 'number') {
+			return (field as number) != 0
+		}
+	}
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	const obj = item as UTSJSONObject
+	const b = obj.getBoolean(key)
+	if (b != null) {
+		return b as boolean
+	}
+	// #endif
+	return false
+}
+
+/** onLoad query 读参：小程序为普通对象，App 多为 UTSJSONObject */
+export function demoReadQueryString(query : any | null, key : string) : string {
+	return demoReadString(query, key)
+}
+
+export function demoFilterComponents(group : string, keyword : string) : any[] {
+	const all = demoComponentList()
+	const kw = keyword.trim().toLowerCase()
+	const out = [] as any[]
+	for (let i = 0; i < all.length; i++) {
+		const item = all[i]
+		const g = demoReadString(item, 'group')
+		if (group != 'all' && g != group) {
+			continue
+		}
+		if (kw.length > 0) {
+			const name = demoReadString(item, 'name').toLowerCase()
+			const tag = demoReadString(item, 'tag').toLowerCase()
+			if (name.indexOf(kw) < 0 && tag.indexOf(kw) < 0) {
+				continue
+			}
+		}
+		out.push(item)
+	}
+	return out
+}
+
+export function demoHotComponents() : any[] {
+	const all = demoComponentList()
+	const out = [] as any[]
+	for (let i = 0; i < all.length; i++) {
+		const item = all[i]
+		if (demoReadBool(item, 'hot')) {
+			out.push(item)
+		}
+	}
+	return out
+}
+
+export function demoCountByGroup(group : string) : number {
+	const all = demoComponentList()
+	if (group == 'all') {
+		return all.length
+	}
+	let n = 0
+	for (let i = 0; i < all.length; i++) {
+		if (demoReadString(all[i], 'group') == group) {
+			n++
+		}
+	}
+	return n
+}
+
+export function demoSceneList() : any[] {
+	return [
+		{
+			name: '个人中心',
+			desc: '头像、单元格、开关与主题切换的组合示例',
+			path: '/pages/scenes/profile/index',
+			icon: 'user',
+			tag: '常用'
+		},
+		{
+			name: '订单确认',
+			desc: '卡片、步进器、金额汇总与主操作按钮',
+			path: '/pages/scenes/order/index',
+			icon: 'star',
+			tag: '电商'
+		},
+		{
+			name: '意见反馈',
+			desc: '表单、评分、多行输入与提交闭环',
+			path: '/pages/scenes/feedback/index',
+			icon: 'edit',
+			tag: '表单'
+		}
+	] as any[]
+}

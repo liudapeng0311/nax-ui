@@ -1,255 +1,123 @@
 <template>
-	<!-- 外层占满页面高度；scroll-view 用 flex:1 + height:0 才能在 App 端正确滚 -->
-	<view class="page-root">
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="nax-ui"
+			:show-back="false"
+			:border="false"
+			type="primary"
+			home-url="/pages/index/index"
+		>
+			<template #right>
+				<view class="nav-action" @click="goMine">
+					<nax-icon name="settings" size="20" color="#ffffff"></nax-icon>
+				</view>
+			</template>
+		</nax-nav-bar>
+
 		<scroll-view class="page-scroll" scroll-y="true">
-			<view class="nax-theme home" :class="themeExtraClass">
-			<view class="home__header">
-				<view class="home__header-text">
-					<text class="home__title">nax-ui</text>
-					<text class="home__desc">uni-app x 通用 UI 演示（主题：nax-ui-theme）</text>
-				</view>
-				<nax-button
-					size="sm"
-					:type="darkMode ? 'primary' : 'default'"
-					:variant="darkMode ? 'solid' : 'secondary'"
-					:label="themeToggleLabel"
-					@click="toggleDarkMode"
-				></nax-button>
-			</view>
-
-			<view class="home__section">
-				<text class="home__section-title">基础组件</text>
-				<view class="home__card" @click="goText">
-					<text class="home__card-name">文本</text>
-					<text class="home__card-tag">nax-text</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goButton">
-					<text class="home__card-name">按钮</text>
-					<text class="home__card-tag">nax-button</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goIcon">
-					<text class="home__card-name">图标</text>
-					<text class="home__card-tag">nax-icon</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goTag">
-					<text class="home__card-name">标签</text>
-					<text class="home__card-tag">nax-tag</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goBadge">
-					<text class="home__card-name">徽标</text>
-					<text class="home__card-tag">nax-badge</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goAvatar">
-					<text class="home__card-name">头像</text>
-					<text class="home__card-tag">nax-avatar</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goImage">
-					<text class="home__card-name">图片</text>
-					<text class="home__card-tag">nax-image</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goUpload">
-					<text class="home__card-name">上传</text>
-					<text class="home__card-tag">nax-upload</text>
-				</view>
-			</view>
-
-			<view class="home__section home__section--gap">
-				<text class="home__section-title">表单组件</text>
-				<view class="home__card" @click="goInput">
-					<text class="home__card-name">输入框</text>
-					<text class="home__card-tag">nax-input</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSearch">
-					<text class="home__card-name">搜索框</text>
-					<text class="home__card-tag">nax-search</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goForm">
-					<text class="home__card-name">表单</text>
-					<text class="home__card-tag">nax-form</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goCheckbox">
-					<text class="home__card-name">复选框</text>
-					<text class="home__card-tag">nax-checkbox</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goRadio">
-					<text class="home__card-name">单选框</text>
-					<text class="home__card-tag">nax-radio</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSwitch">
-					<text class="home__card-name">开关</text>
-					<text class="home__card-tag">nax-switch</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSlider">
-					<text class="home__card-name">滑动选择器</text>
-					<text class="home__card-tag">nax-slider</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goNumberBox">
-					<text class="home__card-name">步进器</text>
-					<text class="home__card-tag">nax-number-box</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goRate">
-					<text class="home__card-name">评分</text>
-					<text class="home__card-tag">nax-rate</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goTextarea">
-					<text class="home__card-name">多行输入</text>
-					<text class="home__card-tag">nax-textarea</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSelect">
-					<text class="home__card-name">列选择器</text>
-					<text class="home__card-tag">nax-select</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goCalendar">
-					<text class="home__card-name">日历</text>
-					<text class="home__card-tag">nax-calendar</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goDatetimePicker">
-					<text class="home__card-name">时间选择</text>
-					<text class="home__card-tag">nax-datetime-picker</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goKeyboard">
-					<text class="home__card-name">键盘</text>
-					<text class="home__card-tag">nax-keyboard</text>
-				</view>
-			</view>
-
-			<view class="home__section home__section--gap">
-				<text class="home__section-title">布局组件</text>
-								<view class="home__card" @click="goLine">
-					<text class="home__card-name">线条</text>
-					<text class="home__card-tag">nax-line</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goDivider">
-					<text class="home__card-name">分割线</text>
-					<text class="home__card-tag">nax-divider</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goCard">
-					<text class="home__card-name">卡片</text>
-					<text class="home__card-tag">nax-card</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goCell">
-					<text class="home__card-name">单元格</text>
-					<text class="home__card-tag">nax-cell</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSpace">
-					<text class="home__card-name">间距</text>
-					<text class="home__card-tag">nax-space</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goEmpty">
-					<text class="home__card-name">空状态</text>
-					<text class="home__card-tag">nax-empty</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goList">
-					<text class="home__card-name">列表</text>
-					<text class="home__card-tag">nax-list</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goVirtualList">
-					<text class="home__card-name">虚拟列表</text>
-					<text class="home__card-tag">nax-virtual-list</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSwipeAction">
-					<text class="home__card-name">滑动操作</text>
-					<text class="home__card-tag">nax-swipe-action</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goGrid">
-					<text class="home__card-name">宫格</text>
-					<text class="home__card-tag">nax-grid</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSwiper">
-					<text class="home__card-name">轮播</text>
-					<text class="home__card-tag">nax-swiper</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goTabbar">
-					<text class="home__card-name">底部标签栏</text>
-					<text class="home__card-tag">nax-tabbar</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goTabs">
-					<text class="home__card-name">标签页</text>
-					<text class="home__card-tag">nax-tabs</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goTabsSwiper">
-					<text class="home__card-name">全屏选项卡配方</text>
-					<text class="home__card-tag">tabs + swiper</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goNavBar">
-					<text class="home__card-name">导航栏</text>
-					<text class="home__card-tag">nax-nav-bar</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goDropdown">
-					<text class="home__card-name">下拉菜单</text>
-					<text class="home__card-tag">nax-dropdown</text>
-				</view>
-			</view>
-
-			<view class="home__section home__section--gap">
-				<text class="home__section-title">反馈组件</text>
-				<view class="home__card" @click="goTransition">
-					<text class="home__card-name">过渡动画</text>
-					<text class="home__card-tag">nax-transition</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goPicker">
-					<text class="home__card-name">弹出容器</text>
-					<text class="home__card-tag">nax-picker</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goActionSheet">
-					<text class="home__card-name">动作面板</text>
-					<text class="home__card-tag">nax-action-sheet</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goAlert">
-					<text class="home__card-name">警告提示</text>
-					<text class="home__card-tag">nax-alert</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goNoticeBar">
-					<text class="home__card-name">滚动通告</text>
-					<text class="home__card-tag">nax-notice-bar</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goOverlay">
-					<text class="home__card-name">遮罩</text>
-					<text class="home__card-tag">nax-overlay</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goLoading">
-					<text class="home__card-name">加载</text>
-					<text class="home__card-tag">nax-loading</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goProgress">
-					<text class="home__card-name">进度条</text>
-					<text class="home__card-tag">nax-progress</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSteps">
-					<text class="home__card-name">步骤条</text>
-					<text class="home__card-tag">nax-steps</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goSkeleton">
-					<text class="home__card-name">骨架屏</text>
-					<text class="home__card-tag">nax-skeleton</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goToast">
-					<text class="home__card-name">轻提示</text>
-					<text class="home__card-tag">nax-toast</text>
-				</view>
-				<view class="home__card home__card--gap" @click="goDialog">
-					<text class="home__card-name">对话框</text>
-					<text class="home__card-tag">nax-dialog</text>
+			<view class="nax-theme page" :class="themeExtraClass">
+				<!-- Hero -->
+				<view class="hero">
+					<view class="hero__top">
+						<view class="hero__brand">
+							<view class="hero__logo">
+								<image class="hero__logo-img" src="/static/logo.png" mode="aspectFill"></image>
+							</view>
+							<view class="hero__titles">
+								<text class="hero__name">nax-ui</text>
+								<text class="hero__slogan">uni-app x 通用 UI 组件库</text>
+							</view>
+						</view>
+						<nax-tag type="success" variant="solid" size="sm" round label="v1.0"></nax-tag>
+					</view>
+					<text class="hero__desc">蒸汽模式优先 · CSS 变量主题 · 多端一致体验</text>
+					<view class="hero__actions">
+						<nax-button type="primary" size="md" label="浏览组件" icon="category" @click="goCatalog"></nax-button>
+						<view class="hero__gap"></view>
+						<nax-button size="md" variant="secondary" label="场景示例" icon="star" @click="goScenes"></nax-button>
+					</view>
 				</view>
 
-				<view class="home__card home__card--gap" @click="goPopup">
-
-					<text class="home__card-name">压窗屏</text>
-
-					<text class="home__card-tag">nax-popup</text>
-
+				<!-- Stats：数值统一用 string，避免鸿蒙 text 绑到非字符串/对象时整段 JSON 化 -->
+				<view class="stats">
+					<view class="stats__item">
+						<text class="stats__num" :lines="1">{{ totalCountText }}</text>
+						<text class="stats__label" :lines="1">组件</text>
+					</view>
+					<view class="stats__divider"></view>
+					<view class="stats__item">
+						<text class="stats__num" :lines="1">4</text>
+						<text class="stats__label" :lines="1">分类</text>
+					</view>
+					<view class="stats__divider"></view>
+					<view class="stats__item">
+						<text class="stats__num" :lines="1">3</text>
+						<text class="stats__label" :lines="1">场景</text>
+					</view>
+					<view class="stats__divider"></view>
+					<view class="stats__item">
+						<text class="stats__num" :lines="1">多端</text>
+						<text class="stats__label" :lines="1">兼容</text>
+					</view>
 				</view>
 
-			</view>
+				<!-- Notice -->
+				<view class="block">
+					<nax-notice-bar
+						type="primary"
+						:list="noticeList"
+						:show-more="false"
+					></nax-notice-bar>
+				</view>
+
+				<!-- Scenes preview：字段已在 script 预解析为 string，模板只绑字符串 -->
+				<view class="section section--last">
+					<view class="section__head">
+						<text class="section__title">场景示例</text>
+						<text class="section__more" @click="goScenes">更多</text>
+					</view>
+					<view
+						v-for="(scene, sIndex) in sceneRows"
+						:key="sIndex"
+						class="scene-card"
+						@click="onOpenScene(sIndex)"
+					>
+						<view class="scene-card__icon">
+							<nax-icon :name="sceneIcon(sIndex)" size="22" color="#18a058"></nax-icon>
+						</view>
+						<view class="scene-card__body">
+							<view class="scene-card__row">
+								<text class="scene-card__name" :lines="1">{{ sceneTitle(sIndex) }}</text>
+								<nax-tag type="primary" variant="light" size="sm" :label="sceneTag(sIndex)"></nax-tag>
+							</view>
+							<text class="scene-card__desc" :lines="2">{{ sceneDesc(sIndex) }}</text>
+						</view>
+						<nax-icon name="chevron-right" size="18" color="#e5e5ea"></nax-icon>
+					</view>
+				</view>
 			</view>
 		</scroll-view>
+
+		<nax-tabbar
+			:model-value="0"
+			:list="tabList"
+			@change="onTabChange"
+		></nax-tabbar>
 	</view>
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import {
+		demoTabList,
+		switchDemoTab,
+		openDemoPage,
+		demoCountByGroup,
+		demoSceneList,
+		demoReadString,
+		hideDemoNativeTabBar
+	} from '@/common/demo-catalog.uts'
 
-	// setup 同步读全局，避免首帧 false 白闪
 	const darkMode = ref(bindDemoThemePage())
 
 	const themeExtraClass = computed((): string => {
@@ -259,326 +127,102 @@
 		return ''
 	})
 
-	const themeToggleLabel = computed((): string => {
-		if (darkMode.value) {
-			return '浅色'
-		}
-		return '深色'
-	})
+	const tabList = demoTabList()
+	// 鸿蒙：text 节点必须是 string；number 直接插值在部分机型会异常
+	const totalCountText = demoCountByGroup('all').toString()
+	const noticeList = [
+		'主题色来自主题包 nax-ui-theme，主色 18a058。可在「我的」切换深色模式。',
+		'组件均 CSS 变量主题，蒸汽模式优先，适配应用、鸿蒙、网页与小程序。'
+	] as string[]
 
-	function toggleDarkMode() {
-		const next = !darkMode.value
-		darkMode.value = next
-		setDemoDarkMode(next)
+	// 预拆成平行 string 数组，模板不直接绑 any 对象，避免鸿蒙把对象 toString 成 JSON
+	const sceneTitles = [] as string[]
+	const sceneDescs = [] as string[]
+	const sceneIcons = [] as string[]
+	const sceneTags = [] as string[]
+	const scenePaths = [] as string[]
+	const rawScenes = demoSceneList()
+	for (let i = 0; i < rawScenes.length; i++) {
+		const item = rawScenes[i]
+		let title = demoReadString(item, 'name')
+		if (title.length == 0) {
+			title = demoReadString(item, 'title')
+		}
+		sceneTitles.push(title)
+		sceneDescs.push(demoReadString(item, 'desc'))
+		sceneIcons.push(demoReadString(item, 'icon'))
+		let tag = demoReadString(item, 'tag')
+		if (tag.length == 0) {
+			tag = '示例'
+		}
+		sceneTags.push(tag)
+		scenePaths.push(demoReadString(item, 'path'))
+	}
+	// v-for 只需长度占位；真正文案走下面的 getter，保证返回 string
+	const sceneRows = sceneTitles
+
+	function sceneTitle(index : number) : string {
+		if (index < 0 || index >= sceneTitles.length) {
+			return ''
+		}
+		return sceneTitles[index]
+	}
+
+	function sceneDesc(index : number) : string {
+		if (index < 0 || index >= sceneDescs.length) {
+			return ''
+		}
+		return sceneDescs[index]
+	}
+
+	function sceneIcon(index : number) : string {
+		if (index < 0 || index >= sceneIcons.length) {
+			return 'star'
+		}
+		const name = sceneIcons[index]
+		if (name.length == 0) {
+			return 'star'
+		}
+		return name
+	}
+
+	function sceneTag(index : number) : string {
+		if (index < 0 || index >= sceneTags.length) {
+			return '示例'
+		}
+		return sceneTags[index]
+	}
+
+	function onOpenScene(index : number) {
+		if (index < 0 || index >= scenePaths.length) {
+			return
+		}
+		openDemoPage(scenePaths[index])
+	}
+
+	function goCatalog() {
+		switchDemoTab(1)
+	}
+
+	function goScenes() {
+		switchDemoTab(2)
+	}
+
+	function goMine() {
+		switchDemoTab(3)
+	}
+
+	function onTabChange(index : number) {
+		if (index == 0) {
+			return
+		}
+		switchDemoTab(index)
 	}
 
 	onShow(() => {
+		hideDemoNativeTabBar()
 		darkMode.value = bindDemoThemePage()
 	})
-
-	function goText() {
-		uni.navigateTo({
-			url: '/pages/components/text/index'
-		})
-	}
-
-	function goButton() {
-		uni.navigateTo({
-			url: '/pages/components/button/index'
-		})
-	}
-
-	function goIcon() {
-		uni.navigateTo({
-			url: '/pages/components/icon/index'
-		})
-	}
-
-	function goTag() {
-		uni.navigateTo({
-			url: '/pages/components/tag/index'
-		})
-	}
-
-	function goBadge() {
-		uni.navigateTo({
-			url: '/pages/components/badge/index'
-		})
-	}
-
-	function goAvatar() {
-		uni.navigateTo({
-			url: '/pages/components/avatar/index'
-		})
-	}
-
-	function goImage() {
-		uni.navigateTo({
-			url: '/pages/image/index'
-		})
-	}
-
-	function goUpload() {
-		uni.navigateTo({
-			url: '/pages/upload/index'
-		})
-	}
-
-	
-	function goForm() {
-		uni.navigateTo({
-			url: '/pages/components/form/index'
-		})
-	}
-	function goInput() {
-		uni.navigateTo({
-			url: '/pages/components/input/index'
-		})
-	}
-
-	function goSearch() {
-		uni.navigateTo({
-			url: '/pages/components/search/index'
-		})
-	}
-
-	function goCheckbox() {
-		uni.navigateTo({
-			url: '/pages/components/checkbox/index'
-		})
-	}
-
-	function goRadio() {
-		uni.navigateTo({
-			url: '/pages/components/radio/index'
-		})
-	}
-
-	function goSwitch() {
-		uni.navigateTo({
-			url: '/pages/components/switch/index'
-		})
-	}
-
-	function goSlider() {
-		uni.navigateTo({
-			url: '/pages/components/slider/index'
-		})
-	}
-
-	function goNumberBox() {
-		uni.navigateTo({
-			url: '/pages/components/number-box/index'
-		})
-	}
-
-	function goRate() {
-		uni.navigateTo({
-			url: '/pages/components/rate/index'
-		})
-	}
-
-	function goTextarea() {
-		uni.navigateTo({
-			url: '/pages/components/textarea/index'
-		})
-	}
-
-	function goSelect() {
-		uni.navigateTo({
-			url: '/pages/components/select/index'
-		})
-	}
-
-	function goCalendar() {
-		uni.navigateTo({
-			url: '/pages/components/calendar/index'
-		})
-	}
-
-	function goDatetimePicker() {
-		uni.navigateTo({
-			url: '/pages/components/datetime-picker/index'
-		})
-	}
-
-	function goLine() {
-		uni.navigateTo({
-			url: '/pages/components/line/index'
-		})
-	}
-
-	function goDivider() {
-		uni.navigateTo({
-			url: '/pages/components/divider/index'
-		})
-	}
-
-	function goCard() {
-		uni.navigateTo({
-			url: '/pages/components/card/index'
-		})
-	}
-
-	function goCell() {
-		uni.navigateTo({
-			url: '/pages/components/cell/index'
-		})
-	}
-
-	function goSpace() {
-		uni.navigateTo({
-			url: '/pages/components/space/index'
-		})
-	}
-
-	function goEmpty() {
-		uni.navigateTo({
-			url: '/pages/components/empty/index'
-		})
-	}
-
-	function goList() {
-		uni.navigateTo({
-			url: '/pages/components/list/index'
-		})
-	}
-
-	function goVirtualList() {
-		uni.navigateTo({
-			url: '/pages/components/virtual-list/index'
-		})
-	}
-
-	function goSwipeAction() {
-		uni.navigateTo({
-			url: '/pages/components/swipe-action/index'
-		})
-	}
-
-	function goGrid() {
-		uni.navigateTo({
-			url: '/pages/components/grid/index'
-		})
-	}
-	function goSwiper() {
-		uni.navigateTo({
-			url: '/pages/components/swiper/index'
-		})
-	}
-
-	function goTabbar() {
-		uni.navigateTo({
-			url: '/pages/components/tabbar/index'
-		})
-	}
-
-	
-	function goTabs() {
-		uni.navigateTo({
-			url: '/pages/components/tabs/index'
-		})
-	}
-
-	function goTabsSwiper() {
-		uni.navigateTo({
-			url: '/pages/components/tabs-swiper/index'
-		})
-	}
-
-	function goNavBar() {
-		uni.navigateTo({
-			url: '/pages/components/nav-bar/index'
-		})
-	}
-
-	function goDropdown() {
-		uni.navigateTo({
-			url: '/pages/components/dropdown/index'
-		})
-	}
-
-	function goTransition() {
-		uni.navigateTo({
-			url: '/pages/components/transition/index'
-		})
-	}
-
-	function goPicker() {
-		uni.navigateTo({
-			url: '/pages/components/picker/index'
-		})
-	}
-	function goActionSheet() {
-		uni.navigateTo({
-			url: '/pages/components/action-sheet/index'
-		})
-	}
-
-
-	function goAlert() {
-		uni.navigateTo({
-			url: '/pages/components/alert/index'
-		})
-	}
-	function goNoticeBar() {
-		uni.navigateTo({
-			url: '/pages/components/notice-bar/index'
-		})
-	}
-	function goOverlay() {
-		uni.navigateTo({
-			url: '/pages/components/overlay/index'
-		})
-	}
-	function goLoading() {
-		uni.navigateTo({
-			url: '/pages/components/loading/index'
-		})
-	}
-	function goProgress() {
-		uni.navigateTo({
-			url: '/pages/components/progress/index'
-		})
-	}
-
-	function goSteps() {
-		uni.navigateTo({
-			url: '/pages/components/steps/index'
-		})
-	}
-
-	function goSkeleton() {
-		uni.navigateTo({
-			url: '/pages/components/skeleton/index'
-		})
-	}
-
-	function goToast() {
-		uni.navigateTo({
-			url: '/pages/components/toast/index'
-		})
-	}
-	function goDialog() {
-		uni.navigateTo({
-			url: '/pages/components/dialog/index'
-		})
-	}
-
-	function goPopup() {
-
-		uni.navigateTo({
-
-			url: '/pages/components/popup/index'
-
-		})
-
-	}
-	function goKeyboard() {
-		uni.navigateTo({
-			url: '/pages/components/keyboard/index'
-		})
-	}
 </script>
 
 <style>
@@ -588,93 +232,229 @@
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		height: 100%;
 		/* #endif */
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 
 	.page-scroll {
 		flex: 1;
-		/* App flex 子项默认按内容高度，给 0 才能吃到剩余空间并启用纵向滚动 */
 		height: 0;
 	}
 
-	.home {
-		padding: 20px;
-		/* 不要 flex:1：内容应随列表变高，否则 scroll-view 认为无需滚动 */
-		padding-bottom: 32px;
+	.page {
+		flex-direction: column;
+		padding: 12px 16px 24px 16px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
-		flex-direction: column;
 	}
 
-	.home__header {
+	.nav-action {
 		flex-direction: row;
-		align-items: flex-start;
-		justify-content: space-between;
-		margin-bottom: 20px;
+		align-items: center;
+		justify-content: center;
+		padding-left: 8px;
+		padding-right: 4px;
+		height: 36px;
 	}
 
-	.home__header-text {
-		flex: 1;
-		margin-right: 12px;
+	.hero {
 		flex-direction: column;
+		padding: 18px 16px 16px 16px;
+		border-radius: 5px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+		margin-bottom: 12px;
 	}
 
-	.home__title {
-		font-size: 22px;
-		color: var(--nax-color-text, #333639);
-		font-weight: 600;
-		margin-bottom: 6px;
-	}
-
-	.home__desc {
-		font-size: 13px;
-		color: var(--nax-color-text-secondary, #767c82);
-	}
-
-	.home__section {
-		flex-direction: column;
-	}
-
-	.home__section--gap {
-		margin-top: 20px;
-	}
-
-	.home__section-title {
-		font-size: 13px;
-		font-weight: 500;
-		color: var(--nax-color-text-secondary, #767c82);
-		margin-bottom: 8px;
-	}
-
-	.home__card {
+	.hero__top {
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
-		padding-top: 10px;
-		padding-bottom: 10px;
-		padding-left: 12px;
-		padding-right: 12px;
+		margin-bottom: 12px;
+	}
+
+	.hero__brand {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.hero__logo {
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		overflow: hidden;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-right: 12px;
 		background-color: var(--nax-color-bg, #ffffff);
-		border-radius: var(--nax-radius-md, 3px);
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #f0f0f3);
 	}
 
-	.home__card--gap {
-		margin-top: 8px;
+	.hero__logo-img {
+		width: 44px;
+		height: 44px;
 	}
 
-	.home__card-name {
-		font-size: 14px;
+	.hero__titles {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.hero__name {
+		font-size: 20px;
+		font-weight: 600;
 		color: var(--nax-color-text, #333639);
-		font-weight: 500;
+		margin-bottom: 2px;
 	}
 
-	.home__card-tag {
+	.hero__slogan {
 		font-size: 12px;
 		color: var(--nax-color-text-secondary, #767c82);
 	}
+
+	.hero__desc {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 14px;
+	}
+
+	.hero__actions {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.hero__gap {
+		width: 10px;
+	}
+
+	.stats {
+		flex-direction: row;
+		align-items: center;
+		padding: 14px 8px;
+		border-radius: 5px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+		margin-bottom: 12px;
+	}
+
+	.stats__item {
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：防止异常文本把统计行撑爆 */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	.stats__num {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--nax-color-primary, #18a058);
+		margin-bottom: 2px;
+		/* #ifdef APP-HARMONY */
+		text-align: center;
+		/* #endif */
+	}
+
+	.stats__label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.stats__divider {
+		width: 1px;
+		height: 28px;
+		background-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.block {
+		margin-bottom: 12px;
+		border-radius: 5px;
+		overflow: hidden;
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 16px;
+	}
+
+	.section--last {
+		margin-bottom: 8px;
+	}
+
+	.section__head {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 10px;
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+
+	.section__title {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.section__more {
+		font-size: 13px;
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.scene-card {
+		flex-direction: row;
+		align-items: center;
+		padding: 14px 12px;
+		margin-bottom: 10px;
+		border-radius: 5px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.scene-card__icon {
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		background-color: var(--nax-color-primary-tertiary, #e3f3eb);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-right: 12px;
+	}
+
+	.scene-card__body {
+		flex: 1;
+		flex-direction: column;
+		margin-right: 8px;
+	}
+
+	.scene-card__row {
+		flex-direction: row;
+		align-items: center;
+		margin-bottom: 4px;
+	}
+
+	.scene-card__name {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-right: 8px;
+	}
+
+	.scene-card__desc {
+		font-size: 12px;
+		line-height: 18px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
 </style>
-
-
-
-

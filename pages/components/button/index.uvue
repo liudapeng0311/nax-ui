@@ -1,7 +1,12 @@
 <template>
-	<scroll-view style="flex:1" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-button"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-button</text>
 			<text class="page__desc">色系与层级参考 Naive UI：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用</text>
 
 			<view class="section">
@@ -297,6 +302,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -336,6 +342,19 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg, #ffffff);

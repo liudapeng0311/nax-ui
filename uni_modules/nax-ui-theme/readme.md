@@ -81,7 +81,7 @@ uni_modules/nax-ui-theme
 | `--nax-color-text` | `#333639` |
 | `--nax-color-bg` | `#ffffff` |
 | `--nax-color-bg-secondary` | `#fafafc` |
-| `--nax-color-border` | `#e0e0e6` |
+| `--nax-color-border` | `#f0f0f3` |
 
 完整说明见：`docs/design-system.md`、`docs/theme.md`。
 

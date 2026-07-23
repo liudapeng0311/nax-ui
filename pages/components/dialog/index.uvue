@@ -1,8 +1,12 @@
 <template>
 	<view class="page-root">
+		<nax-nav-bar
+			title="nax-dialog"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
 			<view class="nax-theme page" :class="themeExtraClass">
-				<text class="page__title">nax-dialog</text>
 				<text class="page__desc">居中对话框：声明式 v-model:show + 命令式 naxDialog()。下方挂一次宿主供函数式演示；自定义复杂弹层请用 nax-picker。</text>
 
 				<view class="section">

@@ -1,7 +1,12 @@
 <template>
-	<scroll-view style="flex:1" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-cell"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-cell</text>
 			<text class="page__desc">单元格 / 单元格组。设置项与列表行基础，对齐 uView Pro Cell。</text>
 
 			<view class="section">
@@ -41,6 +46,23 @@
 					<nax-cell title="账号安全" is-link></nax-cell>
 					<nax-cell title="支付设置" is-link></nax-cell>
 					<nax-cell title="隐私" value="已保护" is-link></nax-cell>
+				</nax-cell-group>
+
+				<text class="section__title">insetBorder 外框（inset 时）</text>
+				<nax-cell-group title="all 四边" inset inset-border="all">
+					<nax-cell title="默认外框" value="all" is-link></nax-cell>
+				</nax-cell-group>
+				<view class="section__gap"></view>
+				<nax-cell-group title="none 无外框" inset inset-border="none">
+					<nax-cell title="仅圆角白底" value="none" is-link></nax-cell>
+				</nax-cell-group>
+				<view class="section__gap"></view>
+				<nax-cell-group title="horizontal 上下" inset inset-border="horizontal">
+					<nax-cell title="无左右边框" value="horizontal" is-link></nax-cell>
+				</nax-cell-group>
+				<view class="section__gap"></view>
+				<nax-cell-group title="vertical 左右" inset inset-border="vertical">
+					<nax-cell title="无上下边框" value="vertical" is-link></nax-cell>
 				</nax-cell-group>
 			</view>
 
@@ -93,6 +115,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -124,6 +147,19 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
 	.page {
 		padding-top: 16px;
 		padding-bottom: 24px;
@@ -160,6 +196,10 @@
 		margin-bottom: 10px;
 		padding-left: 16px;
 		padding-right: 16px;
+	}
+
+	.section__gap {
+		height: 12px;
 	}
 
 	.hint {

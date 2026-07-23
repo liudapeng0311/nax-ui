@@ -1,0 +1,309 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="订单确认"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+					<view class="steps-panel">
+					<nax-steps :current="0" :list="stepList"></nax-steps>
+				</view>
+
+				<view class="block">
+					<nax-card title="收货信息" extra="修改" segmented>
+						<text class="line">张三  138****0000</text>
+						<text class="muted">广东省深圳市南山区科技园南路 88 号</text>
+					</nax-card>
+				</view>
+
+				<view class="block">
+					<nax-card title="商品明细" segmented>
+						<view class="goods">
+							<view class="goods__thumb">
+								<nax-icon name="image" size="28" color="#18a058"></nax-icon>
+							</view>
+							<view class="goods__body">
+								<text class="goods__name">nax-ui 组件库周边 · 主题色马克杯</text>
+								<text class="goods__sku">规格：绿色 / 350ml</text>
+								<view class="goods__row">
+									<text class="goods__price">¥ {{ unitPriceText }}</text>
+									<nax-number-box v-model="count" :min="1" :max="9"></nax-number-box>
+								</view>
+							</view>
+						</view>
+					</nax-card>
+				</view>
+
+				<view class="block">
+					<nax-cell-group inset>
+						<nax-cell title="配送方式" value="快递免邮" is-link @click="onShip"></nax-cell>
+						<nax-cell title="优惠券" value="满 50 减 5" is-link @click="onCoupon"></nax-cell>
+						<nax-cell title="备注">
+							<template #value>
+								<text class="cell-extra">选填</text>
+							</template>
+						</nax-cell>
+					</nax-cell-group>
+				</view>
+
+				<view class="block">
+					<nax-card title="费用明细" segmented>
+						<view class="fee-row">
+							<text class="muted">商品金额</text>
+							<text class="line">¥ {{ goodsAmountText }}</text>
+						</view>
+						<view class="fee-row">
+							<text class="muted">运费</text>
+							<text class="line">¥ 0.00</text>
+						</view>
+						<view class="fee-row">
+							<text class="muted">优惠</text>
+							<text class="discount">-¥ 5.00</text>
+						</view>
+						<nax-divider></nax-divider>
+						<view class="fee-row fee-row--total">
+							<text class="total-label">应付合计</text>
+							<text class="total-price">¥ {{ payAmountText }}</text>
+						</view>
+					</nax-card>
+				</view>
+			</view>
+		</scroll-view>
+
+		<view class="nax-theme bottom-bar" :class="themeExtraClass">
+			<view class="bottom-bar__info">
+				<text class="bottom-bar__label">合计</text>
+				<text class="bottom-bar__price">¥ {{ payAmountText }}</text>
+			</view>
+			<nax-button type="primary" label="提交订单" @click="onSubmit"></nax-button>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const stepList = [
+		{ title: '确认' },
+		{ title: '支付' },
+		{ title: '完成' }
+	] as any[]
+
+	const count = ref(1)
+	// 用分避免浮点误差：39.90 元
+	const unitCents = 3990
+	const couponCents = 500
+
+	function centsToText(cents : number) : string {
+		if (cents < 0) {
+			cents = 0
+		}
+		const yuan = Math.floor(cents / 100)
+		const fen = cents % 100
+		var fenText = '' + fen
+		if (fen < 10) {
+			fenText = '0' + fenText
+		}
+		return '' + yuan + '.' + fenText
+	}
+
+	const unitPriceText = computed((): string => {
+		return centsToText(unitCents)
+	})
+
+	const goodsAmountText = computed((): string => {
+		return centsToText(unitCents * count.value)
+	})
+
+	const payAmountText = computed((): string => {
+		return centsToText(unitCents * count.value - couponCents)
+	})
+
+	function onShip() {
+		uni.showToast({ title: '配送方式（演示）', icon: 'none' })
+	}
+
+	function onCoupon() {
+		uni.showToast({ title: '优惠券（演示）', icon: 'none' })
+	}
+
+	function onSubmit() {
+		uni.showToast({ title: '订单已提交（演示）', icon: 'success' })
+	}
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 12px 12px 24px 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.steps-panel {
+		padding: 14px 8px;
+		border-radius: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.block {
+		margin-top: 12px;
+		flex-direction: column;
+	}
+
+	.line {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 4px;
+	}
+
+	.muted {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 20px;
+	}
+
+	.goods {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+
+	.goods__thumb {
+		width: 72px;
+		height: 72px;
+		border-radius: 10px;
+		background-color: var(--nax-color-primary-tertiary, #e3f3eb);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-right: 12px;
+	}
+
+	.goods__body {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.goods__name {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 4px;
+		
+	}
+
+	.goods__sku {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 10px;
+	}
+
+	.goods__row {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.goods__price {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.cell-extra {
+		font-size: 13px;
+		color: var(--nax-color-text-placeholder, #e5e5ea);
+	}
+
+	.fee-row {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	.fee-row--total {
+		margin-top: 4px;
+		margin-bottom: 0;
+	}
+
+	.discount {
+		font-size: 14px;
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.total-label {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.total-price {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.bottom-bar {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding: 10px 16px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		padding-bottom: calc(10px + env(safe-area-inset-bottom));
+		/* #endif */
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.bottom-bar__info {
+		flex-direction: row;
+		align-items: flex-end;
+	}
+
+	.bottom-bar__label {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-right: 6px;
+	}
+
+	.bottom-bar__price {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--nax-color-error, #d03050);
+	}
+</style>
+
+
+

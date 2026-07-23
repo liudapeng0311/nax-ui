@@ -47,6 +47,30 @@ function resolveSourceFont() {
   return null
 }
 
+function resolveFilledFont() {
+  const candidates = [
+    path.join(staticDir, 'nax-icon.filled.source.ttf'),
+    path.join(root, 'node_modules', '@tabler', 'icons-webfont', 'dist', 'fonts', 'tabler-icons-filled.ttf'),
+    path.join(process.cwd(), 'node_modules', '@tabler', 'icons-webfont', 'dist', 'fonts', 'tabler-icons-filled.ttf')
+  ]
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate
+  }
+  return null
+}
+
+function parseTablerCssCodepoints(cssPath) {
+  if (!fs.existsSync(cssPath)) return null
+  const css = fs.readFileSync(cssPath, 'utf8')
+  const map = {}
+  const re = /\.ti-([a-z0-9-]+):before\s*\{\s*content:\s*"\\([0-9a-fA-F]+)";/g
+  let m
+  while ((m = re.exec(css)) != null) {
+    map[m[1]] = parseInt(m[2], 16)
+  }
+  return map
+}
+
 function loadTablerCodepoints() {
   if (fs.existsSync(tablerCpPath)) {
     return JSON.parse(fs.readFileSync(tablerCpPath, 'utf8'))
@@ -112,23 +136,33 @@ function writeGlyphsUts(mapping) {
   fs.writeFileSync(glyphsPath, lines.join('\n'), 'utf8')
 }
 
-function writeSubsetPython(codepoints) {
+function writeSubsetPython(outlineCodepoints, filledCodepoints) {
   const pyPath = path.join(staticDir, '_subset_tmp.py')
-  const unicodes = [0x20, ...Object.values(codepoints)]
+  const outlineUnicodes = [0x20, ...Object.values(outlineCodepoints || {})]
+  const filledUnicodes = [...Object.values(filledCodepoints || {})]
   const code = `
 from pathlib import Path
 from fontTools.ttLib import TTFont
 from fontTools.subset import Subsetter, Options
+from fontTools.pens.transformPen import TransformPen
+from fontTools.pens.ttGlyphPen import TTGlyphPen
+from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
 import base64
 
 root = Path(r'''${root.replace(/\\/g, '\\\\')}''')
 src = root / 'static' / 'nax-icon.source.ttf'
 if not src.exists():
+    src = root / 'node_modules' / '@tabler' / 'icons-webfont' / 'dist' / 'fonts' / 'tabler-icons.ttf'
+if not src.exists():
     src = root / 'static' / 'nax-icon.ttf'
+filled_src = root / 'static' / 'nax-icon.filled.source.ttf'
+if not filled_src.exists():
+    filled_src = root / 'node_modules' / '@tabler' / 'icons-webfont' / 'dist' / 'fonts' / 'tabler-icons-filled.ttf'
 out_ttf = root / 'static' / 'nax-icon.ttf'
 out_woff = root / 'static' / 'nax-icon.woff'
 out_b64 = root / 'static' / 'nax-icon.base64.txt'
-unicodes = ${JSON.stringify(unicodes)}
+outline_unicodes = ${JSON.stringify(outlineUnicodes)}
+filled_unicodes = ${JSON.stringify(filledUnicodes)}
 
 font = TTFont(str(src))
 options = Options()
@@ -140,9 +174,56 @@ options.recommended_glyphs = True
 options.recalc_bounds = True
 options.recalc_timestamp = False
 subsetter = Subsetter(options=options)
-subsetter.populate(unicodes=unicodes)
+subsetter.populate(unicodes=outline_unicodes)
 subsetter.subset(font)
-# normalize vertical metrics for consistent uvue/web/mp rendering
+
+if filled_unicodes:
+    if not filled_src.exists():
+        raise SystemExit('filled font missing: ' + str(filled_src))
+    filled_font = TTFont(str(filled_src))
+    filled_cmap = {}
+    for table in filled_font['cmap'].tables:
+        if table.isUnicode():
+            filled_cmap.update(table.cmap)
+    glyf_dst = font['glyf']
+    hmtx_dst = font['hmtx']
+    glyf_src = filled_font['glyf']
+    hmtx_src = filled_font['hmtx']
+    uni_map = {}
+    for table in font['cmap'].tables:
+        if table.isUnicode():
+            uni_map.update(table.cmap)
+    for cp in filled_unicodes:
+        if cp not in filled_cmap:
+            raise SystemExit('filled missing U+%04X' % cp)
+        gname_src = filled_cmap[cp]
+        gname_dst = 'filled_%04X' % cp
+        g = glyf_src[gname_src]
+        pen = TTGlyphPen(glyf_src)
+        if g.numberOfContours != 0 or getattr(g, 'components', None):
+            g.draw(pen, glyf_src)
+        new_g = pen.glyph()
+        new_g.recalcBounds(glyf_src)
+        glyf_dst[gname_dst] = new_g
+        hmtx_dst[gname_dst] = hmtx_src[gname_src]
+        uni_map[cp] = gname_dst
+    font['cmap'].tables = []
+    bmp = {k: v for k, v in uni_map.items() if k <= 0xFFFF}
+    t4 = CmapSubtable.newSubtable(4)
+    t4.platformID = 3
+    t4.platEncID = 1
+    t4.language = 0
+    t4.cmap = bmp
+    font['cmap'].tables.append(t4)
+    if any(k > 0xFFFF for k in uni_map):
+        t12 = CmapSubtable.newSubtable(12)
+        t12.platformID = 3
+        t12.platEncID = 10
+        t12.language = 0
+        t12.cmap = dict(uni_map)
+        font['cmap'].tables.append(t12)
+    filled_font.close()
+
 upm = font['head'].unitsPerEm
 font['hhea'].ascent = upm
 font['hhea'].descent = 0
@@ -153,9 +234,6 @@ font['OS/2'].sTypoLineGap = 0
 font['OS/2'].usWinAscent = upm
 font['OS/2'].usWinDescent = 0
 font['OS/2'].fsSelection |= 1 << 7
-# center glyphs in em square
-from fontTools.pens.transformPen import TransformPen
-from fontTools.pens.ttGlyphPen import TTGlyphPen
 glyf = font['glyf']
 hmtx = font['hmtx']
 for gname in list(glyf.keys()):
@@ -179,13 +257,23 @@ for gname in list(glyf.keys()):
     new_g.recalcBounds(glyf)
     glyf[gname] = new_g
     hmtx[gname] = (upm, int(round(new_g.xMin)))
+# 勿声明 Latin codepage：鸿蒙会用该字体渲染 ASCII，缺字形则英文空白
+os2 = font['OS/2']
+os2.ulCodePageRange1 = 0
+os2.ulCodePageRange2 = 0
+os2.ulUnicodeRange1 = 0
+os2.ulUnicodeRange2 = 0
+os2.ulUnicodeRange3 = 0
+os2.ulUnicodeRange4 = 0
+# bit 60 = PUA (U+E000–F8FF)
+os2.ulUnicodeRange2 |= (1 << 28)
 font.flavor = None
 font.save(str(out_ttf))
 font.flavor = 'woff'
 font.save(str(out_woff))
 b64 = base64.b64encode(out_ttf.read_bytes()).decode('ascii')
 out_b64.write_text(b64, encoding='ascii')
-print('subset ttf', out_ttf.stat().st_size, 'b64', len(b64))
+print('subset ttf', out_ttf.stat().st_size, 'b64', len(b64), 'filled', len(filled_unicodes))
 `
   fs.writeFileSync(pyPath, code, 'utf8')
   return pyPath
@@ -255,26 +343,65 @@ function main() {
   let mapping = []
   let codepoints = {}
 
-  if (tablerCodepoints != null) {
+  const outlineCss = path.join(root, 'node_modules', '@tabler', 'icons-webfont', 'dist', 'tabler-icons.css')
+  const filledCss = path.join(root, 'node_modules', '@tabler', 'icons-webfont', 'dist', 'tabler-icons-filled.css')
+  const outlineFromCss = parseTablerCssCodepoints(outlineCss)
+  const filledFromCss = parseTablerCssCodepoints(filledCss)
+  const outlineMap = outlineFromCss || tablerCodepoints || {}
+  const filledMap = filledFromCss || {}
+  const outlineCodepoints = {}
+  const filledCodepoints = {}
+
+  if (tablerCodepoints != null || outlineFromCss != null) {
     const srcFont = resolveSourceFont()
     if (srcFont == null) throw new Error('Tabler source font not found (static/nax-icon.source.ttf)')
-    // keep source full font for subset input
     const sourceTtf = path.join(staticDir, 'nax-icon.source.ttf')
     if (path.resolve(srcFont) !== path.resolve(sourceTtf)) {
       fs.copyFileSync(srcFont, sourceTtf)
+    }
+    const filledFont = resolveFilledFont()
+    if (filledFont != null) {
+      const filledTtf = path.join(staticDir, 'nax-icon.filled.source.ttf')
+      if (path.resolve(filledFont) !== path.resolve(filledTtf)) {
+        fs.copyFileSync(filledFont, filledTtf)
+      }
     }
 
     const missing = []
     for (const item of catalog) {
       const name = String(item.name || '').trim()
       const tabler = String(item.tabler || item.lucide || '').trim()
-      if (tablerCodepoints[tabler] == null) {
-        missing.push(`${name} <= ${tabler}`)
-        continue
+      const isFilled = item.filled === true
+      let cp = null
+      let tablerKey = tabler
+      if (isFilled) {
+        const base = tabler.endsWith('-filled') ? tabler.slice(0, -7) : tabler
+        if (filledMap[base] != null) {
+          cp = Number(filledMap[base])
+          tablerKey = base + '-filled'
+        } else if (tablerCodepoints != null && tablerCodepoints[base + '-filled'] != null) {
+          cp = Number(tablerCodepoints[base + '-filled'])
+          tablerKey = base + '-filled'
+        }
+        if (cp == null) {
+          missing.push(`${name} <= filled:${tabler}`)
+          continue
+        }
+        filledCodepoints[name] = cp
+      } else {
+        if (outlineMap[tabler] != null) {
+          cp = Number(outlineMap[tabler])
+        } else if (tablerCodepoints != null && tablerCodepoints[tabler] != null) {
+          cp = Number(tablerCodepoints[tabler])
+        }
+        if (cp == null) {
+          missing.push(`${name} <= ${tabler}`)
+          continue
+        }
+        outlineCodepoints[name] = cp
       }
-      const cp = Number(tablerCodepoints[tabler])
       codepoints[name] = cp
-      mapping.push({ name, tabler, codepoint: cp })
+      mapping.push({ name, tabler: tablerKey, codepoint: cp, filled: isFilled })
     }
     if (missing.length) throw new Error(`Missing Tabler codepoints:\n- ${missing.join('\n- ')}`)
     fs.writeFileSync(codepointsPath, JSON.stringify(codepoints, null, 2) + '\n', 'utf8')
@@ -283,10 +410,11 @@ function main() {
   } else {
     codepoints = JSON.parse(fs.readFileSync(codepointsPath, 'utf8'))
     mapping = Object.keys(codepoints).map((name) => ({ name, codepoint: codepoints[name] }))
+    for (const name of Object.keys(codepoints)) outlineCodepoints[name] = codepoints[name]
     writeGlyphsUts(mapping)
   }
 
-  const pyPath = writeSubsetPython(codepoints)
+  const pyPath = writeSubsetPython(outlineCodepoints, filledCodepoints)
   const py = spawnSync('python', [pyPath], { encoding: 'utf8' })
   fs.unlinkSync(pyPath)
   if (py.status !== 0) {
@@ -304,9 +432,11 @@ function main() {
   console.log(`[nax-icon] subset ttf => ${path.join(staticDir, 'nax-icon.ttf')}`)
   console.log(`[nax-icon] base64 injected into ${uvuePath}`)
 
-  // cleanup intermediate full font (do not ship ~3MB source)
+  // cleanup intermediate full fonts (do not ship multi-MB sources)
   const sourceTtfCleanup = path.join(staticDir, 'nax-icon.source.ttf')
   if (fs.existsSync(sourceTtfCleanup)) fs.unlinkSync(sourceTtfCleanup)
+  const filledTtfCleanup = path.join(staticDir, 'nax-icon.filled.source.ttf')
+  if (fs.existsSync(filledTtfCleanup)) fs.unlinkSync(filledTtfCleanup)
 }
 
 

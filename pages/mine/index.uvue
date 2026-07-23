@@ -1,0 +1,190 @@
+﻿<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="我的"
+			:show-back="false"
+			:border="false"
+			type="primary"
+			home-url="/pages/index/index"
+		></nax-nav-bar>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<view class="profile">
+					<nax-avatar text="NX" size="lg"></nax-avatar>
+					<view class="profile__info">
+						<text class="profile__name">nax-ui 演示</text>
+						<text class="profile__sub">面向正式上架与插件市场的组件样板工程</text>
+					</view>
+				</view>
+
+				<nax-cell-group inset title="偏好设置">
+					<nax-cell title="深色模式" label="基于 nax-ui-theme 的 dark token" icon="settings" :border="true">
+						<template #right>
+							<nax-switch :model-value="darkMode" @change="onDarkChange"></nax-switch>
+						</template>
+					</nax-cell>
+					<nax-cell title="主题色" value="Primary #18a058" icon="star"></nax-cell>
+				</nax-cell-group>
+
+				<view class="group-gap"></view>
+
+				<nax-cell-group inset title="项目信息">
+					<nax-cell title="版本" value="1.0.0" icon="info"></nax-cell>
+					<nax-cell title="技术栈" value="uni-app x / uvue" icon="square"></nax-cell>
+					<nax-cell title="组件数量" :value="componentCountText" icon="square-check" is-link @click="goCatalog"></nax-cell>
+					<nax-cell title="场景示例" value="3 个" icon="star" is-link @click="goScenes"></nax-cell>
+				</nax-cell-group>
+
+				<view class="group-gap"></view>
+
+				<nax-cell-group inset title="快捷入口">
+					<nax-cell title="导航栏组件" label="nax-nav-bar" icon="home" is-link @click="goNavBar"></nax-cell>
+					<nax-cell title="底部标签栏" label="nax-tabbar" icon="more" is-link @click="goTabbar"></nax-cell>
+					<nax-cell title="按钮组件" label="nax-button" icon="square-check" is-link @click="goButton"></nax-cell>
+				</nax-cell-group>
+
+				<view class="footer">
+					<text class="footer__text">主题变量：--nax-color-primary</text>
+					<text class="footer__text">设计参考：Naive UI 色板</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<nax-tabbar
+			:model-value="3"
+			:list="tabList"
+			@change="onTabChange"
+		></nax-tabbar>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+	import {
+		demoTabList,
+		switchDemoTab,
+		openDemoPage,
+		demoCountByGroup,
+		hideDemoNativeTabBar
+	} from '@/common/demo-catalog.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const tabList = demoTabList()
+	const componentCountText = demoCountByGroup('all').toString() + ' 个'
+
+	function onDarkChange(val : boolean) {
+		setDemoDarkMode(val)
+		darkMode.value = val
+	}
+
+	function goCatalog() {
+		switchDemoTab(1)
+	}
+
+	function goScenes() {
+		switchDemoTab(2)
+	}
+
+	function goNavBar() {
+		openDemoPage('/pages/components/nav-bar/index')
+	}
+
+	function goTabbar() {
+		openDemoPage('/pages/components/tabbar/index')
+	}
+
+	function goButton() {
+		openDemoPage('/pages/components/button/index')
+	}
+
+	function onTabChange(index : number) {
+		if (index == 3) {
+			return
+		}
+		switchDemoTab(index)
+	}
+
+	onShow(() => {
+		hideDemoNativeTabBar()
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px 0 28px 0;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.profile {
+		flex-direction: row;
+		align-items: center;
+		padding: 18px 16px;
+		margin-bottom: 16px;
+		border-radius: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.profile__info {
+		flex: 1;
+		flex-direction: column;
+		margin-left: 12px;
+	}
+
+	.profile__name {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 4px;
+	}
+
+	.profile__sub {
+		font-size: 12px;
+		line-height: 18px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.group-gap {
+		height: 14px;
+	}
+
+	.footer {
+		flex-direction: column;
+		align-items: center;
+		margin-top: 24px;
+	}
+
+	.footer__text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 4px;
+	}
+</style>
+

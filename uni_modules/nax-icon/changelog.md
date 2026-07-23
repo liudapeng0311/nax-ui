@@ -1,3 +1,12 @@
+## 0.2.4（2026-07-23）
+
+- 修复鸿蒙端正文英文空白：子集字体清除 OS/2 Latin codepage 声明，避免系统用图标字体渲染 ASCII
+
+## 0.2.3（2026-07-23）
+
+- 新增内置图标：`category` / `category-filled` / `map-pin` / `map-pin-filled`（Tabler outline + filled 合并子集）
+- 构建脚本支持 catalog 项 `"filled": true`，从 `tabler-icons-filled` 合并字形
+
 ## 0.2.2（2026-07-22）
 - 新增内置图标：loader-4（loader 已有，一并保留）
 

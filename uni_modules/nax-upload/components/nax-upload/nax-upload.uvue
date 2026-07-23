@@ -17,7 +17,7 @@
 			></image>
 			<!-- 非图片占位 -->
 			<view v-else class="nax-upload__file" :style="itemBoxStyle">
-				<nax-icon name="image" size="lg" color="var(--nax-color-text-placeholder, #c2c2c2)"></nax-icon>
+				<nax-icon name="image" size="lg" color="var(--nax-color-text-placeholder, #e5e5ea)"></nax-icon>
 				<text v-if="resolveName(item).length > 0" class="nax-upload__file-name" :lines="1">{{ resolveName(item) }}</text>
 			</view>
 
@@ -1301,7 +1301,7 @@
 	.nax-upload__item--add {
 		border-width: 1px;
 		border-style: dashed;
-		border-color: var(--nax-upload-border-color, var(--nax-color-border, #e0e0e6));
+		border-color: var(--nax-upload-border-color, var(--nax-color-border, #f0f0f3));
 		align-items: center;
 		justify-content: center;
 	}
@@ -1390,7 +1390,7 @@
 		background-color: #fafafc;
 	}
 	.nax-upload__item--add {
-		border-color: #e0e0e6;
+		border-color: #f0f0f3;
 	}
 	/* #endif */
 </style>

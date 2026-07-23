@@ -1,9 +1,18 @@
 <template>
 	<view class="page-root">
+		<nax-nav-bar
+			title="nax-tabbar"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
 			<view class="nax-theme page" :class="themeExtraClass">
-				<text class="page__title">nax-tabbar</text>
-				<text class="page__desc">自定义底部标签栏：字体图标优先、徽标/红点、中间凸起、fixed 占位与安全区。路由由业务自行处理。</text>
+				<text class="page__desc">自定义底部标签栏：字体图标优先、徽标/红点、中间凸起、fixed 占位与安全区。组件只负责 UI；多页秒切请用原生 tabBar + switchTab + hideTabBar（见 docs/tabbar-routing.md）。</text>
+
+				<view class="section">
+					<text class="section__title">多页路由（重要）</text>
+					<text class="hint">演示宿主底栏已按「原生 tabBar 保活 + 隐藏系统栏 + nax-tabbar」接入。业务切 Tab 用 switchTab，避免 reLaunch 整页重建（鸿蒙上尤其明显）。</text>
+				</view>
 
 				<view class="section">
 					<text class="section__title">当前选中</text>

@@ -1,7 +1,12 @@
 <template>
-	<scroll-view class="page-scroll" scroll-y="true">
+	<view class="page-root">
+		<nax-nav-bar
+			title="nax-slider"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__title">nax-slider</text>
 			<text class="page__desc">滑动选择器 · 对齐 uView Pro Slider 主能力</text>
 
 			<view class="section">
@@ -92,6 +97,7 @@
 			</view>
 		</view>
 	</scroll-view>
+	</view>
 </template>
 
 <script setup lang="uts">
@@ -147,6 +153,14 @@
 </script>
 
 <style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
 	.page-scroll {
 		flex: 1;
 		height: 0;
@@ -179,7 +193,7 @@
 		border-radius: var(--nax-radius-md, 3px);
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
+		border-color: var(--nax-color-border, #f0f0f3);
 		flex-direction: column;
 	}
 

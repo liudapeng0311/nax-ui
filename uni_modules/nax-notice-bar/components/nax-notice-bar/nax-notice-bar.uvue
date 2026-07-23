@@ -4,17 +4,17 @@
 		class="nax-notice-bar"
 		:class="rootClass"
 	>
-		<!-- 左侧图标 -->
+		<!-- 瀹革缚鏅堕崶鐐垼 -->
 		<view v-if="showIcon" class="nax-notice-bar__icon">
 			<slot name="icon">
 				<nax-icon :name="resolvedIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
 			</slot>
 		</view>
 
-		<!-- 水平衔接滚动 -->
+		<!-- 濮樻潙閽╃悰鏃€甯村姘З -->
 		<view v-if="useSeamless" class="nax-notice-bar__body">
 			<view class="nax-notice-bar__viewport">
-				<!-- 透明测宽节点：取自然文案宽度作为循环半宽 -->
+				<!-- 闁繑妲戝ù瀣啍閼哄倻鍋ｉ敍姘絿閼奉亞鍔ч弬鍥攳鐎硅棄瀹虫担婊€璐熷顏嗗箚閸楀﹤顔?-->
 				<view class="nax-notice-bar__measure">
 					<text :id="measureId" class="nax-notice-bar__measure-text">{{ seamlessText }}</text>
 				</view>
@@ -32,7 +32,7 @@
 				<!-- #endif -->
 
 				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
-				<!-- Web / 小程序：CSS 双份 -50% 循环 -->
+				<!-- Web / 鐏忓繒鈻兼惔蹇ョ窗CSS 閸欏奔鍞?-50% 瀵邦亞骞?-->
 				<view
 					class="nax-notice-bar__track nax-notice-bar__track--css"
 					:style="cssTrackStyle"
@@ -48,7 +48,7 @@
 			</view>
 		</view>
 
-		<!-- 步进滚动（水平/垂直） -->
+		<!-- 濮濄儴绻樺姘З閿涘牊鎸夐獮?閸ㄥ倻娲块敍?-->
 		<view v-else class="nax-notice-bar__body">
 			<swiper
 				class="nax-notice-bar__swiper"
@@ -72,7 +72,7 @@
 			</swiper>
 		</view>
 
-		<!-- 右侧更多 -->
+		<!-- 閸欏厖鏅堕弴鏉戭樋 -->
 		<view
 			v-if="showMore"
 			class="nax-notice-bar__action"
@@ -81,7 +81,7 @@
 			<nax-icon name="arrow-right" :size="actionSizePx" :color="iconColor"></nax-icon>
 		</view>
 
-		<!-- 关闭 -->
+		<!-- 閸忔娊妫?-->
 		<view
 			v-if="closable"
 			class="nax-notice-bar__action"
@@ -95,7 +95,7 @@
 <script setup lang="uts">
 	/**
 	 * nax-notice-bar
-	 * @description 滚动通告栏。对齐 uView Pro NoticeBar：水平衔接 / 步进 / 垂直步进 + 主题 / 图标 / 关闭。
+	 * @description 濠婃艾濮╅柅姘啞閺嶅繈鈧倸顕?uView Pro NoticeBar閿涙碍鎸夐獮瀹狀敊閹?/ 濮濄儴绻?/ 閸ㄥ倻娲垮銉ㄧ箻 + 娑撳顣?/ 閸ョ偓鐖?/ 閸忔娊妫撮妴?
 	 */
 	const props = defineProps({
 		list: {
@@ -115,7 +115,7 @@
 		playState: { type: String, default: 'play' },
 		duration: { type: Number, default: 2000 },
 		speed: { type: Number, default: 50 },
-		separator: { type: String, default: '　　' },
+		separator: { type: String, default: '    ' },
 		disableTouch: { type: Boolean, default: true },
 		show: { type: Boolean, default: true },
 		noListHidden: { type: Boolean, default: true },
@@ -323,7 +323,8 @@
 	})
 
 	function estimateLoopWidth(text : string) : number {
-		const w = text.length * 14
+		// sm 字号约 14px；略放大避免鸿蒙测宽偏短裁切
+		const w = text.length * 16
 		if (w < 80) {
 			return 80
 		}
@@ -346,7 +347,7 @@
 	})
 
 	const segStyle = computed((): string => {
-		// 仅在实测到宽度后固定段宽；估算阶段不强行拉宽，避免「先空白再从右侧滚出」
+		// 娴犲懎婀€圭偞绁撮崚鏉款啍鎼达箑鎮楅崶鍝勭暰濞堥潧顔旈敍娑楀強缁犳妯佸▓鍏哥瑝瀵缚顢戦幏澶婎啍閿涘矂浼╅崗宥冣偓灞藉帥缁岃櫣娅ч崘宥勭矤閸欏厖鏅跺姘毉閵?
 		if (measuredLoopWidth.value > 0) {
 			return 'width:' + measuredLoopWidth.value.toString() + 'px;'
 		}
@@ -412,13 +413,17 @@
 		if (w <= 1) {
 			return
 		}
-		// 取整，避免亚像素半宽导致接缝微跳
-		const ww = Math.round(w)
+		// 鸿蒙等端：混排英文缺字时 offsetWidth 可能只量到前半段，固定 width + overflow 会裁掉后文
+		const measured = Math.round(w)
+		const estimated = estimateLoopWidth(seamlessText.value)
+		let ww = measured
+		if (estimated > ww) {
+			ww = estimated
+		}
 		if (ww <= 1) {
 			return
 		}
 		const prev = measuredLoopWidth.value
-		// ???????? 2px ????????
 		if (prev <= 0 || Math.abs(prev - ww) > 2) {
 			measuredLoopWidth.value = ww
 		}
@@ -430,7 +435,7 @@
 		}
 		setTimeout(() => {
 			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App 跑马灯：双段文案，translateX 负向循环（视觉持续向左）
+	// App 鐠烘垿鈹堥悘顖ょ窗閸欏本顔岄弬鍥攳閿涘ranslateX 鐠愮喎鎮滃顏嗗箚閿涘牐顫嬬憴澶嬪瘮缂侇厼鎮滃锔肩礆
 			const segEl = uni.getElementById(segMeasureId)
 			if (segEl != null && segEl.offsetWidth > 1) {
 				applyMeasuredWidth(segEl.offsetWidth)
@@ -443,7 +448,7 @@
 			if (proxy != null) {
 				query.in(proxy)
 			}
-			// 透明测宽节点
+			// 闁繑妲戝ù瀣啍閼哄倻鍋?
 			query
 				.select('#' + measureId)
 				.boundingClientRect((rect : NodeInfo) => {
@@ -456,7 +461,7 @@
 					}
 				})
 			// #ifdef APP-HARMONY
-			// 鸿蒙回退：测第一段可见文案
+			// 妤﹁儻鎸嬮崶鐐衡偓鈧敍姘ゴ缁楊兛绔村▓闈涘讲鐟欎焦鏋冨?
 			query
 				.select('#' + segMeasureId)
 				.boundingClientRect((rect2 : NodeInfo) => {
@@ -487,13 +492,13 @@
 
 	// #ifdef APP-HARMONY
 	/**
-	 * 鸿蒙衔接（官方文档）：
-	 * - App 不支持 CSS @keyframes，应用 UniElement.animate（见 uni-app x UniElement / css_diff）
-	 * - 性能：只改 transform，避免 left/top 与 Vue :style 高频重绘
-	 * - 语义：双段 0→-half 线性无限循环 ≡ setInterval 模回绕的视觉效果
-	 * - 鸿蒙 VDOM 暂不返回动画实例：停止时用 0ms animate 顶掉
-	 * - 测宽未完成时 offset=0 静态展示，绝不“先空白再从右侧滚进”
-	 * - 元素暂不可用时回退 requestAnimationFrame + setProperty 模回绕
+	 * 妤﹁儻鎸嬬悰鏃€甯撮敍鍫濈暭閺傝鏋冨锝忕礆閿?
+	 * - App 娑撳秵鏁幐?CSS @keyframes閿涘苯绨查悽?UniElement.animate閿涘牐顫?uni-app x UniElement / css_diff閿?
+	 * - 閹嗗厴閿涙艾褰ч弨?transform閿涘矂浼╅崗?left/top 娑?Vue :style 妤傛﹢顣堕柌宥囩帛
+	 * - 鐠囶厺绠熼敍姘蓟濞?0閳?half 缁炬寧鈧勬￥闂勬劕鎯婇悳?閳?setInterval 濡€虫礀缂佹洜娈戠憴鍡氼潕閺佸牊鐏?
+	 * - 妤﹁儻鎸?VDOM 閺嗗倷绗夋潻鏂挎礀閸斻劎鏁剧€圭偘绶ラ敍姘粻濮濄垺妞傞悽?0ms animate 妞よ埖甯€
+	 * - 濞村顔旈張顏勭暚閹存劖妞?offset=0 闂堟瑦鈧礁鐫嶇粈鐚寸礉缂佹繀绗夐垾婊冨帥缁岃櫣娅ч崘宥勭矤閸欏厖鏅跺姘崇箻閳?
+	 * - 閸忓啰绀岄弳鍌欑瑝閸欘垳鏁ら弮璺烘礀闁偓 requestAnimationFrame + setProperty 濡€虫礀缂?
 	 */
 	let marqueeRafId = 0
 	let marqueeLastTs = 0
@@ -501,13 +506,17 @@
 	let lastAnimHalf = 0.0
 	let usingNativeAnimate = false
 	let cachedTrackEl : UniElement | null = null
+	let hostAlive = true
 
 	const appTrackStyle = computed((): string => {
-		// transform 交由 animate / setProperty 驱动，避免绑定覆盖
+		// transform 娴溿倗鏁?animate / setProperty 妞瑰崬濮╅敍宀勪缉閸忓秶绮︾€规俺顩惄?
 		return ''
 	})
 
 	function getTrackElement() : UniElement | null {
+		if (!hostAlive) {
+			return null
+		}
 		if (cachedTrackEl != null) {
 			return cachedTrackEl
 		}
@@ -519,6 +528,9 @@
 	}
 
 	function applyTrackTransform(offset : number) : boolean {
+		if (!hostAlive) {
+			return false
+		}
 		const el = getTrackElement()
 		if (el == null) {
 			cachedTrackEl = null
@@ -551,11 +563,14 @@
 	}
 
 	function stopNativeAnimate() {
+		if (!hostAlive) {
+			return
+		}
 		const el = getTrackElement()
 		if (el == null) {
 			return
 		}
-		// 鸿蒙不返回动画实例：0 时长 forwards 复位并顶掉循环
+		// 妤﹁儻鎸嬫稉宥堢箲閸ョ偛濮╅悽璇茬杽娓氬绱? 閺冨爼鏆?forwards 婢跺秳缍呴獮鍫曘€婇幒澶婃儕閻?
 		el.animate([
 			{
 				transform: 'translateX(0px)'
@@ -586,12 +601,15 @@
 	}
 
 	function startNativeAnimate(half : number) : boolean {
+		if (!hostAlive) {
+			return false
+		}
 		const el = getTrackElement()
 		if (el == null || half <= 1) {
 			return false
 		}
 		const dur = harmonyDurationMs(half)
-		// 关键帧：0 → -half，线性，近似无限循环；双段使终点与起点视觉重合
+		// 閸忔娊鏁敮褝绱? 閳?-half閿涘瞼鍤庨幀褝绱濇潻鎴滄妧閺冪娀妾哄顏嗗箚閿涙稑寮诲▓鍏稿▏缂佸牏鍋ｆ稉搴ゆ崳閻愮顫嬬憴澶愬櫢閸?
 		el.animate([
 			{
 				transform: 'translateX(0px)'
@@ -602,7 +620,7 @@
 		], {
 			duration: dur,
 			easing: 'linear',
-			// 部分 UTS 端 Infinity 不稳定，用足够大的有限次数
+			// 闁劌鍨?UTS 缁?Infinity 娑撳秶菙鐎规熬绱濋悽銊ㄥ喕婢剁喎銇囬惃鍕箒闂勬劖顐奸弫?
 			iterations: 1000000,
 			fill: 'forwards'
 		} as UniAnimationOption)
@@ -612,6 +630,9 @@
 	}
 
 	function marqueeFrame(timestamp : number, token : number) {
+		if (!hostAlive) {
+			return
+		}
 		if (token != marqueeToken) {
 			return
 		}
@@ -622,7 +643,7 @@
 
 		const half = measuredLoopWidth.value
 		if (half <= 1) {
-			// 半宽未就绪：静态展示，继续测宽
+			// 閸楀﹤顔旈張顏勬皑缂侇亷绱伴棃娆愨偓浣哥潔缁€鐚寸礉缂佈呯敾濞村顔?
 			marqueeOffsetPx = 0
 			applyTrackTransform(0)
 			measureLoopWidth()
@@ -633,19 +654,19 @@
 			return
 		}
 
-		// 原生 animate 已在跑且半宽稳定：不再叠加 rAF，避免双驱动打架
+		// 閸樼喓鏁?animate 瀹告彃婀捄鎴滅瑬閸楀﹤顔旂粙鍐茬暰閿涙矮绗夐崘宥呭綌閸?rAF閿涘矂浼╅崗宥呭蓟妞瑰崬濮╅幍鎾寸仸
 		if (usingNativeAnimate && Math.abs(half - lastAnimHalf) <= 2) {
 			return
 		}
 
-		// 优先原生 animate（GPU 插值，不掉帧）
+		// 娴兼ê鍘涢崢鐔烘晸 animate閿涘湙PU 閹绘帒鈧》绱濇稉宥嗗竴鐢嶇礆
 		if (startNativeAnimate(half)) {
 			clearMarqueeRaf()
 			marqueeRafId = 0
 			return
 		}
 
-		// 兜底：rAF + setProperty 模回绕（语义同 setInterval，无 Vue 重绘）
+		// 閸忔粌绨抽敍姝矨F + setProperty 濡€虫礀缂佹洩绱欑拠顓濈疅閸?setInterval閿涘本妫?Vue 闁插秶绮敍?
 		if (marqueeLastTs <= 0) {
 			marqueeLastTs = timestamp
 		}
@@ -684,7 +705,7 @@
 			measureLoopWidth()
 		}
 		const token = marqueeToken
-		// 内容立刻在 0 位可见
+		// 閸愬懎顔愮粩瀣煝閸?0 娴ｅ秴褰茬憴?
 		applyTrackTransform(0)
 		const half = measuredLoopWidth.value
 		if (half > 1 && startNativeAnimate(half)) {
@@ -783,7 +804,7 @@
 			return
 		}
 		// #ifdef APP-HARMONY
-		// 半宽变化超过阈值再 restart，避免接缝抖动
+		// 閸楀﹤顔旈崣妯哄鐡掑懓绻冮梼鍫濃偓鐓庡晙 restart閿涘矂浼╅崗宥嗗复缂傛繃濮堥崝?
 		if (lastAnimHalf > 0 && Math.abs(w - lastAnimHalf) <= 2) {
 			return
 		}
@@ -792,6 +813,9 @@
 	})
 
 	onUnmounted(() => {
+		// #ifdef APP-HARMONY
+		hostAlive = false
+		// #endif
 		stopMarquee()
 	})
 	// #endif
@@ -928,7 +952,7 @@
 
 	.nax-notice-bar__measure {
 		position: absolute;
-		/* 勿用极大负 left：鸿蒙上可能量到 0 宽 */
+		/* 閸曡法鏁ら弸浣搞亣鐠?left閿涙岸缂氶拏娆庣瑐閸欘垵鍏橀柌蹇撳煂 0 鐎?*/
 		left: 0;
 		top: 0;
 		flex-direction: row;
@@ -941,6 +965,13 @@
 		font-size: var(--nax-font-size-sm, 14px);
 		font-weight: var(--nax-font-weight-regular, 400);
 		flex-shrink: 0;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：显式系统字体；图标字体若声明 Latin codepage 会抢占 ASCII 导致英文空白 */
+		font-family: HarmonyOS Sans;
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS */
+		font-family: sans-serif;
+		/* #endif */
 	}
 
 	.nax-notice-bar__track {
@@ -955,8 +986,14 @@
 		flex-direction: row;
 		align-items: center;
 		flex-shrink: 0;
-		overflow: hidden;
 		height: 22px;
+		/* #ifndef APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：避免 width 测短时 overflow 裁掉后半段（含中英文混排） */
+		overflow: visible;
+		/* #endif */
 	}
 
 	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
@@ -980,9 +1017,15 @@
 		font-size: var(--nax-font-size-sm, 14px);
 		font-weight: var(--nax-font-weight-regular, 400);
 		flex-shrink: 0;
-		/* 单行；折行由 :lines="1" 约束 */
 		height: 22px;
 		line-height: 22px;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：显式系统字体；图标字体若声明 Latin codepage 会抢占 ASCII 导致英文空白 */
+		font-family: HarmonyOS Sans;
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS */
+		font-family: sans-serif;
+		/* #endif */
 	}
 
 	.nax-notice-bar__text--primary {
@@ -1025,3 +1068,4 @@
 		overflow: hidden;
 	}
 </style>
+

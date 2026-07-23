@@ -95,8 +95,8 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 |-------|--------|------|
 | `--nax-color-text` | `#333639` | 主文案 |
 | `--nax-color-text-secondary` | `#767c82` | 次文案（Naive textColor3） |
-| `--nax-color-text-placeholder` | `#c2c2c2` | 占位（Naive placeholder） |
-| `--nax-color-text-disabled` | `#c2c2c2` | 禁用 |
+| `--nax-color-text-placeholder` | `#e5e5ea` | 占位（Naive placeholder） |
+| `--nax-color-text-disabled` | `#e5e5ea` | 禁用 |
 | `--nax-color-text-inverse` | `#ffffff` | 深色底上的文字 |
 
 #### 背景 / 边框 / 遮罩
@@ -107,8 +107,8 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-color-bg-secondary` | `#fafafc` | 次级背景（actionColor） |
 | `--nax-color-bg-hover` | `#f3f3f5` | 点击态（hoverColor） |
 | `--nax-color-skeleton` | `#f2f3f5` | 骨架屏占位块底色 |
-| `--nax-color-border` | `#e0e0e6` | 默认边框（borderColor） |
-| `--nax-color-border-strong` | `#c2c2c2` | 强调边框 |
+| `--nax-color-border` | `#f0f0f3` | 默认边框（borderColor） |
+| `--nax-color-border-strong` | `#e5e5ea` | 强调边框 |
 | `--nax-color-mask` | `rgba(0, 0, 0, 0.4)` | 弹层遮罩 |
 
 
@@ -128,7 +128,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-color-error-secondary` / `tertiary` | `#f7dde3` / `#f9e6ea` | 错误浅底 |
 | `--nax-color-info-hover` / `deep` | `#4098fc` / `#1060c9` | 信息悬停/按压 |
 | `--nax-color-info-secondary` / `tertiary` | `#dbeafc` / `#e4effd` | 信息浅底 |
-| `--nax-color-divider` | `#efeff5` | 分割线 |
+| `--nax-color-divider` | `#f5f5f7` | 分割线 |
 | `--nax-color-button-secondary` / `tertiary` | `#ececed` / `#f2f3f3` | 默认次要/次次要底 |
 
 > 色板来源：[Naive UI common/light](https://github.com/tusen-ai/naive-ui/blob/main/src/_styles/common/light.ts)。默认 **primary 与 success 同为绿色 `#18a058`**（官方默认）。

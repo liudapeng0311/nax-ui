@@ -1,0 +1,208 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="场景"
+			:show-back="false"
+			:border="false"
+			type="primary"
+			home-url="/pages/index/index"
+		></nax-nav-bar>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<text class="intro">用现有组件拼装接近真实业务的页面片段，便于上架演示与二次开发参考。</text>
+
+				<view
+					v-for="(scene, index) in sceneList"
+					:key="index"
+					class="card"
+					@click="onOpen(scene)"
+				>
+					<view class="card__cover" :class="'card__cover--' + (index % 3).toString()">
+						<nax-icon :name="itemIcon(scene)" size="28" color="#ffffff"></nax-icon>
+					</view>
+					<view class="card__body">
+						<view class="card__row">
+							<text class="card__title">{{ itemTitle(scene) }}</text>
+							<nax-tag type="primary" variant="light" size="sm" :label="itemTag(scene)"></nax-tag>
+						</view>
+						<text class="card__desc">{{ itemDesc(scene) }}</text>
+						<view class="card__footer">
+							<text class="card__link">查看示例</text>
+							<nax-icon name="chevron-right" size="16" color="#18a058"></nax-icon>
+						</view>
+					</view>
+				</view>
+
+				<view class="tips">
+					<nax-alert type="info" title="提示" description="场景页只做组合演示，不接真实接口；提交类操作用 Toast / Dialog 反馈。"></nax-alert>
+				</view>
+			</view>
+		</scroll-view>
+
+		<nax-tabbar
+			:model-value="2"
+			:list="tabList"
+			@change="onTabChange"
+		></nax-tabbar>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import {
+		demoTabList,
+		switchDemoTab,
+		openDemoPage,
+		demoSceneList,
+		demoReadString,
+		hideDemoNativeTabBar
+	} from '@/common/demo-catalog.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const tabList = demoTabList()
+	const sceneList = demoSceneList()
+
+	function itemTitle(item : any) : string {
+		return demoReadString(item, 'name')
+	}
+
+	function itemTag(item : any) : string {
+		return demoReadString(item, 'tag')
+	}
+
+	function itemIcon(item : any) : string {
+		return demoReadString(item, 'icon')
+	}
+
+	function itemDesc(item : any) : string {
+		return demoReadString(item, 'desc')
+	}
+
+	function onOpen(item : any) {
+		openDemoPage(demoReadString(item, 'path'))
+	}
+
+	function onTabChange(index : number) {
+		if (index == 2) {
+			return
+		}
+		switchDemoTab(index)
+	}
+
+	onShow(() => {
+		hideDemoNativeTabBar()
+		darkMode.value = bindDemoThemePage()
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 16px;
+		padding-bottom: 28px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.intro {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 14px;
+	}
+
+	.card {
+		flex-direction: column;
+		margin-bottom: 14px;
+		border-radius: 14px;
+		overflow: hidden;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.card__cover {
+		height: 96px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.card__cover--0 {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.card__cover--1 {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	.card__cover--2 {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.card__body {
+		flex-direction: column;
+		padding: 14px 14px 12px 14px;
+	}
+
+	.card__row {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 6px;
+	}
+
+	.card__title {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.card__desc {
+		font-size: 13px;
+		line-height: 20px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 10px;
+	}
+
+	.card__footer {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.card__link {
+		font-size: 13px;
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+		margin-right: 2px;
+	}
+
+	.tips {
+		margin-top: 4px;
+	}
+</style>
+

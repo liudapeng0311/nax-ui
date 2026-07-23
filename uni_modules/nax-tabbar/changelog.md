@@ -1,3 +1,8 @@
+## 0.1.5（2026-07-23）
+
+- 文档：补充多页自定义底栏推荐路由（原生 tabBar + `switchTab` + `hideTabBar`），见仓库 `docs/tabbar-routing.md`
+- readme：强调勿对主 Tab 页默认 `reLaunch`
+
 ## 0.1.4（2026-07-21）
 
 - 修复鸿蒙/App 底部安全区未抬高内容：独立 `nax-tabbar__safe` 占位；`APP-HARMONY` 下 window/systemInfo 双兜底 + 首帧延迟重测

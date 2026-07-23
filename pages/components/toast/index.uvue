@@ -1,8 +1,12 @@
 <template>
 	<view class="page-root">
+		<nax-nav-bar
+			title="nax-toast"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
 			<view class="nax-theme page" :class="themeExtraClass">
-				<text class="page__title">nax-toast</text>
 				<text class="page__desc">函数式轻提示：业务代码只 import 并调用 naxToast()，不必为每条提示写 DOM。下方仅挂一次宿主组件（生产可放到根布局）。</text>
 
 				<view class="section">

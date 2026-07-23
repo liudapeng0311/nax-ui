@@ -19,6 +19,7 @@
 	 * @description 单元格分组容器。包裹 nax-cell，统一边框/圆角/内嵌样式。对齐 uView Pro CellGroup。
 	 * @property {string} title 分组标题
 	 * @property {boolean} inset 圆角卡片内嵌（左右留白）
+	 * @property {string} insetBorder inset 卡片外框：all | none | horizontal | vertical，默认 all
 	 * @property {boolean} border 是否显示子 cell 底部分割线，默认 true
 	 * @property {string} customClass 根节点扩展 class
 	 * @slot default 放置 nax-cell
@@ -33,6 +34,14 @@
 			type: Boolean,
 			default: false
 		},
+		/**
+		 * inset 时卡片外框边框
+		 * all 四边 | none 无 | horizontal 仅上下 | vertical 仅左右
+		 */
+		insetBorder: {
+			type: String,
+			default: 'all'
+		},
 		border: {
 			type: Boolean,
 			default: true
@@ -45,6 +54,23 @@
 
 	const hasTitle = computed((): boolean => {
 		return props.title.length > 0
+	})
+
+	function normalizeInsetBorder(value : string) : string {
+		if (value == 'none' || value == 'false' || value == '0') {
+			return 'none'
+		}
+		if (value == 'horizontal' || value == 'x' || value == 'top-bottom') {
+			return 'horizontal'
+		}
+		if (value == 'vertical' || value == 'y' || value == 'left-right') {
+			return 'vertical'
+		}
+		return 'all'
+	}
+
+	const insetBorderName = computed((): string => {
+		return normalizeInsetBorder(props.insetBorder)
 	})
 
 	const rootClass = computed((): string => {
@@ -62,7 +88,9 @@
 		let cls = ''
 		if (props.inset) {
 			cls += ' nax-cell-group__body--inset'
+			cls += ' nax-cell-group__body--inset-border-' + insetBorderName.value
 		}
+		// border 控制子 cell 分割线；非 inset 时保留 body 顶/底清零约定
 		if (props.border) {
 			cls += ' nax-cell-group__body--border'
 		}
@@ -86,8 +114,8 @@
 	}
 
 	.nax-cell-group--inset {
-		padding-left: 16px;
-		padding-right: 16px;
+		padding-left: 12px;
+		padding-right: 12px;
 	}
 
 	.nax-cell-group__header {
@@ -119,15 +147,46 @@
 
 	.nax-cell-group__body--inset {
 		border-radius: var(--nax-radius-md, 8px);
-		/* 内嵌时略强调卡片边界 */
-		border-width: 1px;
-		border-style: solid;
-		border-color: var(--nax-color-border, #e0e0e6);
 	}
 
+	/* border：非 inset 外层顶/底不画线，分隔交给子 cell */
 	.nax-cell-group__body--border {
-		/* 外层顶/底线：子项内部再画分隔 */
 		border-top-width: 0;
 		border-bottom-width: 0;
+	}
+
+	/* inset 外框：写在 --border 之后，显式四边宽度避免被清零 */
+	.nax-cell-group__body--inset-border-all {
+		border-top-width: 1px;
+		border-right-width: 1px;
+		border-bottom-width: 1px;
+		border-left-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-cell-group__body--inset-border-none {
+		border-top-width: 0;
+		border-right-width: 0;
+		border-bottom-width: 0;
+		border-left-width: 0;
+	}
+
+	.nax-cell-group__body--inset-border-horizontal {
+		border-top-width: 1px;
+		border-right-width: 0;
+		border-bottom-width: 1px;
+		border-left-width: 0;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-cell-group__body--inset-border-vertical {
+		border-top-width: 0;
+		border-right-width: 1px;
+		border-bottom-width: 0;
+		border-left-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
 	}
 </style>

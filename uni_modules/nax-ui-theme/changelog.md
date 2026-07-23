@@ -1,4 +1,10 @@
-﻿## 0.1.6（2026-07-18）
+## 0.1.7（2026-07-23）
+
+- 默认浅色描边调浅：`--nax-color-border` `#e0e0e6` → `#f0f0f3`
+- `--nax-color-border-strong` `#d0d0d6` → `#e5e5ea`
+- `--nax-color-divider` `#efeff5` → `#f5f5f7`
+
+## 0.1.6（2026-07-18）
 
 - **破坏性**：字号阶梯上调，默认正文/控件 `md` 改为 **16px**
 - 阶梯：xs12 / sm14 / md16 / lg18 / xl20 / xxl22（与 nax-text 阅读阶梯对齐）

@@ -1,0 +1,406 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			title="组件"
+			:show-back="false"
+			:border="false"
+			type="primary"
+			home-url="/pages/index/index"
+		>
+			<template #right>
+				<view class="nav-action" @click="clearSearch">
+					<text class="nav-action__text">{{ search.length > 0 ? '清空' : '' }}</text>
+				</view>
+			</template>
+		</nax-nav-bar>
+
+		<view class="nax-theme search-wrap" :class="themeExtraClass">
+			<nax-search
+				v-model="search"
+				placeholder="搜索组件名或 nax-*"
+				shape="round"
+				:show-action="false"
+				@search="onSearch"
+				@change="onSearchChange"
+			></nax-search>
+		</view>
+
+		<view class="nax-theme tabs-wrap" :class="themeExtraClass">
+			<nax-tabs
+				v-model="categoryIndex"
+				:list="categoryTabs"
+				:scrollable="true"
+				@change="onCategoryChange"
+			></nax-tabs>
+		</view>
+
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<view class="result-bar">
+					<text class="result-bar__text">共 {{ rowCountText }} 个组件</text>
+					<nax-tag v-if="search.length > 0" type="primary" variant="light" size="sm" :label="'关键词 ' + search"></nax-tag>
+				</view>
+
+				<!-- 页壳先出：列表在 onReady 后再挂，页内 loading 承接渲染耗时 -->
+				<view v-if="!listReady" class="list-placeholder">
+					<nax-loading vertical text="加载组件列表"></nax-loading>
+				</view>
+
+				<nax-empty
+					v-else-if="rowCount == 0"
+					title="未找到组件"
+					description="试试更换关键词或切换分类"
+				></nax-empty>
+
+				<nax-cell-group v-else inset inset-border="none">
+					<nax-cell
+						v-for="(title, index) in rowTitles"
+						:key="rowKey(index)"
+						:title="title"
+						:value="rowLabel(index)"
+						is-link
+						@click="onOpenRow(index)"
+					></nax-cell>
+				</nax-cell-group>
+			</view>
+		</scroll-view>
+
+		<nax-tabbar
+			:model-value="1"
+			:list="tabList"
+			@change="onTabChange"
+		></nax-tabbar>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import {
+		demoTabList,
+		switchDemoTab,
+		openDemoPage,
+		demoCategoryTabs,
+		demoCategoryKey,
+		demoFilterComponents,
+		demoReadString,
+		demoReadQueryString,
+		hideDemoNativeTabBar,
+		takePendingCatalogTab
+	} from '@/common/demo-catalog.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const tabList = demoTabList()
+	const categoryTabs = demoCategoryTabs()
+	const categoryIndex = ref(0)
+	const search = ref('')
+
+	// 首屏不挂列表：listReady=false 时只有页壳 + loading，保证 switchTab 先完成
+	const listReady = ref(false)
+	const rowTitles = ref([] as string[])
+	const rowTags = ref([] as string[])
+	const rowPaths = ref([] as string[])
+	const rowCount = ref(0)
+	const rowCountText = ref('0')
+
+	// 列表挂载任务序号：快速切分类/搜索时丢弃过期任务
+	let listJobId = 0
+	// 是否已完成首次挂载调度（onReady 只跑一次；保活再进不重复）
+	let listMountScheduled = false
+
+	function rowKey(index : number) : string {
+		if (index < 0 || index >= rowPaths.value.length) {
+			return 'row-' + index.toString()
+		}
+		const path = rowPaths.value[index]
+		if (path.length == 0) {
+			return 'row-' + index.toString()
+		}
+		return path
+	}
+
+	function rowLabel(index : number) : string {
+		if (index < 0 || index >= rowTags.value.length) {
+			return ''
+		}
+		return rowTags.value[index]
+	}
+
+
+
+	function applyList(raw : any[], totalHint : number) {
+		const titles = [] as string[]
+		const tags = [] as string[]
+		const paths = [] as string[]
+		for (let i = 0; i < raw.length; i++) {
+			const item = raw[i]
+			titles.push(demoReadString(item, 'name'))
+			tags.push(demoReadString(item, 'tag'))
+			paths.push(demoReadString(item, 'path'))
+		}
+		rowTitles.value = titles
+		rowTags.value = tags
+		rowPaths.value = paths
+		rowCount.value = titles.length
+		// 分批挂载时用总数提示，避免角标先 12 再跳到全量
+		if (totalHint >= 0) {
+			rowCountText.value = totalHint.toString()
+		} else {
+			rowCountText.value = titles.length.toString()
+		}
+		listReady.value = true
+	}
+
+	function buildRawList() : any[] {
+		const key = demoCategoryKey(categoryIndex.value)
+		return demoFilterComponents(key, search.value)
+	}
+
+	/**
+	 * 鸿蒙：小步追加列表，避免单帧创建过多原生节点卡住 tab。
+	 * job 不一致时丢弃，保证快速连点只保留最后一次。
+	 */
+	function harmonyAppendList(job : number, raw : any[], shown : number, step : number) {
+		if (job != listJobId) {
+			return
+		}
+		const total = raw.length
+		const next = shown + step
+		if (next >= total) {
+			applyList(raw, -1)
+			return
+		}
+		const part = [] as any[]
+		for (let i = 0; i < next; i++) {
+			part.push(raw[i])
+		}
+		applyList(part, total)
+		setTimeout(() => {
+			harmonyAppendList(job, raw, next, step)
+		}, 32)
+	}
+
+	/**
+	 * 列表刷新：先让出当前帧（鸿蒙多让一帧），保证 tab 选中态先画出来，
+	 * 再渲染列表。鸿蒙用更小批次多段补全，其它端轻量分批即可。
+	 */
+	function refreshList() {
+		listJobId++
+		const job = listJobId
+		// #ifdef APP-HARMONY
+		// 鸿蒙 tab 指示条 + 原生节点更重：延迟到动画后，再 8 条/段挂载
+		setTimeout(() => {
+			if (job != listJobId) {
+				return
+			}
+			const raw = buildRawList()
+			const step = 8
+			if (raw.length <= step) {
+				applyList(raw, -1)
+				return
+			}
+			const head = [] as any[]
+			for (let i = 0; i < step; i++) {
+				head.push(raw[i])
+			}
+			applyList(head, raw.length)
+			setTimeout(() => {
+				harmonyAppendList(job, raw, step, step)
+			}, 32)
+		}, 48)
+		// #endif
+		// #ifndef APP-HARMONY
+		setTimeout(() => {
+			if (job != listJobId) {
+				return
+			}
+			const raw = buildRawList()
+			const firstBatch = 12
+			if (raw.length > firstBatch) {
+				const head = [] as any[]
+				for (let i = 0; i < firstBatch; i++) {
+					head.push(raw[i])
+				}
+				applyList(head, raw.length)
+				setTimeout(() => {
+					if (job != listJobId) {
+						return
+					}
+					applyList(raw, -1)
+				}, 16)
+				return
+			}
+			applyList(raw, -1)
+		}, 0)
+		// #endif
+	}
+
+	/** 页面已展示后再挂重列表（与 refreshList 同策略） */
+	function mountListAfterPaint() {
+		refreshList()
+	}
+
+	function scheduleFirstListMount() {
+		if (listMountScheduled) {
+			return
+		}
+		listMountScheduled = true
+		mountListAfterPaint()
+	}
+
+	function onOpenRow(index : number) {
+		if (index < 0 || index >= rowPaths.value.length) {
+			return
+		}
+		openDemoPage(rowPaths.value[index])
+	}
+
+	function onCategoryChange(_index : number) {
+		if (!listReady.value) {
+			// 首挂未完成：只改筛选条件，由进行中的任务或下一次 mount 消费
+			return
+		}
+		refreshList()
+	}
+
+	function onSearch(_val : string) {
+		if (!listReady.value) {
+			return
+		}
+		refreshList()
+	}
+
+	function onSearchChange(_val : string) {
+		if (!listReady.value) {
+			return
+		}
+		refreshList()
+	}
+
+	function clearSearch() {
+		if (search.value.length == 0) {
+			return
+		}
+		search.value = ''
+		if (!listReady.value) {
+			return
+		}
+		refreshList()
+	}
+
+	function onTabChange(index : number) {
+		if (index == 1) {
+			return
+		}
+		switchDemoTab(index)
+	}
+
+	onLoad((query) => {
+		// 只解析入参，不挂列表，避免阻塞 switchTab 首帧
+		// 注意：微信小程序 query 为普通对象，无 getString
+		const tabRaw = demoReadQueryString(query, 'tab')
+		if (tabRaw.length > 0) {
+			const n = parseInt(tabRaw)
+			if (!isNaN(n) && n >= 0 && n <= 4) {
+				categoryIndex.value = n
+			}
+		}
+	})
+
+	onReady(() => {
+		scheduleFirstListMount()
+	})
+
+	onShow(() => {
+		hideDemoNativeTabBar()
+		darkMode.value = bindDemoThemePage()
+		// switchTab 保活页：onLoad/onReady 不再次执行，分类跳转在此消费
+		const pending = takePendingCatalogTab()
+		if (pending >= 0) {
+			categoryIndex.value = pending
+			if (listReady.value) {
+				refreshList()
+			}
+			// 未 ready：categoryIndex 已更新，onReady / 进行中的 mount 会读最新筛选
+		}
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.search-wrap {
+		flex-direction: column;
+		padding: 8px 12px 4px 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.tabs-wrap {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		flex-direction: column;
+		padding: 12px 0 24px 0;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.nav-action {
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		min-width: 40px;
+		height: 36px;
+		padding-right: 4px;
+	}
+
+	.nav-action__text {
+		font-size: 14px;
+		color: #ffffff;
+	}
+
+	.result-bar {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding-left: 12px;
+		padding-right: 12px;
+		margin-bottom: 10px;
+	}
+
+	.result-bar__text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.list-placeholder {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 56px;
+		padding-bottom: 56px;
+	}
+</style>
