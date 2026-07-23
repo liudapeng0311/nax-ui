@@ -122,7 +122,7 @@
 | 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
 | 列表 | `nax-list` | P2 | 滚动列表壳：触底加载 + 下拉刷新；受控 loading/finished/error/empty/refreshing；虚拟列表见 `nax-virtual-list` | `loading` `finished` `error` `empty` `enableRefresh` `refreshing` `immediateCheck` `offset` `height` `usePageScroll` / `load` `refresh` `update:refreshing` `click-error`；方法 `check` **done** |
 | 滑动操作 | `nax-swipe-action` / `nax-swipe-action-group` | P2 | 左滑操作菜单（对齐 uView Pro SwipeAction）；group 互斥；options type token | `show` `options` `name` `disabled` `btnWidth` `rightWidth` / `click` `open` `close` `update:show`；插槽 `right` **done** |
-| 虚拟列表 | `nax-virtual-list` | P1 | 固定行高窗口裁剪；大数据量只渲染可视区；触底/刷新/空态对齐 list | `list` `itemHeight` `buffer` `keyField` `height` / `load` `scroll` `visible-change` `click`；方法 `scrollToIndex` **done** |
+| 虚拟列表 | `nax-virtual-list` | P1 | 固定行高窗口裁剪；鸿蒙滞后更新 + scrollend 同步事件；触底/刷新/空态对齐 list | `list` `itemHeight` `buffer` `keyField` `height` / `load` `scroll` `visible-change` `click`；方法 `scrollToIndex` **done** |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
 | 步骤条 | `nax-steps` / `nax-step` | P1 | 多步进度展示（对齐 uView Pro Steps，增强 status） | `list`/`nax-step` `current` `direction` `mode` `type` `size` `clickable` / `click` **done** |
 | 图片 | `nax-image` | P2 | 占位/失败态 |
@@ -181,7 +181,7 @@
 | `nax-steps` | done | 插件包 `uni_modules/nax-steps`；`nax-steps`+`nax-step`；list/组合；horizontal/vertical；number/dot；type；单步 status；clickable；demo `pages/components/steps` |
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
-| `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；固定行高 spacer 窗口裁剪；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
+| `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步（避免 list-view 全量挂载进页卡死）；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---

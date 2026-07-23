@@ -14,6 +14,9 @@
 			:refresher-default-style="refresherDefaultStyle"
 			:style="scrollStyle"
 			@scroll="onScroll"
+			<!-- #ifdef APP-HARMONY -->
+			@scrollend="onScrollEnd"
+			<!-- #endif -->
 			@scrolltolower="onScrollToLower"
 			@refresherrefresh="onRefresherRefresh"
 			@refresherrestore="onRefresherRestore"
@@ -30,10 +33,15 @@
 					</slot>
 				</view>
 
-				<view v-else class="nax-virtual-list__window">
-					<!-- 顶部占位：撑开滚动高度，只渲染可视区节点 -->
+				<view v-else class="nax-virtual-list__window" :style="windowStyle">
+					<!-- App：上下 spacer 撑开滚动高度 -->
+					<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
 					<view class="nax-virtual-list__spacer" :style="topSpacerStyle"></view>
-
+					<!-- #endif -->
+					<!-- Web/小程序：固定总高 + translateY，避免 scroll anchoring 连滚到底 -->
+					<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+					<view class="nax-virtual-list__shift" :style="shiftStyle">
+					<!-- #endif -->
 					<view
 						v-for="(row, rowIndex) in visibleRows"
 						:key="rowKey(row, rowIndex)"
@@ -48,8 +56,12 @@
 							</view>
 						</slot>
 					</view>
-
+					<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+					</view>
+					<!-- #endif -->
+					<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
 					<view class="nax-virtual-list__spacer" :style="bottomSpacerStyle"></view>
+					<!-- #endif -->
 				</view>
 
 				<view v-if="!empty" class="nax-virtual-list__footer">
@@ -88,11 +100,11 @@
 
 	/**
 	 * nax-virtual-list
-	 * @description 固定行高虚拟列表。上下 spacer + 可视区窗口裁剪，大数据量只挂载少量节点。
+	 * @description 固定行高虚拟列表。App 端 spacer 窗口裁剪；Web/小程序固定总高 + translateY（规避滚动锚定连滚）。鸿蒙滚动滞后更新 + scrollend 同步事件。
 	 * @property {any[]} list 完整数据源（不切片传参；内部按滚动窗口渲染）
 	 * @property {number} itemHeight 行高 px（固定等高）
-	 * @property {number} buffer 上下额外缓冲行数，默认 6
-	 * @property {string} keyField 对象项唯一键字段；空则用 index
+	 * @property {number} buffer 上下额外缓冲行数，默认 6；鸿蒙不足 12 抬到 12
+	 * @property {string} keyField 业务 id 字段；行 DOM key 使用窗口位置
 	 * @property {string} height 滚动区高度；空则 flex:1
 	 * @property {boolean} showScrollbar 是否显示滚动条
 	 * @property {boolean} loading / finished / error / empty 底栏状态（对齐 nax-list）
@@ -234,6 +246,13 @@
 	let lastEmittedStart = -1
 	let lastEmittedEnd = -1
 	let measureToken = 0
+	// #ifdef APP-HARMONY
+	let pendingScrollTop = 0.0
+	let scrollMergeScheduled = false
+	let scrollMergeToken = 0
+	let committedStart = 0
+	let committedEnd = 0
+	// #endif
 
 	const instance = getCurrentInstance()
 
@@ -262,7 +281,13 @@
 		if (b == null || b < 0) {
 			return 0
 		}
-		return Math.floor(b)
+		var n = Math.floor(b)
+		// #ifdef APP-HARMONY
+		if (n < 12) {
+			n = 12
+		}
+		// #endif
+		return n
 	}
 
 	function formatHeight(value : string) : string {
@@ -328,11 +353,18 @@
 	})
 
 	const scrollStyle = computed((): string => {
+		var style = ''
 		const h = formatHeight(props.height)
 		if (h.length > 0) {
-			return 'height:' + h + ';'
+			style = 'height:' + h + ';'
+		} else {
+			style = 'flex:1;'
 		}
-		return 'flex:1;'
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// 关闭浏览器滚动锚定，防止窗口更新时 scrollTop 被自动推高连滚到底
+		style += 'overflow-anchor:none;'
+		// #endif
+		return style
 	})
 
 	const itemStyle = computed((): string => {
@@ -353,6 +385,28 @@
 		}
 		const h = remain * rowHeight()
 		return 'height:' + h.toString() + 'px;'
+	})
+
+	// Web/小程序：整表高度固定，行窗口用 translateY 偏移（避免 spacer 改高触发 scroll anchoring）
+	const windowStyle = computed((): string => {
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		const total = listLength()
+		const h = total * rowHeight()
+		return 'height:' + h.toString() + 'px;'
+		// #endif
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	const shiftStyle = computed((): string => {
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		const y = startIndex.value * rowHeight()
+		return 'transform:translateY(' + y.toString() + 'px);'
+		// #endif
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	const refresherTriggered = computed((): boolean => {
@@ -429,6 +483,20 @@
 			end = start
 		}
 
+		// #ifdef APP-HARMONY
+		if (!forceEmit) {
+			const sticky = Math.max(2, Math.floor(buf / 2))
+			const cStart = committedStart
+			const cEnd = committedEnd
+			if (cEnd > cStart) {
+				const mid = Math.floor(scrollTop / ih)
+				if (mid >= (cStart + sticky) && mid <= (cEnd - sticky - 1)) {
+					return
+				}
+			}
+		}
+		// #endif
+
 		if (!forceEmit && start == startIndex.value && end == endIndex.value) {
 			return
 		}
@@ -436,24 +504,27 @@
 		startIndex.value = start
 		endIndex.value = end
 		visibleRows.value = buildVisibleRows(start, end)
+		// #ifdef APP-HARMONY
+		committedStart = start
+		committedEnd = end
+		// #endif
 
 		if (forceEmit || start != lastEmittedStart || end != lastEmittedEnd) {
 			lastEmittedStart = start
 			lastEmittedEnd = end
+			// #ifdef APP-HARMONY
+			if (forceEmit) {
+				emitVisible(start, end)
+			}
+			// #endif
+			// #ifndef APP-HARMONY
 			emitVisible(start, end)
+			// #endif
 		}
 	}
 
-	function rowKey(row : NaxVirtualRow, rowIndex : number) : string {
-		const field = props.keyField.trim()
-		if (field.length > 0 && row.item != null) {
-			const obj = row.item as UTSJSONObject
-			const raw = obj[field]
-			if (raw != null) {
-				return '' + raw
-			}
-		}
-		return 'i-' + row.index.toString() + '-' + rowIndex.toString()
+	function rowKey(_row : NaxVirtualRow, rowIndex : number) : string {
+		return 'p-' + rowIndex.toString()
 	}
 
 	function fallbackText(row : NaxVirtualRow) : string {
@@ -486,10 +557,7 @@
 		return '#' + row.index.toString()
 	}
 
-	function onScroll(e : UniScrollEvent) {
-		const top = e.detail.scrollTop
-		scrollTopValue.value = top
-		updateRange(top, false)
+	function emitScrollPayload(top : number) {
 		const payload = {
 			scrollTop: top,
 			start: startIndex.value,
@@ -497,6 +565,81 @@
 		} as UTSJSONObject
 		emit('scroll', payload)
 	}
+
+	// #ifdef APP-HARMONY
+	function flushHarmonyScroll(forceEmit : boolean) {
+		scrollMergeScheduled = false
+		const top = pendingScrollTop
+		scrollTopValue.value = top
+		updateRange(top, forceEmit)
+		if (forceEmit) {
+			emitScrollPayload(top)
+		}
+	}
+
+	function scheduleHarmonyScroll() {
+		if (scrollMergeScheduled) {
+			return
+		}
+		scrollMergeScheduled = true
+		const token = scrollMergeToken
+		setTimeout(() => {
+			if (token != scrollMergeToken) {
+				return
+			}
+			flushHarmonyScroll(false)
+		}, 32)
+	}
+
+	function onScroll(e : UniScrollEvent) {
+		pendingScrollTop = e.detail.scrollTop
+		scheduleHarmonyScroll()
+	}
+
+	function onScrollEnd(e : UniScrollEvent) {
+		scrollMergeToken = scrollMergeToken + 1
+		pendingScrollTop = e.detail.scrollTop
+		flushHarmonyScroll(true)
+	}
+	// #endif
+
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	// Web/小程序：合并滚动帧，降低窗口重排频率
+	let pendingScrollTopWeb = 0.0
+	let scrollMergeScheduledWeb = false
+
+	function flushWebScroll() {
+		scrollMergeScheduledWeb = false
+		const top = pendingScrollTopWeb
+		scrollTopValue.value = top
+		updateRange(top, false)
+		emitScrollPayload(top)
+	}
+
+	function scheduleWebScroll() {
+		if (scrollMergeScheduledWeb) {
+			return
+		}
+		scrollMergeScheduledWeb = true
+		setTimeout(() => {
+			flushWebScroll()
+		}, 16)
+	}
+
+	function onScroll(e : UniScrollEvent) {
+		pendingScrollTopWeb = e.detail.scrollTop
+		scheduleWebScroll()
+	}
+	// #endif
+
+	// #ifdef APP-ANDROID || APP-IOS
+	function onScroll(e : UniScrollEvent) {
+		const top = e.detail.scrollTop
+		scrollTopValue.value = top
+		updateRange(top, false)
+		emitScrollPayload(top)
+	}
+	// #endif
 
 	function canLoad() : boolean {
 		if (props.disabled) {
@@ -736,6 +879,7 @@
 		flex: 1;
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
+		overflow-anchor: none;
 		/* #endif */
 	}
 
@@ -760,6 +904,15 @@
 		flex-direction: column;
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
+		overflow-anchor: none;
+		/* #endif */
+	}
+
+	.nax-virtual-list__shift {
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		overflow-anchor: none;
 		/* #endif */
 	}
 
@@ -768,6 +921,7 @@
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
 		/* #endif */
+		flex-shrink: 0;
 	}
 
 	.nax-virtual-list__item {
@@ -775,6 +929,7 @@
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
 		/* #endif */
+		flex-shrink: 0;
 		overflow: hidden;
 	}
 

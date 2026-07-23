@@ -1,3 +1,28 @@
+## 0.1.5（2026-07-23）
+
+- **修复 Web 端轻微滚动会一直滚到列表底部**：浏览器 Scroll Anchoring 在顶部 spacer 增高时自动推高 scrollTop，与窗口更新形成正反馈
+- Web/小程序（`#ifndef APP-ANDROID || APP-IOS || APP-HARMONY`）：固定总高 + `translateY` 偏移渲染；`overflow-anchor: none`；滚动约 16ms 合并
+- App 端仍使用 spacer 窗口裁剪，行为不变
+
+## 0.1.4（2026-07-23）
+
+- **修复鸿蒙进页空白卡死**：取消 `list-view` 全量 `v-for`（大数据/多列表嵌套易主线程假死）
+- 全端统一 **spacer 窗口裁剪**（只挂载可视区 + 缓冲行）
+- 鸿蒙（`APP-HARMONY`）：窗口更新带**滞后**、滚动约 32ms 合并；`scroll`/`visible-change` 在 `scrollend` 同步
+- 行 key 使用窗口位置，减少节点重排
+
+## 0.1.3（2026-07-23）
+
+- 曾尝试鸿蒙原生 list-view 回收 + scrollend 事件同步（快滑更顺，但进页易空白卡死，已回退）
+
+## 0.1.2（2026-07-23）
+
+- 窗口裁剪与滚动合并尝试
+
+## 0.1.1（2026-07-23）
+
+- 修复微信小程序滚动时 “More than one slot named d-N” 警告：行节点改用窗口位置 key
+
 ## 0.1.0（2026-07-22）
 
 - 首版：固定行高窗口裁剪虚拟列表

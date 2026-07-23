@@ -2,11 +2,11 @@
 	<scroll-view style="flex:1" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__title">nax-virtual-list</text>
-			<text class="page__desc">固定行高虚拟列表：只渲染可视区 + 缓冲行，适合一次挂大量数据。</text>
+			<text class="page__desc">固定行高虚拟列表：只渲染可视区 + 缓冲行。适合一次挂大量数据。</text>
 
 			<view class="section">
 				<text class="section__title">5000 条 · 窗口裁剪</text>
-				<text class="hint">itemHeight=52 · buffer=8 · 可见 {{ visStart }} ~ {{ visEnd }}（约 {{ visCount }} 行节点）</text>
+				<text class="hint">itemHeight=52 · buffer=10 · 可见 {{ visStart }} ~ {{ visEnd }}（约 {{ visCount }} 行节点）</text>
 				<view class="list-panel">
 					<nax-virtual-list
 						ref="basicRef"
@@ -14,7 +14,7 @@
 						height="420px"
 						:list="basicList"
 						:item-height="52"
-						:buffer="8"
+						:buffer="10"
 						key-field="id"
 						@visible-change="onVisibleChange"
 						@click="onRowClick"
@@ -404,10 +404,14 @@
 	const emptyList = ref([] as UTSJSONObject[])
 
 	onMounted(() => {
-		buildBasic(5000)
-		// 分页 / 刷新示例首屏灌入
-		onPageLoad()
-		onRfLoad()
+		// 先进页再灌数，避免导航动画期间同步创建大数据
+		nextTick(() => {
+			setTimeout(() => {
+				buildBasic(5000)
+				onPageLoad()
+				onRfLoad()
+			}, 50)
+		})
 	})
 </script>
 
