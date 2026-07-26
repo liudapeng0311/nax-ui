@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="page-root nax-theme" :class="themeExtraClass" :style="pageRootStyle">
 		<nax-nav-bar
 			title="我的"
@@ -6,54 +6,60 @@
 			:border="false"
 			type="primary"
 			home-url="/pages/index/index"
+			:fixed="chromeFixed"
+			:placeholder="chromeFixed"
 		></nax-nav-bar>
 
-		<scroll-view class="page-scroll" scroll-y="true">
-			<view class="nax-theme page" :class="themeExtraClass">
-				<view class="profile">
-					<nax-avatar text="NX" size="lg"></nax-avatar>
-					<view class="profile__info">
-						<text class="profile__name">nax-ui 演示</text>
-						<text class="profile__sub">面向正式上架与插件市场的组件样板工程</text>
+		<view class="page-body" :style="pageBodyStyle">
+			<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
+				<view class="nax-theme page" :class="themeExtraClass">
+					<view class="profile">
+						<nax-avatar text="NX" size="lg"></nax-avatar>
+						<view class="profile__info">
+							<text class="profile__name">nax-ui 演示</text>
+							<text class="profile__sub">面向正式上架与插件市场的组件样板工程</text>
+						</view>
+					</view>
+
+					<nax-cell-group inset title="偏好设置">
+						<nax-cell title="深色模式" label="基于 nax-ui-theme 的 dark token" icon="settings" :border="true">
+							<template #right>
+								<nax-switch :model-value="darkMode" @change="onDarkChange"></nax-switch>
+							</template>
+						</nax-cell>
+						<nax-cell title="主题色" value="Primary #18a058" icon="star"></nax-cell>
+					</nax-cell-group>
+
+					<view class="group-gap"></view>
+
+					<nax-cell-group inset title="项目信息">
+						<nax-cell title="版本" value="1.0.0" icon="info"></nax-cell>
+						<nax-cell title="技术栈" value="uni-app x / uvue" icon="square"></nax-cell>
+						<nax-cell title="组件数量" :value="componentCountText" icon="square-check" is-link @click="goCatalog"></nax-cell>
+						<nax-cell title="场景示例" value="3 个" icon="star" is-link @click="goScenes"></nax-cell>
+					</nax-cell-group>
+
+					<view class="group-gap"></view>
+
+					<nax-cell-group inset title="快捷入口">
+						<nax-cell title="导航栏组件" label="nax-nav-bar" icon="home" is-link @click="goNavBar"></nax-cell>
+						<nax-cell title="底部标签栏" label="nax-tabbar" icon="more" is-link @click="goTabbar"></nax-cell>
+						<nax-cell title="按钮组件" label="nax-button" icon="square-check" is-link @click="goButton"></nax-cell>
+					</nax-cell-group>
+
+					<view class="footer">
+						<text class="footer__text">主题变量：--nax-color-primary</text>
+						<text class="footer__text">设计参考：Naive UI 色板</text>
 					</view>
 				</view>
-
-				<nax-cell-group inset title="偏好设置">
-					<nax-cell title="深色模式" label="基于 nax-ui-theme 的 dark token" icon="settings" :border="true">
-						<template #right>
-							<nax-switch :model-value="darkMode" @change="onDarkChange"></nax-switch>
-						</template>
-					</nax-cell>
-					<nax-cell title="主题色" value="Primary #18a058" icon="star"></nax-cell>
-				</nax-cell-group>
-
-				<view class="group-gap"></view>
-
-				<nax-cell-group inset title="项目信息">
-					<nax-cell title="版本" value="1.0.0" icon="info"></nax-cell>
-					<nax-cell title="技术栈" value="uni-app x / uvue" icon="square"></nax-cell>
-					<nax-cell title="组件数量" :value="componentCountText" icon="square-check" is-link @click="goCatalog"></nax-cell>
-					<nax-cell title="场景示例" value="3 个" icon="star" is-link @click="goScenes"></nax-cell>
-				</nax-cell-group>
-
-				<view class="group-gap"></view>
-
-				<nax-cell-group inset title="快捷入口">
-					<nax-cell title="导航栏组件" label="nax-nav-bar" icon="home" is-link @click="goNavBar"></nax-cell>
-					<nax-cell title="底部标签栏" label="nax-tabbar" icon="more" is-link @click="goTabbar"></nax-cell>
-					<nax-cell title="按钮组件" label="nax-button" icon="square-check" is-link @click="goButton"></nax-cell>
-				</nax-cell-group>
-
-				<view class="footer">
-					<text class="footer__text">主题变量：--nax-color-primary</text>
-					<text class="footer__text">设计参考：Naive UI 色板</text>
-				</view>
-			</view>
-		</scroll-view>
+			</scroll-view>
+		</view>
 
 		<nax-tabbar
 			:model-value="3"
 			:list="tabList"
+			:fixed="chromeFixed"
+			:placeholder="chromeFixed"
 			@change="onTabChange"
 		></nax-tabbar>
 	</view>
@@ -78,18 +84,58 @@
 		return ''
 	})
 
+	const chromeFixed = ref(true)
 	const pageRootStyle = ref('')
+	const pageBodyStyle = ref('')
+	const pageScrollStyle = ref('')
 	function refreshPageRootStyle() {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// App：顶底栏 fixed 贴边；中间区 absolute 卡在顶底之间并写死 px 高
+		chromeFixed.value = true
 		const info = uni.getSystemInfoSync()
-		var h = info.windowHeight
-		if (h <= 0) {
-			h = info.screenHeight
+		var pageH = info.windowHeight
+		if (pageH <= 0) {
+			pageH = info.screenHeight
 		}
-		if (h > 0) {
-			pageRootStyle.value = 'height:' + h.toString() + 'px;width:100%;'
-		} else {
-			pageRootStyle.value = 'flex:1;width:100%;height:100%;'
+		var status = 0
+		if (info.statusBarHeight > 0) {
+			status = info.statusBarHeight
 		}
+		var safeBottom = 0
+		const win = uni.getWindowInfo()
+		if (win.safeAreaInsets != null && win.safeAreaInsets.bottom > 0) {
+			safeBottom = win.safeAreaInsets.bottom
+		} else if (win.safeArea != null) {
+			const gap = win.screenHeight - win.safeArea.bottom
+			if (gap > 0) {
+				safeBottom = gap
+			}
+		}
+		if (pageH <= 0 && win.windowHeight > 0) {
+			pageH = win.windowHeight
+		}
+		if (status <= 0 && win.statusBarHeight > 0) {
+			status = win.statusBarHeight
+		}
+		if (pageH <= 0) {
+			pageH = 700
+		}
+		const navH = status + 44
+		const tabH = 50 + safeBottom
+		var bodyH = pageH - navH - tabH
+		if (bodyH < 200) {
+			bodyH = 200
+		}
+		pageRootStyle.value = 'position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:' + pageH.toString() + 'px;'
+		pageBodyStyle.value = 'position:absolute;left:0;right:0;top:' + navH.toString() + 'px;bottom:' + tabH.toString() + 'px;width:100%;height:' + bodyH.toString() + 'px;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyH.toString() + 'px;'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		chromeFixed.value = true
+		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
+		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'
+		pageScrollStyle.value = 'flex:1;width:100%;height:100%;'
+		// #endif
 	}
 	refreshPageRootStyle()
 
@@ -137,29 +183,19 @@
 
 <style>
 	.page-root {
-		flex: 1;
 		flex-direction: column;
 		width: 100%;
-		height: 100%;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 
-	/* App：绝对铺满视口，不依赖 page 选择器（uvue 不支持 tag 选择器） */
-	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
-	.page-root {
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		height: auto;
+	.page-body {
+		flex-direction: column;
+		width: 100%;
 	}
-	/* #endif */
 
 	.page-scroll {
-		flex: 1;
 		width: 100%;
-		height: 0;
+		flex-direction: column;
 	}
 
 	.page {
@@ -215,4 +251,3 @@
 		margin-bottom: 4px;
 	}
 </style>
-

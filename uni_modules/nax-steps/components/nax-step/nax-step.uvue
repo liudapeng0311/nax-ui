@@ -117,40 +117,46 @@
 	const stepId = 'nax-step-' + Math.floor(Math.random() * 10000000).toString()
 
 	const inGroup = inject('naxStepsInGroup', false) as boolean
-	const currentRef = inject('naxStepsCurrent', null)
-	const directionRef = inject('naxStepsDirection', null)
-	const modeRef = inject('naxStepsMode', null)
-	const typeRef = inject('naxStepsType', null)
-	const sizeRef = inject('naxStepsSize', null)
-	const iconRef = inject('naxStepsIcon', null)
-	const errorIconRef = inject('naxStepsErrorIcon', null)
-	const clickableRef = inject('naxStepsClickable', null)
-	const totalRef = inject('naxStepsTotal', null)
-	const registerRaw = inject('naxStepsRegister', null)
-	const unregisterRaw = inject('naxStepsUnregister', null)
-	const onClickRaw = inject('naxStepsOnClick', null)
+	// 安卓 UTS：inject 默认值必须是同类型 Ref/函数，不能用 null（会收成 Void，再注入 Ref 即 ClassCastException）
+	const currentRef = inject('naxStepsCurrent', ref(0)) as Ref<number>
+	const directionRef = inject('naxStepsDirection', ref('horizontal')) as Ref<string>
+	const modeRef = inject('naxStepsMode', ref('number')) as Ref<string>
+	const typeRef = inject('naxStepsType', ref('primary')) as Ref<string>
+	const sizeRef = inject('naxStepsSize', ref('md')) as Ref<string>
+	const iconRef = inject('naxStepsIcon', ref('check')) as Ref<string>
+	const errorIconRef = inject('naxStepsErrorIcon', ref('close')) as Ref<string>
+	const clickableRef = inject('naxStepsClickable', ref(false)) as Ref<boolean>
+	const totalRef = inject('naxStepsTotal', ref(0)) as Ref<number>
+	function noopRegister(_id : string) : number {
+		return -1
+	}
+	function noopUnregister(_id : string) {}
+	function noopOnClick(_index : number) {}
+	const registerRaw = inject('naxStepsRegister', noopRegister) as (id : string) => number
+	const unregisterRaw = inject('naxStepsUnregister', noopUnregister) as (id : string) => void
+	const onClickRaw = inject('naxStepsOnClick', noopOnClick) as (index : number) => void
 
 	const autoIndex = ref(-1)
 
-	function readRefNumber(r : any | null, fallback : number) : number {
+	function readRefNumber(r : Ref<number>, fallback : number) : number {
 		if (r == null) {
 			return fallback
 		}
-		return (r as Ref<number>).value
+		return r.value
 	}
 
-	function readRefString(r : any | null, fallback : string) : string {
+	function readRefString(r : Ref<string>, fallback : string) : string {
 		if (r == null) {
 			return fallback
 		}
-		return (r as Ref<string>).value
+		return r.value
 	}
 
-	function readRefBool(r : any | null, fallback : boolean) : boolean {
+	function readRefBool(r : Ref<boolean>, fallback : boolean) : boolean {
 		if (r == null) {
 			return fallback
 		}
-		return (r as Ref<boolean>).value
+		return r.value
 	}
 
 	function normalizeStatus(value : string) : string {
@@ -172,15 +178,13 @@
 		return ''
 	}
 
-	if (inGroup && props.index < 0 && registerRaw != null) {
-		const fn = registerRaw as (id : string) => number
-		autoIndex.value = fn(stepId)
+	if (inGroup && props.index < 0) {
+		autoIndex.value = registerRaw(stepId)
 	}
 
 	onUnmounted(() => {
-		if (inGroup && props.index < 0 && unregisterRaw != null) {
-			const fn = unregisterRaw as (id : string) => void
-			fn(stepId)
+		if (inGroup && props.index < 0) {
+			unregisterRaw(stepId)
 		}
 	})
 
@@ -439,10 +443,7 @@
 		if (!isClickable.value) {
 			return
 		}
-		if (onClickRaw != null) {
-			const fn = onClickRaw as (index : number) => void
-			fn(stepIndex.value)
-		}
+		onClickRaw(stepIndex.value)
 	}
 </script>
 

@@ -6,43 +6,49 @@
 			:border="false"
 			type="primary"
 			home-url="/pages/index/index"
+			:fixed="chromeFixed"
+			:placeholder="chromeFixed"
 		></nax-nav-bar>
 
-		<scroll-view class="page-scroll" scroll-y="true">
-			<view class="nax-theme page" :class="themeExtraClass">
-				<text class="intro">用现有组件拼装接近真实业务的页面片段，便于上架演示与二次开发参考。</text>
+		<view class="page-body" :style="pageBodyStyle">
+			<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
+				<view class="nax-theme page" :class="themeExtraClass">
+					<text class="intro">用现有组件拼装接近真实业务的页面片段，便于上架演示与二次开发参考。</text>
 
-				<view
-					v-for="(scene, index) in sceneList"
-					:key="index"
-					class="card"
-					@click="onOpen(scene)"
-				>
-					<view class="card__cover" :class="'card__cover--' + (index % 3).toString()">
-						<nax-icon :name="itemIcon(scene)" size="28" color="#ffffff"></nax-icon>
+					<view
+						v-for="(scene, index) in sceneList"
+						:key="index"
+						class="card"
+						@click="onOpen(scene)"
+					>
+						<view class="card__cover" :class="'card__cover--' + (index % 3).toString()">
+							<nax-icon :name="itemIcon(scene)" size="28" color="#ffffff"></nax-icon>
+						</view>
+						<view class="card__body">
+							<view class="card__row">
+								<text class="card__title">{{ itemTitle(scene) }}</text>
+								<nax-tag type="primary" variant="light" size="sm" :label="itemTag(scene)"></nax-tag>
+							</view>
+							<text class="card__desc">{{ itemDesc(scene) }}</text>
+							<view class="card__footer">
+								<text class="card__link">查看示例</text>
+								<nax-icon name="chevron-right" size="16" color="#18a058"></nax-icon>
+							</view>
+						</view>
 					</view>
-					<view class="card__body">
-						<view class="card__row">
-							<text class="card__title">{{ itemTitle(scene) }}</text>
-							<nax-tag type="primary" variant="light" size="sm" :label="itemTag(scene)"></nax-tag>
-						</view>
-						<text class="card__desc">{{ itemDesc(scene) }}</text>
-						<view class="card__footer">
-							<text class="card__link">查看示例</text>
-							<nax-icon name="chevron-right" size="16" color="#18a058"></nax-icon>
-						</view>
+
+					<view class="tips">
+						<nax-alert type="info" title="提示" description="场景页只做组合演示，不接真实接口；提交类操作用 Toast / Dialog 反馈。"></nax-alert>
 					</view>
 				</view>
-
-				<view class="tips">
-					<nax-alert type="info" title="提示" description="场景页只做组合演示，不接真实接口；提交类操作用 Toast / Dialog 反馈。"></nax-alert>
-				</view>
-			</view>
-		</scroll-view>
+			</scroll-view>
+		</view>
 
 		<nax-tabbar
 			:model-value="2"
 			:list="tabList"
+			:fixed="chromeFixed"
+			:placeholder="chromeFixed"
 			@change="onTabChange"
 		></nax-tabbar>
 	</view>
@@ -68,18 +74,58 @@
 		return ''
 	})
 
+	const chromeFixed = ref(true)
 	const pageRootStyle = ref('')
+	const pageBodyStyle = ref('')
+	const pageScrollStyle = ref('')
 	function refreshPageRootStyle() {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// App：顶底栏 fixed 贴边；中间区 absolute 卡在顶底之间并写死 px 高
+		chromeFixed.value = true
 		const info = uni.getSystemInfoSync()
-		var h = info.windowHeight
-		if (h <= 0) {
-			h = info.screenHeight
+		var pageH = info.windowHeight
+		if (pageH <= 0) {
+			pageH = info.screenHeight
 		}
-		if (h > 0) {
-			pageRootStyle.value = 'height:' + h.toString() + 'px;width:100%;'
-		} else {
-			pageRootStyle.value = 'flex:1;width:100%;height:100%;'
+		var status = 0
+		if (info.statusBarHeight > 0) {
+			status = info.statusBarHeight
 		}
+		var safeBottom = 0
+		const win = uni.getWindowInfo()
+		if (win.safeAreaInsets != null && win.safeAreaInsets.bottom > 0) {
+			safeBottom = win.safeAreaInsets.bottom
+		} else if (win.safeArea != null) {
+			const gap = win.screenHeight - win.safeArea.bottom
+			if (gap > 0) {
+				safeBottom = gap
+			}
+		}
+		if (pageH <= 0 && win.windowHeight > 0) {
+			pageH = win.windowHeight
+		}
+		if (status <= 0 && win.statusBarHeight > 0) {
+			status = win.statusBarHeight
+		}
+		if (pageH <= 0) {
+			pageH = 700
+		}
+		const navH = status + 44
+		const tabH = 50 + safeBottom
+		var bodyH = pageH - navH - tabH
+		if (bodyH < 200) {
+			bodyH = 200
+		}
+		pageRootStyle.value = 'position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:' + pageH.toString() + 'px;'
+		pageBodyStyle.value = 'position:absolute;left:0;right:0;top:' + navH.toString() + 'px;bottom:' + tabH.toString() + 'px;width:100%;height:' + bodyH.toString() + 'px;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyH.toString() + 'px;'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		chromeFixed.value = true
+		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
+		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'
+		pageScrollStyle.value = 'flex:1;width:100%;height:100%;'
+		// #endif
 	}
 	refreshPageRootStyle()
 
@@ -122,29 +168,19 @@
 
 <style>
 	.page-root {
-		flex: 1;
 		flex-direction: column;
 		width: 100%;
-		height: 100%;
 		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 
-	/* App：绝对铺满视口，不依赖 page 选择器（uvue 不支持 tag 选择器） */
-	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
-	.page-root {
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		height: auto;
+	.page-body {
+		flex-direction: column;
+		width: 100%;
 	}
-	/* #endif */
 
 	.page-scroll {
-		flex: 1;
 		width: 100%;
-		height: 0;
+		flex-direction: column;
 	}
 
 	.page {
@@ -233,4 +269,3 @@
 		margin-top: 4px;
 	}
 </style>
-

@@ -6,6 +6,8 @@
 			:border="false"
 			type="primary"
 			home-url="/pages/index/index"
+			:fixed="chromeFixed"
+			:placeholder="chromeFixed"
 		>
 			<template #right>
 				<view class="nav-action" @click="goMine">
@@ -14,93 +16,99 @@
 			</template>
 		</nax-nav-bar>
 
-		<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
-			<view class="nax-theme page" :class="themeExtraClass">
-				<!-- Hero -->
-				<view class="hero">
-					<view class="hero__top">
-						<view class="hero__brand">
-							<view class="hero__logo">
-								<image class="hero__logo-img" src="/static/logo.png" mode="aspectFill"></image>
-							</view>
-							<view class="hero__titles">
-								<text class="hero__name">nax-ui</text>
-								<text class="hero__slogan">uni-app x 通用 UI 组件库</text>
-							</view>
-						</view>
-						<nax-tag type="success" variant="solid" size="sm" round label="v1.0"></nax-tag>
-					</view>
-					<text class="hero__desc">蒸汽模式优先 · CSS 变量主题 · 多端一致体验</text>
-					<view class="hero__actions">
-						<nax-button type="primary" size="md" label="浏览组件" icon="category" @click="goCatalog"></nax-button>
-						<view class="hero__gap"></view>
-						<nax-button size="md" variant="secondary" label="场景示例" icon="star" @click="goScenes"></nax-button>
-					</view>
-				</view>
+		<view class="page-body" :style="pageBodyStyle">
+			<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
+				<view class="nax-theme page" :class="themeExtraClass">
+					<!-- 首帧兜底：即使子组件异常，也能看到原生文本 -->
+					<text class="boot-tip">{{ bootTip }}</text>
 
-				<!-- Stats：数值统一用 string，避免鸿蒙 text 绑到非字符串/对象时整段 JSON 化 -->
-				<view class="stats">
-					<view class="stats__item">
-						<text class="stats__num" :lines="1">{{ totalCountText }}</text>
-						<text class="stats__label" :lines="1">组件</text>
-					</view>
-					<view class="stats__divider"></view>
-					<view class="stats__item">
-						<text class="stats__num" :lines="1">4</text>
-						<text class="stats__label" :lines="1">分类</text>
-					</view>
-					<view class="stats__divider"></view>
-					<view class="stats__item">
-						<text class="stats__num" :lines="1">3</text>
-						<text class="stats__label" :lines="1">场景</text>
-					</view>
-					<view class="stats__divider"></view>
-					<view class="stats__item">
-						<text class="stats__num" :lines="1">多端</text>
-						<text class="stats__label" :lines="1">兼容</text>
-					</view>
-				</view>
-
-				<!-- Notice -->
-				<view class="block">
-					<nax-notice-bar
-						type="primary"
-						:list="noticeList"
-						:show-more="false"
-					></nax-notice-bar>
-				</view>
-
-				<!-- Scenes preview：字段已在 script 预解析为 string，模板只绑字符串 -->
-				<view class="section section--last">
-					<view class="section__head">
-						<text class="section__title">场景示例</text>
-						<text class="section__more" @click="goScenes">更多</text>
-					</view>
-					<view
-						v-for="(scene, sIndex) in sceneRows"
-						:key="sIndex"
-						class="scene-card"
-						@click="onOpenScene(sIndex)"
-					>
-						<view class="scene-card__icon">
-							<nax-icon :name="sceneIcon(sIndex)" size="22" color="#18a058"></nax-icon>
-						</view>
-						<view class="scene-card__body">
-							<view class="scene-card__row">
-								<text class="scene-card__name" :lines="1">{{ sceneTitle(sIndex) }}</text>
-								<nax-tag type="primary" variant="light" size="sm" :label="sceneTag(sIndex)"></nax-tag>
+					<view v-if="contentReady" class="hero">
+						<view class="hero__top">
+							<view class="hero__brand">
+								<view class="hero__logo">
+									<image class="hero__logo-img" src="/static/logo.png" mode="aspectFill"></image>
+								</view>
+								<view class="hero__titles">
+									<text class="hero__name">nax-ui</text>
+									<text class="hero__slogan">uni-app x 通用 UI 组件库</text>
+								</view>
 							</view>
-							<text class="scene-card__desc" :lines="2">{{ sceneDesc(sIndex) }}</text>
+							<nax-tag type="success" variant="solid" size="sm" round label="v1.0"></nax-tag>
 						</view>
-						<nax-icon name="chevron-right" size="18" color="#e5e5ea"></nax-icon>
+						<text class="hero__desc">蒸汽模式优先 · CSS 变量主题 · 多端一致体验</text>
+						<view class="hero__actions">
+							<nax-button type="primary" size="md" label="浏览组件" icon="category" @click="goCatalog"></nax-button>
+							<view class="hero__gap"></view>
+							<nax-button size="md" variant="secondary" label="场景示例" icon="star" @click="goScenes"></nax-button>
+						</view>
+					</view>
+
+					<view v-if="contentReady" class="stats">
+						<view class="stats__item">
+							<text class="stats__num" :lines="1">{{ totalCountText }}</text>
+							<text class="stats__label" :lines="1">组件</text>
+						</view>
+						<view class="stats__divider"></view>
+						<view class="stats__item">
+							<text class="stats__num" :lines="1">4</text>
+							<text class="stats__label" :lines="1">分类</text>
+						</view>
+						<view class="stats__divider"></view>
+						<view class="stats__item">
+							<text class="stats__num" :lines="1">3</text>
+							<text class="stats__label" :lines="1">场景</text>
+						</view>
+						<view class="stats__divider"></view>
+						<view class="stats__item">
+							<text class="stats__num" :lines="1">多端</text>
+							<text class="stats__label" :lines="1">兼容</text>
+						</view>
+					</view>
+
+					<!-- 通知条延后挂载：避免安卓首屏 measure/animate 拖垮整页 -->
+					<view v-if="noticeReady" class="block">
+						<nax-notice-bar
+							type="primary"
+							:list="noticeList"
+							:show-more="false"
+							mode="vertical"
+							scroll="vertical"
+						></nax-notice-bar>
+					</view>
+
+					<view v-if="contentReady" class="section section--last">
+						<view class="section__head">
+							<text class="section__title">场景示例</text>
+							<text class="section__more" @click="goScenes">更多</text>
+						</view>
+						<view
+							v-for="(scene, sIndex) in sceneList"
+							:key="sIndex"
+							class="scene-card"
+							@click="onOpenScene(scene)"
+						>
+							<view class="scene-card__icon">
+								<nax-icon :name="itemIcon(scene)" size="22" color="#18a058"></nax-icon>
+							</view>
+							<view class="scene-card__body">
+								<view class="scene-card__row">
+									<text class="scene-card__name" :lines="1">{{ itemTitle(scene) }}</text>
+									<nax-tag type="primary" variant="light" size="sm" :label="itemTag(scene)"></nax-tag>
+								</view>
+								<text class="scene-card__desc" :lines="2">{{ itemDesc(scene) }}</text>
+							</view>
+							<nax-icon name="chevron-right" size="18" color="#e5e5ea"></nax-icon>
+						</view>
 					</view>
 				</view>
-			</view>
-		</scroll-view>
+			</scroll-view>
+		</view>
 
 		<nax-tabbar
 			:model-value="0"
 			:list="tabList"
+			:fixed="chromeFixed"
+			:placeholder="chromeFixed"
 			@change="onTabChange"
 		></nax-tabbar>
 	</view>
@@ -118,7 +126,14 @@
 		hideDemoNativeTabBar
 	} from '@/common/demo-catalog.uts'
 
-	const darkMode = ref(bindDemoThemePage())
+	// 首屏避免 theme chrome API 异常中断 setup
+	var initialDark = false
+	try {
+		initialDark = bindDemoThemePage()
+	} catch (e) {
+		initialDark = false
+	}
+	const darkMode = ref(initialDark)
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
@@ -127,123 +142,162 @@
 		return ''
 	})
 
-	// App 中间 scroll-view 需要父级确定高度；用窗口高度兜底
+	// Android 首页用文档流；iOS/鸿蒙沿用 absolute 页壳
+	const chromeFixed = ref(true)
 	const pageRootStyle = ref('')
+	const pageBodyStyle = ref('')
 	const pageScrollStyle = ref('')
+	const contentReady = ref(false)
+	const noticeReady = ref(false)
+	const bootTip = ref('首页加载中…')
+
 	function refreshPageRootStyle() {
-		// 安卓 scroll-view 必须有明确高度；height:0 在部分机型不会被 flex 撑开
+		// #ifdef APP-ANDROID
+		// 安卓首页（冷启动第一页）：不用 fixed/absolute，改文档流 + 明确 px 高度
+		// 避免首屏 fixed 顶底栏/absolute 中间层定位失败导致整页白屏
+		chromeFixed.value = false
+		const infoA = uni.getSystemInfoSync()
+		var pageHA = infoA.windowHeight
+		if (pageHA <= 0) {
+			pageHA = infoA.screenHeight
+		}
+		var statusA = 0
+		if (infoA.statusBarHeight > 0) {
+			statusA = infoA.statusBarHeight
+		}
+		var safeBottomA = 0
+		const winA = uni.getWindowInfo()
+		if (winA.safeAreaInsets != null && winA.safeAreaInsets.bottom > 0) {
+			safeBottomA = winA.safeAreaInsets.bottom
+		} else if (winA.safeArea != null) {
+			const gapA = winA.screenHeight - winA.safeArea.bottom
+			if (gapA > 0) {
+				safeBottomA = gapA
+			}
+		}
+		if (pageHA <= 0 && winA.windowHeight > 0) {
+			pageHA = winA.windowHeight
+		}
+		if (statusA <= 0 && winA.statusBarHeight > 0) {
+			statusA = winA.statusBarHeight
+		}
+		if (pageHA <= 0) {
+			pageHA = 700
+		}
+		const navHA = statusA + 44
+		const tabHA = 50 + safeBottomA
+		var bodyHA = pageHA - navHA - tabHA
+		if (bodyHA < 200) {
+			bodyHA = 200
+		}
+		pageRootStyle.value = 'width:100%;height:' + pageHA.toString() + 'px;flex-direction:column;background-color:#eef8f2;'
+		pageBodyStyle.value = 'width:100%;height:' + bodyHA.toString() + 'px;flex-direction:column;background-color:#eef8f2;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyHA.toString() + 'px;background-color:#eef8f2;'
+		bootTip.value = 'Android ' + pageHA.toString() + '/' + bodyHA.toString()
+		// #endif
+
+		// #ifdef APP-IOS || APP-HARMONY
+		chromeFixed.value = true
 		const info = uni.getSystemInfoSync()
-		var winH = info.windowHeight
-		if (winH <= 0) {
-			winH = info.screenHeight
+		var pageH = info.windowHeight
+		if (pageH <= 0) {
+			pageH = info.screenHeight
 		}
 		var status = 0
 		if (info.statusBarHeight > 0) {
 			status = info.statusBarHeight
 		}
 		var safeBottom = 0
-		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-			const win = uni.getWindowInfo()
-			if (win.safeAreaInsets != null && win.safeAreaInsets.bottom > 0) {
-				safeBottom = win.safeAreaInsets.bottom
-			} else if (win.safeArea != null) {
-				const gap = win.screenHeight - win.safeArea.bottom
-				if (gap > 0) {
-					safeBottom = gap
-				}
+		const win = uni.getWindowInfo()
+		if (win.safeAreaInsets != null && win.safeAreaInsets.bottom > 0) {
+			safeBottom = win.safeAreaInsets.bottom
+		} else if (win.safeArea != null) {
+			const gap = win.screenHeight - win.safeArea.bottom
+			if (gap > 0) {
+				safeBottom = gap
 			}
-			if (winH <= 0 && win.windowHeight > 0) {
-				winH = win.windowHeight
-			}
-			if (status <= 0 && win.statusBarHeight > 0) {
-				status = win.statusBarHeight
-			}
-		// #endif
-		if (winH <= 0) {
-			winH = 700
+		}
+		if (pageH <= 0 && win.windowHeight > 0) {
+			pageH = win.windowHeight
+		}
+		if (status <= 0 && win.statusBarHeight > 0) {
+			status = win.statusBarHeight
+		}
+		if (pageH <= 0) {
+			pageH = 700
 		}
 		const navH = status + 44
 		const tabH = 50 + safeBottom
-		var scrollH = winH - navH - tabH
-		if (scrollH < 200) {
-			scrollH = 200
+		var bodyH = pageH - navH - tabH
+		if (bodyH < 200) {
+			bodyH = 200
 		}
-		pageRootStyle.value = 'width:100%;height:' + winH.toString() + 'px;flex-direction:column;'
-		pageScrollStyle.value = 'width:100%;height:' + scrollH.toString() + 'px;'
+		pageRootStyle.value = 'position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:' + pageH.toString() + 'px;'
+		pageBodyStyle.value = 'position:absolute;left:0;right:0;top:' + navH.toString() + 'px;bottom:' + tabH.toString() + 'px;width:100%;height:' + bodyH.toString() + 'px;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyH.toString() + 'px;'
+		bootTip.value = '窗口 ' + pageH.toString() + ' / 内容区 ' + bodyH.toString()
+		// #endif
+
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		chromeFixed.value = true
+		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
+		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'
+		pageScrollStyle.value = 'flex:1;width:100%;height:100%;'
+		bootTip.value = 'nax-ui 演示首页'
+		// #endif
 	}
 	refreshPageRootStyle()
 
 	const tabList = demoTabList()
-	// 鸿蒙：text 节点必须是 string；number 直接插值在部分机型会异常
-	const totalCountText = demoCountByGroup('all').toString()
+	var sceneListSafe = [] as any[]
+	try {
+		sceneListSafe = demoSceneList()
+	} catch (e) {
+		sceneListSafe = [] as any[]
+	}
+	const sceneList = sceneListSafe
+	var totalCountSafe = '0'
+	try {
+		totalCountSafe = demoCountByGroup('all').toString()
+	} catch (e) {
+		totalCountSafe = '0'
+	}
+	const totalCountText = totalCountSafe
 	const noticeList = [
 		'主题色来自主题包 nax-ui-theme，主色 18a058。可在「我的」切换深色模式。',
 		'组件均 CSS 变量主题，蒸汽模式优先，适配应用、鸿蒙、网页与小程序。'
 	] as string[]
 
-	// 预拆成平行 string 数组，模板不直接绑 any 对象，避免鸿蒙把对象 toString 成 JSON
-	const sceneTitles = [] as string[]
-	const sceneDescs = [] as string[]
-	const sceneIcons = [] as string[]
-	const sceneTags = [] as string[]
-	const scenePaths = [] as string[]
-	const rawScenes = demoSceneList()
-	for (let i = 0; i < rawScenes.length; i++) {
-		const item = rawScenes[i]
-		let title = demoReadString(item, 'name')
-		if (title.length == 0) {
-			title = demoReadString(item, 'title')
-		}
-		sceneTitles.push(title)
-		sceneDescs.push(demoReadString(item, 'desc'))
-		sceneIcons.push(demoReadString(item, 'icon'))
-		let tag = demoReadString(item, 'tag')
+	function itemTitle(item : any) : string {
+		return demoReadString(item, 'name')
+	}
+
+	function itemDesc(item : any) : string {
+		return demoReadString(item, 'desc')
+	}
+
+	function itemTag(item : any) : string {
+		const tag = demoReadString(item, 'tag')
 		if (tag.length == 0) {
-			tag = '示例'
+			return '示例'
 		}
-		sceneTags.push(tag)
-		scenePaths.push(demoReadString(item, 'path'))
-	}
-	// v-for 只需长度占位；真正文案走下面的 getter，保证返回 string
-	const sceneRows = sceneTitles
-
-	function sceneTitle(index : number) : string {
-		if (index < 0 || index >= sceneTitles.length) {
-			return ''
-		}
-		return sceneTitles[index]
+		return tag
 	}
 
-	function sceneDesc(index : number) : string {
-		if (index < 0 || index >= sceneDescs.length) {
-			return ''
-		}
-		return sceneDescs[index]
-	}
-
-	function sceneIcon(index : number) : string {
-		if (index < 0 || index >= sceneIcons.length) {
-			return 'star'
-		}
-		const name = sceneIcons[index]
+	function itemIcon(item : any) : string {
+		const name = demoReadString(item, 'icon')
 		if (name.length == 0) {
 			return 'star'
 		}
 		return name
 	}
 
-	function sceneTag(index : number) : string {
-		if (index < 0 || index >= sceneTags.length) {
-			return '示例'
-		}
-		return sceneTags[index]
-	}
-
-	function onOpenScene(index : number) {
-		if (index < 0 || index >= scenePaths.length) {
+	function onOpenScene(item : any) {
+		const path = demoReadString(item, 'path')
+		if (path.length == 0) {
 			return
 		}
-		openDemoPage(scenePaths[index])
+		openDemoPage(path)
 	}
 
 	function goCatalog() {
@@ -265,10 +319,46 @@
 		switchDemoTab(index)
 	}
 
+	function mountHomeContent() {
+		refreshPageRootStyle()
+		if (!contentReady.value) {
+			contentReady.value = true
+		}
+		// 通知条再晚一拍，降低安卓首屏动画/测量风险
+		if (!noticeReady.value) {
+			setTimeout(() => {
+				noticeReady.value = true
+			}, 120)
+		}
+	}
+
+	onReady(() => {
+		// 首个 Tab 页：等原生页就绪后再挂内容
+		mountHomeContent()
+	})
+
 	onShow(() => {
 		hideDemoNativeTabBar()
-		darkMode.value = bindDemoThemePage()
+		try {
+			darkMode.value = bindDemoThemePage()
+		} catch (e) {
+			// ignore first-page chrome API errors
+		}
 		refreshPageRootStyle()
+		// #ifdef APP-ANDROID
+		// 冷启动 hideTabBar 后窗口高度可能异步变化
+		setTimeout(() => {
+			mountHomeContent()
+		}, 30)
+		setTimeout(() => {
+			refreshPageRootStyle()
+		}, 120)
+		// #endif
+		// #ifndef APP-ANDROID
+		if (!contentReady.value) {
+			mountHomeContent()
+		}
+		// #endif
 	})
 </script>
 
@@ -276,22 +366,36 @@
 	.page-root {
 		flex-direction: column;
 		width: 100%;
-		/* 高度由 pageRootStyle 写入，避免 App 上 height:0/absolute 把中间区塌掉 */
-		background-color: #fafafc;
+		background-color: #eef8f2;
+	}
+
+	.page-body {
+		flex-direction: column;
+		width: 100%;
+		background-color: #eef8f2;
 	}
 
 	.page-scroll {
-		/* 高度由 pageScrollStyle 写入；勿写 height:0 */
 		width: 100%;
 		flex-direction: column;
-		background-color: #fafafc;
+		background-color: #eef8f2;
 	}
 
 	.page {
 		flex-direction: column;
 		width: 100%;
 		padding: 12px 16px 24px 16px;
-		background-color: #fafafc;
+		background-color: #eef8f2;
+	}
+
+	.boot-tip {
+		font-size: 14px;
+		font-weight: 600;
+		color: #18a058;
+		margin-bottom: 10px;
+		padding: 8px 10px;
+		background-color: #ffffff;
+		border-radius: 5px;
 	}
 
 	.nav-action {
@@ -311,7 +415,7 @@
 		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
+		border-color: #f0f0f3;
 		margin-bottom: 12px;
 	}
 
@@ -337,10 +441,10 @@
 		align-items: center;
 		justify-content: center;
 		margin-right: 12px;
-		background-color: var(--nax-color-bg, #ffffff);
+		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
+		border-color: #f0f0f3;
 	}
 
 	.hero__logo-img {
@@ -356,19 +460,19 @@
 	.hero__name {
 		font-size: 20px;
 		font-weight: 600;
-		color: var(--nax-color-text, #333639);
+		color: #333639;
 		margin-bottom: 2px;
 	}
 
 	.hero__slogan {
 		font-size: 12px;
-		color: var(--nax-color-text-secondary, #767c82);
+		color: #767c82;
 	}
 
 	.hero__desc {
 		font-size: 13px;
 		line-height: 20px;
-		color: var(--nax-color-text-secondary, #767c82);
+		color: #767c82;
 		margin-bottom: 14px;
 	}
 
@@ -390,7 +494,7 @@
 		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
+		border-color: #f0f0f3;
 		margin-bottom: 12px;
 	}
 
@@ -398,31 +502,24 @@
 		flex: 1;
 		flex-direction: column;
 		align-items: center;
-		/* #ifdef APP-HARMONY */
-		/* 鸿蒙：防止异常文本把统计行撑爆 */
-		overflow: hidden;
-		/* #endif */
 	}
 
 	.stats__num {
 		font-size: 18px;
 		font-weight: 600;
-		color: var(--nax-color-primary, #18a058);
+		color: #18a058;
 		margin-bottom: 2px;
-		/* #ifdef APP-HARMONY */
-		text-align: center;
-		/* #endif */
 	}
 
 	.stats__label {
 		font-size: 12px;
-		color: var(--nax-color-text-secondary, #767c82);
+		color: #767c82;
 	}
 
 	.stats__divider {
 		width: 1px;
 		height: 28px;
-		background-color: var(--nax-color-divider, #f5f5f7);
+		background-color: #f5f5f7;
 	}
 
 	.block {
@@ -452,12 +549,12 @@
 	.section__title {
 		font-size: 16px;
 		font-weight: 600;
-		color: var(--nax-color-text, #333639);
+		color: #333639;
 	}
 
 	.section__more {
 		font-size: 13px;
-		color: var(--nax-color-primary, #18a058);
+		color: #18a058;
 	}
 
 	.scene-card {
@@ -470,14 +567,14 @@
 		background-color: #ffffff;
 		border-width: 1px;
 		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
+		border-color: #f0f0f3;
 	}
 
 	.scene-card__icon {
 		width: 44px;
 		height: 44px;
 		border-radius: 12px;
-		background-color: var(--nax-color-primary-tertiary, #e3f3eb);
+		background-color: #e3f3eb;
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
@@ -499,13 +596,13 @@
 	.scene-card__name {
 		font-size: 15px;
 		font-weight: 500;
-		color: var(--nax-color-text, #333639);
+		color: #333639;
 		margin-right: 8px;
 	}
 
 	.scene-card__desc {
 		font-size: 12px;
 		line-height: 18px;
-		color: var(--nax-color-text-secondary, #767c82);
+		color: #767c82;
 	}
 </style>

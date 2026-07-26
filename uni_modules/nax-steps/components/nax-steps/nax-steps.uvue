@@ -362,16 +362,49 @@
 		return cls
 	})
 
+	// 安卓 UTS：provide 用 Ref，避免 ComputedRef
+	const currentState = ref(0)
+	const directionState = ref('horizontal')
+	const modeState = ref('number')
+	const typeState = ref('primary')
+	const sizeState = ref('md')
+	const iconState = ref('check')
+	const errorIconState = ref('close')
+	const clickableState = ref(false)
+	const totalState = ref(0)
+
+	function syncProvideStates() {
+		currentState.value = currentIndex.value
+		directionState.value = directionName.value
+		modeState.value = modeName.value
+		typeState.value = typeName.value
+		sizeState.value = sizeName.value
+		iconState.value = finishIconName.value
+		errorIconState.value = errorIconName.value
+		clickableState.value = clickableValue.value
+		totalState.value = listTotal.value
+	}
+	syncProvideStates()
+	watch((): number => currentIndex.value, (_v : number) => { syncProvideStates() })
+	watch((): string => directionName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => modeName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => typeName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => sizeName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => finishIconName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => errorIconName.value, (_v : string) => { syncProvideStates() })
+	watch((): boolean => clickableValue.value, (_v : boolean) => { syncProvideStates() })
+	watch((): number => listTotal.value, (_v : number) => { syncProvideStates() })
+
 	provide('naxStepsInGroup', true)
-	provide('naxStepsCurrent', currentIndex)
-	provide('naxStepsDirection', directionName)
-	provide('naxStepsMode', modeName)
-	provide('naxStepsType', typeName)
-	provide('naxStepsSize', sizeName)
-	provide('naxStepsIcon', finishIconName)
-	provide('naxStepsErrorIcon', errorIconName)
-	provide('naxStepsClickable', clickableValue)
-	provide('naxStepsTotal', listTotal)
+	provide('naxStepsCurrent', currentState)
+	provide('naxStepsDirection', directionState)
+	provide('naxStepsMode', modeState)
+	provide('naxStepsType', typeState)
+	provide('naxStepsSize', sizeState)
+	provide('naxStepsIcon', iconState)
+	provide('naxStepsErrorIcon', errorIconState)
+	provide('naxStepsClickable', clickableState)
+	provide('naxStepsTotal', totalState)
 	provide('naxStepsRegister', registerStep)
 	provide('naxStepsUnregister', unregisterStep)
 	provide('naxStepsOnClick', onStepClick)
