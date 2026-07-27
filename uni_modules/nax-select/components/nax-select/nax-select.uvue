@@ -70,6 +70,7 @@
 						:class="pickerClass"
 						:value="pickerValue"
 						:indicator-style="indicatorStyle"
+						:mask-style="pickerMaskStyle"
 						@change="onColumnChange"
 						@pickstart="onPickStart"
 						@pickend="onPickEnd"
@@ -84,7 +85,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(0, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
@@ -95,7 +96,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(1, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
@@ -106,7 +107,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(2, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
@@ -117,7 +118,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(3, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<!-- #endif -->
@@ -129,7 +130,7 @@
 								:key="colItemKey(0, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(0, index)" :lines="1">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
@@ -138,7 +139,7 @@
 								:key="colItemKey(1, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(1, index)" :lines="1">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
@@ -147,7 +148,7 @@
 								:key="colItemKey(2, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(2, index)" :lines="1">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
@@ -156,7 +157,7 @@
 								:key="colItemKey(3, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :class="pickerItemTextClass(3, index)" :lines="1">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<!-- #endif -->
@@ -511,8 +512,27 @@
 	})
 
 	const indicatorStyle = computed((): string => {
-		return 'height: 40px;'
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-bottom-width:1px;border-color:var(--nax-color-divider,#f5f5f7);'
 	})
+
+	const pickerMaskStyle = computed((): string => {
+		// 原生 picker-view 默认白色渐隐遮罩在暗黑模式下会形成亮色块
+		return 'background:none;'
+	})
+
+	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
+		if (columnIndex < 0 || columnIndex >= pickerValue.value.length) {
+			return false
+		}
+		return pickerValue.value[columnIndex] == itemIndex
+	}
+
+	function pickerItemTextClass(columnIndex: number, itemIndex: number): string {
+		if (isPickerItemSelected(columnIndex, itemIndex)) {
+			return 'nax-select__item-text--selected'
+		}
+		return ''
+	}
 
 	function asObject(item: any | null): UTSJSONObject | null {
 		if (item == null) {
@@ -1421,6 +1441,7 @@
 	.nax-select__body {
 		height: 240px;
 		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
 	}
 
 
@@ -1428,10 +1449,12 @@
 	.nax-select__picker {
 		flex: 1;
 		height: 240px;
+		background-color: var(--nax-color-bg, #ffffff);
 	}
 
 	.nax-select__column {
 		flex: 1;
+		background-color: var(--nax-color-bg, #ffffff);
 	}
 
 	.nax-select__item {
@@ -1445,8 +1468,12 @@
 
 	.nax-select__item-text {
 		font-size: var(--nax-font-size-md, 16px);
-		color: var(--nax-color-text, #333639);
+		color: var(--nax-color-text-secondary, #767c82);
 		text-align: center;
+	}
+
+	.nax-select__item-text--selected {
+		color: var(--nax-color-text-black, #000000);
 	}
 
 	/* 鸿蒙：选项不可点选（仅视觉/点击吞掉；勿 pointer-events:none，以免影响滑动） */

@@ -6,127 +6,173 @@
 			:border="true"
 		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
-		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__desc">文本。能力对齐 uView Pro Text：主题色 / 字号 / 省略 / 模式格式化。</text>
+			<view class="nax-theme page" :class="themeExtraClass">
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">基础用法</text>
+						<text class="section__meta">text / icon</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text text="我用十年青春,赴你最后之约"></nax-text></view>
+						<view class="sample-row"><nax-text text="带图标的文本" prefix-icon="star" type="primary"></nax-text></view>
+						<view class="sample-row"><nax-text text="后缀图标" suffix-icon="arrow-right" type="secondary"></nax-text></view>
+					</view>
+				</view>
 
-			<view class="section">
-				<text class="section__title">基础</text>
-				<view class="stack">
-					<nax-text text="我用十年青春,赴你最后之约"></nax-text>
-					<nax-text text="带图标的文本" prefix-icon="star" type="primary"></nax-text>
-					<nax-text text="后缀图标" suffix-icon="arrow-right" type="secondary"></nax-text>
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">主题色</text>
+						<text class="section__meta">type</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text type="default" text="default 主文案"></nax-text></view>
+						<view class="sample-row"><nax-text type="primary" text="primary 主题"></nax-text></view>
+						<view class="sample-row"><nax-text type="info" text="info 信息"></nax-text></view>
+						<view class="sample-row"><nax-text type="success" text="success 成功"></nax-text></view>
+						<view class="sample-row"><nax-text type="warning" text="warning 警告"></nax-text></view>
+						<view class="sample-row"><nax-text type="error" text="error 错误"></nax-text></view>
+						<view class="sample-row"><nax-text type="secondary" text="secondary 次文案"></nax-text></view>
+						<view class="sample-row"><nax-text type="placeholder" text="placeholder 占位"></nax-text></view>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">文字尺寸</text>
+						<text class="section__meta">size</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text size="sm" text="sm 14px"></nax-text></view>
+						<view class="sample-row"><nax-text size="md" text="md 16px（默认）"></nax-text></view>
+						<view class="sample-row"><nax-text size="lg" text="lg 18px"></nax-text></view>
+						<view class="sample-row"><nax-text size="xl" text="xl 20px"></nax-text></view>
+						<view class="sample-row"><nax-text size="20" text="数字 20px"></nax-text></view>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">字重与装饰</text>
+						<text class="section__meta">bold / decoration</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text bold text="加粗 bold"></nax-text></view>
+						<view class="sample-row"><nax-text decoration="underline" text="下划线 underline" type="info"></nax-text></view>
+						<view class="sample-row"><nax-text decoration="line-through" text="删除线 line-through" type="secondary"></nax-text></view>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">文本省略</text>
+						<text class="section__meta">lines</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row">
+							<nax-text
+								:lines="1"
+								block
+								text="单行省略：这是一段很长很长的文本内容，超出一行后会显示省略号，方便列表场景使用。"
+							></nax-text>
+						</view>
+						<view class="sample-row">
+							<nax-text
+								:lines="2"
+								block
+								type="secondary"
+								text="两行省略：这是一段很长很长的文本内容，用于演示多行省略效果。超出两行后会显示省略号，方便卡片摘要等场景使用。再追加一些文字以确保足够长。"
+							></nax-text>
+						</view>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">内容格式化</text>
+						<text class="section__meta">mode / format</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text mode="price" text="128.5" type="error" bold></nax-text></view>
+						<view class="sample-row"><nax-text mode="phone" text="13800138000" type="info"></nax-text></view>
+						<view class="sample-row"><nax-text mode="phone" format="encrypt" text="13800138000"></nax-text></view>
+						<view class="sample-row"><nax-text mode="name" format="encrypt" text="张三丰"></nax-text></view>
+						<view class="sample-row"><nax-text mode="date" text="1710000000"></nax-text></view>
+						<view class="sample-row"><nax-text mode="date" format="yyyy-mm-dd HH:MM" text="1710000000000" type="secondary"></nax-text></view>
+						<view class="sample-row">
+							<nax-text
+								mode="link"
+								text="nax-ui文档"
+								href="https://gitee.com/liusixsix/nax-ui"
+								@click="onLinkClick"
+							></nax-text>
+						</view>
+						<text class="hint">最近事件：{{ lastEvent }}</text>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">拨号操作</text>
+						<text class="section__meta">call</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row">
+							<nax-text
+								mode="phone"
+								call
+								type="primary"
+								text="10086"
+								prefix-icon="share"
+								@click="onCallClick"
+							></nax-text>
+						</view>
+						<text class="hint">点击将尝试拨打电话（真机有效）</text>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">块级对齐</text>
+						<text class="section__meta">block / align</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text block align="left" text="左对齐 left"></nax-text></view>
+						<view class="sample-row"><nax-text block align="center" text="居中 center" type="primary"></nax-text></view>
+						<view class="sample-row"><nax-text block align="right" text="右对齐 right" type="secondary"></nax-text></view>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">文本选择</text>
+						<text class="section__meta">selectable</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text selectable text="长按可选中复制这段文字" type="info"></nax-text></view>
+					</view>
+				</view>
+
+				<view class="section">
+					<view class="section__header">
+						<view class="section__mark"></view>
+						<text class="section__title">自定义颜色</text>
+						<text class="section__meta">color</text>
+					</view>
+					<view class="section__body stack">
+						<view class="sample-row"><nax-text color="#8a2be2" text="自定义紫色 #8a2be2"></nax-text></view>
+					</view>
 				</view>
 			</view>
-
-			<view class="section">
-				<text class="section__title">主题 type</text>
-				<view class="stack">
-					<nax-text type="default" text="default 主文案"></nax-text>
-					<nax-text type="primary" text="primary 主题"></nax-text>
-					<nax-text type="info" text="info 信息"></nax-text>
-					<nax-text type="success" text="success 成功"></nax-text>
-					<nax-text type="warning" text="warning 警告"></nax-text>
-					<nax-text type="error" text="error 错误"></nax-text>
-					<nax-text type="secondary" text="secondary 次文案"></nax-text>
-					<nax-text type="placeholder" text="placeholder 占位"></nax-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">尺寸 size</text>
-				<view class="stack">
-					<nax-text size="sm" text="sm 14px"></nax-text>
-					<nax-text size="md" text="md 16px（默认）"></nax-text>
-					<nax-text size="lg" text="lg 18px"></nax-text>
-					<nax-text size="xl" text="xl 20px"></nax-text>
-					<nax-text size="20" text="数字 20px"></nax-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">加粗 / 装饰</text>
-				<view class="stack">
-					<nax-text bold text="加粗 bold"></nax-text>
-					<nax-text decoration="underline" text="下划线 underline" type="info"></nax-text>
-					<nax-text decoration="line-through" text="删除线 line-through" type="secondary"></nax-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">省略 lines</text>
-				<view class="stack box">
-					<nax-text
-						:lines="1"
-						block
-						text="单行省略：这是一段很长很长的文本内容，超出一行后会显示省略号，方便列表场景使用。"
-					></nax-text>
-					<nax-text
-						:lines="2"
-						block
-						type="secondary"
-						text="两行省略：这是一段很长很长的文本内容，用于演示多行省略效果。超出两行后会显示省略号，方便卡片摘要等场景使用。再追加一些文字以确保足够长。"
-					></nax-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">模式 mode</text>
-				<view class="stack">
-					<nax-text mode="price" text="128.5" type="error" bold></nax-text>
-					<nax-text mode="phone" text="13800138000" type="info"></nax-text>
-					<nax-text mode="phone" format="encrypt" text="13800138000"></nax-text>
-					<nax-text mode="name" format="encrypt" text="张三丰"></nax-text>
-					<nax-text mode="date" text="1710000000"></nax-text>
-					<nax-text mode="date" format="yyyy-mm-dd HH:MM" text="1710000000000" type="secondary"></nax-text>
-					<nax-text
-						mode="link"
-						text="nax-ui文档"
-						href="https://gitee.com/liusixsix/nax-ui"
-						@click="onLinkClick"
-					></nax-text>
-				</view>
-				<text class="hint">最近事件：{{ lastEvent }}</text>
-			</view>
-
-			<view class="section">
-				<text class="section__title">拨号 call</text>
-				<view class="stack">
-					<nax-text
-						mode="phone"
-						call
-						type="primary"
-						text="10086"
-						prefix-icon="share"
-						@click="onCallClick"
-					></nax-text>
-				</view>
-				<text class="hint">点击将尝试拨打电话（真机有效）</text>
-			</view>
-
-			<view class="section">
-				<text class="section__title">对齐 align（block）</text>
-				<view class="stack box">
-					<nax-text block align="left" text="左对齐 left"></nax-text>
-					<nax-text block align="center" text="居中 center" type="primary"></nax-text>
-					<nax-text block align="right" text="右对齐 right" type="secondary"></nax-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">可选中 selectable</text>
-				<view class="stack">
-					<nax-text selectable text="长按可选中复制这段文字" type="info"></nax-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">自定义 color</text>
-				<view class="stack">
-					<nax-text color="#8a2be2" text="自定义紫色 #8a2be2"></nax-text>
-				</view>
-			</view>
-		</view>
-	</scroll-view>
+		</scroll-view>
 	</view>
 </template>
 
@@ -162,7 +208,6 @@
 </script>
 
 <style>
-
 	.page-root {
 		flex: 1;
 		flex-direction: column;
@@ -175,9 +220,13 @@
 		flex: 1;
 		height: 0;
 	}
+
 	.page {
-		padding: 16px;
-		background-color: var(--nax-color-bg, #ffffff);
+		padding-top: 16px;
+		padding-right: 16px;
+		padding-bottom: 28px;
+		padding-left: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 		/* 省略演示依赖百分比宽度，Web 需可传递宽度 */
 		/* #ifdef WEB */
 		width: 100%;
@@ -185,28 +234,53 @@
 		/* #endif */
 	}
 
-	.page__title {
-		font-size: 20px;
-		color: var(--nax-color-text, #333639);
-		font-weight: 600;
-		margin-bottom: 6px;
-	}
-
-	.page__desc {
-		font-size: 13px;
-		color: var(--nax-color-text-secondary, #767c82);
-		margin-bottom: 16px;
-	}
-
 	.section {
-		margin-bottom: 20px;
+		margin-bottom: 12px;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: hidden;
+	}
+
+	.section__header {
+		flex-direction: row;
+		align-items: center;
+		padding-top: 13px;
+		padding-right: 16px;
+		padding-bottom: 13px;
+		padding-left: 16px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.section__mark {
+		width: 3px;
+		height: 16px;
+		margin-right: 9px;
+		border-radius: var(--nax-radius-sm, 3px);
+		background-color: var(--nax-color-primary, #18a058);
 	}
 
 	.section__title {
-		font-size: 14px;
+		flex: 1;
+		font-size: 15px;
+		font-weight: 600;
 		color: var(--nax-color-text, #333639);
-		font-weight: 500;
-		margin-bottom: 10px;
+	}
+
+	.section__meta {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.section__body {
+		padding-top: 16px;
+		padding-right: 16px;
+		padding-bottom: 6px;
+		padding-left: 16px;
 	}
 
 	.stack {
@@ -216,20 +290,14 @@
 		/* #endif */
 	}
 
-	
-
-	.box {
-		padding: 12px;
-		background-color: var(--nax-color-bg-secondary, #fafafc);
-		border-radius: var(--nax-radius-md, 3px);
-		border-width: 1px;
-		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
-		/* 给省略演示提供确定宽度的容器 */
+	.sample-row {
+		flex-direction: column;
+		align-items: stretch;
+		min-height: 24px;
+		margin-bottom: 10px;
 		align-self: stretch;
 		/* #ifdef WEB */
 		width: 100%;
-		box-sizing: border-box;
 		overflow: hidden;
 		/* #endif */
 	}
@@ -237,7 +305,10 @@
 	.hint {
 		font-size: 12px;
 		color: var(--nax-color-text-secondary, #767c82);
-		margin-top: 6px;
+		padding-top: 10px;
+		padding-bottom: 10px;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-divider, #f5f5f7);
 	}
 </style>
-

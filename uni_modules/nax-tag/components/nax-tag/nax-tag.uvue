@@ -130,18 +130,18 @@
 
 	function typeMainColor(name : string) : string {
 		if (name == 'primary' || name == 'success') {
-			return '#18a058'
+			return 'var(--nax-color-primary, #18a058)'
 		}
 		if (name == 'info') {
-			return '#2080f0'
+			return 'var(--nax-color-info, #2080f0)'
 		}
 		if (name == 'warning') {
-			return '#f0a020'
+			return 'var(--nax-color-warning, #f0a020)'
 		}
 		if (name == 'error') {
-			return '#d03050'
+			return 'var(--nax-color-error, #d03050)'
 		}
-		return '#333639'
+		return 'var(--nax-color-text, #333639)'
 	}
 
 	const typeName = computed((): string => {
@@ -227,10 +227,13 @@
 		}
 		const v = effectiveVariant.value
 		if (v == 'solid') {
-			if (effectiveType.value == 'default' && !hasCustomColor.value) {
-				return '#333639'
+			if (hasCustomColor.value) {
+				return '#ffffff'
 			}
-			return '#ffffff'
+			if (effectiveType.value == 'default') {
+				return 'var(--nax-color-text, #333639)'
+			}
+			return 'var(--nax-color-text-inverse, #ffffff)'
 		}
 		return resolvedMainColor.value
 	})

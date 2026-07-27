@@ -462,8 +462,8 @@
 	const contentStyle = computed((): string => {
 		let style = 'height:' + heightCss.value + ';'
 		// #ifdef APP-HARMONY
-		// 鸿蒙：嵌套 CSS 变量 background 常失效，内联实色兜底
-		const bgHarmony = resolvedBackground.value.length > 0 ? resolvedBackground.value : '#f3f3f5'
+		// 鸿蒙：内联解析主题背景，变量不可用时回退浅色默认值
+		const bgHarmony = resolvedBackground.value.length > 0 ? resolvedBackground.value : 'var(--nax-color-bg-hover,#f3f3f5)'
 		style += 'background-color:' + bgHarmony + ';'
 		// #endif
 		// #ifndef APP-HARMONY
@@ -626,9 +626,9 @@
 	}
 
 	/* #ifdef APP-HARMONY */
-	/* 鸿蒙：CSS 变量 background 不可靠，实色兜底（props 背景仍走内联） */
+	/* 鸿蒙：显式声明主题背景，props 自定义背景仍由内联样式覆盖 */
 	.nax-search__content {
-		background-color: #f3f3f5;
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
 	}
 	/* #endif */
 

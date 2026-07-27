@@ -18,7 +18,7 @@
 		<view v-if="showLoadingLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="loading">
 				<view class="nax-image__status-icon">
-					<nax-icon name="image" :size="iconSizeName" color="#e5e5ea"></nax-icon>
+					<nax-icon name="image" :size="iconSizeName" :color="statusIconColor"></nax-icon>
 				</view>
 				<text v-if="loadingText.length > 0" class="nax-image__status-text">{{ loadingText }}</text>
 			</slot>
@@ -27,7 +27,7 @@
 		<view v-if="showErrorLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="error">
 				<view class="nax-image__status-icon">
-					<nax-icon name="image-off" :size="iconSizeName" color="#e5e5ea"></nax-icon>
+					<nax-icon name="image-off" :size="iconSizeName" :color="statusIconColor"></nax-icon>
 				</view>
 				<text v-if="errorText.length > 0" class="nax-image__status-text">{{ errorText }}</text>
 			</slot>
@@ -214,6 +214,16 @@
 		return 'lg'
 	})
 
+	const statusIconColor = computed((): string => {
+		// 鸿蒙内联解析主题色，变量不可用时回退中性灰
+		// #ifdef APP-HARMONY
+		return 'var(--nax-color-text-placeholder,#c2c2c7)'
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'var(--nax-color-text-placeholder, #e5e5ea)'
+		// #endif
+	})
+
 	const rootClass = computed((): string => {
 		let cls = ''
 		const shapeName = normalizeShape(props.shape)
@@ -247,13 +257,21 @@
 	})
 
 	const rootStyle = computed((): string => {
-		// root bg fallback for Harmony
-		return 'width:' + widthCss.value + ';height:' + heightCss.value + ';background-color:#fafafc;'
+		let style = 'width:' + widthCss.value + ';height:' + heightCss.value + ';'
+		// 鸿蒙内联解析主题背景，变量不可用时回退浅色占位底
+		// #ifdef APP-HARMONY
+		style += 'background-color:var(--nax-color-bg-secondary,#fafafc);'
+		// #endif
+		return style
 	})
 
-	// status layer inline bg fallback for Harmony
 	const statusLayerStyle = computed((): string => {
-		return 'width:100%;height:100%;background-color:#fafafc;'
+		let style = 'width:100%;height:100%;'
+		// 鸿蒙绝对定位层显式解析主题背景，避免背景透明
+		// #ifdef APP-HARMONY
+		style += 'background-color:var(--nax-color-bg-secondary,#fafafc);'
+		// #endif
+		return style
 	})
 
 
@@ -326,7 +344,7 @@
 	.nax-image {
 		position: relative;
 		overflow: hidden;
-		background-color: var(--nax-image-bg, #fafafc);
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 		flex-direction: column;
 		align-items: stretch;
 		justify-content: center;
@@ -363,7 +381,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		background-color: var(--nax-image-status-bg, #fafafc);
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 
 	.nax-image__status-icon {
@@ -377,17 +395,20 @@
 	.nax-image__status-text {
 		margin-top: 8px;
 		font-size: var(--nax-font-size-xs, 12px);
-		color: var(--nax-color-text-placeholder, #e5e5ea);
+		color: var(--nax-color-text-secondary, #767c82);
 		lines: 1;
 	}
 
 	/* #ifdef APP-HARMONY */
-	/* Harmony: solid bg fallback when CSS vars fail */
+	/* 鸿蒙：显式声明主题色，CSS 变量不可用时仍有可读 fallback */
 	.nax-image {
-		background-color: #fafafc;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 	.nax-image__status {
-		background-color: #fafafc;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+	.nax-image__status-text {
+		color: var(--nax-color-text-secondary, #767c82);
 	}
 	/* #endif */
 </style>
