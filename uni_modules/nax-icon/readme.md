@@ -97,6 +97,8 @@ category, category-filled, map-pin, map-pin-filled
 - `--nax-color-text`
 - `--nax-opacity-disabled`
 
+未传 `color` 时，组件会在根节点解析图标色，兼容样式隔离 2.0 下的浅色 / 深色主题切换。
+
 ## 重新生成图标映射
 
 1. 编辑 `assets/icons/catalog.json`（`name` + `tabler`；实心图标加 `"filled": true`）

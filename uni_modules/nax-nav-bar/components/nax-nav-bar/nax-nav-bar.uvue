@@ -71,6 +71,7 @@
 	 * @property {boolean} showBack 是否显示返回区，默认 true
 	 * @property {string} backText 返回文案（可选）
 	 * @property {string} backIcon 返回图标名（nax-icon），默认 chevron-left；空字符串则不显示图标
+	 * @property {string} backIconColor 返回图标颜色；空串时跟随导航栏 type / 主题
 	 * @property {boolean} autoBack 点击返回是否自动 navigateBack，默认 true
 	 * @property {string} homeUrl 栈底无法返回时 reLaunch 目标；空则仅 emit
 	 * @property {boolean} fixed 是否固定顶部，默认 true
@@ -105,6 +106,10 @@
 		backIcon: {
 			type: String,
 			default: 'chevron-left'
+		},
+		backIconColor: {
+			type: String,
+			default: ''
 		},
 		autoBack: {
 			type: Boolean,
@@ -221,6 +226,9 @@
 	})
 
 	const iconColorValue = computed((): string => {
+		if (props.backIconColor.length > 0) {
+			return props.backIconColor
+		}
 		if (isPrimary.value) {
 			return '#ffffff'
 		}

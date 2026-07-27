@@ -51,6 +51,7 @@
 | showBack | boolean | `true` | 是否显示返回区 |
 | backText | string | `''` | 返回文案 |
 | backIcon | string | `'chevron-left'` | 返回图标（`nax-icon`）；空串不显示图标 |
+| backIconColor | string | `''` | 返回图标颜色；空串时跟随导航栏 type / 主题 |
 | autoBack | boolean | `true` | 点击返回是否自动 `navigateBack` |
 | homeUrl | string | `''` | 栈底无法返回时 `reLaunch` 目标 |
 | fixed | boolean | `true` | 是否固定顶部 |

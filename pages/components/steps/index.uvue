@@ -1,12 +1,12 @@
 <template>
-	<view class="page-root">
+	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
 			title="nax-steps"
 			home-url="/pages/index/index"
 			:border="true"
 		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
-			<view class="nax-theme page">
+			<view class="nax-theme page" :class="themeExtraClass">
 				<text class="page__desc">步骤条：横向/纵向进度；number / dot；list 或组合式；单步 status</text>
 
 				<view class="section">
@@ -99,6 +99,21 @@
 </template>
 
 <script setup lang="uts">
+	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
 	const basicList = [
 		{ name: '下单' },
 		{ name: '出库' },
@@ -171,7 +186,7 @@
 <style>
 	.page-root {
 		flex: 1;
-		background-color: var(--nax-color-bg-page, #f5f6f7);
+		background-color: var(--nax-color-bg-secondary, #f5f6f7);
 	}
 
 	.page-scroll {

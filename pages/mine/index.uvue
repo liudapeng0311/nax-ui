@@ -4,7 +4,7 @@
 			title="我的"
 			:show-back="false"
 			:border="false"
-			type="primary"
+			:type="navType"
 			home-url="/pages/index/index"
 			:fixed="chromeFixed"
 			:placeholder="chromeFixed"
@@ -22,29 +22,29 @@
 					</view>
 
 					<nax-cell-group inset title="偏好设置">
-						<nax-cell title="深色模式" label="基于 nax-ui-theme 的 dark token" icon="settings" :border="true">
+						<nax-cell title="深色模式" label="基于 nax-ui-theme 的 dark token" icon="settings" :icon-color="cellIconColor" :border="true">
 							<template #right>
 								<nax-switch :model-value="darkMode" @change="onDarkChange"></nax-switch>
 							</template>
 						</nax-cell>
-						<nax-cell title="主题色" value="Primary #18a058" icon="star"></nax-cell>
+						<nax-cell title="主题色" value="Primary #18a058" icon="star" :icon-color="cellIconColor"></nax-cell>
 					</nax-cell-group>
 
 					<view class="group-gap"></view>
 
 					<nax-cell-group inset title="项目信息">
-						<nax-cell title="版本" value="1.0.0" icon="info"></nax-cell>
-						<nax-cell title="技术栈" value="uni-app x / uvue" icon="square"></nax-cell>
-						<nax-cell title="组件数量" :value="componentCountText" icon="square-check" is-link @click="goCatalog"></nax-cell>
-						<nax-cell title="场景示例" value="3 个" icon="star" is-link @click="goScenes"></nax-cell>
+						<nax-cell title="版本" value="1.0.0" icon="info" :icon-color="cellIconColor"></nax-cell>
+						<nax-cell title="技术栈" value="uni-app x / uvue" icon="square" :icon-color="cellIconColor"></nax-cell>
+						<nax-cell title="组件数量" :value="componentCountText" icon="square-check" :icon-color="cellIconColor" is-link @click="goCatalog"></nax-cell>
+						<nax-cell title="场景示例" value="3 个" icon="star" :icon-color="cellIconColor" is-link @click="goScenes"></nax-cell>
 					</nax-cell-group>
 
 					<view class="group-gap"></view>
 
 					<nax-cell-group inset title="快捷入口">
-						<nax-cell title="导航栏组件" label="nax-nav-bar" icon="home" is-link @click="goNavBar"></nax-cell>
-						<nax-cell title="底部标签栏" label="nax-tabbar" icon="more" is-link @click="goTabbar"></nax-cell>
-						<nax-cell title="按钮组件" label="nax-button" icon="square-check" is-link @click="goButton"></nax-cell>
+						<nax-cell title="导航栏组件" label="nax-nav-bar" icon="home" :icon-color="cellIconColor" is-link @click="goNavBar"></nax-cell>
+						<nax-cell title="底部标签栏" label="nax-tabbar" icon="more" :icon-color="cellIconColor" is-link @click="goTabbar"></nax-cell>
+						<nax-cell title="按钮组件" label="nax-button" icon="square-check" :icon-color="cellIconColor" is-link @click="goButton"></nax-cell>
 					</nax-cell-group>
 
 					<view class="footer">
@@ -84,11 +84,66 @@
 		return ''
 	})
 
+	const navType = computed((): string => {
+		if (darkMode.value) {
+			return 'default'
+		}
+		return 'primary'
+	})
+
+	const cellIconColor = computed((): string => {
+		// #ifdef APP-ANDROID || APP-HARMONY
+		// App 原生组件边界不可靠继承运行时主题变量，显式传入当前主题色。
+		if (darkMode.value) {
+			return '#ffffffd1'
+		}
+		return '#333639'
+		// #endif
+		// #ifndef APP-ANDROID || APP-HARMONY
+		return 'var(--nax-color-text, #333639)'
+		// #endif
+	})
+
 	const chromeFixed = ref(true)
 	const pageRootStyle = ref('')
 	const pageBodyStyle = ref('')
 	const pageScrollStyle = ref('')
 	function refreshPageRootStyle() {
+		// #ifdef MP-WEIXIN
+		// 微信小程序 fixed 自定义组件可能被宿主裁剪，顶底栏改用文档流
+		chromeFixed.value = false
+		const winMp = uni.getWindowInfo()
+		var pageHMp = winMp.screenHeight
+		if (pageHMp <= 0) {
+			pageHMp = winMp.windowHeight
+		}
+		if (pageHMp <= 0) {
+			pageHMp = 700
+		}
+		var statusHMp = winMp.statusBarHeight
+		if (statusHMp < 0) {
+			statusHMp = 0
+		}
+		var safeBottomHMp = 0
+		if (winMp.safeAreaInsets != null && winMp.safeAreaInsets.bottom > 0) {
+			safeBottomHMp = winMp.safeAreaInsets.bottom
+		} else if (winMp.safeArea != null) {
+			const gapMp = pageHMp - winMp.safeArea.bottom
+			if (gapMp > 0) {
+				safeBottomHMp = gapMp
+			}
+		}
+		const navHMp = statusHMp + 44
+		const tabHMp = 50 + safeBottomHMp
+		var bodyHMp = pageHMp - navHMp - tabHMp
+		if (bodyHMp < 200) {
+			bodyHMp = 200
+		}
+		pageRootStyle.value = 'width:100%;height:' + pageHMp.toString() + 'px;flex-direction:column;'
+		pageBodyStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;flex-direction:column;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;'
+		// #endif
+
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		// App：顶底栏 fixed 贴边；中间区 absolute 卡在顶底之间并写死 px 高
 		chromeFixed.value = true
@@ -130,7 +185,7 @@
 		pageBodyStyle.value = 'position:absolute;left:0;right:0;top:' + navH.toString() + 'px;bottom:' + tabH.toString() + 'px;width:100%;height:' + bodyH.toString() + 'px;'
 		pageScrollStyle.value = 'width:100%;height:' + bodyH.toString() + 'px;'
 		// #endif
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
 		chromeFixed.value = true
 		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
 		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'

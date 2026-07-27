@@ -1,9 +1,10 @@
 <template>
-	<view class="page-root">
+	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
 			title="nax-icon"
 			home-url="/pages/index/index"
 			:border="true"
+			:back-icon-color="iconTextColor"
 		></nax-nav-bar>
 		<scroll-view class="page-scroll" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
@@ -13,19 +14,19 @@
 				<text class="section__title">尺寸 size</text>
 				<view class="row">
 					<view class="item">
-						<nax-icon name="search" size="sm"></nax-icon>
+						<nax-icon name="search" size="sm" :color="iconTextColor"></nax-icon>
 						<text class="item__label">sm</text>
 					</view>
 					<view class="item">
-						<nax-icon name="search" size="md"></nax-icon>
+						<nax-icon name="search" size="md" :color="iconTextColor"></nax-icon>
 						<text class="item__label">md</text>
 					</view>
 					<view class="item">
-						<nax-icon name="search" size="lg"></nax-icon>
+						<nax-icon name="search" size="lg" :color="iconTextColor"></nax-icon>
 						<text class="item__label">lg</text>
 					</view>
 					<view class="item">
-						<nax-icon name="search" size="28"></nax-icon>
+						<nax-icon name="search" size="28" :color="iconTextColor"></nax-icon>
 						<text class="item__label">28</text>
 					</view>
 				</view>
@@ -35,20 +36,20 @@
 				<text class="section__title">颜色 color</text>
 				<view class="row">
 					<view class="item">
-						<nax-icon name="heart" color="#ff3141"></nax-icon>
-						<text class="item__label">#ff3141</text>
+						<nax-icon name="heart" :color="errorIconColor"></nax-icon>
+						<text class="item__label">error</text>
 					</view>
 					<view class="item">
-						<nax-icon name="star" color="#ff8f1f"></nax-icon>
-						<text class="item__label">#ff8f1f</text>
+						<nax-icon name="star" :color="warningIconColor"></nax-icon>
+						<text class="item__label">warning</text>
 					</view>
 					<view class="item">
-						<nax-icon name="success" color="#00b578"></nax-icon>
+						<nax-icon name="success" :color="successIconColor"></nax-icon>
 						<text class="item__label">success</text>
 					</view>
 					<view class="item">
-						<nax-icon name="info" color="#18a058"></nax-icon>
-						<text class="item__label">primary</text>
+						<nax-icon name="info" :color="infoIconColor"></nax-icon>
+						<text class="item__label">info</text>
 					</view>
 				</view>
 			</view>
@@ -57,11 +58,11 @@
 				<text class="section__title">状态</text>
 				<view class="row">
 					<view class="item">
-						<nax-icon name="settings" @click="onTap('settings')"></nax-icon>
+						<nax-icon name="settings" :color="iconTextColor" @click="onTap('settings')"></nax-icon>
 						<text class="item__label">可点</text>
 					</view>
 					<view class="item">
-						<nax-icon name="settings" disabled @click="onTap('disabled')"></nax-icon>
+						<nax-icon name="settings" :color="iconTextColor" disabled @click="onTap('disabled')"></nax-icon>
 						<text class="item__label">disabled</text>
 					</view>
 				</view>
@@ -74,14 +75,14 @@
 					<view class="item-wide">
 						<nax-button type="primary" label="搜索" @click="onTap('button-search')">
 							<template #icon>
-								<nax-icon name="search" size="sm" color="#ffffff"></nax-icon>
+								<nax-icon name="search" size="sm" :color="inverseIconColor"></nax-icon>
 							</template>
 						</nax-button>
 					</view>
 					<view class="item-wide">
 						<nax-button type="error" variant="outline" label="删除" @click="onTap('button-delete')">
 							<template #icon>
-								<nax-icon name="delete" size="sm" color="#ff3141"></nax-icon>
+								<nax-icon name="delete" size="sm" :color="errorIconColor"></nax-icon>
 							</template>
 						</nax-button>
 					</view>
@@ -92,7 +93,7 @@
 				<text class="section__title">全部图标</text>
 				<view class="grid">
 					<view class="grid__item" v-for="item in icons" :key="item">
-						<nax-icon :name="item" @click="onTap(item)"></nax-icon>
+						<nax-icon :name="item" :color="iconTextColor" @click="onTap(item)"></nax-icon>
 						<text class="grid__name">{{ item }}</text>
 					</view>
 				</view>
@@ -113,6 +114,43 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	function themedIconColor(lightColor : string, darkColor : string, tokenColor : string) : string {
+		// #ifdef APP-ANDROID || APP-HARMONY
+		// App 原生 text 不可靠响应组件边界内的动态 CSS 变量，改传当前主题字面量。
+		if (darkMode.value) {
+			return darkColor
+		}
+		return lightColor
+		// #endif
+		// #ifndef APP-ANDROID || APP-HARMONY
+		return tokenColor
+		// #endif
+	}
+
+	const iconTextColor = computed((): string => {
+		return themedIconColor('#333639', '#ffffffd1', 'var(--nax-color-text, #333639)')
+	})
+
+	const errorIconColor = computed((): string => {
+		return themedIconColor('#d03050', '#e88080', 'var(--nax-color-error, #d03050)')
+	})
+
+	const warningIconColor = computed((): string => {
+		return themedIconColor('#f0a020', '#f2c97d', 'var(--nax-color-warning, #f0a020)')
+	})
+
+	const successIconColor = computed((): string => {
+		return themedIconColor('#18a058', '#63e2b7', 'var(--nax-color-success, #18a058)')
+	})
+
+	const infoIconColor = computed((): string => {
+		return themedIconColor('#2080f0', '#70c0e8', 'var(--nax-color-info, #2080f0)')
+	})
+
+	const inverseIconColor = computed((): string => {
+		return themedIconColor('#ffffff', '#000000', 'var(--nax-color-text-inverse, #ffffff)')
 	})
 
 	onShow(() => {

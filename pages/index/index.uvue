@@ -1,41 +1,41 @@
-<template>
+﻿<template>
 	<view class="page-root nax-theme" :class="themeExtraClass" :style="pageRootStyle">
 		<nax-nav-bar
 			title="nax-ui"
 			:show-back="false"
 			:border="false"
-			type="primary"
+			:type="navType"
 			home-url="/pages/index/index"
 			:fixed="chromeFixed"
 			:placeholder="chromeFixed"
 		>
 			<template #right>
 				<view class="nav-action" @click="goMine">
-					<nax-icon name="settings" size="20" color="#ffffff"></nax-icon>
+					<nax-icon name="settings" size="20" :color="navIconColor"></nax-icon>
 				</view>
 			</template>
 		</nax-nav-bar>
 
-		<view class="page-body" :style="pageBodyStyle">
-			<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
+		<view class="page-body" :class="darkClass('home-page--dark')" :style="pageBodyStyle">
+			<scroll-view class="page-scroll" :class="darkClass('home-page--dark')" scroll-y="true" :style="pageScrollStyle">
 				<view class="nax-theme page" :class="themeExtraClass">
 					<!-- 首帧兜底：即使子组件异常，也能看到原生文本 -->
-					<text class="boot-tip">{{ bootTip }}</text>
+					<text v-if="!contentReady" class="boot-tip" :class="darkClass('home-boot--dark')">{{ bootTip }}</text>
 
-					<view v-if="contentReady" class="hero">
+					<view v-if="contentReady" class="hero" :class="darkClass('home-surface--dark')">
 						<view class="hero__top">
 							<view class="hero__brand">
-								<view class="hero__logo">
+								<view class="hero__logo" :class="darkClass('home-surface--dark')">
 									<image class="hero__logo-img" src="/static/logo.png" mode="aspectFill"></image>
 								</view>
 								<view class="hero__titles">
-									<text class="hero__name">nax-ui</text>
-									<text class="hero__slogan">uni-app x 通用 UI 组件库</text>
+									<text class="hero__name" :class="darkClass('home-text--dark')">nax-ui</text>
+									<text class="hero__slogan" :class="darkClass('home-text-secondary--dark')">uni-app x 通用 UI 组件库</text>
 								</view>
 							</view>
 							<nax-tag type="success" variant="solid" size="sm" round label="v1.0"></nax-tag>
 						</view>
-						<text class="hero__desc">蒸汽模式优先 · CSS 变量主题 · 多端一致体验</text>
+						<text class="hero__desc" :class="darkClass('home-text-secondary--dark')">蒸汽模式优先 · CSS 变量主题 · 多端一致体验</text>
 						<view class="hero__actions">
 							<nax-button type="primary" size="md" label="浏览组件" icon="category" @click="goCatalog"></nax-button>
 							<view class="hero__gap"></view>
@@ -43,25 +43,25 @@
 						</view>
 					</view>
 
-					<view v-if="contentReady" class="stats">
+					<view v-if="contentReady" class="stats" :class="darkClass('home-surface--dark')">
 						<view class="stats__item">
-							<text class="stats__num" :lines="1">{{ totalCountText }}</text>
-							<text class="stats__label" :lines="1">组件</text>
+							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">{{ totalCountText }}</text>
+							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">组件</text>
 						</view>
-						<view class="stats__divider"></view>
+						<view class="stats__divider" :class="darkClass('home-divider--dark')"></view>
 						<view class="stats__item">
-							<text class="stats__num" :lines="1">4</text>
-							<text class="stats__label" :lines="1">分类</text>
+							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">4</text>
+							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">分类</text>
 						</view>
-						<view class="stats__divider"></view>
+						<view class="stats__divider" :class="darkClass('home-divider--dark')"></view>
 						<view class="stats__item">
-							<text class="stats__num" :lines="1">3</text>
-							<text class="stats__label" :lines="1">场景</text>
+							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">3</text>
+							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">场景</text>
 						</view>
-						<view class="stats__divider"></view>
+						<view class="stats__divider" :class="darkClass('home-divider--dark')"></view>
 						<view class="stats__item">
-							<text class="stats__num" :lines="1">多端</text>
-							<text class="stats__label" :lines="1">兼容</text>
+							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">多端</text>
+							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">兼容</text>
 						</view>
 					</view>
 
@@ -71,33 +71,33 @@
 							type="primary"
 							:list="noticeList"
 							:show-more="false"
-							mode="vertical"
 							scroll="vertical"
 						></nax-notice-bar>
 					</view>
 
 					<view v-if="contentReady" class="section section--last">
 						<view class="section__head">
-							<text class="section__title">场景示例</text>
-							<text class="section__more" @click="goScenes">更多</text>
+							<text class="section__title" :class="darkClass('home-text--dark')">场景示例</text>
+							<text class="section__more" :class="darkClass('home-text-primary--dark')" @click="goScenes">更多</text>
 						</view>
 						<view
 							v-for="(scene, sIndex) in sceneList"
 							:key="sIndex"
 							class="scene-card"
+							:class="darkClass('home-surface--dark')"
 							@click="onOpenScene(scene)"
 						>
-							<view class="scene-card__icon">
-								<nax-icon :name="itemIcon(scene)" size="22" color="#18a058"></nax-icon>
+							<view class="scene-card__icon" :class="darkClass('home-primary-soft--dark')">
+								<nax-icon :name="itemIcon(scene)" size="22" :color="primaryIconColor"></nax-icon>
 							</view>
 							<view class="scene-card__body">
 								<view class="scene-card__row">
-									<text class="scene-card__name" :lines="1">{{ itemTitle(scene) }}</text>
+									<text class="scene-card__name" :class="darkClass('home-text--dark')" :lines="1">{{ itemTitle(scene) }}</text>
 									<nax-tag type="primary" variant="light" size="sm" :label="itemTag(scene)"></nax-tag>
 								</view>
-								<text class="scene-card__desc" :lines="2">{{ itemDesc(scene) }}</text>
+								<text class="scene-card__desc" :class="darkClass('home-text-secondary--dark')" :lines="2">{{ itemDesc(scene) }}</text>
 							</view>
-							<nax-icon name="chevron-right" size="18" color="#e5e5ea"></nax-icon>
+							<nax-icon name="chevron-right" size="18" :color="chevronIconColor"></nax-icon>
 						</view>
 					</view>
 				</view>
@@ -137,9 +137,44 @@
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
-			return 'nax-theme-dark'
+			return 'nax-theme-dark home-page--dark'
 		}
 		return ''
+	})
+
+	function darkClass(className : string) : string {
+		if (darkMode.value) {
+			return className
+		}
+		return ''
+	}
+
+	const navType = computed((): string => {
+		if (darkMode.value) {
+			return 'default'
+		}
+		return 'primary'
+	})
+
+	const navIconColor = computed((): string => {
+		if (darkMode.value) {
+			return '#ffffffd1'
+		}
+		return '#ffffff'
+	})
+
+	const primaryIconColor = computed((): string => {
+		if (darkMode.value) {
+			return '#63e2b7'
+		}
+		return '#18a058'
+	})
+
+	const chevronIconColor = computed((): string => {
+		if (darkMode.value) {
+			return '#ffffff73'
+		}
+		return '#e5e5ea'
 	})
 
 	// Android 首页用文档流；iOS/鸿蒙沿用 absolute 页壳
@@ -152,6 +187,41 @@
 	const bootTip = ref('首页加载中…')
 
 	function refreshPageRootStyle() {
+		// #ifdef MP-WEIXIN
+		// 微信小程序 fixed 自定义组件可能被宿主裁剪，顶底栏改用文档流
+		chromeFixed.value = false
+		const winMp = uni.getWindowInfo()
+		var pageHMp = winMp.screenHeight
+		if (pageHMp <= 0) {
+			pageHMp = winMp.windowHeight
+		}
+		if (pageHMp <= 0) {
+			pageHMp = 700
+		}
+		var statusHMp = winMp.statusBarHeight
+		if (statusHMp < 0) {
+			statusHMp = 0
+		}
+		var safeBottomHMp = 0
+		if (winMp.safeAreaInsets != null && winMp.safeAreaInsets.bottom > 0) {
+			safeBottomHMp = winMp.safeAreaInsets.bottom
+		} else if (winMp.safeArea != null) {
+			const gapMp = pageHMp - winMp.safeArea.bottom
+			if (gapMp > 0) {
+				safeBottomHMp = gapMp
+			}
+		}
+		const navHMp = statusHMp + 44
+		const tabHMp = 50 + safeBottomHMp
+		var bodyHMp = pageHMp - navHMp - tabHMp
+		if (bodyHMp < 200) {
+			bodyHMp = 200
+		}
+		pageRootStyle.value = 'width:100%;height:' + pageHMp.toString() + 'px;flex-direction:column;'
+		pageBodyStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;flex-direction:column;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;'
+		// #endif
+
 		// #ifdef APP-ANDROID
 		// 安卓首页（冷启动第一页）：不用 fixed/absolute，改文档流 + 明确 px 高度
 		// 避免首屏 fixed 顶底栏/absolute 中间层定位失败导致整页白屏
@@ -190,9 +260,13 @@
 		if (bodyHA < 200) {
 			bodyHA = 200
 		}
-		pageRootStyle.value = 'width:100%;height:' + pageHA.toString() + 'px;flex-direction:column;background-color:#eef8f2;'
-		pageBodyStyle.value = 'width:100%;height:' + bodyHA.toString() + 'px;flex-direction:column;background-color:#eef8f2;'
-		pageScrollStyle.value = 'width:100%;height:' + bodyHA.toString() + 'px;background-color:#eef8f2;'
+		var backgroundA = '#eef8f2'
+		if (darkMode.value) {
+			backgroundA = '#18181c'
+		}
+		pageRootStyle.value = 'width:100%;height:' + pageHA.toString() + 'px;flex-direction:column;background-color:' + backgroundA + ';'
+		pageBodyStyle.value = 'width:100%;height:' + bodyHA.toString() + 'px;flex-direction:column;background-color:' + backgroundA + ';'
+		pageScrollStyle.value = 'width:100%;height:' + bodyHA.toString() + 'px;background-color:' + backgroundA + ';'
 		bootTip.value = 'Android ' + pageHA.toString() + '/' + bodyHA.toString()
 		// #endif
 
@@ -238,7 +312,7 @@
 		bootTip.value = '窗口 ' + pageH.toString() + ' / 内容区 ' + bodyH.toString()
 		// #endif
 
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
 		chromeFixed.value = true
 		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
 		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'
@@ -605,4 +679,39 @@
 		line-height: 18px;
 		color: #767c82;
 	}
+
+	.home-page--dark {
+		background-color: #18181c;
+	}
+
+	.home-surface--dark {
+		background-color: #101014;
+		border-color: #ffffff24;
+	}
+
+	.home-boot--dark {
+		color: #63e2b7;
+		background-color: #101014;
+	}
+
+	.home-text--dark {
+		color: #ffffffd1;
+	}
+
+	.home-text-secondary--dark {
+		color: #ffffffa6;
+	}
+
+	.home-text-primary--dark {
+		color: #63e2b7;
+	}
+
+	.home-divider--dark {
+		background-color: #ffffff1a;
+	}
+
+	.home-primary-soft--dark {
+		background-color: #1a322c;
+	}
+
 </style>

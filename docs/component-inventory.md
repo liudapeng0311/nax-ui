@@ -115,7 +115,7 @@
 
 | 组件 | 标签 | 优先级 | 说明 |
 |------|------|--------|------|
-| 导航栏 | `nax-nav-bar` | P1 | 自定义页头；状态栏安全区 / fixed 占位 / 胶囊预留 | `title` `showBack` `autoBack` `homeUrl` `fixed` `placeholder` `immersive` `type` / `back` **done** |
+| 导航栏 | `nax-nav-bar` | P1 | 自定义页头；状态栏安全区 / fixed 占位 / 胶囊预留 | `title` `showBack` `backIconColor` `autoBack` `homeUrl` `fixed` `placeholder` `immersive` `type` / `back` **done** |
 | 底部标签栏 | `nax-tabbar` | P1 | 自定义底栏；图标/徽标/中间凸起/安全区 |
 | 标签页 | `nax-tabs` | P1 | 顶部内容切换导航（对齐 uView Pro Tabs 主能力） | `list` `v-model` `scrollable` `scrollAlign` `showLine` `size` `sticky` / `change` `click` **done** |
 | 下拉菜单 | `nax-dropdown` | P1 | 筛选栏式多 Tab 下拉（对齐 uView Pro Dropdown 主场景） | `nax-dropdown` + `nax-dropdown-item`；`options` 单选 / slot 自定义；`fixed`；选中自动高亮 / `highlighted` / `displaySelected` / `open` `close` `change` **done** |

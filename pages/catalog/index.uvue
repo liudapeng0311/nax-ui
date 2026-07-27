@@ -4,14 +4,14 @@
 			title="组件"
 			:show-back="false"
 			:border="false"
-			type="primary"
+			:type="navType"
 			home-url="/pages/index/index"
 			:fixed="chromeFixed"
 			:placeholder="chromeFixed"
 		>
 			<template #right>
 				<view class="nav-action" @click="clearSearch">
-					<text class="nav-action__text">{{ search.length > 0 ? '清空' : '' }}</text>
+					<text class="nav-action__text" :class="navActionTextClass">{{ search.length > 0 ? '清空' : '' }}</text>
 				</view>
 			</template>
 		</nax-nav-bar>
@@ -103,11 +103,65 @@
 		return ''
 	})
 
+	const navType = computed((): string => {
+		if (darkMode.value) {
+			return 'default'
+		}
+		return 'primary'
+	})
+
+	const navActionTextClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nav-action__text--dark'
+		}
+		return ''
+	})
+
 	const chromeFixed = ref(true)
 	const pageRootStyle = ref('')
 	const pageBodyStyle = ref('')
 	const pageScrollStyle = ref('')
 	function refreshPageRootStyle() {
+		// #ifdef MP-WEIXIN
+		// 微信小程序 fixed 自定义组件可能被宿主裁剪，顶底栏改用文档流
+		chromeFixed.value = false
+		const winMp = uni.getWindowInfo()
+		var pageHMp = winMp.screenHeight
+		if (pageHMp <= 0) {
+			pageHMp = winMp.windowHeight
+		}
+		if (pageHMp <= 0) {
+			pageHMp = 700
+		}
+		var statusHMp = winMp.statusBarHeight
+		if (statusHMp < 0) {
+			statusHMp = 0
+		}
+		var safeBottomHMp = 0
+		if (winMp.safeAreaInsets != null && winMp.safeAreaInsets.bottom > 0) {
+			safeBottomHMp = winMp.safeAreaInsets.bottom
+		} else if (winMp.safeArea != null) {
+			const gapMp = pageHMp - winMp.safeArea.bottom
+			if (gapMp > 0) {
+				safeBottomHMp = gapMp
+			}
+		}
+		const navHMp = statusHMp + 44
+		const tabHMp = 50 + safeBottomHMp
+		var bodyHMp = pageHMp - navHMp - tabHMp
+		if (bodyHMp < 200) {
+			bodyHMp = 200
+		}
+		const headHMp = 100
+		var listHMp = bodyHMp - headHMp
+		if (listHMp < 120) {
+			listHMp = 120
+		}
+		pageRootStyle.value = 'width:100%;height:' + pageHMp.toString() + 'px;flex-direction:column;'
+		pageBodyStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;flex-direction:column;'
+		pageScrollStyle.value = 'width:100%;height:' + listHMp.toString() + 'px;'
+		// #endif
+
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		chromeFixed.value = true
 		const info = uni.getSystemInfoSync()
@@ -154,7 +208,7 @@
 		pageBodyStyle.value = 'position:absolute;left:0;right:0;top:' + navH.toString() + 'px;bottom:' + tabH.toString() + 'px;width:100%;height:' + bodyH.toString() + 'px;flex-direction:column;'
 		pageScrollStyle.value = 'width:100%;height:' + listH.toString() + 'px;'
 		// #endif
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
 		chromeFixed.value = true
 		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
 		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'
@@ -451,6 +505,10 @@
 	.nav-action__text {
 		font-size: 14px;
 		color: #ffffff;
+	}
+
+	.nav-action__text--dark {
+		color: var(--nax-color-text, #ffffffd1);
 	}
 
 	.result-bar {

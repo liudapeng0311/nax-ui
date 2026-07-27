@@ -497,19 +497,19 @@
 			if (inactiveColorValue.value.length > 0) {
 				return inactiveColorValue.value
 			}
-			return '#e5e5ea'
+			return 'var(--nax-color-text-secondary, #909399)'
 		}
 		const active = index == activeIndex.value
 		if (active) {
 			if (activeColorValue.value.length > 0) {
 				return activeColorValue.value
 			}
-			return '#18a058'
+			return 'var(--nax-color-primary, #18a058)'
 		}
 		if (inactiveColorValue.value.length > 0) {
 			return inactiveColorValue.value
 		}
-		return '#909399'
+		return 'var(--nax-color-text-secondary, #909399)'
 	}
 
 	const hasMidButton = computed((): boolean => {

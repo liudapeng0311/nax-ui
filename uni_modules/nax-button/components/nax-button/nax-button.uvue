@@ -273,30 +273,30 @@
 	})
 
 	/**
-	 * 图标色直接通过 nax-icon color prop 传入。
+	 * 图标色通过 nax-icon color prop 传入，并与对应文案 token 保持一致。
 	 */
 	const iconColor = computed((): string => {
 		const typeName = normalizeType(props.type)
 		const variantName = normalizeVariant(props.type, props.variant)
 		if (variantName == 'solid' && typeName != 'default') {
-			return '#ffffff'
+			return 'var(--nax-color-text-inverse, #ffffff)'
 		}
 		if (typeName == 'primary') {
-			return '#18a058'
+			return 'var(--nax-color-primary, #18a058)'
 		}
 		if (typeName == 'info') {
-			return '#2080f0'
+			return 'var(--nax-color-info, #2080f0)'
 		}
 		if (typeName == 'success') {
-			return '#18a058'
+			return 'var(--nax-color-success, #18a058)'
 		}
 		if (typeName == 'warning') {
-			return '#f0a020'
+			return 'var(--nax-color-warning, #f0a020)'
 		}
 		if (typeName == 'error') {
-			return '#d03050'
+			return 'var(--nax-color-error, #d03050)'
 		}
-		return '#333639'
+		return 'var(--nax-color-text, #333639)'
 	})
 
 	const loadingDomId = 'nax-btn-ld-' + Math.floor(Math.random() * 10000000).toString()

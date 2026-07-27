@@ -4,7 +4,7 @@
 			title="场景"
 			:show-back="false"
 			:border="false"
-			type="primary"
+			:type="navType"
 			home-url="/pages/index/index"
 			:fixed="chromeFixed"
 			:placeholder="chromeFixed"
@@ -74,11 +74,53 @@
 		return ''
 	})
 
+	const navType = computed((): string => {
+		if (darkMode.value) {
+			return 'default'
+		}
+		return 'primary'
+	})
+
 	const chromeFixed = ref(true)
 	const pageRootStyle = ref('')
 	const pageBodyStyle = ref('')
 	const pageScrollStyle = ref('')
 	function refreshPageRootStyle() {
+		// #ifdef MP-WEIXIN
+		// 微信小程序 fixed 自定义组件可能被宿主裁剪，顶底栏改用文档流
+		chromeFixed.value = false
+		const winMp = uni.getWindowInfo()
+		var pageHMp = winMp.screenHeight
+		if (pageHMp <= 0) {
+			pageHMp = winMp.windowHeight
+		}
+		if (pageHMp <= 0) {
+			pageHMp = 700
+		}
+		var statusHMp = winMp.statusBarHeight
+		if (statusHMp < 0) {
+			statusHMp = 0
+		}
+		var safeBottomHMp = 0
+		if (winMp.safeAreaInsets != null && winMp.safeAreaInsets.bottom > 0) {
+			safeBottomHMp = winMp.safeAreaInsets.bottom
+		} else if (winMp.safeArea != null) {
+			const gapMp = pageHMp - winMp.safeArea.bottom
+			if (gapMp > 0) {
+				safeBottomHMp = gapMp
+			}
+		}
+		const navHMp = statusHMp + 44
+		const tabHMp = 50 + safeBottomHMp
+		var bodyHMp = pageHMp - navHMp - tabHMp
+		if (bodyHMp < 200) {
+			bodyHMp = 200
+		}
+		pageRootStyle.value = 'width:100%;height:' + pageHMp.toString() + 'px;flex-direction:column;'
+		pageBodyStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;flex-direction:column;'
+		pageScrollStyle.value = 'width:100%;height:' + bodyHMp.toString() + 'px;'
+		// #endif
+
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		// App：顶底栏 fixed 贴边；中间区 absolute 卡在顶底之间并写死 px 高
 		chromeFixed.value = true
@@ -120,7 +162,7 @@
 		pageBodyStyle.value = 'position:absolute;left:0;right:0;top:' + navH.toString() + 'px;bottom:' + tabH.toString() + 'px;width:100%;height:' + bodyH.toString() + 'px;'
 		pageScrollStyle.value = 'width:100%;height:' + bodyH.toString() + 'px;'
 		// #endif
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
 		chromeFixed.value = true
 		pageRootStyle.value = 'flex:1;width:100%;height:100%;flex-direction:column;'
 		pageBodyStyle.value = 'flex:1;height:0;width:100%;flex-direction:column;'

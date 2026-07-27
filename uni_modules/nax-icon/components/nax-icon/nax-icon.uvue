@@ -96,8 +96,11 @@
 		// Android remove TextView extra padding; inline avoids uvue-css WARNING
 		style += 'include-font-padding:false;'
 		// #endif
+		// 样式隔离 2.0 下，主题色需在组件根节点解析，才能随宿主主题切换。
 		if (props.color.length > 0) {
 			style += 'color:' + props.color + ';'
+		} else {
+			style += 'color:var(--nax-icon-color,var(--nax-color-text,#333639));'
 		}
 		return style
 	})
@@ -125,7 +128,6 @@
 	/* 单节点 text：避免 view>text>span 多层导致基线偏移 */
 	.nax-icon {
 		font-family: nax-icon;
-		color: var(--nax-icon-color, var(--nax-color-text, #333639));
 		text-align: center;
 		lines: 1;
 		font-weight: normal;
