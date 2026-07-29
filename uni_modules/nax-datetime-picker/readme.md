@@ -57,6 +57,7 @@ confirm 回调字段：value / timestamp / formatted / year / month / day / hour
 
 - 全端原生 picker-view（含鸿蒙）。
 - 鸿蒙禁用选项点选，请滑动后确认。
+- 鸿蒙暗黑模式通过 `mask-top-style` / `mask-bottom-style` 移除原生滚轮默认的白色渐变遮罩；该分端处理由 `APP-HARMONY` 条件编译。
 - 微信小程序滚动中点确认会被忽略。
 
 > 说明：鸿蒙 `picker-view` 打开时的滚到目标动画为原生行为，**无法设置 duration**。未传 `min-date` 时默认近 30 年～当前+10 年，以缩短年列滚动距离。需要更早日期请显式传 `min-date`。

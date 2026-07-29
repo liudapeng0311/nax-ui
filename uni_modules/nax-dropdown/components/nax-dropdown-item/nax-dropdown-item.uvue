@@ -466,6 +466,14 @@
 		text-overflow: ellipsis;
 	}
 
+	/* #ifdef APP-HARMONY */
+	.nax-dropdown-item__option-text {
+		/* 鸿蒙单行 text 的基线不随父级 align-items 居中，显式对齐选项行高。 */
+		height: 48px;
+		line-height: 48px;
+	}
+	/* #endif */
+
 	.nax-dropdown-item__option-text--active {
 		color: var(--nax-color-primary, #18a058);
 	}

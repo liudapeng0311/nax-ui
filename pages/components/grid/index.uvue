@@ -14,7 +14,7 @@
 				<view class="block">
 					<nax-grid :col="3" @click="onGridClick">
 						<nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'' + i">
-							<nax-icon :name="icon" size="22"></nax-icon>
+							<nax-icon :name="icon" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">{{ basicLabels[i] }}</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -27,7 +27,7 @@
 				<view class="block">
 					<nax-grid :col="4" :border="false" @click="onGridClick">
 						<nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'noborder-' + i">
-							<nax-icon :name="icon" size="20"></nax-icon>
+							<nax-icon :name="icon" size="20" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">{{ basicLabels[i] }}</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -39,7 +39,7 @@
 				<view class="block block--plain">
 					<nax-grid :col="3" gap="8" @click="onGridClick">
 						<nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'gap-' + i">
-							<nax-icon :name="icon" size="22"></nax-icon>
+							<nax-icon :name="icon" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">{{ basicLabels[i] }}</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -53,11 +53,11 @@
 					<text class="sub-label">left</text>
 					<nax-grid :col="3" align="left" :border="false" gap="8">
 						<nax-grid-item index="a1">
-							<nax-icon name="home" size="22"></nax-icon>
+							<nax-icon name="home" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">首页</text>
 						</nax-grid-item>
 						<nax-grid-item index="a2">
-							<nax-icon name="user" size="22"></nax-icon>
+							<nax-icon name="user" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">我的</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -66,11 +66,11 @@
 					<text class="sub-label">center</text>
 					<nax-grid :col="3" align="center" :border="false" gap="8">
 						<nax-grid-item index="b1">
-							<nax-icon name="home" size="22"></nax-icon>
+							<nax-icon name="home" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">首页</text>
 						</nax-grid-item>
 						<nax-grid-item index="b2">
-							<nax-icon name="user" size="22"></nax-icon>
+							<nax-icon name="user" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">我的</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -79,11 +79,11 @@
 					<text class="sub-label">right</text>
 					<nax-grid :col="3" align="right" :border="false" gap="8">
 						<nax-grid-item index="c1">
-							<nax-icon name="home" size="22"></nax-icon>
+							<nax-icon name="home" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">首页</text>
 						</nax-grid-item>
 						<nax-grid-item index="c2">
-							<nax-icon name="user" size="22"></nax-icon>
+							<nax-icon name="user" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">我的</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -99,7 +99,7 @@
 								<view class="grid-entry__icon">
 									<nax-badge value="9" offset-x="-9" offset-y="9">
 										<view class="badge-anchor">
-											<nax-icon name="share" size="22"></nax-icon>
+											<nax-icon name="share" size="22" :color="gridIconColor"></nax-icon>
 										</view>
 									</nax-badge>
 								</view>
@@ -111,7 +111,7 @@
 								<view class="grid-entry__icon">
 									<nax-badge dot offset-x="-4" offset-y="4">
 										<view class="badge-anchor">
-											<nax-icon name="heart" size="22"></nax-icon>
+											<nax-icon name="heart" size="22" :color="gridIconColor"></nax-icon>
 										</view>
 									</nax-badge>
 								</view>
@@ -122,7 +122,7 @@
 							<view class="grid-entry">
 								<view class="grid-entry__icon">
 									<view class="badge-anchor">
-										<nax-icon name="star" size="22"></nax-icon>
+										<nax-icon name="star" size="22" :color="gridIconColor"></nax-icon>
 									</view>
 								</view>
 								<text class="grid-text">收藏</text>
@@ -138,15 +138,15 @@
 				<view class="block">
 					<nax-grid :col="3" :hover="false" @click="onGridClick">
 						<nax-grid-item index="ok">
-							<nax-icon name="check" size="22"></nax-icon>
+							<nax-icon name="check" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">可用</text>
 						</nax-grid-item>
 						<nax-grid-item index="off" disabled>
-							<nax-icon name="close" size="22"></nax-icon>
+							<nax-icon name="close" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">禁用</text>
 						</nax-grid-item>
 						<nax-grid-item index="set">
-							<nax-icon name="settings" size="22"></nax-icon>
+							<nax-icon name="settings" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">设置</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -159,15 +159,15 @@
 				<view class="block">
 					<nax-grid :col="3" @click="onGridClick">
 						<nax-grid-item>
-							<nax-icon name="image" size="22"></nax-icon>
+							<nax-icon name="image" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">自动0</text>
 						</nax-grid-item>
 						<nax-grid-item>
-							<nax-icon name="search" size="22"></nax-icon>
+							<nax-icon name="search" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">自动1</text>
 						</nax-grid-item>
 						<nax-grid-item>
-							<nax-icon name="edit" size="22"></nax-icon>
+							<nax-icon name="edit" size="22" :color="gridIconColor"></nax-icon>
 							<text class="grid-text">自动2</text>
 						</nax-grid-item>
 					</nax-grid>
@@ -188,6 +188,19 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	const gridIconColor = computed((): string => {
+		// #ifdef APP-HARMONY
+		// 鸿蒙插槽内的图标显式传色，避免暗色 token 未解析到图标根节点。
+		if (darkMode.value) {
+			return '#ffffffd1'
+		}
+		return '#333639'
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'var(--nax-color-text,#333639)'
+		// #endif
 	})
 
 	onShow(() => {

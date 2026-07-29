@@ -122,6 +122,7 @@ function onConfirm(items: UTSJSONObject[]) {
 
 - 全端统一使用原生 `picker-view` 滚轮（含鸿蒙）。
 - **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
+- **鸿蒙暗黑模式**：通过 `mask-top-style` / `mask-bottom-style` 移除原生滚轮默认的白色渐变遮罩；该分端处理由 `APP-HARMONY` 条件编译。
 - 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。
 - 弹层自包含，不依赖 `nax-popup`。
 - 联动最多 4 列。

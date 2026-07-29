@@ -65,6 +65,10 @@
 								:value="pickerValue"
 								:indicator-style="indicatorStyle"
 								:mask-style="pickerMaskStyle"
+								<!-- #ifdef APP-HARMONY -->
+								:mask-top-style="pickerMaskTopStyle"
+								:mask-bottom-style="pickerMaskBottomStyle"
+								<!-- #endif -->
 								@change="onColumnChange"
 								@pickstart="onPickStart"
 								@pickend="onPickEnd"
@@ -381,7 +385,21 @@
 	})
 
 	const pickerMaskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		return ''
+		// #endif
+		// #ifndef APP-HARMONY
 		return 'background:none;'
+		// #endif
+	})
+
+	const pickerMaskTopStyle = computed((): string => {
+		// 鸿蒙原生 picker-view 需分别覆盖上下遮罩，避免白色渐变覆盖暗色面板。
+		return 'background-image:linear-gradient(to bottom,transparent,transparent);'
+	})
+
+	const pickerMaskBottomStyle = computed((): string => {
+		return 'background-image:linear-gradient(to top,transparent,transparent);'
 	})
 
 	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
