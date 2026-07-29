@@ -146,9 +146,13 @@
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
-			return 'page--dark'
+			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
 	})
 
 	const lastEvent = ref('无')
@@ -247,6 +251,7 @@
 	.page-root {
 		flex: 1;
 		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		height: 100%;
 		/* #endif */
@@ -255,11 +260,13 @@
 	.page-scroll {
 		flex: 1;
 		height: 0;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 	.page {
 		padding: 16px;
 		padding-bottom: 40px;
 		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 
 	.page__title {

@@ -74,7 +74,10 @@
 
 			<view class="section">
 				<text class="section__title">可点击 hoverable</text>
-				<nax-card title="设置项入口" extra=">" hoverable @click="onCardClick">
+				<nax-card title="设置项入口" hoverable @click="onCardClick">
+					<template #extra>
+						<nax-icon name="chevron-right" size="18" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+					</template>
 					<text class="muted">开启 hoverable 后有按压反馈</text>
 				</nax-card>
 				<text class="hint">最近操作：{{ lastEvent }}</text>

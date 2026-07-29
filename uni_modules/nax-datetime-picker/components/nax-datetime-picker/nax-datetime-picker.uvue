@@ -64,6 +64,7 @@
 								:class="pickerClass"
 								:value="pickerValue"
 								:indicator-style="indicatorStyle"
+								:mask-style="pickerMaskStyle"
 								@change="onColumnChange"
 								@pickstart="onPickStart"
 								@pickend="onPickEnd"
@@ -77,7 +78,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(0, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(0, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(0, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
@@ -88,7 +89,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(1, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(1, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(1, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
@@ -99,7 +100,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(2, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(2, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(2, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
@@ -110,7 +111,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(3, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(3, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(3, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
@@ -121,7 +122,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(4, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(4, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(4, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
@@ -132,7 +133,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(5, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(5, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(5, item) }}</text>
 									</view>
 								</picker-view-column>
 								<!-- #endif -->
@@ -140,32 +141,32 @@
 								<!-- #ifndef APP-HARMONY -->
 								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column0" :key="'c0-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(0, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(0, index)" :lines="1">{{ formatColLabel(0, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column1" :key="'c1-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(1, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(1, index)" :lines="1">{{ formatColLabel(1, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column2" :key="'c2-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(2, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(2, index)" :lines="1">{{ formatColLabel(2, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column3" :key="'c3-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(3, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(3, index)" :lines="1">{{ formatColLabel(3, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column4" :key="'c4-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(4, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(4, index)" :lines="1">{{ formatColLabel(4, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column5" :key="'c5-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :lines="1">{{ formatColLabel(5, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(5, index)" :lines="1">{{ formatColLabel(5, item) }}</text>
 									</view>
 								</picker-view-column>
 								<!-- #endif -->
@@ -375,7 +376,27 @@
 		return ''
 	})
 
-	const indicatorStyle = computed((): string => 'height: 40px;')
+	const indicatorStyle = computed((): string => {
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-bottom-width:1px;border-color:var(--nax-color-divider,#f5f5f7);'
+	})
+
+	const pickerMaskStyle = computed((): string => {
+		return 'background:none;'
+	})
+
+	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
+		if (columnIndex < 0 || columnIndex >= pickerValue.value.length) {
+			return false
+		}
+		return pickerValue.value[columnIndex] == itemIndex
+	}
+
+	function pickerItemTextClass(columnIndex: number, itemIndex: number): string {
+		if (isPickerItemSelected(columnIndex, itemIndex)) {
+			return 'nax-datetime-picker__item-text--selected'
+		}
+		return ''
+	}
 
 	const pickerClass = computed((): string => {
 		// #ifdef APP-HARMONY
@@ -1380,8 +1401,12 @@
 
 	.nax-datetime-picker__item-text {
 		font-size: var(--nax-font-size-md, 16px);
-		color: var(--nax-color-text, #333639);
+		color: var(--nax-color-text-secondary, #767c82);
 		text-align: center;
+	}
+
+	.nax-datetime-picker__item-text--selected {
+		color: var(--nax-color-text-black, #000000);
 	}
 
 	/* #ifdef APP-HARMONY */

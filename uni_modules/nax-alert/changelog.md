@@ -1,4 +1,8 @@
-﻿## 0.1.0（2026-07-20）
+﻿## 0.1.1（2026-07-29）
+
+- 修复暗黑主题下 `variant="solid"` 图标与关闭按钮固定为白色、未与正文颜色保持一致的问题。
+
+## 0.1.0（2026-07-20）
 
 - 初版 `nax-alert`
 - 对齐 uView Pro AlertTips 核心能力：type / title / description / showIcon / closable / center
