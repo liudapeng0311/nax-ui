@@ -1,6 +1,6 @@
 # nax-form
 
-uni-app x 表单 / 表单项，功能主要对齐 [uView Pro Form](https://uviewpro.cn/zh/components/form.html)。
+uni-app x 表单 / 表单项，功能覆盖常用场景。
 
 ## 依赖
 

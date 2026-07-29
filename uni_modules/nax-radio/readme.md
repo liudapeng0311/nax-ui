@@ -1,6 +1,6 @@
 # nax-radio
 
-uni-app x 单选框 / 单选框组，功能主要对齐 [uView Pro Radio](https://uviewpro.cn/zh/components/radio.html)。
+uni-app x 单选框 / 单选框组，功能覆盖常用场景。
 
 ## 依赖
 
@@ -84,9 +84,9 @@ uni-app x 单选框 / 单选框组，功能主要对齐 [uView Pro Radio](https:
 - `--nax-opacity-disabled` 禁用透明度
 - `--nax-radius-sm` / `--nax-radius-full` 方/圆角
 
-## 与 uView Pro 差异（有意）
+## 设计说明
 
 - 尺寸统一为 `sm | md | lg`（不用 rpx 数字作默认 API）
 - 默认 `shape` 为 `circle`（与 checkbox 默认 square 区分）
-- 支持单独布尔 `v-model`（uView 主路径依赖 group）
+- 支持单独布尔 `v-model`（传统实现依赖 group）
 - 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量

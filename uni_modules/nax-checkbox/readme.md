@@ -1,6 +1,6 @@
 # nax-checkbox
 
-uni-app x 复选框 / 复选框组，功能主要对齐 [uView Pro Checkbox](https://uviewpro.cn/zh/components/checkbox.html)。
+uni-app x 复选框 / 复选框组，功能覆盖常用场景。
 
 ## 依赖
 
@@ -85,7 +85,7 @@ uni-app x 复选框 / 复选框组，功能主要对齐 [uView Pro Checkbox](htt
 - `--nax-opacity-disabled` 禁用透明度
 - `--nax-radius-sm` / `--nax-radius-full` 方/圆角
 
-## 与 uView Pro 差异（有意）
+## 设计说明
 
 - 尺寸统一为 `sm | md | lg`（不用 rpx 数字作默认 API）
 - 默认 `shape` 为 `square`（与后续 radio 的圆形成区分）

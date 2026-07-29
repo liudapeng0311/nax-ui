@@ -2,7 +2,7 @@
 
 `nax-ui` 上传组件（uni-app x / uvue）。
 
-对齐 [uView Pro Upload](https://uviewpro.cn/zh/components/upload.html) 主能力：文件列表预览、选择、删除、状态展示。实际上传由业务在 `afterRead` 中调用 `uni.uploadFile` 等完成。
+提供文件列表预览、选择、删除与状态展示能力。实际上传由业务在 `afterRead` 中调用 `uni.uploadFile` 等完成。
 
 ## 安装
 

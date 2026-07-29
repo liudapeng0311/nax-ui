@@ -1,8 +1,8 @@
-﻿# nax-grid
+# nax-grid
 
 宫格布局：同时展示多个同类入口（图标 + 文案等）。由 `nax-grid` 容器 + `nax-grid-item` 子项组成。
 
-相对 uView Pro Grid 的改进：
+组件 Grid 的改进：
 
 - 全端统一 **flex** 布局（不用 float 分端）
 - `gap` 间距；`hover` 组件内置按压态（无需写全局 class）

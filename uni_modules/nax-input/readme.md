@@ -1,6 +1,6 @@
 # nax-input
 
-uni-app x 单行输入框，功能主要对齐 [uView Pro Input](https://uviewpro.cn/zh/components/input.html)。
+uni-app x 单行输入框，功能覆盖常用场景。
 
 > **不包含** `type=select`（后续 `nax-select`）与 `type=textarea`（后续 `nax-textarea`）。
 

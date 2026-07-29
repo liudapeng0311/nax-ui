@@ -1,3 +1,6 @@
+## 0.1.10 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## （2026-07-18）
 
 - 字号阶梯改为 sm14 / **md16** / lg18；默认高度略增以匹配 16px 正文字号
@@ -40,7 +43,7 @@
 ## 0.1.0（2026-07-18）
 
 - 初版 `nax-input` 单行输入框
-- 功能对齐 uView Pro Input 主能力：`v-model` / `type` / `clearable` / `password` 可见切换 / `border` / `inputAlign` / `maxlength` / `trim` 等
+- 功能支持 Input 主能力：`v-model` / `type` / `clearable` / `password` 可见切换 / `border` / `inputAlign` / `maxlength` / `trim` 等
 - 不支持 `type=select`（请用后续 `nax-select`）、不支持 `type=textarea`（请用后续 `nax-textarea`）
 - 支持 `prefixIcon` / `suffixIcon` 与 `prefix` / `suffix` 插槽
 - 事件：`update:modelValue` `input` `change` `focus` `blur` `confirm` `click` `clear`

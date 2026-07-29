@@ -1,3 +1,6 @@
+## 0.1.3 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## 0.1.2?2026-07-20?
 
 - ???????autoUpload + action + header + formData
@@ -11,6 +14,6 @@
 ﻿## 0.1.0（2026-07-20）
 
 - 初版 nax-upload（uvue）
-- 对齐 uView Pro Upload 主能力：fileList / 选图 / 预览 / 删除 / 状态遮罩
+- 支持 Upload 主能力：fileList / 选图 / 预览 / 删除 / 状态遮罩
 - 支持 maxCount / maxSize / multiple / accept(image|video|media) / disabled / deletable
 - 事件：afterRead / beforeRead / oversize / delete / beforeDelete / clickPreview

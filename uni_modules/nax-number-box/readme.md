@@ -1,6 +1,6 @@
-﻿# nax-number-box
+# nax-number-box
 
-uni-app x 步进器（加减数量），功能主要对齐 [uView Pro NumberBox](https://uviewpro.cn/zh/components/numberBox.html)。
+uni-app x 步进器（加减数量），功能覆盖常用场景。
 
 ## 依赖
 
@@ -68,7 +68,7 @@ uni-app x 步进器（加减数量），功能主要对齐 [uView Pro NumberBox]
 - `--nax-radius-md` 圆角
 - `--nax-font-size-*` 字号
 
-## 与 uView Pro 差异（有意）
+## 设计说明
 
 - 命名：`v-model` / `modelValue`（不用 `value`）
 - 增加 `size: sm | md | lg`；`inputWidth` / `buttonSize` 单位为 **px**

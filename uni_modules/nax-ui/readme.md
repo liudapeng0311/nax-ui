@@ -13,9 +13,9 @@ uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不�
 | `nax-icon` | 字体图标（Tabler Icons 语义子集） |
 | `nax-swiper` | 轮播（原生 swiper 封装） |
 | `nax-image` | 图片（原生 image 封装，加载/失败占位） |
-| `nax-tag` | 标签（对齐 Naive Tag） |
-| `nax-number-box` | 步进器（对齐 uView Pro NumberBox） |
-| `nax-rate` | 评分（对齐 uView Pro Rate） |
+| `nax-tag` | 标签 |
+| `nax-number-box` | 步进器（支持 NumberBox） |
+| `nax-rate` | 评分（支持 Rate） |
 | `nax-toast` | 轻提示（函数式 naxToast） |
 | `nax-dialog` | 对话框（声明式 + 函数式 naxDialog） |
 | `nax-nav-bar` | 自定义顶部导航栏（状态栏 / fixed 占位 / 返回栈） |

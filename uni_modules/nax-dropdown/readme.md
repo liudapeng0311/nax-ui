@@ -1,6 +1,6 @@
-﻿# nax-dropdown
+# nax-dropdown
 
-筛选栏式下拉菜单（对齐 uView Pro Dropdown 主场景，按 nax-ui token / uvue 约束实现）。
+筛选栏式下拉菜单（支持 Dropdown 主场景，按 nax-ui token / uvue 约束实现）。
 
 ## 组件
 
@@ -22,7 +22,7 @@
 </nax-dropdown>
 ```
 
-## 相对 uView 的改进
+## 组件 的改进
 
 - 外观走 `--nax-*` token，不靠 `active-color` 传色
 - 有 `modelValue` 时自动高亮标题（自定义面板仍可用 `highlighted`）

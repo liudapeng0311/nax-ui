@@ -1,3 +1,6 @@
+## 0.1.15 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## 0.1.14（2026-07-27）
 
 - 修复深色主题下内置 `nax-icon` 与 loading 图标仍使用浅色固定值的问题
@@ -7,7 +10,7 @@
 
 - 默认字号与尺寸档对齐新标准：sm14 / **md16** / lg18；高度 sm32 / md40 / lg48
 ## 0.1.13（2026-07-16）
-- fallback 对齐 Naive UI 按钮色：primary/success `#18a058`，info/warning/error 同步官方 common
+- fallback 对齐 默认按钮色：primary/success `#18a058`，info/warning/error 同步官方 common
 ## 0.1.12（2026-07-16）
 - fallback 色值对齐设计稿：主色 `#ff6b35`，同步 success/warning/error/info 与中性色
 ## 0.1.11（2026-07-16）
@@ -51,11 +54,11 @@ gba 背景在 ucss 下会丢失）
 - secondary / tertiary / quaternary 统一无边框
 ## 0.1.3（2026-07-15）
 
-- 按钮层级对齐 Naive UI：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用
+- 按钮层级：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用
 - `variant` 扩展：`solid` | `secondary` | `tertiary` | `quaternary` | `dashed` | `outline`
 - 兼容：`light`→`secondary`，`text`→`quaternary`，`type="tertiary"`→default+tertiary
 - 次要/次次要使用半透明 soft fill；禁用 `opacity: 0.5`
-- 默认尺寸更贴近 Naive（md 高 34px）
+- 默认尺寸采用默认尺寸（md 高 34px）
 
 ## 0.1.2（2026-07-15）
 

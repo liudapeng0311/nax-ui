@@ -1,3 +1,6 @@
+## 0.1.9 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## （2026-07-18）
 
 - 默认字号仍为 md=16；与全局 `--nax-font-size-md` 对齐（不再单独大于控件）
@@ -27,4 +30,4 @@
 - 修复鸿蒙（APP-HARMONY）单行/多行省略不生效：约束宽度、flex 收缩，并双写 CSS lines
 
 ## 0.1.0
-- 首版：对齐 uView Pro Text 核心能力（type/size/lines/mode/format/call/decoration/icons/selectable 等）
+- 首版：支持 Text 核心能力（type/size/lines/mode/format/call/decoration/icons/selectable 等）

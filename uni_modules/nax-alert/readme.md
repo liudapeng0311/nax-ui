@@ -1,6 +1,6 @@
-﻿# nax-alert
+# nax-alert
 
-警告提示条（页面内常驻提示）。能力对齐 [uView Pro AlertTips](https://uviewpro.cn/zh/components/alertTips.html)。
+警告提示条（页面内常驻提示）。提供常用能力。
 
 ## 用法
 
@@ -26,7 +26,7 @@
 |------|------|------|
 | type | string | `warning` | `primary` / `info` / `success` / `warning` / `error`（兼容 `danger`） |
 | variant | string | `light` | `light` 浅底 / `solid` 实心 |
-| effect | string | `''` | 兼容 uView：`light` / `dark`（`dark` 等价 `solid`） |
+| effect | string | `''` | 兼容：`light` / `dark`（`dark` 等价 `solid`） |
 | title | string | `''` | 标题 |
 | description | string | `''` | 描述；也可用默认插槽 |
 | closable | boolean | `false` | 是否可关闭 |

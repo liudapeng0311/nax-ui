@@ -191,7 +191,7 @@
 	// 选中动画锁：期间禁止改内容宽/重定位指示条，避免滚动中途卡顿一下
 	const selectionAnimLock = ref(false)
 	const selectionAnimToken = ref(0)
-	// 首次定位完成后再开滑动动画（对齐 uView firstTime）
+	// 首次定位完成后再开滑动动画（对齐  firstTime）
 	const lineAnimEnabled = ref(false)
 	// 需要横滑时强制滑块 0ms，避免与 scroll-view 双重动画抖动
 	const lineSnapNoTransition = ref(false)
@@ -387,7 +387,7 @@
 		const h = formatCssSize(props.lineHeight, 3)
 		const w = lineWidthPx.value
 		const left = lineLeftPx.value
-		// 仅 transform 过渡；首次落点 0ms，之后 duration（对齐 uView）
+		// 仅 transform 过渡；首次落点 0ms，之后 duration（对齐 ）
 		var ms = 0
 		// 横滑瞬时：duration=0；否则用 props.duration
 		if (!lineSnapNoTransition.value && lineAnimEnabled.value && lineMeasured.value && props.duration > 0) {
@@ -1453,7 +1453,7 @@
 		opacity: 0;
 		/* 仅过渡 transform，避免 width/opacity 抢动画导致卡顿 */
 		transition-property: transform;
-		/* 对齐 uView：ease，滑块略慢半拍跟随 tabs */
+		/* 对齐 ：ease，滑块略慢半拍跟随 tabs */
 		transition-timing-function: ease;
 	}
 

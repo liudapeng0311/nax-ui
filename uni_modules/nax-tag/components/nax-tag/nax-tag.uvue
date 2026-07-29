@@ -37,10 +37,10 @@
 <script setup lang="uts">
 	/**
 	 * nax-tag
-	 * @description 标签。能力对齐 Naive UI Tag：类型 / 尺寸 / 边框 / 圆角 / 可关闭 / 可选中。
+	 * @description 标签。能力对齐  Tag：类型 / 尺寸 / 边框 / 圆角 / 可关闭 / 可选中。
 	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
-	 * @property {string} variant solid | light(secondary) | outline | text(quaternary)；默认 light（对齐 Naive 浅底）
-	 * @property {string} size sm | md | lg；兼容 tiny/small/medium/large（Naive）
+	 * @property {string} variant solid | light(secondary) | outline | text(quaternary)；默认 light（对齐  浅底）
+	 * @property {string} size sm | md | lg；兼容 tiny/small/medium/large（）
 	 * @property {boolean} closable 是否可关闭
 	 * @property {boolean} disabled 禁用
 	 * @property {boolean} round 圆角胶囊
@@ -48,7 +48,7 @@
 	 * @property {boolean} checkable 可选中模式
 	 * @property {boolean} checked 选中态（配合 checkable / update:checked）
 	 * @property {boolean} strong 加粗文字
-	 * @property {boolean} triggerClickOnClose 点关闭时是否同时触发 click，默认 true（对齐 Naive）
+	 * @property {boolean} triggerClickOnClose 点关闭时是否同时触发 click，默认 true（对齐 ）
 	 * @property {string} label 文案；也可用默认插槽
 	 * @property {string} icon 前缀 nax-icon 名
 	 * @property {string} color 自定义主色（覆盖 type 色）
@@ -102,7 +102,7 @@
 	}
 
 	function normalizeVariant(value : string) : string {
-		// light / secondary 浅底（Naive 默认观感）
+		// light / secondary 浅底（ 默认观感）
 		if (value == 'light' || value == 'secondary') {
 			return 'light'
 		}
@@ -117,7 +117,7 @@
 	}
 
 	function normalizeSize(value : string) : string {
-		// Naive: tiny | small | medium | large
+		// : tiny | small | medium | large
 		if (value == 'tiny' || value == 'small' || value == 'sm') {
 			return 'sm'
 		}

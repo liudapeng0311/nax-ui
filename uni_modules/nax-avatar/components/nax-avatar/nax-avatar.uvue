@@ -24,17 +24,17 @@
 <script setup lang="uts">
 	/**
 	 * nax-avatar
-	 * @description 头像。能力对齐 Naive UI Avatar：尺寸 / 形状 / 图片 / 文字 / 描边 / 失败回退。
+	 * @description 头像。能力对齐  Avatar：尺寸 / 形状 / 图片 / 文字 / 描边 / 失败回退。
 	 * @property {string} src 图片地址
 	 * @property {string} text 文字头像内容（无图或加载失败时展示）
-	 * @property {string} size sm | md | lg | 数字字符串（如 48）；兼容 small/medium/large（Naive）
-	 * @property {string} shape circle | square | round；Naive round 对应 circle
+	 * @property {string} size sm | md | lg | 数字字符串（如 48）；兼容 small/medium/large（）
+	 * @property {string} shape circle | square | round； round 对应 circle
 	 * @property {boolean} bordered 是否显示描边
 	 * @property {string} borderColor 描边颜色；有值时可单独开启描边
 	 * @property {string} color 背景色（文字头像常用）
 	 * @property {string} textColor 文字颜色
 	 * @property {string} mode 图片 mode，同原生 image；默认 aspectFill（≈ cover）
-	 * @property {string} objectFit fill | contain | cover | none | scale-down；Naive 兼容，优先于 mode
+	 * @property {string} objectFit fill | contain | cover | none | scale-down； 兼容，优先于 mode
 	 * @property {string} fallbackSrc 图片加载失败后的回退地址
 	 * @property {string} customClass 根节点扩展 class
 	 * @event click 点击
@@ -108,7 +108,7 @@
 		if (value == 'round') {
 			return 'round'
 		}
-		// 默认 / circle / Naive round=true
+		// 默认 / circle /  round=true
 		return 'circle'
 	}
 
@@ -129,7 +129,7 @@
 
 	/**
 	 * size → 边长 px
-	 * 对齐 Naive：small 28 / medium 34 / large 40
+	 * 对齐 ：small 28 / medium 34 / large 40
 	 */
 	function resolveSizePx(value: string): number {
 		if (value == 'sm' || value == 'small') {
@@ -283,7 +283,7 @@
 		if (props.textColor.length > 0) {
 			style += 'color:' + props.textColor + ';'
 		} else if (props.color.length > 0) {
-			// custom bg: inverse text like Naive letter avatar
+			// custom bg: inverse text like  letter avatar
 			style += 'color:#ffffff;'
 		}
 		// else: color from class token (dark-mode friendly)

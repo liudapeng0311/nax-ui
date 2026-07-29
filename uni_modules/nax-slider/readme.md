@@ -1,6 +1,6 @@
 # nax-slider
 
-uni-app x 滑动选择器，功能主要对齐 [uView Pro Slider](https://uviewpro.cn/zh/components/slider.html)。
+uni-app x 滑动选择器，功能覆盖常用场景。
 
 ## 依赖
 
@@ -68,7 +68,7 @@ uni-app x 滑动选择器，功能主要对齐 [uView Pro Slider](https://uviewp
 - `min` / `max`：可选取值区间，会被夹在 `[start, end]` 内
 - 小数范围请同时设置 `:start` / `:end`（例如 0–1 且 `step=0.1`），不要只设 `min`/`max` 而保留默认 end=100
 
-## 与 uView Pro 差异（有意）
+## 设计说明
 
 - 尺寸增加 `size: sm | md | lg`；`blockWidth` / `height` 单位为 **px**（不用 rpx）
 - 不提供 `blockStyle` / `customStyle` 对象样式入口，扩展用 `customClass` + CSS 变量

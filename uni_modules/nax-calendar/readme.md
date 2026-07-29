@@ -2,7 +2,7 @@
 
 `nax-ui` 日历选择器（uni-app x / uvue）。
 
-功能主要对齐 [uView Pro Calendar](https://uviewpro.cn/zh/components/calendar.html)：
+主要能力：
 
 - 单选 `mode="date"` / 范围 `mode="range"`
 - 底部弹层 / 页面内联 `isPage`

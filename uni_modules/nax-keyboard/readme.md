@@ -1,8 +1,8 @@
-﻿# nax-keyboard
+# nax-keyboard
 
 `nax-ui` 自定义键盘（uni-app x / uvue）。
 
-功能主要对齐 [uView Pro Keyboard](https://uviewpro.cn/zh/components/keyboard.html)：
+主要能力：
 - 数字键盘 `mode="number"`（可带小数点）
 - 车牌号键盘 `mode="car"`（中/英切换）
 - 身份证键盘 `mode="card"`（含 `X`）

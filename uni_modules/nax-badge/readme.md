@@ -1,6 +1,6 @@
 # nax-badge
 
-uni-app x 徽标组件，能力对齐 [Naive UI Badge](https://www.naiveui.com/zh-CN/os-theme/components/badge)。
+uni-app x 徽标组件，提供常用能力。
 
 ## 依赖
 

@@ -1,3 +1,6 @@
+## 0.1.15 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## 0.1.14（2026-07-23）
 
 - 修复鸿蒙无缝滚动后半段文案被裁切：测宽取 `max(测量, 字数估算)`；鸿蒙 seg 取消 overflow 裁剪
@@ -64,7 +67,7 @@
 ## 0.1.0锛?026-07-21锛?
 
 - 鍒濈増 `nax-notice-bar`
-- 瀵归綈 uView Pro NoticeBar锛氭按骞宠鎺?/ 姘村钩姝ヨ繘 / 鍨傜洿姝ヨ繘
+- 瀵归綈  NoticeBar锛氭按骞宠鎺?/ 姘村钩姝ヨ繘 / 鍨傜洿姝ヨ繘
 - type 涓婚 light 鏉?+ showIcon / showMore / closable
 - 鎾斁鎺у埗锛歛utoplay / paused / playState锛沝uration / speed
 - 浜嬩欢锛歝lick / close / getMore / end / update:show

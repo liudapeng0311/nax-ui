@@ -1,6 +1,6 @@
 # nax-tag
 
-标签。能力对齐 [Naive UI Tag](https://www.naiveui.com/zh-CN/os-theme/components/tag)。
+标签。提供常用能力。
 
 ## 用法
 
@@ -16,8 +16,8 @@
 | 属性 | 类型 | 默认 | 说明 |
 |------|------|------|------|
 | type | string | `default` | `default` / `primary` / `info` / `success` / `warning` / `error`（兼容 `danger`） |
-| variant | string | `light` | `solid` / `light`(secondary) / `outline` / `text`(quaternary)；默认浅底对齐 Naive |
-| size | string | `md` | `sm` / `md` / `lg`；兼容 Naive `tiny`/`small`/`medium`/`large` |
+| variant | string | `light` | `solid` / `light`(secondary) / `outline` / `text`(quaternary)；默认浅底 |
+| size | string | `md` | `sm` / `md` / `lg`；兼容常用取值 `tiny`/`small`/`medium`/`large` |
 | closable | boolean | `false` | 是否可关闭 |
 | disabled | boolean | `false` | 禁用 |
 | round | boolean | `false` | 圆角胶囊 |
@@ -25,7 +25,7 @@
 | checkable | boolean | `false` | 可选中模式 |
 | checked | boolean | `false` | 选中态（配合 `update:checked`） |
 | strong | boolean | `false` | 加粗文字 |
-| trigger-click-on-close | boolean | `true` | 点关闭时是否同时触发 `click`（对齐 Naive） |
+| trigger-click-on-close | boolean | `true` | 点关闭时是否同时触发 `click` |
 | label | string | `''` | 文案；也可用默认插槽 |
 | icon | string | `''` | 前缀 `nax-icon` 名 |
 | color | string | `''` | 自定义主色 |

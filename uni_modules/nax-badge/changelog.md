@@ -1,3 +1,6 @@
+## 0.1.1 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## 0.1.2
 - App processing 波纹加密步进（30 步 / 40ms），减轻掉帧感
 
@@ -6,4 +9,4 @@
 - Web / 小程序仍使用 CSS @keyframes
 
 ## 0.1.0
-- 首版：对齐 Naive UI Badge 核心能力（value/max/dot/showZero/show/processing/type/color/offset/alone）
+- 首版：（value/max/dot/showZero/show/processing/type/color/offset/alone）

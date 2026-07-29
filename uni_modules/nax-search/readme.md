@@ -1,6 +1,6 @@
-﻿# nax-search
+# nax-search
 
-uni-app x 搜索框，功能主要对齐 [uView Plus Search](https://ijry.github.io/uview-plus/components/search.html) / uView Pro Search。
+uni-app x 搜索框，功能覆盖常用搜索场景。
 
 ## 依赖
 
@@ -27,7 +27,7 @@ uni-app x 搜索框，功能主要对齐 [uView Plus Search](https://ijry.github
 | modelValue | string | `''` | `v-model` 值 |
 | shape | string | `round` | `round` / `square` |
 | background | string | `''` | 输入区背景；空则 `--nax-color-bg-hover` |
-| bg-color | string | `''` | 兼容 uView；与 `background` 二选一，`background` 优先 |
+| bg-color | string | `''` | 兼容别名；与 `background` 二选一，`background` 优先 |
 | placeholder | string | `请输入关键字` | 占位 |
 | clearable | boolean | `true` | 有内容时显示清除（兼容 `clearabled`） |
 | show-action | boolean | `true` | 显示右侧操作按钮 |

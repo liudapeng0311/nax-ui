@@ -1,3 +1,6 @@
+## 0.1.2 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
 ## 0.1.1（2026-07-27）
 
 - 修复暗黑模式下前缀图标与关闭图标仍使用浅色主题硬编码颜色的问题
@@ -9,6 +12,6 @@
 ## 0.1.0（2026-07-17）
 
 - 初版 `nax-tag`
-- 对齐 Naive UI Tag 核心能力：type / size / bordered / round / closable / checkable / checked / disabled / strong / color
+- ：type / size / bordered / round / closable / checkable / checked / disabled / strong / color
 - 扩展 `variant`：`light`（默认，浅底）/ `solid` / `outline` / `text`
 - 事件：`click` / `close` / `update:checked`；插槽：`default` / `icon`

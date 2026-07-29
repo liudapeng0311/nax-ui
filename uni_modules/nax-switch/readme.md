@@ -1,6 +1,6 @@
 # nax-switch
 
-uni-app x 开关，功能主要对齐 [uView Pro Switch](https://uviewpro.cn/zh/components/switch.html)。
+uni-app x 开关，功能覆盖常用场景。
 
 ## 依赖
 
@@ -42,7 +42,7 @@ uni-app x 开关，功能主要对齐 [uView Pro Switch](https://uviewpro.cn/zh/
 - `--nax-opacity-disabled` 禁用透明度
 - `--nax-radius-full` 胶囊圆角
 
-## 与 uView Pro 差异（有意）
+## 设计说明
 
 - 尺寸统一为 `sm | md | lg`（不用 rpx 数字作默认 API）
 - `v-model` 固定为 boolean（自定义 open/close 值可在业务层映射）

@@ -1,6 +1,6 @@
 # nax-cell
 
-单元格与单元格组。能力对齐 [uView Pro Cell](https://uviewpro.cn/zh/components/cell.html) 主能力，API 按 nax-ui 清单收敛。
+单元格与单元格组，提供常用列表项与分组能力，API 按 nax-ui 清单收敛。
 
 ## 用法
 
@@ -31,7 +31,7 @@
 | value | string | `''` | 右侧内容 |
 | icon | string | `''` | 左侧 `nax-icon` 名 |
 | is-link | boolean | `false` | 展示右侧箭头 |
-| arrow | boolean | `false` | 同 `is-link`（uView 兼容） |
+| arrow | boolean | `false` | 同 `is-link`（兼容） |
 | border | boolean | `true` | 底部分割线；组内受 group.border 控制 |
 | disabled | boolean | `false` | 禁用 |
 | required | boolean | `false` | 标题旁必填星号 |

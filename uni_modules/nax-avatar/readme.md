@@ -1,6 +1,6 @@
 # nax-avatar
 
-uni-app x 头像组件，能力对齐 [Naive UI Avatar](https://www.naiveui.com/zh-CN/os-theme/components/avatar)。
+uni-app x 头像组件，提供常用能力。
 
 ## 依赖
 
@@ -30,11 +30,11 @@ uni-app x 头像组件，能力对齐 [Naive UI Avatar](https://www.naiveui.com/
 | `square` | 直角方形 |
 | `round` | 圆角方形 |
 
-Naive 的 `round` 布尔在本组件用 `shape="circle"` 表达。
+`round` 布尔在本组件用 `shape="circle"` 表达。
 
 ## 尺寸 size
 
-| 值 | 边长 | 对应 Naive |
+| 值 | 边长 | 尺寸别名 |
 |----|------|------------|
 | `sm` / `small` | 28px | small |
 | `md` / `medium` | 34px | medium（默认） |
@@ -54,7 +54,7 @@ Naive 的 `round` 布尔在本组件用 `shape="circle"` 表达。
 | color | string | `''` | 背景色（文字头像常用） |
 | text-color | string | `''` | 文字颜色；有 `color` 时默认 `#fff` |
 | mode | string | `aspectFill` | 原生 image mode |
-| object-fit | string | `''` | Naive 兼容：`fill` / `contain` / `cover` / `none` / `scale-down` |
+| object-fit | string | `''` | 兼容常用取值：`fill` / `contain` / `cover` / `none` / `scale-down` |
 | fallback-src | string | `''` | 加载失败回退图 |
 | custom-class | string | `''` | 根节点扩展 class |
 

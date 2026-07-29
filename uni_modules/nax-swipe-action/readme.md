@@ -1,6 +1,6 @@
 # nax-swipe-action
 
-uni-app x 滑动操作组件，功能主要对齐 [uView Pro SwipeAction](https://uviewpro.cn/zh/components/swipeAction.html)，并增强：
+uni-app x 滑动操作组件，功能覆盖常用场景，并增强：
 
 - `nax-swipe-action-group` 互斥展开（不必手写遍历关其它项）
 - 操作按钮 `type` 走主题 token（`error` / `warning` / `primary`…）
@@ -52,7 +52,7 @@ const options = [
 | show | boolean | `false` | 是否展开（`v-model:show`） |
 | disabled | boolean | `false` | 禁用滑动与按钮 |
 | name | string | `''` | 项标识；组内互斥推荐传稳定 id |
-| index | number | `-1` | 业务序号（写入 click 载荷，兼容 uView） |
+| index | number | `-1` | 业务序号（写入 click 载荷，兼容） |
 | options | array | `[]` | 按钮列表，见下表 |
 | btnWidth | number | `72` | 默认按钮宽度（px） |
 | rightWidth | number | `0` | 自定义 `right` 插槽宽度（px） |
@@ -71,7 +71,7 @@ const options = [
 | type | string | `default` / `primary` / `info` / `success` / `warning` / `error`（`danger` 同 error） |
 | color | string | 文字色覆盖 |
 | bgColor / backgroundColor | string | 背景色覆盖 |
-| style.backgroundColor / style.color | string | 兼容 uView style 写法 |
+| style.backgroundColor / style.color | string | 兼容 style 写法 |
 | width | number | 单项宽度（px） |
 | disabled | boolean | 禁用该按钮 |
 

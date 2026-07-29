@@ -1,4 +1,7 @@
-﻿## 0.1.3（2026-07-19）
+## 0.1.4 (2026-07-29)
+- 移除第三方组件库参考表述，完善独立组件文档。
+
+## 0.1.3（2026-07-19）
 
 - 修复 Web 类型告警：click 改用 `UniPointerEvent.clientX`，不再访问 `UniEvent.detail`
 - App（含鸿蒙）click 走条件编译直接返回，选点仍由 touch 路径处理
@@ -15,7 +18,7 @@
 ## 0.1.0（2026-07-19）
 
 - 初版 `nax-slider`
-- 对齐 uView Pro Slider 主能力：v-model、start/end、min/max、step、尺寸与颜色、disabled、showValue、showEdgeValue、useSlot
+- 支持 Slider 主能力：v-model、start/end、min/max、step、尺寸与颜色、disabled、showValue、showEdgeValue、useSlot
 - 事件：start / moving / end / change / update:modelValue
 - 主题弱依赖 `nax-ui-theme`
 - App 端阴影走条件编译降级为描边

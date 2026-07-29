@@ -1,6 +1,6 @@
-﻿# nax-rate
+# nax-rate
 
-uni-app x 评分组件，功能主要对齐 [uView Pro Rate](https://uviewpro.cn/zh/components/rate.html)。
+uni-app x 评分组件，功能覆盖常用场景。
 
 ## 依赖
 
@@ -53,11 +53,11 @@ uni-app x 评分组件，功能主要对齐 [uView Pro Rate](https://uviewpro.cn
 - `--nax-color-text-placeholder` 默认未选中色
 - `--nax-opacity-disabled` 禁用透明度
 
-## 与 uView Pro 差异（有意）
+## 设计说明
 
 - 尺寸统一为 `sm | md | lg` 或 **px** 数字字符串（不用 rpx）
 - `gutter` 单位为 **px**
-- 默认选中色用 warning 黄，更符合评分场景（uView 默认 error 红）
+- 默认选中色用 warning 黄，更符合评分场景（常用错误色）
 - 图标默认均为 Lucide `star`（当前图标集无 `star-fill`）；通过 `activeColor` 区分选中态
 - 增加 `readonly` / `touchable`
 - 不提供 `current` 遗留 API、`customStyle`、`colors` / `icons` 分段数组、`customPrefix`

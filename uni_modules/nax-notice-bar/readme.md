@@ -1,6 +1,6 @@
 # nax-notice-bar
 
-滚动通告栏。能力对齐 [uView Pro NoticeBar](https://uviewpro.cn/zh/components/noticeBar.html)。
+滚动通告栏。提供常用能力。
 
 ## 用法
 
@@ -33,7 +33,7 @@
 | type | string | `warning` | `primary` / `info` / `success` / `warning` / `error` / `none` |
 | mode | string | `horizontal` | `horizontal` / `vertical` |
 | scroll | string | `''` | `seamless` 衔接 / `step` 步进；空则看 `is-circular` |
-| is-circular | boolean | `true` | 兼容 uView：水平衔接 vs 步进 |
+| is-circular | boolean | `true` | 兼容：水平衔接 vs 步进 |
 | show-icon | boolean | `true` | 左侧图标 |
 | icon | string | `''` | 自定义 `nax-icon` 名 |
 | show-more | boolean | `false` | 右侧更多箭头 |

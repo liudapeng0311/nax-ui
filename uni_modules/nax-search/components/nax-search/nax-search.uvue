@@ -65,12 +65,12 @@
 <script setup lang="uts">
 	/**
 	 * nax-search
-	 * @description 搜索框。功能主要对齐 uView Pro / uView Plus Search。
+	 * @description 搜索框。功能主要对齐  /  Search。
 	 * @property {string} modelValue v-model 绑定值
 	 * @property {string} shape round 圆形 | square 方形（默认 round）
 	 * @property {string} background 输入区背景色；空则用 token
 	 * @property {string} placeholder 占位文案
-	 * @property {boolean} clearable 是否显示清除按钮，默认 true（对齐 uView clearabled）
+	 * @property {boolean} clearable 是否显示清除按钮，默认 true（对齐  clearabled）
 	 * @property {boolean} focus 是否自动聚焦
 	 * @property {boolean} showAction 是否显示右侧操作按钮，默认 true
 	 * @property {string} actionText 右侧按钮文案，默认「搜索」
@@ -117,7 +117,7 @@
 			type: String,
 			default: ''
 		},
-		// 兼容 uView bgColor 命名
+		// 兼容  bgColor 命名
 		bgColor: {
 			type: String,
 			default: ''
@@ -130,7 +130,7 @@
 			type: Boolean,
 			default: true
 		},
-		// 兼容 uView 拼写 clearabled
+		// 兼容  拼写 clearabled
 		clearabled: {
 			type: Boolean,
 			default: true
@@ -292,7 +292,7 @@
 		return normalizeShape(props.shape)
 	})
 
-	/** clearable 与 uView clearabled 任一为 false 则关闭 */
+	/** clearable 与  clearabled 任一为 false 则关闭 */
 	const clearEnabled = computed((): boolean => {
 		return props.clearable && props.clearabled
 	})
@@ -579,7 +579,7 @@
 	}
 
 	function onRootClick() {
-		// 对齐 uView：仅 disabled 时发出 click（用于跳转独立搜索页）
+		// 对齐 ：仅 disabled 时发出 click（用于跳转独立搜索页）
 		if (props.disabled) {
 			emit('click')
 		}

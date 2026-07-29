@@ -2,7 +2,7 @@
 
 `nax-ui` 通用按钮组件（uni-app x / uvue）。
 
-色系与层级参考 [Naive UI Button](https://www.naiveui.com/zh-CN/light/components/button)：
+色系与层级：
 
 - **基础** `variant="solid"`
 - **次要** `variant="secondary"`
@@ -146,7 +146,7 @@ uni_modules/nax-ui-theme
 | `--nax-opacity-disabled` | 禁用透明度（默认 0.5） |
 | `--nax-button-height` / `--nax-button-radius` | 尺寸圆角 |
 
-若希望品牌主色完全等同 Naive 绿：
+若希望使用默认绿色主色：
 
 ```css
 .nax-theme {

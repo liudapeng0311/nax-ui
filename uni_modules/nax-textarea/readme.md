@@ -1,6 +1,6 @@
 # nax-textarea
 
-多行文本域。功能主要对齐 [uView Pro Textarea](https://uviewpro.cn/zh/components/textarea.html)；`formatter` 等 UTS 不便支持的能力暂不做。
+多行文本域。功能覆盖常用场景；`formatter` 等 UTS 不便支持的能力暂不做。
 
 ## 依赖
 
@@ -35,7 +35,7 @@
 | focus | boolean | `false` | 获取焦点 |
 | auto-height | boolean | `false` | 自动增高 |
 | maxlength | number | `140` | 最大长度；`-1` 不限制 |
-| border | boolean | `true` | 是否边框（对齐 uView 默认 surround） |
+| border | boolean | `true` | 是否边框（支持 默认 surround） |
 | border-type | string | `surround` | `surround` 四边 / `bottom` 仅下边框 |
 | border-color | string | `''` | 边框色 |
 | background | string | `''` | 背景色 |
@@ -56,7 +56,7 @@
 | keyboardheightchange | 键盘高度变化（detail） |
 | click | 点击 |
 
-## 暂不支持（相对 uView Pro）
+## 暂不支持（组件）
 
 | 能力 | 原因 |
 |------|------|

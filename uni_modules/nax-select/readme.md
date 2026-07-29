@@ -1,6 +1,6 @@
 # nax-select
 
-uni-app x 列选择器（底部弹层 + `picker-view`），功能主要对齐 [uView Pro Select](https://uviewpro.cn/zh/components/select.html)。
+uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场景。
 
 ## 依赖
 
@@ -8,12 +8,12 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能主要对齐 [u
 - `nax-transition`（弹层进退场动画）
 - `nax-ui-theme`（CSS 变量 `--nax-*`，安装时依赖 / 运行时弱依赖）
 
-## 与 uView 的差异（优化点）
+## 组件特性
 
 | 点 | nax-select |
 |----|------------|
 | 弹层绑定 | `v-model:show`（布尔），避免占用表单 `v-model` 语义 |
-| mode 拼写 | 推荐 `multi-column` / `multi-column-auto`，兼容 uView 的 `mutil-*` |
+| mode 拼写 | 推荐 `multi-column` / `multi-column-auto`，兼容历史 `mutil-*` 拼写 |
 | 安全区 | `safe-area-inset-bottom` **默认 true** |
 | 触发条 | 可选 `show-trigger`，表单页可少写一层 Cell/Button |
 | 事件 | 额外 `change` / `open` / `close` |
@@ -122,6 +122,6 @@ function onConfirm(items: UTSJSONObject[]) {
 
 - 全端统一使用原生 `picker-view` 滚轮（含鸿蒙）。
 - **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
-- 微信小程序滚动未结束时点确认会被忽略（与 uView 一致）。
+- 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。
 - 弹层自包含，不依赖 `nax-popup`。
 - 联动最多 4 列。

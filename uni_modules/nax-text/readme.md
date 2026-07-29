@@ -1,6 +1,6 @@
 # nax-text
 
-uni-app x 文本组件，能力对齐 [uView Pro Text](https://uviewpro.cn/zh/components/text.html)。
+uni-app x 文本组件，提供常用能力。
 
 ## 依赖
 
@@ -62,4 +62,4 @@ uni-app x 文本组件，能力对齐 [uView Pro Text](https://uviewpro.cn/zh/co
 - **装饰线（鸿蒙）**：	ext-decoration 不可用，下划线用 order-bottom，删除线用绝对定位中线（#ifdef APP-HARMONY）
 - **省略号**：依赖原生 <text :lines> + 	ext-overflow；**鸿蒙**额外写 CSS lines / 宽度约束 / flex 收缩（#ifdef APP-HARMONY），避免长文案撑开导致省略失效
 - **link 打开**：App 用 `plus.runtime.openURL`；Web 跳转；小程序复制链接（条件编译隔离）
-- **未实现**（相对 uView Pro）：`openType` 及小程序 button 开放能力、`format` 函数类型、`margin`/`iconStyle`/`textStyle` 对象样式（请用 class / CSS 变量）
+- **未实现**（组件）：`openType` 及小程序 button 开放能力、`format` 函数类型、`margin`/`iconStyle`/`textStyle` 对象样式（请用 class / CSS 变量）

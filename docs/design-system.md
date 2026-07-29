@@ -94,8 +94,8 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | Token | 默认值 | 用途 |
 |-------|--------|------|
 | `--nax-color-text` | `#333639` | 主文案 |
-| `--nax-color-text-secondary` | `#767c82` | 次文案（Naive textColor3） |
-| `--nax-color-text-placeholder` | `#e5e5ea` | 占位（Naive placeholder） |
+| `--nax-color-text-secondary` | `#767c82` | 次文案 |
+| `--nax-color-text-placeholder` | `#e5e5ea` | 占位 |
 | `--nax-color-text-disabled` | `#e5e5ea` | 禁用 |
 | `--nax-color-text-inverse` | `#ffffff` | 深色底上的文字 |
 
@@ -112,7 +112,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-color-mask` | `rgba(0, 0, 0, 0.4)` | 弹层遮罩 |
 
 
-#### 品牌与状态色阶（Naive hover / pressed）
+#### 品牌与状态色阶
 
 | Token | 默认值 | 用途 |
 |-------|--------|------|
@@ -131,7 +131,7 @@ BEM 轻量版：`block__element--modifier`，只允许 class 选择器。
 | `--nax-color-divider` | `#f5f5f7` | 分割线 |
 | `--nax-color-button-secondary` / `tertiary` | `#ececed` / `#f2f3f3` | 默认次要/次次要底 |
 
-> 色板来源：[Naive UI common/light](https://github.com/tusen-ai/naive-ui/blob/main/src/_styles/common/light.ts)。默认 **primary 与 success 同为绿色 `#18a058`**（官方默认）。
+> 默认色板中 **primary 与 success 同为绿色 `#18a058`**。
 
 > 暗黑主题：先预留 `--nax-*` 覆盖层，MVP 不做自动跟随系统；后续在 `theme-dark` class 或页面根变量中切换。
 
@@ -241,9 +241,9 @@ MVP 只做必要过渡；复杂动画后置。
 未列出的枚举需在组件文档中声明，并尽量复用上表语义。
 
 
-### 4.2.1 按钮层级（对齐 Naive UI）
+### 4.2.1 按钮层级
 
-参考 [Naive UI Button](https://www.naiveui.com/zh-CN/light/components/button)：
+按钮层级：
 
 | 中文 | `variant` | 说明 |
 |------|-----------|------|
@@ -255,9 +255,9 @@ MVP 只做必要过渡；复杂动画后置。
 | 描边 | `outline` | 透明底 + 色边（兼容保留） |
 | 禁用 | `disabled` prop | `opacity: var(--nax-opacity-disabled, 0.5)`，不触发事件 |
 
-色板默认值（Naive UI light，可被 `nax-ui-theme` 覆盖）：
+色板默认值（可被 `nax-ui-theme` 覆盖）：
 
-| Token | 默认（Naive light） |
+| Token | 默认值 |
 |-------|--------------------------|
 | `--nax-color-primary` | `#18a058` |
 | `--nax-color-success` | `#18a058` |
@@ -266,7 +266,7 @@ MVP 只做必要过渡；复杂动画后置。
 | `--nax-color-error` | `#d03050` |
 | `--nax-color-button-secondary` | `#fafafc` |
 | `--nax-color-button-tertiary` | `#f3f3f5` |
-| 彩色 secondary / tertiary | 实色浅底（primary `#daefe4` / `#e3f3eb`，对应 Naive 0.16/更淡叠白），避免鸿蒙 `rgba` 失效 |
+| 彩色 secondary / tertiary | 实色浅底（primary `#daefe4` / `#e3f3eb`，按 0.16/更淡叠白），避免鸿蒙 `rgba` 失效 |
 ### 4.3 表单组件约定
 
 | 约定 | 说明 |
