@@ -172,3 +172,5 @@ const formData = ref({ biz: 'avatar' } as UTSJSONObject)
 - `--nax-upload-item-radius`
 - `--nax-upload-border-color`
 - `--nax-color-bg-secondary` / `--nax-color-text-secondary` 等语义 token
+
+鸿蒙端（`APP-HARMONY`）不可靠解析跨组件 CSS 变量。暗色主题时，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在内部使用对应的深色背景、边框和文字色，未传入时使用浅色样式。

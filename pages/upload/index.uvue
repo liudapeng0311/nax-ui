@@ -9,7 +9,7 @@
 		<view class="nax-theme page" :class="themeExtraClass">
 			<view class="section">
 				<text class="section__title">基础用法</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="basicList"
 					:max-count="6"
 					multiple
@@ -23,7 +23,7 @@
 
 			<view class="section">
 				<text class="section__title">限制数量 maxCount=3</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="limitList"
 					:max-count="3"
 					multiple
@@ -35,7 +35,7 @@
 
 			<view class="section">
 				<text class="section__title">状态展示（uploading / failed / success）</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="statusList"
 					:max-count="4"
 					:deletable="true"
@@ -45,7 +45,7 @@
 
 			<view class="section">
 				<text class="section__title">禁用 disabled</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="disabledList"
 					disabled
 					:max-count="4"
@@ -54,7 +54,7 @@
 
 			<view class="section">
 				<text class="section__title">自定义尺寸 / 不可删除</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="sizeList"
 					width="100"
 					height="100"
@@ -66,7 +66,7 @@
 
 			<view class="section">
 				<text class="section__title">自定义添加按钮（slot）</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="slotList"
 					:max-count="5"
 					@after-read="onSlotAfterRead"
@@ -82,7 +82,7 @@
 			<view class="section">
 				<text class="section__title">自动上传 autoUpload</text>
 				<text class="hint">配置 uploadAction 后选图自动 uploadFile；空地址会 toast</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="autoList"
 					auto-upload
 					:action="uploadAction"
@@ -100,7 +100,7 @@
 
 			<view class="section">
 				<text class="section__title">模拟上传进度</text>
-				<nax-upload
+				<nax-upload :custom-class="uploadThemeClass"
 					:file-list="mockList"
 					:max-count="6"
 					multiple
@@ -124,6 +124,19 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	const uploadThemeClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		// 鸿蒙组件隔离边界需要将主题 class 直接挂到组件根节点。
+		if (darkMode.value) {
+			return 'nax-theme nax-theme-dark'
+		}
+		return 'nax-theme'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	onShow(() => {

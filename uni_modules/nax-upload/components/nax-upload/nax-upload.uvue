@@ -5,6 +5,7 @@
 			v-for="(item, index) in displayList"
 			:key="itemKey(item, index as number)"
 			class="nax-upload__item"
+			:class="itemThemeClass"
 			:style="itemBoxStyle"
 			@click.stop="onPreviewClick(index as number)"
 		>
@@ -68,7 +69,7 @@
 			<slot>
 				<view class="nax-upload__add-inner">
 					<nax-icon :name="uploadIconName" size="lg" :color="addIconColor"></nax-icon>
-					<text v-if="uploadTextValue.length > 0" class="nax-upload__add-text">{{ uploadTextValue }}</text>
+					<text v-if="uploadTextValue.length > 0" class="nax-upload__add-text" :class="addTextThemeClass">{{ uploadTextValue }}</text>
 				</view>
 			</slot>
 		</view>
@@ -448,7 +449,39 @@
 	})
 
 	const addIconColor = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
+			return '#ffffffa6'
+		}
+		return '#767c82'
+		// #endif
+		// #ifndef APP-HARMONY
 		return 'var(--nax-color-text-secondary, #767c82)'
+		// #endif
+	})
+
+	const itemThemeClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
+			return 'nax-upload__item--harmony-dark nax-upload__item--harmony-dark-border'
+		}
+		return 'nax-upload__item--harmony-light nax-upload__item--harmony-light-border'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	const addTextThemeClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
+			return 'nax-upload__add-text--harmony-dark'
+		}
+		return 'nax-upload__add-text--harmony-light'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	const rootClass = computed((): string => {
@@ -463,10 +496,11 @@
 	})
 
 	const addClass = computed((): string => {
+		let cls = itemThemeClass.value
 		if (props.disabled) {
-			return 'nax-upload__item--disabled'
+			cls += ' nax-upload__item--disabled'
 		}
-		return ''
+		return cls
 	})
 
 	const addHoverClass = computed((): string => {
@@ -1416,11 +1450,24 @@
 	}
 
 	/* #ifdef APP-HARMONY */
-	.nax-upload__item {
+	/* 鸿蒙端组件隔离下的 CSS 变量解析不可靠，使用本地主题状态色。 */
+	.nax-upload__item--harmony-light {
 		background-color: #fafafc;
 	}
-	.nax-upload__item--add {
+	.nax-upload__item--harmony-light-border {
 		border-color: #f0f0f3;
+	}
+	.nax-upload__item--harmony-dark {
+		background-color: #26272c;
+	}
+	.nax-upload__item--harmony-dark-border {
+		border-color: #ffffff3d;
+	}
+	.nax-upload__add-text--harmony-light {
+		color: #767c82;
+	}
+	.nax-upload__add-text--harmony-dark {
+		color: #ffffffa6;
 	}
 	/* #endif */
 </style>
