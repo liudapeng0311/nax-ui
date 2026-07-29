@@ -4,17 +4,17 @@
 		class="nax-notice-bar"
 		:class="rootClass"
 	>
-		<!-- 瀹革缚鏅堕崶鐐垼 -->
+		<!-- 图标区域 -->
 		<view v-if="showIcon" class="nax-notice-bar__icon">
 			<slot name="icon">
 				<nax-icon :name="resolvedIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
 			</slot>
 		</view>
 
-		<!-- 濮樻潙閽╃悰鏃€甯村姘З -->
+		<!-- 水平无缝滚动区域 -->
 		<view v-if="useSeamless" class="nax-notice-bar__body">
 			<view class="nax-notice-bar__viewport">
-				<!-- 闁繑妲戝ù瀣啍閼哄倻鍋ｉ敍姘絿閼奉亞鍔ч弬鍥攳鐎硅棄瀹虫担婊€璐熷顏嗗箚閸楀﹤顔?-->
+				<!-- 离屏测量文本宽度，供无缝滚动计算使用。 -->
 				<view class="nax-notice-bar__measure">
 					<text :id="measureId" class="nax-notice-bar__measure-text">{{ seamlessText }}</text>
 				</view>
@@ -32,7 +32,7 @@
 				<!-- #endif -->
 
 				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
-				<!-- Web / 鐏忓繒鈻兼惔蹇ョ窗CSS 閸欏奔鍞?-50% 瀵邦亞骞?-->
+				<!-- Web 与小程序端使用 CSS 动画向左移动 50%。 -->
 				<view
 					class="nax-notice-bar__track nax-notice-bar__track--css"
 					:style="cssTrackStyle"
@@ -48,7 +48,7 @@
 			</view>
 		</view>
 
-		<!-- 濮濄儴绻樺姘З閿涘牊鎸夐獮?閸ㄥ倻娲块敍?-->
+		<!-- 步进滚动区域 -->
 		<view v-else class="nax-notice-bar__body">
 			<swiper
 				class="nax-notice-bar__swiper"
@@ -72,7 +72,7 @@
 			</swiper>
 		</view>
 
-		<!-- 閸欏厖鏅堕弴鏉戭樋 -->
+		<!-- 更多操作 -->
 		<view
 			v-if="showMore"
 			class="nax-notice-bar__action"
@@ -81,7 +81,7 @@
 			<nax-icon name="arrow-right" :size="actionSizePx" :color="iconColor"></nax-icon>
 		</view>
 
-		<!-- 閸忔娊妫?-->
+		<!-- 关闭按钮 -->
 		<view
 			v-if="closable"
 			class="nax-notice-bar__action"
@@ -95,7 +95,7 @@
 <script setup lang="uts">
 	/**
 	 * nax-notice-bar
-	 * @description 濠婃艾濮╅柅姘啞閺嶅繈鈧倸顕? NoticeBar閿涙碍鎸夐獮瀹狀敊閹?/ 濮濄儴绻?/ 閸ㄥ倻娲垮銉ㄧ箻 + 娑撳顣?/ 閸ョ偓鐖?/ 閸忔娊妫撮妴?
+	 * @description 滚动通告栏，支持 NoticeBar 的水平衔接、水平步进、垂直步进、主题、图标和关闭操作。
 	 */
 	const props = defineProps({
 		list: {
@@ -347,7 +347,7 @@
 	})
 
 	const segStyle = computed((): string => {
-		// 娴犲懎婀€圭偞绁撮崚鏉款啍鎼达箑鎮楅崶鍝勭暰濞堥潧顔旈敍娑楀強缁犳妯佸▓鍏哥瑝瀵缚顢戦幏澶婎啍閿涘矂浼╅崗宥冣偓灞藉帥缁岃櫣娅ч崘宥勭矤閸欏厖鏅跺姘毉閵?
+		// 仅在测宽成功后固定分段宽度，避免估算宽度截断公告内容。
 		if (measuredLoopWidth.value > 0) {
 			return 'width:' + measuredLoopWidth.value.toString() + 'px;'
 		}
@@ -435,7 +435,7 @@
 		}
 		setTimeout(() => {
 			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App 鐠烘垿鈹堥悘顖ょ窗閸欏本顔岄弬鍥攳閿涘ranslateX 鐠愮喎鎮滃顏嗗箚閿涘牐顫嬬憴澶嬪瘮缂侇厼鎮滃锔肩礆
+			// App 端优先直接读取元素宽度，避免查询延迟影响 translateX 动画。
 			const segEl = uni.getElementById(segMeasureId)
 			if (segEl != null && segEl.offsetWidth > 1) {
 				applyMeasuredWidth(segEl.offsetWidth)
@@ -448,7 +448,7 @@
 			if (proxy != null) {
 				query.in(proxy)
 			}
-			// 闁繑妲戝ù瀣啍閼哄倻鍋?
+			// 其他端通过选择器查询测量离屏文本宽度。
 			query
 				.select('#' + measureId)
 				.boundingClientRect((rect : any | null) => {
@@ -464,7 +464,7 @@
 					}
 				})
 			// #ifdef APP-HARMONY
-			// 妤﹁儻鎸嬮崶鐐衡偓鈧敍姘ゴ缁楊兛绔村▓闈涘讲鐟欎焦鏋冨?
+			// 鸿蒙端额外测量可见分段，作为离屏测量的回退。
 			query
 				.select('#' + segMeasureId)
 				.boundingClientRect((rect2 : any | null) => {
@@ -484,7 +484,7 @@
 	}
 
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App ?????????translateX ????????????
+	// App 端通过 translateX 实现无缝滚动。
 	const marqueeOffset = ref(0)
 	let marqueeTimerId = -1
 	let marqueeToken = 0
@@ -498,13 +498,13 @@
 
 	// #ifdef APP-HARMONY
 	/**
-	 * 妤﹁儻鎸嬬悰鏃€甯撮敍鍫濈暭閺傝鏋冨锝忕礆閿?
-	 * - App 娑撳秵鏁幐?CSS @keyframes閿涘苯绨查悽?UniElement.animate閿涘牐顫?uni-app x UniElement / css_diff閿?
-	 * - 閹嗗厴閿涙艾褰ч弨?transform閿涘矂浼╅崗?left/top 娑?Vue :style 妤傛﹢顣堕柌宥囩帛
-	 * - 鐠囶厺绠熼敍姘蓟濞?0閳?half 缁炬寧鈧勬￥闂勬劕鎯婇悳?閳?setInterval 濡€虫礀缂佹洜娈戠憴鍡氼潕閺佸牊鐏?
-	 * - 妤﹁儻鎸?VDOM 閺嗗倷绗夋潻鏂挎礀閸斻劎鏁剧€圭偘绶ラ敍姘粻濮濄垺妞傞悽?0ms animate 妞よ埖甯€
-	 * - 濞村顔旈張顏勭暚閹存劖妞?offset=0 闂堟瑦鈧礁鐫嶇粈鐚寸礉缂佹繀绗夐垾婊冨帥缁岃櫣娅ч崘宥勭矤閸欏厖鏅跺姘崇箻閳?
-	 * - 閸忓啰绀岄弳鍌欑瑝閸欘垳鏁ら弮璺烘礀闁偓 requestAnimationFrame + setProperty 濡€虫礀缂?
+	 * 鸿蒙端使用原生动画驱动滚动。
+	 * - CSS keyframes 不可用时，优先使用 UniElement.animate。
+	 * - 直接更新 transform，避免通过 Vue :style 高频重绘。
+	 * - 原生动画不可用时，回退到 requestAnimationFrame 与 setProperty。
+	 * - 卸载后不再访问元素，避免无效的原生动画调用。
+	 * - 未测得宽度时保持起点展示，避免内容首次渲染为空白。
+	 * - 使用 requestAnimationFrame 与 setProperty 作为回退方案。
 	 */
 	let marqueeRafId = 0
 	let marqueeLastTs = 0
@@ -515,7 +515,7 @@
 	let hostAlive = true
 
 	const appTrackStyle = computed((): string => {
-		// transform 娴溿倗鏁?animate / setProperty 妞瑰崬濮╅敍宀勪缉閸忓秶绮︾€规俺顩惄?
+		// transform 由原生动画或 setProperty 直接更新。
 		return ''
 	})
 
@@ -576,7 +576,7 @@
 		if (el == null) {
 			return
 		}
-		// 妤﹁儻鎸嬫稉宥堢箲閸ョ偛濮╅悽璇茬杽娓氬绱? 閺冨爼鏆?forwards 婢跺秳缍呴獮鍫曘€婇幒澶婃儕閻?
+		// 用零时长动画复位，避免 forwards 保留在末帧。
 		el.animate([
 			{
 				transform: 'translateX(0px)'
@@ -615,7 +615,7 @@
 			return false
 		}
 		const dur = harmonyDurationMs(half)
-		// 閸忔娊鏁敮褝绱? 閳?-half閿涘瞼鍤庨幀褝绱濇潻鎴滄妧閺冪娀妾哄顏嗗箚閿涙稑寮诲▓鍏稿▏缂佸牏鍋ｆ稉搴ゆ崳閻愮顫嬬憴澶愬櫢閸?
+		// 从 0 线性移动到 -half，重复分段确保接缝连续。
 		el.animate([
 			{
 				transform: 'translateX(0px)'
@@ -626,7 +626,7 @@
 		], {
 			duration: dur,
 			easing: 'linear',
-			// 闁劌鍨?UTS 缁?Infinity 娑撳秶菙鐎规熬绱濋悽銊ㄥ喕婢剁喎銇囬惃鍕箒闂勬劖顐奸弫?
+			// UTS 不支持 Infinity，使用足够大的次数近似无限循环。
 			iterations: 1000000,
 			fill: 'forwards'
 		} as UniAnimationOption)
@@ -649,7 +649,7 @@
 
 		const half = measuredLoopWidth.value
 		if (half <= 1) {
-			// 閸楀﹤顔旈張顏勬皑缂侇亷绱伴棃娆愨偓浣哥潔缁€鐚寸礉缂佈呯敾濞村顔?
+			// 未测得宽度时保持起点展示，并继续发起测量。
 			marqueeOffsetPx = 0
 			applyTrackTransform(0)
 			measureLoopWidth()
@@ -660,19 +660,19 @@
 			return
 		}
 
-		// 閸樼喓鏁?animate 瀹告彃婀捄鎴滅瑬閸楀﹤顔旂粙鍐茬暰閿涙矮绗夐崘宥呭綌閸?rAF閿涘矂浼╅崗宥呭蓟妞瑰崬濮╅幍鎾寸仸
+		// 原生动画的宽度未变化时保持运行，避免重复启动。
 		if (usingNativeAnimate && Math.abs(half - lastAnimHalf) <= 2) {
 			return
 		}
 
-		// 娴兼ê鍘涢崢鐔烘晸 animate閿涘湙PU 閹绘帒鈧》绱濇稉宥嗗竴鐢嶇礆
+		// 优先使用原生动画，无法启动时再回退到 rAF。
 		if (startNativeAnimate(half)) {
 			clearMarqueeRaf()
 			marqueeRafId = 0
 			return
 		}
 
-		// 閸忔粌绨抽敍姝矨F + setProperty 濡€虫礀缂佹洩绱欑拠顓濈疅閸?setInterval閿涘本妫?Vue 闁插秶绮敍?
+		// rAF 与 setProperty 兜底，避免 setInterval 驱动 Vue 样式更新。
 		if (marqueeLastTs <= 0) {
 			marqueeLastTs = timestamp
 		}
@@ -711,7 +711,7 @@
 			measureLoopWidth()
 		}
 		const token = marqueeToken
-		// 閸愬懎顔愮粩瀣煝閸?0 娴ｅ秴褰茬憴?
+		// 先从起点显示，避免首次渲染出现空白。
 		applyTrackTransform(0)
 		const half = measuredLoopWidth.value
 		if (half > 1 && startNativeAnimate(half)) {
@@ -810,7 +810,7 @@
 			return
 		}
 		// #ifdef APP-HARMONY
-		// 閸楀﹤顔旈崣妯哄鐡掑懓绻冮梼鍫濃偓鐓庡晙 restart閿涘矂浼╅崗宥嗗复缂傛繃濮堥崝?
+		// 宽度变化不超过 2px 时无需重启动画。
 		if (lastAnimHalf > 0 && Math.abs(w - lastAnimHalf) <= 2) {
 			return
 		}
@@ -958,7 +958,7 @@
 
 	.nax-notice-bar__measure {
 		position: absolute;
-		/* 閸曡法鏁ら弸浣搞亣鐠?left閿涙岸缂氶拏娆庣瑐閸欘垵鍏橀柌蹇撳煂 0 鐎?*/
+		/* 离屏测量节点从左上角定位，避免位置影响宽度计算。 */
 		left: 0;
 		top: 0;
 		flex-direction: row;
