@@ -1,6 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
+			:back-icon-color="demoNavBackIconColor(darkMode)"
 			title="nax-swiper"
 			home-url="/pages/index/index"
 			:border="true"
@@ -65,7 +66,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	// setup 同步读全局，避免首帧浅色白闪
 	const darkMode = ref(bindDemoThemePage())

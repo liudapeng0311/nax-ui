@@ -1,6 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
+			:back-icon-color="demoNavBackIconColor(darkMode)"
 			title="nax-picker"
 			home-url="/pages/index/index"
 			:border="true"
@@ -46,6 +47,12 @@
 				@click-mask="onEvent('click-mask')"
 			>
 				<view class="panel" :class="'panel--' + mainPosition">
+					<view
+						v-if="mainPosition == 'left' || mainPosition == 'right'"
+						class="panel__safe-top"
+						:class="sidePanelSafeTopClass"
+						:style="sidePanelSafeTopStyle"
+					></view>
 					<view class="panel__header">
 						<text class="panel__title">{{ positionTitle }}</text>
 						<view class="panel__close" @click="mainShow = false">
@@ -98,6 +105,11 @@
 				width="60%"
 			>
 				<view class="panel panel--right">
+					<view
+						class="panel__safe-top"
+						:class="sidePanelSafeTopClass"
+						:style="sidePanelSafeTopStyle"
+					></view>
 					<text class="panel__title">宽 60% 侧栏</text>
 					<text class="panel__desc">width = 60%</text>
 					<nax-button type="primary" label="关闭" @click="sizeShow = false"></nax-button>
@@ -109,7 +121,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
 
@@ -122,6 +134,7 @@
 
 	onShow(() => {
 		darkMode.value = bindDemoThemePage()
+		sidePanelSafeTopPx.value = readStatusBarHeight()
 	})
 
 	const mainShow = ref(false)
@@ -129,6 +142,7 @@
 	const lockedShow = ref(false)
 	const noRoundShow = ref(false)
 	const sizeShow = ref(false)
+	const sidePanelSafeTopPx = ref(0)
 	const lastEvent = ref('无')
 
 	const panelDesc = computed((): string => {
@@ -155,6 +169,36 @@
 		}
 		return '底部弹出'
 	})
+
+	const sidePanelSafeTopClass = computed((): string => {
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (sidePanelSafeTopPx.value <= 0) {
+			return 'panel__safe-top--css'
+		}
+		// #endif
+		return ''
+	})
+
+	const sidePanelSafeTopStyle = computed((): string => {
+		if (sidePanelSafeTopPx.value > 0) {
+			return 'height:' + sidePanelSafeTopPx.value + 'px;'
+		}
+		return ''
+	})
+
+	function readStatusBarHeight() : number {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		const win = uni.getWindowInfo()
+		if (win.statusBarHeight != null && win.statusBarHeight > 0) {
+			return win.statusBarHeight as number
+		}
+		// #endif
+		const sys = uni.getSystemInfoSync()
+		if (sys.statusBarHeight != null && sys.statusBarHeight > 0) {
+			return sys.statusBarHeight as number
+		}
+		return 0
+	}
 
 	function openAt(pos: string) {
 		mainPosition.value = pos
@@ -250,6 +294,18 @@
 		flex-direction: column;
 		padding: 16px;
 	}
+
+	.panel__safe-top {
+		flex-shrink: 0;
+	}
+
+	/* Web 端未读取到状态栏高度时，使用浏览器安全区兜底。 */
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.panel__safe-top--css {
+		height: constant(safe-area-inset-top);
+		height: env(safe-area-inset-top);
+	}
+	/* #endif */
 
 	.panel--bottom {
 		min-height: 180px;

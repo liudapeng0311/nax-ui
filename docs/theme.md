@@ -141,6 +141,19 @@ Sass / `uni.scss` 属于 **编译期** 变量，适合生成 CSS 或工程内部
 
 ---
 
+### 5.4 dialogPage 主题同步
+
+`dialogPage` 是独立页面，不能继承触发页的 `nax-theme-dark`。使用 `openNaxPopup()` 打开内置 host 时，传入当前主题 class：
+
+```uts
+openNaxPopup({
+  title: '提示',
+  themeClass: 'nax-theme-dark'
+})
+```
+
+自定义 `url` 弹层页应在自身根节点挂载相同的 `nax-theme` / `nax-theme-dark` class。
+
 ## 6. 覆盖优先级
 
 ```text

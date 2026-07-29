@@ -2,6 +2,7 @@
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<!-- 本页自身顶栏（页面已 navigationStyle: custom） -->
 		<nax-nav-bar
+			:back-icon-color="demoNavBackIconColor(darkMode)"
 			title="nax-nav-bar"
 			home-url="/pages/index/index"
 			:border="true"
@@ -20,6 +21,7 @@
 				<view class="section">
 					<text class="section__title">默认 default</text>
 					<nax-nav-bar
+						:back-icon-color="demoNavBackIconColor(darkMode)"
 						title="默认标题"
 						:fixed="false"
 						:safe-area-inset-top="false"
@@ -43,6 +45,7 @@
 				<view class="section">
 					<text class="section__title">返回文案 + 无图标</text>
 					<nax-nav-bar
+						:back-icon-color="demoNavBackIconColor(darkMode)"
 						title="设置"
 						back-text="关闭"
 						back-icon=""
@@ -71,6 +74,7 @@
 				<view class="section">
 					<text class="section__title">自定义中间（插槽）</text>
 					<nax-nav-bar
+						:back-icon-color="demoNavBackIconColor(darkMode)"
 						:fixed="false"
 						:safe-area-inset-top="false"
 						:auto-back="false"
@@ -112,7 +116,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
 

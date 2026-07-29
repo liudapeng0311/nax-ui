@@ -1,6 +1,6 @@
 <template>
 	<!-- dialogPage 内置宿主：透明全屏；鸿蒙遮罩动画对齐 nax-picker 三阶段 -->
-	<view class="nax-popup-host nax-theme">
+	<view class="nax-popup-host nax-theme" :class="themeClass">
 		<view
 			v-if="maskEnabled"
 			class="nax-popup-host__mask"
@@ -53,6 +53,7 @@
 	const widthText = ref('')
 	const heightText = ref('')
 	const animDuration = ref(280)
+	const themeClass = ref('')
 	/** 面板是否处于结束态 */
 	const panelShow = ref(false)
 	/** 鸿蒙：遮罩是否点亮（opacity 0→0.4） */
@@ -224,6 +225,10 @@
 			if (dv > 0) {
 				animDuration.value = dv
 			}
+		}
+		const tc = s.getString('themeClass')
+		if (tc != null) {
+			themeClass.value = tc as string
 		}
 	}
 

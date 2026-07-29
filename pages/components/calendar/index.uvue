@@ -1,6 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
+			:back-icon-color="demoNavBackIconColor(darkMode)"
 			title="nax-calendar"
 			home-url="/pages/index/index"
 			:border="true"
@@ -115,7 +116,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
 

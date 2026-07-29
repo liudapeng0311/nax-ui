@@ -40,6 +40,7 @@ var sessionWidth: string = ''
 var sessionHeight: string = ''
 var sessionZIndex: number = 10090
 var sessionDuration: number = 280
+var sessionThemeClass: string = ''
 var sessionUrl: string = ''
 var sessionMode: string = 'auto'
 var sessionViaDialogPage: boolean = false
@@ -106,6 +107,7 @@ export function getNaxPopupSession(): UTSJSONObject {
 		height: sessionHeight,
 		zIndex: sessionZIndex,
 		duration: sessionDuration,
+		themeClass: sessionThemeClass,
 		viaDialogPage: sessionViaDialogPage
 	} as UTSJSONObject
 }
@@ -136,6 +138,7 @@ function clearSession(_action: string) {
 	sessionHeight = ''
 	sessionZIndex = 10090
 	sessionDuration = 280
+	sessionThemeClass = ''
 	sessionUrl = ''
 	sessionMode = 'auto'
 	sessionViaDialogPage = false
@@ -200,6 +203,7 @@ function parseOptions(input: any | null): UTSJSONObject {
 	var height = ''
 	var zIndex = 10090
 	var duration = 280
+	var themeClass = ''
 	var url = ''
 	var mode = 'auto'
 	var animationType = 'none'
@@ -219,6 +223,7 @@ function parseOptions(input: any | null): UTSJSONObject {
 			height: height,
 			zIndex: zIndex,
 			duration: duration,
+			themeClass: themeClass,
 			url: url,
 			mode: mode,
 			animationType: animationType,
@@ -241,6 +246,7 @@ function parseOptions(input: any | null): UTSJSONObject {
 			height: height,
 			zIndex: zIndex,
 			duration: duration,
+			themeClass: themeClass,
 			url: url,
 			mode: mode,
 			animationType: animationType,
@@ -272,6 +278,7 @@ function parseOptions(input: any | null): UTSJSONObject {
 	height = readString(obj, 'height', '')
 	zIndex = readNumber(obj, 'zIndex', 10090)
 	duration = readNumber(obj, 'duration', 280)
+	themeClass = readString(obj, 'themeClass', '')
 	url = readString(obj, 'url', '')
 	mode = normalizeMode(readString(obj, 'mode', 'auto'))
 	animationType = readString(obj, 'animationType', 'none')
@@ -293,6 +300,7 @@ function parseOptions(input: any | null): UTSJSONObject {
 		height: height,
 		zIndex: zIndex,
 		duration: duration,
+		themeClass: themeClass,
 		url: url,
 		mode: mode,
 		animationType: animationType,
@@ -314,6 +322,7 @@ function applySession(opts: UTSJSONObject, viaDialog: boolean) {
 	sessionHeight = readString(opts, 'height', '')
 	sessionZIndex = readNumber(opts, 'zIndex', 10090)
 	sessionDuration = readNumber(opts, 'duration', 280)
+	sessionThemeClass = readString(opts, 'themeClass', '')
 	sessionUrl = readString(opts, 'url', '')
 	sessionMode = normalizeMode(readString(opts, 'mode', 'auto'))
 	sessionViaDialogPage = viaDialog
@@ -415,7 +424,7 @@ function warnMpNoWindowCover() {
  *   - auto：能压窗则 window，否则 page
  *   - window：强制 dialogPage（不支持则降级 page 并 warn）
  *   - page：强制页面宿主 nax-picker（全端）
- * - mask / maskClosable / round / width / height / zIndex / duration
+ * - mask / maskClosable / round / width / height / zIndex / duration / themeClass
  * - animationType / animationDuration / disableEscBack / triggerParentHide
  */
 export function openNaxPopup(input: any | null = null) {

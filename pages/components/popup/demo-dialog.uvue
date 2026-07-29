@@ -1,6 +1,6 @@
 ﻿<template>
 	<!-- 自定义 dialog 页：dialogPage animationType=none，页内自管进退场（对齐 nax-popup host / nax-picker） -->
-	<view class="demo-dialog nax-theme">
+	<view class="demo-dialog nax-theme" :class="themeExtraClass">
 		<view
 			class="demo-dialog__mask"
 			:class="maskClass"
@@ -31,11 +31,21 @@
 </template>
 
 <script setup lang="uts">
+	import { isDemoDarkMode } from '@/common/demo-theme.uts'
+
 	const ANIM_MS = 280
+	const darkMode = ref(isDemoDarkMode())
 	const panelShow = ref(false)
 	const hmMaskOn = ref(false)
 	const hmAnimReady = ref(false)
 	const closing = ref(false)
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
 
 	let openDelayTimer: number = -1
 	let enterReadyTimer: number = -1

@@ -66,6 +66,17 @@ export function demoThemeExtraClass(): string {
 	return ''
 }
 
+/** 返回图标在鸿蒙端使用实色，避免跨组件 CSS 变量失效。 */
+export function demoNavBackIconColor(dark: boolean): string {
+	// #ifdef APP-HARMONY
+	if (dark) {
+		return '#ffffffd1'
+	}
+	return '#333639'
+	// #endif
+	return ''
+}
+
 /**
  * 原生导航栏颜色
  * 注意：uni-app x 的 Uni 类型无 setBackgroundColor，页面底色靠 nax-theme / CSS 变量

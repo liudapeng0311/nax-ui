@@ -112,6 +112,16 @@ closeNaxPopup()
 
 ### options
 
+`dialogPage` 是独立页面，无法继承触发页的主题 class。内置 host 需要同步暗色主题时，传入当前主题 class：
+
+```uts
+openNaxPopup({
+  title: '提示',
+  content: '深色主题会同步到内置 host',
+  themeClass: 'nax-theme-dark'
+})
+```
+
 | 字段 | 类型 | 默认 | 说明 |
 |------|------|------|------|
 | url | string | 内置 host | 自定义 dialog 页面路径 |
@@ -124,6 +134,7 @@ closeNaxPopup()
 | width / height | string | '' | 面板尺寸 |
 | zIndex | number | 10090 | 页面级层级 |
 | duration | number | 280 | 动画 ms |
+| themeClass | string | '' | 应用于内置 dialogPage host 的主题 class，例如 `nax-theme-dark` |
 | animationType | string | fade-in | dialogPage 动画 |
 | animationDuration | number | 280 | dialogPage 动画时长 |
 | disableEscBack | boolean | false | 禁 ESC 关闭 |

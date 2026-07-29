@@ -1,6 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
+			:back-icon-color="demoNavBackIconColor(darkMode)"
 			title="nax-popup"
 			home-url="/pages/index/index"
 			:border="true"
@@ -76,7 +77,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, setDemoDarkMode, demoNavBackIconColor } from '@/common/demo-theme.uts'
 	import {
 		openNaxPopup,
 		closeNaxPopup,
@@ -106,6 +107,7 @@
 
 	function openWindowCenter() {
 		openNaxPopup({
+			themeClass: themeExtraClass.value,
 			title: '压窗屏',
 			content: 'App/Web 下遮罩应盖住导航栏。点遮罩或关闭按钮退出。',
 			position: 'center',
@@ -115,6 +117,7 @@
 
 	function openWindowBottom() {
 		openNaxPopup({
+			themeClass: themeExtraClass.value,
 			title: '底部压窗',
 			content: 'position=bottom 的内置 host 面板。',
 			position: 'bottom',
@@ -124,6 +127,7 @@
 
 	function openForceWindow() {
 		openNaxPopup({
+			themeClass: themeExtraClass.value,
 			mode: 'window',
 			title: '强制 window',
 			content: 'mode=window：不支持的端会 warn 并尝试页面宿主降级。',
