@@ -126,16 +126,26 @@
 
 <script setup lang="uts">
 	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	// #ifdef MP-WEIXIN
+	// å¾®ä¿¡å°ç¨‹åºä¼šæŠŠ naxDialog å¯¼å…¥ä¸ <nax-dialog> è§£æä¸ºåŒåç»„ä»¶ç»‘å®šã€‚
 	import {
-		naxDialog,
+		naxDialog as showNaxDialog,
 		naxDialogAlert,
 		naxDialogConfirm
 	} from '@/uni_modules/nax-dialog/index.uts'
+	// #endif
+	// #ifndef MP-WEIXIN
+	import {
+		naxDialog as showNaxDialog,
+		naxDialogAlert,
+		naxDialogConfirm
+	} from '@/uni_modules/nax-dialog/index.uts'
+	// #endif
 
 	const darkMode = ref(bindDemoThemePage())
 
 	const navBackIconColor = computed((): string => {
-		// Android Ä£°å±àÒë²»Ö±½Óµ÷ÓÃµ¼ÈëµÄ UTS º¯Êı£¬±ÜÃâÉú³ÉÎ´½âÎöµÄ invoke¡£
+		// Android æ¨¡æ¿ç¼–è¯‘ä¸ç›´æ¥è°ƒç”¨å¯¼å…¥çš„ UTS å‡½æ•°ï¼Œé¿å…ç”Ÿæˆæœªè§£æçš„ invokeã€‚
 		// #ifdef APP-ANDROID
 		return ''
 		// #endif
@@ -258,7 +268,7 @@
 	}
 
 	function onApiPromise() {
-		naxDialog({
+		showNaxDialog({
 			title: 'Promise',
 			content: 'ç­‰å¾…ä½ çš„é€‰æ‹©',
 			showCancel: true

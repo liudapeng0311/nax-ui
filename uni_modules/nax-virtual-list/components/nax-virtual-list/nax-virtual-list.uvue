@@ -607,6 +607,70 @@
 	// Web/小程序：合并滚动帧，降低窗口重排频率
 	let pendingScrollTopWeb = 0.0
 	let scrollMergeScheduledWeb = false
+	// #ifdef WEB || MP-WEIXIN
+	// Web/微信小程序会在追加数据后重复派发 scrolltolower，离开底部阈值后才重新解锁
+	let lowerLoadLocked = false
+	let lowerRearmAfter = 0.0
+	let observedListLength = listLength()
+	let restoreScrollToken = 0
+
+	function rearmLowerLoad(top : number, reportedScrollHeight : number) {
+		if (!lowerLoadLocked || props.loading) {
+			return
+		}
+		if (Date.now() < lowerRearmAfter) {
+			return
+		}
+		var scrollHeight = reportedScrollHeight
+		// Web 的事件值可能退化成 viewport 高度，以固定行高估算值兜底
+		const estimatedScrollHeight = listLength() * rowHeight()
+		if (scrollHeight < estimatedScrollHeight) {
+			scrollHeight = estimatedScrollHeight
+		}
+		const viewport = resolveViewport()
+		var remaining = scrollHeight - top - viewport
+		if (remaining < 0) {
+			remaining = 0
+		}
+		var threshold = props.offset
+		if (threshold < 0) {
+			threshold = 0
+		}
+		// 加一行回差，避免底部锚定或尺寸抖动刚越过 lower-threshold 就提前解锁
+		const releaseThreshold = threshold + rowHeight()
+		if (remaining > releaseThreshold) {
+			lowerLoadLocked = false
+		}
+	}
+
+	function restoreScrollAfterAppend(top : number) {
+		const token = restoreScrollToken + 1
+		restoreScrollToken = token
+		nextTick(() => {
+			if (token != restoreScrollToken) {
+				return
+			}
+			// 先改变绑定值，再于布局完成后回到快照位置，覆盖 Web/小程序的底部锚定
+			scrollTopBind.value = top + 0.01
+			setTimeout(() => {
+				if (token != restoreScrollToken) {
+					return
+				}
+				scrollTopBind.value = top
+				scrollTopValue.value = top
+				pendingScrollTopWeb = top
+				updateRange(top, true)
+				const unlockDelay = lowerRearmAfter - Date.now()
+				setTimeout(() => {
+					if (token != restoreScrollToken || props.loading) {
+						return
+					}
+					rearmLowerLoad(top, listLength() * rowHeight())
+				}, unlockDelay > 0 ? unlockDelay : 0)
+			}, 0)
+		})
+	}
+	// #endif
 
 	function flushWebScroll() {
 		scrollMergeScheduledWeb = false
@@ -627,7 +691,12 @@
 	}
 
 	function onScroll(e : UniScrollEvent) {
-		pendingScrollTopWeb = e.detail.scrollTop
+		const top = e.detail.scrollTop
+		const scrollHeight = e.detail.scrollHeight
+		// #ifdef WEB || MP-WEIXIN
+		rearmLowerLoad(top, scrollHeight)
+		// #endif
+		pendingScrollTopWeb = top
 		scheduleWebScroll()
 	}
 	// #endif
@@ -671,7 +740,17 @@
 	}
 
 	function onScrollToLower() {
+		// #ifdef WEB || MP-WEIXIN
+		if (lowerLoadLocked || Date.now() < lowerRearmAfter || !canLoad()) {
+			return
+		}
+		lowerLoadLocked = true
+		lowerRearmAfter = 0.0
+		emit('load')
+		// #endif
+		// #ifndef WEB || MP-WEIXIN
 		tryLoad()
+		// #endif
 	}
 
 	function onErrorClick() {
@@ -808,8 +887,23 @@
 
 	watch((): number => {
 		return listLength()
-	}, (_ : number) => {
+	}, (val : number) => {
+		// #ifdef WEB || MP-WEIXIN
+		const previousLength = observedListLength
+		observedListLength = val
+		const shouldRestoreScroll = lowerLoadLocked && val > previousLength
+		const scrollTopSnapshot = pendingScrollTopWeb
+		if (lowerLoadLocked) {
+			// 数据追加后的布局与底部锚定可能分两阶段发生，冻结期间不允许解锁
+			lowerRearmAfter = Date.now() + 350
+		}
+		// #endif
 		rebuildFromProps()
+		// #ifdef WEB || MP-WEIXIN
+		if (shouldRestoreScroll) {
+			restoreScrollAfterAppend(scrollTopSnapshot)
+		}
+		// #endif
 	})
 
 	watch((): number => {
@@ -890,6 +984,10 @@
 		flex-direction: column;
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
+		/* #endif */
+		/* #ifdef WEB */
+		/* 真正滚动内容禁用锚定；scroll-view 根 class 不在浏览器内部滚动节点上 */
+		overflow-anchor: none;
 		/* #endif */
 	}
 

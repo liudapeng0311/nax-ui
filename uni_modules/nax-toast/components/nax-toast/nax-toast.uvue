@@ -7,7 +7,7 @@
 		:style="rootStyle"
 	>
 		<view class="nax-toast__mask"></view>
-		<view class="nax-toast__stage" :class="stageClass">
+		<view class="nax-toast__stage" :class="stageClass" :style="stageStyle">
 			<view class="nax-toast__panel" :class="panelClass" :style="panelStyle">
 				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
 				<view v-if="showIcon && iconName.length > 0" :id="loadingDomId" class="nax-toast__icon" :style="loadingStyle">
@@ -29,7 +29,7 @@
 		v-else-if="visible"
 		class="nax-toast nax-toast--float"
 		:class="floatClass"
-		:style="rootStyle"
+		:style="floatStyle"
 	>
 		<view class="nax-toast__panel" :class="panelClass" :style="panelStyle">
 			<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
@@ -83,6 +83,9 @@
 	const showIcon = ref(false)
 	const bgColor = ref('')
 	const textColor = ref('')
+	// #ifdef MP-WEIXIN
+	const mpTopOffsetPx = ref(112)
+	// #endif
 
 	let hideTimer: number = -1
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
@@ -100,6 +103,25 @@
 
 	const rootStyle = computed((): string => {
 		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const stageStyle = computed((): string => {
+		// #ifdef MP-WEIXIN
+		if (positionName.value == 'top') {
+			return 'padding-top:' + mpTopOffsetPx.value.toString() + 'px;'
+		}
+		// #endif
+		return ''
+	})
+
+	const floatStyle = computed((): string => {
+		let style = rootStyle.value
+		// #ifdef MP-WEIXIN
+		if (positionName.value == 'top') {
+			style += 'top:' + mpTopOffsetPx.value.toString() + 'px;'
+		}
+		// #endif
+		return style
 	})
 
 	const stageClass = computed((): string => {
@@ -371,6 +393,22 @@
 		}
 	}
 
+	// #ifdef MP-WEIXIN
+	function refreshMpTopOffset() {
+		const win = uni.getWindowInfo()
+		let navBottom = 44
+		if (win.statusBarHeight != null && win.statusBarHeight > 0) {
+			navBottom = (win.statusBarHeight as number) + 44
+		}
+		const rect = uni.getMenuButtonBoundingClientRect()
+		if (rect != null && rect.bottom != null && rect.bottom > navBottom) {
+			navBottom = rect.bottom as number
+		}
+		// 留出导航栏与轻提示之间的视觉间距。
+		mpTopOffsetPx.value = Math.ceil(navBottom + 16)
+	}
+	// #endif
+
 	function mapTypeIcon(type: string, customIcon: string): string {
 		if (customIcon.length > 0) {
 			return customIcon
@@ -403,6 +441,9 @@
 
 	function hostShow(title: string, type: string, icon: string, duration: number, position: string, ov: boolean, withIcon: boolean, bg: string, color: string) {
 		clearHideTimer()
+		// #ifdef MP-WEIXIN
+		refreshMpTopOffset()
+		// #endif
 		titleText.value = title
 		typeName.value = type
 		positionName.value = position
@@ -494,7 +535,7 @@
 		justify-content: flex-start;
 	}
 
-	/* #ifndef APP-HARMONY */
+	/* #ifndef APP-HARMONY || MP-WEIXIN */
 	.nax-toast__stage--top {
 		padding-top: 80px;
 	}
@@ -537,7 +578,7 @@
 	}
 	/* #endif */
 
-	/* #ifndef APP-HARMONY */
+	/* #ifndef APP-HARMONY || MP-WEIXIN */
 	.nax-toast--float-top {
 		top: 80px;
 	}

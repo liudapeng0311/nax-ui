@@ -68,7 +68,7 @@ function onCancel() {
 
 ```uts
 import {
-  naxDialog,
+  naxDialog as showNaxDialog,
   naxDialogAlert,
   naxDialogConfirm,
   hideNaxDialog
@@ -94,12 +94,14 @@ naxDialogAlert('保存成功')
 naxDialogAlert({ title: '提示', content: '网络已恢复' })
 
 // 通用入口
-naxDialog({
+showNaxDialog({
   title: '提示',
   content: '自定义双按钮',
   showCancel: true
 })
 ```
+
+> 微信小程序端：若当前 SFC 同时挂载 `<nax-dialog />` 并导入 `naxDialog`，请像上例一样给函数设置本地别名。`naxDialog` 会与组件标签映射到同一个驼峰名，导致 `MP-WEIXIN` 未注册宿主组件；声明式与命令式按钮都会表现为点击无反应。仅调用函数、不挂载宿主的业务页可继续直接导入 `naxDialog`。
 
 ### asyncClose（异步关闭）
 

@@ -89,8 +89,10 @@
 
 <script setup lang="uts">
 	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	// #ifdef MP-WEIXIN
+	// 微信小程序会把 naxToast 导入与 <nax-toast> 解析为同名组件绑定。
 	import {
-		naxToast,
+		naxToast as showNaxToast,
 		hideNaxToast,
 		naxToastSuccess,
 		naxToastError,
@@ -98,11 +100,23 @@
 		naxToastInfo,
 		naxToastLoading
 	} from '@/uni_modules/nax-toast/index.uts'
+	// #endif
+	// #ifndef MP-WEIXIN
+	import {
+		naxToast as showNaxToast,
+		hideNaxToast,
+		naxToastSuccess,
+		naxToastError,
+		naxToastWarning,
+		naxToastInfo,
+		naxToastLoading
+	} from '@/uni_modules/nax-toast/index.uts'
+	// #endif
 
 	const darkMode = ref(bindDemoThemePage())
 
 	const navBackIconColor = computed((): string => {
-		// Android ģ����벻ֱ�ӵ��õ���� UTS ��������������δ������ invoke��
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
 		// #ifdef APP-ANDROID
 		return ''
 		// #endif
@@ -123,39 +137,39 @@
 	})
 
 	function onText() {
-		naxToast('你好，这是一条轻提示')
+		showNaxToast('你好，这是一条轻提示')
 	}
 
 	function onSuccess() {
-		naxToast({
+		showNaxToast({
 			title: '保存成功',
 			type: 'success'
 		} as UTSJSONObject)
 	}
 
 	function onError() {
-		naxToast({
+		showNaxToast({
 			title: '提交失败',
 			type: 'error'
 		} as UTSJSONObject)
 	}
 
 	function onWarning() {
-		naxToast({
+		showNaxToast({
 			title: '请注意风险',
 			type: 'warning'
 		} as UTSJSONObject)
 	}
 
 	function onInfo() {
-		naxToast({
+		showNaxToast({
 			title: '已为你更新内容',
 			type: 'info'
 		} as UTSJSONObject)
 	}
 
 	function onPos(pos: string) {
-		naxToast({
+		showNaxToast({
 			title: '位置：' + pos,
 			type: 'text',
 			position: pos
@@ -176,7 +190,7 @@
 	}
 
 	function onCustomIcon() {
-		naxToast({
+		showNaxToast({
 			title: '收藏成功',
 			type: 'text',
 			icon: 'star',
@@ -185,7 +199,7 @@
 	}
 
 	function onLong() {
-		naxToast({
+		showNaxToast({
 			title: '这条会停留 4 秒',
 			type: 'info',
 			duration: 4000
@@ -195,7 +209,7 @@
 	function onCustomBg(color: string) {
 		const low = color.toLowerCase()
 		const light = low == '#f5f5f5' || low == '#ffffff' || low == '#fff' || low == '#eeeeee' || low == '#fafafc'
-		naxToast({
+		showNaxToast({
 			title: light ? '浅色背景提示' : '自定义背景色',
 			type: 'text',
 			bg: color,

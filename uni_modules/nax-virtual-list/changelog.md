@@ -1,3 +1,10 @@
+## 0.1.6（2026-07-30）
+
+- 修复 Web 与微信小程序触底后连续加载后续分页：在 `WEB || MP-WEIXIN` 下增加单次触底锁，并根据剩余距离判断是否真正离开底部阈值；事件 `scrollHeight` 异常时用 `list.length * itemHeight` 兜底，数据追加后冻结解锁 350ms
+- 修复加载下一页后视口直接跳到新增页底部：追加前记录 `scrollTop`，DOM 更新后恢复滚动位置；Web 的真实内容节点同时关闭 `overflow-anchor`
+- 位置恢复并离开底部后主动解锁下一次触底，避免 Web 端 `scrolltolower` 早于 `scroll` 时吞掉下一页加载
+- Android、iOS、鸿蒙及其它小程序端行为保持不变
+
 ## 0.1.5（2026-07-23）
 
 - **修复 Web 端轻微滚动会一直滚到列表底部**：浏览器 Scroll Anchoring 在顶部 spacer 增高时自动推高 scrollTop，与窗口更新形成正反馈

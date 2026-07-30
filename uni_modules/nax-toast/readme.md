@@ -20,10 +20,16 @@
 ### 2. 业务页只调方法
 
 ```uts
-import { naxToast, hideNaxToast, naxToastSuccess, naxToastError, naxToastLoading } from '@/uni_modules/nax-toast/index.uts'
+import {
+  naxToast as showNaxToast,
+  hideNaxToast,
+  naxToastSuccess,
+  naxToastError,
+  naxToastLoading
+} from '@/uni_modules/nax-toast/index.uts'
 
-naxToast('操作成功')
-naxToast({ title: '保存成功', type: 'success' })
+showNaxToast('操作成功')
+showNaxToast({ title: '保存成功', type: 'success' })
 naxToastSuccess('已提交')
 naxToastError('网络异常')
 naxToastLoading('提交中…')
@@ -32,6 +38,8 @@ hideNaxToast()
 ```
 
 未挂载宿主时，会回退到 `uni.showToast`，保证基础可用。
+
+> 微信小程序端：若当前 SFC 同时挂载 `<nax-toast />` 并导入 `naxToast`，请像上例一样给函数设置本地别名。`naxToast` 会与组件标签映射到同一个驼峰名，导致 `MP-WEIXIN` 未注册宿主组件并回退到不支持 `position` 的 `uni.showToast`。仅调用函数、不挂载宿主的业务页可继续直接导入 `naxToast`。
 
 ## API
 
@@ -52,6 +60,8 @@ hideNaxToast()
 | overlay | boolean | `false` | 是否显示遮罩（loading 可设 true 防误触） |
 | showIcon | boolean | `true` | 是否显示图标；`text` 类型默认无图标 |
 | bg / background | string | `''` | 单次背景色（如 `#18a058` / `rgba(0,0,0,0.85)`）；空则走主题/type |
+
+- **微信小程序**：`position: 'top'` 会依据状态栏与胶囊位置计算导航栏底部，并额外下移 `16px`，避免覆盖自定义导航栏（`MP-WEIXIN`）。
 
 ### hideNaxToast()
 

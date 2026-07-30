@@ -47,7 +47,7 @@
 
 			<view class="section">
 				<text class="section__title">触底分页追加</text>
-				<text class="hint">初始自动 load · 每次 +30 · 到 300 条 finished</text>
+				<text class="hint">初始自动 load · 每次重新滚到底部 +30 · 追加后保持当前位置</text>
 				<view class="list-panel">
 					<nax-virtual-list
 						:key="pageKey"
@@ -64,7 +64,7 @@
 					>
 						<template #header>
 							<view class="list-header">
-								<text class="list-header__text">已加载 {{ pageList.length }} 条</text>
+								<text class="list-header__text">已加载 {{ pageList.length }} 条 · load {{ pageLoadCount }} 次</text>
 							</view>
 						</template>
 						<template #default="{ item, index }">
@@ -141,7 +141,7 @@
 	const darkMode = ref(bindDemoThemePage())
 
 	const navBackIconColor = computed((): string => {
-		// Android ģ����벻ֱ�ӵ��õ���� UTS ��������������δ������ invoke��
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
 		// #ifdef APP-ANDROID
 		return ''
 		// #endif
@@ -298,6 +298,7 @@
 	const pageFinished = ref(false)
 	const pageError = ref(false)
 	const pageFailNext = ref(false)
+	const pageLoadCount = ref(0)
 	const PAGE_SIZE = 30
 	const PAGE_MAX = 300
 	let pageSeed = 0
@@ -306,6 +307,7 @@
 		if (pageLoading.value || pageFinished.value) {
 			return
 		}
+		pageLoadCount.value = pageLoadCount.value + 1
 		pageLoading.value = true
 		pageError.value = false
 		setTimeout(() => {
@@ -353,6 +355,7 @@
 		pageFinished.value = false
 		pageError.value = false
 		pageFailNext.value = false
+		pageLoadCount.value = 0
 		pageSeed = 0
 		pageKey.value = pageKey.value + 1
 		// remount 后需再次触底；短列表会自动 scrolltolower 不一定触发，手动补一页

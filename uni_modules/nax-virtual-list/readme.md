@@ -122,4 +122,5 @@ const vlRef = ref(null)
 4. **鸿蒙端**使用与其它端相同的窗口裁剪（**不用**全量 `list-view` 挂载，避免进页卡死）；滚动窗口滞后更新，`scroll`/`visible-change` 在 `scrollend` 同步。
 5. 不做瀑布流 / 不等高测量（后续可增强）。
 6. **Web 端**使用固定总高 + `translateY` 窗口偏移，并关闭 `overflow-anchor`，避免滚动锚定导致连滚到底。
-7. **微信小程序**：行节点使用窗口位置 key，避免 “More than one slot named d-N” 警告。
+7. **Web / 微信小程序**：每次进入触底阈值只派发一次 `load`；组件按滚动区剩余距离判断是否真正离开底部，并在追加数据后恢复原 `scrollTop`，避免视口跳到新增页底部（`#ifdef WEB || MP-WEIXIN`）。
+8. **微信小程序**：行节点使用窗口位置 key，避免 “More than one slot named d-N” 警告。

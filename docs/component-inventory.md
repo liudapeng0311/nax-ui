@@ -135,7 +135,7 @@
 | 组件 | 状态 | 备注 |
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
-| `nax-text` | done | 插件包 `uni_modules/nax-text`；鸿蒙省略用 `#ifdef APP-HARMONY` 双写 lines/宽度约束 |
+| `nax-text` | done | 插件包 `uni_modules/nax-text`；鸿蒙省略用 `#ifdef APP-HARMONY` 双写 lines/宽度约束；微信小程序用 `#ifdef MP-WEIXIN` 补充 CSS 省略兜底 |
 | `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（45）；含 `category`/`map-pin` 及 filled 变体 |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区；**演示宿主**用原生 tabBar+`switchTab`+`hideTabBar` 保活（见 `docs/tabbar-routing.md`） |
@@ -151,8 +151,8 @@
 | `nax-action-sheet` | done | 插件包 `uni_modules/nax-action-sheet`；底部操作菜单；薄封装 `nax-picker`；`actions` / `select` / `cancel` |
 | `nax-alert` | done | 插件包 `uni_modules/nax-alert`；type/title/description/showIcon/closable/variant/center/show |
 | `nax-notice-bar` | done | 插件包 `uni_modules/nax-notice-bar`；seamless/step/vertical；App 跑马灯 JS 兜底 |
-| `nax-toast` | done | 插件包 `uni_modules/nax-toast`；函数式 `naxToast()`；全局挂一次 `<nax-toast />` 宿主；未挂载回退 `uni.showToast` |
-| `nax-dialog` | done | 插件包 `uni_modules/nax-dialog`；声明式 `v-model:show` + 命令式 `naxDialog()`/`naxDialogAlert()`/`naxDialogConfirm()`；薄封装 `nax-picker`；未挂载回退 `uni.showModal` |
+| `nax-toast` | done | 插件包 `uni_modules/nax-toast`；函数式 `naxToast()`；全局挂一次 `<nax-toast />` 宿主；未挂载回退 `uni.showToast`；`MP-WEIXIN` 宿主页需为同名导入函数设置本地别名，top 位置按状态栏与胶囊动态避让导航栏 |
+| `nax-dialog` | done | 插件包 `uni_modules/nax-dialog`；声明式 `v-model:show` + 命令式 `naxDialog()`/`naxDialogAlert()`/`naxDialogConfirm()`；薄封装 `nax-picker`；未挂载回退 `uni.showModal`；`MP-WEIXIN` 宿主页需为同名导入函数设置本地别名，避免组件注册冲突 |
 | `nax-popup` | done | 插件包 `uni_modules/nax-popup`；压窗屏：App/Web `openDialogPage`；小程序页面级降级；详见 `docs/popup-window.md` |
 | `nax-keyboard` | done | 插件包 `uni_modules/nax-keyboard`；number/car/card、乱序、遮罩弹层、长按退格 |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
@@ -181,7 +181,7 @@
 | `nax-steps` | done | 插件包 `uni_modules/nax-steps`；`nax-steps`+`nax-step`；list/组合；horizontal/vertical；number/dot；type；单步 status；clickable；demo `pages/components/steps` |
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
-| `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步（避免 list-view 全量挂载进页卡死）；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
+| `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；Web/微信小程序用 `WEB || MP-WEIXIN` 触底锁、剩余距离回差及追加后 scrollTop 恢复；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
 | 其余 MVP | planned | 按依赖自底向上 |
 
 ---
