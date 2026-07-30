@@ -109,17 +109,30 @@
 
 	const emit = defineEmits(['click'])
 
+	function fallbackGetError(_prop: string): string {
+		return ''
+	}
+
+	function fallbackRegister(_prop: string) {
+	}
+
+	function fallbackUnregister(_prop: string) {
+	}
+
+	function fallbackSetItemRules(_prop: string, _rules: any[]) {
+	}
+
 	const inForm = inject('naxFormInForm', false) as boolean
-	const formErrorTypeRef = inject('naxFormErrorType', null)
-	const formBorderBottomRef = inject('naxFormBorderBottom', null)
-	const formLabelPositionRef = inject('naxFormLabelPosition', null)
-	const formLabelWidthRef = inject('naxFormLabelWidth', null)
-	const formLabelAlignRef = inject('naxFormLabelAlign', null)
-	const formErrorVersionRef = inject('naxFormErrorVersion', null)
-	const formGetErrorRaw = inject('naxFormGetError', null)
-	const formRegisterRaw = inject('naxFormRegister', null)
-	const formUnregisterRaw = inject('naxFormUnregister', null)
-	const formSetItemRulesRaw = inject('naxFormSetItemRules', null)
+	const formErrorTypeRef = inject('naxFormErrorType', ref('message')) as Ref<string>
+	const formBorderBottomRef = inject('naxFormBorderBottom', ref(true)) as Ref<boolean>
+	const formLabelPositionRef = inject('naxFormLabelPosition', ref('left')) as Ref<string>
+	const formLabelWidthRef = inject('naxFormLabelWidth', ref('80')) as Ref<string>
+	const formLabelAlignRef = inject('naxFormLabelAlign', ref('left')) as Ref<string>
+	const formErrorVersionRef = inject('naxFormErrorVersion', ref(0)) as Ref<number>
+	const formGetErrorRaw = inject('naxFormGetError', fallbackGetError) as (prop: string) => string
+	const formRegisterRaw = inject('naxFormRegister', fallbackRegister) as (prop: string) => void
+	const formUnregisterRaw = inject('naxFormUnregister', fallbackUnregister) as (prop: string) => void
+	const formSetItemRulesRaw = inject('naxFormSetItemRules', fallbackSetItemRules) as (prop: string, rules: any[]) => void
 
 	function readRefString(r: any | null, fallback: string): string {
 		if (r == null) {
@@ -143,35 +156,19 @@
 	}
 
 	function callGetError(prop: string): string {
-		if (formGetErrorRaw == null) {
-			return ''
-		}
-		const fn = formGetErrorRaw as (p: string) => string
-		return fn(prop)
+		return formGetErrorRaw(prop)
 	}
 
 	function callRegister(prop: string) {
-		if (formRegisterRaw == null) {
-			return
-		}
-		const fn = formRegisterRaw as (p: string) => void
-		fn(prop)
+		formRegisterRaw(prop)
 	}
 
 	function callUnregister(prop: string) {
-		if (formUnregisterRaw == null) {
-			return
-		}
-		const fn = formUnregisterRaw as (p: string) => void
-		fn(prop)
+		formUnregisterRaw(prop)
 	}
 
 	function callSetItemRules(prop: string, rules: any[]) {
-		if (formSetItemRulesRaw == null) {
-			return
-		}
-		const fn = formSetItemRulesRaw as (p: string, r: any[]) => void
-		fn(prop, rules)
+		formSetItemRulesRaw(prop, rules)
 	}
 
 	const labelText = computed((): string => {
@@ -474,6 +471,9 @@
 <style>
 	.nax-form-item {
 		flex-direction: column;
+		/* #ifdef APP-ANDROID */
+		align-self: stretch;
+		/* #endif */
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
 		/* #endif */
@@ -590,6 +590,10 @@
 		flex: 1;
 		flex-direction: column;
 		justify-content: flex-start;
+		/* #ifdef APP-ANDROID */
+		min-width: 0;
+		align-self: stretch;
+		/* #endif */
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		min-width: 0;
 		/* #endif */
@@ -599,6 +603,10 @@
 		flex-direction: row;
 		align-items: center;
 		flex: 1;
+		/* #ifdef APP-ANDROID */
+		width: 100%;
+		align-self: stretch;
+		/* #endif */
 		/* #ifndef APP-HARMONY */
 		height: 40px;
 		min-height: 40px;
@@ -629,6 +637,10 @@
 	.nax-form-item__border {
 		height: 1px;
 		background-color: var(--nax-color-border, #f0f0f3);
+		/* #ifdef APP-ANDROID */
+		width: 100%;
+		align-self: stretch;
+		/* #endif */
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
 		/* #endif */

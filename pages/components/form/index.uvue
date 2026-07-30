@@ -1,12 +1,12 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
-			:back-icon-color="demoNavBackIconColor(darkMode)"
+			:back-icon-color="navBackIconColor"
 			title="nax-form"
 			home-url="/pages/index/index"
 			:border="true"
 		></nax-nav-bar>
-		<scroll-view class="page-scroll" scroll-y="true">
+		<scroll-view class="page-scroll nax-theme" :class="themeExtraClass" scroll-y="true">
 		<view class="nax-theme page" :class="themeExtraClass">
 
 			<view class="section">
@@ -119,6 +119,16 @@
 	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
@@ -359,6 +369,7 @@
 	.page-root {
 		flex: 1;
 		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		height: 100%;
 		/* #endif */
@@ -367,6 +378,7 @@
 	.page-scroll {
 		flex: 1;
 		height: 0;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
 	}
 	.page {
 		padding: 16px;
@@ -385,6 +397,9 @@
 	.section {
 		margin-bottom: 22px;
 		flex-direction: column;
+		/* #ifdef APP-ANDROID */
+		align-items: stretch;
+		/* #endif */
 	}
 
 	.section__title {
@@ -400,6 +415,10 @@
 		padding-left: 12px;
 		padding-right: 12px;
 		flex-direction: column;
+		/* #ifdef APP-ANDROID */
+		align-self: stretch;
+		align-items: stretch;
+		/* #endif */
 	}
 
 	.actions {

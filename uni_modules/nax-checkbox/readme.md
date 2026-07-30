@@ -90,3 +90,4 @@ uni-app x 复选框 / 复选框组，功能覆盖常用场景。
 - 尺寸统一为 `sm | md | lg`（不用 rpx 数字作默认 API）
 - 默认 `shape` 为 `square`（与后续 radio 的圆形成区分）
 - 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量
+- Android 端通过 `APP-ANDROID` 让 group 上下文使用明确的 `Ref` 与函数注入类型，避免 `null` 默认值被 UTS 推断为 `Void`。

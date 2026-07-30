@@ -101,7 +101,29 @@
 
 	const emit = defineEmits(['update:modelValue', 'change'])
 
+	// Android inject 不能用 null 作为 Ref/函数默认值，否则 UTS 会推断为 Void。
+	// #ifdef APP-ANDROID
+	function fallbackToggle(_name : string) : number {
+		return -1
+	}
+	// #endif
+
 	const inGroup = inject('naxCbInGroup', false) as boolean
+	// #ifdef APP-ANDROID
+	const selectedRef = inject('naxCbSelected', ref([] as string[])) as Ref<string[]>
+	const toggleRaw = inject('naxCbToggle', fallbackToggle) as (name : string) => number
+	const groupDisabledRef = inject('naxCbDisabled', ref(false)) as Ref<boolean>
+	const groupShapeRef = inject('naxCbShape', ref('square')) as Ref<string>
+	const groupSizeRef = inject('naxCbSize', ref('md')) as Ref<string>
+	const groupActiveColorRef = inject('naxCbActiveColor', ref('')) as Ref<string>
+	const groupIconSizeRef = inject('naxCbIconSize', ref('')) as Ref<string>
+	const groupLabelSizeRef = inject('naxCbLabelSize', ref('')) as Ref<string>
+	const groupLabelDisabledRef = inject('naxCbLabelDisabled', ref(false)) as Ref<boolean>
+	const groupMaxRef = inject('naxCbMax', ref(0)) as Ref<number>
+	const groupWidthRef = inject('naxCbWidth', ref('')) as Ref<string>
+	const groupWrapRef = inject('naxCbWrap', ref(false)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
 	const selectedRef = inject('naxCbSelected', null)
 	const toggleRaw = inject('naxCbToggle', null)
 	const groupDisabledRef = inject('naxCbDisabled', null)
@@ -114,6 +136,7 @@
 	const groupMaxRef = inject('naxCbMax', null)
 	const groupWidthRef = inject('naxCbWidth', null)
 	const groupWrapRef = inject('naxCbWrap', null)
+	// #endif
 
 	function readRefBool(r : any | null, fallback : boolean) : boolean {
 		if (r == null) {

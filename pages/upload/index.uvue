@@ -1,7 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
-			:back-icon-color="demoNavBackIconColor(darkMode)"
+			:back-icon-color="navBackIconColor"
 			title="nax-upload"
 			home-url="/pages/index/index"
 			:border="true"
@@ -120,6 +120,16 @@
 
 	const darkMode = ref(bindDemoThemePage())
 
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
 			return 'nax-theme-dark'
@@ -128,14 +138,14 @@
 	})
 
 	const uploadThemeClass = computed((): string => {
-		// #ifdef APP-HARMONY
-		// 鸿蒙组件隔离边界需要将主题 class 直接挂到组件根节点。
+		// #ifdef APP-ANDROID || APP-HARMONY
+		// 原生 App 组件隔离边界需要将主题 class 直接挂到组件根节点。
 		if (darkMode.value) {
 			return 'nax-theme nax-theme-dark'
 		}
 		return 'nax-theme'
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifndef APP-ANDROID || APP-HARMONY
 		return ''
 		// #endif
 	})

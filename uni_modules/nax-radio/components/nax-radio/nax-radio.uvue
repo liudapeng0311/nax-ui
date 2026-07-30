@@ -101,7 +101,28 @@
 
 	const emit = defineEmits(['update:modelValue', 'change'])
 
+	// Android inject 不能用 null 作为 Ref/函数默认值，否则 UTS 会推断为 Void。
+	// #ifdef APP-ANDROID
+	function fallbackSelect(_name : string) : boolean {
+		return false
+	}
+	// #endif
+
 	const inGroup = inject('naxRdInGroup', false) as boolean
+	// #ifdef APP-ANDROID
+	const selectedRef = inject('naxRdSelected', ref('')) as Ref<string>
+	const selectRaw = inject('naxRdSelect', fallbackSelect) as (name : string) => boolean
+	const groupDisabledRef = inject('naxRdDisabled', ref(false)) as Ref<boolean>
+	const groupShapeRef = inject('naxRdShape', ref('circle')) as Ref<string>
+	const groupSizeRef = inject('naxRdSize', ref('md')) as Ref<string>
+	const groupActiveColorRef = inject('naxRdActiveColor', ref('')) as Ref<string>
+	const groupIconSizeRef = inject('naxRdIconSize', ref('')) as Ref<string>
+	const groupLabelSizeRef = inject('naxRdLabelSize', ref('')) as Ref<string>
+	const groupLabelDisabledRef = inject('naxRdLabelDisabled', ref(false)) as Ref<boolean>
+	const groupWidthRef = inject('naxRdWidth', ref('')) as Ref<string>
+	const groupWrapRef = inject('naxRdWrap', ref(false)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
 	const selectedRef = inject('naxRdSelected', null)
 	const selectRaw = inject('naxRdSelect', null)
 	const groupDisabledRef = inject('naxRdDisabled', null)
@@ -113,6 +134,7 @@
 	const groupLabelDisabledRef = inject('naxRdLabelDisabled', null)
 	const groupWidthRef = inject('naxRdWidth', null)
 	const groupWrapRef = inject('naxRdWrap', null)
+	// #endif
 
 	function readRefBool(r : any | null, fallback : boolean) : boolean {
 		if (r == null) {

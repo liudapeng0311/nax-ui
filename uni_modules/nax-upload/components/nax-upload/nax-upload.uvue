@@ -449,37 +449,38 @@
 	})
 
 	const addIconColor = computed((): string => {
-		// #ifdef APP-HARMONY
+		// Android / 鸿蒙跨组件传递 CSS 变量不稳定，图标使用实色兜底。
+		// #ifdef APP-ANDROID || APP-HARMONY
 		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
 			return '#ffffffa6'
 		}
 		return '#767c82'
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifndef APP-ANDROID || APP-HARMONY
 		return 'var(--nax-color-text-secondary, #767c82)'
 		// #endif
 	})
 
 	const itemThemeClass = computed((): string => {
-		// #ifdef APP-HARMONY
+		// #ifdef APP-ANDROID || APP-HARMONY
 		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
-			return 'nax-upload__item--harmony-dark nax-upload__item--harmony-dark-border'
+			return 'nax-upload__item--app-dark nax-upload__item--app-dark-border'
 		}
-		return 'nax-upload__item--harmony-light nax-upload__item--harmony-light-border'
+		return 'nax-upload__item--app-light nax-upload__item--app-light-border'
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifndef APP-ANDROID || APP-HARMONY
 		return ''
 		// #endif
 	})
 
 	const addTextThemeClass = computed((): string => {
-		// #ifdef APP-HARMONY
+		// #ifdef APP-ANDROID || APP-HARMONY
 		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
-			return 'nax-upload__add-text--harmony-dark'
+			return 'nax-upload__add-text--app-dark'
 		}
-		return 'nax-upload__add-text--harmony-light'
+		return 'nax-upload__add-text--app-light'
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifndef APP-ANDROID || APP-HARMONY
 		return ''
 		// #endif
 	})
@@ -1449,24 +1450,24 @@
 		color: var(--nax-color-text-secondary, #767c82);
 	}
 
-	/* #ifdef APP-HARMONY */
-	/* 鸿蒙端组件隔离下的 CSS 变量解析不可靠，使用本地主题状态色。 */
-	.nax-upload__item--harmony-light {
+	/* #ifdef APP-ANDROID || APP-HARMONY */
+	/* Android / 鸿蒙组件隔离下使用本地实色，避免主题变量回退成浅色。 */
+	.nax-upload__item--app-light {
 		background-color: #fafafc;
 	}
-	.nax-upload__item--harmony-light-border {
+	.nax-upload__item--app-light-border {
 		border-color: #f0f0f3;
 	}
-	.nax-upload__item--harmony-dark {
+	.nax-upload__item--app-dark {
 		background-color: #26272c;
 	}
-	.nax-upload__item--harmony-dark-border {
+	.nax-upload__item--app-dark-border {
 		border-color: #ffffff3d;
 	}
-	.nax-upload__add-text--harmony-light {
+	.nax-upload__add-text--app-light {
 		color: #767c82;
 	}
-	.nax-upload__add-text--harmony-dark {
+	.nax-upload__add-text--app-dark {
 		color: #ffffffa6;
 	}
 	/* #endif */

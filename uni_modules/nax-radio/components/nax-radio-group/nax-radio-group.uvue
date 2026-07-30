@@ -73,6 +73,18 @@
 	const emit = defineEmits(['update:modelValue', 'change'])
 
 	const selected = ref('')
+	// Android inject 会按默认值推断具体运行时类型，需与子组件的 RefImpl 默认值保持一致。
+	// #ifdef APP-ANDROID
+	const disabledState = ref(props.disabled)
+	const shapeState = ref(props.shape)
+	const sizeState = ref(props.size)
+	const activeColorState = ref(props.activeColor)
+	const iconSizeState = ref(props.iconSize)
+	const labelSizeState = ref(props.labelSize)
+	const labelDisabledState = ref(props.labelDisabled)
+	const widthState = ref(props.width)
+	const wrapState = ref(props.wrap)
+	// #endif
 
 	function syncFromProps() {
 		selected.value = props.modelValue
@@ -85,6 +97,17 @@
 	}, (_ : string) => {
 		syncFromProps()
 	})
+	// #ifdef APP-ANDROID
+	watch((): boolean => props.disabled, (value : boolean) => { disabledState.value = value })
+	watch((): string => props.shape, (value : string) => { shapeState.value = value })
+	watch((): string => props.size, (value : string) => { sizeState.value = value })
+	watch((): string => props.activeColor, (value : string) => { activeColorState.value = value })
+	watch((): string => props.iconSize, (value : string) => { iconSizeState.value = value })
+	watch((): string => props.labelSize, (value : string) => { labelSizeState.value = value })
+	watch((): boolean => props.labelDisabled, (value : boolean) => { labelDisabledState.value = value })
+	watch((): string => props.width, (value : string) => { widthState.value = value })
+	watch((): boolean => props.wrap, (value : boolean) => { wrapState.value = value })
+	// #endif
 
 	/**
 	 * 选中某项
@@ -110,6 +133,18 @@
 	provide('naxRdInGroup', true)
 	provide('naxRdSelected', selected)
 	provide('naxRdSelect', selectItem)
+	// #ifdef APP-ANDROID
+	provide('naxRdDisabled', disabledState)
+	provide('naxRdShape', shapeState)
+	provide('naxRdSize', sizeState)
+	provide('naxRdActiveColor', activeColorState)
+	provide('naxRdIconSize', iconSizeState)
+	provide('naxRdLabelSize', labelSizeState)
+	provide('naxRdLabelDisabled', labelDisabledState)
+	provide('naxRdWidth', widthState)
+	provide('naxRdWrap', wrapState)
+	// #endif
+	// #ifndef APP-ANDROID
 	provide('naxRdDisabled', computed((): boolean => {
 		return props.disabled
 	}))
@@ -137,6 +172,7 @@
 	provide('naxRdWrap', computed((): boolean => {
 		return props.wrap
 	}))
+	// #endif
 
 	const rootClass = computed((): string => {
 		var cls = ''

@@ -396,7 +396,23 @@
 		return '16'
 	})
 
+	const isAndroidDarkTheme = computed((): boolean => {
+		// Android 组件隔离下主题变量可能回退，使用 custom-class 传递主题状态。
+		// #ifdef APP-ANDROID
+		return props.customClass.indexOf('nax-theme-dark') >= 0
+		// #endif
+		// #ifndef APP-ANDROID
+		return false
+		// #endif
+	})
+
 	const iconColor = computed((): string => {
+		if (isAndroidDarkTheme.value) {
+			if (props.disabled) {
+				return '#ffffff4d'
+			}
+			return '#ffffffa6'
+		}
 		if (props.disabled) {
 			return '#e5e5ea'
 		}
@@ -415,6 +431,9 @@
 	const resolvedPlaceholderStyle = computed((): string => {
 		if (props.placeholderStyle.length > 0) {
 			return props.placeholderStyle
+		}
+		if (isAndroidDarkTheme.value) {
+			return 'color: #ffffff61;'
 		}
 		return 'color: #e5e5ea;'
 	})
@@ -526,6 +545,16 @@
 
 	const rootStyle = computed((): string => {
 		let style = 'height:' + heightCss.value + ';'
+		if (isAndroidDarkTheme.value) {
+			if (props.disabled || props.readonly) {
+				style += 'background-color:#26272c;'
+			} else if (props.border && props.background.length == 0) {
+				style += 'background-color:#1e1f24;'
+			}
+			if (props.border && props.borderColor.length == 0) {
+				style += 'border-color:#ffffff3d;'
+			}
+		}
 		if (props.border && props.borderColor.length > 0) {
 			style += 'border-color:' + props.borderColor + ';'
 		}
@@ -547,6 +576,13 @@
 		let style = ''
 		style += 'font-size:' + fontSizeCss.value + ';'
 		style += 'text-align:' + alignName.value + ';'
+		if (isAndroidDarkTheme.value) {
+			if (props.disabled) {
+				style += 'color:#ffffff4d;'
+			} else {
+				style += 'color:#f5f5f5;'
+			}
+		}
 		// #ifdef APP-HARMONY
 		// 鸿蒙原生 input：固定高度 + 等值 line-height 垂直居中，避免 height:100% 裁字
 		// 注意：不要把 line-height 设成字号本身，否则会压扁字形

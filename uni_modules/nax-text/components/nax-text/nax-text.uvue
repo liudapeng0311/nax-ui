@@ -460,8 +460,8 @@
 		} else if (align == 'right') {
 			style = 'justify-content:flex-end'
 		}
-		// 鸿蒙 / Web：省略时根节点强制定宽裁剪，防止被长文本撑开
-		// #ifdef APP-HARMONY || WEB
+		// Android / 鸿蒙 / Web / 微信小程序：省略时根节点强制定宽裁剪，防止被长文本撑开
+		// #ifdef APP-ANDROID || APP-HARMONY || WEB || MP-WEIXIN
 		if (props.lines > 0) {
 			style += ';overflow:hidden'
 			style += ';width:100%'
@@ -516,16 +516,16 @@
 			}
 			style += ';line-height:' + lh
 		}
-		// App 鸿蒙：属性 :lines 在 flex 子项上常不生效，同步写 CSS lines
-		// #ifdef APP-HARMONY
+		// Android / 鸿蒙：属性 :lines 在 flex 子项上可能不生效，同步写 CSS lines
+		// #ifdef APP-ANDROID || APP-HARMONY
 		if (props.lines > 0) {
 			style += ';lines:' + props.lines.toString()
 			style += ';overflow:hidden'
 			style += ';text-overflow:ellipsis'
 		}
 		// #endif
-		// Web：:lines 不可靠，单行 nowrap，多行 -webkit-line-clamp
-		// #ifdef WEB
+		// Web / 微信小程序：:lines 不可靠，单行 nowrap，多行 -webkit-line-clamp
+		// #ifdef WEB || MP-WEIXIN
 		if (props.lines > 0) {
 			style += ';overflow:hidden'
 			style += ';text-overflow:ellipsis'
@@ -787,12 +787,13 @@
 	/* 省略文本：在 flex 行内强制可收缩，内容超宽才触发 lines/ellipsis */
 	.nax-text__value--ellipsis {
 		flex: 1;
+		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 
-	/* 鸿蒙：CSS lines 与属性 :lines 双写；单行/多行共用 overflow */
-	/* #ifdef APP-HARMONY */
+	/* Android / 鸿蒙：CSS lines 与属性 :lines 双写；单行/多行共用 overflow */
+	/* #ifdef APP-ANDROID || APP-HARMONY */
 	.nax-text__value--lines-1 {
 		lines: 1;
 		overflow: hidden;
@@ -805,8 +806,8 @@
 	}
 	/* #endif */
 
-	/* Web：标准单行/多行省略（uni text 的 :lines 在 Web 常不生效） */
-	/* #ifdef WEB */
+	/* Web / 微信小程序：标准单行/多行省略（uni text 的 :lines 在两端可能不生效） */
+	/* #ifdef WEB || MP-WEIXIN */
 	.nax-text--ellipsis {
 		width: 100%;
 		max-width: 100%;
@@ -814,7 +815,7 @@
 	}
 
 	.nax-text__value--ellipsis {
-		/* flex 子项默认可不收缩，Web 必须 min-width:0 才能触发省略 */
+		/* flex 子项默认可不收缩，必须 min-width:0 才能触发省略 */
 		min-width: 0;
 		width: 100%;
 		max-width: 100%;

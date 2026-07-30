@@ -1,7 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
-			:back-icon-color="demoNavBackIconColor(darkMode)"
+			:back-icon-color="navBackIconColor"
 			title="nax-picker"
 			home-url="/pages/index/index"
 			:border="true"
@@ -125,16 +125,21 @@
 
 	const darkMode = ref(bindDemoThemePage())
 
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
 			return 'nax-theme-dark'
 		}
 		return ''
-	})
-
-	onShow(() => {
-		darkMode.value = bindDemoThemePage()
-		sidePanelSafeTopPx.value = readStatusBarHeight()
 	})
 
 	const mainShow = ref(false)
@@ -199,6 +204,12 @@
 		}
 		return 0
 	}
+
+	// Android UTS setup 中需先声明依赖，再注册生命周期回调。
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+		sidePanelSafeTopPx.value = readStatusBarHeight()
+	})
 
 	function openAt(pos: string) {
 		mainPosition.value = pos

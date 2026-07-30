@@ -2,7 +2,7 @@
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<!-- 本页自身顶栏（页面已 navigationStyle: custom） -->
 		<nax-nav-bar
-			:back-icon-color="demoNavBackIconColor(darkMode)"
+			:back-icon-color="navBackIconColor"
 			title="nax-nav-bar"
 			home-url="/pages/index/index"
 			:border="true"
@@ -21,7 +21,7 @@
 				<view class="section">
 					<text class="section__title">默认 default</text>
 					<nax-nav-bar
-						:back-icon-color="demoNavBackIconColor(darkMode)"
+						:back-icon-color="navBackIconColor"
 						title="默认标题"
 						:fixed="false"
 						:safe-area-inset-top="false"
@@ -45,7 +45,7 @@
 				<view class="section">
 					<text class="section__title">返回文案 + 无图标</text>
 					<nax-nav-bar
-						:back-icon-color="demoNavBackIconColor(darkMode)"
+						:back-icon-color="navBackIconColor"
 						title="设置"
 						back-text="关闭"
 						back-icon=""
@@ -74,7 +74,7 @@
 				<view class="section">
 					<text class="section__title">自定义中间（插槽）</text>
 					<nax-nav-bar
-						:back-icon-color="demoNavBackIconColor(darkMode)"
+						:back-icon-color="navBackIconColor"
 						:fixed="false"
 						:safe-area-inset-top="false"
 						:auto-back="false"
@@ -119,6 +119,16 @@
 	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {

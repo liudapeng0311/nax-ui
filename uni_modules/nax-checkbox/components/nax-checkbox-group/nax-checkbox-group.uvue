@@ -78,6 +78,19 @@
 	const emit = defineEmits(['update:modelValue', 'change'])
 
 	const selected = ref([] as string[])
+	// Android inject 会按默认值推断具体运行时类型，需与子组件的 RefImpl 默认值保持一致。
+	// #ifdef APP-ANDROID
+	const disabledState = ref(props.disabled)
+	const shapeState = ref(props.shape)
+	const sizeState = ref(props.size)
+	const activeColorState = ref(props.activeColor)
+	const iconSizeState = ref(props.iconSize)
+	const labelSizeState = ref(props.labelSize)
+	const labelDisabledState = ref(props.labelDisabled)
+	const maxState = ref(props.max)
+	const widthState = ref(props.width)
+	const wrapState = ref(props.wrap)
+	// #endif
 
 	function copyStringArray(raw : any | null) : string[] {
 		const next = [] as string[]
@@ -104,6 +117,18 @@
 	}, (_ : any) => {
 		syncFromProps()
 	})
+	// #ifdef APP-ANDROID
+	watch((): boolean => props.disabled, (value : boolean) => { disabledState.value = value })
+	watch((): string => props.shape, (value : string) => { shapeState.value = value })
+	watch((): string => props.size, (value : string) => { sizeState.value = value })
+	watch((): string => props.activeColor, (value : string) => { activeColorState.value = value })
+	watch((): string => props.iconSize, (value : string) => { iconSizeState.value = value })
+	watch((): string => props.labelSize, (value : string) => { labelSizeState.value = value })
+	watch((): boolean => props.labelDisabled, (value : boolean) => { labelDisabledState.value = value })
+	watch((): number => props.max, (value : number) => { maxState.value = value })
+	watch((): string => props.width, (value : string) => { widthState.value = value })
+	watch((): boolean => props.wrap, (value : boolean) => { wrapState.value = value })
+	// #endif
 
 	/**
 	 * 切换选项
@@ -149,6 +174,19 @@
 	provide('naxCbInGroup', true)
 	provide('naxCbSelected', selected)
 	provide('naxCbToggle', toggleItem)
+	// #ifdef APP-ANDROID
+	provide('naxCbDisabled', disabledState)
+	provide('naxCbShape', shapeState)
+	provide('naxCbSize', sizeState)
+	provide('naxCbActiveColor', activeColorState)
+	provide('naxCbIconSize', iconSizeState)
+	provide('naxCbLabelSize', labelSizeState)
+	provide('naxCbLabelDisabled', labelDisabledState)
+	provide('naxCbMax', maxState)
+	provide('naxCbWidth', widthState)
+	provide('naxCbWrap', wrapState)
+	// #endif
+	// #ifndef APP-ANDROID
 	provide('naxCbDisabled', computed((): boolean => {
 		return props.disabled
 	}))
@@ -179,6 +217,7 @@
 	provide('naxCbWrap', computed((): boolean => {
 		return props.wrap
 	}))
+	// #endif
 
 	const rootClass = computed((): string => {
 		var cls = ''

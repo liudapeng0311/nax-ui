@@ -90,3 +90,4 @@ uni-app x 单选框 / 单选框组，功能覆盖常用场景。
 - 默认 `shape` 为 `circle`（与 checkbox 默认 square 区分）
 - 支持单独布尔 `v-model`（传统实现依赖 group）
 - 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量
+- Android 端通过 `APP-ANDROID` 让 group 上下文使用明确的 `Ref` 与函数注入类型，避免 `null` 默认值被 UTS 推断为 `Void`。

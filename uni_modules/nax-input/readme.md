@@ -92,3 +92,4 @@ uni-app x 单行输入框，功能覆盖常用场景。
 - 基于原生 `input`，键盘类型随端能力差异以官方文档为准。
 - `readonly` 通过禁用原生编辑实现（样式弱于 `disabled`）。
 - App 端去掉 Web 专用 `outline` / `box-sizing`（条件编译）。
+- Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在 `APP-ANDROID` 下使用背景、边框、文字、占位符和图标实色兜底。

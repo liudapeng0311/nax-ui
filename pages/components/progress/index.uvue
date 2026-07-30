@@ -1,7 +1,7 @@
 ﻿<template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
-			:back-icon-color="demoNavBackIconColor(darkMode)"
+			:back-icon-color="navBackIconColor"
 			title="nax-progress"
 			home-url="/pages/index/index"
 			:border="true"
@@ -159,6 +159,16 @@
 	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
 	const dynamicPercent = ref(42)
 
 	const themeExtraClass = computed((): string => {

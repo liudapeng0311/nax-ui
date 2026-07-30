@@ -67,6 +67,29 @@
 
 	const emit = defineEmits(['validate'])
 
+	// Android inject 会按默认值推断运行时类型，统一提供 Ref，避免 ComputedRef 类型强转。
+	const formErrorTypeState = ref(props.errorType)
+	const formBorderBottomState = ref(props.borderBottom)
+	const formLabelPositionState = ref(props.labelPosition)
+	const formLabelWidthState = ref('' + props.labelWidth)
+	const formLabelAlignState = ref(props.labelAlign)
+
+	watch((): string => props.errorType, (value: string) => {
+		formErrorTypeState.value = value
+	})
+	watch((): boolean => props.borderBottom, (value: boolean) => {
+		formBorderBottomState.value = value
+	})
+	watch((): string => props.labelPosition, (value: string) => {
+		formLabelPositionState.value = value
+	})
+	watch((): any => props.labelWidth, (value: any) => {
+		formLabelWidthState.value = '' + value
+	})
+	watch((): string => props.labelAlign, (value: string) => {
+		formLabelAlignState.value = value
+	})
+
 	// 内置规则（可 setRules 覆盖）
 	const formRules = ref({} as UTSJSONObject)
 	// 已注册 form-item prop
@@ -409,21 +432,11 @@
 
 	// —— provide 给 form-item ——
 	provide('naxFormInForm', true)
-	provide('naxFormErrorType', computed((): string => {
-		return props.errorType
-	}))
-	provide('naxFormBorderBottom', computed((): boolean => {
-		return props.borderBottom
-	}))
-	provide('naxFormLabelPosition', computed((): string => {
-		return props.labelPosition
-	}))
-	provide('naxFormLabelWidth', computed((): string => {
-		return '' + props.labelWidth
-	}))
-	provide('naxFormLabelAlign', computed((): string => {
-		return props.labelAlign
-	}))
+	provide('naxFormErrorType', formErrorTypeState)
+	provide('naxFormBorderBottom', formBorderBottomState)
+	provide('naxFormLabelPosition', formLabelPositionState)
+	provide('naxFormLabelWidth', formLabelWidthState)
+	provide('naxFormLabelAlign', formLabelAlignState)
 	provide('naxFormErrorVersion', errorVersion)
 	provide('naxFormGetError', getFieldError)
 	provide('naxFormRegister', registerItem)
@@ -452,6 +465,10 @@
 <style>
 	.nax-form {
 		flex-direction: column;
+		align-items: stretch;
+		/* #ifdef APP-ANDROID */
+		align-self: stretch;
+		/* #endif */
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		width: 100%;
 		/* #endif */

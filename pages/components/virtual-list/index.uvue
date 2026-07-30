@@ -1,7 +1,7 @@
 <template>
 	<view class="page-root nax-theme" :class="themeExtraClass">
 		<nax-nav-bar
-			:back-icon-color="demoNavBackIconColor(darkMode)"
+			:back-icon-color="navBackIconColor"
 			title="nax-virtual-list"
 			home-url="/pages/index/index"
 			:border="true"
@@ -139,6 +139,16 @@
 	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	const darkMode = ref(bindDemoThemePage())
+
+	const navBackIconColor = computed((): string => {
+		// Android Ä£°å±àÒë²»Ö±½Óµ÷ÓÃµ¼ÈëµÄ UTS º¯Êý£¬±ÜÃâÉú³ÉÎ´½âÎöµÄ invoke¡£
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
 	const lastEvent = ref('â€”')
 
 	const themeExtraClass = computed((): string => {
