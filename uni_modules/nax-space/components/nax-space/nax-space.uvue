@@ -121,6 +121,27 @@
 		return 'start'
 	}
 
+	// Android inject 会按默认值推断具体运行时类型，provide 需使用同类型 RefImpl。
+	// #ifdef APP-ANDROID
+	const directionName = ref(normalizeDirection(props.direction))
+	const gapPx = ref(parseSizePx(props.size))
+	const wrapValue = ref(props.wrap)
+	const fillValue = ref(props.fill)
+
+	watch((): string => props.direction, (value : string) => {
+		directionName.value = normalizeDirection(value)
+	})
+	watch((): string => props.size, (value : string) => {
+		gapPx.value = parseSizePx(value)
+	})
+	watch((): boolean => props.wrap, (value : boolean) => {
+		wrapValue.value = value
+	})
+	watch((): boolean => props.fill, (value : boolean) => {
+		fillValue.value = value
+	})
+	// #endif
+	// #ifndef APP-ANDROID
 	const directionName = computed((): string => {
 		return normalizeDirection(props.direction)
 	})
@@ -128,6 +149,15 @@
 	const gapPx = computed((): number => {
 		return parseSizePx(props.size)
 	})
+
+	const wrapValue = computed((): boolean => {
+		return props.wrap
+	})
+
+	const fillValue = computed((): boolean => {
+		return props.fill
+	})
+	// #endif
 
 	const alignName = computed((): string => {
 		return normalizeAlign(props.align)
@@ -145,12 +175,8 @@
 	provide('naxSpaceInGroup', true)
 	provide('naxSpaceGapPx', gapPx)
 	provide('naxSpaceDirection', directionName)
-	provide('naxSpaceWrap', computed((): boolean => {
-		return props.wrap
-	}))
-	provide('naxSpaceFill', computed((): boolean => {
-		return props.fill
-	}))
+	provide('naxSpaceWrap', wrapValue)
+	provide('naxSpaceFill', fillValue)
 
 	const rootClass = computed((): string => {
 		var cls = 'nax-space--' + directionName.value

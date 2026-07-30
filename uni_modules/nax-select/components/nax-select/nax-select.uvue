@@ -71,7 +71,7 @@
 						:value="pickerValue"
 						:indicator-style="indicatorStyle"
 						:mask-style="pickerMaskStyle"
-						<!-- #ifdef APP-HARMONY -->
+						<!-- #ifdef APP-ANDROID || APP-HARMONY -->
 						:mask-top-style="pickerMaskTopStyle"
 						:mask-bottom-style="pickerMaskBottomStyle"
 						<!-- #endif -->
@@ -516,21 +516,27 @@
 	})
 
 	const indicatorStyle = computed((): string => {
+		// #ifdef APP-ANDROID
+		// Android 原生 picker-view 不会为已设置宽度的边框补默认 solid 样式。
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-top-style:solid;border-top-color:var(--nax-color-divider,#f5f5f7);border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:var(--nax-color-divider,#f5f5f7);'
+		// #endif
+		// #ifndef APP-ANDROID
 		return 'height:40px;background-color:transparent;border-top-width:1px;border-bottom-width:1px;border-color:var(--nax-color-divider,#f5f5f7);'
+		// #endif
 	})
 
 	const pickerMaskStyle = computed((): string => {
 		// 原生 picker-view 默认白色渐隐遮罩在暗黑模式下会形成亮色块
-		// #ifdef APP-HARMONY
+		// #ifdef APP-ANDROID || APP-HARMONY
 		return ''
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifndef APP-ANDROID || APP-HARMONY
 		return 'background:none;'
 		// #endif
 	})
 
 	const pickerMaskTopStyle = computed((): string => {
-		// 鸿蒙原生 picker-view 需分别覆盖上下遮罩，避免白色渐变覆盖暗色面板。
+		// Android / 鸿蒙需分别覆盖原生上下遮罩，避免白色渐变覆盖暗色面板。
 		return 'background-image:linear-gradient(to bottom,transparent,transparent);'
 	})
 
@@ -566,6 +572,11 @@
 		if (val == null) {
 			return false
 		}
+		// #ifdef APP-ANDROID
+		// Android 的数组强转会在读取 length 前抛异常，先用运行时类型判断。
+		return Array.isArray(val)
+		// #endif
+		// #ifndef APP-ANDROID
 		// 排除基础类型与 UTSJSONObject（无 length）
 		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
 			return false
@@ -576,6 +587,7 @@
 			return false
 		}
 		return true
+		// #endif
 	}
 
 	function asAnyArray(val: any | null): any[] {

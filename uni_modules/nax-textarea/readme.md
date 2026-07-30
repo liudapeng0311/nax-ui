@@ -6,6 +6,8 @@
 
 - `nax-ui-theme`（CSS 变量 `--nax-*`，安装时依赖 / 运行时弱依赖）
 
+Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在 `APP-ANDROID` 下使用背景、边框、文字和占位符实色兜底。
+
 ## 基础用法
 
 ```uvue

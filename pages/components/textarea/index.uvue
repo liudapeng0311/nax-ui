@@ -18,6 +18,7 @@
 			<view id="sec-basic" class="section">
 				<text class="section__title">基础用法</text>
 				<nax-textarea
+					:custom-class="textareaThemeClass"
 					v-model="basic"
 					:adjust-position="textareaAdjustPosition"
 					placeholder="请输入内容"
@@ -33,6 +34,7 @@
 			<view id="sec-count" class="section">
 				<text class="section__title">字数统计 count</text>
 				<nax-textarea
+					:custom-class="textareaThemeClass"
 					v-model="withCount"
 					count
 					:maxlength="100"
@@ -48,6 +50,7 @@
 			<view id="sec-auto" class="section">
 				<text class="section__title">自动增高 auto-height</text>
 				<nax-textarea
+					:custom-class="textareaThemeClass"
 					v-model="autoH"
 					auto-height
 					height="70"
@@ -64,6 +67,7 @@
 				<text class="section__title">无边框 / 背景色</text>
 				<view class="panel">
 					<nax-textarea
+						:custom-class="textareaThemeClass"
 						v-model="plain"
 						:border="false"
 						:adjust-position="textareaAdjustPosition"
@@ -76,9 +80,10 @@
 				</view>
 				<view class="item item--gap">
 					<nax-textarea
+						:custom-class="textareaThemeClass"
 						v-model="plainBg"
 						:border="false"
-						background="#f3f3f5"
+						:background="plainBackgroundColor"
 						:adjust-position="textareaAdjustPosition"
 						placeholder="无边框 + 背景色"
 						@click="onFieldFocus('sec-plain')"
@@ -92,6 +97,7 @@
 			<view id="sec-bottom-border" class="section">
 				<text class="section__title">仅下边框 border-type=bottom</text>
 				<nax-textarea
+					:custom-class="textareaThemeClass"
 					v-model="bottomBorder"
 					border
 					border-type="bottom"
@@ -108,6 +114,7 @@
 				<text class="section__title">尺寸 size</text>
 				<view id="sec-size-sm" class="item">
 					<nax-textarea
+						:custom-class="textareaThemeClass"
 						v-model="sizeSm"
 						size="sm"
 						height="56"
@@ -121,6 +128,7 @@
 				</view>
 				<view id="sec-size-md" class="item">
 					<nax-textarea
+						:custom-class="textareaThemeClass"
 						v-model="sizeMd"
 						size="md"
 						height="70"
@@ -134,6 +142,7 @@
 				</view>
 				<view id="sec-size-lg" class="item">
 					<nax-textarea
+						:custom-class="textareaThemeClass"
 						v-model="sizeLg"
 						size="lg"
 						height="88"
@@ -150,16 +159,17 @@
 			<view id="sec-state" class="section">
 				<text class="section__title">禁用 / 只读</text>
 				<view class="item">
-					<nax-textarea v-model="disabledVal" disabled count></nax-textarea>
+					<nax-textarea :custom-class="textareaThemeClass" v-model="disabledVal" disabled count></nax-textarea>
 				</view>
 				<view class="item">
-					<nax-textarea v-model="readonlyVal" readonly></nax-textarea>
+					<nax-textarea :custom-class="textareaThemeClass" v-model="readonlyVal" readonly></nax-textarea>
 				</view>
 			</view>
 
 			<view id="sec-color" class="section">
 				<text class="section__title">自定义边框色 + 高度</text>
 				<nax-textarea
+					:custom-class="textareaThemeClass"
 					v-model="colorBorder"
 					border
 					border-color="#18a058"
@@ -204,6 +214,27 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	const textareaThemeClass = computed((): string => {
+		// #ifdef APP-ANDROID
+		if (darkMode.value) {
+			return 'nax-theme nax-theme-dark'
+		}
+		return 'nax-theme'
+		// #endif
+		// #ifndef APP-ANDROID
+		return ''
+		// #endif
+	})
+
+	const plainBackgroundColor = computed((): string => {
+		// #ifdef APP-ANDROID
+		if (darkMode.value) {
+			return '#26272c'
+		}
+		// #endif
+		return '#f3f3f5'
 	})
 
 	onShow(() => {

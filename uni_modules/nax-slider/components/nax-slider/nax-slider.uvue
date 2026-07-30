@@ -25,9 +25,6 @@
 					<slot></slot>
 				</view>
 				<view v-else class="nax-slider__thumb" :style="thumbStyle"></view>
-				<view v-if="showValue" class="nax-slider__value" :class="valueClass">
-					<text class="nax-slider__value-text">{{ displayText }}</text>
-				</view>
 			</view>
 		</view>
 
@@ -56,8 +53,6 @@
 	 * @property {string} blockColor 滑块颜色；空则主题背景色
 	 * @property {boolean} disabled 禁用
 	 * @property {boolean} useSlot 使用默认插槽自定义滑块
-	 * @property {boolean} showValue 显示当前值气泡
-	 * @property {string} valuePosition top | bottom
 	 * @property {boolean} showEdgeValue 显示起止数值
 	 * @property {string} edgeValuePosition top | bottom
 	 * @property {string} customClass 根节点扩展 class
@@ -83,8 +78,6 @@
 		blockColor: { type: String, default: '' },
 		disabled: { type: Boolean, default: false },
 		useSlot: { type: Boolean, default: false },
-		showValue: { type: Boolean, default: false },
-		valuePosition: { type: String, default: 'top' },
 		showEdgeValue: { type: Boolean, default: false },
 		edgeValuePosition: { type: String, default: 'top' },
 		customClass: { type: String, default: '' }
@@ -235,41 +228,10 @@
 		return d
 	}
 
-	function formatDisplay(v : number) : string {
-		const step = readNum(props.step as number)
-		const digits = stepDecimals(step)
-		if (digits > 0) {
-			return v.toFixed(digits)
-		}
-		if (Math.abs(v - Math.round(v)) < 0.000001) {
-			return '' + Math.round(v)
-		}
-		return '' + v
-	}
-
-	const displayText = computed((): string => {
-		return formatDisplay(innerValue.value)
-	})
-
-	const valueClass = computed((): string => {
-		if (props.valuePosition == 'bottom') {
-			return 'nax-slider__value--bottom'
-		}
-		return 'nax-slider__value--top'
-	})
-
 	const rootClass = computed((): string => {
 		var cls = 'nax-slider--' + normalizedSize.value
 		if (props.disabled) {
 			cls += ' nax-slider--disabled'
-		}
-		if (props.showValue) {
-			cls += ' nax-slider--show-value'
-			if (props.valuePosition == 'bottom') {
-				cls += ' nax-slider--value-bottom'
-			} else {
-				cls += ' nax-slider--value-top'
-			}
 		}
 		if (props.showEdgeValue) {
 			cls += ' nax-slider--show-edge'
@@ -688,14 +650,6 @@
 		opacity: var(--nax-opacity-disabled, 0.5);
 	}
 
-	.nax-slider--value-top {
-		padding-top: 36px;
-	}
-
-	.nax-slider--value-bottom {
-		padding-bottom: 36px;
-	}
-
 	.nax-slider--edge-top {
 		padding-top: 8px;
 	}
@@ -782,43 +736,5 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
-	}
-
-	.nax-slider__value {
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
-		padding-top: 2px;
-		padding-bottom: 2px;
-		padding-left: 8px;
-		padding-right: 8px;
-		border-radius: var(--nax-radius-full, 999px);
-		background-color: var(--nax-color-bg, #ffffff);
-		border-width: 1px;
-		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-		/* #endif */
-	}
-
-	.nax-slider__value--top {
-		bottom: 100%;
-		margin-bottom: 8px;
-	}
-
-	.nax-slider__value--bottom {
-		top: 100%;
-		margin-top: 8px;
-	}
-
-	.nax-slider__value-text {
-		font-size: 12px;
-		font-weight: 500;
-		color: var(--nax-color-text, #333639);
-		lines: 1;
 	}
 </style>

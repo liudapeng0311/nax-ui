@@ -30,8 +30,6 @@ uni-app x 滑动选择器，功能覆盖常用场景。
 | blockColor | string | `''` | 滑块颜色；空则 `--nax-color-bg` |
 | disabled | boolean | `false` | 禁用 |
 | useSlot | boolean | `false` | 使用默认插槽自定义滑块 |
-| showValue | boolean | `false` | 显示当前值气泡 |
-| valuePosition | string | `top` | 气泡位置 `top` / `bottom` |
 | showEdgeValue | boolean | `false` | 显示起止数值 |
 | edgeValuePosition | string | `top` | 起止数值位置 `top` / `bottom` |
 | customClass | string | `''` | 根节点扩展 class |
@@ -56,8 +54,7 @@ uni-app x 滑动选择器，功能覆盖常用场景。
 
 - `--nax-color-primary` 默认已选轨道色
 - `--nax-color-border` 默认轨道底色 / 滑块描边
-- `--nax-color-bg` 默认滑块与气泡底色
-- `--nax-color-text` 气泡文字色
+- `--nax-color-bg` 默认滑块底色
 - `--nax-color-text-secondary` 起止数值色
 - `--nax-opacity-disabled` 禁用透明度
 - `--nax-radius-full` 圆角
@@ -74,3 +71,4 @@ uni-app x 滑动选择器，功能覆盖常用场景。
 - 不提供 `blockStyle` / `customStyle` 对象样式入口，扩展用 `customClass` + CSS 变量
 - 额外提供 `change` 事件（松手/点击最终值），便于表单联动
 - 阴影仅 Web / 小程序；App 端用描边保证层次（条件编译）
+- 组件不内置跟随滑块移动的数值气泡；需要展示当前值时，在滑块外使用普通文本绑定 `v-model`

@@ -16,10 +16,19 @@
 	})
 
 	const inGroup = inject('naxSpaceInGroup', false) as boolean
+	// Android inject 不能用 null 作为 Ref 默认值，否则 UTS 会推断为 Void。
+	// #ifdef APP-ANDROID
+	const gapRef = inject('naxSpaceGapPx', ref(0)) as Ref<number>
+	const dirRef = inject('naxSpaceDirection', ref('horizontal')) as Ref<string>
+	const wrapRef = inject('naxSpaceWrap', ref(false)) as Ref<boolean>
+	const fillRef = inject('naxSpaceFill', ref(false)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
 	const gapRef = inject('naxSpaceGapPx', null)
 	const dirRef = inject('naxSpaceDirection', null)
 	const wrapRef = inject('naxSpaceWrap', null)
 	const fillRef = inject('naxSpaceFill', null)
+	// #endif
 
 	function readRefNumber(r : any | null, fallback : number) : number {
 		if (r == null) {

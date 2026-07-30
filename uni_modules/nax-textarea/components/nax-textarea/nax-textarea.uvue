@@ -170,7 +170,7 @@
 		},
 		placeholderStyle: {
 			type: String,
-			default: 'color: #e5e5ea;'
+			default: ''
 		},
 		confirmHold: {
 			type: Boolean,
@@ -257,9 +257,22 @@
 		return props.maxlength
 	})
 
+	const isAndroidDarkTheme = computed((): boolean => {
+		// Android 组件隔离下主题变量可能回退，使用 custom-class 传递主题状态。
+		// #ifdef APP-ANDROID
+		return props.customClass.indexOf('nax-theme-dark') >= 0
+		// #endif
+		// #ifndef APP-ANDROID
+		return false
+		// #endif
+	})
+
 	const resolvedPlaceholderStyle = computed((): string => {
 		if (props.placeholderStyle.length > 0) {
 			return props.placeholderStyle
+		}
+		if (isAndroidDarkTheme.value) {
+			return 'color: #ffffff61;'
 		}
 		return 'color: #e5e5ea;'
 	})
@@ -351,6 +364,16 @@
 	/** 根节点：边框/背景；高度由 field 明确高度撑开（对齐 nax-input 不靠 %） */
 	const rootStyle = computed((): string => {
 		let style = ''
+		if (isAndroidDarkTheme.value) {
+			if (props.disabled || props.readonly) {
+				style += 'background-color:#26272c;'
+			} else if (props.border && props.background.length == 0) {
+				style += 'background-color:#1e1f24;'
+			}
+			if (props.border && props.borderColor.length == 0) {
+				style += 'border-color:#ffffff3d;'
+			}
+		}
 		if (props.border && props.borderColor.length > 0) {
 			style += 'border-color:' + props.borderColor + ';'
 		}
@@ -374,6 +397,13 @@
 	 */
 	const fieldStyle = computed((): string => {
 		let style = 'font-size:' + fontSizeCss.value + ';'
+		if (isAndroidDarkTheme.value) {
+			if (props.disabled) {
+				style += 'color:#ffffff4d;'
+			} else {
+				style += 'color:#f5f5f5;'
+			}
+		}
 		if (props.autoHeight) {
 			style += 'min-height:' + heightCss.value + ';'
 		} else {

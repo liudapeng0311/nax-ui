@@ -80,7 +80,7 @@
 | 时间选择 | `nax-datetime-picker` | P1 | 日期时间滚轮选择 | `v-model:show` `v-model` `mode(datetime/date/time/year-month/year/month-day)` `minDate` `maxDate` `showSecond` `showTrigger` / `confirm` `cancel` `change` **done** |
 | 键盘 | `nax-keyboard` | P1 | 自定义键盘 | `v-model:show` `mode(number/car/card)` `dotEnabled` `tooltip` `tips` `random` `mask` / `change` `backspace` `confirm` `cancel` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换 | `v-model` `disabled` `loading` `size` `activeColor` `inactiveColor` `vibrateShort` / `change` **done** |
-| 滑动选择器 | `nax-slider` | P1 | 区间滑动选择 | `v-model` `start` `end` `min` `max` `step` `size` `blockWidth` `height` `activeColor` `inactiveColor` `blockColor` `disabled` `useSlot` `showValue` `valuePosition` `showEdgeValue` `edgeValuePosition` / `change` `start` `moving` `end` **done** |
+| 滑动选择器 | `nax-slider` | P1 | 区间滑动选择 | `v-model` `start` `end` `min` `max` `step` `size` `blockWidth` `height` `activeColor` `inactiveColor` `blockColor` `disabled` `useSlot` `showEdgeValue` `edgeValuePosition` / `change` `start` `moving` `end` **done** |
 | 复选框 | `nax-checkbox` | P0 | 多选 | `v-model` `name`/`value` `label` `shape` `size` `disabled` `labelDisabled` `activeColor` / `change` **done** |
 | 复选框组 | `nax-checkbox-group` | P0 | 多选组 | `v-model` `shape` `size` `max` `wrap` `width` `labelDisabled` `activeColor` / `change` **done** |
 | 单选框 | `nax-radio` | P0 | 单选 | `v-model` `name`/`value` `label` `shape` `size` `disabled` `labelDisabled` `activeColor` / `change` **done** |
@@ -160,7 +160,7 @@
 | `nax-checkbox` / `nax-checkbox-group` | done | 插件包 `uni_modules/nax-checkbox`；单独布尔 v-model / 组 string[]；provide-inject |
 | `nax-radio` / `nax-radio-group` | done | 插件包 `uni_modules/nax-radio`；单独布尔 v-model / 组 string；provide-inject |
 | `nax-switch` | done | 插件包 `uni_modules/nax-switch`；布尔 v-model；loading 分端旋转；transform 滑动 + 轨道变色过渡 |
-| `nax-slider` | done | 插件包 `uni_modules/nax-slider`；v-model/min/max/step/showValue/useSlot；start/moving/end/change |
+| `nax-slider` | done | 插件包 `uni_modules/nax-slider`；v-model/min/max/step/useSlot；数值在滑块外展示；start/moving/end/change |
 | `nax-number-box` | done | 插件包 `uni_modules/nax-number-box`；加减/输入/长按/asyncChange/overlimit |
 | `nax-search` | done | 插件包 `uni_modules/nax-search`；shape/showAction/animation/search/custom；清除不依赖 focus |
 | `nax-rate` | done | 插件包 `uni_modules/nax-rate`；v-model/count/allowHalf/minCount/滑动打分/readonly |

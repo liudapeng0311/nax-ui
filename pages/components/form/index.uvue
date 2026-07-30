@@ -23,19 +23,19 @@
 						:border-bottom="true"
 					>
 						<nax-form-item label="姓名" prop="name" required>
-							<nax-input v-model="name" placeholder="请输入姓名" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="name" placeholder="请输入姓名" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
 						</nax-form-item>
 						<nax-form-item label="手机" prop="phone" required>
-							<nax-input v-model="phone" type="number" placeholder="请输入手机号" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="phone" type="number" placeholder="请输入手机号" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
 						</nax-form-item>
 						<nax-form-item label="邮箱" prop="email">
-							<nax-input v-model="email" placeholder="选填，校验邮箱格式" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="email" placeholder="选填，校验邮箱格式" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
 						</nax-form-item>
 						<nax-form-item label="密码" prop="password" required>
-							<nax-input v-model="password" type="password" placeholder="6-20 位" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="password" type="password" placeholder="6-20 位" :clearable="true" @change="syncFormModel" @blur="syncFormModel"></nax-input>
 						</nax-form-item>
 						<nax-form-item label="简介" prop="intro" label-position="top">
-							<nax-textarea v-model="intro" placeholder="至少 5 个字" height="80" @change="syncFormModel" @blur="syncFormModel"></nax-textarea>
+							<nax-textarea :custom-class="fieldThemeClass" v-model="intro" placeholder="至少 5 个字" height="80" @change="syncFormModel" @blur="syncFormModel"></nax-textarea>
 						</nax-form-item>
 						<nax-form-item label="性别" prop="sex" required>
 							<nax-radio-group v-model="sex" @change="onSexChange">
@@ -75,10 +75,10 @@
 						:border-bottom="false"
 					>
 						<nax-form-item label="昵称" prop="nickname" required>
-							<nax-input v-model="nickname" border placeholder="必填昵称" @change="syncTopModel" @blur="syncTopModel"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="nickname" border placeholder="必填昵称" @change="syncTopModel" @blur="syncTopModel"></nax-input>
 						</nax-form-item>
 						<nax-form-item label="备注" prop="remark">
-							<nax-input v-model="remark" border placeholder="可选" @change="syncTopModel" @blur="syncTopModel"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="remark" border placeholder="可选" @change="syncTopModel" @blur="syncTopModel"></nax-input>
 						</nax-form-item>
 					</nax-form>
 				</view>
@@ -94,10 +94,10 @@
 				<view class="panel">
 					<nax-form :model="formManualModel" :border-bottom="true" :label-width="80">
 						<nax-form-item label="账号" prop="account" :error-message="manualError" status="error">
-							<nax-input v-model="account" placeholder="外部错误文案"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="account" placeholder="外部错误文案"></nax-input>
 						</nax-form-item>
 						<nax-form-item label="状态" prop="ok" status="success" :border-bottom="true">
-							<nax-input v-model="okText" placeholder="success 下划线"></nax-input>
+							<nax-input :custom-class="fieldThemeClass" v-model="okText" placeholder="success 下划线"></nax-input>
 						</nax-form-item>
 					</nax-form>
 				</view>
@@ -135,6 +135,19 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	const fieldThemeClass = computed((): string => {
+		// Android 表单子组件隔离下主题变量可能回退，显式传递暗黑状态。
+		// #ifdef APP-ANDROID
+		if (darkMode.value) {
+			return 'nax-theme nax-theme-dark'
+		}
+		return 'nax-theme'
+		// #endif
+		// #ifndef APP-ANDROID
+		return ''
+		// #endif
 	})
 
 	onShow(() => {
