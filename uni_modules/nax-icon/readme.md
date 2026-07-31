@@ -28,7 +28,7 @@ uni_modules/nax-ui-theme
 |------|------|
 | `nax-ui-theme` | **安装时依赖**；**运行时弱依赖**（未挂主题时走 fallback） |
 
-> 安装 theme 后仍需：`App.uvue` `@import` + 一处 `class="nax-theme"`。详见 `docs/theme.md`。
+> 安装 theme 后仍需：`App.uvue` `@import` + 一处 `class="nax-theme"`。详见 `uni_modules/nax-ui-theme/readme.md`。
 
 ## 基础用法
 

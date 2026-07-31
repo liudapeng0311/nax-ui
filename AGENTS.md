@@ -17,7 +17,7 @@
 
 - `docs/design-system.md` — 设计与 API 规范
 - `docs/component-inventory.md` — 组件分期与清单
-- `docs/theme.md` — 主题 token 接入（nax-ui-theme）
+- `uni_modules/nax-ui-theme/readme.md` — 主题 token 接入（随主题包发布）
 - `docs/README.md` — 文档索引
 
 实现前先读上述文档；**不要**在未更新清单的情况下随意新增清单外大型组件。
@@ -298,7 +298,7 @@ const emit = defineEmits(['click'])
 
 - 设计规范：`docs/design-system.md`
 - 组件清单：`docs/component-inventory.md`
-- 主题接入：`docs/theme.md`
+  - 主题接入：`uni_modules/nax-ui-theme/readme.md`
 - 文档索引：`docs/README.md`
 - 主题包：`uni_modules/nax-ui-theme`
 - 官方参考（人工查阅）：

@@ -29,7 +29,7 @@
 @import "@/uni_modules/nax-ui-theme/theme/default.css";
 ```
 
-页面或布局根节点挂载 `class="nax-theme"`。暗色主题使用 `nax-theme-dark` 修饰类，详见仓库 `docs/theme.md`。
+页面或布局根节点挂载 `class="nax-theme"`。暗色主题使用 `nax-theme-dark` 修饰类，详见 `uni_modules/nax-ui-theme/readme.md`。
 
 ## 使用示例
 

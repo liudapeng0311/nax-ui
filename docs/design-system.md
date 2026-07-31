@@ -350,7 +350,7 @@ MVP 只做必要过渡；复杂动画后置。
 ## 6. 主题机制
 
 权威实现：`uni_modules/nax-ui-theme`（token 约定包，不是 UI 组件）。  
-接入说明：`docs/theme.md`。
+接入说明：`uni_modules/nax-ui-theme/readme.md`。
 
 ### 6.1 默认主题注入
 
