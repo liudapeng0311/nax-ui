@@ -1,7 +1,7 @@
 # nax-ui 设计规范
 
 > 适用范围：`uni_modules/nax-*` 独立组件包、`uni_modules/nax-ui` 套装入口及本仓库演示工程
-> 目标端：App（Android / iOS / HarmonyOS）+ Web + 微信小程序  
+> 目标端：App（Android / HarmonyOS）+ Web + 微信小程序
 > 渲染模式：蒸汽模式优先；样式隔离策略 2.0  
 > 技术栈：uvue + uts（组合式 API）
 
@@ -393,7 +393,7 @@ MVP 只做必要过渡；复杂动画后置。
 每个组件至少包含：
 
 1. 用途一句话
-2. 平台兼容表（App-Android / App-iOS / App-Harmony / Web / 微信小程序）
+2. 平台兼容表（App-Android / App-Harmony / Web / 微信小程序）
 3. 基础用法
 4. Props / Events / Slots / externalClasses
 5. Token / 可覆盖 class
