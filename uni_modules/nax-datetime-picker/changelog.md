@@ -1,8 +1,6 @@
-## 0.1.9 (2026-07-30)
-
+## 0.1.9（2026-07-31）
 - 修复 Android 端（`APP-ANDROID`）暗黑模式下原生 `picker-view` 上下白色渐变遮罩覆盖时间选择器面板的问题；复用鸿蒙端的 `mask-top-style` 与 `mask-bottom-style` 透明渐变方案，iOS、Web 与小程序保持原有行为。
 - 修复 Android 端（`APP-ANDROID`）时间滚轮选中项上下边框不显示的问题；为原生 `picker-view` 指示器补全 `solid` 边框样式并继续使用主题分割线 token，其它端保持原有行为。
-
 ## 0.1.8 (2026-07-29)
 
 - 修复鸿蒙端（`APP-HARMONY`）暗黑模式下原生 `picker-view` 上下白色渐变遮罩覆盖时间滚轮背景的问题：改用 `mask-top-style` 与 `mask-bottom-style` 分别设为透明渐变；其它端保持原有遮罩行为。

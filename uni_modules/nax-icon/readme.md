@@ -2,8 +2,6 @@
 
 `nax-ui` 字体图标组件（uni-app x / uvue）。
 
-默认图标集基于 **[Tabler Icons](https://tabler.io/icons)**（MIT）语义子集，通过 `name` 使用，不直接暴露 Tabler 原始包名。
-
 ## 安装
 
 ```text

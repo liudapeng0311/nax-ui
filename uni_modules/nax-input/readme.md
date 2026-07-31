@@ -1,6 +1,6 @@
 # nax-input
 
-uni-app x 单行输入框，功能覆盖常用场景。
+uni-app x 单行输入框。
 
 > **不包含** `type=select`（后续 `nax-select`）与 `type=textarea`（后续 `nax-textarea`）。
 
@@ -29,7 +29,7 @@ uni-app x 单行输入框，功能覆盖常用场景。
 | `tel` | 电话键盘 |
 | `email` / `url` / `nickname` / `safe-password` / `none` | 透传原生 input type |
 
-传入 `select` / `textarea` / `idcard` 会回落为 `text`（请使用独立组件；身份证键盘后续单独提供）。
+传入 `select` / `textarea` / `idcard` 会回落为 `text`。
 
 ## 常用 Props
 

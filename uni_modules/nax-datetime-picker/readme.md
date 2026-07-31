@@ -1,6 +1,6 @@
 # nax-datetime-picker
 
-uni-app x 时间选择器（底部弹层 + `picker-view`），功能覆盖常用场景 DatetimePicker。
+uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
 ## 依赖
 

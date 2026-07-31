@@ -1,14 +1,6 @@
 # nax-grid
 
-宫格布局：同时展示多个同类入口（图标 + 文案等）。由 `nax-grid` 容器 + `nax-grid-item` 子项组成。
-
-组件 Grid 的改进：
-
-- 全端统一 **flex** 布局（不用 float 分端）
-- `gap` 间距；`hover` 组件内置按压态（无需写全局 class）
-- `index` 可省略，按挂载顺序自动分配
-- 外观走 token，不暴露 `bgColor` / `customStyle` 泛滥
-- Android 端已适配容器与子项的响应式注入，无需额外配置
+宫格布局：由 `nax-grid` 容器 + `nax-grid-item` 子项组成。
 
 ## 用法
 

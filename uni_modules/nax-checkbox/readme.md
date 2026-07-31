@@ -1,6 +1,6 @@
 # nax-checkbox
 
-uni-app x 复选框 / 复选框组，功能覆盖常用场景。
+uni-app x 复选框 / 复选框组。
 
 ## 依赖
 

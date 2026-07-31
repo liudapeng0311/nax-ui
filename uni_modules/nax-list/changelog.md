@@ -1,9 +1,7 @@
-## 0.1.1（2026-07-22）
-
+## 0.1.1（2026-07-31）
 - 新增下拉刷新：`enableRefresh` / `refreshing` / `refresherThreshold` / `refresherBackground` / `refresherDefaultStyle`
 - 事件：`refresh`、`update:refreshing`（可 v-model:refreshing）
 - 刷新中暂停触底 load；基于 scroll-view 原生 refresher（仅内部滚动模式）
-
 ## 0.1.0（2026-07-22）
 
 - 初版 `nax-list` 滚动列表壳（方案 A）

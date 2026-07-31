@@ -1,6 +1,6 @@
 # nax-dropdown
 
-筛选栏式下拉菜单（支持 Dropdown 主场景，按 nax-ui token / uvue 约束实现）。
+筛选栏式下拉菜单。
 
 ## 组件
 

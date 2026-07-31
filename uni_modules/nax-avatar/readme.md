@@ -18,7 +18,7 @@ uni-app x 头像组件，提供常用能力。
 <!-- 自定义尺寸（px） -->
 <nax-avatar src="https://example.com/a.jpg" size="48"></nax-avatar>
 
-<!-- ?????? -->
+<!-- 边框 -->
 <nax-avatar src="https://example.com/a.jpg" border-color="#18a058"></nax-avatar>
 ```
 

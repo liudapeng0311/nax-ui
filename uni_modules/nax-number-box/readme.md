@@ -1,6 +1,6 @@
 # nax-number-box
 
-uni-app x 步进器（加减数量），功能覆盖常用场景。
+uni-app x 步进器（加减数量）。
 
 ## 依赖
 

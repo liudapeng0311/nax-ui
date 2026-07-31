@@ -1,5 +1,4 @@
-## 0.1.0（2026-07-21）
-
+## 0.1.0（2026-07-31）
 - 初版 `nax-card`（内容卡片）
 - `title` / `extra` 页头文案
 - 插槽 `header` / `default` / `footer` / `title` / `extra` / `cover`
