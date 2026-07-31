@@ -1,33 +1,37 @@
 # nax-ui
 
-uni-app x 通用 UI 相关插件集合（当前以**独立插件**为主，不强制单包套装）。
+`nax-ui` 是面向 uni-app x 的 UI 组件套装入口。
 
-`nax-ui` 套装入口通过 `package.json` 聚合当前全部 50 个 `nax-*` 组件包与 `nax-ui-theme`；按需使用时仍可只安装独立插件。
+组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前全部 50 个 `nax-*` 组件包与 `nax-ui-theme`。可以安装整套，也可以只安装需要的独立组件。
 
-## 已有插件
+## 安装方式
 
-| 插件 | 说明 |
-|------|------|
-| `nax-ui-theme` | 主题 token 约定包（CSS 变量） |
-| `nax-button` | 通用按钮 |
-| `nax-badge` | 徽标 |
-| `nax-avatar` | 头像 |
-| `nax-icon` | 字体图标（Tabler Icons 语义子集） |
-| `nax-swiper` | 轮播（原生 swiper 封装） |
-| `nax-image` | 图片（原生 image 封装，加载/失败占位） |
-| `nax-tag` | 标签 |
-| `nax-number-box` | 步进器（支持 NumberBox） |
-| `nax-rate` | 评分（支持 Rate） |
-| `nax-toast` | 轻提示（函数式 naxToast） |
-| `nax-dialog` | 对话框（声明式 + 函数式 naxDialog） |
-| `nax-nav-bar` | 自定义顶部导航栏（状态栏 / fixed 占位 / 返回栈） |
-| `nax-list` | 滚动列表壳（触底加载 / 空错底态） |
-| `nax-virtual-list` | 固定行高虚拟列表（窗口裁剪） |
+### 整套安装
 
-## 推荐接入
+安装 `nax-ui`。套装依赖以本包 `package.json` 的 `uni_modules.dependencies` 为准。
 
-1. 安装 `nax-ui-theme`
-2. `App.uvue` 引入 `theme/default.css`
-3. 安装需要的 `nax-*` 组件插件
+### 按需安装
 
-详见：`docs/theme.md`、`docs/component-inventory.md`。
+只安装需要的 `nax-*` 组件，并按对应组件文档补充它的依赖。
+
+## 主题接入
+
+在 `App.uvue` 引入主题样式：
+
+```css
+@import "@/uni_modules/nax-ui-theme/theme/default.css";
+```
+
+页面或布局根节点挂载 `class="nax-theme"`。暗色主题使用 `nax-theme-dark` 修饰类，详见仓库 `docs/theme.md`。
+
+## 使用示例
+
+`nax-ui` 是套装入口，不是实际渲染组件，不需要也不能写成 `<nax-ui />`。安装完成后直接使用具体组件：
+
+```uvue
+<nax-button type="primary" label="确定" @click="onConfirm"></nax-button>
+```
+
+## 组件范围
+
+当前套装覆盖基础、布局、表单、反馈、导航与展示组件。完整组件清单、状态和 demo 路径以仓库 `docs/component-inventory.md` 为准。
