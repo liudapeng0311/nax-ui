@@ -72,6 +72,26 @@
 		return 'left'
 	}
 
+	// #ifdef APP-ANDROID
+	// Android provide Ref，避免子项注入 ComputedRef 时发生运行时类型转换。
+	const colRef = ref(normalizeCol(props.col))
+	const borderRef = ref(props.border)
+	const gapPxRef = ref(parseGapPx(props.gap))
+	const hoverRef = ref(props.hover)
+	watch((): number => props.col, (value : number) => {
+		colRef.value = normalizeCol(value)
+	})
+	watch((): boolean => props.border, (value : boolean) => {
+		borderRef.value = value
+	})
+	watch((): string => props.gap, (value : string) => {
+		gapPxRef.value = parseGapPx(value)
+	})
+	watch((): boolean => props.hover, (value : boolean) => {
+		hoverRef.value = value
+	})
+	// #endif
+	// #ifndef APP-ANDROID
 	const colRef = computed((): number => {
 		return normalizeCol(props.col)
 	})
@@ -87,6 +107,7 @@
 	const hoverRef = computed((): boolean => {
 		return props.hover
 	})
+	// #endif
 
 	const nextSeq = ref(0)
 

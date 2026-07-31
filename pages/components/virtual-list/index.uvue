@@ -6,7 +6,19 @@
 			home-url="/pages/index/index"
 			:border="true"
 		></nax-nav-bar>
-		<scroll-view class="page-scroll" scroll-y="true">
+		<scroll-view
+			class="page-scroll"
+			scroll-y="true"
+			<!-- #ifdef APP-ANDROID -->
+			type="nested"
+			<!-- #endif -->
+		>
+			<!-- #ifdef APP-ANDROID -->
+			<nested-scroll-header>
+				<view class="page-scroll__nested-header"></view>
+			</nested-scroll-header>
+			<nested-scroll-body>
+			<!-- #endif -->
 		<view class="nax-theme page" :class="themeExtraClass">
 
 			<view class="section">
@@ -16,6 +28,7 @@
 					<nax-virtual-list
 						ref="basicRef"
 						:key="basicKey"
+						nested-scroll
 						height="420px"
 						:list="basicList"
 						:item-height="52"
@@ -51,6 +64,7 @@
 				<view class="list-panel">
 					<nax-virtual-list
 						:key="pageKey"
+						nested-scroll
 						height="360px"
 						:list="pageList"
 						:item-height="72"
@@ -90,6 +104,7 @@
 				<view class="list-panel">
 					<nax-virtual-list
 						:key="rfKey"
+						nested-scroll
 						height="320px"
 						:list="rfList"
 						:item-height="48"
@@ -122,6 +137,7 @@
 				<text class="section__title">空状态</text>
 				<view class="list-panel list-panel--short">
 					<nax-virtual-list
+						nested-scroll
 						height="200px"
 						:list="emptyList"
 						:item-height="48"
@@ -131,6 +147,9 @@
 				</view>
 			</view>
 		</view>
+			<!-- #ifdef APP-ANDROID -->
+			</nested-scroll-body>
+			<!-- #endif -->
 	</scroll-view>
 	</view>
 </template>
@@ -473,6 +492,11 @@
 		flex: 1;
 		height: 0;
 	}
+
+	.page-scroll__nested-header {
+		height: 0;
+	}
+
 	.page {
 		padding: 16px;
 		background-color: var(--nax-color-bg-secondary, #fafafc);

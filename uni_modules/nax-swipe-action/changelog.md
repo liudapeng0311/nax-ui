@@ -1,3 +1,8 @@
+## 0.1.2（2026-07-31）
+
+- 修复 Android（`APP-ANDROID`）组内互斥运行时报 `RefImpl cannot be cast`：注入的活动项状态改用 `Ref<string>` 接收，避免将 Vue 运行时 ref 强制转换为自定义结构类型。
+- Web、iOS、HarmonyOS 与小程序保持既有行为。
+
 ## 0.1.1 (2026-07-29)
 - 移除第三方组件库参考表述，完善独立组件文档。
 

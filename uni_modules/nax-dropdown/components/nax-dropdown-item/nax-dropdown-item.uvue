@@ -114,12 +114,30 @@
 	const itemId = 'nax-dd-item-' + Math.floor(Math.random() * 10000000).toString()
 
 	const inGroup = inject('naxDdInGroup', false) as boolean
+	// Android UTS 会把 null 默认值推断为 Void，需使用同类型兜底值接收父级注入。
+	function fallbackRegister(_id : string, _title : string, _disabled : boolean, _visible : boolean, _highlighted : boolean) : number {
+		return -1
+	}
+	function fallbackUpdate(_id : string, _title : string, _disabled : boolean, _visible : boolean, _highlighted : boolean) {}
+	function fallbackUnregister(_id : string) {}
+	function fallbackClose() {}
+
+	// #ifdef APP-ANDROID
+	const activeIdRef = inject('naxDdActiveId', ref('')) as Ref<string>
+	const registerRaw = inject('naxDdRegister', fallbackRegister) as (a : string, b : string, c : boolean, d : boolean, e : boolean) => number
+	const updateRaw = inject('naxDdUpdate', fallbackUpdate) as (a : string, b : string, c : boolean, d : boolean, e : boolean) => void
+	const unregisterRaw = inject('naxDdUnregister', fallbackUnregister) as (a : string) => void
+	const closeRaw = inject('naxDdClose', fallbackClose) as () => void
+	const closeOnClickSelfRef = inject('naxDdCloseOnClickSelf', ref(true)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
 	const activeIdRef = inject('naxDdActiveId', null)
 	const registerRaw = inject('naxDdRegister', null)
 	const updateRaw = inject('naxDdUpdate', null)
 	const unregisterRaw = inject('naxDdUnregister', null)
 	const closeRaw = inject('naxDdClose', null)
 	const closeOnClickSelfRef = inject('naxDdCloseOnClickSelf', null)
+	// #endif
 
 	function readRefString(r : any | null, fallback : string) : string {
 		if (r == null) {

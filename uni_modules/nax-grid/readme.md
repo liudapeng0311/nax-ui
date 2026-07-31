@@ -8,6 +8,7 @@
 - `gap` 间距；`hover` 组件内置按压态（无需写全局 class）
 - `index` 可省略，按挂载顺序自动分配
 - 外观走 token，不暴露 `bgColor` / `customStyle` 泛滥
+- Android 端已适配容器与子项的响应式注入，无需额外配置
 
 ## 用法
 

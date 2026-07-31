@@ -535,9 +535,15 @@
 		justify-content: flex-start;
 	}
 
-	/* #ifndef APP-HARMONY || MP-WEIXIN */
+	/* #ifndef APP-ANDROID || APP-HARMONY || MP-WEIXIN */
 	.nax-toast__stage--top {
 		padding-top: 80px;
+	}
+	/* #endif */
+	/* #ifdef APP-ANDROID */
+	.nax-toast__stage--top {
+		/* 安卓避开状态栏与导航栏区域。 */
+		padding-top: 128px;
 	}
 	/* #endif */
 	/* #ifdef APP-HARMONY */
@@ -561,9 +567,15 @@
 		align-items: center;
 	}
 
-	/* #ifdef APP-ANDROID || APP-IOS */
+	/* #ifdef APP-IOS */
 	.nax-toast--float-center {
 		top: 280px;
+	}
+	/* #endif */
+	/* #ifdef APP-ANDROID */
+	.nax-toast--float-center {
+		/* 安卓固定 280px 偏上，按屏幕高度定位更接近视觉中心。 */
+		top: 42%;
 	}
 	/* #endif */
 	/* #ifdef APP-HARMONY */
@@ -578,9 +590,15 @@
 	}
 	/* #endif */
 
-	/* #ifndef APP-HARMONY || MP-WEIXIN */
+	/* #ifndef APP-ANDROID || APP-HARMONY || MP-WEIXIN */
 	.nax-toast--float-top {
 		top: 80px;
+	}
+	/* #endif */
+	/* #ifdef APP-ANDROID */
+	.nax-toast--float-top {
+		/* 安卓避开状态栏与导航栏区域。 */
+		top: 128px;
 	}
 	/* #endif */
 	/* #ifdef APP-HARMONY */

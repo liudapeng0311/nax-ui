@@ -4,6 +4,7 @@
 			:id="scrollDomId"
 			class="nax-virtual-list__scroll"
 			direction="vertical"
+			:associative-container="associativeContainer"
 			:scroll-top="scrollTopBind"
 			:show-scrollbar="showScrollbar"
 			:lower-threshold="offset"
@@ -107,6 +108,7 @@
 	 * @property {string} keyField 业务 id 字段；行 DOM key 使用窗口位置
 	 * @property {string} height 滚动区高度；空则 flex:1
 	 * @property {boolean} showScrollbar 是否显示滚动条
+	 * @property {boolean} nestedScroll Android 端与外层 scroll-view 协商嵌套滚动
 	 * @property {boolean} loading / finished / error / empty 底栏状态（对齐 nax-list）
 	 * @property {boolean} enableRefresh 下拉刷新
 	 * @property {boolean} refreshing 刷新中（受控）
@@ -147,6 +149,10 @@
 		showScrollbar: {
 			type: Boolean,
 			default: true
+		},
+		nestedScroll: {
+			type: Boolean,
+			default: false
 		},
 		loading: {
 			type: Boolean,
@@ -242,7 +248,16 @@
 	const viewportPx = ref(0.0)
 	const localTriggered = ref(false)
 	const visibleRows = ref([] as NaxVirtualRow[])
-
+	const associativeContainer = computed(() : string => {
+		let container = ''
+		// #ifdef APP-ANDROID
+		// Android 端通过子列表声明关联容器启用嵌套滚动协商。
+		if (props.nestedScroll) {
+			container = 'nested-scroll-view'
+		}
+		// #endif
+		return container
+	})
 	let lastEmittedStart = -1
 	let lastEmittedEnd = -1
 	let measureToken = 0

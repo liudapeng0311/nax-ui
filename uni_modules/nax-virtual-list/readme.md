@@ -70,6 +70,7 @@ const vlRef = ref(null)
 | key-field | string | `''` | 数据项业务 id（行 DOM 使用窗口位置 key） |
 | height | string | `''` | 滚动区高度；空则 `flex:1` |
 | show-scrollbar | boolean | `true` | 滚动条 |
+| nested-scroll | boolean | `false` | Android 端嵌套滚动：VDOM 外层需启用 `type="nested"` 并包裹 `nested-scroll-body`；蒸汽模式只需此属性；其它端无影响 |
 | loading / finished / error / empty | boolean | `false` | 底栏 / 空态（受控） |
 | disabled | boolean | `false` | 禁用触底 load |
 | offset | number | `80` | 触底阈值 px |

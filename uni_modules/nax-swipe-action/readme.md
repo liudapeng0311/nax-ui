@@ -45,6 +45,8 @@ const options = [
 
 > 列表 `key` 与 `name` 请用稳定唯一 id，不要用数组下标。
 
+> Android 端组内互斥已适配响应式注入；无需额外配置。
+
 ## nax-swipe-action Props
 
 | 属性 | 类型 | 默认 | 说明 |

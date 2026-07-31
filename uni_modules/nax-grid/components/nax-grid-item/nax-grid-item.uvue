@@ -41,12 +41,28 @@
 	const emit = defineEmits(['click'])
 
 	const inGroup = inject('naxGridInGroup', false) as boolean
+	// #ifdef APP-ANDROID
+	// Android inject 默认值必须是同类型 Ref，不能用 null 推断为 Void。
+	function fallbackClaimIndex() : number {
+		return -1
+	}
+	function fallbackOnItemClick(_index : string) {
+	}
+	const colRef = inject('naxGridCol', ref(3)) as Ref<number>
+	const borderRef = inject('naxGridBorder', ref(true)) as Ref<boolean>
+	const gapPxRef = inject('naxGridGapPx', ref(0)) as Ref<number>
+	const hoverRef = inject('naxGridHover', ref(true)) as Ref<boolean>
+	const claimRaw = inject('naxGridClaimIndex', fallbackClaimIndex) as () => number
+	const onClickRaw = inject('naxGridOnClick', fallbackOnItemClick) as (index : string) => void
+	// #endif
+	// #ifndef APP-ANDROID
 	const colRef = inject('naxGridCol', null)
 	const borderRef = inject('naxGridBorder', null)
 	const gapPxRef = inject('naxGridGapPx', null)
 	const hoverRef = inject('naxGridHover', null)
 	const claimRaw = inject('naxGridClaimIndex', null)
 	const onClickRaw = inject('naxGridOnClick', null)
+	// #endif
 
 	function readRefNumber(r : any | null, fallback : number) : number {
 		if (r == null) {

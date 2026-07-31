@@ -1,3 +1,9 @@
+## 0.1.7（2026-07-31）
+
+- 新增 `nested-scroll`：Android 端（`APP-ANDROID`）通过内层 `scroll-view` 的 `associative-container` 建立嵌套滚动协商；Web、iOS、HarmonyOS 及未启用该属性的实例行为保持不变。
+- 修复 Android 演示页空白与内层列表无法滚动：外层滚动容器启用 `type="nested"`，并以 `nested-scroll-header` / `nested-scroll-body` 包裹页面内容；移除会阻断边界交接的 `touchmove.stop`。
+- 修复 Android 警告：不再给 `nested-scroll-body` 设置仅适用于视图节点的 `flex-direction` 样式。
+
 ## 0.1.6（2026-07-30）
 
 - 修复 Web 与微信小程序触底后连续加载后续分页：在 `WEB || MP-WEIXIN` 下增加单次触底锁，并根据剩余距离判断是否真正离开底部阈值；事件 `scrollHeight` 异常时用 `list.length * itemHeight` 兜底，数据追加后冻结解锁 350ms

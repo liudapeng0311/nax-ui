@@ -30,12 +30,22 @@ function writeStorage(val: boolean) {
 	}
 }
 
+function applyDemoAppTheme(dark: boolean) {
+	// App 原生页面背景需在页面创建前切换，避免暗色页面转场先闪浅色。
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	uni.setAppTheme({
+		theme: (dark ? 'dark' : 'light') as 'light' | 'dark'
+	})
+	// #endif
+}
+
 export function initDemoTheme() {
 	if (themeInited) {
 		return
 	}
 	darkModeFlag = readStorage()
 	themeInited = true
+	applyDemoAppTheme(darkModeFlag)
 	applyDemoThemeChrome(darkModeFlag)
 }
 
@@ -50,6 +60,7 @@ export function setDemoDarkMode(val: boolean) {
 	darkModeFlag = val
 	themeInited = true
 	writeStorage(val)
+	applyDemoAppTheme(val)
 	applyDemoThemeChrome(val)
 }
 

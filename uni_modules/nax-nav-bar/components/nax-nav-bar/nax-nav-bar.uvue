@@ -232,6 +232,10 @@
 		if (isPrimary.value) {
 			return '#ffffff'
 		}
+		// Android ucss 对 nax-icon 内部嵌套 var fallback 解析不稳定，显式传入单层主题变量。
+		// #ifdef APP-ANDROID
+		return 'var(--nax-color-text,#333639)'
+		// #endif
 		// 空串交给 nax-icon 走主题 token
 		return ''
 	})

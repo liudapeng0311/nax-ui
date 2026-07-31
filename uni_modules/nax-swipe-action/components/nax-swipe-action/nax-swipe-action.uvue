@@ -127,12 +127,17 @@
 	const syncingFromProp = ref(false)
 
 	const inGroup = inject('naxSaInGroup', false) as boolean
-	// App UTS：不能对 any 读 .value，注入 ref 用显式类型
+	// #ifdef APP-ANDROID
+	// Android 注入的响应式值是 RefImpl，必须按 Ref<T> 接收，不能转为自定义结构类型。
+	const activeNameRef = inject('naxSaActiveName', ref('')) as Ref<string>
+	// #endif
+	// #ifndef APP-ANDROID
 	type NaxSaActiveNameRef = {
 		value : string
 	}
-	type NaxSaNameFn = (n : string) => void
 	const activeNameRef = inject('naxSaActiveName', null) as NaxSaActiveNameRef | null
+	// #endif
+	type NaxSaNameFn = (n : string) => void
 	const openItemRaw = inject('naxSaOpenItem', null) as NaxSaNameFn | null
 	const closeItemRaw = inject('naxSaCloseItem', null) as NaxSaNameFn | null
 
