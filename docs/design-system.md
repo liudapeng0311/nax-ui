@@ -1,6 +1,6 @@
 # nax-ui 设计规范
 
-> 适用范围：`uni_modules/nax-ui` 及本仓库演示工程  
+> 适用范围：`uni_modules/nax-*` 独立组件包、`uni_modules/nax-ui` 套装入口及本仓库演示工程
 > 目标端：App（Android / iOS / HarmonyOS）+ Web + 微信小程序  
 > 渲染模式：蒸汽模式优先；样式隔离策略 2.0  
 > 技术栈：uvue + uts（组合式 API）

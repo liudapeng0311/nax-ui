@@ -7,7 +7,9 @@
 > - `later`：三期及以后
 > - `done`：已完成（实现后更新）
 
-命名统一：`nax-<name>`，目录：`uni_modules/nax-ui/components/nax-<name>/nax-<name>.uvue`。
+命名统一：`nax-<name>`；组件包目录：`uni_modules/nax-<name>/components/nax-<name>/nax-<name>.uvue`；套装入口为 `uni_modules/nax-ui`，仅聚合依赖。
+
+当前落地：50 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。
 
 ---
 
@@ -33,9 +35,9 @@
 
 | 组件 | 标签 | 优先级 | 说明 | 核心 API（提纲） |
 |------|------|--------|------|------------------|
-| 按钮 | `nax-button` | P0 | 主操作入口；层级：基础/次要/次次要/次次次要/虚线/禁用 | `type(default/primary/info/success/warning/error)` `variant(solid/secondary/tertiary/quaternary/dashed/outline)` `size` `disabled` `loading` `block` `label` `icon` `iconPosition` / `click` |
+| 按钮 | `nax-button` | P0 | 主操作入口；层级：基础/次要/次次要/次次次要/虚线/禁用 | `type(default/primary/info/success/warning/error)` `variant(solid/secondary/tertiary/quaternary/dashed/outline)` `size` `disabled` `loading` `block` `label` `icon` `iconPosition` / `click` **done** |
 | 文本 | `nax-text` | P0 | 统一字号/颜色/省略/模式格式化 | `type` `size` `lines` `selectable` `mode` `format` `call` `decoration` `bold` `block` / `click` **done** |
-| 图标 | `nax-icon` | P0 | 字体图标壳（Tabler Icons 语义子集） | `name` `size` `color` / `click` |
+| 图标 | `nax-icon` | P0 | 字体图标壳（Tabler Icons 语义子集） | `name` `size` `color` / `click` **done** |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器；子项 `nax-space-item` | `direction` `size` `wrap` `align` `justify` `fill` **done** |
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
 | 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` `contentPosition` `size` `type` / **done** |
@@ -61,7 +63,7 @@
 
 - [ ] 能用 Button + Cell + Space + Text + Empty 搭出列表页与简单设置页
 - [ ] 主题色可通过 CSS 变量全局切换
-- [ ] 每个组件有 demo 页
+- [x] 每个已完成组件有 demo 页，统一路径为 `pages/components/<name>/index.uvue`
 - [ ] App 与 Web 至少一端主流程可跑通（优先双端）
 
 ---
@@ -116,16 +118,16 @@
 | 组件 | 标签 | 优先级 | 说明 |
 |------|------|--------|------|
 | 导航栏 | `nax-nav-bar` | P1 | 自定义页头；状态栏安全区 / fixed 占位 / 胶囊预留 | `title` `showBack` `backIconColor` `autoBack` `homeUrl` `fixed` `placeholder` `immersive` `type` / `back` **done** |
-| 底部标签栏 | `nax-tabbar` | P1 | 自定义底栏；图标/徽标/中间凸起/安全区 |
+| 底部标签栏 | `nax-tabbar` | P1 | 自定义底栏；图标/徽标/中间凸起/安全区 **done** |
 | 标签页 | `nax-tabs` | P1 | 顶部内容切换导航 | `list` `v-model` `scrollable` `scrollAlign` `showLine` `size` `sticky` / `change` `click` **done** |
 | 下拉菜单 | `nax-dropdown` | P1 | 筛选栏式多 Tab 下拉 | `nax-dropdown` + `nax-dropdown-item`；`options` 单选 / slot 自定义；`fixed`；选中自动高亮 / `highlighted` / `displaySelected` / `open` `close` `change` **done** |
-| 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 |
+| 宫格 | `nax-grid` / `nax-grid-item` | P2 | 入口宫格；col/border/align/gap/hover；插件包已完成 **done** |
 | 列表 | `nax-list` | P2 | 滚动列表壳：触底加载 + 下拉刷新；受控 loading/finished/error/empty/refreshing；虚拟列表见 `nax-virtual-list` | `loading` `finished` `error` `empty` `enableRefresh` `refreshing` `immediateCheck` `offset` `height` `usePageScroll` / `load` `refresh` `update:refreshing` `click-error`；方法 `check` **done** |
 | 滑动操作 | `nax-swipe-action` / `nax-swipe-action-group` | P2 | 左滑操作菜单；group 互斥；options type token | `show` `options` `name` `disabled` `btnWidth` `rightWidth` / `click` `open` `close` `update:show`；插槽 `right` **done** |
 | 虚拟列表 | `nax-virtual-list` | P1 | 固定行高窗口裁剪；鸿蒙滞后更新 + scrollend 同步事件；触底/刷新/空态对齐 list | `list` `itemHeight` `buffer` `keyField` `height` / `load` `scroll` `visible-change` `click`；方法 `scrollToIndex` **done** |
-| 轮播 | `nax-swiper` | P1 | 图片/内容轮播 |
+| 轮播 | `nax-swiper` | P1 | 图片/内容轮播 **done** |
 | 步骤条 | `nax-steps` / `nax-step` | P1 | 多步进度展示 | `list`/`nax-step` `current` `direction` `mode` `type` `size` `clickable` / `click` **done** |
-| 图片 | `nax-image` | P2 | 占位/失败态 |
+| 图片 | `nax-image` | P2 | 占位/失败态 **done** |
 | 业务卡片等 | — | later | 不进 MVP |
 
 ---
@@ -144,6 +146,7 @@
 | `nax-nav-bar` | done | 插件包 `uni_modules/nax-nav-bar`；状态栏安全区 + fixed 占位 + 返回栈兜底 + 微信胶囊预留；`type` default/primary |
 | `nax-ui-theme` | done | 默认色使用当前主题 |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；图片/文字/尺寸/形状/描边/fallback |
+| `nax-image` | done | 插件包 `uni_modules/nax-image`；统一尺寸/形状；loading/error 占位；demo `pages/components/image` |
 | `nax-select` | done | 插件包 `uni_modules/nax-select`；单列/多列/联动 + showTrigger；弹层动画复用 `nax-transition` |
 | `nax-tag` | done | 插件包 `uni_modules/nax-tag`；type/variant/size/closable/checkable/round/bordered |
 | `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
@@ -182,7 +185,7 @@
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；Web/微信小程序用 `WEB || MP-WEIXIN` 触底锁、剩余距离回差及追加后 scrollTop 恢复；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
-| 其余 MVP | planned | 按依赖自底向上 |
+| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 50 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
 
 ---
 
