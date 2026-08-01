@@ -4,12 +4,6 @@
 
 提供文件列表预览、选择、删除与状态展示能力。实际上传由业务在 `afterRead` 中调用 `uni.uploadFile` 等完成。
 
-## 安装
-
-```text
-uni_modules/nax-upload
-```
-
 依赖：
 
 ```text

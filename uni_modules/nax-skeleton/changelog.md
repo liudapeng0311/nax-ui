@@ -1,5 +1,4 @@
-## 0.1.0（2026-07-22）
-
+## 0.1.0（2026-08-01）
 - 初版 `nax-skeleton`
 - 预设：avatar / title / rows；`loading` 切换默认插槽
 - `count` 列表重复；`rows-width` / `rows-height` 支持逗号分隔

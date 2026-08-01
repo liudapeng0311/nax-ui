@@ -99,4 +99,95 @@ function onClick(index: number) {
 - **多页秒切（推荐）**：`pages.json` 登记原生 `tabBar` → 业务用 `uni.switchTab` 互切 → 各 Tab 页 `uni.hideTabBar` → 底部渲染本组件。
 - **切勿**对主 Tab 页默认 `reLaunch`（整页重建，鸿蒙/App 上可感知数百毫秒～1s 延迟）。
 - 单页方案：同一容器内多区块用 CSS `visibility` 保活，避免反复 `v-if` 销毁。
-- 完整步骤、传参与检查清单：**[docs/tabbar-routing.md](../../docs/tabbar-routing.md)**。
+
+## 自定义底栏 + 原生 Tab 路由（推荐方案）
+
+### 推荐方案（本仓库已采用）
+
+1. 把「主 Tab 页」登记为 **`pages.json` 原生 `tabBar` 页面**（系统负责保活与 `switchTab`）
+2. 业务 UI 继续用 **`nax-tabbar`**（图标 / 徽标 / 中间凸起 / 主题）
+3. 每个 Tab 页 `onShow` 调 **`uni.hideTabBar({ animation: false })`**，隐藏原生底栏，避免双栏
+4. Tab 互切统一走 **`uni.switchTab`**，禁止对 Tab 页 `reLaunch` / `redirectTo`
+
+### 配置示例（pages.json）
+
+```json
+{
+  "tabBar": {
+    "color": "#767c82",
+    "selectedColor": "#18a058",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tabbar/blank.png",
+        "selectedIconPath": "static/tabbar/blank-active.png"
+      },
+      {
+        "pagePath": "pages/catalog/index",
+        "text": "组件",
+        "iconPath": "static/tabbar/blank.png",
+        "selectedIconPath": "static/tabbar/blank-active.png"
+      }
+    ]
+  }
+}
+```
+
+### 路由封装示例
+
+```uts
+export function demoTabPaths() : string[] {
+	return [
+		'/pages/index/index',
+		'/pages/catalog/index',
+		'/pages/scenes/index',
+		'/pages/mine/index'
+	] as string[]
+}
+
+export function hideDemoNativeTabBar() {
+	// 仅 Tab 页可调；非 Tab 页会 fail（HBuilderX ≥ 4.23）
+	uni.hideTabBar({
+		animation: false
+	})
+}
+
+export function switchDemoTab(index : number) {
+	const paths = demoTabPaths()
+	if (index < 0 || index >= paths.length) {
+		return
+	}
+	uni.switchTab({
+		url: paths[index]
+	})
+}
+```
+
+### 页面侧
+
+```uvue
+<template>
+  <view class="page-root">
+    <!-- 内容区 -->
+    <nax-tabbar :model-value="0" :list="tabList" @change="onTabChange" />
+  </view>
+</template>
+
+<script setup lang="uts">
+function onTabChange(index : number) {
+	if (index == 0) return
+	switchDemoTab(index)
+}
+
+onShow(() => {
+	hideDemoNativeTabBar()
+})
+</script>
+```
+
+每个主 Tab 页都要挂 `nax-tabbar`（或抽公共 layout），`model-value` 对应当前下标。
+
+---

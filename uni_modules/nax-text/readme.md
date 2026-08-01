@@ -1,6 +1,6 @@
 # nax-text
 
-uni-app x 文本组件，提供常用能力。
+uni-app x 文本组件。
 
 ## 依赖
 
@@ -10,10 +10,10 @@ uni-app x 文本组件，提供常用能力。
 ## 基础用法
 
 ```uvue
-<nax-text text="我用十年青春,赴你最后之约"></nax-text>
+<nax-text text="这是多行输入啊"></nax-text>
 <nax-text type="primary" text="主题色"></nax-text>
 <nax-text mode="price" text="128.5" type="error"></nax-text>
-<nax-text mode="phone" format="encrypt" text="13800138000"></nax-text>
+<nax-text mode="phone" format="encrypt" text="130xxxxxxxx"></nax-text>
 <nax-text :lines="2" text="超出两行显示省略号……"></nax-text>
 ```
 
@@ -56,10 +56,3 @@ uni-app x 文本组件，提供常用能力。
 | default | 文案后的附加内容 |
 | prefix | 自定义前置区域 |
 | suffix | 自定义后置区域 |
-
-## 平台说明
-
-- **装饰线（鸿蒙）**：	ext-decoration 不可用，下划线用 order-bottom，删除线用绝对定位中线（#ifdef APP-HARMONY）
-- **省略号**：默认依赖原生 `<text :lines>` + `text-overflow`；**Android / 鸿蒙**额外双写 CSS `lines` 并补充宽度与 flex 收缩约束（`#ifdef APP-ANDROID || APP-HARMONY`），**微信小程序**用 `white-space` / `-webkit-line-clamp` + 宽度收缩兜底（`#ifdef MP-WEIXIN`）
-- **link 打开**：App 用 `plus.runtime.openURL`；Web 跳转；小程序复制链接（条件编译隔离）
-- **未实现**（组件）：`openType` 及小程序 button 开放能力、`format` 函数类型、`margin`/`iconStyle`/`textStyle` 对象样式（请用 class / CSS 变量）

@@ -1,5 +1,4 @@
-## 0.1.0
-
+## 0.1.0（2026-08-01）
 - 首版：`nax-steps` + `nax-step`
 - 支持 list 数据驱动 / 组合式子项
 - direction horizontal|vertical；mode number|dot

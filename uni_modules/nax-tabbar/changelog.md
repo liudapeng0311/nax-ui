@@ -1,8 +1,6 @@
-## 0.1.6（2026-07-27）
-
+## 0.1.6（2026-08-01）
 - 修复暗黑模式下字体图标仍使用浅色主题固定色，导致激活图标与文字颜色不一致
 - 图标默认激活色与未激活色改为跟随 `--nax-color-primary`、`--nax-color-text-secondary`；显式 `activeColor` / `inactiveColor` 行为不变
-
 ## 0.1.5（2026-07-23）
 
 - 文档：补充多页自定义底栏推荐路由（原生 tabBar + `switchTab` + `hideTabBar`），见仓库 `docs/tabbar-routing.md`

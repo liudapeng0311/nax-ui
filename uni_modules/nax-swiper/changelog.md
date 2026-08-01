@@ -1,7 +1,5 @@
-## 0.1.4（2026-07-16）
-
+## 0.1.4（2026-08-01）
 - package：安装依赖增加 nax-ui-theme（运行时仍弱依赖 + fallback）
-
 ## 0.1.3（2026-07-16）
 
 - 修复微信小程序：自定义 swiper-item 时 display-multiple-items 大于 item 数量

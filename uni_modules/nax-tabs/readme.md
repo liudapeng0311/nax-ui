@@ -90,8 +90,6 @@ function onChange(index: number) {
 3. 内容区高度 = 窗口高度 − tabs 高度；每页内用 `scroll-view` 单独滚动
 4. 业务负责懒加载、嵌套列表、空状态等，不要塞进导航组件
 
-演示页：`pages/components/tabs-swiper/index`（首页「布局组件 → 全屏选项卡配方」）。
-
 ```uvue
 <template>
   <view class="page">

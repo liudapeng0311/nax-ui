@@ -2,7 +2,13 @@
 
 `nax-ui` 是面向 uni-app x 的 UI 组件套装入口。
 
-组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前全部 50 个 `nax-*` 组件包与 `nax-ui-theme`。可以安装整套，也可以只安装需要的独立组件。
+组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前全部 51 个 `nax-*` 组件包与 `nax-ui-theme`。可以安装整套，也可以只安装需要的独立组件。
+
+## 注意
+
+- 当前发布只是第一个尝试版本，仅支持了安卓、鸿蒙、微信小程序和Web端。
+- ios设备正在采购中...后续会支持等设备来了之后，后续会支持ios。
+- 兼职自己写的，有问题轻点喷啊
 
 ## 安装方式
 
@@ -39,6 +45,3 @@
 <nax-button type="primary" label="确定" @click="onConfirm"></nax-button>
 ```
 
-## 组件范围
-
-当前套装覆盖基础、布局、表单、反馈、导航与展示组件。完整组件清单、状态和 demo 路径以仓库 `docs/component-inventory.md` 为准。

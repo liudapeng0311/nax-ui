@@ -1,6 +1,5 @@
-## 0.1.2 (2026-07-30)
+## 0.1.2（2026-08-01）
 - 修复 Android 端 `inject(..., null)` 将 group 注入推断为 `Void`，导致 `RefImpl cannot be cast to java.lang.Void`：通过 `APP-ANDROID` 让 radio-group 提供普通 `Ref` 状态，radio 使用同类型默认值和明确函数兜底。其它端保持原有注入实现与行为。
-
 ## 0.1.1 (2026-07-29)
 - 移除第三方组件库参考表述，完善独立组件文档。
 
