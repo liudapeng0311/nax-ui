@@ -1,0 +1,144 @@
+---
+demo: icon
+---
+
+# nax-icon
+
+`nax-ui` 字体图标组件（uni-app x / uvue）。
+
+## 安装
+
+```text
+uni_modules/nax-icon
+```
+
+easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
+
+> 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
+
+## 依赖
+
+| 依赖 | 说明 |
+|------|------|
+| `nax-ui-theme` | **安装时依赖**；**运行时弱依赖**（未挂主题时走 fallback） |
+
+
+> 当前版本：0.2.5（见 `changelog.md`）
+
+## 代码示例
+
+### 基础用法
+
+```html
+<nax-icon name="search"></nax-icon>
+<nax-icon name="close" size="sm" color="#999999"></nax-icon>
+<nax-icon name="arrow-right" size="20" @click="onTap"></nax-icon>
+```
+
+配合按钮：
+
+```html
+<nax-button type="primary" icon="search" label="搜索"></nax-button>
+
+<nax-button type="primary" label="搜索">
+  <template #icon>
+    <nax-icon name="search" size="sm" color="#ffffff"></nax-icon>
+  </template>
+</nax-button>
+```
+
+### 内置图标（MVP）
+
+
+| 图标名 |
+|--------|
+| `close` |
+| `check` |
+| `plus` |
+| `minus` |
+| `arrow-left` |
+| `arrow-right` |
+| `arrow-up` |
+| `arrow-down` |
+| `chevron-left` |
+| `chevron-right` |
+| `chevron-up` |
+| `chevron-down` |
+| `search` |
+| `loading` |
+| `info` |
+| `warning` |
+| `success` |
+| `error` |
+| `user` |
+| `home` |
+| `more` |
+| `edit` |
+| `delete` |
+| `star` |
+| `heart` |
+| `settings` |
+| `eye` |
+| `eye-off` |
+| `copy` |
+| `share` |
+| `image` |
+| `image-off` |
+| `loader` |
+| `loader-4` |
+| `square` |
+| `circle` |
+| `square-check` |
+| `file-off` |
+| `notes-off` |
+| `database-off` |
+| `message-off` |
+| `category` |
+| `category-filled` |
+| `map-pin` |
+| `map-pin-filled` |
+
+完整映射见：`assets/icons/catalog.json`、`icons/mapping.json`。
+
+语义名与 Tabler 原始名不完全相同（例如 `close` → `x`，`image` → `photo`，`more` → `dots`）。
+
+
+### 主题变量
+
+- `--nax-icon-color`（优先）
+- `--nax-color-text`
+- `--nax-opacity-disabled`
+
+未传 `color` 时，组件会在根节点解析图标色，兼容样式隔离 2.0 下的浅色 / 深色主题切换。
+
+### 说明
+
+- 当前分发字体为 **45 图标子集**（约 16KB），不是完整 Tabler font。
+- 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序。
+- 组件 API 只暴露语义化 `name`。
+- 图标源：[Tabler Icons](https://tabler.io/icons)（MIT License）。
+
+### 已知注意
+
+- uvue / 鸿蒙 `@font-face` 仅支持 `font-family` 与 `src`。
+- 微信小程序不要改回本地字体路径。
+- 重新生成需要本机 Python `fontTools`：`pip install fonttools`。
+
+
+## Props
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| name | string | `''` | 图标名，如 close / search / arrow-right |
+| size | string | `'md'` | sm \| md \| lg \| 数字字符串（如 20） |
+| color | string | `''` | 可选颜色；默认走 --nax-icon-color / --nax-color-text |
+| disabled | boolean | `false` | 禁用点击 |
+| customClass | string | `''` | 根节点扩展 class |
+
+
+## Events
+
+| 事件 | 说明 |
+|------|------|
+| click | 点击；disabled 时不触发 |
+

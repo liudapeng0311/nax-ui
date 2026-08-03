@@ -11,6 +11,7 @@
 | [popup-window.md](./popup-window.md) | 压窗屏跨端能力与小程序限制 | 弹层 / 反馈组件作者与业务 |
 | [tabbar-routing.md](./tabbar-routing.md) | 自定义 nax-tabbar + 原生 tabBar/`switchTab` 秒切方案（鸿蒙性能） | 底栏 / 多页 Tab 接入 |
 | [../AGENTS.md](../AGENTS.md) | 给 Codex / 协作者的仓库约束（实现时强制遵守） | 所有 AI/贡献者 |
+| [../docs-site/](../docs-site/) | **组件文档站**（VitePress）：`npm run gen` 生成组件页 + `npm run dev` 本地预览 | 组件使用者 / 贡献者 |
 
 ## 推荐阅读顺序
 
@@ -29,6 +30,7 @@
 | `uni_modules/nax-ui/` | 套装骨架（可选，非必须） |
 | `pages/` | 演示与文档示例页 |
 | `docs/` | 规范与清单（本目录） |
+| `docs-site/` | VitePress 组件文档站（独立 npm 工程；组件页由脚本从源码生成） |
 | `AGENTS.md` | 自动化与人工协作约束 |
 
 ## 维护约定

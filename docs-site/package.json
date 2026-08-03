@@ -1,0 +1,17 @@
+{
+  "name": "nax-ui-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "nax-ui（uni-app x 通用 UI 组件库）组件文档站，基于 VitePress。",
+  "scripts": {
+    "gen": "node scripts/gen-docs.mjs",
+    "sync:demo": "node scripts/sync-demo.mjs",
+    "dev": "vitepress dev .",
+    "build": "node scripts/gen-docs.mjs && node scripts/sync-demo.mjs && vitepress build . && node scripts/merge-demo.mjs",
+    "preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}
