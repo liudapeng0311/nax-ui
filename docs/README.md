@@ -8,6 +8,7 @@
 |------|------|--------|
 | [design-system.md](./design-system.md) | 设计规范：定位、命名、Token、API、样式、主题、质量门槛 | 设计与开发 |
 | [component-inventory.md](./component-inventory.md) | 组件清单：分期、依赖、兼容策略、状态看板 | 开发与排期 |
+| [nax-video-headless.md](./nax-video-headless.md) | `nax-video` 无头视频播放器：行为契约、跨端边界、API、demo 与验收规范 | 视频组件作者与后续 AI |
 | [popup-window.md](./popup-window.md) | 压窗屏跨端能力与小程序限制 | 弹层 / 反馈组件作者与业务 |
 | [tabbar-routing.md](./tabbar-routing.md) | 自定义 nax-tabbar + 原生 tabBar/`switchTab` 秒切方案（鸿蒙性能） | 底栏 / 多页 Tab 接入 |
 | [../AGENTS.md](../AGENTS.md) | 给 Codex / 协作者的仓库约束（实现时强制遵守） | 所有 AI/贡献者 |
@@ -18,8 +19,9 @@
 1. `design-system.md` — 先统一设计与 API 原则  
 2. `component-inventory.md` — 再按分期选组件实现  
 3. `uni_modules/nax-ui-theme/readme.md` — 主题分档接入（默认能用、可选换肤）
-4. `tabbar-routing.md` — 多页自定义底栏性能方案（按需）  
-5. `AGENTS.md` — 编码/改文档时的硬约束  
+4. `nax-video-headless.md` — 实现无头视频播放器时的专项规范（按需）
+5. `tabbar-routing.md` — 多页自定义底栏性能方案（按需）
+6. `AGENTS.md` — 编码/改文档时的硬约束
 
 ## 仓库角色
 

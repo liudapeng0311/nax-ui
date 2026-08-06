@@ -9,7 +9,7 @@
 
 命名统一：`nax-<name>`；组件包目录：`uni_modules/nax-<name>/components/nax-<name>/nax-<name>.uvue`；套装入口为 `uni_modules/nax-ui`，仅聚合依赖。
 
-当前落地：50 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。
+当前落地：50 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。
 
 ---
 
@@ -126,6 +126,7 @@
 | 滑动操作 | `nax-swipe-action` / `nax-swipe-action-group` | P2 | 左滑操作菜单；group 互斥；options type token | `show` `options` `name` `disabled` `btnWidth` `rightWidth` / `click` `open` `close` `update:show`；插槽 `right` **done** |
 | 虚拟列表 | `nax-virtual-list` | P1 | 固定行高窗口裁剪；鸿蒙滞后更新 + scrollend 同步事件；触底/刷新/空态对齐 list | `list` `itemHeight` `buffer` `keyField` `height` / `load` `scroll` `visible-change` `click`；方法 `scrollToIndex` **done** |
 | 轮播 | `nax-swiper` | P1 | 图片/内容轮播 **done** |
+| 无头视频 | `nax-video` | P1 | 原生 video + VideoContext 行为控制；无默认控制条皮肤；作用域插槽自定义 UI；规范见 `docs/nax-video-headless.md` **done** |
 | 步骤条 | `nax-steps` / `nax-step` | P1 | 多步进度展示 | `list`/`nax-step` `current` `direction` `mode` `type` `size` `clickable` / `click` **done** |
 | 图片 | `nax-image` | P2 | 占位/失败态 **done** |
 | 业务卡片等 | — | later | 不进 MVP |
@@ -185,6 +186,7 @@
 | `nax-skeleton` | done | 插件包 `uni_modules/nax-skeleton`；avatar/title/rows；count 列表重复；loading+默认插槽；skeleton 自定义槽；App 透明度脉冲 / Web CSS 动画；token `--nax-color-skeleton` |
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；Web/微信小程序用 `WEB || MP-WEIXIN` 触底锁、剩余距离回差及追加后 scrollTop 恢复；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
+| `nax-video` | done | 插件包 `uni_modules/nax-video`（**独立发布，不聚合进 `nax-ui` 套装**）；无头视频；原生 `<video>` + `VideoContext`；默认 `controls=false`；作用域插槽状态/方法；多实例隔离；能力下限 4.61；iOS 未验证；demo `pages/components/video` |
 | `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 50 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
 
 ---

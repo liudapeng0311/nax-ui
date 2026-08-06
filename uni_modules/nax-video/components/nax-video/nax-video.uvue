@@ -1,0 +1,602 @@
+<template>
+	<view class="nax-video" :class="rootClass" :style="rootStyle">
+		<video
+			:id="resolvedVideoId"
+			class="nax-video__media"
+			:src="src"
+			:poster="poster"
+			:autoplay="autoplay"
+			:loop="loop"
+			:muted="mutedState"
+			:initial-time="initialTime"
+			:controls="controls"
+			:object-fit="normalizedObjectFit"
+			:title="title"
+			:header="header"
+			@play="onPlay"
+			@pause="onPause"
+			@ended="onEnded"
+			@timeupdate="onTimeUpdate"
+			@waiting="onWaiting"
+			@progress="onProgress"
+			@error="onError"
+			@fullscreenchange="onFullscreenChange"
+			@controlstoggle="onControlsToggle"
+			@fullscreenclick="onFullscreenClick"
+		>
+			<slot
+				:status="status"
+				:playing="playing"
+				:waiting="waiting"
+				:ended="ended"
+				:current-time="currentTime"
+				:duration="duration"
+				:fullscreen="fullscreen"
+				:muted="mutedState"
+				:playback-rate="rateState"
+				:error-code="errorCode"
+				:play="play"
+				:pause="pause"
+				:toggle="toggle"
+				:stop="stop"
+				:seek="seek"
+				:seek-by="seekBy"
+				:set-playback-rate="setPlaybackRate"
+				:set-muted="setMuted"
+				:toggle-muted="toggleMuted"
+				:request-fullscreen="requestFullscreen"
+				:exit-fullscreen="exitFullscreen"
+				:toggle-fullscreen="toggleFullscreen"
+			></slot>
+		</video>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-video
+	 * @description 无头视频播放器。原生 video + VideoContext；默认无控制条皮肤，作用域插槽自定义 UI。
+	 * @property {string} src 视频地址
+	 * @property {string} poster 封面
+	 * @property {boolean} autoplay 自动播放
+	 * @property {boolean} loop 循环
+	 * @property {boolean} muted 静音（v-model:muted）
+	 * @property {number} initialTime 初始播放位置（秒）
+	 * @property {boolean} controls 原生控制条；Headless 默认 false
+	 * @property {string} objectFit contain | fill | cover
+	 * @property {string} title 全屏标题
+	 * @property {object} header 请求头
+	 * @property {number} playbackRate 倍速 0.5/0.8/1/1.25/1.5
+	 * @property {number} fullscreenDirection 请求全屏方向 0/90/-90
+	 * @property {string} width 宽度；纯数字按 px
+	 * @property {string} height 高度；纯数字按 px
+	 * @property {string} customClass 根节点扩展 class
+	 * @event play / pause / ended / timeupdate / waiting / progress / error
+	 * @event fullscreenchange / controlstoggle / fullscreenclick / state-change / update:muted
+	 * @slot default 作用域插槽：状态 + 控制方法
+	 */
+	const props = defineProps({
+		src: {
+			type: String,
+			default: ''
+		},
+		poster: {
+			type: String,
+			default: ''
+		},
+		autoplay: {
+			type: Boolean,
+			default: false
+		},
+		loop: {
+			type: Boolean,
+			default: false
+		},
+		muted: {
+			type: Boolean,
+			default: false
+		},
+		initialTime: {
+			type: Number,
+			default: 0
+		},
+		controls: {
+			type: Boolean,
+			default: false
+		},
+		objectFit: {
+			type: String,
+			default: 'contain'
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		header: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		playbackRate: {
+			type: Number,
+			default: 1
+		},
+		fullscreenDirection: {
+			type: Number,
+			default: 90
+		},
+		width: {
+			type: String,
+			default: '100%'
+		},
+		height: {
+			type: String,
+			default: '225'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'play',
+		'pause',
+		'ended',
+		'timeupdate',
+		'waiting',
+		'progress',
+		'error',
+		'fullscreenchange',
+		'controlstoggle',
+		'fullscreenclick',
+		'state-change',
+		'update:muted'
+	])
+
+	const instance = getCurrentInstance()
+	const resolvedVideoId = 'nax-video-' + Math.floor(Math.random() * 10000000).toString()
+
+	let videoContext : VideoContext | null = null
+	let disposed = false
+	let lastStateKey = ''
+
+	const status = ref('idle')
+	const playing = ref(false)
+	const waiting = ref(false)
+	const ended = ref(false)
+	const currentTime = ref(0.0)
+	const duration = ref(0.0)
+	const fullscreen = ref(false)
+	const fullscreenDirection = ref('')
+	const mutedState = ref(props.muted)
+	const rateState = ref(1.0)
+	const errorCode = ref(0)
+
+	function normalizeObjectFit(value : string) : string {
+		if (value == 'fill' || value == 'cover') {
+			return value
+		}
+		return 'contain'
+	}
+
+	function normalizePlaybackRate(value : number) : number {
+		if (value == 0.5 || value == 0.8 || value == 1.25 || value == 1.5) {
+			return value
+		}
+		if (value == 1 || value == 1.0) {
+			return 1.0
+		}
+		return 1.0
+	}
+
+	rateState.value = normalizePlaybackRate(props.playbackRate)
+
+	function formatDim(value : string, fallback : string) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return fallback
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0 ||
+			trimmed.indexOf('vh') >= 0 ||
+			trimmed.indexOf('vw') >= 0
+		) {
+			return trimmed
+		}
+		const n = parseFloat(trimmed)
+		if (isNaN(n)) {
+			return fallback
+		}
+		return n.toString() + 'px'
+	}
+
+	function isFiniteNumber(value : number) : boolean {
+		if (isNaN(value)) {
+			return false
+		}
+		if (value == Infinity || value == -Infinity) {
+			return false
+		}
+		return true
+	}
+
+	const normalizedObjectFit = computed(() : string => {
+		return normalizeObjectFit(props.objectFit)
+	})
+
+	const rootClass = computed(() : string => {
+		const extra = props.customClass.trim()
+		if (extra.length == 0) {
+			return ''
+		}
+		return extra
+	})
+
+	const rootStyle = computed(() : string => {
+		const w = formatDim(props.width, '100%')
+		const h = formatDim(props.height, '225px')
+		return 'width:' + w + ';height:' + h
+	})
+
+	function buildStateSnapshot() : UTSJSONObject {
+		return {
+			status: status.value,
+			playing: playing.value,
+			waiting: waiting.value,
+			ended: ended.value,
+			currentTime: currentTime.value,
+			duration: duration.value,
+			fullscreen: fullscreen.value,
+			fullscreenDirection: fullscreenDirection.value,
+			muted: mutedState.value,
+			playbackRate: rateState.value,
+			errorCode: errorCode.value
+		} as UTSJSONObject
+	}
+
+	function stateKeyOf() : string {
+		// 语义状态键：不含高频 currentTime，避免 timeupdate 刷 state-change
+		return status.value + '|' + (playing.value ? '1' : '0') + '|' + (waiting.value ? '1' : '0') + '|' + (ended.value ? '1' : '0') + '|' + (fullscreen.value ? '1' : '0') + '|' + (mutedState.value ? '1' : '0') + '|' + rateState.value.toString() + '|' + errorCode.value.toString() + '|' + fullscreenDirection.value
+	}
+
+	function emitStateChangeIfNeeded() : void {
+		const key = stateKeyOf()
+		if (key == lastStateKey) {
+			return
+		}
+		lastStateKey = key
+		emit('state-change', buildStateSnapshot())
+	}
+
+	function resetPlaybackState() : void {
+		status.value = 'idle'
+		playing.value = false
+		waiting.value = false
+		ended.value = false
+		currentTime.value = 0.0
+		duration.value = 0.0
+		errorCode.value = 0
+		emitStateChangeIfNeeded()
+	}
+
+	function ensureContext() : VideoContext | null {
+		if (disposed) {
+			return null
+		}
+		return videoContext
+	}
+
+	function applyPlaybackRate(rate : number) : void {
+		const ctx = ensureContext()
+		if (ctx == null) {
+			return
+		}
+		ctx.playbackRate(rate)
+	}
+
+	function play() : void {
+		const ctx = ensureContext()
+		if (ctx == null) {
+			return
+		}
+		ctx.play()
+	}
+
+	function pause() : void {
+		const ctx = ensureContext()
+		if (ctx == null) {
+			return
+		}
+		ctx.pause()
+	}
+
+	function toggle() : void {
+		if (playing.value) {
+			pause()
+		} else {
+			play()
+		}
+	}
+
+	function stop() : void {
+		const ctx = ensureContext()
+		if (ctx == null) {
+			resetPlaybackState()
+			return
+		}
+		ctx.stop()
+		status.value = 'idle'
+		playing.value = false
+		waiting.value = false
+		ended.value = false
+		currentTime.value = 0.0
+		errorCode.value = 0
+		emitStateChangeIfNeeded()
+	}
+
+	function seek(seconds : number) : void {
+		if (!isFiniteNumber(seconds)) {
+			return
+		}
+		var target = seconds
+		if (target < 0) {
+			target = 0
+		}
+		const dur = duration.value
+		if (dur > 0 && target > dur) {
+			target = dur
+		}
+		const ctx = ensureContext()
+		if (ctx == null) {
+			return
+		}
+		ctx.seek(target)
+	}
+
+	function seekBy(delta : number) : void {
+		if (!isFiniteNumber(delta)) {
+			return
+		}
+		seek(currentTime.value + delta)
+	}
+
+	function setPlaybackRate(rate : number) : void {
+		const normalized = normalizePlaybackRate(rate)
+		rateState.value = normalized
+		applyPlaybackRate(normalized)
+		emitStateChangeIfNeeded()
+	}
+
+	function setMuted(muted : boolean) : void {
+		mutedState.value = muted
+		emit('update:muted', muted)
+		emitStateChangeIfNeeded()
+	}
+
+	function toggleMuted() : void {
+		setMuted(!mutedState.value)
+	}
+
+	function resolveFullscreenDirection(direction : number | null) : number {
+		if (direction != null && (direction == 0 || direction == 90 || direction == -90)) {
+			return direction
+		}
+		const propDir = props.fullscreenDirection
+		if (propDir == 0 || propDir == 90 || propDir == -90) {
+			return propDir
+		}
+		return 90
+	}
+
+	function requestFullscreen(direction : number | null = null) : void {
+		const ctx = ensureContext()
+		if (ctx == null) {
+			return
+		}
+		const dir = resolveFullscreenDirection(direction)
+		ctx.requestFullScreen({
+			direction: dir
+		} as RequestFullScreenOptions)
+	}
+
+	function exitFullscreen() : void {
+		const ctx = ensureContext()
+		if (ctx == null) {
+			return
+		}
+		ctx.exitFullScreen()
+	}
+
+	function toggleFullscreen() : void {
+		if (fullscreen.value) {
+			exitFullscreen()
+		} else {
+			requestFullscreen(null)
+		}
+	}
+
+	function getState() : UTSJSONObject {
+		return buildStateSnapshot()
+	}
+
+	function onPlay(e : UniEvent) : void {
+		playing.value = true
+		waiting.value = false
+		ended.value = false
+		status.value = 'playing'
+		errorCode.value = 0
+		emitStateChangeIfNeeded()
+		emit('play', e)
+	}
+
+	function onPause(e : UniEvent) : void {
+		playing.value = false
+		if (!ended.value) {
+			status.value = 'paused'
+		}
+		emitStateChangeIfNeeded()
+		emit('pause', e)
+	}
+
+	function onEnded(e : UniEvent) : void {
+		playing.value = false
+		waiting.value = false
+		ended.value = true
+		status.value = 'ended'
+		emitStateChangeIfNeeded()
+		emit('ended', e)
+	}
+
+	function onTimeUpdate(e : UniVideoTimeUpdateEvent) : void {
+		const detail = e.detail
+		const ct = detail.currentTime
+		const dur = detail.duration
+		if (isFiniteNumber(ct)) {
+			currentTime.value = ct
+		}
+		if (isFiniteNumber(dur) && dur >= 0) {
+			duration.value = dur
+		}
+		if (waiting.value) {
+			waiting.value = false
+			emitStateChangeIfNeeded()
+		}
+		emit('timeupdate', {
+			currentTime: currentTime.value,
+			duration: duration.value
+		} as UTSJSONObject)
+	}
+
+	function onWaiting(e : UniEvent) : void {
+		waiting.value = true
+		if (status.value == 'idle' || status.value == 'loading') {
+			status.value = 'loading'
+		}
+		emitStateChangeIfNeeded()
+		emit('waiting', e)
+	}
+
+	function onProgress(e : UniVideoProgressEvent) : void {
+		emit('progress', e)
+	}
+
+	function onError(e : UniVideoErrorEvent) : void {
+		var code = 0
+		const detail = e.detail
+		const c = detail.errCode
+		if (isFiniteNumber(c)) {
+			code = Math.floor(c)
+		}
+		errorCode.value = code
+		playing.value = false
+		waiting.value = false
+		status.value = 'error'
+		emitStateChangeIfNeeded()
+		emit('error', {
+			errCode: code
+		} as UTSJSONObject)
+	}
+
+	function onFullscreenChange(e : UniVideoFullScreenChangeEvent) : void {
+		const detail = e.detail
+		fullscreen.value = detail.fullScreen
+		const dir = detail.direction
+		if (dir != null) {
+			fullscreenDirection.value = dir
+		} else {
+			fullscreenDirection.value = ''
+		}
+		emitStateChangeIfNeeded()
+		const payload = {
+			fullScreen: fullscreen.value,
+			direction: fullscreenDirection.value
+		} as UTSJSONObject
+		emit('fullscreenchange', payload)
+	}
+
+	function onControlsToggle(e : UniVideoControlsToggleEvent) : void {
+		emit('controlstoggle', e)
+	}
+
+	function onFullscreenClick(e : UniVideoFullScreenClickEvent) : void {
+		emit('fullscreenclick', e)
+	}
+
+	watch(() : boolean => {
+		return props.muted
+	}, (val : boolean) => {
+		if (mutedState.value != val) {
+			mutedState.value = val
+			emitStateChangeIfNeeded()
+		}
+	})
+
+	watch(() : number => {
+		return props.playbackRate
+	}, (val : number) => {
+		const normalized = normalizePlaybackRate(val)
+		if (rateState.value != normalized) {
+			rateState.value = normalized
+			applyPlaybackRate(normalized)
+			emitStateChangeIfNeeded()
+		}
+	})
+
+	watch(() : string => {
+		return props.src
+	}, (_ : string) => {
+		resetPlaybackState()
+	})
+
+	onMounted(() => {
+		nextTick(() => {
+			if (disposed) {
+				return
+			}
+			const proxy = instance?.proxy
+			if (proxy != null) {
+				videoContext = uni.createVideoContext(resolvedVideoId, proxy)
+			} else {
+				videoContext = uni.createVideoContext(resolvedVideoId)
+			}
+			if (rateState.value != 1) {
+				applyPlaybackRate(rateState.value)
+			}
+		})
+	})
+
+	onUnmounted(() => {
+		disposed = true
+		videoContext = null
+	})
+
+	defineExpose({
+		play,
+		pause,
+		toggle,
+		stop,
+		seek,
+		seekBy,
+		setPlaybackRate,
+		setMuted,
+		toggleMuted,
+		requestFullscreen,
+		exitFullscreen,
+		toggleFullscreen,
+		getState
+	})
+</script>
+
+<style>
+	.nax-video {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.nax-video__media {
+		width: 100%;
+		height: 100%;
+	}
+</style>

@@ -1,0 +1,432 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="nax-video"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll" scroll-y="true">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<view class="section">
+					<text class="section__title">1. 最小无头播放器</text>
+					<nax-video :src="demoSrc" height="200" @state-change="onBasicState">
+						<template #default="{ playing, waiting, currentTime, duration, toggle, stop }">
+							<view class="overlay">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
+									<text class="overlay__btn" @click="stop">停止</text>
+									<text v-if="waiting" class="overlay__hint">加载中</text>
+									<text class="overlay__time">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</text>
+								</view>
+							</view>
+						</template>
+					</nax-video>
+					<text class="section__meta">状态：{{ basicStatus }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">2. 自定义进度（拖动结束再 seek）</text>
+					<nax-video :src="demoSrc" height="200" @timeupdate="onProgressTime">
+						<template #default="{ playing, toggle, seek, seekBy, currentTime, duration }">
+							<view class="overlay overlay--stack">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
+									<text class="overlay__btn" @click="seekBy(-10)">-10s</text>
+									<text class="overlay__btn" @click="seekBy(10)">+10s</text>
+									<text class="overlay__btn" @click="seek(0)">回起点</text>
+									<text class="overlay__time">{{ formatTime(sliderDragging ? sliderTime : currentTime) }} / {{ formatTime(duration) }}</text>
+								</view>
+								<view class="slider-wrap">
+									<nax-slider
+										:model-value="sliderDragging ? sliderTime : currentTime"
+										:min="0"
+										:max="duration > 0 ? duration : 1"
+										:step="0.1"
+										@start="onSliderStart"
+										@change="seek"
+										@end="onSliderEnd"
+									></nax-slider>
+								</view>
+							</view>
+						</template>
+					</nax-video>
+					<text class="section__meta">松手触发 seek；也可 ±10s / 回起点</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">3. 静音与倍速</text>
+					<nax-video
+						:src="demoSrc"
+						height="200"
+						v-model:muted="muted"
+						:playback-rate="rate"
+					>
+						<template #default="{ playing, muted, playbackRate, toggle, toggleMuted, setPlaybackRate }">
+							<view class="overlay">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
+									<text class="overlay__btn" @click="toggleMuted">{{ muted ? '取消静音' : '静音' }}</text>
+									<text class="overlay__btn" @click="setPlaybackRate(0.5)">0.5x</text>
+									<text class="overlay__btn" @click="setPlaybackRate(1)">1x</text>
+									<text class="overlay__btn" @click="setPlaybackRate(1.25)">1.25x</text>
+									<text class="overlay__btn" @click="setPlaybackRate(1.5)">1.5x</text>
+								</view>
+							</view>
+							<text class="overlay__float">slot muted={{ muted }} · rate={{ playbackRate }}</text>
+						</template>
+					</nax-video>
+					<view class="row">
+						<nax-button size="sm" :label="muted ? '外部：开声' : '外部：静音'" @click="onToggleMutedExternal"></nax-button>
+						<view class="row__gap"></view>
+						<nax-button size="sm" label="外部 1.5x" @click="onRate15"></nax-button>
+						<view class="row__gap"></view>
+						<nax-button size="sm" label="外部 1x" @click="onRate1"></nax-button>
+					</view>
+					<text class="section__meta">v-model:muted={{ muted }} · playbackRate={{ rate }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">4. 全屏控制</text>
+					<nax-video
+						:src="demoSrc"
+						height="200"
+						title="nax-video demo"
+						:fullscreen-direction="90"
+						@fullscreenchange="onFsChange"
+					>
+						<template #default="{ playing, fullscreen, toggle, requestFullscreen, exitFullscreen, toggleFullscreen }">
+							<view class="overlay">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
+									<text class="overlay__btn" @click="requestFullscreen(90)">横屏全屏</text>
+									<text class="overlay__btn" @click="requestFullscreen(0)">竖屏全屏</text>
+									<text class="overlay__btn" @click="exitFullscreen">退出</text>
+									<text class="overlay__btn" @click="toggleFullscreen">切换</text>
+								</view>
+							</view>
+							<text class="overlay__float">fullscreen={{ fullscreen }}</text>
+						</template>
+					</nax-video>
+					<text class="section__meta">{{ fsHint }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">5. 原生控制条降级</text>
+					<nax-video
+						:src="demoSrc"
+						height="200"
+						controls
+						poster="https://web-ext-storage.dcloud.net.cn/hello-uni-app-x/video/video-poster.jpg"
+					></nax-video>
+					<text class="section__meta">controls=true，无自定义插槽</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">6. 加载与错误</text>
+					<nax-video
+						:src="errorSrc"
+						height="180"
+						@error="onErrorDemo"
+						@waiting="onWaitingDemo"
+						@state-change="onErrorState"
+					>
+						<template #default="{ status, waiting, errorCode, play, stop }">
+							<view class="overlay">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="play">尝试播放</text>
+									<text class="overlay__btn" @click="stop">停止</text>
+									<text v-if="waiting" class="overlay__hint">waiting</text>
+									<text class="overlay__time">status={{ status }} · err={{ errorCode }}</text>
+								</view>
+							</view>
+						</template>
+					</nax-video>
+					<view class="row">
+						<nax-button size="sm" label="切到无效地址" @click="useBadSrc"></nax-button>
+						<view class="row__gap"></view>
+						<nax-button size="sm" type="primary" label="恢复有效地址" @click="useGoodSrc"></nax-button>
+					</view>
+					<text class="section__meta">{{ errorHint }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">7. 多实例隔离</text>
+					<text class="section__label">实例 A</text>
+					<nax-video :src="demoSrc" height="160">
+						<template #default="{ playing, currentTime, toggle }">
+							<view class="overlay">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="toggle">A {{ playing ? '暂停' : '播放' }}</text>
+									<text class="overlay__time">{{ formatTime(currentTime) }}</text>
+								</view>
+							</view>
+						</template>
+					</nax-video>
+					<text class="section__label section__label--gap">实例 B</text>
+					<nax-video :src="demoSrc" height="160">
+						<template #default="{ playing, currentTime, toggle }">
+							<view class="overlay">
+								<view class="overlay__bar">
+									<text class="overlay__btn" @click="toggle">B {{ playing ? '暂停' : '播放' }}</text>
+									<text class="overlay__time">{{ formatTime(currentTime) }}</text>
+								</view>
+							</view>
+						</template>
+					</nax-video>
+					<text class="section__meta">两个播放器应独立控制，id/context 不串台</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
+
+	const darkMode = ref(bindDemoThemePage())
+
+	const navBackIconColor = computed(() : string => {
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed(() : string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const demoSrc = 'https://web-ext-storage.dcloud.net.cn/video/sample/2minute-demo.mp4'
+	const goodSrc = demoSrc
+	const badSrc = 'https://web-ext-storage.dcloud.net.cn/video/sample/not-found-nax-video.mp4'
+
+	const basicStatus = ref('idle')
+	const sliderTime = ref(0.0)
+	const sliderDragging = ref(false)
+	const muted = ref(false)
+	const rate = ref(1.0)
+	const fsHint = ref('尚未全屏')
+	const errorSrc = ref(goodSrc)
+	const errorHint = ref('可切换无效地址观察 error')
+
+	function formatTime(sec : number) : string {
+		if (isNaN(sec) || sec < 0) {
+			return '0:00'
+		}
+		const total = Math.floor(sec)
+		const m = Math.floor(total / 60)
+		const s = total % 60
+		if (s < 10) {
+			return m.toString() + ':0' + s.toString()
+		}
+		return m.toString() + ':' + s.toString()
+	}
+
+	function onBasicState(state : UTSJSONObject) {
+		const s = state.getString('status')
+		if (s != null) {
+			basicStatus.value = s
+		}
+	}
+
+	function onProgressTime(payload : UTSJSONObject) {
+		const ct = payload.getNumber('currentTime')
+		if (ct != null && !sliderDragging.value) {
+			sliderTime.value = ct
+		}
+	}
+
+	function onSliderStart() {
+		sliderDragging.value = true
+	}
+
+	function onSliderEnd() {
+		sliderDragging.value = false
+	}
+
+	function onToggleMutedExternal() {
+		muted.value = !muted.value
+	}
+
+	function onRate15() {
+		rate.value = 1.5
+	}
+
+	function onRate1() {
+		rate.value = 1.0
+	}
+
+	function onFsChange(payload : UTSJSONObject) {
+		const fs = payload.getBoolean('fullScreen')
+		const dir = payload.getString('direction')
+		const fsText = fs == true ? 'true' : 'false'
+		const dirText = dir != null ? dir : ''
+		fsHint.value = 'fullScreen=' + fsText + ' · direction=' + dirText
+	}
+
+	function onErrorDemo(payload : UTSJSONObject) {
+		const code = payload.getNumber('errCode')
+		const c = code != null ? code : 0
+		errorHint.value = 'error errCode=' + c.toString()
+	}
+
+	function onWaitingDemo(_ : any) {
+		errorHint.value = 'waiting…'
+	}
+
+	function onErrorState(state : UTSJSONObject) {
+		const s = state.getString('status')
+		const code = state.getNumber('errorCode')
+		if (s != null) {
+			const c = code != null ? code : 0
+			errorHint.value = 'status=' + s + ' · errorCode=' + c.toString()
+		}
+	}
+
+	function useBadSrc() {
+		errorSrc.value = badSrc
+		errorHint.value = '已切换无效地址'
+	}
+
+	function useGoodSrc() {
+		errorSrc.value = goodSrc
+		errorHint.value = '已恢复有效地址'
+	}
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.section__label {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 8px;
+	}
+
+	.section__label--gap {
+		margin-top: 12px;
+	}
+
+	.section__meta {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 10px;
+	}
+
+	.overlay {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: 8px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: rgba(0, 0, 0, 0.45);
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: #00000088;
+		/* #endif */
+	}
+
+	.overlay--stack {
+		flex-direction: column;
+	}
+
+	.overlay__bar {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.overlay__btn {
+		font-size: 12px;
+		color: #ffffff;
+		margin-right: 10px;
+		margin-bottom: 4px;
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+	.overlay__hint {
+		font-size: 12px;
+		color: #ffd666;
+		margin-right: 10px;
+	}
+
+	.overlay__time {
+		font-size: 12px;
+		color: #ffffff;
+	}
+
+	.overlay__float {
+		position: absolute;
+		left: 8px;
+		top: 8px;
+		font-size: 11px;
+		color: #ffffff;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: rgba(0, 0, 0, 0.4);
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: #00000066;
+		/* #endif */
+		padding: 4px 6px;
+	}
+
+	.slider-wrap {
+		margin-top: 8px;
+	}
+
+	.row {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		margin-top: 10px;
+	}
+
+	.row__gap {
+		width: 8px;
+	}
+</style>
