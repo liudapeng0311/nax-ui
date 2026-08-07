@@ -626,14 +626,12 @@
 			return
 		}
 
-		// Web/小程序：横向滑动时尽量阻止页面滚动抢手势
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// 横向滑动时阻止页面滚动抢手势（App 端 touchmove preventDefault 同样有效，参考官方 touch 事件拖拽示例）
 		try {
 			e.preventDefault()
 		} catch (err) {
 			// ignore
 		}
-		// #endif
 
 		dragging.value = true
 		ignoreContentClick.value = true

@@ -1,3 +1,5 @@
+## 0.1.3（2026-08-07）
+- 支持 iOS 端：App 端能力分支（沉浸式、安全区等）已覆盖 `APP-IOS`，iOS 直接可用
 ## 0.1.2（2026-07-31）
 - 修复 Android 暗黑模式下默认返回图标颜色过深的问题：`APP-ANDROID` 下由导航栏显式传入单层 `--nax-color-text` 变量，避免 `nax-icon` 内部嵌套 CSS 变量 fallback 解析异常；浅色模式、`primary` 类型及显式 `backIconColor` 保持原有行为。
 ## 0.1.1（2026-07-27）

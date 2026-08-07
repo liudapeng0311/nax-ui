@@ -56,7 +56,48 @@
 							</view>
 						</view>
 
+						<!-- #ifdef APP-IOS -->
+						<!-- iOS 上 border-color 不生效（退化黑色）且 1px 高度 view 不可见，标题分割线用 inline 背景色 2px 线 -->
+						<view class="nax-datetime-picker__header-line" :style="headerLineStyle"></view>
+						<!-- #endif -->
+
 						<view class="nax-datetime-picker__body">
+							<!-- #ifdef APP-IOS -->
+							<!-- iOS 自研滚轮：原生 picker-view 列 CSS 不生效（初始值错位/文字不居中）且挂载定位动画卡顿，改用框架渲染滚轮 -->
+							<view v-if="readyToRender" class="nax-datetime-picker__wheel">
+								<view
+									v-for="idx in wheelCols"
+									:key="'wc-' + idx.toString()"
+									class="nax-datetime-picker__wheel-col-wrap"
+								>
+									<view class="nax-datetime-picker__wheel-indicator">
+										<view class="nax-datetime-picker__wheel-indicator-line" :style="wheelIndicatorLineStyle"></view>
+										<view class="nax-datetime-picker__wheel-indicator-line" :style="wheelIndicatorLineStyle"></view>
+									</view>
+									<scroll-view
+										:id="wheelColId(idx)"
+										class="nax-datetime-picker__wheel-col"
+										direction="vertical"
+										:bounces="false"
+										:show-scrollbar="false"
+										@scrollend="onWheelEnd(idx)"
+									>
+										<view class="nax-datetime-picker__wheel-track">
+											<view
+												v-for="(label, i) in wheelItems(idx)"
+												:key="'wi-' + idx.toString() + '-' + i.toString()"
+												class="nax-datetime-picker__wheel-item"
+												:class="wheelItemClassAt(idx, i)"
+												@click="onWheelTap(idx, i)"
+											>
+												<text class="nax-datetime-picker__wheel-text" :class="wheelTextClassAt(idx, i)" :lines="1">{{ label }}</text>
+											</view>
+										</view>
+									</scroll-view>
+								</view>
+							</view>
+							<!-- #endif -->
+							<!-- #ifndef APP-IOS -->
 							<picker-view
 								v-if="readyToRender"
 								:key="pickerRenderKey"
@@ -175,6 +216,7 @@
 								</picker-view-column>
 								<!-- #endif -->
 							</picker-view>
+							<!-- #endif -->
 						</view>
 					</view>
 				</nax-transition>
@@ -269,6 +311,48 @@
 	const column5 = ref([] as number[])
 	const fieldTypes = ref([] as string[])
 
+	// #ifdef APP-IOS
+	// iOS 自研滚轮：原生 picker-view 列 CSS 不生效且挂载定位动画卡顿，改用框架渲染滚轮（scrollTo 直接定位）
+	const WHEEL_ITEM_H = 40
+	const WHEEL_PAD_ITEMS = 3
+	const wheelBaseId = 'nax-dtp-w-' + Math.floor(Math.random() * 10000000).toString()
+	const wheelIndexes = ref([] as number[])
+	/** 挂载/定位期间忽略 scrollend，防止初始位置反推污染选中值 */
+	let wheelLocked: boolean = false
+	let wheelLocateTimer: number = -1
+	let wheelUnlockTimer: number = -1
+
+	// iOS 暗黑主题：iOS 上自定义 CSS 变量不可靠（var 失效），用官方主题 API 驱动字面量颜色
+	const iosDark = ref(false)
+	let iosThemeChangeId: number = -1
+
+	function refreshIosTheme() {
+		try {
+			const info = uni.getAppBaseInfo()
+			const t = info.appTheme
+			if (t == 'dark' || t == 'light') {
+				iosDark.value = t == 'dark'
+				return
+			}
+		} catch (e) {
+		}
+		try {
+			const dev = uni.getDeviceInfo()
+			if (dev.osTheme == 'dark') {
+				iosDark.value = true
+			}
+		} catch (e) {
+		}
+	}
+
+	const iosThemeClass = computed((): string => {
+		if (iosDark.value) {
+			return 'nax-datetime-picker--ios-dark'
+		}
+		return 'nax-datetime-picker--ios-light'
+	})
+	// #endif
+
 	function normalizeMode(value: string): string {
 		if (value == 'date') return 'date'
 		if (value == 'time') return 'time'
@@ -301,6 +385,10 @@
 
 	const rootClass = computed((): string => {
 		let cls = ''
+		// #ifdef APP-IOS
+		// iOS 主题 class：样式块内按字面量覆盖弹窗内颜色（不依赖 CSS 变量）
+		cls += ' ' + iosThemeClass.value
+		// #endif
 		if (props.customClass.length > 0) cls += ' ' + props.customClass
 		return cls.trim()
 	})
@@ -363,7 +451,11 @@
 		if (panelShow.value) return 'background-color:rgba(0,0,0,0.45);opacity:1;'
 		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifdef APP-IOS
+		if (panelShow.value) return 'background-color:' + (iosDark.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
+		return 'background-color:' + (iosDark.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY || APP-IOS
 		return ''
 		// #endif
 	})
@@ -374,10 +466,15 @@
 	})
 
 	const panelStyle = computed((): string => {
+		let style = ''
+		// #ifdef APP-IOS
+		// iOS 不支持自定义 CSS 变量（var 声明整体失效→背景透明），用官方主题 API 驱动的字面量兜底
+		style += 'background-color:' + (iosDark.value ? '#101014' : '#ffffff') + ';'
+		// #endif
 		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
-			return 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+			style += 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
 		}
-		return ''
+		return style
 	})
 
 	const indicatorStyle = computed((): string => {
@@ -950,6 +1047,213 @@
 		syncPickerValue(selector)
 	}
 
+	// #ifdef APP-IOS
+	// ===== iOS 自研滚轮逻辑（框架渲染，CSS 完全可控）=====
+
+	/** iOS：分割线用官方主题 API 驱动的字面量 inline 背景色（iOS 上 var 声明会整体失效） */
+	const headerLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (iosDark.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+
+	const wheelIndicatorLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (iosDark.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+
+	function wheelColId(colIndex: number): string {
+		return wheelBaseId + '-' + colIndex.toString()
+	}
+
+	const wheelCols = computed((): number[] => {
+		const out = [] as number[]
+		var i = 0
+		while (i < columnNum.value) {
+			out.push(i)
+			i++
+		}
+		return out
+	})
+
+	function wheelItems(colIndex: number): string[] {
+		const col = getColumnList(colIndex)
+		const total = col.length + WHEEL_PAD_ITEMS * 2
+		const items = [] as string[]
+		var i = 0
+		while (i < total) {
+			const real = i - WHEEL_PAD_ITEMS
+			if (real >= 0 && real < col.length) {
+				items.push(formatColLabel(colIndex, col[real]))
+			} else {
+				items.push('')
+			}
+			i++
+		}
+		return items
+	}
+
+	function wheelRealIndex(colIndex: number, itemIndex: number): number {
+		return itemIndex - WHEEL_PAD_ITEMS
+	}
+
+	function wheelItemClassAt(colIndex: number, itemIndex: number): string {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		if (real >= 0 && real == wheelIndexes.value[colIndex]) {
+			return 'nax-datetime-picker__wheel-item--selected'
+		}
+		return ''
+	}
+
+	function wheelTextClassAt(colIndex: number, itemIndex: number): string {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		if (real >= 0 && real == wheelIndexes.value[colIndex]) {
+			return 'nax-datetime-picker__wheel-text--selected'
+		}
+		return ''
+	}
+
+	/** 定位列到指定下标（无动画直接跳转，避免原生长距离滚动卡顿） */
+	function locateWheelCol(colIndex: number, index: number) {
+		const el = uni.getElementById(wheelColId(colIndex))
+		if (el == null) {
+			return
+		}
+		const sv = el as UniScrollViewElement
+		// 选中项（content index = WHEEL_PAD_ITEMS + index）对准可视区第 4 行，上方 3 行留白与下方对称
+		const top = index * WHEEL_ITEM_H
+		sv.scrollTo(0, top)
+	}
+
+	/** 按当前选中值定位全部列 */
+	function locateAllWheels() {
+		const fields = fieldTypes.value
+		const next = [] as number[]
+		var c = 0
+		while (c < fields.length) {
+			const col = getColumnList(c)
+			const fi = fieldIndex(fields[c])
+			const idx = indexOfValue(col, currentParts.value[fi])
+			next.push(idx)
+			locateWheelCol(c, idx)
+			c++
+		}
+		wheelIndexes.value = next
+	}
+
+	/** 等所有滚轮列挂载就绪后定位；未就绪则重试（最多 6 次） */
+	function locateWheelsWhenReady(attempt: number) {
+		const fields = fieldTypes.value
+		var c = 0
+		while (c < fields.length) {
+			if (uni.getElementById(wheelColId(c)) == null) {
+				if (attempt < 6) {
+					wheelLocateTimer = setTimeout(() => {
+						wheelLocateTimer = -1
+						locateWheelsWhenReady(attempt + 1)
+					}, 40)
+				}
+				return
+			}
+			c++
+		}
+		wheelLocked = true
+		locateAllWheels()
+		if (wheelUnlockTimer >= 0) {
+			clearTimeout(wheelUnlockTimer)
+		}
+		// scrollTo 触发的 scrollend 为异步派发，等其落地后再解锁
+		wheelUnlockTimer = setTimeout(() => {
+			wheelUnlockTimer = -1
+			wheelLocked = false
+		}, 80)
+	}
+
+	/** 上级列变化后：重建的后续列重新定位 */
+	function relocateFollowingWheels(fromCol: number) {
+		const fields = fieldTypes.value
+		var c = fromCol + 1
+		while (c < fields.length) {
+			const col = getColumnList(c)
+			const fi = fieldIndex(fields[c])
+			const idx = indexOfValue(col, currentParts.value[fi])
+			if (idx != wheelIndexes.value[c]) {
+				const next = wheelIndexes.value.slice()
+				next[c] = idx
+				wheelIndexes.value = next
+			}
+			locateWheelCol(c, idx)
+			c++
+		}
+	}
+
+	/** 列停止后正式生效：联动上级列或更新选中值 */
+	function applyWheelSelection(colIndex: number) {
+		const fields = fieldTypes.value
+		if (colIndex >= fields.length) {
+			return
+		}
+		const parts = copyParts(currentParts.value)
+		const col = getColumnList(colIndex)
+		const idx = wheelIndexes.value[colIndex]
+		if (col.length > 0) {
+			parts[fieldIndex(fields[colIndex])] = col[idx]
+		}
+		if (colIndex < fields.length - 1) {
+			rebuildColumns(parts, false)
+			// 列数据重建会重渲染当前列内容，重新吸附当前位置，防止 iOS 内容重建后 scrollTop 重置
+			locateWheelCol(colIndex, idx)
+			relocateFollowingWheels(colIndex)
+		} else {
+			const clamped = clampParts(parts)
+			currentParts.value = clamped
+		}
+		emit('change', buildResult(currentParts.value))
+	}
+
+	function onWheelEnd(colIndex: number) {
+		// #ifdef APP-IOS
+		// 挂载/程序化定位期间忽略 scrollend，避免初始位置反推污染选中值
+		if (wheelLocked) {
+			return
+		}
+		// #endif
+		const el = uni.getElementById(wheelColId(colIndex))
+		if (el == null) {
+			return
+		}
+		const top = el.scrollTop
+		// 与 locateWheelCol 对齐：选中项居中于可视区第 4 行，反推 idx = scrollTop / 行高
+		var idx = Math.round(top / WHEEL_ITEM_H)
+		const col = getColumnList(colIndex)
+		if (idx < 0) {
+			idx = 0
+		}
+		if (col.length > 0 && idx >= col.length) {
+			idx = col.length - 1
+		}
+		const aligned = Math.abs(top - idx * WHEEL_ITEM_H) <= 1
+		if (!aligned) {
+			// 未对齐：先吸附，吸附后 scrollend 再次进入正式生效分支
+			locateWheelCol(colIndex, idx)
+			return
+		}
+		if (idx != wheelIndexes.value[colIndex]) {
+			const next = wheelIndexes.value.slice()
+			next[colIndex] = idx
+			wheelIndexes.value = next
+			applyWheelSelection(colIndex)
+		}
+	}
+
+	function onWheelTap(colIndex: number, itemIndex: number) {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		const col = getColumnList(colIndex)
+		if (real < 0 || real >= col.length) {
+			return
+		}
+		locateWheelCol(colIndex, real)
+		// 跳转后 scrollend 触发正式生效
+	}
+	// #endif
+
 		function buildResult(parts: number[]): UTSJSONObject {
 		const ts = partsToTimestamp(parts)
 		const formatted = formatCurrent(parts)
@@ -1027,19 +1331,34 @@
 		// 先卸再挂：首帧即带正确 value，对齐 nax-select（避免挂载后改 value 的滚动动画）
 		readyToRender.value = false
 		initPicker()
-		// 等列数据与 value 就绪再挂载 picker-view
+		// 等列数据与 value 就绪再挂载选择器
 		readyToRender.value = true
 		// 始终先 false 再 true：保证 nax-transition 进场
 		panelShow.value = false
+		// #ifdef APP-IOS
+		// iOS 自研滚轮：挂载后无动画直接定位到选中值，再显示面板（原生 picker 定位动画卡顿且会暴露初始列值）
+		const openDelay = 50
+		// #endif
 		// #ifdef APP-HARMONY
 		const openDelay = 50
 		// #endif
-		// #ifndef APP-HARMONY
+		// #ifndef APP-HARMONY || APP-IOS
 		const openDelay = 30
 		// #endif
 		openDelayTimer = setTimeout(() => {
 			openDelayTimer = -1
+			// 先挂载面板：nax-transition 为 v-if 渲染，panelShow 之前 scroll-view 不在 DOM，定位会全部落空
 			panelShow.value = true
+			// #ifdef APP-IOS
+			// 挂载完成后再定位滚轮；定位期间锁定 scrollend，避免挂载初始位置被当成选中值
+			if (wheelLocateTimer >= 0) {
+				clearTimeout(wheelLocateTimer)
+			}
+			wheelLocateTimer = setTimeout(() => {
+				wheelLocateTimer = -1
+				locateWheelsWhenReady(0)
+			}, 30)
+			// #endif
 		}, openDelay)
 		emit('update:show', true)
 		emit('open')
@@ -1064,6 +1383,17 @@
 		if (panelShow.value) return
 		clearSuppressTimer()
 		suppressPickerEvent = false
+		// #ifdef APP-IOS
+		if (wheelLocateTimer >= 0) {
+			clearTimeout(wheelLocateTimer)
+			wheelLocateTimer = -1
+		}
+		if (wheelUnlockTimer >= 0) {
+			clearTimeout(wheelUnlockTimer)
+			wheelUnlockTimer = -1
+		}
+		wheelLocked = false
+		// #endif
 		rootMounted.value = false
 		readyToRender.value = false
 		moving.value = false
@@ -1235,6 +1565,9 @@
 		if (rootMounted.value && panelShow.value) {
 			// 展示中切 mode：刷新列数据，不 remount
 			rebuildColumns(currentParts.value, false)
+			// #ifdef APP-IOS
+			locateAllWheels()
+			// #endif
 		}
 	})
 
@@ -1243,6 +1576,27 @@
 	if (props.show) {
 		openPicker()
 	}
+
+	// #ifdef APP-IOS
+	// 官方主题 API：App 端 4.18+ 支持；监听 appTheme 变化驱动弹窗字面量颜色
+	refreshIosTheme()
+	try {
+		iosThemeChangeId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			iosDark.value = res.appTheme == 'dark'
+		})
+	} catch (e) {
+		iosThemeChangeId = -1
+	}
+	onUnmounted(() => {
+		if (iosThemeChangeId >= 0) {
+			try {
+				uni.offAppThemeChange(iosThemeChangeId)
+			} catch (e) {
+			}
+			iosThemeChangeId = -1
+		}
+	})
+	// #endif
 </script>
 
 <style>
@@ -1413,6 +1767,130 @@
 	}
 
 	.nax-datetime-picker__column { flex: 1; }
+
+	/* #ifdef APP-IOS */
+	/* iOS 自研滚轮样式（框架渲染，可正常控制文字居中） */
+	.nax-datetime-picker__wheel {
+		flex: 1;
+		height: 240px;
+		flex-direction: row;
+	}
+
+	/* iOS 主题 class：按暗黑/浅色用字面量覆盖弹窗内颜色（不依赖 CSS 变量） */
+	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel {
+		background-color: #ffffff;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel {
+		background-color: #101014;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__title {
+		color: #333639;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__title {
+		color: #ffffffd1;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__btn-text {
+		color: #767c82;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__btn-text {
+		color: #ffffffa6;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__btn-text--confirm {
+		color: #18a058;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__btn-text--confirm {
+		color: #63e2b7;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel-text {
+		color: #767c82;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel-text {
+		color: #ffffffa6;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel-text--selected {
+		color: #000000;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel-text--selected {
+		color: #ffffff;
+	}
+
+	/* iOS 上 border-color 不生效（退化黑色），标题分割线改用普通流布局的背景色线（inline 兜底） */
+	.nax-datetime-picker__header {
+		border-bottom-width: 0;
+		border-bottom-color: transparent;
+	}
+
+	.nax-datetime-picker__header-line {
+		background-color: #f5f5f7;
+	}
+
+	.nax-datetime-picker__wheel-col-wrap {
+		flex: 1;
+		flex-direction: column;
+		height: 240px;
+		position: relative;
+	}
+
+	/* 固定选中行指示器（上下边框）：独立于滚动内容，滑动/点击时始终停在可视区中间，不随 item 移动 */
+	/* iOS 上 border-color 与 1px 高度均不可靠：容器 absolute 定位，两条线 flex 流布局 + inline 背景色 2px */
+	.nax-datetime-picker__wheel-indicator {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 120px;
+		height: 40px;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+
+	.nax-datetime-picker__wheel-indicator-line {
+		background-color: #f5f5f7;
+	}
+
+	.nax-datetime-picker__wheel-col {
+		flex: 1;
+		height: 240px;
+	}
+
+	.nax-datetime-picker__wheel-track {
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__wheel-item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.nax-datetime-picker__wheel-item--selected {}
+
+	.nax-datetime-picker__wheel-text {
+		font-size: 16px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		/* iOS 单行 text 基线不随父级居中，显式对齐行高 */
+		height: 40px;
+		line-height: 40px;
+	}
+
+	.nax-datetime-picker__wheel-text--selected {
+		color: var(--nax-color-text-black, #000000);
+	}
+	/* #endif */
 
 	.nax-datetime-picker__item {
 		height: 40px;

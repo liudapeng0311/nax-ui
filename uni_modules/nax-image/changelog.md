@@ -1,3 +1,5 @@
+## 0.1.7（2026-08-07）
+- 支持 iOS 端：走 `#ifndef APP-HARMONY` 公共分支，无额外端差异代码，iOS 直接可用
 ## 0.1.6（2026-07-31）
 - 修复暗黑模式下加载、失败与空图片占位文字因浅色背景与亮色文字叠加而不可见的问题
 - Web、Android、iOS 与小程序端的占位背景改为跟随 `--nax-color-bg-secondary`，文字跟随 `--nax-color-text-secondary`

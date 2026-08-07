@@ -1,3 +1,5 @@
+## 0.1.3（2026-08-07）
+- 支持 iOS 端：走公共注入与样式分支，App 端 flex 拉伸约束已覆盖 `APP-IOS`，iOS 直接可用
 ## 0.1.2（2026-07-31）
 - 修复 Android 端 `inject(..., null)` 将注入类型推断为 `Void`，导致 `ComputedRef cannot be cast to java.lang.Void` 并使表单项无法渲染：父表单统一提供 `Ref` 状态，子项使用同类型默认值与空函数兜底。
 - 补充 `APP-ANDROID` 下表单、表单项、内容区、控件行和分隔线的 flex 拉伸与宽度约束。iOS、鸿蒙、Web 与小程序行为保持不变。

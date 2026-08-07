@@ -141,6 +141,7 @@
 		return '' + iconDefaultPx()
 	})
 
+	// #ifndef APP-IOS
 	const activeColorValue = computed((): string => {
 		if (props.activeColor.length > 0) {
 			return props.activeColor
@@ -154,13 +155,40 @@
 		}
 		return 'var(--nax-color-border, #f0f0f3)'
 	})
+	// #endif
+	// #ifdef APP-IOS
+	// iOS：内联 style 中 var() 过渡解析异常，关闭态轨道整钮透明/发白；实色兜底，显式 activeColor/inactiveColor 仍生效
+	const activeColorValue = computed((): string => {
+		if (props.activeColor.length > 0) {
+			return props.activeColor
+		}
+		return '#18a058'
+	})
 
+	const inactiveColorValue = computed((): string => {
+		if (props.inactiveColor.length > 0) {
+			return props.inactiveColor
+		}
+		return '#f0f0f3'
+	})
+	// #endif
+
+	// #ifndef APP-IOS
 	const loadingIconColor = computed((): string => {
 		if (isChecked.value) {
 			return activeColorValue.value
 		}
 		return 'var(--nax-color-text-secondary, #767c82)'
 	})
+	// #endif
+	// #ifdef APP-IOS
+	const loadingIconColor = computed((): string => {
+		if (isChecked.value) {
+			return activeColorValue.value
+		}
+		return '#767c82'
+	})
+	// #endif
 
 	const rootClass = computed((): string => {
 		var cls = 'nax-switch--' + normalizedSize.value
@@ -451,6 +479,19 @@
 		background-color: var(--nax-color-primary, #18a058);
 		border-color: var(--nax-color-primary, #18a058);
 	}
+
+	/* #ifdef APP-IOS */
+	/* iOS：主题变量解析异常兜底，避免关闭态整钮透明/发白 */
+	.nax-switch {
+		background-color: #f0f0f3;
+		border-color: #f0f0f3;
+	}
+
+	.nax-switch--on {
+		background-color: #18a058;
+		border-color: #18a058;
+	}
+	/* #endif */
 
 	.nax-switch--disabled {
 		opacity: var(--nax-opacity-disabled, 0.5);

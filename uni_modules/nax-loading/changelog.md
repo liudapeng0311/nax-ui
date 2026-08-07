@@ -1,3 +1,7 @@
+## 0.1.4（2026-08-07）
+- Android：加载旋转改用原生 `animate`（失败再低频 setProperty 兜底），与 iOS/鸿蒙方案一致，移除 setInterval + 响应式 transform，修复 Android 端掉帧（`APP-ANDROID`）；Web 和小程序行为保持不变。
+## 0.1.3（2026-08-06）
+- iOS：加载旋转改用原生 `animate`（失败再低频 setProperty 兜底），与鸿蒙方案一致，修复 setInterval 高频响应式 transform 掉帧（`APP-IOS`）；Android、Web 和小程序行为保持不变。
 ## 0.1.2（2026-07-31）
 - 鸿蒙：加载旋转改用原生 `animate`（失败再低频 setProperty 兜底），修复 setInterval 高频响应式掉帧
 ## 0.1.1（2026-07-22）

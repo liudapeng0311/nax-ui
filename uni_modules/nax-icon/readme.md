@@ -97,21 +97,6 @@ category, category-filled, map-pin, map-pin-filled
 
 未传 `color` 时，组件会在根节点解析图标色，兼容样式隔离 2.0 下的浅色 / 深色主题切换。
 
-## 重新生成图标映射
-
-1. 编辑 `assets/icons/catalog.json`（`name` + `tabler`；实心图标加 `"filled": true`）
-2. 准备 Tabler 完整字体到 `static/nax-icon.source.ttf`（`@tabler/icons-webfont` 的 `dist/fonts/tabler-icons.ttf`）
-3. 确保 `assets/icons/tabler-codepoints.json` 含对应 codepoint
-4. 运行：
-
-```bash
-cd uni_modules/nax-icon
-# 可选：npm install --no-save @tabler/icons-webfont@3.45.0
-node scripts/build-icons.mjs
-```
-
-提交产物：`static/nax-icon.ttf`、`icons/glyphs.uts`、`icons/codepoints.json`、`icons/mapping.json`、组件内 base64 `@font-face`。
-
 ## 说明
 
 - 当前分发字体为 **45 图标子集**（约 16KB），不是完整 Tabler font。
@@ -123,4 +108,3 @@ node scripts/build-icons.mjs
 
 - uvue / 鸿蒙 `@font-face` 仅支持 `font-family` 与 `src`。
 - 微信小程序不要改回本地字体路径。
-- 重新生成需要本机 Python `fontTools`：`pip install fonttools`。

@@ -1,3 +1,5 @@
+## 0.1.1（2026-08-07）
+- 支持 iOS 端：App 透明度脉冲动画与 `@keyframes` 分支均覆盖 `APP-IOS`
 ## 0.1.0（2026-08-01）
 - 初版 `nax-skeleton`
 - 预设：avatar / title / rows；`loading` 切换默认插槽

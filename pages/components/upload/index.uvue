@@ -138,14 +138,14 @@
 	})
 
 	const uploadThemeClass = computed((): string => {
-		// #ifdef APP-ANDROID || APP-HARMONY
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		// 原生 App 组件隔离边界需要将主题 class 直接挂到组件根节点。
 		if (darkMode.value) {
 			return 'nax-theme nax-theme-dark'
 		}
 		return 'nax-theme'
 		// #endif
-		// #ifndef APP-ANDROID || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		return ''
 		// #endif
 	})

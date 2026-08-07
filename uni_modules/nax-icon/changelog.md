@@ -1,3 +1,9 @@
+## 0.2.8（2026-08-07）
+- readme 移除构建相关内容（重新生成图标映射、fontTools 提示），仅保留用户视角文档
+## 0.2.7（2026-08-07）
+- 构建脚本 `build-icons.mjs` 由 `scripts/` 移至包根目录；同步更新 readme、`package.build.json` 与生成文件头注释
+## 0.2.6（2026-08-07）
+- 支持 iOS 端：走 `#ifndef APP-ANDROID` 公共分支，无额外端差异代码，iOS 直接可用
 ## 0.2.5（2026-07-31）
 - 修复样式隔离 2.0 下默认图标色不随 `nax-theme-dark` 切换的问题
 - 默认颜色改为在组件根节点内联解析 `--nax-icon-color` / `--nax-color-text`

@@ -1,3 +1,9 @@
+## 0.1.15（2026-08-07）
+- **iOS 端（`APP-IOS`）改用自研滚轮替代原生 `picker-view`**：修复选中项文字无法在选中边框（指示器）内垂直居中的问题。iOS 原生 picker 列内容不受 CSS 控制（显式行高无效，同 nax-datetime-picker 0.1.10/0.1.11 结论），自研滚轮由框架渲染（scroll-view + 固定行高），文字显式行高居中，滚动停止吸附对齐选中行，支持点选，联动与 `change` / `confirm` 事件语义不变
+- **修复 iOS 端滚动/点选后选中不生效**：`applyWheelSelection` 未把本次滚动到的新下标写入选中值，导致 `pickerValue` 被旧值原样写回，选中文字状态与选中数据均不更新；现由 `onWheelEnd` 先写入新下标再生效（对齐 datetime-picker 的 `wheelIndexes` 更新时序）
+- **修复 iOS 端联动弹窗背景透明**：联动弹窗打开期间宿主页因 `change` 事件重渲染后，class 背景偶发不重绘导致整个面板透明；iOS 下面板底色与遮罩底色改走 inline style（对齐鸿蒙遮罩做法），滚轮区域显式补 class 底色
+- **修复 iOS 端弹窗背景透明 / 边框黑 / 分割线不显示（根因级）**：uni-app x 官方文档确认 Android/iOS 不支持自定义 CSS 变量（`var(--nax-*)` 声明在 iOS 上会整体失效 → background 取透明、border-color 取默认黑）；- **iOS 弹窗暗黑模式适配**：改用官方主题 API（`uni.getAppBaseInfo().appTheme` + `uni.onAppThemeChange`，App 4.18+）监听应用主题，JS 驱动弹窗内字面量颜色（面板 `#101014`/`#ffffff`、分割线 `#ffffff1a`/`#f5f5f7`、遮罩 `rgba(0,0,0,0.6)`/`0.4`、文字/按钮色对齐 dark.css）；根节点挂 `nax-select--ios-dark/light` class 覆盖弹窗内颜色，不依赖 CSS 变量
+- 仅影响 iOS 端；Android、鸿蒙、Web、微信小程序保持原生 picker-view 与 var 主题行为不变
 ## 0.1.14（2026-08-01）
 - 修复 Android 端（`APP-ANDROID`）判断多列数据时将 `UTSJSONObject` 强转为 `UTSArray` 引发的 `ClassCastException`；改用 `Array.isArray()` 做运行时类型判断，其它端保持原有逻辑。
 - 修复 Android 端（`APP-ANDROID`）暗黑模式下原生 `picker-view` 上下白色渐变遮罩覆盖选择器面板的问题；复用鸿蒙端的 `mask-top-style` 与 `mask-bottom-style` 透明渐变方案，iOS、Web 与小程序保持原有行为。

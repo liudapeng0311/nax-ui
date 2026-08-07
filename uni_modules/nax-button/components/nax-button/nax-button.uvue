@@ -301,8 +301,8 @@
 
 	const loadingDomId = 'nax-btn-ld-' + Math.floor(Math.random() * 10000000).toString()
 
-	// #ifdef APP-HARMONY
-	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
 	let spinToken = 0
 	let usingNativeSpin = false
 	let cachedSpinEl : UniElement | null = null
@@ -318,7 +318,13 @@
 		if (cachedSpinEl != null) {
 			return cachedSpinEl
 		}
-		const el = uni.getElementById(loadingDomId)
+		// iOS：原生页面未就绪时 getElementById 抛 null 异常，防御性捕获后按未命中处理（重试等待挂载）
+		var el : UniElement | null = null
+		try {
+			el = uni.getElementById(loadingDomId)
+		} catch (e) {
+			el = null
+		}
 		if (el != null) {
 			cachedSpinEl = el
 		}
@@ -429,49 +435,6 @@
 			startFallbackSpin()
 		}
 		tryStart(0)
-	}
-
-	watch((): boolean => {
-		return props.loading
-	}, (val: boolean) => {
-		if (val) {
-			startLoadingSpin()
-		} else {
-			stopLoadingSpin()
-		}
-	}, { immediate: true })
-
-	onUnmounted(() => {
-		stopLoadingSpin()
-	})
-	// #endif
-
-	// #ifdef APP-ANDROID || APP-IOS
-	const loadingAngle = ref(0)
-	let loadingTimerId = -1
-
-	const loadingStyle = computed((): string => {
-		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg)'
-	})
-
-	function stopLoadingSpin() {
-		if (loadingTimerId >= 0) {
-			clearInterval(loadingTimerId)
-			loadingTimerId = -1
-		}
-		loadingAngle.value = 0
-	}
-
-	function startLoadingSpin() {
-		stopLoadingSpin()
-		loadingAngle.value = 0
-		loadingTimerId = setInterval(() => {
-			let next = loadingAngle.value + 30
-			if (next >= 360) {
-				next = 0
-			}
-			loadingAngle.value = next
-		}, 50)
 	}
 
 	watch((): boolean => {

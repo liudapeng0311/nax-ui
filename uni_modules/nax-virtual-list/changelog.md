@@ -1,3 +1,7 @@
+## 0.1.8（2026-08-07）
+- 修复 iOS 端滑动掉帧：`onScroll` 从每个 scroll 事件同步更新窗口改为 32ms 合并 + `scrollend` 强制同步（`APP-IOS` 复用鸿蒙机制，`scroll`/`visible-change` 在 `scrollend` 同步触发），并在窗口中部滚动时跳过重建
+- 修复 iOS 端快速滑动下方空白：缓冲行数下限抬到 12（`APP-IOS`），`scrollend` 用最新 `scrollTop` 强制对齐窗口
+- Android、Web 和小程序行为保持不变
 ## 0.1.7（2026-08-01）
 - 新增 `nested-scroll`：Android 端（`APP-ANDROID`）通过内层 `scroll-view` 的 `associative-container` 建立嵌套滚动协商；Web、iOS、HarmonyOS 及未启用该属性的实例行为保持不变。
 - 修复 Android 演示页空白与内层列表无法滚动：外层滚动容器启用 `type="nested"`，并以 `nested-scroll-header` / `nested-scroll-body` 包裹页面内容；移除会阻断边界交接的 `touchmove.stop`。

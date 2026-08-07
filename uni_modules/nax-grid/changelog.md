@@ -1,3 +1,5 @@
+## 0.1.3（2026-08-07）
+- 兼容性声明：补充 iOS（`APP-IOS`）端支持，package.json 平台标记同步为 `√`
 ## 0.1.2（2026-07-31）
 - 修复 Android（`APP-ANDROID`）`ComputedRef cannot be cast to java.lang.Void`：容器改为提供同步的 `Ref` 状态，子项以同类型 `ref(...)` 默认值注入，避免 `null` 被推断为 `Void`。
 - Web、iOS、HarmonyOS 与小程序保持既有的 computed 注入行为。

@@ -1,3 +1,20 @@
+# nax-datetime-picker 变更记录
+
+## 0.1.13（2026-08-07）
+- **修复 iOS 端弹窗背景透明 / 边框黑 / 分割线不显示（根因级）**：uni-app x 官方文档确认 Android/iOS 不支持自定义 CSS 变量（`var(--nax-*)` 声明在 iOS 上会整体失效 → background 取透明、border-color 取默认黑）；- **iOS 弹窗暗黑模式适配**：改用官方主题 API（`uni.getAppBaseInfo().appTheme` + `uni.onAppThemeChange`，App 4.18+）监听应用主题，JS 驱动弹窗内字面量颜色（面板 `#101014`/`#ffffff`、分割线 `#ffffff1a`/`#f5f5f7`、遮罩 `rgba(0,0,0,0.6)`/`0.4`、文字/按钮色对齐 dark.css）；根节点挂 `nax-datetime-picker--ios-dark/light` class 覆盖弹窗内颜色，不依赖 CSS 变量
+- 仅影响 iOS 端；Android、鸿蒙、Web、微信小程序保持原生 picker-view 与 var 主题行为不变
+## 0.1.12（2026-08-07）
+- **修复 iOS 端（`APP-IOS`）打开弹框默认选中值错乱**：此前 `locateAllWheels` 在 `panelShow=true` 之前执行，而 `nax-transition` 为 v-if 渲染，此时 scroll-view 尚未挂载，`getElementById` 全部落空；挂载后 scroll-view 初始位置触发的 `scrollend` 又以视觉位置反推选中值，导致默认选中漂移到错误时间（如停在 1997-02-02 01:01）
+- 调整打开时序：先挂载面板，再等滚轮列就绪后定位（未就绪自动重试），定位期间锁定 `scrollend` 处理，防止挂载初始位置污染选中值；列联动重建后重新吸附当前列，防止内容重建后 scrollTop 重置
+- **修复 iOS 端选中项显示位置**：原定位公式把选中项滚到可视区第一行（`top = pad数*40 + idx*40`），现改为 `top = idx*40` 使选中项居中于可视区第 4 行，上下留白对称；`scrollend` 反推公式同步对齐
+- **修复 iOS 端选中行缺少上下边框**：自研滚轮选中项原无指示器边框，现补上与其它端原生 `picker-view` 指示器一致的 1px 上下边框（`--nax-color-divider` token）
+- **修复 iOS 端边框错位/闪烁**：边框原挂在选中 item 上，滑动时随内容滚动错位、点击重建时瞬间丢失变黑；改为独立固定指示器层（绝对定位在可视区中间），边框不随滚动内容移动，item 仅保留选中文字高亮
+- 仅影响 iOS 端；Android、鸿蒙、Web、微信小程序保持原生 picker-view 行为不变
+## 0.1.11（2026-08-06）
+- **iOS 端改用自研滚轮替代原生 `picker-view`**（`APP-IOS`）：原生 picker 列内容 CSS 不生效（选项文字无法垂直居中）、挂载后从初始值长距离定位动画卡顿且会暴露错误初始值，自研滚轮由框架渲染（scroll-view + 固定行高），CSS 完全可控；打开时无动画直接定位到选中值，文字显式行高居中，滚动停止后吸附并对齐选中行，联动与 `change` 事件语义不变
+- Android、鸿蒙、Web、微信小程序保持原生 picker-view 行为不变
+## 0.1.10（2026-08-06）
+- 曾尝试通过延长挂载抑制窗口、iOS 选项文字显式行高等方式修复 iOS 端初始值错位与文字不居中的问题，实测 iOS 原生 `picker-view` 列内容不受 CSS 控制、挂载定位动画无法消除，方案废弃（见 0.1.11 自研滚轮方案）
 ## 0.1.9（2026-07-31）
 - 修复 Android 端（`APP-ANDROID`）暗黑模式下原生 `picker-view` 上下白色渐变遮罩覆盖时间选择器面板的问题；复用鸿蒙端的 `mask-top-style` 与 `mask-bottom-style` 透明渐变方案，iOS、Web 与小程序保持原有行为。
 - 修复 Android 端（`APP-ANDROID`）时间滚轮选中项上下边框不显示的问题；为原生 `picker-view` 指示器补全 `solid` 边框样式并继续使用主题分割线 token，其它端保持原有行为。

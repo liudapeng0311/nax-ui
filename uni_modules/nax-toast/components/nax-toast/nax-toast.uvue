@@ -89,8 +89,6 @@
 
 	let hideTimer: number = -1
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	const loadingAngle = ref(0)
-	let loadingTimerId: number = -1
 	const loadingDomId = 'nax-toast-ld-' + Math.floor(Math.random() * 10000000).toString()
 	// #endif
 
@@ -226,8 +224,8 @@
 	})
 	// #endif
 
-	// #ifdef APP-HARMONY
-	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App 端：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
 	let spinToken = 0
 	let usingNativeSpin = false
 	let cachedSpinEl : UniElement | null = null
@@ -354,35 +352,6 @@
 			startFallbackSpin()
 		}
 		tryStart(0)
-	}
-	// #endif
-
-	// #ifdef APP-ANDROID || APP-IOS
-	const loadingStyle = computed((): string => {
-		if (typeName.value != 'loading') {
-			return ''
-		}
-		return 'transform:rotate(' + loadingAngle.value.toString() + 'deg);'
-	})
-
-	function stopLoadingSpin() {
-		if (loadingTimerId >= 0) {
-			clearInterval(loadingTimerId)
-			loadingTimerId = -1
-		}
-		loadingAngle.value = 0
-	}
-
-	function startLoadingSpin() {
-		stopLoadingSpin()
-		loadingAngle.value = 0
-		loadingTimerId = setInterval(() => {
-			let next = loadingAngle.value + 30
-			if (next >= 360) {
-				next = 0
-			}
-			loadingAngle.value = next
-		}, 50)
 	}
 	// #endif
 
@@ -535,7 +504,7 @@
 		justify-content: flex-start;
 	}
 
-	/* #ifndef APP-ANDROID || APP-HARMONY || MP-WEIXIN */
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN */
 	.nax-toast__stage--top {
 		padding-top: 80px;
 	}
@@ -543,6 +512,12 @@
 	/* #ifdef APP-ANDROID */
 	.nax-toast__stage--top {
 		/* 安卓避开状态栏与导航栏区域。 */
+		padding-top: 128px;
+	}
+	/* #endif */
+	/* #ifdef APP-IOS */
+	.nax-toast__stage--top {
+		/* iOS 避开状态栏与导航栏区域。 */
 		padding-top: 128px;
 	}
 	/* #endif */
@@ -569,7 +544,8 @@
 
 	/* #ifdef APP-IOS */
 	.nax-toast--float-center {
-		top: 280px;
+		/* iOS 固定 280px 在大屏偏上，按屏幕高度定位更接近视觉中心。 */
+		top: 42%;
 	}
 	/* #endif */
 	/* #ifdef APP-ANDROID */
@@ -590,7 +566,7 @@
 	}
 	/* #endif */
 
-	/* #ifndef APP-ANDROID || APP-HARMONY || MP-WEIXIN */
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN */
 	.nax-toast--float-top {
 		top: 80px;
 	}
@@ -598,6 +574,12 @@
 	/* #ifdef APP-ANDROID */
 	.nax-toast--float-top {
 		/* 安卓避开状态栏与导航栏区域。 */
+		top: 128px;
+	}
+	/* #endif */
+	/* #ifdef APP-IOS */
+	.nax-toast--float-top {
+		/* iOS 避开状态栏与导航栏区域。 */
 		top: 128px;
 	}
 	/* #endif */

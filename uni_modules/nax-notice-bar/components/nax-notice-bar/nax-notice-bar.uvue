@@ -20,7 +20,7 @@
 				</view>
 
 				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
-				<!-- App: dual segs; Android/iOS timer wrap; Harmony UniElement.animate + rAF fallback -->
+				<!-- App: dual segs; UniElement.animate + rAF fallback -->
 				<view :id="trackId" class="nax-notice-bar__track" :style="appTrackStyle">
 					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
 						<text :id="segMeasureId" class="nax-notice-bar__text" :class="textClass" :lines="1">{{ seamlessText }}</text>
@@ -484,38 +484,19 @@
 	}
 
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	// App 端通过 translateX 实现无缝滚动。
-	const marqueeOffset = ref(0)
-	let marqueeTimerId = -1
+	// App 端通过 rAF + setProperty 驱动无缝滚动。
+	// - DOM 直写跳过 Vue diff，16ms/帧不掉帧（官方推荐的高性能手动动画方式）。
+	// - 暂停/恢复通过 cancelAnimationFrame / requestAnimationFrame 控制，全端语义一致；
+	//   不依赖 UniElement.animate 的无限循环（iOS 上无法可靠停止，暂停会失效）。
 	let marqueeToken = 0
-
-	function resolveLoopHalf() : number {
-		if (measuredLoopWidth.value > 0) {
-			return measuredLoopWidth.value
-		}
-		return estimateLoopWidth(seamlessText.value)
-	}
-
-	// #ifdef APP-HARMONY
-	/**
-	 * 鸿蒙端使用原生动画驱动滚动。
-	 * - CSS keyframes 不可用时，优先使用 UniElement.animate。
-	 * - 直接更新 transform，避免通过 Vue :style 高频重绘。
-	 * - 原生动画不可用时，回退到 requestAnimationFrame 与 setProperty。
-	 * - 卸载后不再访问元素，避免无效的原生动画调用。
-	 * - 未测得宽度时保持起点展示，避免内容首次渲染为空白。
-	 * - 使用 requestAnimationFrame 与 setProperty 作为回退方案。
-	 */
 	let marqueeRafId = 0
 	let marqueeLastTs = 0
 	let marqueeOffsetPx = 0.0
-	let lastAnimHalf = 0.0
-	let usingNativeAnimate = false
 	let cachedTrackEl : UniElement | null = null
 	let hostAlive = true
 
 	const appTrackStyle = computed((): string => {
-		// transform 由原生动画或 setProperty 直接更新。
+		// transform 由 setProperty 直接更新。
 		return ''
 	})
 
@@ -553,86 +534,13 @@
 		}
 	}
 
-	function clearMarqueeTimer() {
-		if (marqueeTimerId >= 0) {
-			clearTimeout(marqueeTimerId)
-			marqueeTimerId = -1
-		}
-	}
-
-	function harmonyDurationMs(half : number) : number {
-		let ms = Math.floor(half * 1000 / speedPx.value)
-		if (ms < 800) {
-			ms = 800
-		}
-		return ms
-	}
-
-	function stopNativeAnimate() {
-		if (!hostAlive) {
-			return
-		}
-		const el = getTrackElement()
-		if (el == null) {
-			return
-		}
-		// 用零时长动画复位，避免 forwards 保留在末帧。
-		el.animate([
-			{
-				transform: 'translateX(0px)'
-			} as UniAnimationKeyframe
-		], {
-			duration: 0,
-			fill: 'forwards',
-			iterations: 1,
-			easing: 'linear'
-		} as UniAnimationOption)
-	}
-
 	function stopMarquee() {
 		marqueeToken = marqueeToken + 1
 		clearMarqueeRaf()
-		clearMarqueeTimer()
 		marqueeLastTs = 0
 		marqueeOffsetPx = 0
-		marqueeOffset.value = 0
-		lastAnimHalf = 0
-		if (usingNativeAnimate) {
-			stopNativeAnimate()
-		} else {
-			applyTrackTransform(0)
-		}
-		usingNativeAnimate = false
+		applyTrackTransform(0)
 		cachedTrackEl = null
-	}
-
-	function startNativeAnimate(half : number) : boolean {
-		if (!hostAlive) {
-			return false
-		}
-		const el = getTrackElement()
-		if (el == null || half <= 1) {
-			return false
-		}
-		const dur = harmonyDurationMs(half)
-		// 从 0 线性移动到 -half，重复分段确保接缝连续。
-		el.animate([
-			{
-				transform: 'translateX(0px)'
-			} as UniAnimationKeyframe,
-			{
-				transform: 'translateX(' + (0 - half).toString() + 'px)'
-			} as UniAnimationKeyframe
-		], {
-			duration: dur,
-			easing: 'linear',
-			// UTS 不支持 Infinity，使用足够大的次数近似无限循环。
-			iterations: 1000000,
-			fill: 'forwards'
-		} as UniAnimationOption)
-		usingNativeAnimate = true
-		lastAnimHalf = half
-		return true
 	}
 
 	function marqueeFrame(timestamp : number, token : number) {
@@ -660,19 +568,6 @@
 			return
 		}
 
-		// 原生动画的宽度未变化时保持运行，避免重复启动。
-		if (usingNativeAnimate && Math.abs(half - lastAnimHalf) <= 2) {
-			return
-		}
-
-		// 优先使用原生动画，无法启动时再回退到 rAF。
-		if (startNativeAnimate(half)) {
-			clearMarqueeRaf()
-			marqueeRafId = 0
-			return
-		}
-
-		// rAF 与 setProperty 兜底，避免 setInterval 驱动 Vue 样式更新。
 		if (marqueeLastTs <= 0) {
 			marqueeLastTs = timestamp
 		}
@@ -692,7 +587,6 @@
 			next = 0
 		}
 		marqueeOffsetPx = next
-		lastAnimHalf = half
 		if (!applyTrackTransform(next)) {
 			marqueeLastTs = 0
 		}
@@ -713,69 +607,16 @@
 		const token = marqueeToken
 		// 先从起点显示，避免首次渲染出现空白。
 		applyTrackTransform(0)
-		const half = measuredLoopWidth.value
-		if (half > 1 && startNativeAnimate(half)) {
-			return
-		}
 		marqueeRafId = requestAnimationFrame((ts : number) => {
 			marqueeFrame(ts, token)
 		})
 	}
-	// #endif
-
-	// #ifndef APP-HARMONY
-	const appTrackStyle = computed((): string => {
-		return 'transform:translateX(' + marqueeOffset.value.toString() + 'px);'
-	})
-
-	function stopMarquee() {
-		marqueeToken = marqueeToken + 1
-		if (marqueeTimerId >= 0) {
-			clearInterval(marqueeTimerId)
-			marqueeTimerId = -1
-		}
-	}
-
-	function startMarquee() {
-		stopMarquee()
-		marqueeOffset.value = 0
-		if (!useSeamless.value || !isPlaying.value || listCount.value == 0 || !visible.value) {
-			return
-		}
-		if (measuredLoopWidth.value <= 0) {
-			measureLoopWidth()
-		}
-		const tickMs = 32
-		const step = speedPx.value * tickMs / 1000
-		if (step <= 0) {
-			return
-		}
-		const token = marqueeToken
-		marqueeTimerId = setInterval(() => {
-			if (token != marqueeToken) {
-				return
-			}
-			const half = resolveLoopHalf()
-			if (half <= 0) {
-				return
-			}
-			let next = marqueeOffset.value - step
-			while (next <= (0 - half)) {
-				next = next + half
-			}
-			marqueeOffset.value = next
-		}, tickMs)
-	}
-	// #endif
 
 	function syncMarquee() {
 		if (useSeamless.value && isPlaying.value && visible.value) {
 			startMarquee()
 		} else {
 			stopMarquee()
-			if (!useSeamless.value) {
-				marqueeOffset.value = 0
-			}
 		}
 	}
 
@@ -789,7 +630,6 @@
 		return seamlessText.value
 	}, (_t : string) => {
 		measuredLoopWidth.value = 0
-		marqueeOffset.value = 0
 		measureLoopWidth()
 		syncMarquee()
 	})
@@ -809,17 +649,11 @@
 		if (!useSeamless.value || !isPlaying.value || !visible.value) {
 			return
 		}
-		// #ifdef APP-HARMONY
-		// 宽度变化不超过 2px 时无需重启动画。
-		if (lastAnimHalf > 0 && Math.abs(w - lastAnimHalf) <= 2) {
-			return
-		}
-		// #endif
 		startMarquee()
 	})
 
 	onUnmounted(() => {
-		// #ifdef APP-HARMONY
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		hostAlive = false
 		// #endif
 		stopMarquee()

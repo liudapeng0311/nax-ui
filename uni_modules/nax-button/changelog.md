@@ -1,3 +1,9 @@
+## 0.1.18（2026-08-07）
+- 修复 iOS 启动报错 `null is not an object (evaluating 'this.getNativePage().document')`：原生页面未就绪时 `uni.getElementById` 在 iOS 直接抛错，`getSpinElement` 增加防御性 try/catch，按未命中处理并走原有重试等待挂载
+## 0.1.17（2026-08-07）
+- 修复 iOS 加载动画掉帧：App 三端统一改用原生 `UniElement.animate()` 无限旋转（`APP-ANDROID || APP-IOS || APP-HARMONY`），移除 setInterval + 响应式 transform 方案；对齐 nax-loading / nax-switch 实现
+## 0.1.16（2026-08-07）
+- 支持 iOS 端：App 端条件编译分支（loading 旋转、禁用透明度）已覆盖 `APP-IOS`，iOS 直接可用
 ## 0.1.15（2026-07-31）
 - 移除第三方组件库参考表述，完善独立组件文档。
 ## 0.1.14（2026-07-27）

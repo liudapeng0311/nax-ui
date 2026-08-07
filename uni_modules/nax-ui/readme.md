@@ -25,6 +25,7 @@
 - Web
 - 微信小程序
 - App Android
+- App iOS
 - App HarmonyOS
 
 ## 主题接入

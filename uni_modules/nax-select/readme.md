@@ -120,7 +120,8 @@ function onConfirm(items: UTSJSONObject[]) {
 
 ## 平台说明
 
-- 全端统一使用原生 `picker-view` 滚轮（含鸿蒙）。
+- **iOS**：自研滚轮（`APP-IOS` 条件编译）：iOS 原生 `picker-view` 列内容不受 CSS 控制（选中文字无法垂直居中），改为 scroll-view + 固定行高框架渲染滚轮，文字显式行高居中；滚动停止吸附对齐选中行，支持点选。
+- 其余端（Android / 鸿蒙 / Web / 微信小程序）统一使用原生 `picker-view` 滚轮。
 - **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
 - **鸿蒙暗黑模式**：通过 `mask-top-style` / `mask-bottom-style` 移除原生滚轮默认的白色渐变遮罩；该分端处理由 `APP-HARMONY` 条件编译。
 - 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。

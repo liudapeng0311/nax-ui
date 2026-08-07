@@ -15,7 +15,7 @@
 			:refresher-default-style="refresherDefaultStyle"
 			:style="scrollStyle"
 			@scroll="onScroll"
-			<!-- #ifdef APP-HARMONY -->
+			<!-- #ifdef APP-HARMONY || APP-IOS -->
 			@scrollend="onScrollEnd"
 			<!-- #endif -->
 			@scrolltolower="onScrollToLower"
@@ -101,7 +101,7 @@
 
 	/**
 	 * nax-virtual-list
-	 * @description 固定行高虚拟列表。App 端 spacer 窗口裁剪；Web/小程序固定总高 + translateY（规避滚动锚定连滚）。鸿蒙滚动滞后更新 + scrollend 同步事件。
+	 * @description 固定行高虚拟列表。App 端 spacer 窗口裁剪；Web/小程序固定总高 + translateY（规避滚动锚定连滚）。iOS/鸿蒙滚动合并更新 + scrollend 同步事件。
 	 * @property {any[]} list 完整数据源（不切片传参；内部按滚动窗口渲染）
 	 * @property {number} itemHeight 行高 px（固定等高）
 	 * @property {number} buffer 上下额外缓冲行数，默认 6；鸿蒙不足 12 抬到 12
@@ -261,7 +261,7 @@
 	let lastEmittedStart = -1
 	let lastEmittedEnd = -1
 	let measureToken = 0
-	// #ifdef APP-HARMONY
+	// #ifdef APP-HARMONY || APP-IOS
 	let pendingScrollTop = 0.0
 	let scrollMergeScheduled = false
 	let scrollMergeToken = 0
@@ -297,7 +297,8 @@
 			return 0
 		}
 		var n = Math.floor(b)
-		// #ifdef APP-HARMONY
+		// #ifdef APP-HARMONY || APP-IOS
+		// iOS/鸿蒙：滚动事件滞后于渲染，扩大缓冲避免快速滑动出现空白窗口
 		if (n < 12) {
 			n = 12
 		}
@@ -498,7 +499,7 @@
 			end = start
 		}
 
-		// #ifdef APP-HARMONY
+		// #ifdef APP-HARMONY || APP-IOS
 		if (!forceEmit) {
 			const sticky = Math.max(2, Math.floor(buf / 2))
 			const cStart = committedStart
@@ -519,7 +520,7 @@
 		startIndex.value = start
 		endIndex.value = end
 		visibleRows.value = buildVisibleRows(start, end)
-		// #ifdef APP-HARMONY
+		// #ifdef APP-HARMONY || APP-IOS
 		committedStart = start
 		committedEnd = end
 		// #endif
@@ -527,12 +528,12 @@
 		if (forceEmit || start != lastEmittedStart || end != lastEmittedEnd) {
 			lastEmittedStart = start
 			lastEmittedEnd = end
-			// #ifdef APP-HARMONY
+			// #ifdef APP-HARMONY || APP-IOS
 			if (forceEmit) {
 				emitVisible(start, end)
 			}
 			// #endif
-			// #ifndef APP-HARMONY
+			// #ifndef APP-HARMONY || APP-IOS
 			emitVisible(start, end)
 			// #endif
 		}
@@ -581,8 +582,9 @@
 		emit('scroll', payload)
 	}
 
-	// #ifdef APP-HARMONY
-	function flushHarmonyScroll(forceEmit : boolean) {
+	// #ifdef APP-HARMONY || APP-IOS
+	// iOS/鸿蒙：滚动帧合并（32ms）+ scrollend 强制同步，避免每个 scroll 事件触发响应式重渲染掉帧
+	function flushAppScroll(forceEmit : boolean) {
 		scrollMergeScheduled = false
 		const top = pendingScrollTop
 		scrollTopValue.value = top
@@ -592,7 +594,7 @@
 		}
 	}
 
-	function scheduleHarmonyScroll() {
+	function scheduleAppScroll() {
 		if (scrollMergeScheduled) {
 			return
 		}
@@ -602,19 +604,19 @@
 			if (token != scrollMergeToken) {
 				return
 			}
-			flushHarmonyScroll(false)
+			flushAppScroll(false)
 		}, 32)
 	}
 
 	function onScroll(e : UniScrollEvent) {
 		pendingScrollTop = e.detail.scrollTop
-		scheduleHarmonyScroll()
+		scheduleAppScroll()
 	}
 
 	function onScrollEnd(e : UniScrollEvent) {
 		scrollMergeToken = scrollMergeToken + 1
 		pendingScrollTop = e.detail.scrollTop
-		flushHarmonyScroll(true)
+		flushAppScroll(true)
 	}
 	// #endif
 
@@ -716,7 +718,8 @@
 	}
 	// #endif
 
-	// #ifdef APP-ANDROID || APP-IOS
+	// #ifdef APP-ANDROID
+	// Android：每个 scroll 事件直接更新窗口（与既有行为一致）
 	function onScroll(e : UniScrollEvent) {
 		const top = e.detail.scrollTop
 		scrollTopValue.value = top

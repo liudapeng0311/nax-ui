@@ -1,3 +1,7 @@
+## 0.1.17（2026-08-07）
+- 修复 iOS 端无缝滚动暂停/播放不生效：`UniElement.animate` 无限循环在 iOS 上无法可靠停止（0ms 动画顶不掉循环），改为 rAF + `style.setProperty` 驱动（DOM 直写跳过 Vue diff，16ms/帧不掉帧），暂停/恢复通过 `cancelAnimationFrame` 全端语义一致（`APP-ANDROID`、`APP-IOS`、`APP-HARMONY` 统一）；Web 和小程序 CSS 动画行为不变。
+## 0.1.16（2026-08-06）
+- Android / iOS：无缝滚动改用原生 `UniElement.animate`（0→-half 线性无限循环，失败回退 rAF + setProperty），与鸿蒙方案统一；移除 setInterval + Vue `:style` 高频重绘，修复 Android / iOS 端掉帧（`APP-ANDROID`、`APP-IOS`）；Web 和小程序 CSS 动画行为不变。
 ## 0.1.15（2026-07-31）
 - 移除第三方组件库参考表述，完善独立组件文档。
 ## 0.1.14 (2026-07-23)

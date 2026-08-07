@@ -449,38 +449,38 @@
 	})
 
 	const addIconColor = computed((): string => {
-		// Android / 鸿蒙跨组件传递 CSS 变量不稳定，图标使用实色兜底。
-		// #ifdef APP-ANDROID || APP-HARMONY
+		// Android / 鸿蒙 / iOS 跨组件传递 CSS 变量不稳定，图标使用实色兜底。
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
 			return '#ffffffa6'
 		}
 		return '#767c82'
 		// #endif
-		// #ifndef APP-ANDROID || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		return 'var(--nax-color-text-secondary, #767c82)'
 		// #endif
 	})
 
 	const itemThemeClass = computed((): string => {
-		// #ifdef APP-ANDROID || APP-HARMONY
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
 			return 'nax-upload__item--app-dark nax-upload__item--app-dark-border'
 		}
 		return 'nax-upload__item--app-light nax-upload__item--app-light-border'
 		// #endif
-		// #ifndef APP-ANDROID || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		return ''
 		// #endif
 	})
 
 	const addTextThemeClass = computed((): string => {
-		// #ifdef APP-ANDROID || APP-HARMONY
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		if (props.customClass.indexOf('nax-theme-dark') >= 0) {
 			return 'nax-upload__add-text--app-dark'
 		}
 		return 'nax-upload__add-text--app-light'
 		// #endif
-		// #ifndef APP-ANDROID || APP-HARMONY
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		return ''
 		// #endif
 	})
@@ -1450,8 +1450,8 @@
 		color: var(--nax-color-text-secondary, #767c82);
 	}
 
-	/* #ifdef APP-ANDROID || APP-HARMONY */
-	/* Android / 鸿蒙组件隔离下使用本地实色，避免主题变量回退成浅色。 */
+	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Android / 鸿蒙 / iOS 组件隔离下使用本地实色，避免主题变量回退成浅色或黑色。 */
 	.nax-upload__item--app-light {
 		background-color: #fafafc;
 	}

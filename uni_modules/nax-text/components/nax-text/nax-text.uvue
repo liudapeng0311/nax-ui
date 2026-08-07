@@ -460,8 +460,8 @@
 		} else if (align == 'right') {
 			style = 'justify-content:flex-end'
 		}
-		// Android / 鸿蒙 / Web / 微信小程序：省略时根节点强制定宽裁剪，防止被长文本撑开
-		// #ifdef APP-ANDROID || APP-HARMONY || WEB || MP-WEIXIN
+		// Android / 鸿蒙 / iOS / Web / 微信小程序：省略时根节点强制定宽裁剪，防止被长文本撑开
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || WEB || MP-WEIXIN
 		if (props.lines > 0) {
 			style += ';overflow:hidden'
 			style += ';width:100%'
@@ -516,8 +516,8 @@
 			}
 			style += ';line-height:' + lh
 		}
-		// Android / 鸿蒙：属性 :lines 在 flex 子项上可能不生效，同步写 CSS lines
-		// #ifdef APP-ANDROID || APP-HARMONY
+		// Android / 鸿蒙 / iOS：属性 :lines 在 flex 子项上可能不生效，同步写 CSS lines
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		if (props.lines > 0) {
 			style += ';lines:' + props.lines.toString()
 			style += ';overflow:hidden'
@@ -792,8 +792,8 @@
 		text-overflow: ellipsis;
 	}
 
-	/* Android / 鸿蒙：CSS lines 与属性 :lines 双写；单行/多行共用 overflow */
-	/* #ifdef APP-ANDROID || APP-HARMONY */
+	/* Android / 鸿蒙 / iOS：CSS lines 与属性 :lines 双写；单行/多行共用 overflow */
+	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
 	.nax-text__value--lines-1 {
 		lines: 1;
 		overflow: hidden;

@@ -24,7 +24,7 @@
 <script setup lang="uts">
 	/**
 	 * nax-loading
-	 * @description 局部/区块加载指示。鸿蒙用原生 animate 旋转；Android/iOS 定时 transform；Web/小程序用 CSS 动画。
+	 * @description 局部/区块加载指示。App 端用原生 animate 旋转；Web/小程序用 CSS 动画。
 	 * @property {boolean} show 是否显示，默认 true
 	 * @property {string} size sm | md | lg
 	 * @property {string} text 文案；也可用默认插槽
@@ -194,8 +194,8 @@
 
 	const spinnerDomId = 'nax-ld-' + Math.floor(Math.random() * 10000000).toString()
 
-	// #ifdef APP-HARMONY
-	// 鸿蒙：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App 端：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
 	let spinToken = 0
 	let usingNativeSpin = false
 	let cachedSpinEl : UniElement | null = null
@@ -234,7 +234,7 @@
 		if (el == null) {
 			return
 		}
-		// 鸿蒙不返回动画实例：0 时长 forwards 复位并顶掉循环
+		// 不返回动画实例：0 时长 forwards 复位并顶掉循环
 		el.animate([
 			{
 				transform: 'rotate(0deg)'
@@ -326,50 +326,6 @@
 			startFallbackSpin()
 		}
 		tryStart(0)
-	}
-
-	watch((): boolean => {
-		return props.show
-	}, (val: boolean) => {
-		if (val) {
-			startSpin()
-		} else {
-			stopSpin()
-		}
-	}, { immediate: true })
-
-	onUnmounted(() => {
-		stopSpin()
-	})
-	// #endif
-
-	// #ifdef APP-ANDROID || APP-IOS
-	// Android / iOS：定时 transform 兜底（uvue CSS 不支持 @keyframes）
-	const spinAngle = ref(0)
-	let spinTimerId = -1
-
-	const spinnerStyle = computed((): string => {
-		return 'transform:rotate(' + spinAngle.value.toString() + 'deg)'
-	})
-
-	function stopSpin() {
-		if (spinTimerId >= 0) {
-			clearInterval(spinTimerId)
-			spinTimerId = -1
-		}
-		spinAngle.value = 0
-	}
-
-	function startSpin() {
-		stopSpin()
-		spinAngle.value = 0
-		spinTimerId = setInterval(() => {
-			let next = spinAngle.value + 30
-			if (next >= 360) {
-				next = 0
-			}
-			spinAngle.value = next
-		}, 50)
 	}
 
 	watch((): boolean => {

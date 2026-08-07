@@ -1,3 +1,5 @@
+## 0.2.1（2026-08-07）
+- 支持IOS端。
 ## 0.2.0（2026-08-01）
 - 新增 `openNaxPopup({ themeClass })`：内置 dialogPage host 可应用传入的主题 class，解决独立页面无法继承触发页暗色主题的问题。
 - 演示：window 模式传递当前 `nax-theme-dark`；自定义 `demo-dialog` 同步演示工程的暗色状态。

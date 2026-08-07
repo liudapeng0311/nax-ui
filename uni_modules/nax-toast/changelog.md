@@ -1,3 +1,11 @@
+## 0.1.9（2026-08-07）
+- Android：loading 类型图标旋转改用原生 `animate`（失败再低频 setProperty 兜底），与 iOS/鸿蒙方案一致，移除 setInterval + 响应式 transform，修复 Android 端掉帧（`APP-ANDROID`）；Web 和小程序行为保持不变。
+## 0.1.8（2026-08-06）
+- 修复 iOS 端 loading 类型图标旋转掉帧：改用原生 `animate` 无限旋转（与鸿蒙方案一致，失败再低频 setProperty 兜底），替代 setInterval + 响应式 transform（`APP-IOS`）；Android、Web 和小程序行为保持不变。
+## 0.1.7（2026-08-06）
+- 修复 iOS 端 `position: 'center'` 的无蒙层轻提示在大屏设备上视觉偏上问题：固定 `280px` 改为按屏幕高度 `42%` 定位（`APP-IOS`）；安卓、鸿蒙、Web 和小程序行为保持不变。
+## 0.1.6（2026-08-06）
+- 修复 iOS 端 `position: 'top'` 的有、无蒙层轻提示位置过于靠上问题：下移至 `128px`，避开 iOS 状态栏与导航栏区域（`APP-IOS`）；安卓、鸿蒙、Web 和小程序行为保持不变。
 ## 0.1.5（2026-08-01）
 - 修复 Android 端无蒙层 Toast 的 `center` 与 `top` 定位偏上问题：`center` 改为按屏幕高度定位，`top` 下移至 `128px`；有蒙层与无蒙层路径均使用 `APP-ANDROID` 隔离，iOS、鸿蒙、Web 和小程序保持原有行为。
 ## 0.1.4（2026-07-30）
