@@ -4,7 +4,8 @@ demo: progress
 
 # nax-progress
 
-# nax-progress
+> 当前版本：0.1.7（见 `changelog.md`）
+
 进度条。线形 / 圆形统一入口，用 `shape` 切换。
 
 ## 安装

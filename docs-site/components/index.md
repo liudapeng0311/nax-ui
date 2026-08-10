@@ -8,12 +8,12 @@
 |------|------|
 | [nax-button](/components/button) | 通用按钮。色系与层级参考 ：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用。 |
 | [nax-text](/components/text) | 文本 Text：主题色 / 字号 / 省略 / 加粗 / 装饰 / 模式格式化（价格、手机号、姓名、日期、链接）等。 |
-| [nax-icon](/components/icon) | 字体图标。默认图标集来自 Tabler Icons（MIT）语义子集。 |
+| [nax-icon](/components/icon) | 字体图标。 |
 | [nax-space](/components/space) | 间距容器。横向/纵向排列子项并统一间距。配合 nax-space-item 使用。 |
 | [nax-line](/components/line) | 纯线条（布局分隔）。横/竖、粗细、虚线、语义色；默认走 --nax-color-divider。 |
 | [nax-divider](/components/divider) | 内容分割线（可带文字）。与 nax-line 分工：line 只画纯线，本组件负责「文案分隔」。 |
 | [nax-tag](/components/tag) | 标签。能力对齐  Tag：类型 / 尺寸 / 边框 / 圆角 / 可关闭 / 可选中。 |
-| [nax-badge](/components/badge) | 徽标。能力对齐  Badge。 |
+| [nax-badge](/components/badge) | 徽标。 |
 | [nax-avatar](/components/avatar) | 头像。能力对齐  Avatar：尺寸 / 形状 / 图片 / 文字 / 描边 / 失败回退。 |
 
 ## 布局组件
@@ -25,7 +25,7 @@
 | [nax-grid](/components/grid) | 宫格容器。配合 nax-grid-item 使用。 |
 | [nax-steps](/components/steps) | 步骤条容器。list 数据驱动或配合 nax-step 组合使用。 |
 | [nax-list](/components/list) | 滚动列表壳：内部 scroll-view 触底加载 + 下拉刷新 + 空/错/底态。虚拟列表见 nax-virtual-list。 |
-| [nax-virtual-list](/components/virtual-list) | 固定行高虚拟列表。App 端 spacer 窗口裁剪；Web/小程序固定总高 + translateY（规避滚动锚定连滚）。鸿蒙滚动滞后更新 + scrollend 同步事件。 |
+| [nax-virtual-list](/components/virtual-list) | 固定行高虚拟列表。App 端 spacer 窗口裁剪；Web/小程序固定总高 + translateY（规避滚动锚定连滚）。iOS/鸿蒙滚动合并更新 + scrollend 同步事件。 |
 | [nax-swipe-action](/components/swipe-action) | 滑动操作。左滑露出右侧操作按钮；可与 nax-swipe-action-group 互斥展开。 |
 | [nax-swiper](/components/swiper) | 轮播。基于原生 swiper 封装。 |
 
@@ -54,7 +54,7 @@
 | 组件 | 说明 |
 |------|------|
 | [nax-transition](/components/transition) | 轻量进退场过渡。预设 fade / slide-up / slide-down / slide-left / slide-right / zoom / fade-up。 |
-| [nax-loading](/components/loading) | 局部/区块加载指示。鸿蒙用原生 animate 旋转；Android/iOS 定时 transform；Web/小程序用 CSS 动画。 |
+| [nax-loading](/components/loading) | 局部/区块加载指示。App 端用原生 animate 旋转；Web/小程序用 CSS 动画。 |
 | [nax-progress](/components/progress) | 进度条。线形 / 圆形统一入口；props 管行为，外观走 type/size + CSS 变量。 |
 | [nax-skeleton](/components/skeleton) | 骨架屏。头像/标题/段落占位；loading 控制骨架与真实内容切换。 |
 | [nax-overlay](/components/overlay) | 全屏遮罩层（弹层底层）。半透明蒙层 + 可选默认插槽内容；支持淡入淡出。 |
@@ -81,8 +81,3 @@
 |------|------|
 | [nax-image](/components/image) | 图片。基于原生 image 封装，支持加载中 / 失败占位。 |
 | [nax-empty](/components/empty) | 空状态。无数据 / 失败 / 搜索无结果等占位。 |
-
-## 相关文档
-
-- 设计规范：仓库内 `docs/design-system.md`
-- 组件清单：仓库内 `docs/component-inventory.md`

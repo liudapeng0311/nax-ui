@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
 	/**
 	 * 配方：全屏选项卡（Tabs + Swiper）
@@ -91,7 +91,8 @@
 	 * - nax-tabs 管导航，原生 swiper 管内容，共享 current
 	 * - circular=false，避免与 Tab 下标错位
 	 */
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
 
 	const navBackIconColor = computed((): string => {
 		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。

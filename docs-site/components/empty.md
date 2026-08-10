@@ -4,6 +4,8 @@ demo: empty
 
 # nax-empty
 
+> 当前版本：0.1.2（见 `changelog.md`）
+
 空状态占位。用于列表无数据、搜索无结果、加载失败等场景。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-empty
 easycom 自动生效，页面直接使用 `<nax-empty />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.1（见 `changelog.md`）
 
 ## 代码示例
 

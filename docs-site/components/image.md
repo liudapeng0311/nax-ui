@@ -4,6 +4,8 @@ demo: image
 
 # nax-image
 
+> 当前版本：0.1.7（见 `changelog.md`）
+
 `nax-ui` 图片组件（uni-app x / uvue）。
 基于原生 `image` 封装，提供统一尺寸/圆角 API，以及**加载中**与**加载失败**占位。
 
@@ -24,8 +26,6 @@ easycom 自动生效，页面直接使用 `<nax-image />` 即可。
 | `nax-icon` | 图标（loading 等） |
 | `nax-ui-theme` | **安装时依赖**；**运行时弱依赖**（组件内 `var(--nax-*, fallback)`，未接主题也能显示） |
 
-
-> 当前版本：0.1.6（见 `changelog.md`）
 
 ## 代码示例
 

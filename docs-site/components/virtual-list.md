@@ -4,6 +4,8 @@ demo: virtual-list
 
 # nax-virtual-list
 
+> 当前版本：0.1.8（见 `changelog.md`）
+
 固定行高**虚拟列表**。使用 `scroll-view` + 上下 spacer，只渲染可视区与缓冲行，适合一次性持有大量数据。鸿蒙端对窗口更新做滞后合并，`scroll`/`visible-change` 在 `scrollend` 同步。
 > 与 `nax-list` 的区别：`nax-list` 是滚动壳（内容自行 `v-for`，不裁剪 DOM）；本组件接管数据源并做窗口裁剪。
 
@@ -16,8 +18,6 @@ uni_modules/nax-virtual-list
 easycom 自动生效，页面直接使用 `<nax-virtual-list />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.7（见 `changelog.md`）
 
 ## 代码示例
 

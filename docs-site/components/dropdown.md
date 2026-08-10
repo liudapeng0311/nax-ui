@@ -4,6 +4,8 @@ demo: dropdown
 
 # nax-dropdown
 
+> 当前版本：0.1.4（见 `changelog.md`）
+
 筛选栏式下拉菜单。
 
 ## 安装

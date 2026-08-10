@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef } from '@/common/demo-theme.uts'
 	import {
 		demoTabList,
 		switchDemoTab,
@@ -94,7 +94,8 @@
 		takePendingCatalogTab
 	} from '@/common/demo-catalog.uts'
 
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {

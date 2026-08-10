@@ -4,6 +4,8 @@ demo: action-sheet
 
 # nax-action-sheet
 
+> 当前版本：0.1.1（见 `changelog.md`）
+
 底部操作菜单（动作面板）。内部薄封装 `nax-picker`（`position=bottom`），只提供「选项列表 + 取消」语义。
 自定义任意底部内容请直接用 `nax-picker`。
 
@@ -16,8 +18,6 @@ uni_modules/nax-action-sheet
 easycom 自动生效，页面直接使用 `<nax-action-sheet />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.0（见 `changelog.md`）
 
 ## 代码示例
 

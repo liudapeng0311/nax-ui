@@ -51,7 +51,8 @@ export default defineConfig({
     nav: [
       { text: '指南', link: '/guide/' },
       { text: '组件', link: '/components/' },
-      { text: '主题接入', link: '/guide/theme' }
+      { text: '主题接入', link: '/guide/theme' },
+      { text: '暗黑模式', link: '/guide/dark-mode' }
     ],
     sidebar,
     outline: { label: '本页目录', level: [2, 3] },

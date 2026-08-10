@@ -77,14 +77,15 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, setDemoDarkMode, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef, setDemoDarkMode, demoNavBackIconColor } from '@/common/demo-theme.uts'
 	import {
 		openNaxPopup,
 		closeNaxPopup,
 		naxPopupSupportsWindowCover
 	} from '@/uni_modules/nax-popup/index.uts'
 
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
 
 	const navBackIconColor = computed((): string => {
 		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。

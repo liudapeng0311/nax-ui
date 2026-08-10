@@ -390,7 +390,8 @@
 		return 90
 	}
 
-	function requestFullscreen(direction : number | null = null) : void {
+	// 注：参数不带默认值——Android 端插槽传递带默认参数函数引用会编译失败
+	function requestFullscreen(direction : number | null) : void {
 		const ctx = ensureContext()
 		if (ctx == null) {
 			return

@@ -4,6 +4,8 @@ demo: icon
 
 # nax-icon
 
+> 当前版本：0.2.8（见 `changelog.md`）
+
 `nax-ui` 字体图标组件（uni-app x / uvue）。
 
 ## 安装
@@ -22,8 +24,6 @@ easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
 |------|------|
 | `nax-ui-theme` | **安装时依赖**；**运行时弱依赖**（未挂主题时走 fallback） |
 
-
-> 当前版本：0.2.5（见 `changelog.md`）
 
 ## 代码示例
 
@@ -122,7 +122,6 @@ easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
 
 - uvue / 鸿蒙 `@font-face` 仅支持 `font-family` 与 `src`。
 - 微信小程序不要改回本地字体路径。
-- 重新生成需要本机 Python `fontTools`：`pip install fonttools`。
 
 
 ## Props

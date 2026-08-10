@@ -17,7 +17,7 @@
 									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
 									<text class="overlay__btn" @click="stop">停止</text>
 									<text v-if="waiting" class="overlay__hint">加载中</text>
-									<text class="overlay__time">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</text>
+									<text class="overlay__time">{{ formatTimeAny(currentTime) }} / {{ formatTimeAny(duration) }}</text>
 								</view>
 							</view>
 						</template>
@@ -27,24 +27,24 @@
 
 				<view class="section">
 					<text class="section__title">2. 自定义进度（拖动结束再 seek）</text>
-					<nax-video :src="demoSrc" height="200" @timeupdate="onProgressTime">
-						<template #default="{ playing, toggle, seek, seekBy, currentTime, duration }">
+					<nax-video ref="video2Ref" :src="demoSrc" height="200" @timeupdate="onProgressTime">
+						<template #default="{ playing, toggle, currentTime, duration }">
 							<view class="overlay overlay--stack">
 								<view class="overlay__bar">
 									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
-									<text class="overlay__btn" @click="seekBy(-10)">-10s</text>
-									<text class="overlay__btn" @click="seekBy(10)">+10s</text>
-									<text class="overlay__btn" @click="seek(0)">回起点</text>
-									<text class="overlay__time">{{ formatTime(sliderDragging ? sliderTime : currentTime) }} / {{ formatTime(duration) }}</text>
+									<text class="overlay__btn" @click="seekBy2(-10)">-10s</text>
+									<text class="overlay__btn" @click="seekBy2(10)">+10s</text>
+									<text class="overlay__btn" @click="seek2(0)">回起点</text>
+									<text class="overlay__time">{{ formatTimeAny(sliderDragging ? sliderTime : currentTime) }} / {{ formatTimeAny(duration) }}</text>
 								</view>
 								<view class="slider-wrap">
 									<nax-slider
-										:model-value="sliderDragging ? sliderTime : currentTime"
+										:model-value="sliderDragging ? sliderTime : toNum(currentTime)"
 										:min="0"
-										:max="duration > 0 ? duration : 1"
+										:max="toNum(duration) > 0 ? toNum(duration) : 1"
 										:step="0.1"
 										@start="onSliderStart"
-										@change="seek"
+										@change="seek2"
 										@end="onSliderEnd"
 									></nax-slider>
 								</view>
@@ -57,20 +57,21 @@
 				<view class="section">
 					<text class="section__title">3. 静音与倍速</text>
 					<nax-video
+						ref="video3Ref"
 						:src="demoSrc"
 						height="200"
 						v-model:muted="muted"
 						:playback-rate="rate"
 					>
-						<template #default="{ playing, muted, playbackRate, toggle, toggleMuted, setPlaybackRate }">
+						<template #default="{ playing, muted, playbackRate, toggle, toggleMuted }">
 							<view class="overlay">
 								<view class="overlay__bar">
 									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
 									<text class="overlay__btn" @click="toggleMuted">{{ muted ? '取消静音' : '静音' }}</text>
-									<text class="overlay__btn" @click="setPlaybackRate(0.5)">0.5x</text>
-									<text class="overlay__btn" @click="setPlaybackRate(1)">1x</text>
-									<text class="overlay__btn" @click="setPlaybackRate(1.25)">1.25x</text>
-									<text class="overlay__btn" @click="setPlaybackRate(1.5)">1.5x</text>
+									<text class="overlay__btn" @click="setRate3(0.5)">0.5x</text>
+									<text class="overlay__btn" @click="setRate3(1)">1x</text>
+									<text class="overlay__btn" @click="setRate3(1.25)">1.25x</text>
+									<text class="overlay__btn" @click="setRate3(1.5)">1.5x</text>
 								</view>
 							</view>
 							<text class="overlay__float">slot muted={{ muted }} · rate={{ playbackRate }}</text>
@@ -89,18 +90,19 @@
 				<view class="section">
 					<text class="section__title">4. 全屏控制</text>
 					<nax-video
+						ref="video4Ref"
 						:src="demoSrc"
 						height="200"
 						title="nax-video demo"
 						:fullscreen-direction="90"
 						@fullscreenchange="onFsChange"
 					>
-						<template #default="{ playing, fullscreen, toggle, requestFullscreen, exitFullscreen, toggleFullscreen }">
+						<template #default="{ playing, fullscreen, toggle, exitFullscreen, toggleFullscreen }">
 							<view class="overlay">
 								<view class="overlay__bar">
 									<text class="overlay__btn" @click="toggle">{{ playing ? '暂停' : '播放' }}</text>
-									<text class="overlay__btn" @click="requestFullscreen(90)">横屏全屏</text>
-									<text class="overlay__btn" @click="requestFullscreen(0)">竖屏全屏</text>
+									<text class="overlay__btn" @click="fs4(90)">横屏全屏</text>
+									<text class="overlay__btn" @click="fs4(0)">竖屏全屏</text>
 									<text class="overlay__btn" @click="exitFullscreen">退出</text>
 									<text class="overlay__btn" @click="toggleFullscreen">切换</text>
 								</view>
@@ -158,7 +160,7 @@
 							<view class="overlay">
 								<view class="overlay__bar">
 									<text class="overlay__btn" @click="toggle">A {{ playing ? '暂停' : '播放' }}</text>
-									<text class="overlay__time">{{ formatTime(currentTime) }}</text>
+									<text class="overlay__time">{{ formatTimeAny(currentTime) }}</text>
 								</view>
 							</view>
 						</template>
@@ -169,7 +171,7 @@
 							<view class="overlay">
 								<view class="overlay__bar">
 									<text class="overlay__btn" @click="toggle">B {{ playing ? '暂停' : '播放' }}</text>
-									<text class="overlay__time">{{ formatTime(currentTime) }}</text>
+									<text class="overlay__time">{{ formatTimeAny(currentTime) }}</text>
 								</view>
 							</view>
 						</template>
@@ -182,9 +184,10 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
 
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
 
 	const navBackIconColor = computed(() : string => {
 		// #ifdef APP-ANDROID
@@ -230,6 +233,58 @@
 			return m.toString() + ':0' + s.toString()
 		}
 		return m.toString() + ':' + s.toString()
+	}
+
+	// 插槽解构变量在 Android 端推断为 Any?，这里显式转 number（运行期值本就是 number）
+	function toNum(v : any | null) : number {
+		if (v == null) {
+			return 0
+		}
+		return v as number
+	}
+
+	function formatTimeAny(v : any | null) : string {
+		return formatTime(toNum(v))
+	}
+
+	// Android 端插槽作用域带参函数（seek/setPlaybackRate/requestFullscreen）调用解析失败，
+	// 改用组件 defineExpose 方法（demo 页 form 同款模式）
+	type NaxVideoExpose = {
+		seek: (sec : number) => void,
+		seekBy: (delta : number) => void,
+		setPlaybackRate: (rateVal : number) => void,
+		requestFullscreen: (direction : number) => void
+	}
+	const video2Ref = ref(null as NaxVideoExpose | null)
+	const video3Ref = ref(null as NaxVideoExpose | null)
+	const video4Ref = ref(null as NaxVideoExpose | null)
+
+	function seek2(sec : number) {
+		const v = video2Ref.value
+		if (v != null) {
+			v.seek(sec)
+		}
+	}
+
+	function seekBy2(delta : number) {
+		const v = video2Ref.value
+		if (v != null) {
+			v.seekBy(delta)
+		}
+	}
+
+	function setRate3(rateVal : number) {
+		const v = video3Ref.value
+		if (v != null) {
+			v.setPlaybackRate(rateVal)
+		}
+	}
+
+	function fs4(direction : number) {
+		const v = video4Ref.value
+		if (v != null) {
+			v.requestFullscreen(direction)
+		}
 	}
 
 	function onBasicState(state : UTSJSONObject) {
@@ -280,7 +335,7 @@
 		errorHint.value = 'error errCode=' + c.toString()
 	}
 
-	function onWaitingDemo(_ : any) {
+	function onWaitingDemo(e : any) {
 		errorHint.value = 'waiting…'
 	}
 

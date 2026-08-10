@@ -4,6 +4,8 @@ demo: dialog
 
 # nax-dialog
 
+> 当前版本：0.2.0（见 `changelog.md`）
+
 居中对话框（确认 / 告警）。内部薄封装 `nax-picker`（`position=center`）。
 支持两种用法：
 1. **声明式**：页面里写 `<nax-dialog v-model:show>`，可插槽自定义内容

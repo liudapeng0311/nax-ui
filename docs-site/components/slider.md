@@ -4,6 +4,8 @@ demo: slider
 
 # nax-slider
 
+> 当前版本：1.0.1（见 `changelog.md`）
+
 uni-app x 滑动选择器，功能覆盖常用场景。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-slider
 easycom 自动生效，页面直接使用 `<nax-slider />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：1.0.0（见 `changelog.md`）
 
 ## 代码示例
 

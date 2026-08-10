@@ -4,6 +4,8 @@ demo: checkbox
 
 # nax-checkbox / nax-checkbox-group
 
+> 当前版本：0.1.3（见 `changelog.md`）
+
 uni-app x 复选框 / 复选框组。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-checkbox
 easycom 自动生效，页面直接使用 `<nax-checkbox />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.2（见 `changelog.md`）
 
 ## 代码示例
 

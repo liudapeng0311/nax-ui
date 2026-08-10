@@ -4,6 +4,8 @@ demo: calendar
 
 # nax-calendar
 
+> 当前版本：0.1.2（见 `changelog.md`）
+
 `nax-ui` 日历选择器（uni-app x / uvue）。
 主要能力：
 - 单选 `mode="date"` / 范围 `mode="range"`
@@ -31,8 +33,6 @@ easycom 自动生效，页面直接使用 `<nax-calendar />` 即可。
 | `nax-transition` | 弹层进退场 |
 | `nax-ui-theme` | 主题 token（运行时弱依赖） |
 
-
-> 当前版本：0.1.1（见 `changelog.md`）
 
 ## 代码示例
 

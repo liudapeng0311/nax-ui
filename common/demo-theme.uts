@@ -2,40 +2,109 @@
  * 演示工程全局主题状态（宿主 demo）
  * 模块单例 + storage；setup 同步读取，减少进页白闪
  *
+ * 主题模式三态：followSystem（跟随系统）/ light / dark
+ * 手动选择后不再跟随系统；切回 followSystem 恢复联动。
+ *
  * 说明：uni-app x App 蒸汽模式不宜引入 Pinia 等重状态库；
  * 宿主用本模块作为轻量全局状态即可。
  */
-const STORAGE_KEY = 'nax_demo_dark_mode'
+const STORAGE_KEY = 'nax_demo_theme_mode'
+const LEGACY_KEY = 'nax_demo_dark_mode'
 
-var darkModeFlag = false
+// 说明：UTSHarmony 为鸿蒙平台内置对象，无需 import 直接调用
+
+var themeMode = 'followSystem'
+var systemDark = false
 var themeInited = false
 
-function readStorage(): boolean {
+/**
+ * 共享响应式暗黑态：系统主题切换时更新，页面 computed 依赖它即可实时刷新
+ * （页面 setup 用 `const darkMode = demoDarkRef` 引用，替代本地 ref）
+ */
+export const demoDarkRef = ref(false)
+
+function syncDemoDarkRef() {
+	demoDarkRef.value = isDemoDarkMode()
+}
+
+// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+var osThemeListenerId = -1
+// #endif
+
+function readStorage(): string {
 	const raw = uni.getStorageSync(STORAGE_KEY)
-	if (raw == null) {
+	if (raw != null) {
+		const s = '' + raw
+		if (s == 'followSystem' || s == 'light' || s == 'dark') {
+			return s
+		}
+	}
+	// 旧版布尔 key 迁移：1/true → 手动深色
+	const legacy = uni.getStorageSync(LEGACY_KEY)
+	if (legacy != null) {
+		const ls = '' + legacy
+		if (ls == '1' || ls == 'true') {
+			return 'dark'
+		}
+	}
+	return 'followSystem'
+}
+
+function writeStorage(mode: string) {
+	uni.setStorageSync(STORAGE_KEY, mode)
+	uni.removeStorageSync(LEGACY_KEY)
+}
+
+/** 读取系统当前主题是否为暗色 */
+function readSystemDark(): boolean {
+	// 鸿蒙：getAppBaseInfo().hostTheme 与 getSystemInfoSync().theme 均返回 undefined，
+	// 只能使用原生 UTSHarmony.getOsTheme() 获取系统主题
+	// #ifdef APP-HARMONY
+	const osTheme = UTSHarmony.getOsTheme()
+	if ((osTheme as string) == 'dark') {
+		return true
+	} else if ((osTheme as string) == 'light') {
 		return false
 	}
-	const s = '' + raw
-	if (s == '1' || s == 'true') {
+	// #endif
+	// #ifdef APP-ANDROID
+	// Android：uni API 的 theme 字段缺失，用原生 getOsTheme()（与鸿蒙对称）
+	const osThemeAndroid = UTSAndroid.getOsTheme()
+	if ((osThemeAndroid as string) == 'dark') {
 		return true
+	} else if ((osThemeAndroid as string) == 'light') {
+		return false
+	}
+	// #endif
+	// 公共兜底：osTheme 为操作系统主题（GetSystemInfoResult 全端字段）；
+	// hostTheme 仅 web / 微信小程序支持，App 端不可用
+	const info = uni.getSystemInfoSync()
+	if (info.osTheme == 'dark') {
+		return true
+	} else if (info.osTheme == 'light') {
+		return false
 	}
 	return false
 }
 
-function writeStorage(val: boolean) {
-	if (val) {
-		uni.setStorageSync(STORAGE_KEY, '1')
-	} else {
-		uni.setStorageSync(STORAGE_KEY, '0')
-	}
-}
-
-function applyDemoAppTheme(dark: boolean) {
+function applyDemoAppTheme(mode: string) {
 	// App 原生页面背景需在页面创建前切换，避免暗色页面转场先闪浅色。
+	// auto = 跟随系统，仅 App 端可用。
 	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
-	uni.setAppTheme({
-		theme: (dark ? 'dark' : 'light') as 'light' | 'dark'
-	})
+	var theme = 'light'
+	if (mode == 'dark') {
+		theme = 'dark'
+	} else if (mode == 'followSystem') {
+		theme = 'auto'
+	}
+	try {
+		uni.setAppTheme({
+			theme: theme as 'light' | 'dark' | 'auto'
+		})
+	} catch (e : any) {
+		// 鸿蒙旧版本可能不支持运行时 setAppTheme，保持 manifest defaultAppTheme
+		console.log('[nax-demo-theme] setAppTheme failed: ' + (e as Error).message)
+	}
 	// #endif
 }
 
@@ -43,31 +112,116 @@ export function initDemoTheme() {
 	if (themeInited) {
 		return
 	}
-	darkModeFlag = readStorage()
+	themeMode = readStorage()
 	themeInited = true
-	applyDemoAppTheme(darkModeFlag)
-	applyDemoThemeChrome(darkModeFlag)
+	systemDark = readSystemDark()
+	// 诊断日志：平台主题 API 实际返回值（排查跟随系统失效用）
+	// #ifdef APP-HARMONY
+	const osThemeDiag = UTSHarmony.getOsTheme()
+	console.log('[nax-demo-theme] UTSHarmony.getOsTheme()=' + osThemeDiag + ' mode=' + themeMode + ' systemDark=' + systemDark.toString())
+	// #endif
+	// #ifdef APP-ANDROID
+	const osThemeDiagAndroid = UTSAndroid.getOsTheme()
+	const appBaseDiagAndroid = uni.getAppBaseInfo()
+	console.log('[nax-demo-theme] UTSAndroid.getOsTheme()=' + osThemeDiagAndroid + ' appTheme=' + appBaseDiagAndroid.appTheme + ' hostTheme=' + appBaseDiagAndroid.hostTheme + ' mode=' + themeMode + ' systemDark=' + systemDark.toString())
+	// #endif
+	// #ifdef APP-IOS
+	const appBaseDiag = uni.getAppBaseInfo()
+	const sysIosDiag = uni.getSystemInfoSync()
+	console.log('[nax-demo-theme] osTheme=' + sysIosDiag.osTheme + ' appTheme=' + appBaseDiag.appTheme + ' hostTheme=' + appBaseDiag.hostTheme + ' mode=' + themeMode + ' systemDark=' + systemDark.toString())
+	// #endif
+	applyDemoAppTheme(themeMode)
+	applyDemoThemeChrome(isDemoDarkMode())
+	syncDemoDarkRef()
+	// #ifdef APP-ANDROID
+	// Android 无 onOsThemeChange API：onAppThemeChange 仅作触发信号，真值用原生 getOsTheme
+	try {
+		osThemeListenerId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			const osTheme = UTSAndroid.getOsTheme()
+			systemDark = (osTheme as string) == 'dark'
+			console.log('[nax-demo-theme] appThemeChange signal, getOsTheme=' + osTheme)
+			if (themeMode == 'followSystem') {
+				applyDemoAppTheme('followSystem')
+				applyDemoThemeChrome(systemDark)
+				// 更新共享暗黑态：所有页面 computed 依赖 demoDarkRef 即时重渲染
+				syncDemoDarkRef()
+			}
+		})
+		console.log('[nax-demo-theme] onAppThemeChange registered, id=' + osThemeListenerId.toString())
+	} catch (e : any) {
+		console.log('[nax-demo-theme] onAppThemeChange failed: ' + (e as Error).message)
+	}
+	// #endif
+	// #ifdef APP-IOS || APP-HARMONY
+	// 系统主题变化：仅跟随系统模式实时同步原生层；手动模式保持不变
+	try {
+		osThemeListenerId = uni.onOsThemeChange((res: OnOsThemeChangeCallbackResult) => {
+			// #ifdef APP-HARMONY
+			// 鸿蒙回调参数 theme 未实现（undefined），仅作触发信号，真值用原生 API
+			const osTheme = UTSHarmony.getOsTheme()
+			systemDark = (osTheme as string) == 'dark'
+			console.log('[nax-demo-theme] osThemeChange -> ' + osTheme)
+			// #endif
+			// #ifdef APP-IOS
+			// iOS 兜底：回调未携带主题时读 osTheme（操作系统主题字段）
+			if (res.theme == null || res.theme.length == 0) {
+				const sysIos = uni.getSystemInfoSync()
+				systemDark = sysIos.osTheme == 'dark'
+			} else {
+				systemDark = res.theme == 'dark'
+			}
+			console.log('[nax-demo-theme] osThemeChange -> ' + (systemDark ? 'dark' : 'light'))
+			// #endif
+			if (themeMode == 'followSystem') {
+				applyDemoAppTheme('followSystem')
+				applyDemoThemeChrome(systemDark)
+				// 更新共享暗黑态：所有页面 computed 依赖 demoDarkRef 即时重渲染
+				syncDemoDarkRef()
+			}
+		})
+		console.log('[nax-demo-theme] onOsThemeChange registered, id=' + osThemeListenerId.toString())
+	} catch (e : any) {
+		console.log('[nax-demo-theme] onOsThemeChange failed: ' + (e as Error).message)
+	}
+	// #endif
 }
 
-export function isDemoDarkMode(): boolean {
+export function getDemoThemeMode(): string {
 	if (!themeInited) {
 		initDemoTheme()
 	}
-	return darkModeFlag
+	return themeMode
 }
 
-export function setDemoDarkMode(val: boolean) {
-	darkModeFlag = val
+export function setDemoThemeMode(mode: string) {
+	themeMode = mode
 	themeInited = true
-	writeStorage(val)
-	applyDemoAppTheme(val)
-	applyDemoThemeChrome(val)
+	writeStorage(mode)
+	applyDemoAppTheme(mode)
+	applyDemoThemeChrome(isDemoDarkMode())
+	syncDemoDarkRef()
+}
+
+/** 手动切换明暗（等价 setDemoThemeMode('light'|'dark')） */
+export function setDemoDarkMode(val: boolean) {
+	setDemoThemeMode(val ? 'dark' : 'light')
 }
 
 export function toggleDemoDarkMode(): boolean {
 	const next = !isDemoDarkMode()
 	setDemoDarkMode(next)
 	return next
+}
+
+/** 当前实际生效的暗黑状态：followSystem 时取系统主题 */
+export function isDemoDarkMode(): boolean {
+	if (!themeInited) {
+		initDemoTheme()
+	}
+	if (themeMode == 'followSystem') {
+		return systemDark
+	}
+	return themeMode == 'dark'
 }
 
 export function demoThemeExtraClass(): string {
@@ -114,6 +268,7 @@ export function applyDemoThemeChrome(dark: boolean) {
 /** 页面 setup 同步调用：刷导航栏，返回是否暗黑 */
 export function bindDemoThemePage(): boolean {
 	const dark = isDemoDarkMode()
+	syncDemoDarkRef()
 	applyDemoThemeChrome(dark)
 	return dark
 }

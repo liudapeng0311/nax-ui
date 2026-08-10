@@ -1,3 +1,7 @@
+## 0.1.1（2026-08-10）
+
+- 修复 Android 编译失败：插槽传递带默认参数（`direction: number | null = null`）的函数引用报 "Function invocation expected"；`requestFullscreen` 改为必选参数，组件内部调用处已显式传参，行为不变
+
 ## 0.1.0（2026-08-06）
 
 - 初版 `nax-video` 无头视频播放器（uvue）

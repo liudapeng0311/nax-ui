@@ -4,6 +4,8 @@ demo: steps
 
 # nax-steps / nax-step
 
+> 当前版本：0.1.1（见 `changelog.md`）
+
 步骤条。用于展示多步任务进度（物流、表单向导、审批等）。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-steps
 easycom 自动生效，页面直接使用 `<nax-steps />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.0（见 `changelog.md`）
 
 ## 代码示例
 

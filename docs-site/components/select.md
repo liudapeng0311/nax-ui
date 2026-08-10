@@ -4,6 +4,8 @@ demo: select
 
 # nax-select
 
+> 当前版本：0.1.15（见 `changelog.md`）
+
 uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场景。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-select
 easycom 自动生效，页面直接使用 `<nax-select />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.14（见 `changelog.md`）
 
 ## 代码示例
 

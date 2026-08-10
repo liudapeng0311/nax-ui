@@ -4,6 +4,8 @@ demo: notice-bar
 
 # nax-notice-bar
 
+> 当前版本：0.1.17（见 `changelog.md`）
+
 滚动通告栏。提供常用能力。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-notice-bar
 easycom 自动生效，页面直接使用 `<nax-notice-bar />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.15（见 `changelog.md`）
 
 ## 代码示例
 

@@ -4,6 +4,8 @@ demo: swiper
 
 # nax-swiper
 
+> 当前版本：0.1.5（见 `changelog.md`）
+
 `nax-ui` 轮播组件（uni-app x / uvue）。
 基于原生 `swiper` / `swiper-item` 封装，提供统一 API、主题圆角与数字指示器。
 
@@ -23,8 +25,6 @@ easycom 自动生效，页面直接使用 `<nax-swiper />` 即可。
 |------|------|
 | `nax-ui-theme` | **安装时依赖**（下载本插件时建议自动带上）；**运行时弱依赖**（未 `@import` / 未挂 `nax-theme` 时组件走 fallback） |
 
-
-> 当前版本：0.1.4（见 `changelog.md`）
 
 ## 代码示例
 

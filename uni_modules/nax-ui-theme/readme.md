@@ -120,7 +120,7 @@ openNaxPopup({
 })
 ```
 
-自定义 `url` 弹层页需要在自身根节点挂载相同的 `nax-theme` / `nax-theme-dark` class。
+用 `openNaxPopup({ url })` 打开的**自定义弹层页**是独立页面，看不到触发页上的主题 class，换肤不会自动生效。需要在你**自己写的那个弹层页**根节点上手动挂主题 class：浅色挂 `nax-theme`，暗色挂 `nax-theme nax-theme-dark`（按当前暗黑状态决定）。
 
 ## 覆盖优先级
 

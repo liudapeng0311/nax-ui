@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="page-root nax-theme" :class="themeExtraClass" :style="pageRootStyle">
 		<nax-nav-bar
 			title="nax-ui"
@@ -115,7 +115,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef } from '@/common/demo-theme.uts'
 	import {
 		demoTabList,
 		switchDemoTab,
@@ -127,13 +127,12 @@
 	} from '@/common/demo-catalog.uts'
 
 	// 首屏避免 theme chrome API 异常中断 setup
-	var initialDark = false
 	try {
-		initialDark = bindDemoThemePage()
+		bindDemoThemePage()
 	} catch (e) {
-		initialDark = false
+		// 保持默认
 	}
-	const darkMode = ref(initialDark)
+	const darkMode = demoDarkRef
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {

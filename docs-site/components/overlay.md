@@ -4,7 +4,8 @@ demo: overlay
 
 # nax-overlay
 
-# nax-overlay
+> 当前版本：0.1.1（见 `changelog.md`）
+
 全屏遮罩层（弹层底层）。用于压暗页面、拦截点击，可叠加自定义内容（如 `nax-loading`）。
 
 ## 安装

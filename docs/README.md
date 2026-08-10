@@ -19,9 +19,10 @@
 1. `design-system.md` — 先统一设计与 API 原则  
 2. `component-inventory.md` — 再按分期选组件实现  
 3. `uni_modules/nax-ui-theme/readme.md` — 主题分档接入（默认能用、可选换肤）
-4. `nax-video-headless.md` — 实现无头视频播放器时的专项规范（按需）
-5. `tabbar-routing.md` — 多页自定义底栏性能方案（按需）
-6. `AGENTS.md` — 编码/改文档时的硬约束
+4. `docs-site/guide/dark-mode.md` — 暗黑模式三态接入（跟随系统/浅色/深色，含各平台实现）
+5. `nax-video-headless.md` — 实现无头视频播放器时的专项规范（按需）
+6. `tabbar-routing.md` — 多页自定义底栏性能方案（按需）
+7. `AGENTS.md` — 编码/改文档时的硬约束
 
 ## 仓库角色
 

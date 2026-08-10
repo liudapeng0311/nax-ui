@@ -10,6 +10,10 @@ export const sidebar = [
       {
         "text": "主题接入",
         "link": "/guide/theme"
+      },
+      {
+        "text": "暗黑模式",
+        "link": "/guide/dark-mode"
       }
     ]
   },

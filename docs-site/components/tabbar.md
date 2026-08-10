@@ -4,6 +4,8 @@ demo: tabbar
 
 # nax-tabbar
 
+> 当前版本：0.1.7（见 `changelog.md`）
+
 自定义底部标签栏（非 pages.json 原生 tabBar）。面向 uni-app x：字体图标优先、轻量徽标、fixed 占位与安全区。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-tabbar
 easycom 自动生效，页面直接使用 `<nax-tabbar />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.6（见 `changelog.md`）
 
 ## 代码示例
 

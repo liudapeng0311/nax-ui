@@ -4,6 +4,8 @@ demo: keyboard
 
 # nax-keyboard
 
+> 当前版本：0.1.2（见 `changelog.md`）
+
 `nax-ui` 自定义键盘（uni-app x / uvue）。
 主要能力：
 - 数字键盘 `mode="number"`（可带小数点）
@@ -30,8 +32,6 @@ easycom 自动生效，页面直接使用 `<nax-keyboard />` 即可。
 | `nax-transition` | 底部进退场 |
 | `nax-ui-theme` | 主题 token（运行时弱依赖） |
 
-
-> 当前版本：0.1.1（见 `changelog.md`）
 
 ## 代码示例
 

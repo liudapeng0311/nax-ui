@@ -4,7 +4,8 @@ demo: nav-bar
 
 # nax-nav-bar
 
-# nax-nav-bar
+> 当前版本：0.1.3（见 `changelog.md`）
+
 自定义顶部导航栏（需页面 `navigationStyle: custom`）。面向 uni-app x：状态栏安全区、fixed 占位、返回栈兜底、微信小程序胶囊预留。
 
 ## 安装

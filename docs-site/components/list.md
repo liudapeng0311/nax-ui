@@ -4,6 +4,8 @@ demo: list
 
 # nax-list
 
+> 当前版本：0.1.2（见 `changelog.md`）
+
 滚动列表壳。负责内部滚动触底加载、下拉刷新与空 / 加载 / 结束 / 错误状态；**行内容由业务在默认插槽自行 `v-for`**（可配合 `nax-cell`）。
 > 虚拟长列表请用独立组件 `nax-virtual-list`（固定行高窗口裁剪）。
 
@@ -16,8 +18,6 @@ uni_modules/nax-list
 easycom 自动生效，页面直接使用 `<nax-list />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.1（见 `changelog.md`）
 
 ## 代码示例
 

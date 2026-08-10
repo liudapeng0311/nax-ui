@@ -4,6 +4,8 @@ demo: space
 
 # nax-space / nax-space-item
 
+> 当前版本：0.1.2（见 `changelog.md`）
+
 间距容器：横向 / 纵向排列子项，并统一间距。
 > 因 uni-app x **样式隔离 2.0**，父组件无法给任意子节点加 margin。请用 **`nax-space-item`** 包裹每个子项（与 `nax-grid` / `nax-grid-item` 同模式）。
 
@@ -16,8 +18,6 @@ uni_modules/nax-space
 easycom 自动生效，页面直接使用 `<nax-space />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.1（见 `changelog.md`）
 
 ## 代码示例
 

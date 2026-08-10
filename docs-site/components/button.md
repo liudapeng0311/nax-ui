@@ -4,6 +4,8 @@ demo: button
 
 # nax-button
 
+> 当前版本：0.1.18（见 `changelog.md`）
+
 `nax-ui` 通用按钮组件（uni-app x / uvue）。
 色系与层级：
 - **基础** `variant="solid"`
@@ -15,9 +17,7 @@ demo: button
 
 ## 安装
 
-```text
-uni_modules/nax-button
-```
+- 插件市场：[nax-button](https://ext.dcloud.net.cn/plugin?id=29025)
 
 easycom 自动生效，页面直接使用 `<nax-button />` 即可。
 
@@ -127,16 +127,16 @@ easycom 自动生效，页面直接使用 `<nax-button />` 即可。
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| type | string | `'default'` | default \| primary \| info \| success \| warning \| error（兼容 tertiary / danger） |
-| variant | string | `'solid'` | solid \| secondary \| tertiary \| quaternary \| outline \| dashed \| text \| light |
-| size | string | `'md'` | sm \| md \| lg |
-| shape | string | `'square'` | square \| round \| circle |
+| type | string | `'default'` | `default` 默认 \| `primary` 主要 \| `info` 信息 \| `success` 成功 \| `warning` 警告 \| `error` 错误（兼容 `tertiary` / `danger`） |
+| variant | string | `'solid'` | `solid` 实心 \| `secondary` 次要 \| `tertiary` 次次要 \| `quaternary` 次次次要 \| `outline` 描边 \| `dashed` 虚线 \| `text` 文字 \| `light` 浅色 |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大 |
+| shape | string | `'square'` | `square` 方形 \| `round` 圆角 \| `circle` 圆形 |
 | disabled | boolean | `false` | 禁用 |
 | loading | boolean | `false` | 加载中（阻止点击；显示旋转 loading 图标） |
 | block | boolean | `false` | 块级宽度 |
 | label | string | `''` | 文案；也可用默认插槽扩展 |
 | icon | string | `''` | nax-icon 图标名；空则不渲染内置图标 |
-| iconPosition | string | `'left'` | left \| right，默认 left |
+| iconPosition | string | `'left'` | 图标位置：`left` 左侧（默认）\| `right` 右侧 |
 | customClass | string | `''` | 根节点扩展 class |
 
 

@@ -125,7 +125,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
 	// #ifdef MP-WEIXIN
 	// 微信小程序会把 naxDialog 导入与 <nax-dialog> 解析为同名组件绑定。
 	import {
@@ -142,7 +142,8 @@
 	} from '@/uni_modules/nax-dialog/index.uts'
 	// #endif
 
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
 
 	const navBackIconColor = computed((): string => {
 		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。

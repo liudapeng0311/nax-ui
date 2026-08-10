@@ -104,10 +104,11 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef } from '@/common/demo-theme.uts'
 
 	// setup 同步读全局，避免首帧浅色白闪
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {

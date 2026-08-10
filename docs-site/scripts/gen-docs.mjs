@@ -125,11 +125,42 @@ const COMPONENT_LABELS = {
   empty: '空状态'
 }
 
+// 文档站点级覆盖（只影响生成的 docs-site 页面，不改组件包内容）
+// 插件市场链接：有值的组件，安装节展示插件市场链接替代 uni_modules 目录
+const PLUGIN_URLS = {
+  button: 'https://ext.dcloud.net.cn/plugin?id=29025',
+  text: 'https://ext.dcloud.net.cn/plugin?id=29072'
+}
+
+// 组件总览表说明覆盖
+const OVERVIEW_DESCS = {
+  icon: '字体图标。',
+  badge: '徽标。'
+}
+
+// Props 说明覆盖（键：组件名 -> 属性名 -> 说明）
+const PROPS_DESC_OVERRIDES = {
+  button: {
+    type: '`default` 默认 | `primary` 主要 | `info` 信息 | `success` 成功 | `warning` 警告 | `error` 错误（兼容 `tertiary` / `danger`）',
+    variant: '`solid` 实心 | `secondary` 次要 | `tertiary` 次次要 | `quaternary` 次次次要 | `outline` 描边 | `dashed` 虚线 | `text` 文字 | `light` 浅色',
+    size: '`sm` 小 | `md` 中 | `lg` 大',
+    shape: '`square` 方形 | `round` 圆角 | `circle` 圆形',
+    iconPosition: '图标位置：`left` 左侧（默认）| `right` 右侧'
+  },
+  text: {
+    type: '`default` 默认 | `primary` 主题色 | `info` 信息 | `success` 成功 | `warning` 警告 | `error` 错误 | `secondary` 次要 | `placeholder` 占位',
+    mode: '模式：`text` 文本 | `price` 价格 | `phone` 手机号 | `name` 姓名 | `date` 日期 | `link` 链接',
+    size: '字号：`sm`(14) | `md`(16 默认) | `lg`(18) | `xl`(20) | 数字字符串（px）',
+    decoration: '装饰：`none` 无 | `underline` 下划线 | `line-through` 删除线',
+    align: '对齐：`left` 左对齐（默认）| `center` 居中 | `right` 右对齐'
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 通用工具
 // ---------------------------------------------------------------------------
 function readUtf8(p) {
-  return fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n')
+  return fs.readFileSync(p, 'utf8').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n')
 }
 
 function escTableCell(s) {
@@ -367,11 +398,13 @@ function defaultDisplay(raw) {
   return '`' + v + '`'
 }
 
-function propsTable(props) {
+function propsTable(name, props) {
   if (props.length === 0) return ''
+  const overrides = PROPS_DESC_OVERRIDES[name] || {}
   const rows = props.map((p) => {
-    const type = p.type || (p.desc.includes(' ') ? '' : p.desc)
-    return `| ${p.name} | ${escTableCell(typeDisplay(type))} | ${defaultDisplay(p.default)} | ${escTableCell(p.desc)} |`
+    const desc = overrides[p.name] || p.desc
+    const type = p.type || (desc.includes(' ') ? '' : desc)
+    return `| ${p.name} | ${escTableCell(typeDisplay(type))} | ${defaultDisplay(p.default)} | ${escTableCell(desc)} |`
   })
   return [
     '',
@@ -442,14 +475,18 @@ function buildPage(name, pkg) {
   parts.push(`demo: ${name}`)
   parts.push('---\n')
   parts.push(`# ${display}\n`)
+  if (pkg.version) {
+    parts.push('> 当前版本：' + pkg.version + '（见 `changelog.md`）\n')
+  }
   if (intro) parts.push(intro + '\n')
 
   // 安装
+  const pluginUrl = PLUGIN_URLS[name]
   parts.push(
     '## 安装\n',
-    '```text',
-    `uni_modules/nax-${name}`,
-    '```\n',
+    pluginUrl
+      ? `- 插件市场：[nax-${name}](${pluginUrl})\n`
+      : '```text\n' + `uni_modules/nax-${name}` + '\n```\n',
     'easycom 自动生效，页面直接使用 `<nax-' + name + ' />` 即可。\n',
     '> 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。\n'
   )
@@ -460,11 +497,6 @@ function buildPage(name, pkg) {
     if (depTable) {
       parts.push('## 依赖\n', depTable, '\n')
     }
-  }
-
-  // 版本
-  if (pkg.version) {
-    parts.push('> 当前版本：' + pkg.version + '（见 `changelog.md`）\n')
   }
 
   // 用法示例（readme 其它小节）
@@ -489,7 +521,7 @@ function buildPage(name, pkg) {
   }
 
   // API 表
-  parts.push(propsTable(uvue.props))
+  parts.push(propsTable(name, uvue.props))
   parts.push(eventsTable(uvue.events))
   parts.push(slotsTable(uvue.jsdocSlots))
 
@@ -553,7 +585,8 @@ function generateSidebar(found) {
   return [
     { text: '指南', items: [
       { text: '快速开始', link: '/guide/' },
-      { text: '主题接入', link: '/guide/theme' }
+      { text: '主题接入', link: '/guide/theme' },
+      { text: '暗黑模式', link: '/guide/dark-mode' }
     ] },
     { text: '组件', items: [{ text: '组件总览', link: '/components/' }] },
     ...groups
@@ -584,14 +617,11 @@ function buildOverview(found) {
     parts.push(`## ${c.text}`, '')
     parts.push('| 组件 | 说明 |', '|------|------|')
     for (const it of items) {
-      parts.push(`| [nax-${it.name}](/components/${it.name}) | ${escTableCell(it.desc)} |`)
+      const desc = OVERVIEW_DESCS[it.name] !== undefined ? OVERVIEW_DESCS[it.name] : it.desc
+      parts.push(`| [nax-${it.name}](/components/${it.name}) | ${escTableCell(desc)} |`)
     }
     parts.push('')
   }
-  parts.push('## 相关文档', '')
-  parts.push('- 设计规范：仓库内 `docs/design-system.md`')
-  parts.push('- 组件清单：仓库内 `docs/component-inventory.md`')
-  parts.push('')
   return parts.join('\n')
 }
 

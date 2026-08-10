@@ -21,7 +21,7 @@ uni-app x 文本组件。
 
 | 属性 | 类型 | 默认 | 说明 |
 |------|------|------|------|
-| type | string | `default` | `default` / `primary` / `info` / `success` / `warning` / `error` / `secondary` / `placeholder`；兼容 `main`/`content`/`tips`/`light`/`danger` |
+| type | string | `default` | `default` / `primary` / `info` / `success` / `warning` / `error` / `secondary` / `placeholder` |
 | show | boolean | `true` | 是否显示 |
 | text | string | `''` | 文案 |
 | prefix-icon | string | `''` | 前置图标名（nax-icon） |

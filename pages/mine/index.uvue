@@ -22,9 +22,20 @@
 					</view>
 
 					<nax-cell-group inset title="偏好设置">
-						<nax-cell title="深色模式" label="基于 nax-ui-theme 的 dark token" icon="settings" :icon-color="cellIconColor" :border="true">
+						<nax-cell title="外观模式" label="手动选择后不再跟随系统" icon="settings" :icon-color="cellIconColor" :border="true"></nax-cell>
+						<nax-cell title="跟随系统" @click="onThemeModeChange('followSystem')">
 							<template #right>
-								<nax-switch :model-value="darkMode" @change="onDarkChange"></nax-switch>
+								<nax-icon v-if="themeMode == 'followSystem'" name="check" :size="'18'" :color="checkIconColor"></nax-icon>
+							</template>
+						</nax-cell>
+						<nax-cell title="浅色" @click="onThemeModeChange('light')">
+							<template #right>
+								<nax-icon v-if="themeMode == 'light'" name="check" :size="'18'" :color="checkIconColor"></nax-icon>
+							</template>
+						</nax-cell>
+						<nax-cell title="深色" :border="false" @click="onThemeModeChange('dark')">
+							<template #right>
+								<nax-icon v-if="themeMode == 'dark'" name="check" :size="'18'" :color="checkIconColor"></nax-icon>
 							</template>
 						</nax-cell>
 						<nax-cell title="主题色" value="Primary #18a058" icon="star" :icon-color="cellIconColor"></nax-cell>
@@ -65,7 +76,7 @@
 </template>
 
 <script setup lang="uts">
-	import { bindDemoThemePage, setDemoDarkMode } from '@/common/demo-theme.uts'
+	import { bindDemoThemePage, demoDarkRef, getDemoThemeMode, setDemoThemeMode } from '@/common/demo-theme.uts'
 	import {
 		demoTabList,
 		switchDemoTab,
@@ -74,7 +85,9 @@
 		hideDemoNativeTabBar
 	} from '@/common/demo-catalog.uts'
 
-	const darkMode = ref(bindDemoThemePage())
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+	const themeMode = ref(getDemoThemeMode())
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
@@ -100,6 +113,18 @@
 		// #endif
 		// #ifndef APP-ANDROID || APP-HARMONY
 		return 'var(--nax-color-text, #333639)'
+		// #endif
+	})
+
+	const checkIconColor = computed((): string => {
+		// #ifdef APP-ANDROID || APP-HARMONY
+		if (darkMode.value) {
+			return '#63e2b7'
+		}
+		return '#18a058'
+		// #endif
+		// #ifndef APP-ANDROID || APP-HARMONY
+		return 'var(--nax-color-primary, #18a058)'
 		// #endif
 	})
 
@@ -196,9 +221,10 @@
 	const tabList = demoTabList()
 	const componentCountText = demoCountByGroup('all').toString() + ' 个'
 
-	function onDarkChange(val : boolean) {
-		setDemoDarkMode(val)
-		darkMode.value = val
+	function onThemeModeChange(mode : string) {
+		setDemoThemeMode(mode)
+		themeMode.value = mode
+		darkMode.value = bindDemoThemePage()
 	}
 
 	function goCatalog() {
@@ -232,6 +258,7 @@
 		hideDemoNativeTabBar()
 		refreshPageRootStyle()
 		darkMode.value = bindDemoThemePage()
+		themeMode.value = getDemoThemeMode()
 	})
 </script>
 

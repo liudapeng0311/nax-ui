@@ -4,6 +4,8 @@ demo: radio
 
 # nax-radio / nax-radio-group
 
+> 当前版本：0.1.3（见 `changelog.md`）
+
 uni-app x 单选框 / 单选框组，功能覆盖常用场景。
 
 ## 安装
@@ -15,8 +17,6 @@ uni_modules/nax-radio
 easycom 自动生效，页面直接使用 `<nax-radio />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
-
-> 当前版本：0.1.2（见 `changelog.md`）
 
 ## 代码示例
 

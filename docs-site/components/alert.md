@@ -4,6 +4,8 @@ demo: alert
 
 # nax-alert
 
+> 当前版本：0.1.3（见 `changelog.md`）
+
 警告提示条（页面内常驻提示）。提供常用能力。
 
 ## 安装

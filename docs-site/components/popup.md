@@ -4,6 +4,8 @@ demo: popup
 
 # nax-popup
 
+> 当前版本：0.2.1（见 `changelog.md`）
+
 压窗屏 / 页面级弹层。
 > **压窗屏**：遮罩与内容能盖住 `pages.json` 配置的**原生导航栏**和**底部 tabBar**。  
 > 官方能力来源：uni-app x [`dialogPage`](https://doc.dcloud.net.cn/uni-app-x/api/dialog-page.html)（HBuilderX 4.31+）。
