@@ -90,6 +90,7 @@
   /* 布局 */
   --vp-nav-height: 56px;
   --vp-sidebar-width: 276px;
+  --vp-layout-max-width: 1560px;
 
   /* 导航（强毛玻璃：大材质 = 更厚） */
   --vp-nav-bg-color: rgba(245, 245, 247, 0.68);
@@ -528,8 +529,14 @@ html {
 }
 
 /* 3.5 文档正文：排版、链接、表格、提示块、行内代码 */
-.vp-doc .content-container {
-  max-width: 736px;
+/* VitePress 默认正文区宽度硬编码（VPDoc .container 992px / content-container 688px），
+   这里统一加宽，宽屏下内容更舒展 */
+.VPDoc .container {
+  max-width: 1400px !important;
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: 960px !important;
 }
 
 .vp-doc h1 {

@@ -1252,6 +1252,7 @@ function collectPackages() {
 }
 
 function generateSidebar(found) {
+  // 按路径前缀分区：指南页只显示指南侧栏，组件页只显示组件侧栏
   const groups = CATEGORIES.map((c) => ({
     text: c.text,
     items: c.items
@@ -1261,15 +1262,20 @@ function generateSidebar(found) {
         link: `/components/${n}`
       }))
   }))
-  return [
-    { text: '指南', items: [
-      { text: '快速开始', link: '/guide/' },
-      { text: '主题接入', link: '/guide/theme' },
-      { text: '暗黑模式', link: '/guide/dark-mode' }
-    ] },
-    { text: '组件', items: [{ text: '组件总览', link: '/components/' }] },
-    ...groups
-  ]
+  return {
+    '/guide/': [
+      { text: '指南', items: [
+        { text: '介绍', link: '/guide/intro' },
+        { text: '快速开始', link: '/guide/' },
+        { text: '主题接入', link: '/guide/theme' },
+        { text: '暗黑模式', link: '/guide/dark-mode' }
+      ] }
+    ],
+    '/components/': [
+      { text: '组件', items: [{ text: '组件总览', link: '/components/' }] },
+      ...groups
+    ]
+  }
 }
 
 function buildOverview(found) {

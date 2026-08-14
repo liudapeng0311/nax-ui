@@ -49,10 +49,8 @@ export default defineConfig({
   themeConfig: {
     logo: '/logo.png',
     nav: [
-      { text: '指南', link: '/guide/' },
-      { text: '组件', link: '/components/' },
-      { text: '主题接入', link: '/guide/theme' },
-      { text: '暗黑模式', link: '/guide/dark-mode' }
+      { text: '指南', link: '/guide/intro' },
+      { text: '组件', link: '/components/' }
     ],
     sidebar,
     outline: { label: '本页目录', level: [2, 3] },
