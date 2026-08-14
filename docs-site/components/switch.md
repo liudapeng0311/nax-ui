@@ -4,7 +4,7 @@ demo: switch
 
 # nax-switch
 
-> 当前版本：0.1.4
+> 当前版本：0.1.5
 
 uni-app x 开关，功能覆盖常用场景。
 

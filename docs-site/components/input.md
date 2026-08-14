@@ -4,7 +4,7 @@ demo: input
 
 # nax-input
 
-> 当前版本：0.2.0
+> 当前版本：0.2.1
 
 uni-app x 单行输入框。
 
@@ -61,24 +61,6 @@ function onChange(val : string) {
 const sizeSm = ref('')
 const sizeMd = ref('')
 const sizeLg = ref('')
-```
-
-:::
-
-::: details 类型 type
-
-```uvue
-<nax-input v-model="typeText" type="text" border placeholder="text"></nax-input>
-<nax-input v-model="typeNumber" type="number" border placeholder="number"></nax-input>
-<nax-input v-model="typeDigit" type="digit" border placeholder="digit"></nax-input>
-<nax-input v-model="typeTel" type="tel" border placeholder="tel"></nax-input>
-```
-
-```uts
-const typeText = ref('')
-const typeNumber = ref('')
-const typeDigit = ref('')
-const typeTel = ref('')
 ```
 
 :::
@@ -246,6 +228,22 @@ const colorBorder = ref('')
 
 传入 `select` / `textarea` / `idcard` 会回落为 `text`。
 
+## 类型 type
+
+```uvue
+<nax-input v-model="typeText" type="text" border placeholder="text"></nax-input>
+<nax-input v-model="typeNumber" type="number" border placeholder="number"></nax-input>
+<nax-input v-model="typeDigit" type="digit" border placeholder="digit"></nax-input>
+<nax-input v-model="typeTel" type="tel" border placeholder="tel"></nax-input>
+```
+
+```uts
+const typeText = ref('')
+const typeNumber = ref('')
+const typeDigit = ref('')
+const typeTel = ref('')
+```
+
 
 ## Events
 
@@ -272,4 +270,4 @@ const colorBorder = ref('')
 
 - 基于原生 `input`，键盘类型随端能力差异以官方文档为准。
 - `readonly` 通过禁用原生编辑实现（样式弱于 `disabled`）。
-- Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在 `APP-ANDROID` 下使用背景、边框、文字、占位符和图标实色兜底。
+- Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`。

@@ -87,16 +87,16 @@
     ui-monospace, 'SFMono-Regular', 'JetBrains Mono', 'Cascadia Code',
     Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-  /* 布局 */
+  /* 布局（宽屏全幅：max-width 设 100%，侧栏/导航/正文不再居中留白，贴左占满） */
   --vp-nav-height: 56px;
   --vp-sidebar-width: 276px;
-  --vp-layout-max-width: 1560px;
+  --vp-layout-max-width: 100%;
 
   /* 导航（强毛玻璃：大材质 = 更厚） */
   --vp-nav-bg-color: rgba(245, 245, 247, 0.68);
   --vp-nav-screen-bg-color: rgba(245, 245, 247, 0.92);
   --vp-local-nav-bg-color: rgba(245, 245, 247, 0.68);
-  --vp-sidebar-bg-color: transparent;
+  --vp-sidebar-bg-color: #f5f5f5;
 
   /* 代码 */
   --vp-code-block-bg: rgba(255, 255, 255, 0.75);
@@ -148,6 +148,7 @@
   --vp-nav-bg-color: rgba(11, 11, 13, 0.6);
   --vp-nav-screen-bg-color: rgba(11, 11, 13, 0.92);
   --vp-local-nav-bg-color: rgba(11, 11, 13, 0.6);
+  --vp-sidebar-bg-color: #131316;
 
   /* 代码 */
   --vp-code-block-bg: rgba(19, 19, 22, 0.9);
@@ -529,14 +530,14 @@ html {
 }
 
 /* 3.5 文档正文：排版、链接、表格、提示块、行内代码 */
-/* VitePress 默认正文区宽度硬编码（VPDoc .container 992px / content-container 688px），
-   这里统一加宽，宽屏下内容更舒展 */
+/* 宽屏全幅布局：正文容器不再限宽，占满侧栏右侧全部空间
+   （演示页右侧另有 380px 演示面板由 DocDemoLayout 让位） */
 .VPDoc .container {
-  max-width: 1400px !important;
+  max-width: none !important;
 }
 
 .VPDoc.has-aside .content-container {
-  max-width: 960px !important;
+  max-width: none !important;
 }
 
 .vp-doc h1 {
@@ -775,43 +776,49 @@ html {
   font-weight: 500;
 }
 
-/* 3.6 侧边栏：胶囊激活（无左侧竖条） */
+/* 3.6 侧边栏：浅灰底 + 大圆角导航项 + 激活态浅绿底 + 左侧绿色竖条（参考设计） */
 .VPSidebar {
   padding-top: 8px;
+  /* 覆盖 VitePress ≥1440px 的 max(32px, calc(...)) 左内边距 */
+  padding-left: 13px !important;
+  padding-right: 13px !important;
+  border-right: 1px solid var(--vp-c-border);
 }
 
 .VPSidebarItem .link {
-  /* 胶囊内文字与左缘留出呼吸空间 */
-  padding-left: 14px;
-  margin: 3px 0;
-  border-radius: var(--nax-radius-sm);
+  /* 固定 42px 高度（border-box），文字 flex 垂直居中；每项上边距 6px */
+  height: 42px;
+  padding: 0 12px;
+  margin: 6px 0 0;
+  border-radius: 4px;
   transition:
     color var(--nax-dur-fast) var(--nax-ease-out),
     background-color var(--nax-dur-mid) var(--nax-ease-out);
 }
 
+/* 激活态：浅绿底 + 翡翠绿文字（参考 #e6f7ed / #18a058），常规字重 */
 .VPSidebarItem.is-active > .item .link {
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(255, 255, 255, 0.9);
-  color: var(--vp-c-brand-1);
-  font-weight: 600;
+  background: rgba(24, 160, 88, 0.1);
+  box-shadow: none;
+  color: #18a058;
 }
 
 .dark .VPSidebarItem.is-active > .item .link {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: none;
+  background: rgba(52, 211, 153, 0.16);
+  color: #63e2b7;
 }
 
-/* 用户要求：去掉激活项左侧的绿色竖条 */
+/* 激活项左侧绿色竖条：暂去掉 */
 .VPSidebarItem .indicator {
   display: none;
 }
 
+/* 分组标题：小号灰字，常规字重 */
 .VPSidebarItem.level-0 > .item .text {
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--vp-c-text-3);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #9ca3af;
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -4,7 +4,7 @@ demo: avatar
 
 # nax-avatar
 
-> 当前版本：0.1.3
+> 当前版本：0.1.4
 
 uni-app x 头像组件，提供常用能力。
 
@@ -274,8 +274,3 @@ const okSrc = '/static/logo.png'
 | 插槽 | 说明 |
 |------|------|
 | default | 无图 / 最终失败时的自定义内容（如图标） |
-
-## 平台说明
-
-- 图片使用原生 `image`，`object-fit` 映射为 uni-app x `mode`。
-- Harmony：根节点背景使用字面量 fallback，避免 CSS 变量失效。

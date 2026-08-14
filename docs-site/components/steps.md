@@ -4,7 +4,7 @@ demo: steps
 
 # nax-steps / nax-step
 
-> 当前版本：0.1.2
+> 当前版本：0.1.3
 
 步骤条。用于展示多步任务进度（物流、表单向导、审批等）。
 
@@ -55,14 +55,6 @@ const list = [
   <nax-step title="完成" status="finish"></nax-step>
 </nax-steps>
 ```
-
-:::
-
-::: details 说明
-
-- 外观优先 `--nax-*` token + `type`，不靠颜色字符串当主题主路径。
-- 单步可显式 `status`，比仅靠 `current` 更适合失败/跳过场景。
-- App 端连接线/指示器用像素尺寸，避免百分比 `max-width` 等 ucss 限制。
 
 :::
 
@@ -299,3 +291,7 @@ function onStepClick(index: number) {
 | 插槽 | 说明 |
 |------|------|
 | default | 放置 nax-step（list 为空时） |
+
+## 说明
+
+- 单步可显式 `status`，比仅靠 `current` 更适合失败 / 跳过场景。

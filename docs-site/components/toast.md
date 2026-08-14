@@ -4,7 +4,7 @@ demo: toast
 
 # nax-toast
 
-> 当前版本：0.1.10
+> 当前版本：0.1.11
 
 `nax-ui` 轻提示（uni-app x / uvue）。
 **推荐用法：函数式调用**，业务页面不写 Toast DOM。

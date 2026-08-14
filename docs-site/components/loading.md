@@ -4,9 +4,9 @@ demo: loading
 
 # nax-loading
 
-> 当前版本：0.1.5
+> 当前版本：0.1.6
 
-局部 / 区块加载指示。App 端定时 `transform` 旋转；Web / 小程序用 CSS `@keyframes`。
+局部 / 区块加载指示。
 
 ## 安装
 

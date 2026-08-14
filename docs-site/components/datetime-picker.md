@@ -4,7 +4,7 @@ demo: datetime-picker
 
 # nax-datetime-picker
 
-> 当前版本：0.1.15
+> 当前版本：0.1.16
 
 uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
@@ -337,7 +337,6 @@ function onFmtConfirm(e : UTSJSONObject) {
 
 ## 平台说明
 
-- 全端原生 picker-view（含鸿蒙）。
 - 鸿蒙禁用选项点选，请滑动后确认。
 - 鸿蒙暗黑模式：组件自动移除原生滚轮默认的白色渐变遮罩。
 - 微信小程序滚动中点确认会被忽略。

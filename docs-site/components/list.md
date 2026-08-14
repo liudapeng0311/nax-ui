@@ -75,16 +75,6 @@ function onRefresh() {
 
 :::
 
-::: details 说明
-
-1. 内部滚动模式必须有明确高度：`height` 或父级 flex 高度链。
-2. `empty == true` 时不会继续自动 load；首屏请先请求再决定是否 empty。
-3. **下拉刷新只在 `usePageScroll=false` 时生效**；页面滚动请用页面 `onPullDownRefresh` + `uni.stopPullDownRefresh`。
-4. 刷新中会暂停触底 `load`，避免并发；业务在 `@refresh` 里重置数据与 `finished`。
-5. 虚拟长列表请使用 `nax-virtual-list`，勿与本壳混为 `virtual` 开关。
-
-:::
-
 ::: details 基础分页加载
 
 ```uvue
@@ -410,3 +400,11 @@ function onClearFilter() {
 |------|------|
 | check() | 手动检查是否需 load（页面滚动触底时调用） |
 | tryLoad() | 在 canLoad 时直接发 `load` |
+
+## 说明
+
+1. 内部滚动模式必须有明确高度：`height` 或父级 flex 高度链。
+2. `empty == true` 时不会继续自动 load；首屏请先请求再决定是否 empty。
+3. **下拉刷新只在 `usePageScroll=false` 时生效**；页面滚动请用页面 `onPullDownRefresh` + `uni.stopPullDownRefresh`。
+4. 刷新中会暂停触底 `load`，避免并发；业务在 `@refresh` 里重置数据与 `finished`。
+5. 虚拟长列表请使用 `nax-virtual-list`，勿与本壳混为 `virtual` 开关。

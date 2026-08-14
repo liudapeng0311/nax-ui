@@ -4,7 +4,7 @@ demo: icon
 
 # nax-icon
 
-> 当前版本：0.2.12
+> 当前版本：0.2.13
 
 `nax-ui` 字体图标组件（uni-app x / uvue）。
 
@@ -46,15 +46,6 @@ easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
 <IconGrid :names="['close', 'check', 'plus', 'minus', 'arrow-left', 'arrow-right', 'arrow-up', 'arrow-down', 'chevron-left', 'chevron-right', 'chevron-up', 'chevron-down', 'search', 'loading', 'info', 'warning', 'success', 'error', 'user', 'home', 'more', 'edit', 'delete', 'star', 'heart', 'settings', 'eye', 'eye-off', 'copy', 'share', 'image', 'image-off', 'loader', 'loader-4', 'square', 'circle', 'square-check', 'file-off', 'notes-off', 'database-off', 'message-off', 'category', 'category-filled', 'map-pin', 'map-pin-filled']" />
 
 
-:::
-
-::: details 主题变量
-
-- `--nax-icon-color`（优先）
-- `--nax-color-text`
-- `--nax-opacity-disabled`
-
-未传 `color` 时，组件会在根节点解析图标色，兼容样式隔离 2.0 下的浅色 / 深色主题切换。
 
 :::
 

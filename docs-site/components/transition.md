@@ -4,7 +4,7 @@ demo: transition
 
 # nax-transition
 
-> 当前版本：0.1.2
+> 当前版本：0.1.3
 
 uni-app x 轻量进退场过渡组件。用 class + CSS transition 实现，供遮罩、弹层、选择器等复用。
 
@@ -175,5 +175,4 @@ function onSheetGone() {
 ## 说明
 
 - 关闭时会等动画播完再卸载节点，避免闪断
-
 - 布局（如底部贴边、全屏遮罩）由外层容器负责，本组件只负责进退场

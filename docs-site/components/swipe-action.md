@@ -4,7 +4,7 @@ demo: swipe-action
 
 # nax-swipe-action / nax-swipe-action-group
 
-> 当前版本：0.1.4
+> 当前版本：0.1.5
 
 uni-app x 滑动操作组件，功能覆盖常用场景。
 

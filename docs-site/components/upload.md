@@ -4,7 +4,7 @@ demo: upload
 
 # nax-upload
 
-> 当前版本：0.1.10
+> 当前版本：0.1.11
 
 `nax-ui` 上传组件（uni-app x / uvue）。提供文件列表预览、选择、删除与状态展示能力。实际上传由业务在 `afterRead` 中调用 `uni.uploadFile` 等完成。
 
@@ -91,14 +91,9 @@ const formData = ref({ biz: 'avatar' } as UTSJSONObject)
 
 :::
 
-::: details 主题变量
+::: details 暗色主题
 
-- `--nax-upload-item-bg`
-- `--nax-upload-item-radius`
-- `--nax-upload-border-color`
-- `--nax-color-bg-secondary` / `--nax-color-text-secondary` 等语义 token
-
-Android / 鸿蒙端（`APP-ANDROID || APP-HARMONY`）不可靠解析跨组件 CSS 变量。暗色主题时，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在内部使用对应的深色背景、边框、图标和文字色，未传入时使用浅色样式。
+暗色主题时，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在内部使用对应的深色背景、边框、图标和文字色，未传入时使用浅色样式。
 
 :::
 

@@ -4,7 +4,7 @@ demo: dialog
 
 # nax-dialog
 
-> 当前版本：0.2.2
+> 当前版本：0.2.3
 
 居中对话框（确认 / 告警）。
 
@@ -69,7 +69,7 @@ function onCancel() {
 <nax-dialog />
 ```
 
-> 与 toast 相同：挂在常驻根布局；演示页可本地挂。  
+> 与 toast 相同：挂在常驻根布局。  
 > 未挂宿主时回退 `uni.showModal`。
 
 ### 2. 业务只调方法

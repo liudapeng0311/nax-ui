@@ -4,7 +4,7 @@ demo: dropdown
 
 # nax-dropdown
 
-> 当前版本：0.1.5
+> 当前版本：0.1.7
 
 筛选栏式下拉菜单。
 
@@ -255,6 +255,22 @@ function closeCmd() {
 | placeholder | boolean | `true` | fixed 时是否占位，默认 true |
 | customClass | string | `''` | 根扩展 class |
 
+## Props（nax-dropdown-item）
+
+| 属性 | 类型 | 默认 | 说明 |
+|------|------|------|
+| modelValue | string | `''` | 当前选中值（v-model），与 `options[].value` 对应 |
+| title | string | `''` | 菜单标题 |
+| options | array | `[]` | 选项 `{ label, value }` 或字符串 |
+| disabled | boolean | `false` | 禁用该菜单 |
+| show | boolean | `true` | 是否展示该菜单标题 |
+| height | string | `''` | 默认列表高度（有值时 scroll-view，纯数字按 px） |
+| highlighted | boolean | `false` | 强制高亮标题；默认跟 modelValue 自动 |
+| displaySelected | boolean | `false` | 标题展示已选 label |
+| labelName | string | `'label'` | 选项文案字段 |
+| valueName | string | `'value'` | 选项值字段 |
+| customClass | string | `''` | 根扩展 class |
+
 
 ## Events
 
@@ -270,7 +286,3 @@ function closeCmd() {
 | 插槽 | 说明 |
 |------|------|
 | default | 放置 nax-dropdown-item |
-
-## 平台说明
-
-- 鸿蒙端通过 `APP-HARMONY` 为默认选项文字设置 48px 行框，保证与选项行垂直居中；其它端保持原有排版。

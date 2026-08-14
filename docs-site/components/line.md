@@ -31,14 +31,6 @@ easycom 自动生效，页面直接使用 `<nax-line />` 即可。
 
 :::
 
-::: details 说明
-
-1. 默认颜色使用 `--nax-color-divider`，跟随 `nax-ui-theme` / 暗黑模式。
-2. 竖线 `length=100%` 时，父容器需要有明确高度，否则可能不可见。
-3. 与 `nax-divider` 分工：本组件无字；带文字请用 divider。
-
-:::
-
 ::: details 基础
 
 ```uvue
@@ -160,3 +152,9 @@ easycom 自动生效，页面直接使用 `<nax-line />` 即可。
 | customClass | string | `''` | 根节点扩展 class |
 
 
+
+## 说明
+
+1. 默认颜色使用 `--nax-color-divider`，跟随 `nax-ui-theme` / 暗黑模式。
+2. 竖线 `length=100%` 时，父容器需要有明确高度，否则可能不可见。
+3. 与 `nax-divider` 分工：本组件无字；带文字请用 divider。

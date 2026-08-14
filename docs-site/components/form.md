@@ -4,7 +4,7 @@ demo: form
 
 # nax-form / nax-form-item
 
-> 当前版本：0.1.5
+> 当前版本：0.1.6
 
 uni-app x 表单 / 表单项，功能覆盖常用场景。
 
@@ -427,4 +427,4 @@ function clearManualError() {
 ## 平台说明
 
 - 控件需自行 `v-model` 绑定到 `model` 字段；提交时调用 `validate()`。
-- 字段事件触发（blur/change）需业务侧调用 `validateField(prop, 'blur')`；后续可与输入类组件深度集成。
+- 字段事件触发（blur/change）需业务侧调用 `validateField(prop, 'blur')`。

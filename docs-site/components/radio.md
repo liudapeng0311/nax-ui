@@ -4,7 +4,7 @@ demo: radio
 
 # nax-radio / nax-radio-group
 
-> 当前版本：0.1.4
+> 当前版本：0.1.5
 
 uni-app x 单选框 / 单选框组，功能覆盖常用场景。
 

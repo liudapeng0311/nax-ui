@@ -4,7 +4,7 @@ demo: overlay
 
 # nax-overlay
 
-> 当前版本：0.1.2
+> 当前版本：0.1.3
 
 全屏遮罩层（弹层底层）。用于压暗页面、拦截点击，可叠加自定义内容（如 `nax-loading`）。
 
@@ -205,5 +205,4 @@ function onClose(name : string) {
 ## 说明
 
 1. 完整弹层（定位面板）请用 `nax-picker`；本组件只负责蒙层。
-
-3. Dialog / ActionSheet 等仍使用 `nax-picker` 内置 mask；本组件面向自定义浮层与独立蒙层场景。
+2. Dialog / ActionSheet 等仍使用 `nax-picker` 内置 mask；本组件面向自定义浮层与独立蒙层场景。
