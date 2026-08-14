@@ -80,13 +80,19 @@ function onClick(index: number) {
 | change | number | 选中下标变化 |
 | click | number | 点击项（含重复点击同一项） |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-bg` / `--nax-color-border`
-- `--nax-color-primary` / `--nax-color-primary-deep`
-- `--nax-color-text-secondary`
-- `--nax-color-error`
-- `--nax-font-size-xs`
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-primary-deep` | 主题主色（加深） |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 ## 依赖
 
@@ -102,7 +108,7 @@ function onClick(index: number) {
 
 ## 自定义底栏 + 原生 Tab 路由（推荐方案）
 
-### 推荐方案（本仓库已采用）
+### 推荐方案
 
 1. 把「主 Tab 页」登记为 **`pages.json` 原生 `tabBar` 页面**（系统负责保活与 `switchTab`）
 2. 业务 UI 继续用 **`nax-tabbar`**（图标 / 徽标 / 中间凸起 / 主题）

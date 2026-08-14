@@ -2,6 +2,24 @@
 
 进度条。线形 / 圆形统一入口，用 `shape` 切换。
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
+
 ## 依赖
 
 - `nax-ui-theme`（可选，CSS 变量 `--nax-*`）
@@ -54,5 +72,3 @@
 ## 说明
 
 - 主题优先 CSS 变量；`color` / `track-color` 仅作局部覆盖。
-- 圆形采用双半环 + `transform: rotate`，全端公共实现。
-- App 鸿蒙线形进度使用 `APP-HARMONY` 条件编译，以 `transform: scaleX()` 驱动动画，避开百分比宽度过渡的满宽闪烁；其它端仍使用 `width` 过渡。

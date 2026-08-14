@@ -4,16 +4,14 @@ demo: toast
 
 # nax-toast
 
-> 当前版本：0.1.9（见 `changelog.md`）
+> 当前版本：0.1.10
 
 `nax-ui` 轻提示（uni-app x / uvue）。
 **推荐用法：函数式调用**，业务页面不写 Toast DOM。
 
 ## 安装
 
-```text
-uni_modules/nax-toast
-```
+- 插件市场：[nax-toast](https://ext.dcloud.net.cn/plugin?id=29074)
 
 easycom 自动生效，页面直接使用 `<nax-toast />` 即可。
 
@@ -21,7 +19,7 @@ easycom 自动生效，页面直接使用 `<nax-toast />` 即可。
 
 ## 代码示例
 
-### 接入
+::: details 接入
 
 ### 1. 全局挂载一次宿主
 
@@ -58,7 +56,9 @@ hideNaxToast()
 
 > 微信小程序端：若当前 SFC 同时挂载 `<nax-toast />` 并导入 `naxToast`，请像上例一样给函数设置本地别名。`naxToast` 会与组件标签映射到同一个驼峰名，导致 `MP-WEIXIN` 未注册宿主组件并回退到不支持 `position` 的 `uni.showToast`。仅调用函数、不挂载宿主的业务页可继续直接导入 `naxToast`。
 
-### API
+:::
+
+::: details API
 
 ### naxToast(input)
 
@@ -92,14 +92,193 @@ hideNaxToast()
 - `naxToastInfo(title)`
 - `naxToastLoading(title?, overlay?)`
 
-### 宿主组件 props
+:::
 
-| prop | 类型 | 默认 | 说明 |
-|------|------|------|------|
-| z-index | number | `10090` | 层级 |
-| custom-class | string | `''` | 根节点扩展 class |
+::: details 基础（纯文案）
 
-### 主题 Token（改默认背景）
+```uvue
+<!-- 宿主挂载：生产建议根布局挂一次；演示页本地挂载保证可展示 -->
+<nax-toast></nax-toast>
+```
+
+```uts
+import {
+	naxToast,
+	hideNaxToast,
+	naxToastSuccess,
+	naxToastError,
+	naxToastWarning,
+	naxToastInfo,
+	naxToastLoading
+} from '@/uni_modules/nax-toast/index.uts'
+
+naxToast('你好，这是一条轻提示')
+```
+
+:::
+
+::: details 类型 type
+
+```uvue
+<nax-button type="success" label="success" @click="onSuccess"></nax-button>
+<nax-button type="error" label="error" @click="onError"></nax-button>
+<nax-button type="warning" label="warning" @click="onWarning"></nax-button>
+<nax-button type="info" label="info" @click="onInfo"></nax-button>
+```
+
+```uts
+function onSuccess() {
+	naxToast({
+		title: '保存成功',
+		type: 'success'
+	} as UTSJSONObject)
+}
+
+function onError() {
+	naxToast({
+		title: '提交失败',
+		type: 'error'
+	} as UTSJSONObject)
+}
+
+function onWarning() {
+	naxToast({
+		title: '请注意风险',
+		type: 'warning'
+	} as UTSJSONObject)
+}
+
+function onInfo() {
+	naxToast({
+		title: '已为你更新内容',
+		type: 'info'
+	} as UTSJSONObject)
+}
+```
+
+:::
+
+::: details 位置 position
+
+```uvue
+<nax-button label="top" @click="onPos('top')"></nax-button>
+<nax-button label="center" @click="onPos('center')"></nax-button>
+<nax-button label="bottom" @click="onPos('bottom')"></nax-button>
+```
+
+```uts
+function onPos(pos : string) {
+	naxToast({
+		title: '位置：' + pos,
+		type: 'text',
+		position: pos
+	} as UTSJSONObject)
+}
+```
+
+:::
+
+::: details Loading + 手动关闭
+
+```uvue
+<nax-button type="primary" label="显示 loading" @click="onLoading"></nax-button>
+<nax-button label="hideNaxToast()" @click="onHide"></nax-button>
+```
+
+```uts
+function onLoading() {
+	naxToastLoading('提交中…', true)
+	// loading 默认 duration=0 且带遮罩，需手动关闭或稍后再调 hide
+	setTimeout(() => {
+		hideNaxToast()
+		naxToastSuccess('提交完成')
+	}, 2500)
+}
+
+function onHide() {
+	hideNaxToast()
+}
+```
+
+:::
+
+::: details 自定义图标 / 时长
+
+```uvue
+<nax-button label="自定义 icon" @click="onCustomIcon"></nax-button>
+<nax-button label="4 秒后关闭" @click="onLong"></nax-button>
+```
+
+```uts
+function onCustomIcon() {
+	naxToast({
+		title: '收藏成功',
+		type: 'text',
+		icon: 'star',
+		showIcon: true
+	} as UTSJSONObject)
+}
+
+function onLong() {
+	naxToast({
+		title: '这条会停留 4 秒',
+		type: 'info',
+		duration: 4000
+	} as UTSJSONObject)
+}
+```
+
+:::
+
+::: details 自定义背景 bg（请用 hex）
+
+```uvue
+<nax-button label="品牌绿" @click="onCustomBg('#18a058')"></nax-button>
+```
+
+```uts
+// 鸿蒙/App 请优先 hex（如 #18a058）；rgba 在端上可能失效
+function onCustomBg(color : string) {
+	naxToast({
+		title: '自定义背景色',
+		type: 'text',
+		bg: color,
+		color: '#ffffff',
+		showIcon: false
+	} as UTSJSONObject)
+}
+```
+
+:::
+
+::: details 快捷方法
+
+```uvue
+<nax-button type="success" label="naxToastSuccess" @click="onQuickSuccess"></nax-button>
+<nax-button type="error" label="naxToastError" @click="onQuickError"></nax-button>
+```
+
+```uts
+function onQuickSuccess() {
+	naxToastSuccess('快捷成功')
+}
+
+function onQuickError() {
+	naxToastError('快捷错误')
+}
+
+// 同系列：naxToastWarning('注意') / naxToastInfo('提示') / naxToastLoading('加载中', true)
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-mask` | 遮罩色 |
 
 在 `nax-theme` 节点或全局 CSS 覆盖：
 
@@ -117,7 +296,7 @@ hideNaxToast()
 - 默认文案 / loading：半透明黑（`--nax-toast-bg`）
 - success / error / warning / info：使用对应语义色底
 - 单次调用优先 `bg`，覆盖主题与 type 底色
-- **鸿蒙 / App**：背景请用实色 hex（如 `#18a058`）。`rgba(...)`、嵌套 `var()` 在 ucss 下可能失效；组件内部默认与 type 色已改为实色 hex + inline 写入
+- **鸿蒙 / App**：背景请用实色 hex（如 `#18a058`）。`rgba(...)`、嵌套 `var()` 在 ucss 下可能失效
 
 
 ## Props

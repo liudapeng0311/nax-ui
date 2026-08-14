@@ -33,18 +33,15 @@ uni-app x 开关，功能覆盖常用场景。
 | update:modelValue | v-model |
 | change | 状态变化（boolean） |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-primary` 默认打开色
-- `--nax-color-border` 默认关闭色
-- `--nax-color-bg` 滑块底色
-- `--nax-color-text-secondary` 关闭态 loading 图标色
-- `--nax-opacity-disabled` 禁用透明度
-- `--nax-radius-full` 胶囊圆角
+通过 CSS 变量覆盖：
 
-## 设计说明
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
-- 尺寸统一为 `sm | md | lg`（不用 rpx 数字作默认 API）
-- `v-model` 固定为 boolean（自定义 open/close 值可在业务层映射）
-- 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量
-- 滑块位移用 flex `justify-content`，避免依赖 transform 平移

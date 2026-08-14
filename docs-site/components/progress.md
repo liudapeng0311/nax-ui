@@ -4,15 +4,13 @@ demo: progress
 
 # nax-progress
 
-> 当前版本：0.1.7（见 `changelog.md`）
+> 当前版本：0.1.8
 
 进度条。线形 / 圆形统一入口，用 `shape` 切换。
 
 ## 安装
 
-```text
-uni_modules/nax-progress
-```
+- 插件市场：[nax-progress](https://ext.dcloud.net.cn/plugin?id=29055)
 
 easycom 自动生效，页面直接使用 `<nax-progress />` 即可。
 
@@ -20,7 +18,7 @@ easycom 自动生效，页面直接使用 `<nax-progress />` 即可。
 
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <!-- 线形（默认） -->
@@ -40,11 +38,153 @@ easycom 自动生效，页面直接使用 `<nax-progress />` 即可。
 </nax-progress>
 ```
 
-### 说明
+:::
 
-- 主题优先 CSS 变量；`color` / `track-color` 仅作局部覆盖。
-- 圆形采用双半环 + `transform: rotate`，全端公共实现。
-- App 鸿蒙线形进度使用 `APP-HARMONY` 条件编译，以 `transform: scaleX()` 驱动动画，避开百分比宽度过渡的满宽闪烁；其它端仍使用 `width` 过渡。
+::: details 基础线形
+
+```uvue
+<nax-progress :percent="30"></nax-progress>
+<nax-progress :percent="60"></nax-progress>
+<nax-progress :percent="100"></nax-progress>
+```
+
+:::
+
+::: details 动态 percent
+
+```uvue
+<nax-progress :percent="dynamicPercent" type="primary"></nax-progress>
+
+<nax-button size="sm" label="-10" @click="dec"></nax-button>
+<nax-button size="sm" type="primary" label="+10" @click="inc"></nax-button>
+<nax-button size="sm" variant="secondary" label="随机" @click="rand"></nax-button>
+
+<nax-progress shape="circle" :percent="dynamicPercent" type="info" :width="112" :stroke-width="8"></nax-progress>
+```
+
+```uts
+const dynamicPercent = ref(42)
+
+function clamp(v : number) : number {
+	if (v < 0) {
+		return 0
+	}
+	if (v > 100) {
+		return 100
+	}
+	return v
+}
+
+function inc() {
+	dynamicPercent.value = clamp(dynamicPercent.value + 10)
+}
+
+function dec() {
+	dynamicPercent.value = clamp(dynamicPercent.value - 10)
+}
+
+function rand() {
+	dynamicPercent.value = Math.floor(Math.random() * 101)
+}
+```
+
+:::
+
+::: details 类型 type
+
+```uvue
+<nax-progress type="primary" :percent="70"></nax-progress>
+<nax-progress type="info" :percent="70"></nax-progress>
+<nax-progress type="success" :percent="70"></nax-progress>
+<nax-progress type="warning" :percent="70"></nax-progress>
+<nax-progress type="error" :percent="70"></nax-progress>
+```
+
+:::
+
+::: details 尺寸 size
+
+```uvue
+<nax-progress size="sm" :percent="50"></nax-progress>
+<nax-progress size="md" :percent="50"></nax-progress>
+<nax-progress size="lg" :percent="50"></nax-progress>
+```
+
+:::
+
+::: details 条内文案 textInside
+
+```uvue
+<nax-progress :percent="55" text-inside></nax-progress>
+<nax-progress :percent="88" text-inside type="success"></nax-progress>
+```
+
+:::
+
+::: details 隐藏文案 / 自定义 pivotText
+
+```uvue
+<nax-progress :percent="40" :show-info="false"></nax-progress>
+<nax-progress :percent="40" pivot-text="上传中"></nax-progress>
+```
+
+:::
+
+::: details status 覆盖色
+
+```uvue
+<nax-progress :percent="100" status="success"></nax-progress>
+<nax-progress :percent="60" status="warning"></nax-progress>
+<nax-progress :percent="30" status="error"></nax-progress>
+```
+
+:::
+
+::: details 圆形 shape=circle（含类型）
+
+```uvue
+<nax-progress shape="circle" :percent="25" size="sm"></nax-progress>
+<nax-progress shape="circle" :percent="60"></nax-progress>
+<nax-progress shape="circle" :percent="100" type="success" size="lg"></nax-progress>
+
+<nax-progress shape="circle" type="primary" :percent="70" size="sm"></nax-progress>
+<nax-progress shape="circle" type="info" :percent="70" size="sm"></nax-progress>
+<nax-progress shape="circle" type="warning" :percent="70" size="sm"></nax-progress>
+<nax-progress shape="circle" type="error" :percent="70" size="sm"></nax-progress>
+```
+
+:::
+
+::: details 插槽 useSlot
+
+```uvue
+<nax-progress :percent="50" use-slot>
+	<text class="slot-text">一半啦</text>
+</nax-progress>
+
+<nax-progress shape="circle" :percent="75" use-slot size="md">
+	<text class="slot-text">3/4</text>
+</nax-progress>
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
 
 
 ## Props
@@ -52,10 +192,10 @@ easycom 自动生效，页面直接使用 `<nax-progress />` 即可。
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | percent | number | `0` | 进度 0–100 |
-| shape | string | `'line'` | line \| circle |
-| type | string | `'primary'` | default \| primary \| info \| success \| warning \| error（兼容 danger） |
-| status | string | `''` | success \| warning \| error；有值时覆盖 type 色 |
-| size | string | `'md'` | sm \| md \| lg |
+| shape | string | `'line'` | `line` 条形 \| `circle` 圆形 |
+| type | string | `'primary'` | `default` 默认 \| `primary` 主要 \| `info` 信息 \| `success` 成功 \| `warning` 警告 \| `error` 错误（兼容 `danger`） |
+| status | string | `''` | `success` 成功 \| `warning` 警告 \| `error` 错误（有值时覆盖 type 色） |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大 |
 | showInfo | boolean | `true` | 是否显示百分比/文案 |
 | textInside | boolean | `false` | 线形文案是否在条内 |
 | useSlot | boolean | `false` | 使用默认插槽自定义信息区 |

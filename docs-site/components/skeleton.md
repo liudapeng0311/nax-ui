@@ -4,15 +4,13 @@ demo: skeleton
 
 # nax-skeleton
 
-> 当前版本：0.1.1（见 `changelog.md`）
+> 当前版本：0.1.2
 
 骨架屏。请求完成前用灰色块模拟页面结构，降低白屏感。
 
 ## 安装
 
-```text
-uni_modules/nax-skeleton
-```
+- 插件市场：[nax-skeleton](https://ext.dcloud.net.cn/plugin?id=29061)
 
 easycom 自动生效，页面直接使用 `<nax-skeleton />` 即可。
 
@@ -20,7 +18,7 @@ easycom 自动生效，页面直接使用 `<nax-skeleton />` 即可。
 
 ## 代码示例
 
-### 用法
+::: details 用法
 
 ```uvue
 <!-- 基础：标题 + 3 行段落 -->
@@ -47,12 +45,151 @@ easycom 自动生效，页面直接使用 `<nax-skeleton />` 即可。
 </nax-skeleton>
 ```
 
-### 主题 Token
+:::
 
-| Token | 默认 | 说明 |
-|-------|------|------|
-| `--nax-color-skeleton` | `#f2f3f5` | 骨架块底色 |
-| `--nax-skeleton-radius` | `var(--nax-radius-md, 3px)` | 块圆角 |
+::: details 基础（标题 + 段落）
+
+```uvue
+<nax-skeleton></nax-skeleton>
+```
+
+:::
+
+::: details 头像 + 标题 + 段落
+
+```uvue
+<nax-skeleton avatar :rows="2"></nax-skeleton>
+```
+
+:::
+
+::: details 方形头像 avatar-shape
+
+```uvue
+<nax-skeleton avatar avatar-shape="square" avatar-size="40" :rows="2"></nax-skeleton>
+```
+
+:::
+
+::: details 自定义行宽 rows-width
+
+```uvue
+<nax-skeleton :rows="3" rows-width="100%,88%,52%" title-width="50%"></nax-skeleton>
+```
+
+:::
+
+::: details 列表重复 count
+
+```uvue
+<nax-skeleton avatar :rows="2" :count="3" gap="20"></nax-skeleton>
+```
+
+:::
+
+::: details 关闭动画 animate=false
+
+```uvue
+<nax-skeleton :animate="false" avatar :rows="2"></nax-skeleton>
+```
+
+:::
+
+::: details 仅段落（无标题）
+
+```uvue
+<nax-skeleton :title="false" :rows="4" rows-width="100%,100%,90%,40%"></nax-skeleton>
+```
+
+:::
+
+::: details loading 切换真实内容
+
+```uvue
+<nax-skeleton :loading="demoLoading" avatar :rows="2">
+	<view class="real__row">
+		<view class="real__avatar"></view>
+		<view class="real__body">
+			<text class="real__title">张三 · 前端工程师</text>
+			<text class="real__desc">骨架结束后展示真实列表项内容。</text>
+		</view>
+	</view>
+</nax-skeleton>
+
+<nax-button
+	type="primary"
+	size="sm"
+	:label="demoLoading ? '结束加载' : '重新加载 1.5s'"
+	@click="toggleDemo"
+></nax-button>
+```
+
+```uts
+const demoLoading = ref(true)
+let demoTimer = -1
+
+function toggleDemo() {
+	if (demoLoading.value) {
+		demoLoading.value = false
+		clearTimeout(demoTimer)
+		return
+	}
+	demoLoading.value = true
+	demoTimer = setTimeout(() => {
+		demoTimer = -1
+		demoLoading.value = false
+	}, 1500)
+}
+```
+
+:::
+
+::: details 自定义骨架 #skeleton
+
+```uvue
+<nax-skeleton :loading="cardLoading">
+	<template #skeleton>
+		<view class="card-sk">
+			<view class="card-sk__cover nax-sk-bone"></view>
+			<view class="card-sk__line nax-sk-bone"></view>
+			<view class="card-sk__line nax-sk-bone card-sk__line--short"></view>
+		</view>
+	</template>
+	<view class="card-real">
+		<view class="card-real__cover"></view>
+		<text class="card-real__title">自定义卡片内容</text>
+		<text class="card-real__desc">封面 + 两行文案已加载完成</text>
+	</view>
+</nax-skeleton>
+
+<nax-button type="primary" size="sm" label="模拟卡片加载" @click="reloadCard"></nax-button>
+```
+
+骨架占位块样式（nax-sk-bone 等 class）由页面样式自行定义。
+
+```uts
+const cardLoading = ref(true)
+let cardTimer = -1
+
+function reloadCard() {
+	cardLoading.value = true
+	cardTimer = setTimeout(() => {
+		cardTimer = -1
+		cardLoading.value = false
+	}, 1500)
+}
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-skeleton` | 骨架屏占位色 |
+| `--nax-skeleton-radius` | 骨架屏圆角 |
 
 
 ## Props
@@ -64,7 +201,7 @@ easycom 自动生效，页面直接使用 `<nax-skeleton />` 即可。
 | title | boolean | `true` | 是否显示标题行，默认 true |
 | avatar | boolean | `false` | 是否显示头像，默认 false |
 | avatarSize | string | `'32'` | 头像边长，默认 32 |
-| avatarShape | string | `'circle'` | circle \| square，默认 circle |
+| avatarShape | string | `'circle'` | `circle` 圆形 \| `square` 方形；默认 `circle` |
 | rows | number | `3` | 段落行数，默认 3 |
 | titleWidth | string | `'40%'` | 标题宽度，默认 40% |
 | titleHeight | string | `'16'` | 标题高度，默认 16 |

@@ -6,6 +6,21 @@ uni-app x 滑动操作组件，功能覆盖常用场景，并增强：
 - 操作按钮 `type` 走主题 token（`error` / `warning` / `primary`…）
 - 支持 `options[].width` 与 `right` 自定义插槽
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
+
 ## 依赖
 
 - `nax-ui-theme`（CSS 变量 `--nax-*`，安装时依赖 / 运行时弱依赖）
@@ -44,8 +59,6 @@ const options = [
 ```
 
 > 列表 `key` 与 `name` 请用稳定唯一 id，不要用数组下标。
-
-> Android 端组内互斥已适配响应式注入；无需额外配置。
 
 ## nax-swipe-action Props
 
@@ -110,10 +123,3 @@ const options = [
 | 方法 | 说明 |
 |------|------|
 | closeAll | 收起组内全部 |
-
-## 主题 Token
-
-- `--nax-color-primary` / `info` / `success` / `warning` / `error`
-- `--nax-color-text-secondary` 默认按钮底
-- `--nax-color-bg` 内容区底色（遮住操作按钮）
-- `--nax-font-size-sm` 按钮字号

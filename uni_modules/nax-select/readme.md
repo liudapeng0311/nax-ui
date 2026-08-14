@@ -107,23 +107,30 @@ function onConfirm(items: UTSJSONObject[]) {
 |------|------|
 | trigger | 自定义触发区域（需 `show-trigger`） |
 
-## 主题 Token
+## 主题
+
+通过 CSS 变量覆盖：
 
 | Token | 用途 |
 |-------|------|
-| `--nax-color-bg` | 面板 / 触发条背景 |
-| `--nax-color-mask` | 遮罩 |
-| `--nax-color-primary` | 确认色 |
-| `--nax-color-text` / `secondary` / `placeholder` | 文案 |
-| `--nax-color-divider` | 顶部分割线 |
-| `--nax-radius-xl` | 面板顶圆角（建议业务覆盖为 12px+） |
+| `--nax-border-width` | 边框粗细 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-mask` | 遮罩色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-black` | 纯黑文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
 
 ## 平台说明
 
-- **iOS**：自研滚轮（`APP-IOS` 条件编译）：iOS 原生 `picker-view` 列内容不受 CSS 控制（选中文字无法垂直居中），改为 scroll-view + 固定行高框架渲染滚轮，文字显式行高居中；滚动停止吸附对齐选中行，支持点选。
+- **iOS**：自研滚轮（原生 `picker-view` 列文字无法垂直居中），滚动停止吸附对齐选中行，支持点选。
 - 其余端（Android / 鸿蒙 / Web / 微信小程序）统一使用原生 `picker-view` 滚轮。
 - **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
-- **鸿蒙暗黑模式**：通过 `mask-top-style` / `mask-bottom-style` 移除原生滚轮默认的白色渐变遮罩；该分端处理由 `APP-HARMONY` 条件编译。
+- **鸿蒙暗黑模式**：组件自动移除原生滚轮默认的白色渐变遮罩。
 - 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。
-- 弹层自包含，不依赖 `nax-popup`。
 - 联动最多 4 列。

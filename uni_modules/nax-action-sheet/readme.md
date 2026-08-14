@@ -1,8 +1,25 @@
 # nax-action-sheet
 
-底部操作菜单（动作面板）。内部薄封装 `nax-picker`（`position=bottom`），只提供「选项列表 + 取消」语义。
+底部操作菜单（动作面板），提供「选项列表 + 取消」语义。
 
 自定义任意底部内容请直接用 `nax-picker`。
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
 
 ## 依赖
 
@@ -45,13 +62,13 @@ function onCancel() {
 
 ## actions 项字段
 
-| 字段 | 说明 |
-|------|------|
-| `name` / `text` / `label` | 主文案（优先 `name`） |
-| `subname` / `subText` / `description` | 副文案 |
-| `disabled` | 禁用 |
-| `type` | `default` / `error`（`danger` 兼容） |
-| `color` | 可选自定义文字色（优先于 type） |
+| 字段 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| name | string | — | 主文案（优先 `name`，兼容 `text` / `label`） |
+| subname | string | `''` | 副文案，显示在主文案下方（优先 `subname`，兼容 `subText` / `description`） |
+| disabled | boolean | `false` | 禁用该项：点击不触发事件，文字置灰 |
+| type | string | `'default'` | 文案色：`default` 默认 / `error` 错误红（`danger` 同 `error`） |
+| color | string | `''` | 自定义文字色，优先于 `type` |
 
 兼容：也可传 `list`（与 `actions` 相同形态；`actions` 优先）。
 

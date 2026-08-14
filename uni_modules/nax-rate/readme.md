@@ -47,18 +47,13 @@ uni-app x 评分组件，功能覆盖常用场景。
 | update:modelValue | v-model |
 | change | 分值变化（number） |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-warning` 默认选中色
-- `--nax-color-text-placeholder` 默认未选中色
-- `--nax-opacity-disabled` 禁用透明度
+通过 CSS 变量覆盖：
 
-## 设计说明
+| Token | 用途 |
+|-------|------|
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-warning` | 警告色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
-- 尺寸统一为 `sm | md | lg` 或 **px** 数字字符串（不用 rpx）
-- `gutter` 单位为 **px**
-- 默认选中色用 warning 黄，更符合评分场景（常用错误色）
-- 图标默认均为 Lucide `star`（当前图标集无 `star-fill`）；通过 `activeColor` 区分选中态
-- 增加 `readonly` / `touchable`
-- 不提供 `current` 遗留 API、`customStyle`、`colors` / `icons` 分段数组、`customPrefix`
-- 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量

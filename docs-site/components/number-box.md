@@ -4,15 +4,13 @@ demo: number-box
 
 # nax-number-box
 
-> 当前版本：0.1.3（见 `changelog.md`）
+> 当前版本：0.1.4
 
 uni-app x 步进器（加减数量）。
 
 ## 安装
 
-```text
-uni_modules/nax-number-box
-```
+- 插件市场：[nax-number-box](https://ext.dcloud.net.cn/plugin?id=29045)
 
 easycom 自动生效，页面直接使用 `<nax-number-box />` 即可。
 
@@ -20,37 +18,225 @@ easycom 自动生效，页面直接使用 `<nax-number-box />` 即可。
 
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <nax-number-box v-model="value" @change="onChange"></nax-number-box>
 ```
 
-### Slot
+:::
 
-| 名称 | 说明 |
-|------|------|
-| minus | 自定义减号内容 |
-| plus | 自定义加号内容 |
+::: details 基础用法
 
-### 主题 Token
+```uvue
+<nax-number-box v-model="basic" @change="onBasicChange"></nax-number-box>
+```
 
-- `--nax-color-bg-secondary` 默认按钮/输入背景
-- `--nax-color-bg-hover` 按钮按压底
-- `--nax-color-text` 默认文字/图标色
-- `--nax-color-text-disabled` 禁用文字色
-- `--nax-color-border` 分隔线
-- `--nax-opacity-disabled` 禁用透明度
-- `--nax-radius-md` 圆角
-- `--nax-font-size-*` 字号
+```uts
+const basic = ref(1)
 
-### 设计说明
+function onBasicChange(v : number) {
+	// v 为最新值
+}
+```
 
-- 命名：`v-model` / `modelValue`（不用 `value`）
-- 增加 `size: sm | md | lg`；`inputWidth` / `buttonSize` 单位为 **px**
-- 不提供 `customStyle` / `iconStyle` 对象样式，扩展用 `customClass` + CSS 变量
-- 默认 `min=0`、`modelValue=0`（更通用；购物场景可自行设 `min=1`）
-- 图标使用 `nax-icon` 的 `minus` / `plus`
+:::
+
+::: details 尺寸 size
+
+```uvue
+<nax-number-box v-model="sizeSm" size="sm"></nax-number-box>
+<nax-number-box v-model="sizeMd" size="md"></nax-number-box>
+<nax-number-box v-model="sizeLg" size="lg"></nax-number-box>
+```
+
+```uts
+const sizeSm = ref(1)
+const sizeMd = ref(2)
+const sizeLg = ref(3)
+```
+
+:::
+
+::: details 范围 min / max / step
+
+```uvue
+<nax-number-box v-model="rangeVal" :min="1" :max="10" :step="1" @overlimit="onOverlimit"></nax-number-box>
+
+<nax-number-box v-model="stepVal" :min="0" :max="5" :step="0.5"></nax-number-box>
+```
+
+```uts
+const rangeVal = ref(1)
+const stepVal = ref(0)
+
+function onOverlimit(type : string) {
+	// type 为 'plus' 或 'minus'，已达边界
+}
+```
+
+:::
+
+::: details 仅整数 integer
+
+```uvue
+<nax-number-box v-model="intVal" integer :min="0" :max="99"></nax-number-box>
+```
+
+```uts
+const intVal = ref(3)
+```
+
+:::
+
+::: details 禁用
+
+```uvue
+<nax-number-box v-model="disabledAll" disabled></nax-number-box>
+
+<nax-number-box v-model="disabledInputVal" disabled-input></nax-number-box>
+
+<nax-number-box v-model="disableBtnVal" disable-plus disable-minus></nax-number-box>
+```
+
+```uts
+const disabledAll = ref(5)
+const disabledInputVal = ref(2)
+const disableBtnVal = ref(4)
+```
+
+:::
+
+::: details 长按 longPress
+
+```uvue
+<nax-number-box v-model="longPressOn" :long-press="true"></nax-number-box>
+
+<nax-number-box v-model="longPressOff" :long-press="false"></nax-number-box>
+```
+
+```uts
+const longPressOn = ref(0)
+const longPressOff = ref(0)
+```
+
+:::
+
+::: details 异步变更 asyncChange
+
+```uvue
+<nax-number-box v-model="asyncVal" async-change @change="onAsyncChange"></nax-number-box>
+```
+
+```uts
+const asyncVal = ref(1)
+const asyncBusy = ref(false)
+
+// 收到 change 后延迟回写 v-model，期间可展示“提交中”状态
+function onAsyncChange(v : number) {
+	if (asyncBusy.value) {
+		return
+	}
+	asyncBusy.value = true
+	const target = v
+	setTimeout(() => {
+		asyncVal.value = target
+		asyncBusy.value = false
+	}, 800)
+}
+```
+
+:::
+
+::: details 自定义颜色 / 宽度
+
+```uvue
+<nax-number-box v-model="colorVal" bg-color="#e8f5ee" color="#18a058" :button-size="36" :input-width="56"></nax-number-box>
+```
+
+```uts
+const colorVal = ref(1)
+```
+
+:::
+
+::: details 自定义插槽
+
+```uvue
+<nax-number-box v-model="slotVal">
+	<template #minus>
+		<text class="slot-text">减</text>
+	</template>
+	<template #plus>
+		<text class="slot-text">加</text>
+	</template>
+</nax-number-box>
+```
+
+```uts
+const slotVal = ref(1)
+```
+
+:::
+
+::: details 事件
+
+```uvue
+<nax-number-box
+	v-model="eventVal"
+	:min="0"
+	:max="20"
+	@change="onEventChange"
+	@focus="onEventFocus"
+	@blur="onEventBlur"
+	@plus="onEventPlus"
+	@minus="onEventMinus"
+	@overlimit="onOverlimit"
+></nax-number-box>
+```
+
+```uts
+const eventVal = ref(0)
+const eventLog = ref('等待操作')
+
+function onEventChange(v : number) {
+	eventLog.value = 'change: ' + v.toString()
+}
+
+function onEventFocus() {
+	eventLog.value = 'focus'
+}
+
+function onEventBlur(v : number) {
+	eventLog.value = 'blur: ' + v.toString()
+}
+
+function onEventPlus() {
+	eventLog.value = 'plus'
+}
+
+function onEventMinus() {
+	eventLog.value = 'minus'
+}
+
+function onOverlimit(type : string) {
+	eventLog.value = 'overlimit: ' + type
+}
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 
 ## Props
@@ -68,7 +254,7 @@ easycom 自动生效，页面直接使用 `<nax-number-box />` 即可。
 | disableMinus | boolean | `false` | 禁用减号 |
 | asyncChange | boolean | `false` | 异步变更：点击后不立刻改内部值，等外部 v-model 回写 |
 | longPress | boolean | `true` | 长按连续加减 |
-| size | string | `'md'` | sm \| md \| lg |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大 |
 | inputWidth | number | `0` | 输入框宽度（px）；0 跟随 size |
 | buttonSize | number | `0` | 按钮边长（px）；0 跟随 size |
 | showMinus | boolean | `true` | 显示减号 |

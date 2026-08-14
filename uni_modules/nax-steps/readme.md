@@ -9,6 +9,26 @@
 | `nax-steps` | 容器：方向、模式、当前步、语义色 |
 | `nax-step` | 单步（组合式）；也可由 `list` 自动生成 |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-text-tertiary` | 三级文字色 |
+| `--nax-color-warning` | 警告色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
+
+
 ## 依赖
 
 - `nax-icon`
@@ -73,6 +93,4 @@ const list = [
 
 ## 说明
 
-- 外观优先 `--nax-*` token + `type`，不靠颜色字符串当主题主路径。
-- 单步可显式 `status`，比仅靠 `current` 更适合失败/跳过场景。
-- App 端连接线/指示器用像素尺寸，避免百分比 `max-width` 等 ucss 限制。
+- 单步可显式 `status`，比仅靠 `current` 更适合失败 / 跳过场景。

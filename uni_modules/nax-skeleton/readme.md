@@ -55,12 +55,14 @@
 | default | `loading=false` 时展示的真实内容 |
 | skeleton | 自定义骨架结构（覆盖默认头像/标题/段落） |
 
-## 主题 Token
+## 主题
 
-| Token | 默认 | 说明 |
-|-------|------|------|
-| `--nax-color-skeleton` | `#f2f3f5` | 骨架块底色 |
-| `--nax-skeleton-radius` | `var(--nax-radius-md, 3px)` | 块圆角 |
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-skeleton` | 骨架屏占位色 |
+| `--nax-skeleton-radius` | 骨架屏圆角 |
 
 ## 依赖
 

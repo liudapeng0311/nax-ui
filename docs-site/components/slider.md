@@ -4,15 +4,13 @@ demo: slider
 
 # nax-slider
 
-> 当前版本：1.0.1（见 `changelog.md`）
+> 当前版本：1.0.2
 
 uni-app x 滑动选择器，功能覆盖常用场景。
 
 ## 安装
 
-```text
-uni_modules/nax-slider
-```
+- 插件市场：[nax-slider](https://ext.dcloud.net.cn/plugin?id=29062)
 
 easycom 自动生效，页面直接使用 `<nax-slider />` 即可。
 
@@ -20,40 +18,198 @@ easycom 自动生效，页面直接使用 `<nax-slider />` 即可。
 
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <nax-slider v-model="value" @change="onChange"></nax-slider>
 ```
 
-### Slot
+:::
 
-| 名称 | 说明 |
-|------|------|
-| default | 自定义滑块（需 `useSlot`） |
-
-### 主题 Token
-
-- `--nax-color-primary` 默认已选轨道色
-- `--nax-color-border` 默认轨道底色 / 滑块描边
-- `--nax-color-bg` 默认滑块底色
-- `--nax-color-text-secondary` 起止数值色
-- `--nax-opacity-disabled` 禁用透明度
-- `--nax-radius-full` 圆角
-
-### 范围说明
+::: details 范围说明
 
 - `start` / `end`：整条轨道的刻度范围（决定滑块视觉位置）
 - `min` / `max`：可选取值区间，会被夹在 `[start, end]` 内
 - 小数范围请同时设置 `:start` / `:end`（例如 0–1 且 `step=0.1`），不要只设 `min`/`max` 而保留默认 end=100
 
-### 设计说明
+:::
 
-- 尺寸增加 `size: sm | md | lg`；`blockWidth` / `height` 单位为 **px**（不用 rpx）
-- 不提供 `blockStyle` / `customStyle` 对象样式入口，扩展用 `customClass` + CSS 变量
-- 额外提供 `change` 事件（松手/点击最终值），便于表单联动
-- 阴影仅 Web / 小程序；App 端用描边保证层次（条件编译）
-- 组件不内置跟随滑块移动的数值气泡；需要展示当前值时，在滑块外使用普通文本绑定 `v-model`
+::: details 基础用法
+
+```uvue
+<nax-slider v-model="basic" @change="onBasicChange"></nax-slider>
+```
+
+```uts
+const basic = ref(30)
+
+function onBasicChange(v: number) {
+	// 值变化回调
+}
+```
+
+:::
+
+::: details 尺寸 size
+
+```uvue
+<nax-slider v-model="sizeSm" size="sm"></nax-slider>
+<nax-slider v-model="sizeMd" size="md"></nax-slider>
+<nax-slider v-model="sizeLg" size="lg"></nax-slider>
+```
+
+```uts
+const sizeSm = ref(20)
+const sizeMd = ref(40)
+const sizeLg = ref(60)
+```
+
+:::
+
+::: details 范围 min / max
+
+```uvue
+<nax-slider v-model="rangeVal" :min="30" :max="80" show-edge-value></nax-slider>
+```
+
+```uts
+const rangeVal = ref(50)
+```
+
+:::
+
+::: details 步长 step
+
+```uvue
+<nax-slider v-model="stepVal" :step="10"></nax-slider>
+```
+
+```uts
+const stepVal = ref(30)
+```
+
+:::
+
+::: details 小数步长
+
+```uvue
+<nax-slider v-model="stepFloat" :step="0.1" :start="0" :end="1"></nax-slider>
+```
+
+```uts
+const stepFloat = ref(0.3)
+```
+
+:::
+
+::: details 自定义颜色
+
+```uvue
+<nax-slider
+	v-model="colorVal"
+	active-color="#2080f0"
+	inactive-color="#d6e4ff"
+	block-color="#ffffff"
+></nax-slider>
+```
+
+```uts
+const colorVal = ref(45)
+```
+
+:::
+
+::: details 显示起止值 showEdgeValue
+
+```uvue
+<nax-slider
+	v-model="edgeVal"
+	:start="0"
+	:end="100"
+	show-edge-value
+	edge-value-position="bottom"
+></nax-slider>
+```
+
+```uts
+const edgeVal = ref(55)
+```
+
+:::
+
+::: details 自定义滑块 useSlot
+
+```uvue
+<nax-slider v-model="slotVal" use-slot :block-width="28">
+	<view class="custom-thumb">
+		<text class="custom-thumb__text">{{ slotVal }}</text>
+	</view>
+</nax-slider>
+```
+
+```uts
+const slotVal = ref(35)
+```
+
+:::
+
+::: details 禁用 disabled
+
+```uvue
+<nax-slider v-model="disabledVal" disabled></nax-slider>
+```
+
+```uts
+const disabledVal = ref(40)
+```
+
+:::
+
+::: details 事件 start / moving / end
+
+```uvue
+<nax-slider
+	v-model="eventVal"
+	@start="onStart"
+	@moving="onMoving"
+	@end="onEnd"
+	@change="onEventChange"
+></nax-slider>
+```
+
+```uts
+const eventVal = ref(25)
+
+function onStart() {
+	// 开始拖动
+}
+
+function onMoving() {
+	// 拖动中
+}
+
+function onEnd() {
+	// 结束拖动
+}
+
+function onEventChange(v: number) {
+	// 值变化
+}
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 
 ## Props
@@ -66,7 +222,7 @@ easycom 自动生效，页面直接使用 `<nax-slider />` 即可。
 | min | number | `0` | 可选最小值（夹在 start/end 内） |
 | max | number | `100` | 可选最大值（夹在 start/end 内） |
 | step | number | `1` | 步长 |
-| size | string | `'md'` | sm \| md \| lg（影响轨道高度与滑块尺寸；可被 blockWidth/height 覆盖） |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大（影响轨道高度与滑块尺寸；可用 blockWidth / height 覆盖） |
 | blockWidth | number | `0` | 滑块边长（px）；0 表示跟随 size |
 | height | number | `0` | 轨道高度（px）；0 表示跟随 size |
 | inactiveColor | string | `''` | 轨道底色；空则主题边框色 |
@@ -75,7 +231,7 @@ easycom 自动生效，页面直接使用 `<nax-slider />` 即可。
 | disabled | boolean | `false` | 禁用 |
 | useSlot | boolean | `false` | 使用默认插槽自定义滑块 |
 | showEdgeValue | boolean | `false` | 显示起止数值 |
-| edgeValuePosition | string | `'top'` | top \| bottom |
+| edgeValuePosition | string | `'top'` | `top` 上方 \| `bottom` 下方 |
 | customClass | string | `''` | 根节点扩展 class |
 
 

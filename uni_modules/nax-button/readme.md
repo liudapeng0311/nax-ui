@@ -33,6 +33,50 @@ uni_modules/nax-ui-theme
 
 页面根节点加 `class="nax-theme"`。未安装主题包时，组件仍可使用内置 fallback 颜色。
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-border-width` | 边框粗细 |
+| `--nax-button-height` | 按钮高度 |
+| `--nax-button-padding-x` | 按钮水平内边距 |
+| `--nax-button-radius` | 按钮圆角 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-button-secondary` | 按钮次要底色 |
+| `--nax-color-button-tertiary` | 按钮次次要底色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-error-secondary` | 错误色浅底 |
+| `--nax-color-error-tertiary` | 错误色次浅底 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-info-secondary` | 信息色浅底 |
+| `--nax-color-info-tertiary` | 信息色次浅底 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-primary-secondary` | 主题主色浅底 |
+| `--nax-color-primary-tertiary` | 主题主色次浅底 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-success-secondary` | 成功色浅底 |
+| `--nax-color-success-tertiary` | 成功色次浅底 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-color-warning` | 警告色 |
+| `--nax-color-warning-secondary` | 警告色浅底 |
+| `--nax-color-warning-tertiary` | 警告色次浅底 |
+| `--nax-opacity-disabled` | 禁用透明度 |
+
+若希望使用默认绿色主色：
+
+```css
+.nax-theme {
+  --nax-color-primary: #18a058;
+  --nax-color-primary-secondary: rgba(24, 160, 88, 0.16);
+  --nax-color-primary-tertiary: rgba(24, 160, 88, 0.12);
+}
+```
+
+
 ## 依赖
 
 | 依赖 | 说明 |
@@ -131,27 +175,3 @@ uni_modules/nax-ui-theme
 |------|------|
 | default | 自定义内容 |
 | icon | 自定义前缀图标区域（可与 icon prop 并存；loading 时隐藏） |
-
-## 主题
-
-通过 CSS 变量覆盖：
-
-| Token | 用途 |
-|-------|------|
-| `--nax-color-primary` | 主色实心/描边/文字 |
-| `--nax-color-button-secondary` | default 次要底 |
-| `--nax-color-button-tertiary` | default 次次要底 |
-| `--nax-color-primary-secondary` | primary 次要底 |
-| `--nax-color-primary-tertiary` | primary 次次要底 |
-| `--nax-opacity-disabled` | 禁用透明度（默认 0.5） |
-| `--nax-button-height` / `--nax-button-radius` | 尺寸圆角 |
-
-若希望使用默认绿色主色：
-
-```css
-.nax-theme {
-  --nax-color-primary: #18a058;
-  --nax-color-primary-secondary: rgba(24, 160, 88, 0.16);
-  --nax-color-primary-tertiary: rgba(24, 160, 88, 0.12);
-}
-```

@@ -68,14 +68,17 @@ function onChange(index: number) {
 | change | number | 选中下标变化 |
 | click | number | 点击项（含重复点同一项；禁用项不触发） |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-bg` / `--nax-color-border`
-- `--nax-color-primary`
-- `--nax-color-text` / `--nax-color-text-secondary`
-- `--nax-color-error`
-- `--nax-font-size-sm` / `--nax-font-size-md` / `--nax-font-size-lg`
-- `--nax-font-weight-medium`
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text-secondary` | 次要文字色 |
 
 ## 依赖
 

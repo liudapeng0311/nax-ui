@@ -32,13 +32,20 @@
 
 1. 默认颜色使用 `--nax-color-divider`，跟随 `nax-ui-theme` / 暗黑模式。
 2. 竖线 `length=100%` 时，父容器需要有明确高度，否则可能不可见。
-3. `space` / `inset` 替代任意 `margin` CSS 字符串，更利于设计系统一致。
-4. 与 `nax-divider` 分工：本组件无字；带文字请用 divider。
+3. 与 `nax-divider` 分工：本组件无字；带文字请用 divider。
 
-## 主题 Token
+## 主题
 
-- `--nax-color-divider`（默认线色）
-- `--nax-color-primary` / `info` / `success` / `warning` / `error`
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-warning` | 警告色 |
 
 ## 依赖
 

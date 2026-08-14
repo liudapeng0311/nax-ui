@@ -1,3 +1,7 @@
+## 0.1.19（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+## 0.1.18（2026-08-11）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
 ## 0.1.17（2026-08-07）
 - 修复 iOS 端无缝滚动暂停/播放不生效：`UniElement.animate` 无限循环在 iOS 上无法可靠停止（0ms 动画顶不掉循环），改为 rAF + `style.setProperty` 驱动（DOM 直写跳过 Vue diff，16ms/帧不掉帧），暂停/恢复通过 `cancelAnimationFrame` 全端语义一致（`APP-ANDROID`、`APP-IOS`、`APP-HARMONY` 统一）；Web 和小程序 CSS 动画行为不变。
 ## 0.1.16（2026-08-06）

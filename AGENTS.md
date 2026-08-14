@@ -158,7 +158,8 @@ nax-ui/                          # 演示宿主
 | 调整分期/优先级 | `docs/component-inventory.md` |
 | 新增/修改 token | `docs/design-system.md` |
 | 公共 API 原则变化 | `docs/design-system.md` |
-| 组件包代码 / API / 样式 / 行为 / 依赖变化 | 对应组件的 `changelog.md` + `package.json` 版本号 |
+| 组件包代码 / API / 样式 / 行为 / 依赖变化 | 对应组件的 `changelog.md` + `package.json` 版本号；并检查 `uni_modules/nax-ui` 套装是否需要同步 |
+| 新增/移除组件包 | `uni_modules/nax-ui` 套装 `package.json` 的 `uni_modules.dependencies` + `changelog.md` + 版本号 |
 | 仓库协作约束变化 | `AGENTS.md` |
 
 完成组件实现后：
@@ -185,6 +186,10 @@ nax-ui/                          # 演示宿主
 
 补充约定：
 
+- **每次修改任一 `nax-*` 组件包时，必须检查套装 `uni_modules/nax-ui` 是否需要同步更新**（它不收录组件源码，只聚合依赖）：
+  - 新增/移除组件包 → 更新套装 `package.json` 的 `uni_modules.dependencies` 列表与 readme 中的组件数量表述
+  - 套装依赖列表、平台支持、聚合说明等变化 → 同步套装 `changelog.md` + `package.json` 版本号（新增组件按 `minor`，修复类同步按 `patch`）
+  - 若仅组件内部实现变化、套装聚合信息无任何变化，可在套装 `changelog.md` 记一条“依赖组件更新”说明并递增 `patch`，或经判断确认无需更新并在任务说明中写明原因
 - 仅修改演示宿主页、且组件包本身未变化时，不强制升级组件版本
 - 为记录本次版本而修改 `changelog.md` / `package.json`，不视为需要再次递增版本号的新一轮组件改动
 - 同一任务多次修改同一组件包时只确定一个最终版本，changelog 合并记录本次任务的全部变化
@@ -288,6 +293,7 @@ const emit = defineEmits(['click'])
 - [ ] 清单或设计文档已同步
 - [ ] 每个发生变化的组件包均已更新对应 `changelog.md`
 - [ ] 每个发生变化的组件包均已按 SemVer 自动递增并同步 `package.json` 版本号
+- [ ] 已检查套装 `uni_modules/nax-ui` 是否需要同步（依赖列表 / 版本号 / changelog）
 - [ ] 有可运行 demo 或明确说明为何没有
 - [ ] 除 Web 端外，未主动运行或编译其它端；非 Web 端由用户自行核实
 - [ ] 无无关重构与无关文件打扰

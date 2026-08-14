@@ -118,17 +118,19 @@ function onSubmit() {
 | default（item） | 表单控件 |
 | label（item） | 自定义标签 |
 
-## 主题 Token
+## 主题
+
+通过 CSS 变量覆盖：
 
 | Token | 用途 |
 |-------|------|
-| `--nax-color-text` | 标签文字 |
-| `--nax-color-error` | 错误文案 / 必填星号 / 错误下划线 |
-| `--nax-color-border` | 默认下划线 |
-| `--nax-color-success` / `--nax-color-warning` | status 下划线 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-warning` | 警告色 |
 
 ## 平台说明
 
-- Android 端的 `provide/inject` 使用明确 `Ref` 与函数默认类型，避免 `null` 被推断成 `Void`；同时通过 `APP-ANDROID` 为表单及表单项补充原生 flex 拉伸与宽度约束。
 - 控件需自行 `v-model` 绑定到 `model` 字段；提交时调用 `validate()`。
-- 字段事件触发（blur/change）需业务侧调用 `validateField(prop, 'blur')`；后续可与输入类组件深度集成。
+- 字段事件触发（blur/change）需业务侧调用 `validateField(prop, 'blur')`。

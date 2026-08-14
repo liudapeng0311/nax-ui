@@ -47,6 +47,21 @@
 |------|------|
 | default | 自定义中间内容（需同时提供 `text` 以开启中间区，可用 `text=" "`） |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
+
 ## 依赖
 
 - `nax-ui-theme`（可选）

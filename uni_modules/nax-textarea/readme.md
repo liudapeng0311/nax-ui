@@ -6,7 +6,7 @@
 
 - `nax-ui-theme`（CSS 变量 `--nax-*`，安装时依赖 / 运行时弱依赖）
 
-Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在 `APP-ANDROID` 下使用背景、边框、文字和占位符实色兜底。
+Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`。
 
 ## 基础用法
 
@@ -33,7 +33,7 @@ Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-clas
 | confirm-type | string | `return` | 键盘右下角；默认 return 可回车换行；设为 done/search 等会当完成并可能失焦 |
 | disabled | boolean | `false` | 禁用 |
 | readonly | boolean | `false` | 只读 |
-| count | boolean | `false` | 字数统计（清单亦称 show-count） |
+| count | boolean | `false` | 字数统计 |
 | focus | boolean | `false` | 获取焦点 |
 | auto-height | boolean | `false` | 自动增高 |
 | maxlength | number | `140` | 最大长度；`-1` 不限制 |
@@ -51,7 +51,8 @@ Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-clas
 | 事件 | 说明 |
 |------|------|
 | update:modelValue | v-model |
-| input / change | 内容变化（当前值） |
+| input | 输入变化（当前值），输入过程中每次触发 |
+| change | 失焦时内容与聚焦时不同才触发（当前值），对齐原生 input 语义 |
 | focus / blur | 聚焦 / 失焦（当前值） |
 | confirm | 键盘完成（当前值） |
 | linechange | 行数变化（detail） |
@@ -67,23 +68,26 @@ Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-clas
 | `placeholderClass` | 样式隔离 2.0 下类穿透不稳定，请用 `placeholder-style` |
 | `disableDefaultPadding` | uni-app x 原生 textarea 未统一提供 |
 
-## 主题 Token（可选覆盖）
+## 主题
+
+通过 CSS 变量覆盖：
 
 | Token | 用途 |
-|------|------|
-| `--nax-textarea-bg` / `--nax-color-bg` | 背景 |
-| `--nax-color-border` | 边框 |
-| `--nax-color-primary` | 聚焦边框 |
-| `--nax-color-text` | 文字 |
-| `--nax-color-text-secondary` | 字数统计 |
-| `--nax-color-error` | 达上限字数色 |
-| `--nax-radius-md` | 圆角 |
-| `--nax-space-*` | 内边距 |
+|-------|------|
+| `--nax-border-width` | 边框粗细 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
+| `--nax-textarea-bg` | 多行输入框背景色 |
 
 ## 平台说明
 
 - 基于原生 `textarea`，`auto-height` / 键盘相关能力随端差异以官方文档为准。
 - `readonly` 通过禁用原生编辑实现（样式弱于 `disabled`）。
-- App 端去掉 Web 专用 `outline` / `resize`（条件编译）。
-- **鸿蒙**：高度与 nax-input 相同，写在原生 textarea 的明确 px 上，避免 height:100% / class height:auto 覆盖导致键盘避让测高失败；原生 cursor-spacing 仍不支持。
-- **鸿蒙演示页**：关闭原生 `adjust-position`，通过 `#ifdef APP-HARMONY` 的底部键盘占位 + 按遮挡量微调 `scroll-top`（不使用 `scroll-into-view`，避免输入框被顶到顶部留白过大）。组件默认 `adjust-position` 仍为 true，业务页可直接使用原生上推。
+- 鸿蒙端：原生 `cursor-spacing` 仍不支持。

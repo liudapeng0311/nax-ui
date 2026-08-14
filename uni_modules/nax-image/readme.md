@@ -32,6 +32,20 @@ uni_modules/nax-ui-theme
 
 页面根节点加 `class="nax-theme"`。
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-image-bg` | 容器背景 |
+| `--nax-image-status-bg` | 占位层背景 |
+| `--nax-image-radius` | 图片圆角（`shape=round` 时，默认跟 `--nax-radius-md` / 3px，对齐 button） |
+
+
 ## 依赖
 
 | 依赖 | 说明 |
@@ -113,11 +127,3 @@ uni_modules/nax-ui-theme
 | default | 覆盖在图片上的内容 |
 | loading | 自定义加载占位 |
 | error | 自定义失败占位 |
-
-## 主题
-
-| Token | 用途 |
-|-------|------|
-| `--nax-image-bg` | 容器背景 |
-| `--nax-image-status-bg` | 占位层背景 |
-| `--nax-image-radius` | `shape=round` 圆角（默认跟 `--nax-radius-md` / 3px，对齐 button） |

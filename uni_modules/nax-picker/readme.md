@@ -63,3 +63,13 @@ easycom 自动注册，页面内直接使用 `<nax-picker>`。
 ## 插槽
 
 - `default`：面板自定义内容
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-mask` | 遮罩色 |
+

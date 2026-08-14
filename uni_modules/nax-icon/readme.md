@@ -20,6 +20,17 @@ uni_modules/nax-ui-theme
 @import "@/uni_modules/nax-ui-theme/theme/default.css";
 ```
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-text` | 主文字色 |
+| `--nax-icon-color` | 图标颜色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
+
+
 ## 依赖
 
 | 依赖 | 说明 |
@@ -52,11 +63,11 @@ uni_modules/nax-ui-theme
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| name | string | `''` | 图标名 |
-| size | string | `md` | `sm` / `md` / `lg`，或数字字符串像素值 |
+| name | string | `''` | 图标名（必填），可选值见“当前支持的图标”，如 close / search / arrow-right |
+| size | string | `md` | 尺寸：`sm`（小）/ `md`（中）/ `lg`（大），或数字字符串像素值（如 20 表示 20px） |
 | color | string | `''` | 可选颜色；空则走 CSS 变量 |
 | disabled | boolean | `false` | 禁用点击 |
-| customClass | string | `''` | 根节点扩展 class |
+| customClass | string | `''` | 根节点扩展类名（class），用于自定义样式 |
 
 ### 尺寸
 
@@ -72,7 +83,7 @@ uni_modules/nax-ui-theme
 |------|------|
 | click | 点击触发；`disabled` 时不触发 |
 
-## 内置图标（MVP）
+## 当前支持的图标
 
 ```text
 close, check, plus, minus
@@ -85,26 +96,3 @@ file-off, notes-off, database-off, message-off,
 category, category-filled, map-pin, map-pin-filled
 ```
 
-完整映射见：`assets/icons/catalog.json`、`icons/mapping.json`。
-
-语义名与 Tabler 原始名不完全相同（例如 `close` → `x`，`image` → `photo`，`more` → `dots`）。
-
-## 主题变量
-
-- `--nax-icon-color`（优先）
-- `--nax-color-text`
-- `--nax-opacity-disabled`
-
-未传 `color` 时，组件会在根节点解析图标色，兼容样式隔离 2.0 下的浅色 / 深色主题切换。
-
-## 说明
-
-- 当前分发字体为 **45 图标子集**（约 16KB），不是完整 Tabler font。
-- 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序。
-- 组件 API 只暴露语义化 `name`。
-- 图标源：[Tabler Icons](https://tabler.io/icons)（MIT License）。
-
-## 已知注意
-
-- uvue / 鸿蒙 `@font-face` 仅支持 `font-family` 与 `src`。
-- 微信小程序不要改回本地字体路径。

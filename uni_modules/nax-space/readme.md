@@ -34,11 +34,11 @@
 
 | 属性 | 类型 | 默认 | 说明 |
 |------|------|------|------|
-| direction | string | `horizontal` | `horizontal` / `vertical`（兼容 `row` / `column`） |
-| size | string | `md` | 间距：`xs`/`sm`/`md`/`lg`/`xl`，或 token 档 `1`~`10`，或纯数字 px |
+| direction | string | `horizontal` | `horizontal` 横向 \| `vertical` 纵向（兼容 `row` / `column`） |
+| size | string | `md` | 间距：`xs` 特小 \| `sm` 小 \| `md` 中 \| `lg` 大 \| `xl` 特大，或 token 档 `1`~`10`，或纯数字 px |
 | wrap | boolean | `false` | 横向是否换行 |
-| align | string | `center` | 交叉轴：`start` / `center` / `end` / `baseline` / `stretch` |
-| justify | string | `start` | 主轴：`start` / `center` / `end` / `between` / `around` / `evenly` |
+| align | string | `center` | 交叉轴：`start` 起点 \| `center` 居中 \| `end` 终点 \| `baseline` 基线 \| `stretch` 拉伸 |
+| justify | string | `start` | 主轴：`start` 起点 \| `center` 居中 \| `end` 终点 \| `between` 两端对齐 \| `around` 环绕 \| `evenly` 均匀分布 |
 | fill | boolean | `false` | 子项拉伸（纵向时 item 宽 100%） |
 | custom-class | string | `''` | 根节点扩展 class |
 

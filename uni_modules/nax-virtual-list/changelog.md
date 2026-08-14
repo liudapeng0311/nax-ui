@@ -1,3 +1,7 @@
+## 0.1.10（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+## 0.1.9（2026-08-11）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
 ## 0.1.8（2026-08-07）
 - 修复 iOS 端滑动掉帧：`onScroll` 从每个 scroll 事件同步更新窗口改为 32ms 合并 + `scrollend` 强制同步（`APP-IOS` 复用鸿蒙机制，`scroll`/`visible-change` 在 `scrollend` 同步触发），并在窗口中部滚动时跳过重建
 - 修复 iOS 端快速滑动下方空白：缓冲行数下限抬到 12（`APP-IOS`），`scrollend` 用最新 `scrollTop` 强制对齐窗口

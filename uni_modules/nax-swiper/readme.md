@@ -26,6 +26,19 @@ uni_modules/nax-ui-theme
 
 页面根节点加 `class="nax-theme"`。
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-swiper-number-bg` | 数字指示器背景色 |
+| `--nax-swiper-number-color` | 数字指示器文字色 |
+| `--nax-swiper-radius` | 轮播圆角 |
+
+
 ## 依赖
 
 | 依赖 | 说明 |
@@ -141,6 +154,16 @@ const panels = ref([
 | radius | boolean | `true` | 圆角 |
 | customClass | string | `''` | 根节点扩展 class |
 
+### list 项
+
+`list` 元素支持字符串（图片 url）或对象，对象字段如下：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| src / image / url | string | 图片地址，优先级 `src` > `image` > `url`；字符串元素等价于传 `src` |
+| bg / background | string | 背景色，优先级 `bg` > `background`；无图片时配合 `text` 渲染色块文案 |
+| text / title | string | 文案，优先级 `text` > `title`；可叠加在图片上，或配合 `bg` 组成色块项 |
+
 ## Events
 
 | 事件 | 说明 |
@@ -155,11 +178,3 @@ const panels = ref([
 | 插槽 | 说明 |
 |------|------|
 | default | 自定义 `swiper-item`（`list` 为空时；小程序请传 `itemCount`） |
-
-## 主题
-
-| Token | 用途 |
-|-------|------|
-| `--nax-swiper-radius` | 圆角（默认跟 `--nax-radius-md` / 3px，对齐 button） |
-| `--nax-swiper-number-bg` | 数字指示器背景 |
-| `--nax-swiper-number-color` | 数字指示器文字色 |

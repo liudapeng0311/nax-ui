@@ -57,21 +57,15 @@ uni-app x 步进器（加减数量）。
 | minus | 自定义减号内容 |
 | plus | 自定义加号内容 |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-bg-secondary` 默认按钮/输入背景
-- `--nax-color-bg-hover` 按钮按压底
-- `--nax-color-text` 默认文字/图标色
-- `--nax-color-text-disabled` 禁用文字色
-- `--nax-color-border` 分隔线
-- `--nax-opacity-disabled` 禁用透明度
-- `--nax-radius-md` 圆角
-- `--nax-font-size-*` 字号
+通过 CSS 变量覆盖：
 
-## 设计说明
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
-- 命名：`v-model` / `modelValue`（不用 `value`）
-- 增加 `size: sm | md | lg`；`inputWidth` / `buttonSize` 单位为 **px**
-- 不提供 `customStyle` / `iconStyle` 对象样式，扩展用 `customClass` + CSS 变量
-- 默认 `min=0`、`modelValue=0`（更通用；购物场景可自行设 `min=1`）
-- 图标使用 `nax-icon` 的 `minus` / `plus`

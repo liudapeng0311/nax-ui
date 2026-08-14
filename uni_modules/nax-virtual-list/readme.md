@@ -1,12 +1,12 @@
 # nax-virtual-list
 
-固定行高**虚拟列表**。使用 `scroll-view` + 上下 spacer，只渲染可视区与缓冲行，适合一次性持有大量数据。鸿蒙端对窗口更新做滞后合并，`scroll`/`visible-change` 在 `scrollend` 同步。
+固定行高**虚拟列表**。使用 `scroll-view` + 上下 spacer，只渲染可视区与缓冲行，适合一次性持有大量数据。
 
 > 与 `nax-list` 的区别：`nax-list` 是滚动壳（内容自行 `v-for`，不裁剪 DOM）；本组件接管数据源并做窗口裁剪。
 
 ## 能力
 
-- 固定 `itemHeight`：全端窗口裁剪；鸿蒙滞后更新 + scrollend 事件
+- 固定 `itemHeight`：全端窗口裁剪
 - 作用域插槽自定义行：`{ item, index }`
 - 触底 `load`、下拉刷新、空 / 加载 / 结束 / 错误态（对齐 `nax-list`）
 - 方法：`scrollToIndex` / `scrollToOffset` / `getVisibleRange`
@@ -109,6 +109,19 @@ const vlRef = ref(null)
 | header / footer | 顶 / 底 |
 | empty / loading / finished / error | 状态覆盖 |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+
 ## 依赖
 
 - `nax-empty`
@@ -119,9 +132,5 @@ const vlRef = ref(null)
 
 1. **必须等高**：每行实际高度应等于 `item-height`，否则滚动定位会漂。
 2. 必须有明确高度：`height` 或父级 flex 高度链。
-3. 作用域插槽在部分端对类型较严，demo 用 `UTSJSONObject` 取字段。
-4. **鸿蒙端**使用与其它端相同的窗口裁剪（**不用**全量 `list-view` 挂载，避免进页卡死）；滚动窗口滞后更新，`scroll`/`visible-change` 在 `scrollend` 同步。
-5. 不做瀑布流 / 不等高测量（后续可增强）。
-6. **Web 端**使用固定总高 + `translateY` 窗口偏移，并关闭 `overflow-anchor`，避免滚动锚定导致连滚到底。
-7. **Web / 微信小程序**：每次进入触底阈值只派发一次 `load`；组件按滚动区剩余距离判断是否真正离开底部，并在追加数据后恢复原 `scrollTop`，避免视口跳到新增页底部（`#ifdef WEB || MP-WEIXIN`）。
-8. **微信小程序**：行节点使用窗口位置 key，避免 “More than one slot named d-N” 警告。
+3. 作用域插槽在部分端对类型较严，建议用 `UTSJSONObject` 取字段。
+4. 不做瀑布流 / 不等高测量。

@@ -82,6 +82,15 @@ hideNaxToast()
 | z-index | number | `10090` | 层级 |
 | custom-class | string | `''` | 根节点扩展 class |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-mask` | 遮罩色 |
+
+
 ## 依赖
 
 - `nax-icon`（类型图标 / loading）
@@ -106,4 +115,4 @@ hideNaxToast()
 - 默认文案 / loading：半透明黑（`--nax-toast-bg`）
 - success / error / warning / info：使用对应语义色底
 - 单次调用优先 `bg`，覆盖主题与 type 底色
-- **鸿蒙 / App**：背景请用实色 hex（如 `#18a058`）。`rgba(...)`、嵌套 `var()` 在 ucss 下可能失效；组件内部默认与 type 色已改为实色 hex + inline 写入
+- **鸿蒙 / App**：背景请用实色 hex（如 `#18a058`）。`rgba(...)`、嵌套 `var()` 在 ucss 下可能失效

@@ -108,6 +108,16 @@ function onRefresh() {
 | empty | 自定义空态 |
 | loading / finished / error | 覆盖对应默认状态 UI |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-error` | 错误色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+
 ## 依赖
 
 - `nax-empty`

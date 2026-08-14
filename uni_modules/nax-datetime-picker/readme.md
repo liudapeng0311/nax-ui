@@ -2,6 +2,26 @@
 
 uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-border-width` | 边框粗细 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-mask` | 遮罩色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-black` | 纯黑文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+
 ## 依赖
 
 - `nax-icon`（触发条箭头）
@@ -55,9 +75,8 @@ confirm 回调字段：value / timestamp / formatted / year / month / day / hour
 
 ## 平台说明
 
-- 全端原生 picker-view（含鸿蒙）。
 - 鸿蒙禁用选项点选，请滑动后确认。
-- 鸿蒙暗黑模式通过 `mask-top-style` / `mask-bottom-style` 移除原生滚轮默认的白色渐变遮罩；该分端处理由 `APP-HARMONY` 条件编译。
+- 鸿蒙暗黑模式：组件自动移除原生滚轮默认的白色渐变遮罩。
 - 微信小程序滚动中点确认会被忽略。
 
 > 说明：鸿蒙 `picker-view` 打开时的滚到目标动画为原生行为，**无法设置 duration**。未传 `min-date` 时默认近 30 年～当前+10 年，以缩短年列滚动距离。需要更早日期请显式传 `min-date`。

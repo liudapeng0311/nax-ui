@@ -4,8 +4,6 @@
 
 基于原生 `<video>` + `uni.createVideoContext`，负责媒体承载、事件归一化与播放控制。**不提供** nax 风格默认控制条皮肤；通过作用域插槽自行组合 UI。
 
-规范见仓库 `docs/nax-video-headless.md`。
-
 ## 安装
 
 ```text
@@ -113,5 +111,5 @@ easycom 自动生效。首版**无**运行时依赖（不强制 `nax-icon` / `na
 - “无头”指**控制 UI 无头**，视频仍渲染原生 `<video>`。
 - 状态以原生事件为真相来源；`play()` 不会乐观把 `playing` 设为 true。
 - 不提供持续受控的 `currentTime` prop，避免 `timeupdate → prop → seek` 循环。
-- 首版**不**承诺可放入虚拟列表并保持播放状态（HarmonyOS `recycle` / `reuse` 后续再做）。
+- 不承诺可放入虚拟列表并保持播放状态。
 - 不暴露 `VideoContext` / 平台播放器实例。

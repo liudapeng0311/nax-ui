@@ -53,6 +53,15 @@
 |------|------|
 | default | 叠在遮罩中央的内容 |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-mask` | 遮罩色 |
+
+
 ## 依赖
 
 - `nax-ui-theme`（可选，提供 `--nax-color-mask`）
@@ -60,5 +69,4 @@
 ## 说明
 
 1. 完整弹层（定位面板）请用 `nax-picker`；本组件只负责蒙层。
-2. 鸿蒙端淡入淡出走 opacity 三阶段，避免首帧闪黑。
-3. Dialog / ActionSheet 等仍使用 `nax-picker` 内置 mask；本组件面向自定义浮层与独立蒙层场景。
+2. Dialog / ActionSheet 等仍使用 `nax-picker` 内置 mask；本组件面向自定义浮层与独立蒙层场景。

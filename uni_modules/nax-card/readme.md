@@ -49,6 +49,20 @@
 | cover | 封面（需 `show-cover`） |
 | footer | 页脚（需 `show-footer`） |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+
 ## 依赖
 
 - `nax-ui-theme`（可选）

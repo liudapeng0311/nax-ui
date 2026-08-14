@@ -4,30 +4,21 @@ demo: icon
 
 # nax-icon
 
-> 当前版本：0.2.8（见 `changelog.md`）
+> 当前版本：0.2.12
 
 `nax-ui` 字体图标组件（uni-app x / uvue）。
 
 ## 安装
 
-```text
-uni_modules/nax-icon
-```
+- 插件市场：[nax-icon](https://ext.dcloud.net.cn/plugin?id=29021)
 
 easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
 
-## 依赖
-
-| 依赖 | 说明 |
-|------|------|
-| `nax-ui-theme` | **安装时依赖**；**运行时弱依赖**（未挂主题时走 fallback） |
-
-
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```html
 <nax-icon name="search"></nax-icon>
@@ -47,63 +38,17 @@ easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
 </nax-button>
 ```
 
-### 内置图标（MVP）
+:::
+
+::: details 当前支持的图标
 
 
-| 图标名 |
-|--------|
-| `close` |
-| `check` |
-| `plus` |
-| `minus` |
-| `arrow-left` |
-| `arrow-right` |
-| `arrow-up` |
-| `arrow-down` |
-| `chevron-left` |
-| `chevron-right` |
-| `chevron-up` |
-| `chevron-down` |
-| `search` |
-| `loading` |
-| `info` |
-| `warning` |
-| `success` |
-| `error` |
-| `user` |
-| `home` |
-| `more` |
-| `edit` |
-| `delete` |
-| `star` |
-| `heart` |
-| `settings` |
-| `eye` |
-| `eye-off` |
-| `copy` |
-| `share` |
-| `image` |
-| `image-off` |
-| `loader` |
-| `loader-4` |
-| `square` |
-| `circle` |
-| `square-check` |
-| `file-off` |
-| `notes-off` |
-| `database-off` |
-| `message-off` |
-| `category` |
-| `category-filled` |
-| `map-pin` |
-| `map-pin-filled` |
-
-完整映射见：`assets/icons/catalog.json`、`icons/mapping.json`。
-
-语义名与 Tabler 原始名不完全相同（例如 `close` → `x`，`image` → `photo`，`more` → `dots`）。
+<IconGrid :names="['close', 'check', 'plus', 'minus', 'arrow-left', 'arrow-right', 'arrow-up', 'arrow-down', 'chevron-left', 'chevron-right', 'chevron-up', 'chevron-down', 'search', 'loading', 'info', 'warning', 'success', 'error', 'user', 'home', 'more', 'edit', 'delete', 'star', 'heart', 'settings', 'eye', 'eye-off', 'copy', 'share', 'image', 'image-off', 'loader', 'loader-4', 'square', 'circle', 'square-check', 'file-off', 'notes-off', 'database-off', 'message-off', 'category', 'category-filled', 'map-pin', 'map-pin-filled']" />
 
 
-### 主题变量
+:::
+
+::: details 主题变量
 
 - `--nax-icon-color`（优先）
 - `--nax-color-text`
@@ -111,28 +56,82 @@ easycom 自动生效，页面直接使用 `<nax-icon />` 即可。
 
 未传 `color` 时，组件会在根节点解析图标色，兼容样式隔离 2.0 下的浅色 / 深色主题切换。
 
-### 说明
+:::
 
-- 当前分发字体为 **45 图标子集**（约 16KB），不是完整 Tabler font。
-- 组件内 `@font-face` 使用 **base64 内联**，兼容微信小程序。
-- 组件 API 只暴露语义化 `name`。
-- 图标源：[Tabler Icons](https://tabler.io/icons)（MIT License）。
+::: details 尺寸 size
 
-### 已知注意
+```uvue
+<nax-icon name="search" size="sm"></nax-icon>
+<nax-icon name="search" size="md"></nax-icon>
+<nax-icon name="search" size="lg"></nax-icon>
+<nax-icon name="search" size="28"></nax-icon>
+```
 
-- uvue / 鸿蒙 `@font-face` 仅支持 `font-family` 与 `src`。
-- 微信小程序不要改回本地字体路径。
+:::
+
+::: details 颜色 color
+
+```uvue
+<nax-icon name="heart" color="#d03050"></nax-icon>
+<nax-icon name="star" color="#f0a020"></nax-icon>
+<nax-icon name="success" color="#18a058"></nax-icon>
+<nax-icon name="info" color="#2080f0"></nax-icon>
+```
+
+:::
+
+::: details 状态
+
+```uvue
+<nax-icon name="settings" @click="onTap"></nax-icon>
+<nax-icon name="settings" disabled @click="onTap"></nax-icon>
+```
+
+```uts
+function onTap() {
+	// 处理点击；disabled 时不会触发
+}
+```
+
+:::
+
+::: details 配合 nax-button
+
+```uvue
+<nax-button type="primary" label="搜索">
+	<template #icon>
+		<nax-icon name="search" size="sm"></nax-icon>
+	</template>
+</nax-button>
+<nax-button type="error" variant="outline" label="删除">
+	<template #icon>
+		<nax-icon name="delete" size="sm" color="#d03050"></nax-icon>
+	</template>
+</nax-button>
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-text` | 主文字色 |
+| `--nax-icon-color` | 图标颜色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 
 ## Props
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| name | string | `''` | 图标名，如 close / search / arrow-right |
-| size | string | `'md'` | sm \| md \| lg \| 数字字符串（如 20） |
-| color | string | `''` | 可选颜色；默认走 --nax-icon-color / --nax-color-text |
+| name | string | `''` | 图标名（必填），可选值见“当前支持的图标”，如 `close` / `search` / `arrow-right` |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大 \| 数字字符串像素值（如 20 表示 20px） |
+| color | string | `''` | 可选颜色；默认走 `--nax-icon-color` / `--nax-color-text` |
 | disabled | boolean | `false` | 禁用点击 |
-| customClass | string | `''` | 根节点扩展 class |
+| customClass | string | `''` | 根节点扩展类名（class），用于自定义样式 |
 
 
 ## Events

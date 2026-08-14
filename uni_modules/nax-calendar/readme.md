@@ -2,13 +2,27 @@
 
 `nax-ui` 日历选择器（uni-app x / uvue）。
 
-主要能力：
+## 主题
 
-- 单选 `mode="date"` / 范围 `mode="range"`
-- 底部弹层 / 页面内联 `isPage`
-- 年/月切换、最小最大日期
-- 节假日 / 加班日 / 节日标记
-- 打卡签到标记
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-mask` | 遮罩色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-primary-secondary` | 主题主色浅底 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
 
 ## 依赖
 

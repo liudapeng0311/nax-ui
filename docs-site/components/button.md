@@ -4,7 +4,7 @@ demo: button
 
 # nax-button
 
-> 当前版本：0.1.18（见 `changelog.md`）
+> 当前版本：0.1.20
 
 `nax-ui` 通用按钮组件（uni-app x / uvue）。
 色系与层级：
@@ -23,23 +23,17 @@ easycom 自动生效，页面直接使用 `<nax-button />` 即可。
 
 > 建议同时安装主题包 `uni_modules/nax-ui-theme` 并在 `App.uvue` 引入主题变量，详见 [主题接入](/guide/theme)。
 
-## 依赖
-
-| 依赖 | 说明 |
-|------|------|
-| `nax-icon` | 图标（loading 等） |
-| `nax-ui-theme` | **安装时依赖**；**运行时弱依赖**（组件内 `var(--nax-*, fallback)`，未接主题也能显示） |
-
-
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```html
 <nax-button type="primary" label="确定" @click="onConfirm"></nax-button>
 ```
 
-### 层级示例
+:::
+
+::: details 层级示例
 
 ```html
 <!-- 基础 -->
@@ -59,7 +53,9 @@ easycom 自动生效，页面直接使用 `<nax-button />` 即可。
 <nax-button type="primary" variant="secondary" label="Primary 次要"></nax-button>
 ```
 
-### 图标
+:::
+
+::: details 图标
 
 需要同时安装 `nax-icon`。推荐直接用 `icon` prop：
 
@@ -79,7 +75,9 @@ easycom 自动生效，页面直接使用 `<nax-button />` 即可。
 </nax-button>
 ```
 
-### Loading
+:::
+
+::: details Loading
 
 `loading` 为 true 时：
 
@@ -91,26 +89,205 @@ easycom 自动生效，页面直接使用 `<nax-button />` 即可。
 <nax-button type="primary" :loading="true" label="提交中"></nax-button>
 ```
 
-### Slots
+:::
 
-| 插槽 | 说明 |
-|------|------|
-| default | 自定义内容 |
-| icon | 自定义前缀图标区域（可与 icon prop 并存；loading 时隐藏） |
+::: details 层级与类型（default / primary）
 
-### 主题
+```uvue
+<nax-button label="基础" @click="onTap('base')"></nax-button>
+<nax-button variant="secondary" label="次要" @click="onTap('secondary')"></nax-button>
+<nax-button variant="tertiary" label="次次要" @click="onTap('tertiary')"></nax-button>
+<nax-button variant="quaternary" label="次次次要" @click="onTap('quaternary')"></nax-button>
+<nax-button variant="dashed" label="虚线" @click="onTap('dashed')"></nax-button>
+<nax-button disabled label="禁用" @click="onTap('disabled')"></nax-button>
+
+<nax-button type="primary" label="基础"></nax-button>
+<nax-button type="primary" variant="secondary" label="次要"></nax-button>
+<nax-button type="primary" variant="tertiary" label="次次要"></nax-button>
+<nax-button type="primary" variant="quaternary" label="次次次要"></nax-button>
+<nax-button type="primary" variant="dashed" label="虚线"></nax-button>
+<nax-button type="primary" disabled label="禁用"></nax-button>
+```
+
+```uts
+function onTap(name: string) {
+	uni.showToast({ title: name, icon: 'none' })
+}
+```
+
+:::
+
+::: details 类型 type × variant
+
+```uvue
+<nax-button label="Default"></nax-button>
+<nax-button type="primary" label="Primary"></nax-button>
+<nax-button type="info" label="Info"></nax-button>
+<nax-button type="success" label="Success"></nax-button>
+<nax-button type="warning" label="Warning"></nax-button>
+<nax-button type="error" label="Error"></nax-button>
+
+<nax-button variant="secondary" label="Default"></nax-button>
+<nax-button type="primary" variant="secondary" label="Primary"></nax-button>
+<nax-button type="info" variant="secondary" label="Info"></nax-button>
+<nax-button type="success" variant="secondary" label="Success"></nax-button>
+<nax-button type="warning" variant="secondary" label="Warning"></nax-button>
+<nax-button type="error" variant="secondary" label="Error"></nax-button>
+
+<nax-button variant="tertiary" label="Default"></nax-button>
+<nax-button type="primary" variant="tertiary" label="Primary"></nax-button>
+<nax-button type="info" variant="tertiary" label="Info"></nax-button>
+<nax-button type="success" variant="tertiary" label="Success"></nax-button>
+<nax-button type="warning" variant="tertiary" label="Warning"></nax-button>
+<nax-button type="error" variant="tertiary" label="Error"></nax-button>
+
+<nax-button variant="quaternary" label="Default"></nax-button>
+<nax-button type="primary" variant="quaternary" label="Primary"></nax-button>
+<nax-button type="info" variant="quaternary" label="Info"></nax-button>
+<nax-button type="success" variant="quaternary" label="Success"></nax-button>
+<nax-button type="warning" variant="quaternary" label="Warning"></nax-button>
+<nax-button type="error" variant="quaternary" label="Error"></nax-button>
+
+<nax-button variant="dashed" label="Default"></nax-button>
+<nax-button type="primary" variant="dashed" label="Primary"></nax-button>
+<nax-button type="info" variant="dashed" label="Info"></nax-button>
+<nax-button type="success" variant="dashed" label="Success"></nax-button>
+<nax-button type="warning" variant="dashed" label="Warning"></nax-button>
+<nax-button type="error" variant="dashed" label="Error"></nax-button>
+```
+
+:::
+
+::: details 禁用 disabled × type
+
+```uvue
+<nax-button disabled label="Default"></nax-button>
+<nax-button type="primary" disabled label="Primary"></nax-button>
+<nax-button type="info" disabled label="Info"></nax-button>
+<nax-button type="success" disabled label="Success"></nax-button>
+<nax-button type="warning" disabled label="Warning"></nax-button>
+<nax-button type="error" disabled label="Error"></nax-button>
+```
+
+:::
+
+::: details 描边 outline（兼容）
+
+```uvue
+<nax-button type="primary" variant="outline" label="outline"></nax-button>
+<nax-button type="error" variant="outline" label="outline error"></nax-button>
+```
+
+:::
+
+::: details 尺寸 size
+
+```uvue
+<nax-button type="primary" size="sm" label="small"></nax-button>
+<nax-button type="primary" size="md" label="medium"></nax-button>
+<nax-button type="primary" size="lg" label="large"></nax-button>
+```
+
+:::
+
+::: details 形状 shape
+
+```uvue
+<nax-button type="primary" shape="square" label="square"></nax-button>
+<nax-button type="primary" shape="round" label="round"></nax-button>
+<nax-button type="primary" shape="circle" label="好"></nax-button>
+```
+
+:::
+
+::: details 图标 icon（nax-icon）
+
+```uvue
+<nax-button type="primary" icon="search" label="搜索" @click="onTap('icon-search')"></nax-button>
+<nax-button type="primary" icon="arrow-right" icon-position="right" label="下一步" @click="onTap('icon-right')"></nax-button>
+<nax-button type="success" variant="secondary" icon="check" label="完成"></nax-button>
+<nax-button type="error" variant="outline" icon="delete" label="删除"></nax-button>
+<nax-button type="primary" shape="circle" icon="plus" @click="onTap('icon-circle')"></nax-button>
+<nax-button type="primary" icon="search" :loading="loading" label="加载中"></nax-button>
+```
+
+```uts
+const loading = ref(false)
+
+function onTap(name: string) {
+	uni.showToast({ title: name, icon: 'none' })
+}
+```
+
+:::
+
+::: details 状态 loading 动画
+
+```uvue
+<nax-button type="primary" label="正常" @click="onTap('normal')"></nax-button>
+<nax-button type="primary" :loading="loading" label="加载" @click="toggleLoading"></nax-button>
+<nax-button type="primary" loading label="提交中"></nax-button>
+<nax-button type="success" variant="secondary" loading label="保存中"></nax-button>
+<nax-button type="primary" shape="circle" loading></nax-button>
+```
+
+```uts
+const loading = ref(false)
+
+function toggleLoading() {
+	loading.value = !loading.value
+}
+```
+
+:::
+
+::: details 块级 block
+
+```uvue
+<nax-button type="primary" block label="块级主按钮" @click="onTap('block')"></nax-button>
+<nax-button type="error" variant="secondary" block label="块级次要错误按钮"></nax-button>
+```
+
+```uts
+function onTap(name: string) {
+	uni.showToast({ title: name, icon: 'none' })
+}
+```
+
+:::
+
+## 主题
 
 通过 CSS 变量覆盖：
 
 | Token | 用途 |
 |-------|------|
-| `--nax-color-primary` | 主色实心/描边/文字 |
-| `--nax-color-button-secondary` | default 次要底 |
-| `--nax-color-button-tertiary` | default 次次要底 |
-| `--nax-color-primary-secondary` | primary 次要底 |
-| `--nax-color-primary-tertiary` | primary 次次要底 |
-| `--nax-opacity-disabled` | 禁用透明度（默认 0.5） |
-| `--nax-button-height` / `--nax-button-radius` | 尺寸圆角 |
+| `--nax-border-width` | 边框粗细 |
+| `--nax-button-height` | 按钮高度 |
+| `--nax-button-padding-x` | 按钮水平内边距 |
+| `--nax-button-radius` | 按钮圆角 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-button-secondary` | 按钮次要底色 |
+| `--nax-color-button-tertiary` | 按钮次次要底色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-error-secondary` | 错误色浅底 |
+| `--nax-color-error-tertiary` | 错误色次浅底 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-info-secondary` | 信息色浅底 |
+| `--nax-color-info-tertiary` | 信息色次浅底 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-primary-secondary` | 主题主色浅底 |
+| `--nax-color-primary-tertiary` | 主题主色次浅底 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-success-secondary` | 成功色浅底 |
+| `--nax-color-success-tertiary` | 成功色次浅底 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-color-warning` | 警告色 |
+| `--nax-color-warning-secondary` | 警告色浅底 |
+| `--nax-color-warning-tertiary` | 警告色次浅底 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 若希望使用默认绿色主色：
 

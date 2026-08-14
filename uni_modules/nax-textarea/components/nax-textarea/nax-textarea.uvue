@@ -69,8 +69,8 @@
 	 * @property {string} size sm | md | lg
 	 * @property {string} customClass 根节点扩展 class
 	 * @event update:modelValue v-model
-	 * @event input 输入变化（当前值）
-	 * @event change 输入变化
+	 * @event input 输入变化（当前值），输入过程中每次触发
+	 * @event change 失焦时内容与聚焦时不同才触发（当前值），对齐原生 input 语义
 	 * @event focus 聚焦（当前值）
 	 * @event blur 失焦（当前值）
 	 * @event confirm 键盘完成（当前值）
@@ -200,6 +200,8 @@
 
 	const innerValue = ref(props.modelValue)
 	const isFocused = ref(false)
+	// 聚焦时的内容基准，用于失焦时判断是否触发 change
+	let changeBaseValue: string = ''
 
 	watch((): string => {
 		return props.modelValue
@@ -419,7 +421,6 @@
 		innerValue.value = val
 		emit('update:modelValue', val)
 		emit('input', val)
-		emit('change', val)
 	}
 
 	function onInput(e: UniInputEvent) {
@@ -434,6 +435,8 @@
 	function onFocus(e: UniTextareaFocusEvent) {
 		isFocused.value = true
 		const val = e.detail.value
+		// 记录聚焦时内容，作为 change（失焦对比）的基准
+		changeBaseValue = val
 		emit('focus', val)
 	}
 
@@ -442,6 +445,10 @@
 			isFocused.value = false
 		}, 150)
 		const val = e.detail.value
+		// 对齐原生 input 语义：失焦时内容与聚焦时不同才触发 change
+		if (val != changeBaseValue) {
+			emit('change', val)
+		}
 		emit('blur', val)
 	}
 

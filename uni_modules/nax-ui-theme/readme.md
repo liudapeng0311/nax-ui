@@ -131,14 +131,6 @@ openNaxPopup({
   > 组件内 fallback 字面量
 ```
 
-## 组件作者约定
-
-1. 外观色使用 `var(--nax-*, <fallback>)`，fallback 与默认 Token 对齐
-2. 不在组件内写死唯一品牌色，示例除外
-3. 不依赖 tag、`page` 或 id 选择器挂主题
-4. 主题挂载点统一使用 `.nax-theme`、`.nax-theme-dark`
-5. 组件文档引用本 README，不再引用仓库外部的主题接入文档
-
 ## 核心变量
 
 | 变量 | 默认浅色 |
@@ -152,7 +144,7 @@ openNaxPopup({
 | `--nax-color-bg-secondary` | `#fafafc` |
 | `--nax-color-border` | `#f0f0f3` |
 
-完整 Token 表见包内 `theme/default.css` 和 `theme/dark.css`；仓库设计原则见 `docs/design-system.md`。
+完整 Token 表见包内 `theme/default.css` 和 `theme/dark.css`。
 
 ## 兜底
 

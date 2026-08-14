@@ -2,6 +2,18 @@
 
 uni-app x 徽标组件，提供常用能力。
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-warning` | 警告色 |
+
+
 ## 依赖
 
 - `nax-ui-theme`（CSS 变量 `--nax-*`）
@@ -46,7 +58,3 @@ uni-app x 徽标组件，提供常用能力。
 |------|------|
 | default | 被徽标锚定的内容 |
 | value | 自定义徽标内容 |
-
-## 平台说明
-
-- **processing 动画**：Web / 小程序使用 CSS `@keyframes`；App（Android / iOS / Harmony）使用 JS 定时 `transform/opacity` 波纹（条件编译隔离，对齐 nax-button loading）。

@@ -4,15 +4,13 @@ demo: rate
 
 # nax-rate
 
-> 当前版本：0.1.2（见 `changelog.md`）
+> 当前版本：0.1.3
 
 uni-app x 评分组件，功能覆盖常用场景。
 
 ## 安装
 
-```text
-uni_modules/nax-rate
-```
+- 插件市场：[nax-rate](https://ext.dcloud.net.cn/plugin?id=29057)
 
 easycom 自动生效，页面直接使用 `<nax-rate />` 即可。
 
@@ -20,27 +18,148 @@ easycom 自动生效，页面直接使用 `<nax-rate />` 即可。
 
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <nax-rate v-model="value" @change="onChange"></nax-rate>
 ```
 
-### 主题 Token
+:::
 
-- `--nax-color-warning` 默认选中色
-- `--nax-color-text-placeholder` 默认未选中色
-- `--nax-opacity-disabled` 禁用透明度
+::: details 基础用法
 
-### 设计说明
+```uvue
+<nax-rate v-model="basic" @change="onBasicChange"></nax-rate>
+```
 
-- 尺寸统一为 `sm | md | lg` 或 **px** 数字字符串（不用 rpx）
-- `gutter` 单位为 **px**
-- 默认选中色用 warning 黄，更符合评分场景（常用错误色）
-- 图标默认均为 Lucide `star`（当前图标集无 `star-fill`）；通过 `activeColor` 区分选中态
-- 增加 `readonly` / `touchable`
-- 不提供 `current` 遗留 API、`customStyle`、`colors` / `icons` 分段数组、`customPrefix`
-- 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量
+```uts
+const basic = ref(3.0)
+
+function onBasicChange(v : number) {
+	// v 为当前分值
+}
+```
+
+:::
+
+::: details 尺寸 size
+
+```uvue
+<nax-rate v-model="sizeSm" size="sm"></nax-rate>
+<nax-rate v-model="sizeMd" size="md"></nax-rate>
+<nax-rate v-model="sizeLg" size="lg"></nax-rate>
+<nax-rate v-model="sizePx" size="32"></nax-rate>
+```
+
+```uts
+const sizeSm = ref(2.0)
+const sizeMd = ref(3.0)
+const sizeLg = ref(4.0)
+const sizePx = ref(3.0)
+```
+
+:::
+
+::: details 星星数量 count
+
+```uvue
+<nax-rate v-model="countVal" :count="8"></nax-rate>
+```
+
+```uts
+const countVal = ref(5.0)
+```
+
+:::
+
+::: details 自定义颜色 / 间距
+
+```uvue
+<nax-rate v-model="colorVal" active-color="#d03050" inactive-color="#f0f0f3" :gutter="12"></nax-rate>
+
+<nax-rate v-model="infoVal" active-color="#2080f0" inactive-color="#d6e4ff"></nax-rate>
+```
+
+```uts
+const colorVal = ref(4.0)
+const infoVal = ref(3.0)
+```
+
+:::
+
+::: details 最少可选 minCount
+
+```uvue
+<nax-rate v-model="minVal" :min-count="2"></nax-rate>
+```
+
+```uts
+const minVal = ref(2.0)
+```
+
+:::
+
+::: details 半星 allowHalf
+
+```uvue
+<nax-rate v-model="halfVal" allow-half></nax-rate>
+```
+
+```uts
+const halfVal = ref(2.5)
+```
+
+:::
+
+::: details 禁用 / 只读
+
+```uvue
+<nax-rate v-model="disabledVal" disabled></nax-rate>
+<nax-rate v-model="readonlyVal" readonly></nax-rate>
+<nax-rate v-model="halfReadonly" allow-half readonly></nax-rate>
+```
+
+```uts
+const disabledVal = ref(4.0)
+const readonlyVal = ref(3.0)
+const halfReadonly = ref(3.5)
+```
+
+:::
+
+::: details 禁用滑动 touchable=false
+
+```uvue
+<nax-rate v-model="noTouchVal" :touchable="false"></nax-rate>
+```
+
+```uts
+const noTouchVal = ref(2.0)
+```
+
+:::
+
+::: details 自定义图标
+
+```uvue
+<nax-rate v-model="heartVal" active-icon="heart" inactive-icon="heart" active-color="#d03050"></nax-rate>
+```
+
+```uts
+const heartVal = ref(3.0)
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-warning` | 警告色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 
 ## Props
@@ -51,7 +170,7 @@ easycom 自动生效，页面直接使用 `<nax-rate />` 即可。
 | count | number | `5` | 星星总数 |
 | disabled | boolean | `false` | 禁用交互（降低透明度） |
 | readonly | boolean | `false` | 只读展示（不触发交互，不降低透明度） |
-| size | string | `'md'` | sm \| md \| lg \| 数字像素字符串 |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大 \| 数字像素字符串 |
 | inactiveColor | string | `''` | 未选中色；空则占位色 token |
 | activeColor | string | `''` | 选中色；空则警告色 token |
 | gutter | number | `6` | 星星间距（px） |

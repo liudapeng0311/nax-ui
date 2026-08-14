@@ -1,3 +1,6 @@
+## 0.1.2（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+
 ## 0.1.1（2026-08-10）
 
 - 修复 Android 编译失败：插槽传递带默认参数（`direction: number | null = null`）的函数引用报 "Function invocation expected"；`requestFullscreen` 改为必选参数，组件内部调用处已显式传参，行为不变

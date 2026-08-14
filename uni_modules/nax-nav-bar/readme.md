@@ -80,13 +80,17 @@
 | default | 中间自定义（覆盖 title） |
 | right | 右侧操作区 |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-bg` / `--nax-color-border`
-- `--nax-color-primary`
-- `--nax-color-text` / `--nax-color-text-inverse`
-- `--nax-font-size-md` / `--nax-font-size-lg`
-- `--nax-font-weight-medium`
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
 
 ## 依赖
 

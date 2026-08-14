@@ -49,6 +49,17 @@
 | action | 操作区（按钮等） |
 | default | 额外内容 |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+
 ## 依赖
 
 - `nax-icon`

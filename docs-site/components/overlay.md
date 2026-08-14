@@ -4,15 +4,13 @@ demo: overlay
 
 # nax-overlay
 
-> 当前版本：0.1.1（见 `changelog.md`）
+> 当前版本：0.1.2
 
 全屏遮罩层（弹层底层）。用于压暗页面、拦截点击，可叠加自定义内容（如 `nax-loading`）。
 
 ## 安装
 
-```text
-uni_modules/nax-overlay
-```
+- 插件市场：[nax-overlay](https://ext.dcloud.net.cn/plugin?id=29046)
 
 easycom 自动生效，页面直接使用 `<nax-overlay />` 即可。
 
@@ -20,7 +18,7 @@ easycom 自动生效，页面直接使用 `<nax-overlay />` 即可。
 
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <nax-overlay :show="visible" @click="visible = false"></nax-overlay>
@@ -31,7 +29,9 @@ easycom 自动生效，页面直接使用 `<nax-overlay />` 即可。
 <nax-overlay v-model:show="visible" close-on-click></nax-overlay>
 ```
 
-### 遮罩 + 内容
+:::
+
+::: details 遮罩 + 内容
 
 ```uvue
 <nax-overlay :show="loading">
@@ -39,11 +39,137 @@ easycom 自动生效，页面直接使用 `<nax-overlay />` 即可。
 </nax-overlay>
 ```
 
-### 说明
+:::
 
-1. 完整弹层（定位面板）请用 `nax-picker`；本组件只负责蒙层。
-2. 鸿蒙端淡入淡出走 opacity 三阶段，避免首帧闪黑。
-3. Dialog / ActionSheet 等仍使用 `nax-picker` 内置 mask；本组件面向自定义浮层与独立蒙层场景。
+::: details 基础遮罩
+
+```uvue
+<nax-button type="primary" size="sm" label="打开遮罩" @click="openBasic"></nax-button>
+
+<nax-overlay v-model:show="basicShow" close-on-click @click="onOverlayClick"></nax-overlay>
+```
+
+```uts
+const basicShow = ref(false)
+
+function openBasic() {
+	basicShow.value = true
+}
+
+function onOverlayClick() {
+	// 点击遮罩
+}
+```
+
+:::
+
+::: details 遮罩 + Loading
+
+```uvue
+<nax-button type="primary" size="sm" label="全屏加载 2s" @click="openLoading"></nax-button>
+
+<nax-overlay :show="loadingShow" :close-on-click="true" @update:show="onLoadingShowUpdate">
+	<view class="loading-box">
+		<nax-loading vertical text="加载中" type="primary"></nax-loading>
+	</view>
+</nax-overlay>
+```
+
+```uts
+const loadingShow = ref(false)
+let loadingTimer : number = -1
+
+function openLoading() {
+	loadingShow.value = true
+	loadingTimer = setTimeout(() => {
+		loadingShow.value = false
+		loadingTimer = -1
+	}, 2000)
+}
+
+function onLoadingShowUpdate(val : boolean) {
+	loadingShow.value = val
+	if (!val && loadingTimer >= 0) {
+		clearTimeout(loadingTimer)
+		loadingTimer = -1
+	}
+}
+```
+
+:::
+
+::: details 自定义颜色
+
+```uvue
+<nax-button size="sm" label="深蓝遮罩" @click="openColor"></nax-button>
+
+<nax-overlay v-model:show="colorShow" close-on-click color="rgba(8, 40, 90, 0.55)"></nax-overlay>
+```
+
+```uts
+const colorShow = ref(false)
+
+function openColor() {
+	colorShow.value = true
+}
+```
+
+:::
+
+::: details 无动画 duration=0
+
+```uvue
+<nax-button size="sm" label="立即显示" @click="openInstant"></nax-button>
+
+<nax-overlay v-model:show="instantShow" :duration="0" close-on-click></nax-overlay>
+```
+
+```uts
+const instantShow = ref(false)
+
+function openInstant() {
+	instantShow.value = true
+}
+```
+
+:::
+
+::: details 事件日志
+
+```uvue
+<nax-overlay v-model:show="basicShow" close-on-click @click="onOverlayClick" @open="onOpen('basic')" @opened="onOpened('basic')" @close="onClose('basic')"></nax-overlay>
+```
+
+```uts
+const basicShow = ref(false)
+const logText = ref('暂无事件')
+
+function onOverlayClick() {
+	logText.value = 'click 遮罩'
+}
+
+function onOpen(name : string) {
+	logText.value = name + ' open'
+}
+
+function onOpened(name : string) {
+	logText.value = name + ' opened'
+}
+
+function onClose(name : string) {
+	logText.value = name + ' close'
+}
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-mask` | 遮罩色 |
 
 
 ## Props
@@ -75,3 +201,9 @@ easycom 自动生效，页面直接使用 `<nax-overlay />` 即可。
 | 插槽 | 说明 |
 |------|------|
 | default | 叠在遮罩上的内容（如 loading）；点击内容不冒泡到遮罩 |
+
+## 说明
+
+1. 完整弹层（定位面板）请用 `nax-picker`；本组件只负责蒙层。
+
+3. Dialog / ActionSheet 等仍使用 `nax-picker` 内置 mask；本组件面向自定义浮层与独立蒙层场景。

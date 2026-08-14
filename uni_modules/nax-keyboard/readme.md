@@ -9,6 +9,23 @@
 - 按键乱序 `random`
 - 底部弹层 + 遮罩 + 顶部工具条
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-mask` | 遮罩色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
+
 ## 依赖
 
 | 依赖 | 说明 |

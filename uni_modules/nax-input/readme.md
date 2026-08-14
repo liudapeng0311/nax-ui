@@ -2,8 +2,6 @@
 
 uni-app x 单行输入框。
 
-> **不包含** `type=select`（后续 `nax-select`）与 `type=textarea`（后续 `nax-textarea`）。
-
 ## 依赖
 
 - `nax-icon`（清除 / 密码可见 / 前后缀图标）
@@ -63,7 +61,8 @@ uni-app x 单行输入框。
 | 事件 | 说明 |
 |------|------|
 | update:modelValue | v-model |
-| input / change | 内容变化（当前值） |
+| input | 输入变化（当前值），输入过程中每次触发 |
+| change | 失焦时内容与聚焦时不同才触发（当前值），对齐原生 input 语义 |
 | focus / blur | 聚焦 / 失焦（当前值） |
 | confirm | 键盘完成（当前值） |
 | click | 点击 |
@@ -76,20 +75,24 @@ uni-app x 单行输入框。
 | prefix | 自定义前缀 |
 | suffix | 自定义后缀 |
 
-## 主题 Token（可选覆盖）
+## 主题
+
+通过 CSS 变量覆盖：
 
 | Token | 用途 |
 |-------|------|
-| `--nax-color-bg` | 背景 |
-| `--nax-color-border` | 边框 |
-| `--nax-color-primary` | 聚焦边框 |
-| `--nax-color-text` | 文字 |
-| `--nax-radius-md` | 圆角 |
-| `--nax-space-*` | 内边距 / 图标间距 |
+| `--nax-border-width` | 边框粗细 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-input-bg` | 输入框背景色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 ## 平台说明
 
 - 基于原生 `input`，键盘类型随端能力差异以官方文档为准。
 - `readonly` 通过禁用原生编辑实现（样式弱于 `disabled`）。
-- App 端去掉 Web 专用 `outline` / `box-sizing`（条件编译）。
-- Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在 `APP-ANDROID` 下使用背景、边框、文字、占位符和图标实色兜底。
+- Android 暗黑模式下跨组件 CSS 变量可能失效，请通过 `custom-class` 传入 `nax-theme-dark`。

@@ -55,14 +55,17 @@
 - `border=true` 且 `gap>0`：子项独立描边 + 圆角卡片感
 - `border=false`：纯内容格，可用 `gap` 控制疏密
 
-## 主题 Token
+## 主题
 
-- `--nax-color-bg`
-- `--nax-color-bg-hover`
-- `--nax-color-divider` / `--nax-color-border`
-- `--nax-color-text` / `--nax-color-text-secondary`
-- `--nax-radius-md`
-- `--nax-opacity-disabled`
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 ## 依赖
 

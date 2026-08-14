@@ -70,7 +70,7 @@
 	 * @property {string} shape round 圆形 | square 方形（默认 round）
 	 * @property {string} background 输入区背景色；空则用 token
 	 * @property {string} placeholder 占位文案
-	 * @property {boolean} clearable 是否显示清除按钮，默认 true（对齐  clearabled）
+	 * @property {boolean} clearable 是否显示清除按钮，默认 true
 	 * @property {boolean} focus 是否自动聚焦
 	 * @property {boolean} showAction 是否显示右侧操作按钮，默认 true
 	 * @property {string} actionText 右侧按钮文案，默认「搜索」
@@ -92,8 +92,8 @@
 	 * @property {string} size sm | md | lg
 	 * @property {string} customClass 根节点扩展 class
 	 * @event update:modelValue v-model
-	 * @event input 输入变化
-	 * @event change 输入变化（与 input 同步）
+	 * @event input 输入变化（当前值），输入过程中每次触发
+	 * @event change 失焦时内容与聚焦时不同才触发（当前值），对齐原生 input 语义
 	 * @event search 键盘搜索/完成（当前值）
 	 * @event custom 点击右侧操作按钮（当前值）
 	 * @event focus 聚焦（当前值）
@@ -117,21 +117,11 @@
 			type: String,
 			default: ''
 		},
-		// 兼容  bgColor 命名
-		bgColor: {
-			type: String,
-			default: ''
-		},
 		placeholder: {
 			type: String,
 			default: '请输入关键字'
 		},
 		clearable: {
-			type: Boolean,
-			default: true
-		},
-		// 兼容  拼写 clearabled
-		clearabled: {
 			type: Boolean,
 			default: true
 		},
@@ -232,6 +222,8 @@
 
 	const innerValue = ref(props.modelValue)
 	const isFocused = ref(false)
+	// 聚焦时的内容基准，用于失焦时判断是否触发 change
+	let changeBaseValue: string = ''
 
 	watch((): string => {
 		return props.modelValue
@@ -292,19 +284,12 @@
 		return normalizeShape(props.shape)
 	})
 
-	/** clearable 与  clearabled 任一为 false 则关闭 */
 	const clearEnabled = computed((): boolean => {
-		return props.clearable && props.clearabled
+		return props.clearable
 	})
 
 	const resolvedBackground = computed((): string => {
-		if (props.background.length > 0) {
-			return props.background
-		}
-		if (props.bgColor.length > 0) {
-			return props.bgColor
-		}
-		return ''
+		return props.background
 	})
 
 	const hasLabel = computed((): boolean => {
@@ -519,7 +504,6 @@
 		innerValue.value = val
 		emit('update:modelValue', val)
 		emit('input', val)
-		emit('change', val)
 	}
 
 	function hideKeyboardSafe() {
@@ -538,15 +522,21 @@
 	function onFocus(e: UniInputFocusEvent) {
 		isFocused.value = true
 		const val = e.detail.value
+		// 记录聚焦时内容，作为 change（失焦对比）的基准
+		changeBaseValue = val
 		emit('focus', val)
 	}
 
 	function onBlur(e: UniInputBlurEvent) {
 		const val = e.detail.value
-		// 延迟失焦：给清除按钮 touch/click 留窗口
+		// 延迟失焦态：给清除按钮 touch/click 留出窗口
 		setTimeout(() => {
 			isFocused.value = false
 		}, 150)
+		// 对齐原生 input 语义：失焦时内容与聚焦时不同才触发 change
+		if (val != changeBaseValue) {
+			emit('change', val)
+		}
 		emit('blur', val)
 	}
 

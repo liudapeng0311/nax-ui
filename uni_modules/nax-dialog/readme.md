@@ -1,6 +1,6 @@
 # nax-dialog
 
-居中对话框（确认 / 告警）。内部薄封装 `nax-picker`（`position=center`）。
+居中对话框（确认 / 告警）。
 
 支持两种用法：
 
@@ -8,6 +8,24 @@
 2. **命令式**：全局挂一次宿主后，业务只调 `naxDialog()` / `naxDialogAlert()` / `naxDialogConfirm()`
 
 自定义任意复杂弹层请直接用 `nax-picker`。
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
 
 ## 依赖
 
@@ -61,7 +79,7 @@ function onCancel() {
 <nax-dialog />
 ```
 
-> 与 toast 相同：挂在常驻根布局；演示页可本地挂。  
+> 与 toast 相同：挂在常驻根布局。  
 > 未挂宿主时回退 `uni.showModal`。
 
 ### 2. 业务只调方法
@@ -165,15 +183,21 @@ naxDialogConfirm({
 
 `input` 可为 string（content）或 object：
 
-| 字段 | 说明 |
-|------|------|
-| title / content / message | 文案 |
-| showCancel / showConfirm | 按钮显隐 |
-| cancelText / confirmText | 按钮文案 |
-| confirmType / confirmButtonType | 确定按钮色 |
-| maskClosable / closeOnClickOverlay | 遮罩关闭 |
-| asyncClose | 异步关闭 |
-| width | 宽度 |
+| 字段 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| title | string | `''` | 标题文案（显示在内容上方，加粗） |
+| content | string | `''` | 正文文案；传 string 时等价于只传 content |
+| message | string | `''` | 兼容字段，同 `content` |
+| showCancel | boolean | `true` | 是否显示取消按钮 |
+| showConfirm | boolean | `true` | 是否显示确认按钮 |
+| cancelText | string | `'取消'` | 取消按钮文案 |
+| confirmText | string | `'确认'` | 确认按钮文案 |
+| confirmType | string | `'primary'` | 确认按钮色：`primary` 主要 / `info` 信息 / `success` 成功 / `warning` 警告 / `error` 错误（`danger` 同 `error`）/ `default` 默认 |
+| confirmButtonType | string | `'primary'` | 兼容字段，同 `confirmType` |
+| maskClosable | boolean | `false` | 点遮罩是否关闭弹层 |
+| closeOnClickOverlay | boolean | `false` | 兼容字段，同 `maskClosable` |
+| asyncClose | boolean | `false` | `true` 时点击确认不自动关闭，由业务手动关闭（异步提交场景） |
+| width | string | `''` | 对话框宽度；纯数字按 px |
 
 返回 `Promise<UTSJSONObject>`，字段同上。
 

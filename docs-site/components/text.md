@@ -4,7 +4,7 @@ demo: text
 
 # nax-text
 
-> 当前版本：0.1.14（见 `changelog.md`）
+> 当前版本：0.1.15
 
 uni-app x 文本组件。
 
@@ -18,7 +18,7 @@ easycom 自动生效，页面直接使用 `<nax-text />` 即可。
 
 ## 代码示例
 
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <nax-text text="这是多行输入啊"></nax-text>
@@ -27,6 +27,158 @@ easycom 自动生效，页面直接使用 `<nax-text />` 即可。
 <nax-text mode="phone" format="encrypt" text="130xxxxxxxx"></nax-text>
 <nax-text :lines="2" text="超出两行显示省略号……"></nax-text>
 ```
+
+:::
+
+::: details 基础用法
+
+```uvue
+<nax-text text="我用十年青春,赴你最后之约"></nax-text>
+<nax-text text="带图标的文本" prefix-icon="star" type="primary"></nax-text>
+<nax-text text="后缀图标" suffix-icon="arrow-right" type="secondary"></nax-text>
+```
+
+:::
+
+::: details 主题色
+
+```uvue
+<nax-text type="default" text="default 主文案"></nax-text>
+<nax-text type="primary" text="primary 主题"></nax-text>
+<nax-text type="info" text="info 信息"></nax-text>
+<nax-text type="success" text="success 成功"></nax-text>
+<nax-text type="warning" text="warning 警告"></nax-text>
+<nax-text type="error" text="error 错误"></nax-text>
+<nax-text type="secondary" text="secondary 次文案"></nax-text>
+<nax-text type="placeholder" text="placeholder 占位"></nax-text>
+```
+
+:::
+
+::: details 文字尺寸
+
+```uvue
+<nax-text size="sm" text="sm 14px"></nax-text>
+<nax-text size="md" text="md 16px（默认）"></nax-text>
+<nax-text size="lg" text="lg 18px"></nax-text>
+<nax-text size="xl" text="xl 20px"></nax-text>
+<nax-text size="20" text="数字 20px"></nax-text>
+```
+
+:::
+
+::: details 字重与装饰
+
+```uvue
+<nax-text bold text="加粗 bold"></nax-text>
+<nax-text decoration="underline" text="下划线 underline" type="info"></nax-text>
+<nax-text decoration="line-through" text="删除线 line-through" type="secondary"></nax-text>
+```
+
+:::
+
+::: details 文本省略
+
+```uvue
+<nax-text
+	:lines="1"
+	block
+	text="单行省略：这是一段很长很长的文本内容，超出一行后会显示省略号，方便列表场景使用。"
+></nax-text>
+<nax-text
+	:lines="2"
+	block
+	type="secondary"
+	text="两行省略：这是一段很长很长的文本内容，用于演示多行省略效果。超出两行后会显示省略号，方便卡片摘要等场景使用。再追加一些文字以确保足够长。"
+></nax-text>
+```
+
+:::
+
+::: details 内容格式化
+
+```uvue
+<nax-text mode="price" text="128.5" type="error" bold></nax-text>
+<nax-text mode="phone" text="13800138000" type="info"></nax-text>
+<nax-text mode="phone" format="encrypt" text="13800138000"></nax-text>
+<nax-text mode="name" format="encrypt" text="张三丰"></nax-text>
+<nax-text mode="date" text="1710000000"></nax-text>
+<nax-text mode="date" format="yyyy-mm-dd HH:MM" text="1710000000000" type="secondary"></nax-text>
+<nax-text mode="link" text="nax-ui文档" href="https://gitee.com/liusixsix/nax-ui" @click="onLinkClick"></nax-text>
+```
+
+```uts
+function onLinkClick() {
+	uni.showToast({
+		title: '已触发 click',
+		icon: 'none'
+	})
+}
+```
+
+:::
+
+::: details 拨号操作
+
+```uvue
+<nax-text
+	mode="phone"
+	call
+	type="primary"
+	text="10086"
+	prefix-icon="share"
+	@click="onCallClick"
+></nax-text>
+```
+
+```uts
+function onCallClick() {
+	// 点击尝试拨打电话（真机有效）
+}
+```
+
+:::
+
+::: details 块级对齐
+
+```uvue
+<nax-text block align="left" text="左对齐 left"></nax-text>
+<nax-text block align="center" text="居中 center" type="primary"></nax-text>
+<nax-text block align="right" text="右对齐 right" type="secondary"></nax-text>
+```
+
+:::
+
+::: details 文本选择
+
+```uvue
+<nax-text selectable text="长按可选中复制这段文字" type="info"></nax-text>
+```
+
+:::
+
+::: details 自定义颜色
+
+```uvue
+<nax-text color="#8a2be2" text="自定义紫色 #8a2be2"></nax-text>
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
 
 
 ## Props

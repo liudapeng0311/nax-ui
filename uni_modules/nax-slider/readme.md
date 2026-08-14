@@ -50,14 +50,17 @@ uni-app x 滑动选择器，功能覆盖常用场景。
 |------|------|
 | default | 自定义滑块（需 `useSlot`） |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-primary` 默认已选轨道色
-- `--nax-color-border` 默认轨道底色 / 滑块描边
-- `--nax-color-bg` 默认滑块底色
-- `--nax-color-text-secondary` 起止数值色
-- `--nax-opacity-disabled` 禁用透明度
-- `--nax-radius-full` 圆角
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 ## 范围说明
 
@@ -65,10 +68,3 @@ uni-app x 滑动选择器，功能覆盖常用场景。
 - `min` / `max`：可选取值区间，会被夹在 `[start, end]` 内
 - 小数范围请同时设置 `:start` / `:end`（例如 0–1 且 `step=0.1`），不要只设 `min`/`max` 而保留默认 end=100
 
-## 设计说明
-
-- 尺寸增加 `size: sm | md | lg`；`blockWidth` / `height` 单位为 **px**（不用 rpx）
-- 不提供 `blockStyle` / `customStyle` 对象样式入口，扩展用 `customClass` + CSS 变量
-- 额外提供 `change` 事件（松手/点击最终值），便于表单联动
-- 阴影仅 Web / 小程序；App 端用描边保证层次（条件编译）
-- 组件不内置跟随滑块移动的数值气泡；需要展示当前值时，在滑块外使用普通文本绑定 `v-model`

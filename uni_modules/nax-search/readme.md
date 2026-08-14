@@ -29,7 +29,7 @@ uni-app x 搜索框，功能覆盖常用搜索场景。
 | background | string | `''` | 输入区背景；空则 `--nax-color-bg-hover` |
 | bg-color | string | `''` | 兼容别名；与 `background` 二选一，`background` 优先 |
 | placeholder | string | `请输入关键字` | 占位 |
-| clearable | boolean | `true` | 有内容时显示清除（兼容 `clearabled`） |
+| clearable | boolean | `true` | 有内容时显示清除 |
 | show-action | boolean | `true` | 显示右侧操作按钮 |
 | action-text | string | `搜索` | 右侧按钮文案 |
 | action-color | string | `''` | 右侧按钮文字色 |
@@ -55,7 +55,8 @@ uni-app x 搜索框，功能覆盖常用搜索场景。
 | 事件 | 说明 |
 |------|------|
 | update:modelValue | v-model |
-| input / change | 内容变化（当前值） |
+| input | 输入变化（当前值），输入过程中每次触发 |
+| change | 失焦时内容与聚焦时不同才触发（当前值），对齐原生 input 语义 |
 | search | 键盘搜索/完成（当前值） |
 | custom | 点击右侧操作（当前值） |
 | focus / blur | 聚焦 / 失焦（当前值） |
@@ -70,20 +71,19 @@ uni-app x 搜索框，功能覆盖常用搜索场景。
 | label | 自定义左侧 label |
 | action | 自定义右侧操作区 |
 
-## 主题 Token（可选覆盖）
+## 主题
+
+通过 CSS 变量覆盖：
 
 | Token | 用途 |
 |-------|------|
-| `--nax-search-bg` | 输入区背景 |
-| `--nax-search-clear-bg` | 清除按钮圆底 |
-| `--nax-color-bg-hover` | 默认背景回退 |
-| `--nax-color-text` | 文字 / 操作按钮 |
-| `--nax-radius-md` | square 圆角 |
-| `--nax-space-*` | 内边距 / 间距 |
+| `--nax-border-width` | 边框粗细 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
 ## 平台说明
 
 - 基于原生 `input` + `confirm-type=search`。
-- 清除按钮：有内容即显示（不依赖 focus），兼容鸿蒙 focus 不稳定与 Web blur 抢点击。
-- App 端去掉 Web 专用 `outline` / `appearance`（条件编译）。
-- 鸿蒙端对 input 高度/行高做了加高与内联居中（`#ifdef APP-HARMONY`）。
+- 清除按钮：有内容即显示（不依赖 focus）。

@@ -1,3 +1,7 @@
+## 0.2.3（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+## 0.2.2（2026-08-11）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
 ## 0.2.1（2026-08-07）
 - 支持IOS端。
 ## 0.2.0（2026-08-01）
@@ -9,7 +13,7 @@
 - 内置 host 默认 dialogPage animationType 改为 none，避免与内部淡入叠闪
 - 关闭时先退场再 closeDialogPage
 
-﻿## 0.1.0（2026-07-21）
+## 0.1.0（2026-07-21）
 
 - 首版：压窗屏 `nax-popup`
 - App / Web：`openNaxPopup()` 走 `uni.openDialogPage`，可盖住原生导航栏与 tabBar

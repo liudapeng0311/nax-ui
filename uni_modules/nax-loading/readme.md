@@ -1,6 +1,6 @@
 # nax-loading
 
-局部 / 区块加载指示。App 端定时 `transform` 旋转；Web / 小程序用 CSS `@keyframes`。
+局部 / 区块加载指示。
 
 ## 用法
 
@@ -42,20 +42,24 @@
 | default | 自定义文案区 |
 | icon | 自定义图标 |
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-error` | 错误色 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-color-warning` | 警告色 |
+
+
 ## 依赖
 
 - `nax-icon`
 - `nax-ui-theme`（可选）
 
-## 平台动画
-
-| 端 | 实现 |
-|------|------|
-| 鸿蒙 App | 原生 `element.animate` 无限旋转；失败时 `setProperty` 低频兜底 |
-| Android / iOS App | 定时 `transform`（uvue 不支持 `@keyframes`） |
-| Web / 小程序 | CSS `@keyframes` |
-
 ## 说明
 
-1. 全局面板式 Loading（遮罩 + 命令式 API）后续可对齐 `nax-toast` 宿主模式扩展。
-2. 按钮内加载请继续用 `nax-button` 的 `loading`。
+- 按钮内加载请继续用 `nax-button` 的 `loading`。

@@ -43,5 +43,4 @@ uni-app x 轻量进退场过渡组件。用 class + CSS transition 实现，供�
 ## 说明
 
 - 关闭时会等动画播完再卸载节点，避免闪断
-- 动画依赖 opacity / transform + transition，全端公共实现，无 Web 专用 @keyframes 依赖
 - 布局（如底部贴边、全屏遮罩）由外层容器负责，本组件只负责进退场

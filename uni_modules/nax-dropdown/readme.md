@@ -22,16 +22,18 @@
 </nax-dropdown>
 ```
 
-## 组件 的改进
+## 主题
 
-- 外观走 `--nax-*` token，不靠 `active-color` 传色
-- 有 `modelValue` 时自动高亮标题（自定义面板仍可用 `highlighted`）
-- `displaySelected` 可将标题替换为已选文案
-- 关闭后卸载遮罩，避免挡点击
+通过 CSS 变量覆盖：
 
-## 平台说明
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-mask` | 遮罩色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
 
-- 鸿蒙端通过 `APP-HARMONY` 为默认选项文字设置 48px 行框，保证与选项行垂直居中；其它端保持原有排版。
 
 ## 依赖
 

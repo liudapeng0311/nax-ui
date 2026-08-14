@@ -1,3 +1,7 @@
+## 0.1.11（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+## 0.1.10（2026-08-11）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
 ## 0.1.9（2026-08-07）
 - 支持 iOS 端：iOS 嵌套 CSS 变量解析失败导致添加格边框变黑、暗黑模式失效；并入 `APP-ANDROID || APP-IOS || APP-HARMONY` 实色兜底分支（背景、边框、图标、文案，含深浅色，与 Android/鸿蒙一致），演示页 iOS 下也向 `custom-class` 传递主题 class。Web 与小程序行为不变。
 ## 0.1.8（2026-08-01）
@@ -21,7 +25,7 @@
 
 - fix chooseImage/chooseVideo success: use native fields instead of UTSJSONObject.getArray
 
-﻿## 0.1.0（2026-07-20）
+## 0.1.0（2026-07-20）
 
 - 初版 nax-upload（uvue）
 - 支持 Upload 主能力：fileList / 选图 / 预览 / 删除 / 状态遮罩

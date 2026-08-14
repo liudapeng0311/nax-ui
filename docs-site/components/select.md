@@ -4,15 +4,13 @@ demo: select
 
 # nax-select
 
-> 当前版本：0.1.15（见 `changelog.md`）
+> 当前版本：0.1.17
 
 uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场景。
 
 ## 安装
 
-```text
-uni_modules/nax-select
-```
+- 插件市场：[nax-select](https://ext.dcloud.net.cn/plugin?id=29060)
 
 easycom 自动生效，页面直接使用 `<nax-select />` 即可。
 
@@ -20,18 +18,7 @@ easycom 自动生效，页面直接使用 `<nax-select />` 即可。
 
 ## 代码示例
 
-### 组件特性
-
-| 点 | nax-select |
-|----|------------|
-| 弹层绑定 | `v-model:show`（布尔），避免占用表单 `v-model` 语义 |
-| mode 拼写 | 推荐 `multi-column` / `multi-column-auto`，兼容历史 `mutil-*` 拼写 |
-| 安全区 | `safe-area-inset-bottom` **默认 true** |
-| 触发条 | 可选 `show-trigger`，表单页可少写一层 Cell/Button |
-| 事件 | 额外 `change` / `open` / `close` |
-| 遮罩关闭 | `mask-closable`（兼容 `mask-close-able`） |
-
-### 基础用法
+::: details 基础用法
 
 ```uvue
 <nax-button label="打开选择" @click="visible = true"></nax-button>
@@ -55,7 +42,9 @@ function onConfirm(items: UTSJSONObject[]) {
 }
 ```
 
-### 内置触发条
+:::
+
+::: details 内置触发条
 
 ```uvue
 <nax-select
@@ -67,72 +56,270 @@ function onConfirm(items: UTSJSONObject[]) {
 ></nax-select>
 ```
 
-### 模式 mode
+:::
 
-| 值 | 说明 | list 形态 |
-|----|------|-----------|
-| `single-column` | 单列（默认） | `[{ value, label }]` |
-| `multi-column` | 多列独立 | `[[col1...], [col2...]]` |
-| `multi-column-auto` | 多列联动 | 树形，子级字段默认 `children` |
+::: details 单列 + 按钮打开
 
-兼容：`mutil-column` / `mutil-column-auto` / `cascade`。
+```uvue
+<nax-button label="选择水果" type="primary" @click="openSingle"></nax-button>
 
-### 常用 Props
+<nax-select
+	v-model:show="singleShow"
+	:list="fruitList"
+	title="选择水果"
+	:default-value="singleDefault"
+	@confirm="onSingleConfirm"
+	@cancel="onCancel"
+></nax-select>
+```
 
-| 属性 | 类型 | 默认 | 说明 |
-|------|------|------|------|
-| show | boolean | `false` | `v-model:show` 显隐 |
-| list | array | `[]` | 列数据 |
-| mode | string | `single-column` | 见上表 |
-| default-value | number[] | `[]` | 默认选中下标 |
-| title | string | `''` | 标题 |
-| confirm-text / cancel-text | string | 确认 / 取消 | 按钮文案 |
-| value-name / label-name | string | value / label | 字段名 |
-| child-name | string | children | 联动子级字段 |
-| mask-closable | boolean | `true` | 点遮罩关闭 |
-| safe-area-inset-bottom | boolean | `true` | 底部安全区 |
-| preserve-selection | boolean | `true` | 保留上次确认下标 |
-| show-trigger | boolean | `false` | 内置触发条 |
-| placeholder | string | 请选择 | 触发条占位 |
-| disabled | boolean | `false` | 触发条禁用 |
-| separator | string | ` / ` | 多列展示分隔 |
-| z-index | number | `10075` | 层级 |
-| size | string | `md` | 触发条 sm/md/lg |
-| border | boolean | `true` | 触发条描边 |
-| custom-class | string | `''` | 根扩展 class |
+```uts
+const singleShow = ref(false)
+const singleDefault = [1] as number[]
+const singleText = ref('未选择')
+const fruitList = [
+	{ value: 'apple', label: '苹果' },
+	{ value: 'banana', label: '香蕉' },
+	{ value: 'orange', label: '橙子' },
+	{ value: 'grape', label: '葡萄' },
+	{ value: 'mango', label: '芒果' }
+]
 
-### 事件
+function openSingle() {
+	singleShow.value = true
+}
 
-| 事件 | 说明 |
-|------|------|
-| update:show | 显隐 |
-| confirm | 确认，回调选中项数组 |
-| cancel | 取消或遮罩关闭 |
-| change | 滚轮变化 |
-| open / close | 打开 / 关闭 |
+// items 为选中项数组，含 value / label 字段
+function onSingleConfirm(items: UTSJSONObject[]) {
+	singleText.value = '已选择'
+}
 
-确认项字段：`value`、`label`、`index`，若源数据有 `extra` 则带回。
+function onCancel() {
+	// 点击取消
+}
+```
 
-### 主题 Token
+:::
+
+::: details 内置触发条 show-trigger
+
+```uvue
+<nax-select
+	v-model:show="triggerShow"
+	show-trigger
+	placeholder="请选择城市"
+	:list="cityList"
+	title="城市"
+	@confirm="onTriggerConfirm"
+></nax-select>
+```
+
+```uts
+const triggerShow = ref(false)
+const triggerText = ref('未选择')
+const cityList = [
+	{ value: 'bj', label: '北京' },
+	{ value: 'sh', label: '上海' },
+	{ value: 'gz', label: '广州' },
+	{ value: 'sz', label: '深圳' },
+	{ value: 'cd', label: '成都' }
+]
+
+function onTriggerConfirm(items: UTSJSONObject[]) {
+	triggerText.value = '已选择'
+}
+```
+
+:::
+
+::: details 多列 multi-column
+
+```uvue
+<nax-button label="选择时间段" @click="multiShow = true"></nax-button>
+
+<nax-select
+	v-model:show="multiShow"
+	mode="multi-column"
+	:list="multiList"
+	title="上课时间"
+	@confirm="onMultiConfirm"
+></nax-select>
+```
+
+```uts
+const multiShow = ref(false)
+const multiText = ref('未选择')
+const multiList = [
+	[
+		{ value: 'mon', label: '周一' },
+		{ value: 'tue', label: '周二' },
+		{ value: 'wed', label: '周三' },
+		{ value: 'thu', label: '周四' },
+		{ value: 'fri', label: '周五' }
+	],
+	[
+		{ value: 'am', label: '上午' },
+		{ value: 'pm', label: '下午' },
+		{ value: 'eve', label: '晚上' }
+	]
+]
+
+function onMultiConfirm(items: UTSJSONObject[]) {
+	multiText.value = '已选择'
+}
+```
+
+:::
+
+::: details 多列联动 multi-column-auto
+
+```uvue
+<nax-select
+	v-model:show="cascadeShow"
+	show-trigger
+	mode="multi-column-auto"
+	:list="regionList"
+	title="选择地区"
+	placeholder="省 / 市 / 区"
+	@confirm="onCascadeConfirm"
+	@change="onCascadeChange"
+></nax-select>
+```
+
+```uts
+const cascadeShow = ref(false)
+const cascadeText = ref('未选择')
+const cascadeLive = ref('-')
+// 联动数据：children 表示下一级
+const regionList = [
+	{
+		value: 'zhejiang',
+		label: '浙江',
+		children: [
+			{
+				value: 'hangzhou',
+				label: '杭州',
+				children: [
+					{ value: 'xihu', label: '西湖' },
+					{ value: 'yuhang', label: '余杭' }
+				]
+			},
+			{
+				value: 'ningbo',
+				label: '宁波',
+				children: [
+					{ value: 'haishu', label: '海曙' },
+					{ value: 'jiangbei', label: '江北' }
+				]
+			}
+		]
+	},
+	{
+		value: 'jiangsu',
+		label: '江苏',
+		children: [
+			{
+				value: 'nanjing',
+				label: '南京',
+				children: [
+					{ value: 'xuanwu', label: '玄武' },
+					{ value: 'gulou', label: '鼓楼' }
+				]
+			},
+			{
+				value: 'suzhou',
+				label: '苏州',
+				children: [
+					{ value: 'gusu', label: '姑苏' },
+					{ value: 'wuzhong', label: '吴中' }
+				]
+			}
+		]
+	}
+]
+
+function onCascadeConfirm(items: UTSJSONObject[]) {
+	cascadeText.value = '已选择'
+}
+
+// 滚动切换联动项时触发
+function onCascadeChange(items: UTSJSONObject[]) {
+	cascadeLive.value = '滚动中'
+}
+```
+
+:::
+
+::: details 自定义字段名
+
+```uvue
+<nax-button label="打开（id/name）" size="sm" @click="customShow = true"></nax-button>
+
+<nax-select
+	v-model:show="customShow"
+	:list="customList"
+	value-name="id"
+	label-name="name"
+	title="自定义字段"
+	@confirm="onCustomConfirm"
+></nax-select>
+```
+
+```uts
+const customShow = ref(false)
+const customText = ref('未选择')
+const customList = [
+	{ id: 10, name: '一号方案' },
+	{ id: 20, name: '二号方案' },
+	{ id: 30, name: '三号方案' }
+]
+
+function onCustomConfirm(items: UTSJSONObject[]) {
+	customText.value = '已选择'
+}
+```
+
+:::
+
+::: details 禁用触发条
+
+```uvue
+<nax-select
+	show-trigger
+	disabled
+	placeholder="已禁用"
+	:list="fruitList"
+></nax-select>
+```
+
+```uts
+const fruitList = [
+	{ value: 'apple', label: '苹果' },
+	{ value: 'banana', label: '香蕉' },
+	{ value: 'orange', label: '橙子' }
+]
+```
+
+:::
+
+## 主题
+
+通过 CSS 变量覆盖：
 
 | Token | 用途 |
 |-------|------|
-| `--nax-color-bg` | 面板 / 触发条背景 |
-| `--nax-color-mask` | 遮罩 |
-| `--nax-color-primary` | 确认色 |
-| `--nax-color-text` / `secondary` / `placeholder` | 文案 |
-| `--nax-color-divider` | 顶部分割线 |
-| `--nax-radius-xl` | 面板顶圆角（建议业务覆盖为 12px+） |
-
-### 平台说明
-
-- **iOS**：自研滚轮（`APP-IOS` 条件编译）：iOS 原生 `picker-view` 列内容不受 CSS 控制（选中文字无法垂直居中），改为 scroll-view + 固定行高框架渲染滚轮，文字显式行高居中；滚动停止吸附对齐选中行，支持点选。
-- 其余端（Android / 鸿蒙 / Web / 微信小程序）统一使用原生 `picker-view` 滚轮。
-- **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
-- **鸿蒙暗黑模式**：通过 `mask-top-style` / `mask-bottom-style` 移除原生滚轮默认的白色渐变遮罩；该分端处理由 `APP-HARMONY` 条件编译。
-- 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。
-- 弹层自包含，不依赖 `nax-popup`。
-- 联动最多 4 列。
+| `--nax-border-width` | 边框粗细 |
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-divider` | 分割线色 |
+| `--nax-color-mask` | 遮罩色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-black` | 纯黑文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
 
 
 ## Props
@@ -141,7 +328,7 @@ function onConfirm(items: UTSJSONObject[]) {
 |------|------|--------|------|
 | show | boolean | `false` | v-model:show 控制弹层显隐（对齐  的 v-model 布尔用法） |
 | list | array | `() => [] as any[]` | 列数据；单列一维 / 多列二维 / 联动树形（children） |
-| mode | string | `'single-column'` | single-column \| multi-column \| multi-column-auto（兼容 mutil-column / mutil-column-auto） |
+| mode | string | `'single-column'` | `single-column` 单列 \| `multi-column` 多列 \| `multi-column-auto` 多列联动（兼容 `mutil-column` / `mutil-column-auto`） |
 | defaultValue | array | `() => [] as any[]` | 默认选中下标数组，如 [0] / [1, 2] |
 | title | string | `''` | 顶部标题 |
 | confirmText | string | `'确认'` | 确认文案，默认「确认」 |
@@ -152,8 +339,6 @@ function onConfirm(items: UTSJSONObject[]) {
 | labelName | string | `'label'` | list 项 label 字段名，默认 label |
 | childName | string | `'children'` | 联动子级字段名，默认 children |
 | maskClosable | boolean | `true` | 点击遮罩是否关闭，默认 true（兼容 maskCloseAble） |
-| /** 兼容  拼写 */
-		maskCloseAble | boolean | `true` |  |
 | safeAreaInsetBottom | boolean | `true` | 底部安全区，默认 true（比  默认更友好） |
 | zIndex | number | `10075` | 弹层层级，默认 10075 |
 | preserveSelection | boolean | `true` | 再次打开是否保留上次确认项，默认 true |
@@ -162,9 +347,19 @@ function onConfirm(items: UTSJSONObject[]) {
 | disabled | boolean | `false` | 触发条禁用 |
 | separator | string | `' / '` | 多列展示分隔符，默认「 / 」 |
 | border | boolean | `true` | 触发条是否描边，默认 true |
-| size | string | `'md'` | 触发条尺寸 sm \| md \| lg |
+| size | string | `'md'` | `sm` 小 \| `md` 中 \| `lg` 大（触发条尺寸） |
 | customClass | string | `''` | 根节点扩展 class |
 | maskCloseAble | boolean | — | 兼容  拼写，与 maskClosable 任一为 false 则不可点遮罩关闭 |
+
+## 模式 mode
+
+| 值 | 说明 | list 形态 |
+|----|------|-----------|
+| `single-column` | 单列（默认） | `[{ value, label }]` |
+| `multi-column` | 多列独立 | `[[col1...], [col2...]]` |
+| `multi-column-auto` | 多列联动 | 树形，子级字段默认 `children` |
+
+兼容：`mutil-column` / `mutil-column-auto` / `cascade`。
 
 
 ## Events
@@ -175,8 +370,8 @@ function onConfirm(items: UTSJSONObject[]) {
 | confirm | 点确认，回调选中项数组 { value, label, index, extra? } |
 | cancel | 点取消 / 遮罩关闭，回调当前滚轮项 |
 | change | 滚轮变化（当前选中项数组） |
-| open | / close 打开 / 关闭 |
-| close |  |
+| open | 弹层打开 |
+| close | 弹层关闭 |
 
 
 ## Slots
@@ -184,3 +379,13 @@ function onConfirm(items: UTSJSONObject[]) {
 | 插槽 | 说明 |
 |------|------|
 | trigger | 自定义触发区域（需 showTrigger） |
+
+## 平台说明
+
+- **iOS**：自研滚轮（原生 `picker-view` 列文字无法垂直居中），滚动停止吸附对齐选中行，支持点选。
+- 其余端（Android / 鸿蒙 / Web / 微信小程序）统一使用原生 `picker-view` 滚轮。
+- **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
+- **鸿蒙暗黑模式**：组件自动移除原生滚轮默认的白色渐变遮罩。
+- 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。
+- 弹层自包含，不依赖 `nax-popup`。
+- 联动最多 4 列。

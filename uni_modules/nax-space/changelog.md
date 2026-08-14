@@ -1,3 +1,5 @@
+## 0.1.3（2026-08-14）
+- readme Props 说明补充中文描述（direction/size/align/justify 枚举值中文含义）
 ## 0.1.2（2026-08-07）
 - 兼容性声明：补充 iOS（`APP-IOS`）端支持，package.json 平台标记同步为 `√`
 ## 0.1.1（2026-08-01）

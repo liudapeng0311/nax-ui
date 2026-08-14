@@ -74,20 +74,17 @@ uni-app x 单选框 / 单选框组，功能覆盖常用场景。
 | update:modelValue | v-model |
 | change | 选中值变化（string） |
 
-## 主题 Token
+## 主题
 
-- `--nax-color-primary` 默认选中色
-- `--nax-color-border-strong` 未选中边框
-- `--nax-color-bg` 未选中底
-- `--nax-color-text` / `--nax-color-text-disabled` 文案
-- `--nax-color-text-inverse` 勾选图标色
-- `--nax-opacity-disabled` 禁用透明度
-- `--nax-radius-sm` / `--nax-radius-full` 方/圆角
+通过 CSS 变量覆盖：
 
-## 设计说明
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border-strong` | 强调边框色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-disabled` | 禁用文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
 
-- 尺寸统一为 `sm | md | lg`（不用 rpx 数字作默认 API）
-- 默认 `shape` 为 `circle`（与 checkbox 默认 square 区分）
-- 支持单独布尔 `v-model`（传统实现依赖 group）
-- 不提供 `customStyle` 泛样式入口，扩展用 `customClass` + CSS 变量
-- Android 端通过 `APP-ANDROID` 让 group 上下文使用明确的 `Ref` 与函数注入类型，避免 `null` 默认值被 UTS 推断为 `Void`。

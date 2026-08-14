@@ -64,17 +64,23 @@
 | 名称 | 说明 |
 |------|------|
 | icon | 自定义左侧图标 |
+## 主题
 
-## 端差异
+通过 CSS 变量覆盖：
 
-- **Web / 小程序**：衔接模式用 CSS `@keyframes` 动画
-- **App Android / iOS**：双段显式宽度 + `setInterval` `translateX` 模回绕（uvue 不支持 keyframes）
-- **App 鸿蒙**：`UniElement.animate` 双段 0→-half 线性循环为主；失败回退 `requestAnimationFrame` + `style.setProperty` 模回绕（`#ifdef APP-HARMONY`）；步进仍用原生 swiper
-- **步进模式**：三端统一原生 `swiper`
-
-## 主题 Token
-
-浅底语义色：`--nax-color-*-secondary`；文字色：`--nax-color-primary/info/success/warning/error`。
+| Token | 用途 |
+|-------|------|
+| `--nax-color-error` | 错误色 |
+| `--nax-color-error-secondary` | 错误色浅底 |
+| `--nax-color-info` | 信息色 |
+| `--nax-color-info-secondary` | 信息色浅底 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-primary-secondary` | 主题主色浅底 |
+| `--nax-color-success` | 成功色 |
+| `--nax-color-success-secondary` | 成功色浅底 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-warning-deep` | 警告色（加深） |
+| `--nax-color-warning-secondary` | 警告色浅底 |
 
 ## 依赖
 

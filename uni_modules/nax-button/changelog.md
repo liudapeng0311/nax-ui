@@ -1,3 +1,7 @@
+## 0.1.20（2026-08-14）
+- readme 合并重复的“主题”小节：完整 Token 表 + 绿色主色示例并入一节
+## 0.1.19（2026-08-11）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
 ## 0.1.18（2026-08-07）
 - 修复 iOS 启动报错 `null is not an object (evaluating 'this.getNativePage().document')`：原生页面未就绪时 `uni.getElementById` 在 iOS 直接抛错，`getSpinElement` 增加防御性 try/catch，按未命中处理并走原有重试等待挂载
 ## 0.1.17（2026-08-07）

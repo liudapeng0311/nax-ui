@@ -160,11 +160,25 @@ const formData = ref({ biz: 'avatar' } as UTSJSONObject)
 3. 成功响应尝试解析 `url` / `data.url` / `path` / `fileUrl`
 4. 失败项可调 ref：`upload(index)` / `uploadAll()` / `reupload(index)`
 
-## 主题变量
+## 暗色主题
 
-- `--nax-upload-item-bg`
-- `--nax-upload-item-radius`
-- `--nax-upload-border-color`
-- `--nax-color-bg-secondary` / `--nax-color-text-secondary` 等语义 token
+暗色主题时，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在内部使用对应的深色背景、边框、图标和文字色，未传入时使用浅色样式。
 
-Android / 鸿蒙端（`APP-ANDROID || APP-HARMONY`）不可靠解析跨组件 CSS 变量。暗色主题时，请通过 `custom-class` 传入 `nax-theme-dark`；组件会在内部使用对应的深色背景、边框、图标和文字色，未传入时使用浅色样式。
+
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg-hover` | 按压/悬停背景色 |
+| `--nax-color-bg-secondary` | 次级背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-text-placeholder` | 占位文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+| `--nax-opacity-disabled` | 禁用透明度 |
+| `--nax-upload-border-color` | 上传项边框色 |
+| `--nax-upload-item-bg` | 上传项背景色 |
+| `--nax-upload-item-radius` | 上传项圆角 |
+

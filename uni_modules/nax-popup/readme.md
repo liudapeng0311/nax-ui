@@ -190,6 +190,19 @@ pages.json 注册该页，`navigationStyle: custom`，背景透明；再：
 openNaxPopup({ url: '/pages/xxx/my-dialog' })
 ```
 
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text` | 主文字色 |
+| `--nax-color-text-inverse` | 反白文字色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+
 ## 依赖
 
 - `nax-picker`（声明式 / 小程序降级）
@@ -197,7 +210,7 @@ openNaxPopup({ url: '/pages/xxx/my-dialog' })
 
 ### 自定义 dialog 页动画建议
 
-- 推荐 `animationType: 'none'`，由页面内部做遮罩淡入 + 面板缩放/滑入（见演示 `demo-dialog`）。
+- 推荐 `animationType: 'none'`，由页面内部做遮罩淡入 + 面板缩放/滑入。
 - 若用页级 `fade-in`，请勿再在页内对同一遮罩做首帧 opacity 动画，以免鸿蒙叠闪。
 
 ## 已知限制

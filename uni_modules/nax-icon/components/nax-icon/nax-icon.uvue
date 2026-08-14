@@ -11,11 +11,11 @@
 	/**
 	 * nax-icon
 	 * @description 字体图标。默认图标集来自 Tabler Icons（MIT）语义子集。
-	 * @property {string} name 图标名，如 close / search / arrow-right
-	 * @property {string} size sm | md | lg | 数字字符串（如 20）
+	 * @property {string} name 图标名（必填），可选值见“当前支持的图标”，如 close / search / arrow-right
+	 * @property {string} size 尺寸：sm（小）/ md（中）/ lg（大），或数字字符串像素值（如 20 表示 20px）
 	 * @property {string} color 可选颜色；默认走 --nax-icon-color / --nax-color-text
 	 * @property {boolean} disabled 禁用点击
-	 * @property {string} customClass 根节点扩展 class
+	 * @property {string} customClass 根节点扩展类名（class），用于自定义样式
 	 * @event click 点击；disabled 时不触发
 	 */
 	import { getNaxIconGlyph } from '../../icons/glyphs.uts'
