@@ -198,42 +198,61 @@ body {
   color: #d1fae5;
 }
 
-html {
+/* 滚动条：宽度 6px，滚动时显示、停止 500ms 后隐藏（.scrolling 由 theme/index.ts 维护） */
+* {
+  scrollbar-width: thin;
+}
+
+:root:not(.scrolling) * {
+  scrollbar-color: transparent transparent;
+}
+
+:root.scrolling * {
   scrollbar-color: var(--nax-ink-300) transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d2d3d8;
+  background: transparent;
   border-radius: var(--nax-radius-full);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #b5b7bd;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+/* 滚动条显隐动画：伪元素不支持 transition，改用 @keyframes 淡入淡出 */
+:root {
+  --nax-scrollbar-thumb: #b5b7bd;
+}
+
+.dark {
+  --nax-scrollbar-thumb: #4a4a50;
+}
+
+@keyframes nax-scrollbar-in {
+  from { background-color: transparent; }
+  to { background-color: var(--nax-scrollbar-thumb); }
+}
+
+@keyframes nax-scrollbar-out {
+  from { background-color: var(--nax-scrollbar-thumb); }
+  to { background-color: transparent; }
+}
+
+:root.scrolling ::-webkit-scrollbar-thumb {
+  background-color: var(--nax-scrollbar-thumb);
+  animation: nax-scrollbar-in 0.25s var(--nax-ease-out) both;
+}
+
+:root:not(.scrolling) ::-webkit-scrollbar-thumb {
+  animation: nax-scrollbar-out 0.25s var(--nax-ease-out) both;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #38383d;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #4a4a50;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 :focus-visible {
@@ -242,8 +261,10 @@ html {
 }
 
 /* 3.2 导航：Apple 材质（blur 24 + 高饱和 + 顶部受光边 + 渐变发丝线） */
-.VPNavBar,
-.VPLocalNav {
+.VPNavBar.home,
+:root .VPNavBar:not(.home),
+:root .VPLocalNav {
+  background-color: var(--vp-nav-bg-color);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
@@ -267,6 +288,47 @@ html {
 
 .VPNavBar .divider {
   background: transparent;
+}
+
+/* 上导航通栏：去掉 VitePress 默认的左右各 32px 预留
+   （容器 max-width: calc(100% - 64px) + wrapper 内边距 0 32px） */
+:root .VPNavBar .container {
+  max-width: none;
+}
+
+:root .VPNavBar .wrapper {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* 桌面端整个导航一条通栏底边线：由导航根节点的伪元素绘制，
+   避免标题、divider 与侧栏边框在交界处拼出断线。 */
+@media (min-width: 960px) {
+  :root .VPNavBar {
+    border-bottom: 0;
+  }
+
+  :root .VPNavBar::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background-color: var(--vp-c-divider);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  :root .VPNavBar .divider,
+  :root .VPNavBar .divider-line {
+    display: none;
+  }
+
+  :root .VPNavBarTitle.has-sidebar .title,
+  :root .VPNavBar .container > .title {
+    border-bottom: 0;
+  }
 }
 
 .VPNavBar .divider-line {
@@ -310,6 +372,24 @@ html {
   font-weight: 600;
   letter-spacing: -0.01em;
   transition: color var(--nax-dur-mid) var(--nax-ease-out);
+}
+
+/* 桌面端 logo 在左侧导航栏宽度内居中 */
+@media (min-width: 960px) {
+  :root .VPNavBarTitle .title {
+    justify-content: center;
+  }
+}
+
+/* 桌面端 logo 链接占满左侧导航栏宽度（与侧栏同宽，底部边框线贯通侧栏顶部）；
+   padding 置零：去掉 VitePress 默认的左右各 32px 内边距 */
+@media (min-width: 960px) {
+  :root .VPNavBar .container > .title {
+    width: var(--vp-sidebar-width);
+    flex-shrink: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -770,6 +850,187 @@ html {
   border: 1px solid var(--vp-c-divider);
 }
 
+/* Guide introduction: a dedicated reading layout without affecting other docs. */
+.nax-intro-page .vp-doc {
+  max-width: 1040px !important;
+}
+
+.nax-intro-page .vp-doc > h1 {
+  margin-bottom: 28px;
+}
+
+.nax-intro-page .vp-doc > h2 {
+  margin-top: 72px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.nax-intro-lead {
+  max-width: 760px;
+  margin: 0;
+  border-left: 3px solid var(--vp-c-brand-1);
+  padding-left: 20px;
+  color: var(--vp-c-text-1);
+  font-size: 19px;
+  line-height: 1.75;
+}
+
+.nax-intro-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 20px;
+}
+
+.nax-intro-summary p {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.nax-intro-summary strong {
+  color: var(--vp-c-text-1);
+  font-size: 16px;
+}
+
+.nax-intro-summary span {
+  color: var(--vp-c-text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.nax-intro-principles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.nax-intro-principles article {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background-color: var(--vp-c-bg-elv);
+  padding: 20px;
+}
+
+.nax-intro-principles__index {
+  margin: 0;
+  color: var(--vp-c-brand-1);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nax-intro-principles h3,
+.nax-intro-features h3 {
+  margin: 10px 0 8px;
+  color: var(--vp-c-text-1);
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+.nax-intro-principles article > p:last-child,
+.nax-intro-features p {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.nax-intro-features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.nax-intro-features article {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background-color: var(--vp-c-bg-elv);
+  padding: 20px;
+}
+
+.nax-intro-features h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0;
+}
+
+.nax-intro-features h3::before {
+  content: '';
+  width: 3px;
+  height: 17px;
+  flex: 0 0 auto;
+  background-color: var(--vp-c-brand-1);
+}
+
+.nax-intro-page .vp-doc table td:last-child {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.nax-intro-reward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.nax-intro-reward__item {
+  width: 210px;
+}
+
+.nax-intro-reward__item img {
+  display: block;
+  width: 210px;
+  height: 300px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.nax-intro-reward__item p {
+  margin: 8px 0 0;
+  color: var(--vp-c-text-2);
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .nax-intro-page .vp-doc > h2 {
+    margin-top: 52px;
+  }
+
+  .nax-intro-lead {
+    padding-left: 16px;
+    font-size: 17px;
+  }
+
+  .nax-intro-summary,
+  .nax-intro-principles,
+  .nax-intro-features {
+    grid-template-columns: 1fr;
+  }
+
+  .nax-intro-summary {
+    gap: 16px;
+  }
+
+  .nax-intro-principles {
+    gap: 12px;
+  }
+
+  .nax-intro-features {
+    gap: 12px;
+  }
+
+  .nax-intro-reward {
+    gap: 16px;
+  }
+}
+
 /* 徽标 */
 .vp-badge {
   border-radius: var(--nax-radius-sm);
@@ -780,9 +1041,24 @@ html {
 .VPSidebar {
   padding-top: 8px;
   /* 覆盖 VitePress ≥1440px 的 max(32px, calc(...)) 左内边距 */
-  padding-left: 13px !important;
-  padding-right: 13px !important;
+  padding-left: 7px !important;
+  padding-right: 7px !important;
   border-right: 1px solid var(--vp-c-border);
+  /* 滚动条只渲染在右侧，左右各预留等宽槽位保证两侧间距一致 */
+  scrollbar-gutter: stable both-edges;
+}
+
+/* 桌面端侧栏内容从导航条下方开始，避免盖住 header
+   （主题原 padding-top: 8px 会覆盖 VitePress 默认的 var(--vp-nav-height)） */
+@media (min-width: 960px) {
+  :root .VPSidebar {
+    padding-top: var(--vp-nav-height);
+  }
+}
+
+/* 分组占满侧栏内容区（VitePress 默认按 32px 内边距计算宽度，改小内边距后需跟随） */
+:root .VPSidebar .group {
+  width: 100%;
 }
 
 .VPSidebarItem .link {
@@ -813,12 +1089,30 @@ html {
   display: none;
 }
 
-/* 分组标题：小号灰字，常规字重 */
-.VPSidebarItem.level-0 > .item .text {
+/* 分组标题：小号灰字，常规字重
+   （:root 前缀提升特异性，压过 VitePress scoped 的 .level-0 .text[data-v-*]；
+    has-active 同规则：分组内有激活子项时标题也保持 #666） */
+:root .VPSidebarItem.level-0 > .item .text,
+:root .VPSidebarItem.level-0.has-active > .item > .text {
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.02em;
-  color: #9ca3af;
+  color: #666666;
+}
+
+/* 菜单项：中文名 #333；英文名 #666（由生成脚本包裹 .nax-sidebar-en） */
+:root .VPSidebarItem.level-1 > .item .text {
+  color: #333333;
+}
+
+:root .VPSidebarItem .text .nax-sidebar-en {
+  color: #666666;
+}
+
+/* 激活 / 悬停时英文名跟随品牌色（继承 .link 颜色） */
+:root .VPSidebarItem.is-active .text .nax-sidebar-en,
+:root .VPSidebarItem .link:hover .text .nax-sidebar-en {
+  color: inherit;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -956,5 +1250,9 @@ html {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    animation: none !important;
   }
 }

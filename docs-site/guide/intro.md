@@ -1,38 +1,82 @@
+---
+pageClass: nax-intro-page
+---
+
 # 介绍
 
-`nax-ui` 是面向 **uni-app x**（uvue）的通用 UI 组件库，以组合式 API 与 CSS 变量主题化为核心设计，覆盖基础、布局、表单、反馈、导航、展示六大类常用业务场景。
+<p class="nax-intro-lead"><code>nax-ui</code> 是面向 <strong>uni-app x</strong>（uvue）的通用 UI 组件库，以组合式 API 与 CSS 变量主题化为核心设计，覆盖基础、布局、表单、反馈、导航、展示六大类常用业务场景。</p>
+
+<div class="nax-intro-summary">
+  <p><strong>uvue 优先</strong><span>围绕 uni-app x 蒸汽模式构建</span></p>
+  <p><strong>按需接入</strong><span>独立 uni_modules 组件包与 easycom</span></p>
+  <p><strong>统一主题</strong><span>语义化 <code>--nax-*</code> CSS 变量</span></p>
+</div>
 
 ## 由来
 
-uni-app x 生态起步较晚，社区组件大多仍是老 uni-app（Vue2/Vue3 + wxml）时代的产物，或仅做简单兼容。`nax-ui` 选择**只做 uni-app x**：
+uni-app x 生态起步较晚，社区组件大多仍是老 uni-app（Vue2/Vue3 + wxml）时代的产物，或仅做简单兼容。`nax-ui` 选择只做 uni-app x：
 
-- 全部组件基于 **uvue（`<script setup lang="uts">`）** 从零实现，不是兼容层、不是双栈维护
-- 按 **蒸汽模式** 设计：组合式 API + 样式隔离 2.0，无历史包袱
-- 样式仅用 **class 选择器 + `--nax-*` CSS 变量**，不依赖 Web 独有 CSS，适配 App 端 ucss 子集
+<div class="nax-intro-principles">
+  <article>
+    <p class="nax-intro-principles__index">01</p>
+    <h3>从 uvue 出发</h3>
+    <p>全部组件基于 <strong>uvue（<code>&lt;script setup lang="uts"&gt;</code>）</strong> 从零实现，不是兼容层，也不维护双栈。</p>
+  </article>
+  <article>
+    <p class="nax-intro-principles__index">02</p>
+    <h3>遵循蒸汽模式</h3>
+    <p>组合式 API 与样式隔离 2.0 共同约束组件实现，避免遗留模式带来的额外负担。</p>
+  </article>
+  <article>
+    <p class="nax-intro-principles__index">03</p>
+    <h3>样式可控可扩展</h3>
+    <p>核心样式只用 <strong>class 选择器 + <code>--nax-*</code> CSS 变量</strong>，适配 App 端 ucss 子集。</p>
+  </article>
+</div>
 
 ## 特性
 
-- 🧩 **组件齐全**：50+ 个独立 `nax-*` 组件包 + `nax-ui-theme` 主题包，按「基础 / 布局 / 表单 / 反馈 / 导航 / 展示」六大类组织
-- ⚡ **零配置接入**：每个组件是独立 `uni_modules` 插件包，easycom 自动注册，页面直接 `<nax-button />` 即可使用，可整套安装也可按需安装
-- 📱 **多端运行**：一套代码覆盖 Web、微信小程序、App Android / iOS / 鸿蒙（见下方平台支持）
-- 🎨 **主题 token**：`--nax-*` CSS 变量驱动设计体系，业务改色不改组件源码；支持运行时换肤与三态暗黑模式（跟随系统 / 浅色 / 深色）
-- 🔌 **双模式反馈**：Toast / Dialog 等同时提供声明式（`v-model:show`）与命令式（`naxToast()` / `naxDialog()`）调用
-- 🛡️ **端差异显式处理**：平台差异用条件编译（`#ifdef`）隔离，不迁就一端而牺牲其它端
+<div class="nax-intro-features">
+  <article>
+    <h3>组件齐全</h3>
+    <p>50+ 个独立 <code>nax-*</code> 组件包与 <code>nax-ui-theme</code> 主题包，按六大类组织。</p>
+  </article>
+  <article>
+    <h3>零配置接入</h3>
+    <p>独立 <code>uni_modules</code> 插件包通过 easycom 自动注册，可整套安装也可按需安装。</p>
+  </article>
+  <article>
+    <h3>多端运行</h3>
+    <p>一套代码覆盖 Web、微信小程序，以及 App Android、iOS、鸿蒙。</p>
+  </article>
+  <article>
+    <h3>主题 token</h3>
+    <p><code>--nax-*</code> 驱动设计体系，业务改色无需改组件源码，支持运行时换肤。</p>
+  </article>
+  <article>
+    <h3>双模式反馈</h3>
+    <p>Toast、Dialog 等同时提供声明式与命令式调用方式，适配不同页面组织方式。</p>
+  </article>
+  <article>
+    <h3>端差异显式处理</h3>
+    <p>通过条件编译隔离平台差异，不以牺牲其它端能力来换取单端适配。</p>
+  </article>
+</div>
 
 ## 平台支持
 
 | 平台 | 支持 |
 |------|------|
-| Web（H5） | ✅ |
-| 微信小程序 | ✅ |
-| App Android | ✅ |
-| App iOS | ✅ |
-| App HarmonyOS | ✅ |
+| Web（H5） | 支持 |
+| 微信小程序 | 支持 |
+| App Android | 支持 |
+| App iOS | 支持 |
+| App HarmonyOS | 支持 |
 
 ## 与其它框架的区别
 
 - 老 uni-app 组件库以 Vue 生态 + wxml 渲染为基础，无法直接用于 uni-app x 工程
-- `nax-ui` 以 **uvue + uts 原生实现**，面向 uni-app x 蒸汽模式设计，不做与老 uni-app 的双栈兼容，因此没有历史包袱，组件 API 与样式约束更统一
+- `nax-ui` 以 **uvue 前端组件 + uts setup 逻辑**实现，面向 uni-app x 蒸汽模式设计，不做与老 uni-app 的双栈兼容，因此没有历史包袱，组件 API 与样式约束更统一
 
 ## 相关地址
 
@@ -41,16 +85,16 @@ uni-app x 生态起步较晚，社区组件大多仍是老 uni-app（Vue2/Vue3 +
 
 ## 赞赏支持
 
-如果这个项目对您有帮助，可以请作者喝杯咖啡 ☕️
+如果这个项目对您有帮助，可以请作者喝杯咖啡。
 
-<div style="display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;">
-  <div style="text-align: center;">
-    <img src="/reward/weixin.png" alt="微信收款码" style="width: 210px; height: 300px; border-radius: 8px;" />
-    <p style="margin: 8px 0 0; font-size: 14px; color: var(--vp-c-text-2);">微信</p>
+<div class="nax-intro-reward">
+  <div class="nax-intro-reward__item">
+    <img src="/reward/weixin.png" alt="微信收款码" />
+    <p>微信</p>
   </div>
-  <div style="text-align: center;">
-    <img src="/reward/zhifubao.png" alt="支付宝收款码" style="width: 210px; height: 300px; border-radius: 8px;" />
-    <p style="margin: 8px 0 0; font-size: 14px; color: var(--vp-c-text-2);">支付宝</p>
+  <div class="nax-intro-reward__item">
+    <img src="/reward/zhifubao.png" alt="支付宝收款码" />
+    <p>支付宝</p>
   </div>
 </div>
 

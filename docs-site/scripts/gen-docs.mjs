@@ -1251,6 +1251,11 @@ function collectPackages() {
   return { found, warnings }
 }
 
+// 组件英文名：去掉 nax- 前缀并转 PascalCase，如 datetime-picker -> DateTimePicker
+function englishName(n) {
+  return n.split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')
+}
+
 function generateSidebar(found) {
   // 按路径前缀分区：指南页只显示指南侧栏，组件页只显示组件侧栏
   const groups = CATEGORIES.map((c) => ({
@@ -1258,7 +1263,7 @@ function generateSidebar(found) {
     items: c.items
       .filter((n) => found.some((f) => f.name === n))
       .map((n) => ({
-        text: `nax-${n}（${COMPONENT_LABELS[n] || '组件'}）`,
+        text: `${COMPONENT_LABELS[n] || '组件'} <span class="nax-sidebar-en">${englishName(n)}</span>`,
         link: `/components/${n}`
       }))
   }))
