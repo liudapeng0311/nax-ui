@@ -31,10 +31,25 @@ function hideIframe(): void {
 
 const REVEAL_MIN_HOLD = 200
 
+// 文档内嵌演示隐藏导航栏返回按钮（点击会 reLaunch 回演示首页）。
+// 只在此 iframe 内注入样式，不改宿主演示工程本身。
+const HIDE_BACK_CSS = '.nax-nav-bar__back { display: none !important; }'
+
+function hideDemoBackButton(): void {
+  const doc = iframeRef.value?.contentDocument
+  if (!doc) return
+  if (doc.getElementById('nax-doc-demo-hide-back')) return
+  const style = doc.createElement('style')
+  style.id = 'nax-doc-demo-hide-back'
+  style.textContent = HIDE_BACK_CSS
+  doc.head.appendChild(style)
+}
+
 function onIframeLoad(): void {
   // 暗色模式下，演示应用先以浅色首绘、再挂 nax-theme-dark，
   // 直接显示会闪白。这里等 iframe 内部出现暗色类，并保证最小持有期
   // （覆盖演示自身的白色首绘帧）后再淡入。
+  hideDemoBackButton()
   if (!isSiteDark()) {
     showIframe()
     return
@@ -44,6 +59,7 @@ function onIframeLoad(): void {
   const check = (): void => {
     const doc = iframeRef.value?.contentDocument
     tries++
+    hideDemoBackButton()
     const hasDark = !!(doc && doc.querySelector('.nax-theme-dark'))
     const held = Date.now() - startedAt >= REVEAL_MIN_HOLD
     if ((hasDark && held) || tries > 80) {

@@ -100,8 +100,8 @@
 
   /* 代码 */
   --vp-code-block-bg: rgba(255, 255, 255, 0.75);
-  --vp-code-bg: var(--vp-c-brand-soft);
-  --vp-code-color: var(--vp-c-brand-1);
+  --vp-code-bg: var(--vp-c-default-soft);
+  --vp-code-color: var(--vp-c-text-1);
   --vp-code-block-divider-color: var(--vp-c-divider);
   --vp-code-copy-code-border-color: var(--vp-c-divider);
   --vp-code-copy-code-bg: var(--vp-c-bg-elv);
@@ -152,7 +152,7 @@
 
   /* 代码 */
   --vp-code-block-bg: rgba(19, 19, 22, 0.9);
-  --vp-code-bg: var(--vp-c-brand-soft);
+  --vp-code-bg: var(--vp-c-default-soft);
   --vp-code-line-highlight-color: rgba(52, 211, 153, 0.12);
 
   /* 首页氛围光 */
@@ -746,26 +746,7 @@ body {
   padding-bottom: 6px;
 }
 
-/* 行内代码：品牌芯片 */
-.vp-doc :not(pre) > code {
-  padding: 0.15em 0.4em;
-  border: 1px solid rgba(24, 160, 88, 0.16);
-  border-radius: var(--nax-radius-sm);
-  background-color: rgba(24, 160, 88, 0.09);
-  color: var(--vp-c-brand-1);
-  font-size: 0.875em;
-  transition: color var(--nax-dur-fast) var(--nax-ease-out);
-}
-
-.dark .vp-doc :not(pre) > code {
-  border-color: rgba(52, 211, 153, 0.22);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .vp-doc :not(pre) > code:hover {
-    color: var(--vp-c-brand-2);
-  }
-}
+/* 行内代码：VitePress 默认样式（--vp-code-bg 灰底 + --vp-code-color，无边框） */
 
 /* 代码块：玻璃面板 + 语言标签 + 复制按钮 */
 .vp-doc div[class*='language-'] {
