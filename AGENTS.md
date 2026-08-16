@@ -160,6 +160,7 @@ nax-ui/                          # 演示宿主
 | 公共 API 原则变化 | `docs/design-system.md` |
 | 组件包代码 / API / 样式 / 行为 / 依赖变化 | 对应组件的 `changelog.md` + `package.json` 版本号；并检查 `uni_modules/nax-ui` 套装是否需要同步 |
 | 新增/移除组件包 | `uni_modules/nax-ui` 套装 `package.json` 的 `uni_modules.dependencies` + `changelog.md` + 版本号 |
+| 组件 API / 主题 token / 组件数量变化 | **必须检查技能包 `nax-ui-skill-build` 是否需要同步更新**（见 5.2） |
 | 仓库协作约束变化 | `AGENTS.md` |
 
 完成组件实现后：
@@ -193,6 +194,34 @@ nax-ui/                          # 演示宿主
 - 仅修改演示宿主页、且组件包本身未变化时，不强制升级组件版本
 - 为记录本次版本而修改 `changelog.md` / `package.json`，不视为需要再次递增版本号的新一轮组件改动
 - 同一任务多次修改同一组件包时只确定一个最终版本，changelog 合并记录本次任务的全部变化
+
+### 5.2 技能包同步与发布（硬约束）
+
+**技能包**（`nax-ui-skill-build/`，发布为 GitHub `liudapeng0311/nax-ui-skills`）是给 AI 编码助手使用的 nax-ui 使用指南。**凡修改任一 `nax-*` 组件包或 `nax-ui-theme` 的公共 API / 样式 / 行为 / 依赖 / 组件数量，必须检查技能包是否需要同步更新**：
+
+| 组件包变更 | 技能包动作 |
+|-----------|-----------|
+| 组件 props / events / slots / methods / 枚举值变化 | 重新生成对应组件卡：`python nax-ui-skill-build/scripts/gen-nax-refs.py <uni_modules 路径> nax-ui-skill-build/references/components` |
+| 新增组件 | 重新生成组件卡 + 更新 `references/component-index.md`（分类、一句话说明、组件数量） |
+| 移除组件 | 删除对应组件卡 + 更新 `references/component-index.md` |
+| 主题 token 变化 | 检查 `references/theme-guide.md` 及受影响组件卡 token 表是否需同步 |
+| 组件 readme 文档变化 | 重新生成组件卡（脚本以 readme 为数据源） |
+
+判断标准：**组件卡的"用法示例 / Props / Events / Slots / Methods / 依赖"与组件实际 API 不一致时，必须更新**；仅内部实现（不改公共 API）可不更新，但需在任务说明中写明判断依据。
+
+### 5.3 技能包发布流程
+
+技能包更新完成后，按以下流程发布（**用户未要求时不发布**）：
+
+1. **更新源目录**：在 `nax-ui-skill-build/` 修改 `SKILL.md` / `references/` / `scripts/`
+2. **重新生成组件卡**（如涉及组件 API 变化）：
+   ```bash
+   python nax-ui-skill-build/scripts/gen-nax-refs.py <nax-ui/uni_modules 路径> nax-ui-skill-build/references/components
+   ```
+3. **手动同步**：`SKILL.md` 中的组件数量、`references/component-index.md` 的组件清单与说明
+4. **同步发布副本**：将更新内容复制到 `nax-ui-skill-release/`（该目录的 git origin 指向 GitHub `liudapeng0311/nax-ui-skills`）
+5. **提交推送**：在 `nax-ui-skill-release/` 中 `git add` + `git commit` + `git push`（默认分支 `main`）
+6. **验证**（可选）：`npx skills add liudapeng0311/nax-ui-skills --list` 确认 CLI 能识别技能；skills.sh 页面可能延迟更新，如长时间 404 可在 `vercel-labs/skills` 仓库提 re-index issue
 
 ---
 
@@ -294,6 +323,7 @@ const emit = defineEmits(['click'])
 - [ ] 每个发生变化的组件包均已更新对应 `changelog.md`
 - [ ] 每个发生变化的组件包均已按 SemVer 自动递增并同步 `package.json` 版本号
 - [ ] 已检查套装 `uni_modules/nax-ui` 是否需要同步（依赖列表 / 版本号 / changelog）
+- [ ] **已检查技能包 `nax-ui-skill-build` 是否需要同步**（组件 API / 主题 token / 组件数量变化时，按 5.2 / 5.3 处理；不需要更新时在任务说明写明判断依据）
 - [ ] 有可运行 demo 或明确说明为何没有
 - [ ] 除 Web 端外，未主动运行或编译其它端；非 Web 端由用户自行核实
 - [ ] 无无关重构与无关文件打扰
@@ -307,6 +337,7 @@ const emit = defineEmits(['click'])
   - 主题接入：`uni_modules/nax-ui-theme/readme.md`
 - 文档索引：`docs/README.md`
 - 主题包：`uni_modules/nax-ui-theme`
+- 技能包（AI 使用指南，发布到 GitHub `liudapeng0311/nax-ui-skills`）：`nax-ui-skill-build/`（源目录）、`nax-ui-skill-release/`（发布副本）
 - 官方参考（人工查阅）：
   - uni-app x 文档：https://doc.dcloud.net.cn/uni-app-x/
   - uni_modules：https://doc.dcloud.net.cn/uni-app-x/plugin/uni_modules.html

@@ -1273,7 +1273,8 @@ function generateSidebar(found) {
         { text: '介绍', link: '/guide/intro' },
         { text: '快速开始', link: '/guide/' },
         { text: '主题接入', link: '/guide/theme' },
-        { text: '暗黑模式', link: '/guide/dark-mode' }
+        { text: '暗黑模式', link: '/guide/dark-mode' },
+        { text: 'AI 技能包', link: '/guide/ai-skill' }
       ] }
     ],
     '/components/': [

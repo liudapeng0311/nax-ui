@@ -19,6 +19,10 @@ export const sidebar = {
         {
           "text": "暗黑模式",
           "link": "/guide/dark-mode"
+        },
+        {
+          "text": "AI 技能包",
+          "link": "/guide/ai-skill"
         }
       ]
     }

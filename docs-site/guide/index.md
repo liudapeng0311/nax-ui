@@ -47,3 +47,13 @@ easycom 会自动完成注册，页面中直接使用：
 ```
 
 完整分档（L0 默认色 / L1 启动配置 / L2 运行时切换）见 [主题接入](./theme)；三态暗黑模式（跟随系统/浅色/深色）接入见 [暗黑模式](./dark-mode)。
+
+## 让 AI 帮你写页面
+
+nax-ui 提供官方 **Agent 技能包**（skills.sh 生态），安装后 Claude Code、Cursor、OpenCode 等 AI 编码助手能准确使用 nax-ui 的组件与 API：
+
+```bash
+npx skills add liudapeng0311/nax-ui-skills
+```
+
+详见 [AI 技能包](./ai-skill)。
