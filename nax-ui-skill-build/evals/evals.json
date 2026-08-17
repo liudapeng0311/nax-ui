@@ -1,0 +1,26 @@
+{
+  "skill_name": "nax-ui",
+  "evals": [
+    {
+      "id": 1,
+      "name": "login-form",
+      "prompt": "在 uni-app x 项目里写一个登录页 login.uvue：包含手机号、密码两个输入框（密码要可切换明文），一个登录按钮，点击登录时做简单非空校验（手机号 11 位），校验失败用轻提示弹出错误，成功后用对话框提示登录成功。项目已安装 nax-ui 组件库和主题包，页面根节点已加 nax-theme。请写出完整的页面代码（template + script setup lang=\"uts\" + style）。",
+      "expected_output": "完整的 login.uvue 页面，使用 nax-form/nax-input/nax-button/nax-toast/nax-dialog 等 nax-ui 组件，props/事件名与 nax-ui 文档一致，遵循 uni-app x 代码规范。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "product-list",
+      "prompt": "在 uni-app x 项目里写一个商品列表页 list.uvue：使用 nax-list 实现触底加载更多 + 下拉刷新，行内容用 nax-cell 展示商品名和价格，列表为空时显示空状态，加载完成显示没有更多。模拟数据即可。请写出完整页面代码（template + script setup lang=\"uts\"）。",
+      "expected_output": "完整的 list.uvue 页面，正确使用 nax-list 的受控状态（loading/finished/empty）、load/refresh 事件和 nax-cell 行渲染。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "settings-page",
+      "prompt": "在 uni-app x 项目里写一个设置页 settings.uvue：用 nax-cell-group 分两组展示设置项（账户组：头像、昵称、手机号；通用组：消息通知开关 nax-switch、清除缓存、检查更新），开关状态用 v-model 绑定，点击可进入的设置项显示右箭头。请写出完整页面代码。",
+      "expected_output": "完整的 settings.uvue 页面，正确使用 nax-cell-group/nax-cell/nax-switch，开关用 v-model 双向绑定。",
+      "files": []
+    }
+  ]
+}
