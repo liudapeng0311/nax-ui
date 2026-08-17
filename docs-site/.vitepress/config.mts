@@ -9,7 +9,19 @@ export default defineConfig({
   cleanUrls: true,
 
   head: [
-    ['meta', { name: 'keywords', content: 'uni-app x, uvue, nax-ui, UI 组件库' }]
+    ['link', { rel: 'icon', type: 'image/png', href: '/logo.png' }],
+    ['meta', { name: 'keywords', content: 'uni-app x, uvue, nax-ui, UI 组件库' }],
+    [
+      'script',
+      {},
+      `var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?b9eb936c193689c86814194a442129df";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();`
+    ]
   ],
 
   markdown: {
