@@ -724,29 +724,6 @@
 		return true
 	}
 
-	type NaxUploadFileSuccess = {
-		statusCode: number
-		data: string
-	}
-
-	type NaxImageTempFile = {
-		path: string
-		tempFilePath: string
-		url: string
-		size: number
-	}
-
-	type NaxChooseImageSuccess = {
-		tempFiles: any[]
-		tempFilePaths: string[]
-	}
-
-	type NaxChooseVideoSuccess = {
-		tempFilePath: string
-		size: number
-		thumbTempFilePath: string
-	}
-
 	function resolveUploadHeader(): UTSJSONObject {
 		if (props.header == null) {
 			return {} as UTSJSONObject
@@ -822,9 +799,8 @@
 			header: resolveUploadHeader(),
 			formData: resolveUploadFormData(),
 			success: (res) => {
-				const uploadRes = res as NaxUploadFileSuccess
-				const statusCode = uploadRes.statusCode
-				const data = uploadRes.data
+				const statusCode = res.statusCode
+				const data = res.data
 				const ok = statusCode >= 200 && statusCode < 300
 				if (!ok) {
 					updateItemAt(captureIndex, 'failed', '????', '')
@@ -904,9 +880,8 @@
 					header: resolveUploadHeader(),
 					formData: resolveUploadFormData(),
 					success: (res) => {
-						const uploadRes = res as NaxUploadFileSuccess
-						const statusCode = uploadRes.statusCode
-						const data = uploadRes.data
+						const statusCode = res.statusCode
+						const data = res.data
 						const ok = statusCode >= 200 && statusCode < 300
 						const list2 = cloneFileList()
 						if (ok) {
@@ -1016,52 +991,26 @@
 			if (typeof raw == 'string') {
 				path = raw as string
 			} else {
-				// 安卓 UTS：禁止 (x as any).field，改用具体类型 / UTSJSONObject
-				const f = raw as NaxImageTempFile
-				const pn = f.path
-				if (pn != null && pn.length > 0) {
-					path = pn
-				} else {
-					const p2n = f.tempFilePath
-					if (p2n != null && p2n.length > 0) {
-						path = p2n
+				// 安卓 UTS：禁止把 SDK 对象 as 到自定义 type（会 ClassCastException），统一走 UTSJSONObject getter
+				const obj = asObject(raw)
+				if (obj != null) {
+					const p1 = obj.getString('path')
+					if (p1 != null && p1.length > 0) {
+						path = p1
 					} else {
-						const p3n = f.url
-						if (p3n != null && p3n.length > 0) {
-							path = p3n
+						const p2 = obj.getString('tempFilePath')
+						if (p2 != null && p2.length > 0) {
+							path = p2
+						} else {
+							const p3 = obj.getString('url')
+							if (p3 != null) {
+								path = p3
+							}
 						}
 					}
-				}
-				const sn = f.size
-				if (sn != null) {
-					size = sn
-				}
-				// 业务 UTSJSONObject 兜底
-				if (path.length == 0 || size <= 0) {
-					const obj = asObject(raw)
-					if (obj != null) {
-						if (path.length == 0) {
-							const p1 = obj.getString('path')
-							if (p1 != null && p1.length > 0) {
-								path = p1
-							} else {
-								const p2 = obj.getString('tempFilePath')
-								if (p2 != null && p2.length > 0) {
-									path = p2
-								} else {
-									const p3 = obj.getString('url')
-									if (p3 != null) {
-										path = p3
-									}
-								}
-							}
-						}
-						if (size <= 0) {
-							const sz = obj.getNumber('size')
-							if (sz != null) {
-								size = sz
-							}
-						}
+					const sz = obj.getNumber('size')
+					if (sz != null) {
+						size = sz
 					}
 				}
 			}
@@ -1098,55 +1047,33 @@
 		emitReadPayload(okFiles, false)
 	}
 
-	function pickFromImageSuccess(res: any) {
+	function pickFromImageSuccess(res: ChooseImageSuccess) {
 		const files = [] as any[]
-		const result = res as NaxChooseImageSuccess
-		const tempFiles = result.tempFiles
-		if (tempFiles != null && tempFiles.length > 0) {
+		const paths = res.tempFilePaths
+		if (paths != null && paths.length > 0) {
 			var i = 0
-			while (i < tempFiles.length) {
-				files.push(tempFiles[i])
+			while (i < paths.length) {
+				files.push(paths[i])
 				i++
 			}
-			processPickedFiles(files, 'image')
-			return
-		}
-		const pathsAny = result.tempFilePaths
-		if (pathsAny != null && pathsAny.length > 0) {
-			var j = 0
-			while (j < pathsAny.length) {
-				const p = pathsAny[j]
-				if (typeof p == 'string') {
-					files.push(p as string)
-				}
-				j++
-			}
-			processPickedFiles(files, 'image')
-			return
 		}
 		processPickedFiles(files, 'image')
 	}
 
-	function pickFromVideoSuccess(res: any) {
+	function pickFromVideoSuccess(res: ChooseVideoSuccess) {
 		var path = ''
-		const result = res as NaxChooseVideoSuccess
-		const tp = result.tempFilePath
+		const tp = res.tempFilePath
 		if (tp != null) {
 			path = tp
 		}
 		var size = 0
-		const sz = result.size
+		const sz = res.size
 		if (sz != null) {
 			size = sz
 		}
-		var thumb = path
-		const th = result.thumbTempFilePath
-		if (th != null && th.length > 0) {
-			thumb = th
-		}
 		const item = {
 			url: path,
-			thumb: thumb,
+			thumb: path,
 			name: '',
 			type: 'video',
 			size: size,

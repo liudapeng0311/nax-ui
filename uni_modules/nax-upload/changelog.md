@@ -1,3 +1,5 @@
+## 0.1.12（2026-08-17）
+- 修复 Android 端选图/选视频/上传时的 `ClassCastException` 崩溃：不再把 SDK 结果对象（`ChooseImageSuccess` / `ChooseVideoSuccess` / `UploadFileSuccess`）强制转换到组件自定义 `type`，改用 SDK 全局类型直接取值、对象型文件走 `UTSJSONObject` getter（`APP-ANDROID` 根因修复，其余端行为不变）。
 ## 0.1.11（2026-08-14）
 - 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
 ## 0.1.10（2026-08-11）
