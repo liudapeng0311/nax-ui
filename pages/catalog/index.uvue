@@ -17,7 +17,7 @@
 		</nax-nav-bar>
 
 		<view class="page-body" :style="pageBodyStyle">
-			<view class="nax-theme search-wrap" :class="themeExtraClass">
+			<view class="nax-theme search-wrap" id="catalog-search-wrap" :class="themeExtraClass">
 				<nax-search
 					v-model="search"
 					placeholder="搜索组件名或 nax-*"
@@ -28,7 +28,7 @@
 				></nax-search>
 			</view>
 
-			<view class="nax-theme tabs-wrap" :class="themeExtraClass">
+			<view class="nax-theme tabs-wrap" id="catalog-tabs-wrap" :class="themeExtraClass">
 				<nax-tabs
 					v-model="categoryIndex"
 					:list="categoryTabs"
@@ -37,7 +37,7 @@
 				></nax-tabs>
 			</view>
 
-			<scroll-view class="page-scroll" scroll-y="true" :style="pageScrollStyle">
+			<scroll-view class="page-scroll" :bounces="false" :style="pageScrollStyle">
 			<view class="nax-theme page" :class="themeExtraClass">
 				<view class="result-bar">
 					<text class="result-bar__text">共 {{ rowCountText }} 个组件</text>
@@ -94,7 +94,12 @@
 		takePendingCatalogTab
 	} from '@/common/demo-catalog.uts'
 
-	bindDemoThemePage()
+	// VDOM 模式页面 setup 阶段页面 body 未就绪，系统信息/窗口 API 可能抛异常；onShow 会再次校准
+	try {
+		bindDemoThemePage()
+	} catch (e) {
+		// 保持默认
+	}
 	const darkMode = demoDarkRef
 
 	const themeExtraClass = computed((): string => {
@@ -202,7 +207,26 @@
 		pageRootStyle.value = 'position:absolute;left:0;top:0;right:0;bottom:0;width:100%;height:' + pageH.toString() + 'px;'
 		// 搜索+分类占自然高度，列表用剩余 px
 		const headH = 100
+		// #ifdef APP-HARMONY
+		// 鸿蒙（含蒸汽）：px 估算与实际渲染偏差大，实测头部（搜索+分类）高度
+		var headReal = 0
+		const searchEl = uni.getElementById('catalog-search-wrap')
+		const tabsEl = uni.getElementById('catalog-tabs-wrap')
+		if (searchEl != null) {
+			const rectSearch = searchEl.getBoundingClientRect()
+			headReal += rectSearch.height
+		}
+		if (tabsEl != null) {
+			const rectTabs = tabsEl.getBoundingClientRect()
+			headReal += rectTabs.height
+		}
+		// #endif
 		var listH = bodyH - headH
+		// #ifdef APP-HARMONY
+		if (headReal > 0) {
+			listH = bodyH - headReal
+		}
+		// #endif
 		if (listH < 120) {
 			listH = 120
 		}
@@ -216,7 +240,12 @@
 		pageScrollStyle.value = 'flex:1;width:100%;height:0;'
 		// #endif
 	}
-	refreshPageRootStyle()
+	// VDOM 模式 setup 阶段窗口信息可能不可用，失败由 onShow 兜底
+	try {
+		refreshPageRootStyle()
+	} catch (e) {
+		// 保持默认
+	}
 
 	const tabList = demoTabList()
 	const categoryTabs = demoCategoryTabs()
@@ -437,6 +466,12 @@
 
 	onReady(() => {
 		scheduleFirstListMount()
+		// #ifdef APP-HARMONY
+		// 首帧后补一次实测高度，修正列表占满剩余空间
+		setTimeout(() => {
+			refreshPageRootStyle()
+		}, 120)
+		// #endif
 	})
 
 	onShow(() => {

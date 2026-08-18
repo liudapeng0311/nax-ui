@@ -11,7 +11,7 @@
 			@click="onTriggerClick"
 		>
 			<slot name="trigger">
-				<text class="nax-select__trigger-text" :class="triggerTextClass" :lines="1" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+				<text class="nax-select__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
 				<view class="nax-select__trigger-arrow">
 					<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
 				</view>
@@ -48,7 +48,7 @@
 						<text class="nax-select__btn-text" :style="cancelTextStyle" @click.stop="onCancel">{{ cancelTextValue }}</text>
 					</view>
 					<view class="nax-select__title-wrap">
-						<text v-if="title.length > 0" class="nax-select__title" :lines="1">{{ title }}</text>
+						<text v-if="title.length > 0" class="nax-select__title" :max-lines="1">{{ title }}</text>
 					</view>
 					<view
 						class="nax-select__btn nax-select__btn--confirm"
@@ -94,7 +94,7 @@
 										:class="wheelItemClassAt(idx, i)"
 										@click="onWheelTap(idx, i)"
 									>
-										<text class="nax-select__wheel-text" :class="wheelTextClassAt(idx, i)" :lines="1">{{ label }}</text>
+										<text class="nax-select__wheel-text" :max-lines="1" :class="wheelTextClassAt(idx, i)">{{ label }}</text>
 									</view>
 								</view>
 							</scroll-view>
@@ -104,22 +104,38 @@
 
 					<!-- #ifndef APP-IOS -->
 					<!-- 其它端原生滚轮 -->
+					<!-- #ifdef APP-ANDROID || APP-HARMONY -->
 					<picker-view
 						v-if="readyToRender"
 						:key="pickerRenderKey"
 						class="nax-select__picker"
 						:class="pickerClass"
+						:style="pickerWheelStyle"
 						:value="pickerValue"
 						:indicator-style="indicatorStyle"
 						:mask-style="pickerMaskStyle"
-						<!-- #ifdef APP-ANDROID || APP-HARMONY -->
 						:mask-top-style="pickerMaskTopStyle"
 						:mask-bottom-style="pickerMaskBottomStyle"
-						<!-- #endif -->
 						@change="onColumnChange"
 						@pickstart="onPickStart"
 						@pickend="onPickEnd"
 					>
+					<!-- #endif -->
+					<!-- #ifndef APP-ANDROID || APP-HARMONY -->
+					<picker-view
+						v-if="readyToRender"
+						:key="pickerRenderKey"
+						class="nax-select__picker"
+						:class="pickerClass"
+						:style="pickerWheelStyle"
+						:value="pickerValue"
+						:indicator-style="indicatorStyle"
+						:mask-style="pickerMaskStyle"
+						@change="onColumnChange"
+						@pickstart="onPickStart"
+						@pickend="onPickEnd"
+					>
+					<!-- #endif -->
 						<!-- #ifdef APP-HARMONY -->
 						<!-- 鸿蒙：选项 click 直接吞掉，不提供点选；滑动仍由原生滚轮处理 -->
 						<picker-view-column v-if="columnNum > 0" class="nax-select__column">
@@ -130,7 +146,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(0, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
@@ -141,7 +157,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(1, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
@@ -152,7 +168,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(2, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
@@ -163,7 +179,7 @@
 								hover-class="none"
 								@click.stop.prevent="onWheelItemClickBlock"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(3, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<!-- #endif -->
@@ -175,7 +191,7 @@
 								:key="colItemKey(0, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(0, index)" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
@@ -184,7 +200,7 @@
 								:key="colItemKey(1, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(1, index)" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
@@ -193,7 +209,7 @@
 								:key="colItemKey(2, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(2, index)" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
@@ -202,7 +218,7 @@
 								:key="colItemKey(3, index, item)"
 								class="nax-select__item"
 							>
-								<text class="nax-select__item-text" :class="pickerItemTextClass(3, index)" :lines="1">{{ resolveLabel(item) }}</text>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)">{{ resolveLabel(item) }}</text>
 							</view>
 						</picker-view-column>
 						<!-- #endif -->
@@ -641,6 +657,11 @@
 
 	const pickerMaskBottomStyle = computed((): string => {
 		return 'background-image:linear-gradient(to top,transparent,transparent);'
+	})
+
+	const pickerWheelStyle = computed((): string => {
+		// 原生 picker-view 高度需内联显式指定（App 蒸汽/VDOM 下 CSS height 均不可靠，曾出现只显示一条选项高度）
+		return 'flex:1;height:240px;'
 	})
 
 	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
@@ -1650,6 +1671,7 @@
 		/* #endif */
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-select__trigger--sm .nax-select__trigger-text {
 		font-size: var(--nax-font-size-sm, 14px);
 	}
@@ -1657,6 +1679,7 @@
 	.nax-select__trigger--lg .nax-select__trigger-text {
 		font-size: var(--nax-font-size-lg, 18px);
 	}
+	/* #endif */
 
 	.nax-select__trigger-text--placeholder {
 		color: var(--nax-color-text-placeholder, #e5e5ea);
@@ -1849,6 +1872,7 @@
 	}
 
 	/* iOS 主题 class：按暗黑/浅色用字面量覆盖弹窗内颜色（不依赖 CSS 变量） */
+	/* #ifndef VUE3-VAPOR */
 	.nax-select--ios-light .nax-select__wheel {
 		background-color: #ffffff;
 	}
@@ -1896,6 +1920,7 @@
 	.nax-select--ios-dark .nax-select__wheel-text--selected {
 		color: #ffffff;
 	}
+	/* #endif */
 
 	.nax-select__wheel-col-wrap {
 		flex: 1;

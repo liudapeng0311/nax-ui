@@ -6,7 +6,7 @@
 			home-url="/pages/index/index"
 			:border="true"
 		></nax-nav-bar>
-		<scroll-view class="page-scroll" scroll-y="true">
+		<scroll-view class="page-scroll">
 			<view class="nax-theme page" :class="themeExtraClass">
 
 				<view class="section">
@@ -106,7 +106,7 @@
 			@cancel="onDeclCancel('custom')"
 		>
 			<view class="custom-box">
-				<text class="custom-box__text" :lines="6">请阅读并同意服务条款与隐私政策。本示例用默认插槽自定义内容区。</text>
+				<text class="custom-box__text" :max-lines="6">请阅读并同意服务条款与隐私政策。本示例用默认插槽自定义内容区。</text>
 			</view>
 		</nax-dialog>
 

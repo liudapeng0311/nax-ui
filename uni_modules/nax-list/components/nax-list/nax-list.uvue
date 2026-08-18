@@ -46,12 +46,12 @@
 							@click="onErrorClick"
 						>
 							<slot name="error">
-								<text class="nax-list__status-text nax-list__status-text--error" :lines="1">{{ errorText }}</text>
+								<text class="nax-list__status-text nax-list__status-text--error" :max-lines="1">{{ errorText }}</text>
 							</slot>
 						</view>
 						<view v-else-if="finished" class="nax-list__status nax-list__status--finished">
 							<slot name="finished">
-								<text class="nax-list__status-text" :lines="1">{{ finishedText }}</text>
+								<text class="nax-list__status-text" :max-lines="1">{{ finishedText }}</text>
 							</slot>
 						</view>
 					</slot>
@@ -87,12 +87,12 @@
 						@click="onErrorClick"
 					>
 						<slot name="error">
-							<text class="nax-list__status-text nax-list__status-text--error" :lines="1">{{ errorText }}</text>
+							<text class="nax-list__status-text nax-list__status-text--error" :max-lines="1">{{ errorText }}</text>
 						</slot>
 					</view>
 					<view v-else-if="finished" class="nax-list__status nax-list__status--finished">
 						<slot name="finished">
-							<text class="nax-list__status-text" :lines="1">{{ finishedText }}</text>
+							<text class="nax-list__status-text" :max-lines="1">{{ finishedText }}</text>
 						</slot>
 					</view>
 				</slot>

@@ -17,7 +17,7 @@
 			<slot name="header">
 				<view class="nax-card__header-main">
 					<slot name="title">
-						<text v-if="hasTitle" class="nax-card__title" :class="titleClass" :lines="2">{{ title }}</text>
+						<text v-if="hasTitle" class="nax-card__title" :max-lines="2" :class="titleClass">{{ title }}</text>
 					</slot>
 					<slot name="extra">
 						<text v-if="hasExtra" class="nax-card__extra" :class="extraClass">{{ extra }}</text>
@@ -215,11 +215,13 @@
 		padding-right: 20px;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-card--segmented .nax-card__header {
 		border-bottom-width: 1px;
 		border-bottom-style: solid;
 		border-bottom-color: var(--nax-color-divider, #f5f5f7);
 	}
+	/* #endif */
 
 	.nax-card__header-main {
 		flex-direction: row;
@@ -334,9 +336,11 @@
 		padding-right: 20px;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-card--segmented .nax-card__footer {
 		border-top-width: 1px;
 		border-top-style: solid;
 		border-top-color: var(--nax-color-divider, #f5f5f7);
 	}
+	/* #endif */
 </style>

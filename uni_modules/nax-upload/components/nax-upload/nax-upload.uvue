@@ -19,7 +19,7 @@
 			<!-- 非图片占位 -->
 			<view v-else class="nax-upload__file" :style="itemBoxStyle">
 				<nax-icon name="image" size="lg" color="var(--nax-color-text-placeholder, #e5e5ea)"></nax-icon>
-				<text v-if="resolveName(item).length > 0" class="nax-upload__file-name" :lines="1">{{ resolveName(item) }}</text>
+				<text v-if="resolveName(item).length > 0" class="nax-upload__file-name" :max-lines="1">{{ resolveName(item) }}</text>
 			</view>
 
 			<!-- 状态遮罩 -->
@@ -42,7 +42,7 @@
 					size="md"
 					color="#ffffff"
 				></nax-icon>
-				<text v-if="resolveMessage(item).length > 0" class="nax-upload__mask-text" :lines="2">{{ resolveMessage(item) }}</text>
+				<text v-if="resolveMessage(item).length > 0" class="nax-upload__mask-text" :max-lines="2">{{ resolveMessage(item) }}</text>
 			</view>
 
 			<!-- 删除 -->

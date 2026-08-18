@@ -10,7 +10,7 @@
 			@click="onTriggerClick"
 		>
 			<slot name="trigger">
-				<text class="nax-datetime-picker__trigger-text" :class="triggerTextClass" :lines="1" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+				<text class="nax-datetime-picker__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
 				<view class="nax-datetime-picker__trigger-arrow">
 					<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
 				</view>
@@ -43,7 +43,7 @@
 								<text class="nax-datetime-picker__btn-text" :style="cancelTextStyle" @click.stop="onCancel">{{ cancelTextValue }}</text>
 							</view>
 							<view class="nax-datetime-picker__title-wrap">
-								<text v-if="title.length > 0" class="nax-datetime-picker__title" :lines="1">{{ title }}</text>
+								<text v-if="title.length > 0" class="nax-datetime-picker__title" :max-lines="1">{{ title }}</text>
 							</view>
 							<view
 								class="nax-datetime-picker__btn nax-datetime-picker__btn--confirm"
@@ -56,8 +56,8 @@
 							</view>
 						</view>
 
-						<!-- #ifdef APP-IOS -->
-						<!-- iOS 上 border-color 不生效（退化黑色）且 1px 高度 view 不可见，标题分割线用 inline 背景色 2px 线 -->
+						<!-- #ifdef APP-IOS || APP-ANDROID -->
+						<!-- iOS/Android 上 border-color 不生效（退化黑色），标题分割线用 inline 背景色线 -->
 						<view class="nax-datetime-picker__header-line" :style="headerLineStyle"></view>
 						<!-- #endif -->
 
@@ -90,7 +90,7 @@
 												:class="wheelItemClassAt(idx, i)"
 												@click="onWheelTap(idx, i)"
 											>
-												<text class="nax-datetime-picker__wheel-text" :class="wheelTextClassAt(idx, i)" :lines="1">{{ label }}</text>
+												<text class="nax-datetime-picker__wheel-text" :max-lines="1" :class="wheelTextClassAt(idx, i)">{{ label }}</text>
 											</view>
 										</view>
 									</scroll-view>
@@ -98,22 +98,38 @@
 							</view>
 							<!-- #endif -->
 							<!-- #ifndef APP-IOS -->
+							<!-- #ifdef APP-ANDROID || APP-HARMONY -->
 							<picker-view
 								v-if="readyToRender"
 								:key="pickerRenderKey"
 								class="nax-datetime-picker__picker"
 								:class="pickerClass"
+								:style="pickerWheelStyle"
 								:value="pickerValue"
 								:indicator-style="indicatorStyle"
 								:mask-style="pickerMaskStyle"
-								<!-- #ifdef APP-ANDROID || APP-HARMONY -->
 								:mask-top-style="pickerMaskTopStyle"
 								:mask-bottom-style="pickerMaskBottomStyle"
-								<!-- #endif -->
 								@change="onColumnChange"
 								@pickstart="onPickStart"
 								@pickend="onPickEnd"
 							>
+							<!-- #endif -->
+							<!-- #ifndef APP-ANDROID || APP-HARMONY -->
+							<picker-view
+								v-if="readyToRender"
+								:key="pickerRenderKey"
+								class="nax-datetime-picker__picker"
+								:class="pickerClass"
+								:style="pickerWheelStyle"
+								:value="pickerValue"
+								:indicator-style="indicatorStyle"
+								:mask-style="pickerMaskStyle"
+								@change="onColumnChange"
+								@pickstart="onPickStart"
+								@pickend="onPickEnd"
+							>
+							<!-- #endif -->
 								<!-- #ifdef APP-HARMONY -->
 								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
 									<view
@@ -123,7 +139,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(0, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(0, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(0, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
@@ -134,7 +150,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(1, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(1, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(1, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
@@ -145,7 +161,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(2, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(2, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(2, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
@@ -156,7 +172,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(3, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(3, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(3, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
@@ -167,7 +183,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(4, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(4, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(4, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(4, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
@@ -178,7 +194,7 @@
 										hover-class="none"
 										@click.stop.prevent="onWheelItemClickBlock"
 									>
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(5, index)" :lines="1" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(5, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(5, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(5, item) }}</text>
 									</view>
 								</picker-view-column>
 								<!-- #endif -->
@@ -186,32 +202,32 @@
 								<!-- #ifndef APP-HARMONY -->
 								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column0" :key="'c0-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(0, index)" :lines="1">{{ formatColLabel(0, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)">{{ formatColLabel(0, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column1" :key="'c1-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(1, index)" :lines="1">{{ formatColLabel(1, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)">{{ formatColLabel(1, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column2" :key="'c2-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(2, index)" :lines="1">{{ formatColLabel(2, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)">{{ formatColLabel(2, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column3" :key="'c3-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(3, index)" :lines="1">{{ formatColLabel(3, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)">{{ formatColLabel(3, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column4" :key="'c4-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(4, index)" :lines="1">{{ formatColLabel(4, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(4, index)">{{ formatColLabel(4, item) }}</text>
 									</view>
 								</picker-view-column>
 								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
 									<view v-for="(item, index) in column5" :key="'c5-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
-										<text class="nax-datetime-picker__item-text" :class="pickerItemTextClass(5, index)" :lines="1">{{ formatColLabel(5, item) }}</text>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(5, index)">{{ formatColLabel(5, item) }}</text>
 									</view>
 								</picker-view-column>
 								<!-- #endif -->
@@ -321,17 +337,20 @@
 	let wheelLocked: boolean = false
 	let wheelLocateTimer: number = -1
 	let wheelUnlockTimer: number = -1
+	// #endif
 
-	// iOS 暗黑主题：iOS 上自定义 CSS 变量不可靠（var 失效），用官方主题 API 驱动字面量颜色
-	const iosDark = ref(false)
-	let iosThemeChangeId: number = -1
+	// #ifdef APP-IOS || APP-ANDROID
+	// App 端自定义 CSS 变量不可靠（var 声明失效：iOS 弹窗背景透明、Android 原生 picker 文字退系统默认色，
+	// 深色模式下白字白底不可见），用官方主题 API 驱动字面量颜色
+	const darkTheme = ref(false)
+	let themeChangeId: number = -1
 
-	function refreshIosTheme() {
+	function refreshTheme() {
 		try {
 			const info = uni.getAppBaseInfo()
 			const t = info.appTheme
 			if (t == 'dark' || t == 'light') {
-				iosDark.value = t == 'dark'
+				darkTheme.value = t == 'dark'
 				return
 			}
 		} catch (e) {
@@ -339,17 +358,21 @@
 		try {
 			const dev = uni.getDeviceInfo()
 			if (dev.osTheme == 'dark') {
-				iosDark.value = true
+				darkTheme.value = true
 			}
 		} catch (e) {
 		}
 	}
 
-	const iosThemeClass = computed((): string => {
-		if (iosDark.value) {
-			return 'nax-datetime-picker--ios-dark'
-		}
-		return 'nax-datetime-picker--ios-light'
+	const themeClass = computed((): string => {
+		let cls = ''
+		// #ifdef APP-IOS
+		cls += darkTheme.value ? ' nax-datetime-picker--ios-dark' : ' nax-datetime-picker--ios-light'
+		// #endif
+		// #ifdef APP-ANDROID
+		cls += darkTheme.value ? ' nax-datetime-picker--android-dark' : ' nax-datetime-picker--android-light'
+		// #endif
+		return cls
 	})
 	// #endif
 
@@ -385,9 +408,9 @@
 
 	const rootClass = computed((): string => {
 		let cls = ''
-		// #ifdef APP-IOS
-		// iOS 主题 class：样式块内按字面量覆盖弹窗内颜色（不依赖 CSS 变量）
-		cls += ' ' + iosThemeClass.value
+		// #ifdef APP-IOS || APP-ANDROID
+		// App 端主题 class：样式块内按字面量覆盖弹窗内颜色（不依赖 CSS 变量）
+		cls += themeClass.value
 		// #endif
 		if (props.customClass.length > 0) cls += ' ' + props.customClass
 		return cls.trim()
@@ -452,10 +475,14 @@
 		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
 		// #endif
 		// #ifdef APP-IOS
-		if (panelShow.value) return 'background-color:' + (iosDark.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
-		return 'background-color:' + (iosDark.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
+		if (panelShow.value) return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
+		return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
 		// #endif
-		// #ifndef APP-HARMONY || APP-IOS
+		// #ifdef APP-ANDROID
+		if (panelShow.value) return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
+		return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY || APP-IOS || APP-ANDROID
 		return ''
 		// #endif
 	})
@@ -469,7 +496,11 @@
 		let style = ''
 		// #ifdef APP-IOS
 		// iOS 不支持自定义 CSS 变量（var 声明整体失效→背景透明），用官方主题 API 驱动的字面量兜底
-		style += 'background-color:' + (iosDark.value ? '#101014' : '#ffffff') + ';'
+		style += 'background-color:' + (darkTheme.value ? '#101014' : '#ffffff') + ';'
+		// #endif
+		// #ifdef APP-ANDROID
+		// Android 同样不支持自定义 CSS 变量，面板底色用字面量兜底
+		style += 'background-color:' + (darkTheme.value ? '#101014' : '#ffffff') + ';'
 		// #endif
 		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
 			style += 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
@@ -479,8 +510,9 @@
 
 	const indicatorStyle = computed((): string => {
 		// #ifdef APP-ANDROID
-		// Android 原生 picker-view 不会为已设置宽度的边框补默认 solid 样式。
-		return 'height:40px;background-color:transparent;border-top-width:1px;border-top-style:solid;border-top-color:var(--nax-color-divider,#f5f5f7);border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:var(--nax-color-divider,#f5f5f7);'
+		// Android 原生 picker-view 不会为已设置宽度的边框补默认 solid 样式；var 在 Android 失效，用字面量颜色按主题兜底
+		const dividerColor = darkTheme.value ? '#ffffff1a' : '#f5f5f7'
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-top-style:solid;border-top-color:' + dividerColor + ';border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:' + dividerColor + ';'
 		// #endif
 		// #ifndef APP-ANDROID
 		return 'height:40px;background-color:transparent;border-top-width:1px;border-bottom-width:1px;border-color:var(--nax-color-divider,#f5f5f7);'
@@ -503,6 +535,11 @@
 
 	const pickerMaskBottomStyle = computed((): string => {
 		return 'background-image:linear-gradient(to top,transparent,transparent);'
+	})
+
+	const pickerWheelStyle = computed((): string => {
+		// 原生 picker-view 高度需内联显式指定（App 蒸汽/VDOM 下 CSS height 均不可靠，曾出现只显示一条选项高度）
+		return 'flex:1;height:240px;'
 	})
 
 	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
@@ -1047,16 +1084,18 @@
 		syncPickerValue(selector)
 	}
 
+	// #ifdef APP-IOS || APP-ANDROID
+	/** iOS/Android：分割线用官方主题 API 驱动的字面量 inline 背景色（App 端 var 声明失效） */
+	const headerLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (darkTheme.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+	// #endif
+
 	// #ifdef APP-IOS
 	// ===== iOS 自研滚轮逻辑（框架渲染，CSS 完全可控）=====
 
-	/** iOS：分割线用官方主题 API 驱动的字面量 inline 背景色（iOS 上 var 声明会整体失效） */
-	const headerLineStyle = computed((): string => {
-		return 'height:1px;background-color:' + (iosDark.value ? '#ffffff1a' : '#f5f5f7') + ';'
-	})
-
 	const wheelIndicatorLineStyle = computed((): string => {
-		return 'height:1px;background-color:' + (iosDark.value ? '#ffffff1a' : '#f5f5f7') + ';'
+		return 'height:1px;background-color:' + (darkTheme.value ? '#ffffff1a' : '#f5f5f7') + ';'
 	})
 
 	function wheelColId(colIndex: number): string {
@@ -1577,23 +1616,23 @@
 		openPicker()
 	}
 
-	// #ifdef APP-IOS
+	// #ifdef APP-IOS || APP-ANDROID
 	// 官方主题 API：App 端 4.18+ 支持；监听 appTheme 变化驱动弹窗字面量颜色
-	refreshIosTheme()
+	refreshTheme()
 	try {
-		iosThemeChangeId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
-			iosDark.value = res.appTheme == 'dark'
+		themeChangeId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			darkTheme.value = res.appTheme == 'dark'
 		})
 	} catch (e) {
-		iosThemeChangeId = -1
+		themeChangeId = -1
 	}
 	onUnmounted(() => {
-		if (iosThemeChangeId >= 0) {
+		if (themeChangeId >= 0) {
 			try {
-				uni.offAppThemeChange(iosThemeChangeId)
+				uni.offAppThemeChange(themeChangeId)
 			} catch (e) {
 			}
-			iosThemeChangeId = -1
+			themeChangeId = -1
 		}
 	})
 	// #endif
@@ -1639,8 +1678,10 @@
 		/* #endif */
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-datetime-picker__trigger--sm .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-sm, 14px); }
 	.nax-datetime-picker__trigger--lg .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-lg, 18px); }
+	/* #endif */
 	.nax-datetime-picker__trigger-text--placeholder { color: var(--nax-color-text-placeholder, #e5e5ea); }
 	.nax-datetime-picker__trigger-text--disabled { color: var(--nax-color-text-disabled, #e5e5ea); }
 
@@ -1777,6 +1818,7 @@
 	}
 
 	/* iOS 主题 class：按暗黑/浅色用字面量覆盖弹窗内颜色（不依赖 CSS 变量） */
+	/* #ifndef VUE3-VAPOR */
 	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel {
 		background-color: #ffffff;
 	}
@@ -1824,6 +1866,7 @@
 	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel-text--selected {
 		color: #ffffff;
 	}
+	/* #endif */
 
 	/* iOS 上 border-color 不生效（退化黑色），标题分割线改用普通流布局的背景色线（inline 兜底） */
 	.nax-datetime-picker__header {
@@ -1910,6 +1953,36 @@
 	.nax-datetime-picker__item-text--selected {
 		color: var(--nax-color-text-black, #000000);
 	}
+
+	/* #ifdef APP-ANDROID */
+	/* Android 不支持自定义 CSS 变量（var 声明失效：文字颜色退系统默认，深色系统下白字白底不可见），
+	   用官方主题 API 驱动的字面量颜色覆盖弹窗内文字与面板 */
+	/* #ifndef VUE3-VAPOR */
+	.nax-datetime-picker--android-light .nax-datetime-picker__panel { background-color: #ffffff; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__panel { background-color: #101014; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__title { color: #333639; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__title { color: #ffffffd1; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__btn-text { color: #767c82; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__btn-text { color: #ffffffa6; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__btn-text--confirm { color: #18a058; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__btn-text--confirm { color: #63e2b7; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__item-text { color: #767c82; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__item-text { color: #ffffffa6; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__item-text--selected { color: #000000; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__item-text--selected { color: #ffffff; }
+	/* #endif */
+
+	/* Android 上 border-color 不生效（退化黑色），标题分割线改用背景色线（inline 兜底） */
+	.nax-datetime-picker__header {
+		border-bottom-width: 0;
+		border-bottom-color: transparent;
+	}
+	/* #endif */
 
 	/* #ifdef APP-HARMONY */
 	.nax-datetime-picker__item--no-tap {}

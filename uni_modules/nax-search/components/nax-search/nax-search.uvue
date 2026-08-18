@@ -56,7 +56,7 @@
 			@click.stop.prevent="onActionClick"
 		>
 			<slot name="action">
-				<text class="nax-search__action-text" :style="actionTextStyle">{{ actionText }}</text>
+				<text class="nax-search__action-text" :style="actionTextStyle" :max-lines="1">{{ actionText }}</text>
 			</slot>
 		</view>
 	</view>
@@ -634,15 +634,16 @@
 		border-width: var(--nax-border-width, 1px);
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-search--sm .nax-search__content {
 		padding-left: var(--nax-space-2, 8px);
 		padding-right: var(--nax-space-2, 8px);
 	}
-
 	.nax-search--lg .nax-search__content {
 		padding-left: var(--nax-space-4, 16px);
 		padding-right: var(--nax-space-4, 16px);
 	}
+	/* #endif */
 
 	.nax-search__label {
 		flex-shrink: 0;
@@ -722,15 +723,16 @@
 		background-color: #c6c7cb;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-search--sm .nax-search__clear {
 		width: 16px;
 		height: 16px;
 	}
-
 	.nax-search--lg .nax-search__clear {
 		width: 20px;
 		height: 20px;
 	}
+	/* #endif */
 
 	.nax-search__action {
 		flex-direction: row;
@@ -745,7 +747,6 @@
 	.nax-search__action-text {
 		color: var(--nax-color-text, #333639);
 		font-size: var(--nax-font-size-sm, 14px);
-		lines: 1;
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		white-space: nowrap;
 		/* #endif */

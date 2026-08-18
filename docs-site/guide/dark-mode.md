@@ -74,13 +74,16 @@ function readSystemDark(): boolean {
 	}
 	// #endif
 	// Android：uni API 没有可用字段，用原生能力（无需 import）
+	// 注意：蒸汽模式（Vapor）下 Android 的 uvue 页面里 UTSAndroid 不可用，需改用下方 osTheme 字段
 	// #ifdef APP-ANDROID
+	// #ifndef VUE3-VAPOR
 	const osThemeAndroid = UTSAndroid.getOsTheme()
 	if ((osThemeAndroid as string) == 'dark') {
 		return true
 	} else if ((osThemeAndroid as string) == 'light') {
 		return false
 	}
+	// #endif
 	// #endif
 	// iOS / Web / 小程序：osTheme 是系统主题字段（全端可用）
 	const info = uni.getSystemInfoSync()
@@ -125,8 +128,14 @@ export function initTheme() {
 	// #ifdef APP-ANDROID
 	try {
 		uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			// 蒸汽模式：UTSAndroid 不可用，回调 appTheme（4.19+ 仅返回 light/dark）即真实主题
+			// #ifndef VUE3-VAPOR
 			const osTheme = UTSAndroid.getOsTheme()
 			systemDark = (osTheme as string) == 'dark'
+			// #endif
+			// #ifdef VUE3-VAPOR
+			systemDark = res.appTheme == 'dark'
+			// #endif
 			if (themeMode == 'followSystem') {
 				applyAppTheme('followSystem')
 				syncDark()
@@ -262,12 +271,13 @@ function onMode(mode : string) {
 | 平台 | 怎么知道系统是暗的 | 系统切换时如何感知 |
 |------|--------------------|--------------------|
 | 鸿蒙 | `UTSHarmony.getOsTheme()`（原生） | `onOsThemeChange` 回调 |
-| Android | `UTSAndroid.getOsTheme()`（原生） | `onAppThemeChange` 回调（平台没有 `onOsThemeChange`） |
+| Android | `UTSAndroid.getOsTheme()`（原生）；**蒸汽模式下 uvue 页面不可用**，改用 `getSystemInfoSync().osTheme` | `onAppThemeChange` 回调（平台没有 `onOsThemeChange`） |
 | iOS | `getSystemInfoSync().osTheme` | `onOsThemeChange` 回调 |
 | Web / 小程序 | `getSystemInfoSync().osTheme` | 无实时通知，回到页面时 `onShow` 刷新即可 |
 
 > 为什么不用 `uni.getAppBaseInfo().hostTheme`？官方文档明确：`hostTheme` **仅 Web 和微信小程序支持**，App 端拿不到（实测返回 `undefined`）。
 > 为什么不用 `getSystemInfoSync().theme`？该字段在 Android 端类型中不存在（编译报错），鸿蒙端返回 `undefined`；请统一使用 `osTheme` 字段。
+> **蒸汽模式（Vapor）注意**：官方限制 Android 蒸汽模式的 uvue 页面中 `UTSAndroid` 不可用（需在 uts 插件中调用），本方案已用 `#ifdef VUE3-VAPOR` 自动切换为 uni API 读取（`osTheme` 字段 / `onAppThemeChange` 回调的 `appTheme`），非蒸汽模式行为不变。
 
 ## 常见问题
 

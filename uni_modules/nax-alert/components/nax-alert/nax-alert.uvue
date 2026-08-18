@@ -19,7 +19,7 @@
 					v-if="hasTitle"
 					class="nax-alert__title"
 					:class="titleClass"
-					:lines="3"
+					:max-lines="3"
 				>{{ title }}</text>
 			</slot>
 			<slot>
@@ -27,7 +27,7 @@
 					v-if="hasDescription"
 					class="nax-alert__desc"
 					:class="descClass"
-					:lines="10"
+					:max-lines="10"
 				>{{ description }}</text>
 			</slot>
 		</view>

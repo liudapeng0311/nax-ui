@@ -21,8 +21,8 @@
 			<!-- 顶部提示 -->
 			<view v-if="hasHeader" class="nax-action-sheet__header">
 				<slot name="header">
-					<text v-if="titleText.length > 0" class="nax-action-sheet__title" :lines="2">{{ titleText }}</text>
-					<text v-if="descText.length > 0" class="nax-action-sheet__desc" :lines="3">{{ descText }}</text>
+				<text v-if="titleText.length > 0" class="nax-action-sheet__title" :max-lines="2">{{ titleText }}</text>
+				<text v-if="descText.length > 0" class="nax-action-sheet__desc" :max-lines="3">{{ descText }}</text>
 				</slot>
 			</view>
 
@@ -39,20 +39,20 @@
 						:hover-stay-time="70"
 						@click="onActionClick(index)"
 					>
-						<text
-							class="nax-action-sheet__item-name"
-							:class="itemNameClass(item)"
-							:style="itemNameStyle(item)"
-							:lines="1"
-							@click.stop="onActionClick(index)"
-						>{{ resolveName(item) }}</text>
-						<text
-							v-if="resolveSubName(item).length > 0"
-							class="nax-action-sheet__item-sub"
-							:class="itemSubClass(item)"
-							:lines="2"
-							@click.stop="onActionClick(index)"
-						>{{ resolveSubName(item) }}</text>
+					<text
+						class="nax-action-sheet__item-name"
+						:class="itemNameClass(item)"
+					:style="itemNameStyle(item)"
+					:max-lines="1"
+					@click.stop="onActionClick(index)"
+					>{{ resolveName(item) }}</text>
+					<text
+						v-if="resolveSubName(item).length > 0"
+						class="nax-action-sheet__item-sub"
+					:class="itemSubClass(item)"
+					:max-lines="2"
+					@click.stop="onActionClick(index)"
+					>{{ resolveSubName(item) }}</text>
 					</view>
 				</slot>
 			</view>
@@ -68,7 +68,7 @@
 				@click="onCancelClick"
 			>
 				<slot name="cancel">
-					<text class="nax-action-sheet__cancel-text" :lines="1" @click.stop="onCancelClick">{{ cancelLabel }}</text>
+					<text class="nax-action-sheet__cancel-text" :max-lines="1" @click.stop="onCancelClick">{{ cancelLabel }}</text>
 				</slot>
 			</view>
 		</view>

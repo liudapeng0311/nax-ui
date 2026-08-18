@@ -50,16 +50,16 @@
 								v-else-if="resolveBadgeText(item).length > 0"
 								class="nax-tabbar__badge"
 							>
-								<text class="nax-tabbar__badge-text" :lines="1">{{ resolveBadgeText(item) }}</text>
+								<text class="nax-tabbar__badge-text" :max-lines="1">{{ resolveBadgeText(item) }}</text>
 							</view>
 						</view>
-						<text
-							v-if="resolveText(item).length > 0"
-							class="nax-tabbar__text"
-							:class="textClass(index, item)"
-							:style="textStyle(index, item)"
-							:lines="1"
-						>{{ resolveText(item) }}</text>
+					<text
+						v-if="resolveText(item).length > 0"
+						class="nax-tabbar__text"
+						:class="textClass(index, item)"
+					:style="textStyle(index, item)"
+					:max-lines="1"
+				>{{ resolveText(item) }}</text>
 					</view>
 				</view>
 			</view>

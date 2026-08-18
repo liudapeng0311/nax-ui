@@ -1,3 +1,7 @@
+## 0.1.14（2026-08-18）
+- 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
+## 0.1.13（2026-08-18）
+- 蒸汽模式兼容：移除 `<text>` 上不支持的 `lines` 属性，改为 CSS `lines` 声明（各文本 class 补齐 `lines: N;`），消除 App 蒸汽模式 warning
 ## 0.1.12（2026-08-17）
 - 修复 Android 端选图/选视频/上传时的 `ClassCastException` 崩溃：不再把 SDK 结果对象（`ChooseImageSuccess` / `ChooseVideoSuccess` / `UploadFileSuccess`）强制转换到组件自定义 `type`，改用 SDK 全局类型直接取值、对象型文件走 `UTSJSONObject` getter（`APP-ANDROID` 根因修复，其余端行为不变）。
 ## 0.1.11（2026-08-14）

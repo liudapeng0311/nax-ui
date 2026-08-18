@@ -6,13 +6,17 @@
 			home-url="/pages/index/index"
 			:border="true"
 		></nax-nav-bar>
+		<!-- #ifdef APP-ANDROID -->
 		<scroll-view
 			class="page-scroll"
-			scroll-y="true"
-			<!-- #ifdef APP-ANDROID -->
 			type="nested"
-			<!-- #endif -->
 		>
+		<!-- #endif -->
+		<!-- #ifndef APP-ANDROID -->
+		<scroll-view
+			class="page-scroll"
+		>
+		<!-- #endif -->
 			<!-- #ifdef APP-ANDROID -->
 			<nested-scroll-header>
 				<view class="page-scroll__nested-header"></view>
@@ -40,8 +44,8 @@
 						<template #default="{ item, index }">
 							<view class="row-item" :class="rowAltClass(index)">
 								<view class="row-item__main">
-									<text class="row-item__title" :lines="1">{{ readTitle(item) }}</text>
-									<text class="row-item__sub" :lines="1">{{ readSub(item) }}</text>
+									<text class="row-item__title" :max-lines="1">{{ readTitle(item) }}</text>
+									<text class="row-item__sub" :max-lines="1">{{ readSub(item) }}</text>
 								</view>
 								<text class="row-item__index">{{ indexLabel(index) }}</text>
 							</view>
@@ -526,7 +530,7 @@
 	.hint {
 		font-size: 12px;
 		color: var(--nax-color-text-secondary, #767c82);
-		margin-bottom: 8px;
+		margin-top: 2px;
 	}
 
 	.event {

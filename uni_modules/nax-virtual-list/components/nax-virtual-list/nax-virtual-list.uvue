@@ -1,5 +1,6 @@
 <template>
 	<view class="nax-virtual-list" :class="rootClass" :style="rootStyle">
+		<!-- #ifdef APP-HARMONY || APP-IOS -->
 		<scroll-view
 			:id="scrollDomId"
 			class="nax-virtual-list__scroll"
@@ -15,14 +16,35 @@
 			:refresher-default-style="refresherDefaultStyle"
 			:style="scrollStyle"
 			@scroll="onScroll"
-			<!-- #ifdef APP-HARMONY || APP-IOS -->
 			@scrollend="onScrollEnd"
-			<!-- #endif -->
 			@scrolltolower="onScrollToLower"
 			@refresherrefresh="onRefresherRefresh"
 			@refresherrestore="onRefresherRestore"
 			@refresherabort="onRefresherAbort"
 		>
+		<!-- #endif -->
+		<!-- #ifndef APP-HARMONY || APP-IOS -->
+		<scroll-view
+			:id="scrollDomId"
+			class="nax-virtual-list__scroll"
+			direction="vertical"
+			:associative-container="associativeContainer"
+			:scroll-top="scrollTopBind"
+			:show-scrollbar="showScrollbar"
+			:lower-threshold="offset"
+			:refresher-enabled="enableRefresh"
+			:refresher-triggered="refresherTriggered"
+			:refresher-threshold="refresherThreshold"
+			:refresher-background="refresherBackground"
+			:refresher-default-style="refresherDefaultStyle"
+			:style="scrollStyle"
+			@scroll="onScroll"
+			@scrolltolower="onScrollToLower"
+			@refresherrefresh="onRefresherRefresh"
+			@refresherrestore="onRefresherRestore"
+			@refresherabort="onRefresherAbort"
+		>
+		<!-- #endif -->
 			<view class="nax-virtual-list__body">
 				<view class="nax-virtual-list__header">
 					<slot name="header"></slot>
@@ -53,7 +75,7 @@
 					>
 						<slot :item="row.item" :index="row.index">
 							<view class="nax-virtual-list__fallback">
-								<text class="nax-virtual-list__fallback-text" :lines="1">{{ fallbackText(row) }}</text>
+								<text class="nax-virtual-list__fallback-text" :max-lines="1">{{ fallbackText(row) }}</text>
 							</view>
 						</slot>
 					</view>
@@ -78,12 +100,12 @@
 							@click="onErrorClick"
 						>
 							<slot name="error">
-								<text class="nax-virtual-list__status-text nax-virtual-list__status-text--error" :lines="1">{{ errorText }}</text>
+								<text class="nax-virtual-list__status-text nax-virtual-list__status-text--error" :max-lines="1">{{ errorText }}</text>
 							</slot>
 						</view>
 						<view v-else-if="finished" class="nax-virtual-list__status nax-virtual-list__status--finished">
 							<slot name="finished">
-								<text class="nax-virtual-list__status-text" :lines="1">{{ finishedText }}</text>
+								<text class="nax-virtual-list__status-text" :max-lines="1">{{ finishedText }}</text>
 							</slot>
 						</view>
 					</slot>

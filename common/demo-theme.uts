@@ -68,13 +68,16 @@ function readSystemDark(): boolean {
 	}
 	// #endif
 	// #ifdef APP-ANDROID
-	// Android：uni API 的 theme 字段缺失，用原生 getOsTheme()（与鸿蒙对称）
+	// 蒸汽模式：Android uvue 中 UTSAndroid 不可用（需在 uts 插件调用），走下方 uni API 公共兜底
+	// #ifndef VUE3-VAPOR
+	// Android 非蒸汽：uni API 的 theme 字段缺失，用原生 getOsTheme()（与鸿蒙对称）
 	const osThemeAndroid = UTSAndroid.getOsTheme()
 	if ((osThemeAndroid as string) == 'dark') {
 		return true
 	} else if ((osThemeAndroid as string) == 'light') {
 		return false
 	}
+	// #endif
 	// #endif
 	// 公共兜底：osTheme 为操作系统主题（GetSystemInfoResult 全端字段）；
 	// hostTheme 仅 web / 微信小程序支持，App 端不可用
@@ -121,9 +124,17 @@ export function initDemoTheme() {
 	console.log('[nax-demo-theme] UTSHarmony.getOsTheme()=' + osThemeDiag + ' mode=' + themeMode + ' systemDark=' + systemDark.toString())
 	// #endif
 	// #ifdef APP-ANDROID
+	// 蒸汽模式：Android uvue 中 UTSAndroid 不可用，改用 uni API 诊断
+	// #ifndef VUE3-VAPOR
 	const osThemeDiagAndroid = UTSAndroid.getOsTheme()
 	const appBaseDiagAndroid = uni.getAppBaseInfo()
 	console.log('[nax-demo-theme] UTSAndroid.getOsTheme()=' + osThemeDiagAndroid + ' appTheme=' + appBaseDiagAndroid.appTheme + ' hostTheme=' + appBaseDiagAndroid.hostTheme + ' mode=' + themeMode + ' systemDark=' + systemDark.toString())
+	// #endif
+	// #ifdef VUE3-VAPOR
+	const sysDiagAndroid = uni.getSystemInfoSync()
+	const appBaseDiagAndroidV = uni.getAppBaseInfo()
+	console.log('[nax-demo-theme] osTheme=' + sysDiagAndroid.osTheme + ' appTheme=' + appBaseDiagAndroidV.appTheme + ' hostTheme=' + appBaseDiagAndroidV.hostTheme + ' mode=' + themeMode + ' systemDark=' + systemDark.toString())
+	// #endif
 	// #endif
 	// #ifdef APP-IOS
 	const appBaseDiag = uni.getAppBaseInfo()
@@ -134,12 +145,19 @@ export function initDemoTheme() {
 	applyDemoThemeChrome(isDemoDarkMode())
 	syncDemoDarkRef()
 	// #ifdef APP-ANDROID
-	// Android 无 onOsThemeChange API：onAppThemeChange 仅作触发信号，真值用原生 getOsTheme
+	// Android 无 onOsThemeChange API：onAppThemeChange 仅作触发信号，真值用原生 getOsTheme（蒸汽模式用回调 appTheme）
 	try {
 		osThemeListenerId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			// 蒸汽模式：UTSAndroid 不可用，onAppThemeChange 的 appTheme（4.19+ 仅返回 light/dark）即真实主题
+			// #ifndef VUE3-VAPOR
 			const osTheme = UTSAndroid.getOsTheme()
 			systemDark = (osTheme as string) == 'dark'
 			console.log('[nax-demo-theme] appThemeChange signal, getOsTheme=' + osTheme)
+			// #endif
+			// #ifdef VUE3-VAPOR
+			systemDark = res.appTheme == 'dark'
+			console.log('[nax-demo-theme] appThemeChange signal, appTheme=' + res.appTheme)
+			// #endif
 			if (themeMode == 'followSystem') {
 				applyDemoAppTheme('followSystem')
 				applyDemoThemeChrome(systemDark)
@@ -252,16 +270,22 @@ export function applyDemoThemeChrome(dark: boolean) {
 	if (pages.length == 0) {
 		return
 	}
-	if (dark) {
-		uni.setNavigationBarColor({
-			frontColor: '#ffffff',
-			backgroundColor: '#101014'
-		})
-	} else {
-		uni.setNavigationBarColor({
-			frontColor: '#000000',
-			backgroundColor: '#F8F8F8'
-		})
+	// VDOM 模式页面 setup 阶段页面 body 尚未挂载，导航栏 API 可能抛 bodyNode/null；
+	// 失败时保持默认，onShow 的调用会再次刷新
+	try {
+		if (dark) {
+			uni.setNavigationBarColor({
+				frontColor: '#ffffff',
+				backgroundColor: '#101014'
+			})
+		} else {
+			uni.setNavigationBarColor({
+				frontColor: '#000000',
+				backgroundColor: '#F8F8F8'
+			})
+		}
+	} catch (e : any) {
+		console.log('[nax-demo-theme] setNavigationBarColor failed: ' + (e as Error).message)
 	}
 }
 

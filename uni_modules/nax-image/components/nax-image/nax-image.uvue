@@ -1,5 +1,6 @@
 <template>
 	<view class="nax-image" :class="rootClass" :style="rootStyle" @click="onClick">
+		<!-- #ifndef VUE3-VAPOR -->
 		<image
 			v-if="showImage"
 			class="nax-image__img"
@@ -14,13 +15,28 @@
 			@load="onLoad"
 			@error="onError"
 		></image>
+		<!-- #endif -->
+		<!-- #ifdef VUE3-VAPOR -->
+		<!-- 蒸汽模式原生渲染器不支持以下属性（webp App 默认开启 / draggable 仅 H5 / 长按菜单仅小程序） -->
+		<image
+			v-if="showImage"
+			class="nax-image__img"
+			:class="imgClass"
+			:src="src"
+			:mode="mode"
+			:lazy-load="lazyLoad"
+			:fade-show="fadeShow"
+			@load="onLoad"
+			@error="onError"
+		></image>
+		<!-- #endif -->
 
 		<view v-if="showLoadingLayer" class="nax-image__status" :style="statusLayerStyle">
 			<slot name="loading">
 				<view class="nax-image__status-icon">
 					<nax-icon name="image" :size="iconSizeName" :color="statusIconColor"></nax-icon>
 				</view>
-				<text v-if="loadingText.length > 0" class="nax-image__status-text">{{ loadingText }}</text>
+				<text v-if="loadingText.length > 0" class="nax-image__status-text" :max-lines="1">{{ loadingText }}</text>
 			</slot>
 		</view>
 
@@ -29,7 +45,7 @@
 				<view class="nax-image__status-icon">
 					<nax-icon name="image-off" :size="iconSizeName" :color="statusIconColor"></nax-icon>
 				</view>
-				<text v-if="errorText.length > 0" class="nax-image__status-text">{{ errorText }}</text>
+				<text v-if="errorText.length > 0" class="nax-image__status-text" :max-lines="1">{{ errorText }}</text>
 			</slot>
 		</view>
 
@@ -396,7 +412,6 @@
 		margin-top: 8px;
 		font-size: var(--nax-font-size-xs, 12px);
 		color: var(--nax-color-text-secondary, #767c82);
-		lines: 1;
 	}
 
 	/* #ifdef APP-HARMONY */

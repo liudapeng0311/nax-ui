@@ -24,7 +24,7 @@
 				class="nax-text__value"
 				:class="valueClass"
 				:style="valueStyle"
-				:lines="lines"
+				:max-lines="lines"
 				:selectable="selectable"
 			>{{ fullDisplayText }}</text>
 			<view v-if="isStrike" class="nax-text__strike" :style="strikeStyle"></view>
@@ -53,7 +53,7 @@
 			class="nax-text__value nax-text__value--price"
 			:class="valueClass"
 			:style="valueStyle"
-			:lines="lines"
+			:max-lines="lines"
 			:selectable="selectable"
 		>￥{{ displayValue }}</text>
 		<text
@@ -68,7 +68,7 @@
 			class="nax-text__value"
 			:class="valueClass"
 			:style="valueStyle"
-			:lines="lines"
+			:max-lines="lines"
 			:selectable="selectable"
 		>{{ displayValue }}</text>
 		<text
@@ -792,10 +792,9 @@
 		text-overflow: ellipsis;
 	}
 
-	/* Android / 鸿蒙 / iOS：CSS lines 与属性 :lines 双写；单行/多行共用 overflow */
+	/* Android / 鸿蒙 / iOS：overflow 兜底；行数由 :max-lines 属性承担 */
 	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
 	.nax-text__value--lines-1 {
-		lines: 1;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
@@ -830,7 +829,6 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		lines: 1;
 	}
 
 	.nax-text__value--lines-multi {

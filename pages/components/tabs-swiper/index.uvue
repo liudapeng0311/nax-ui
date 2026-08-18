@@ -27,7 +27,7 @@
 			@change="onSwiperChange"
 		>
 			<swiper-item>
-				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+				<scroll-view class="pane-scroll" :style="swiperStyle">
 					<view class="pane">
 						<text class="pane__tip">点 Tab 或左右滑动切换 · 当前「关注」</text>
 						<view class="card" v-for="(title, index) in followTitles" :key="index">
@@ -39,7 +39,7 @@
 			</swiper-item>
 
 			<swiper-item>
-				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+				<scroll-view class="pane-scroll" :style="swiperStyle">
 					<view class="pane">
 						<text class="pane__tip">点 Tab 或左右滑动切换 · 当前「推荐」</text>
 						<view class="card" v-for="(title, index) in recommendTitles" :key="index">
@@ -51,7 +51,7 @@
 			</swiper-item>
 
 			<swiper-item>
-				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+				<scroll-view class="pane-scroll" :style="swiperStyle">
 					<view class="pane">
 						<text class="pane__tip">点 Tab 或左右滑动切换 · 当前「热榜」</text>
 						<view class="rank" v-for="(title, index) in hotTitles" :key="index">
@@ -68,7 +68,7 @@
 			</swiper-item>
 
 			<swiper-item>
-				<scroll-view class="pane-scroll" scroll-y="true" :style="swiperStyle">
+				<scroll-view class="pane-scroll" :style="swiperStyle">
 					<view class="pane pane--empty">
 						<nax-empty
 							title="暂无同城动态"

@@ -17,17 +17,17 @@
 			<view class="nax-cell__content">
 				<view class="nax-cell__title-row">
 					<text v-if="required" class="nax-cell__required">*</text>
-					<text v-if="hasTitle" class="nax-cell__title" :class="titleClass" :style="titleStyle" :lines="2">{{ title }}</text>
+					<text v-if="hasTitle" class="nax-cell__title" :max-lines="2" :class="titleClass" :style="titleStyle">{{ title }}</text>
 					<slot name="title"></slot>
 				</view>
-				<text v-if="hasLabel" class="nax-cell__label" :class="labelClass" :style="labelStyle" :lines="3">{{ label }}</text>
+				<text v-if="hasLabel" class="nax-cell__label" :max-lines="3" :class="labelClass" :style="labelStyle">{{ label }}</text>
 				<slot name="label"></slot>
 				<slot></slot>
 			</view>
 
 			<!-- 右侧值 + 箭头 -->
 			<view class="nax-cell__right">
-				<text v-if="hasValue" class="nax-cell__value" :class="valueClass" :style="valueStyle" :lines="2">{{ value }}</text>
+				<text v-if="hasValue" class="nax-cell__value" :max-lines="2" :class="valueClass" :style="valueStyle">{{ value }}</text>
 				<slot name="value"></slot>
 				<slot name="right"></slot>
 				<view v-if="showArrow" class="nax-cell__arrow">

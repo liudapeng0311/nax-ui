@@ -17,7 +17,7 @@
 					:class="titleClassAt(item)"
 					@click="onTitleClick(item)"
 				>
-					<text class="nax-dropdown__title-text" :class="titleTextClassAt(item)" :lines="1">{{ titleTextAt(item) }}</text>
+					<text class="nax-dropdown__title-text" :max-lines="1" :class="titleTextClassAt(item)">{{ titleTextAt(item) }}</text>
 					<view class="nax-dropdown__title-icon">
 						<nax-icon :name="iconNameAt(item)" :size="menuIconSizePx"></nax-icon>
 					</view>
@@ -808,6 +808,7 @@
 		/* #endif */
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-dropdown--sm .nax-dropdown__title-text {
 		font-size: var(--nax-font-size-sm, 14px);
 		line-height: 20px;
@@ -817,6 +818,7 @@
 		font-size: var(--nax-font-size-lg, 18px);
 		line-height: 24px;
 	}
+	/* #endif */
 
 	.nax-dropdown__title-text--active {
 		color: var(--nax-color-primary, #18a058);

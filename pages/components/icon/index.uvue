@@ -6,7 +6,7 @@
 			:border="true"
 			:back-icon-color="iconTextColor"
 		></nax-nav-bar>
-		<scroll-view class="page-scroll" scroll-y="true">
+		<scroll-view class="page-scroll">
 		<view class="nax-theme page" :class="themeExtraClass">
 			<text class="page__desc">Tabler Icons 语义子集 · name / size / color / click</text>
 
@@ -94,7 +94,7 @@
 				<view class="grid">
 					<view class="grid__item" v-for="item in icons" :key="item">
 						<nax-icon :name="item" :color="iconTextColor" @click="onTap(item)"></nax-icon>
-						<text class="grid__name">{{ item }}</text>
+						<text class="grid__name" :max-lines="1">{{ item }}</text>
 					</view>
 				</view>
 			</view>
@@ -310,6 +310,5 @@
 		font-size: 11px;
 		color: var(--nax-color-text-secondary, #767c82);
 		margin-top: 6px;
-		lines: 1;
 	}
 </style>

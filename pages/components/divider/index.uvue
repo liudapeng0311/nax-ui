@@ -6,7 +6,7 @@
 			home-url="/pages/index/index"
 			:border="true"
 		></nax-nav-bar>
-		<scroll-view class="page-scroll" scroll-y="true">
+		<scroll-view class="page-scroll">
 		<view class="nax-theme page" :class="themeExtraClass">
 
 			<view class="section">
@@ -171,10 +171,12 @@
 		flex-wrap: wrap;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.row--gap > .item {
 		margin-right: 16px;
 		margin-bottom: 12px;
 	}
+	/* #endif */
 
 	.body-text {
 		font-size: 14px;

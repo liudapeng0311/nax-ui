@@ -8,6 +8,7 @@
 					<text
 						v-if="showInfo && textInside && !useSlot"
 						class="nax-progress__info nax-progress__info--inside"
+						:max-lines="1"
 						:style="insideInfoStyle"
 					>{{ displayText }}</text>
 					<view v-if="showInfo && textInside && useSlot" class="nax-progress__slot-inside">
@@ -26,6 +27,7 @@
 					<text
 						v-if="!useSlot"
 						class="nax-progress__info nax-progress__info--inside"
+						:max-lines="1"
 						:style="insideInfoStyle"
 					>{{ displayText }}</text>
 					<view v-if="useSlot" class="nax-progress__slot-inside">
@@ -37,6 +39,7 @@
 			<text
 				v-if="showInfo && !textInside && !useSlot"
 				class="nax-progress__info nax-progress__info--outer"
+				:max-lines="1"
 				:style="outerInfoStyle"
 			>{{ displayText }}</text>
 			<view v-if="showInfo && !textInside && useSlot" class="nax-progress__slot-outer">
@@ -66,6 +69,7 @@
 					<text
 						v-else-if="showInfo"
 						class="nax-progress__info nax-progress__info--circle"
+						:max-lines="1"
 						:style="circleInfoStyle"
 					>{{ displayText }}</text>
 				</view>
@@ -670,13 +674,11 @@
 		margin-left: 8px;
 		min-width: 36px;
 		text-align: right;
-		lines: 1;
 	}
 
 	.nax-progress__info--inside {
 		padding-left: 6px;
 		padding-right: 6px;
-		lines: 1;
 	}
 
 	.nax-progress__slot-outer {
@@ -737,7 +739,6 @@
 	}
 
 	.nax-progress__info--circle {
-		lines: 1;
 		text-align: center;
 	}
 </style>

@@ -1,3 +1,9 @@
+## 0.1.12（2026-08-18）
+- 修复模板条件编译注释位于标签属性区被解析为属性的隐患：`webp` / `draggable` / `show-menu-by-longpress` 改为条件编译双分支渲染（注释移至标签外），消除非蒸汽端 "Property '
+## 0.1.11（2026-08-18）
+- 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
+## 0.1.10（2026-08-18）
+- 蒸汽模式兼容：`webp` / `draggable` / `show-menu-by-longpress` 仅在非蒸汽模式（`#ifndef VUE3-VAPOR`）下绑定，消除 App 蒸汽模式 warning
 ## 0.1.9（2026-08-14）
 - readme 合并重复的“主题”小节为一张 Token 表
 ## 0.1.8（2026-08-11）

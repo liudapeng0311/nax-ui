@@ -17,10 +17,10 @@
 			</view>
 			<view class="nax-step__body nax-step__body--h">
 				<slot name="title">
-					<text v-if="titleText.length > 0" class="nax-step__title" :class="titleClass" :lines="2">{{ titleText }}</text>
+					<text v-if="titleText.length > 0" class="nax-step__title" :class="titleClass" :max-lines="2">{{ titleText }}</text>
 				</slot>
 				<slot name="desc">
-					<text v-if="descText.length > 0" class="nax-step__desc" :class="descClass" :lines="3">{{ descText }}</text>
+					<text v-if="descText.length > 0" class="nax-step__desc" :class="descClass" :max-lines="3">{{ descText }}</text>
 				</slot>
 				<slot></slot>
 			</view>
@@ -42,10 +42,10 @@
 			</view>
 			<view class="nax-step__body nax-step__body--v" :class="bodyVClass">
 				<slot name="title">
-					<text v-if="titleText.length > 0" class="nax-step__title" :class="titleClass" :lines="2">{{ titleText }}</text>
+					<text v-if="titleText.length > 0" class="nax-step__title" :class="titleClass" :max-lines="2">{{ titleText }}</text>
 				</slot>
 				<slot name="desc">
-					<text v-if="descText.length > 0" class="nax-step__desc" :class="descClass" :lines="3">{{ descText }}</text>
+					<text v-if="descText.length > 0" class="nax-step__desc" :class="descClass" :max-lines="3">{{ descText }}</text>
 				</slot>
 				<slot></slot>
 			</view>
@@ -473,13 +473,14 @@
 		height: 24px;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--sm .nax-step__head--h {
 		height: 20px;
 	}
-
 	.nax-step--lg .nax-step__head--h {
 		height: 28px;
 	}
+	/* #endif */
 
 	.nax-step__rail {
 		flex-direction: column;
@@ -488,13 +489,14 @@
 		flex-shrink: 0;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--sm .nax-step__rail {
 		width: 20px;
 	}
-
 	.nax-step--lg .nax-step__rail {
 		width: 28px;
 	}
+	/* #endif */
 
 	.nax-step__indicator {
 		width: 24px;
@@ -510,17 +512,18 @@
 		background-color: var(--nax-color-bg, #ffffff);
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--sm .nax-step__indicator {
 		width: 20px;
 		height: 20px;
 		border-radius: 10px;
 	}
-
 	.nax-step--lg .nax-step__indicator {
 		width: 28px;
 		height: 28px;
 		border-radius: 14px;
 	}
+	/* #endif */
 
 	.nax-step__indicator--dot {
 		width: 10px;
@@ -529,17 +532,18 @@
 		border-width: 0;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--sm .nax-step__indicator--dot {
 		width: 8px;
 		height: 8px;
 		border-radius: 4px;
 	}
-
 	.nax-step--lg .nax-step__indicator--dot {
 		width: 12px;
 		height: 12px;
 		border-radius: 6px;
 	}
+	/* #endif */
 
 	.nax-step__indicator--wait {
 		background-color: var(--nax-color-bg, #ffffff);
@@ -588,15 +592,16 @@
 		text-align: center;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--sm .nax-step__num {
 		font-size: 10px;
 		line-height: 14px;
 	}
-
 	.nax-step--lg .nax-step__num {
 		font-size: 13px;
 		line-height: 18px;
 	}
+	/* #endif */
 
 	.nax-step__num--process,
 	.nax-step__num--finish {
@@ -677,19 +682,19 @@
 		text-align: center;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--vertical .nax-step__title {
 		text-align: left;
 	}
-
 	.nax-step--sm .nax-step__title {
 		font-size: var(--nax-font-size-xs, 12px);
 		line-height: 18px;
 	}
-
 	.nax-step--lg .nax-step__title {
 		font-size: var(--nax-font-size-md, 16px);
 		line-height: 22px;
 	}
+	/* #endif */
 
 	.nax-step__title--wait {
 		color: var(--nax-color-text-secondary, #767c82);
@@ -716,9 +721,11 @@
 		text-align: center;
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-step--vertical .nax-step__desc {
 		text-align: left;
 	}
+	/* #endif */
 
 	.nax-step__desc--process,
 	.nax-step__desc--finish {

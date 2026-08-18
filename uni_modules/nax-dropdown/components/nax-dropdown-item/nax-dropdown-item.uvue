@@ -7,7 +7,6 @@
 				<scroll-view
 					v-if="useScroll"
 					class="nax-dropdown-item__scroll"
-					scroll-y="true"
 					:show-scrollbar="false"
 					:style="scrollStyle"
 				>
@@ -18,7 +17,7 @@
 						:class="optionClassAt(opt)"
 						@click="onOptionClick(opt)"
 					>
-						<text class="nax-dropdown-item__option-text" :class="optionTextClassAt(opt)" :lines="1">{{ resolveLabel(opt) }}</text>
+						<text class="nax-dropdown-item__option-text" :max-lines="1" :class="optionTextClassAt(opt)">{{ resolveLabel(opt) }}</text>
 						<view v-if="isOptionSelected(opt)" class="nax-dropdown-item__check">
 							<nax-icon name="check" size="16" color="#18a058"></nax-icon>
 						</view>
@@ -32,7 +31,7 @@
 						:class="optionClassAt(opt)"
 						@click="onOptionClick(opt)"
 					>
-						<text class="nax-dropdown-item__option-text" :class="optionTextClassAt(opt)" :lines="1">{{ resolveLabel(opt) }}</text>
+						<text class="nax-dropdown-item__option-text" :max-lines="1" :class="optionTextClassAt(opt)">{{ resolveLabel(opt) }}</text>
 						<view v-if="isOptionSelected(opt)" class="nax-dropdown-item__check">
 							<nax-icon name="check" size="16" color="#18a058"></nax-icon>
 						</view>

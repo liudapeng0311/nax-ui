@@ -41,6 +41,7 @@
 					<text
 						v-if="resolveText(item).length > 0"
 						class="nax-swiper__text"
+						:max-lines="1"
 					>{{ resolveText(item) }}</text>
 				</view>
 			</swiper-item>
@@ -72,7 +73,7 @@
 
 		<view v-if="showNumberIndicator" class="nax-swiper__number-bar" :class="numberBarClass">
 			<view class="nax-swiper__number">
-				<text class="nax-swiper__number-text">{{ numberText }}</text>
+				<text class="nax-swiper__number-text" :max-lines="1">{{ numberText }}</text>
 			</view>
 		</view>
 	</view>
@@ -529,7 +530,6 @@
 		font-size: var(--nax-font-size-md, 16px);
 		color: var(--nax-color-text-inverse, #ffffff);
 		font-weight: 500;
-		lines: 1;
 	}
 
 	.nax-swiper__number-bar {
@@ -588,6 +588,5 @@
 	.nax-swiper__number-text {
 		font-size: var(--nax-font-size-xs, 12px);
 		color: var(--nax-swiper-number-color, #ffffff);
-		lines: 1;
 	}
 </style>

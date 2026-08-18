@@ -23,10 +23,10 @@
 				<!-- App: dual segs; UniElement.animate + rAF fallback -->
 				<view :id="trackId" class="nax-notice-bar__track" :style="appTrackStyle">
 					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
-						<text :id="segMeasureId" class="nax-notice-bar__text" :class="textClass" :lines="1">{{ seamlessText }}</text>
+						<text :id="segMeasureId" class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
 					</view>
 					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
-						<text class="nax-notice-bar__text" :class="textClass" :lines="1">{{ seamlessText }}</text>
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
 					</view>
 				</view>
 				<!-- #endif -->
@@ -38,10 +38,10 @@
 					:style="cssTrackStyle"
 				>
 					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
-						<text class="nax-notice-bar__text" :class="textClass" :lines="1">{{ seamlessText }}</text>
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
 					</view>
 					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
-						<text class="nax-notice-bar__text" :class="textClass" :lines="1">{{ seamlessText }}</text>
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
 					</view>
 				</view>
 				<!-- #endif -->
@@ -66,7 +66,7 @@
 					class="nax-notice-bar__swiper-item"
 				>
 					<view class="nax-notice-bar__step" @click="onClickItem(index)">
-						<text class="nax-notice-bar__text" :class="textClass" :lines="1">{{ item }}</text>
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ item }}</text>
 					</view>
 				</swiper-item>
 			</swiper>

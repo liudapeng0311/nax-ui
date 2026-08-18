@@ -1,3 +1,5 @@
+## 0.1.9（2026-08-18）
+- 蒸汽模式兼容：移除 `.nax-swiper__text`、`.nax-swiper__number-text` 中已废弃的 `lines: 1` 声明（仅 VDOM 支持，Vapor 下告警），改用 `<text>` 的 `:max-lines="1"` 属性
 ## 0.1.8（2026-08-14）
 - readme 新增“list 项”字段说明表（src/image/url、text/title、bg/background 及优先级）
 ## 0.1.7（2026-08-12）

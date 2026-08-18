@@ -34,24 +34,24 @@
 							:size="backIconSizeText"
 							:color="iconColorValue"
 						></nax-icon>
-						<text
-							v-if="backTextValue.length > 0"
-							class="nax-nav-bar__back-text"
-							:class="backTextClass"
-							:lines="1"
-						>{{ backTextValue }}</text>
+					<text
+						v-if="backTextValue.length > 0"
+						class="nax-nav-bar__back-text"
+					:class="backTextClass"
+					:max-lines="1"
+				>{{ backTextValue }}</text>
 					</view>
 					<slot name="left"></slot>
 				</view>
 
 				<view class="nax-nav-bar__center" :class="centerClass" :style="centerStyle">
 					<slot>
-						<text
-							v-if="titleValue.length > 0"
-							class="nax-nav-bar__title"
-							:class="titleClass"
-							:lines="1"
-						>{{ titleValue }}</text>
+					<text
+						v-if="titleValue.length > 0"
+						class="nax-nav-bar__title"
+					:class="titleClass"
+					:max-lines="1"
+				>{{ titleValue }}</text>
 					</slot>
 				</view>
 

@@ -17,11 +17,11 @@
 		</view>
 
 		<!-- 标题（可选） -->
-		<text v-if="hasTitle" class="nax-empty__title" :lines="2">{{ title }}</text>
+		<text v-if="hasTitle" class="nax-empty__title" :max-lines="2">{{ title }}</text>
 		<slot name="title"></slot>
 
 		<!-- 描述 -->
-		<text v-if="hasDescription" class="nax-empty__desc" :lines="4">{{ description }}</text>
+		<text v-if="hasDescription" class="nax-empty__desc" :max-lines="4">{{ description }}</text>
 		<slot name="description"></slot>
 
 		<!-- 操作区 -->

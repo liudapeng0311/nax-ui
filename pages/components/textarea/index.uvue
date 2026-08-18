@@ -8,7 +8,6 @@
 		></nax-nav-bar>
 		<scroll-view
 			class="page-scroll"
-			scroll-y="true"
 			:scroll-top="scrollTop"
 			:scroll-with-animation="false"
 			@scroll="onPageScroll"
@@ -218,19 +217,20 @@
 	})
 
 	const textareaThemeClass = computed((): string => {
-		// #ifdef APP-ANDROID
+		// App（含蒸汽）：组件内 CSS 变量不可靠，用 custom-class 传主题状态驱动字面量颜色
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		if (darkMode.value) {
 			return 'nax-theme nax-theme-dark'
 		}
 		return 'nax-theme'
 		// #endif
-		// #ifndef APP-ANDROID
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		return ''
 		// #endif
 	})
 
 	const plainBackgroundColor = computed((): string => {
-		// #ifdef APP-ANDROID
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		if (darkMode.value) {
 			return '#26272c'
 		}

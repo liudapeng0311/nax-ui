@@ -35,7 +35,22 @@
 			<nax-icon :name="icon" :size="iconSizeName" :color="iconColor"></nax-icon>
 		</view>
 		<slot v-if="!loading" name="icon"></slot>
-		<text v-if="label.length > 0" class="nax-button__text" :class="textClass" :lines="1">{{ label }}</text>
+		<!-- #ifndef APP-HARMONY -->
+		<text
+			v-if="label.length > 0"
+			class="nax-button__text"
+			:max-lines="1"
+			:class="textClass"
+		>{{ label }}</text>
+		<!-- #endif -->
+		<!-- #ifdef APP-HARMONY -->
+		<!-- 鸿蒙：max-lines / text-overflow 在无宽度约束的 flex 子项上误省略，保留完整展示 -->
+		<text
+			v-if="label.length > 0"
+			class="nax-button__text"
+			:class="textClass"
+		>{{ label }}</text>
+		<!-- #endif -->
 		<view
 			v-if="!loading && hasIcon && iconAtEnd"
 			class="nax-button__icon nax-button__icon--end"
@@ -786,7 +801,10 @@
 	.nax-button__text {
 		text-align: center;
 		font-weight: var(--nax-font-weight-regular, 400);
+		/* #ifndef APP-HARMONY */
+		/* 鸿蒙：text-overflow 无 max-lines 约束时也会误省略，鸿蒙端不启用 */
 		text-overflow: ellipsis;
+		/* #endif */
 	}
 
 	/* loading 图标：固定方盒 + 旋转中心居中；颜色由 color prop 传入 nax-icon */

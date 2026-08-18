@@ -12,8 +12,8 @@
 		<text
 			v-else-if="showText"
 			class="nax-avatar__text"
+			:max-lines="1"
 			:style="textStyle"
-			:lines="1"
 		>{{ displayText }}</text>
 		<view v-else class="nax-avatar__slot">
 			<slot></slot>

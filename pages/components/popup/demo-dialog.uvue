@@ -14,8 +14,8 @@
 			@click.stop="onPanel"
 		>
 			<view class="demo-dialog__panel">
-				<text class="demo-dialog__title" :lines="1">自定义 dialog 页</text>
-				<text class="demo-dialog__desc" :lines="8">这是业务自建透明页。App/Web 下作为 dialogPage 打开时可盖住原生导航栏与 tabBar。显示/隐藏动画在本页内部实现。</text>
+				<text class="demo-dialog__title" :max-lines="1">自定义 dialog 页</text>
+				<text class="demo-dialog__desc" :max-lines="8">这是业务自建透明页。App/Web 下作为 dialogPage 打开时可盖住原生导航栏与 tabBar。显示/隐藏动画在本页内部实现。</text>
 				<view
 					class="demo-dialog__btn"
 					hover-class="demo-dialog__btn--hover"
@@ -23,7 +23,7 @@
 					:hover-stay-time="70"
 					@click="onClose"
 				>
-					<text class="demo-dialog__btn-text" :lines="1">关闭</text>
+					<text class="demo-dialog__btn-text" :max-lines="1">关闭</text>
 				</view>
 			</view>
 		</view>

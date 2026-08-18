@@ -6,6 +6,7 @@
 			v-if="scrollable"
 			:id="scrollDomId"
 			class="nax-tabs__scroll"
+			:style="sizeStyle"
 			direction="horizontal"
 			:show-scrollbar="false"
 			:scroll-with-animation="true"
@@ -19,30 +20,32 @@
 					:key="index"
 					class="nax-tabs__item nax-tabs__item--scroll"
 					:class="itemClass(index, item)"
+					:style="sizeStyle"
 					@click="onItemClick(index)"
 				>
-					<view class="nax-tabs__label">
-						<text class="nax-tabs__text" :class="textClass(index, item)" :lines="1">{{ resolveText(item) }}</text>
-						<view v-if="resolveShowDot(item)" class="nax-tabs__dot"></view>
-						<view v-else-if="resolveBadgeText(item).length > 0" class="nax-tabs__badge">
-							<text class="nax-tabs__badge-text">{{ resolveBadgeText(item) }}</text>
-						</view>
+				<view class="nax-tabs__label">
+					<text class="nax-tabs__text" :class="textClass(index, item)" :max-lines="1">{{ resolveText(item) }}</text>
+					<view v-if="resolveShowDot(item)" class="nax-tabs__dot"></view>
+					<view v-else-if="resolveBadgeText(item).length > 0" class="nax-tabs__badge">
+						<text class="nax-tabs__badge-text">{{ resolveBadgeText(item) }}</text>
 					</view>
 				</view>
-				<view
-					v-if="showLine && tabItems.length > 0"
-					class="nax-tabs__line"
-					:class="lineReadyClass"
-					:style="lineStyle"
-				></view>
 			</view>
-		</scroll-view>
+			<view
+				v-if="showLine && tabItems.length > 0"
+				class="nax-tabs__line"
+				:class="lineReadyClass"
+				:style="lineStyle"
+			></view>
+		</view>
+	</scroll-view>
 
 		<!-- 均分宽度 -->
 		<view
 			v-else
 			:id="listDomId"
 			class="nax-tabs__list nax-tabs__list--equal"
+			:style="sizeStyle"
 		>
 			<view
 				v-for="(item, index) in tabItems"
@@ -50,10 +53,11 @@
 				:key="index"
 				class="nax-tabs__item nax-tabs__item--equal"
 				:class="itemClass(index, item)"
+				:style="sizeStyle"
 				@click="onItemClick(index)"
 			>
 				<view class="nax-tabs__label">
-					<text class="nax-tabs__text" :class="textClass(index, item)" :lines="1">{{ resolveText(item) }}</text>
+					<text class="nax-tabs__text" :class="textClass(index, item)" :max-lines="1">{{ resolveText(item) }}</text>
 					<view v-if="resolveShowDot(item)" class="nax-tabs__dot"></view>
 					<view v-else-if="resolveBadgeText(item).length > 0" class="nax-tabs__badge">
 						<text class="nax-tabs__badge-text">{{ resolveBadgeText(item) }}</text>
@@ -374,6 +378,27 @@
 			return ''
 		}
 		return 'top:' + formatCssSize(props.offsetTop, 0) + ';'
+	})
+
+	const sizeHeightPx = computed((): number => {
+		const s = sizeName.value
+		if (s == 'sm') {
+			return 36
+		}
+		if (s == 'lg') {
+			return 50
+		}
+		return 44
+	})
+
+	const sizeStyle = computed((): string => {
+		// 鸿蒙（含蒸汽）：组件内 CSS 变量失效，高度改内联，避免塌陷
+		// #ifdef APP-HARMONY
+		return 'height:' + sizeHeightPx.value.toString() + 'px;'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	const lineReadyClass = computed((): string => {
@@ -1304,6 +1329,7 @@
 		flex-direction: row;
 		/* 避免被父级竖向 flex 撑乱 */
 		flex-shrink: 0;
+		height: var(--nax-tabs-h, 44px);
 	}
 
 	.nax-tabs__list {
@@ -1331,6 +1357,7 @@
 		align-items: center;
 		justify-content: center;
 		/* 点击热区 */
+		height: var(--nax-tabs-h, 44px);
 	}
 
 	.nax-tabs__item--scroll {
@@ -1347,29 +1374,45 @@
 		padding-right: 4px;
 	}
 
+	/* 蒸汽模式：Vapor 不支持后代选择器，尺寸修饰由根节点 CSS 变量下传（VDOM 走下方条件编译规则，值一致） */
+	.nax-tabs--sm {
+		--nax-tabs-h: 36px;
+		--nax-tabs-text-size: var(--nax-font-size-sm, 14px);
+		--nax-tabs-text-lh: 20px;
+	}
+
+	.nax-tabs--md {
+		--nax-tabs-h: 44px;
+		--nax-tabs-text-size: var(--nax-font-size-md, 16px);
+		--nax-tabs-text-lh: 22px;
+	}
+
+	.nax-tabs--lg {
+		--nax-tabs-h: 50px;
+		--nax-tabs-text-size: var(--nax-font-size-lg, 18px);
+		--nax-tabs-text-lh: 24px;
+	}
+
+	/* #ifndef VUE3-VAPOR */
 	.nax-tabs--sm .nax-tabs__scroll {
 		height: 36px;
 	}
-
 	.nax-tabs--md .nax-tabs__scroll {
 		height: 44px;
 	}
-
 	.nax-tabs--lg .nax-tabs__scroll {
 		height: 50px;
 	}
-
 	.nax-tabs--sm .nax-tabs__item {
 		height: 36px;
 	}
-
 	.nax-tabs--md .nax-tabs__item {
 		height: 44px;
 	}
-
 	.nax-tabs--lg .nax-tabs__item {
 		height: 50px;
 	}
+	/* #endif */
 
 	.nax-tabs__item--disabled {
 		opacity: 0.45;
@@ -1385,22 +1428,24 @@
 	.nax-tabs__text {
 		color: var(--nax-color-text-secondary, #909399);
 		text-overflow: ellipsis;
+		font-size: var(--nax-tabs-text-size, var(--nax-font-size-md, 16px));
+		line-height: var(--nax-tabs-text-lh, 22px);
 	}
 
+	/* #ifndef VUE3-VAPOR */
 	.nax-tabs--sm .nax-tabs__text {
 		font-size: var(--nax-font-size-sm, 14px);
 		line-height: 20px;
 	}
-
 	.nax-tabs--md .nax-tabs__text {
 		font-size: var(--nax-font-size-md, 16px);
 		line-height: 22px;
 	}
-
 	.nax-tabs--lg .nax-tabs__text {
 		font-size: var(--nax-font-size-lg, 18px);
 		line-height: 24px;
 	}
+	/* #endif */
 
 	.nax-tabs__text--active {
 		color: var(--nax-color-primary, #18a058);

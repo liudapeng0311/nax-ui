@@ -1,3 +1,15 @@
+## 0.1.18（2026-08-18）
+- 依赖组件更新：nax-input（0.2.2→0.2.3）、nax-textarea（0.2.2→0.2.3）蒸汽模式输入文字白色不可见修复（字面量内联色 + 暗色检测扩展全 App 端）；nax-tabs（0.1.14→0.1.15）蒸汽模式高度丢失修复（尺寸改 CSS 变量下传）
+- 依赖组件更新：nax-select（0.1.20→0.1.21）、nax-datetime-picker（0.1.19→0.1.20）蒸汽模式滚轮高度塌陷修复（picker-view 高度改内联 style）
+- 依赖组件更新：nax-button（0.1.22→0.1.23）鸿蒙端按钮文字误省略修复（`max-lines` 鸿蒙端移除，恢复完整展示）
+- 依赖组件更新：nax-button（0.1.22→0.1.23）鸿蒙端文字误省略修复；nax-image（0.1.11→0.1.12）、nax-select（0.1.21→0.1.22）、nax-datetime-picker（0.1.20→0.1.21）、nax-virtual-list（0.1.12→0.1.13）修复标签属性区条件编译注释被解析为属性的隐患（改双分支渲染）
+- 依赖组件更新：nax-tabs（0.1.15→0.1.16）鸿蒙端高度塌陷修复（组件内 CSS 变量失效，高度改内联）
+## 0.1.17（2026-08-18）
+- 依赖组件更新：本轮蒸汽模式兼容修复（`lines` CSS → `:max-lines` 属性、下级选择器 `#ifndef VUE3-VAPOR` 隔离）涉及 nax-avatar/badge/button/card/cell/checkbox/datetime-picker/dialog/dropdown/empty/form/grid/icon/image/list/nav-bar/notice-bar/popup/progress/radio/search/select/steps/swipe-action/swiper/tabbar/tabs/tag/text/textarea/upload/virtual-list/action-sheet/alert 共 34 个组件包
+## 0.1.14（2026-08-18）
+- 依赖组件更新：25 个 nax-* 组件包蒸汽模式兼容修复（`lines` 属性→CSS、scroll-view 移除 `scroll-y`、image 平台属性条件编译）
+## 0.1.13（2026-08-18）
+- 依赖组件更新：`nax-datetime-picker` 修复 Android 端深色系统下滚轮/文字不可见（呈现空白），面板/文字/指示器改为官方主题 API 驱动的字面量颜色（0.1.16 → 0.1.17）
 ## 0.1.12（2026-08-18）
 - 依赖组件更新：`nax-badge` 修复在居中容器（如宫格）内被 `align-self: flex-start` 顶偏的问题（0.1.5 → 0.1.6）
 - 依赖组件更新：`nax-input` 修复密码可见切换图标语义颠倒：密文显示 `eye-off`（当前不可见）、明文显示 `eye`（当前可见）（0.2.1 → 0.2.2）

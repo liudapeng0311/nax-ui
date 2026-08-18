@@ -1,3 +1,6 @@
+## 0.2.2（2026-08-18）
+- 蒸汽模式兼容：移除 `.nax-search__action-text` 中已废弃的 `lines: 1` 声明（仅 VDOM 支持，Vapor 下告警），改用 `<text>` 的 `:max-lines="1"` 属性
+- 蒸汽模式（`VUE3-VAPOR`）兼容修复：下级选择器规则用 `#ifndef VUE3-VAPOR` 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
 ## 0.2.1（2026-08-14）
 - 移除废弃兼容属性 `clearabled`、`bgColor`，仅保留标准写法 `clearable`、`background`
 - 事件语义对齐 nax-input / uni-app x 原生 input：`change` 不再与 `input` 同时触发，改为**失焦时内容与聚焦时不同才触发**；`input` 保持输入过程中每次触发

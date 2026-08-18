@@ -17,7 +17,7 @@
 		</nax-nav-bar>
 
 		<view class="page-body" :class="darkClass('home-page--dark')" :style="pageBodyStyle">
-			<scroll-view class="page-scroll" :class="darkClass('home-page--dark')" scroll-y="true" :style="pageScrollStyle">
+			<scroll-view class="page-scroll" :class="darkClass('home-page--dark')" :style="pageScrollStyle">
 				<view class="nax-theme page" :class="themeExtraClass">
 					<!-- 首帧兜底：即使子组件异常，也能看到原生文本 -->
 					<text v-if="!contentReady" class="boot-tip" :class="darkClass('home-boot--dark')">{{ bootTip }}</text>
@@ -45,23 +45,23 @@
 
 					<view v-if="contentReady" class="stats" :class="darkClass('home-surface--dark')">
 						<view class="stats__item">
-							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">{{ totalCountText }}</text>
-							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">组件</text>
+							<text class="stats__num" :max-lines="1" :class="darkClass('home-text-primary--dark')">{{ totalCountText }}</text>
+							<text class="stats__label" :max-lines="1" :class="darkClass('home-text-secondary--dark')">组件</text>
 						</view>
 						<view class="stats__divider" :class="darkClass('home-divider--dark')"></view>
 						<view class="stats__item">
-							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">4</text>
-							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">分类</text>
+							<text class="stats__num" :max-lines="1" :class="darkClass('home-text-primary--dark')">4</text>
+							<text class="stats__label" :max-lines="1" :class="darkClass('home-text-secondary--dark')">分类</text>
 						</view>
 						<view class="stats__divider" :class="darkClass('home-divider--dark')"></view>
 						<view class="stats__item">
-							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">3</text>
-							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">场景</text>
+							<text class="stats__num" :max-lines="1" :class="darkClass('home-text-primary--dark')">3</text>
+							<text class="stats__label" :max-lines="1" :class="darkClass('home-text-secondary--dark')">场景</text>
 						</view>
 						<view class="stats__divider" :class="darkClass('home-divider--dark')"></view>
 						<view class="stats__item">
-							<text class="stats__num" :class="darkClass('home-text-primary--dark')" :lines="1">多端</text>
-							<text class="stats__label" :class="darkClass('home-text-secondary--dark')" :lines="1">兼容</text>
+							<text class="stats__num" :max-lines="1" :class="darkClass('home-text-primary--dark')">多端</text>
+							<text class="stats__label" :max-lines="1" :class="darkClass('home-text-secondary--dark')">兼容</text>
 						</view>
 					</view>
 
@@ -92,10 +92,10 @@
 							</view>
 							<view class="scene-card__body">
 								<view class="scene-card__row">
-									<text class="scene-card__name" :class="darkClass('home-text--dark')" :lines="1">{{ itemTitle(scene) }}</text>
+									<text class="scene-card__name" :max-lines="1" :class="darkClass('home-text--dark')">{{ itemTitle(scene) }}</text>
 									<nax-tag type="primary" variant="light" size="sm" :label="itemTag(scene)"></nax-tag>
 								</view>
-								<text class="scene-card__desc" :class="darkClass('home-text-secondary--dark')" :lines="2">{{ itemDesc(scene) }}</text>
+								<text class="scene-card__desc" :max-lines="2" :class="darkClass('home-text-secondary--dark')">{{ itemDesc(scene) }}</text>
 							</view>
 							<nax-icon name="chevron-right" size="18" :color="chevronIconColor"></nax-icon>
 						</view>
@@ -319,7 +319,12 @@
 		bootTip.value = 'nax-ui 演示首页'
 		// #endif
 	}
-	refreshPageRootStyle()
+	// VDOM 模式 setup 阶段窗口信息可能不可用，失败由 onShow 兜底
+	try {
+		refreshPageRootStyle()
+	} catch (e) {
+		// 保持默认
+	}
 
 	const tabList = demoTabList()
 	var sceneListSafe = [] as any[]

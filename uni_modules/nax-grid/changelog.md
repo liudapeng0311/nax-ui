@@ -1,3 +1,5 @@
+## 0.1.5（2026-08-18）
+- 蒸汽模式（`VUE3-VAPOR`）兼容修复：`nax-grid-item--card` 的下级选择器规则用 `#ifndef VUE3-VAPOR` 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
 ## 0.1.4（2026-08-14）
 - readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
 ## 0.1.3（2026-08-07）

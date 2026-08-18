@@ -17,6 +17,7 @@
 		<text
 			v-if="hasLabel"
 			class="nax-radio__label"
+			:max-lines="1"
 			:class="labelClass"
 			:style="labelStyle"
 			@click.stop="onLabelClick"
@@ -496,7 +497,6 @@
 	.nax-radio__label {
 		margin-left: 8px;
 		color: var(--nax-color-text, #333639);
-		lines: 1;
 	}
 
 	.nax-radio__label--disabled {

@@ -1,3 +1,8 @@
+## 0.1.9（2026-08-18）
+- 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
+- 蒸汽模式（`VUE3-VAPOR`）兼容修复：标题文字 sm/lg 尺寸的 2 条下级选择器规则用 `#ifndef VUE3-VAPOR` 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
+## 0.1.8（2026-08-18）
+- 蒸汽模式兼容：移除 `<text>` 上不支持的 `lines` 属性，改为 CSS `lines` 声明（各文本 class 补齐 `lines: N;`），消除 App 蒸汽模式 warning
 ## 0.1.7（2026-08-14）
 - readme 补齐 `nax-dropdown` / `nax-dropdown-item` 的 Props 与事件表格（此前仅源码 JSDoc 有 API 说明）
 ## 0.1.6（2026-08-14）

@@ -21,14 +21,14 @@
 			<!-- 标题 -->
 			<view v-if="hasHeader" class="nax-dialog__header">
 				<slot name="title">
-					<text v-if="titleText.length > 0" class="nax-dialog__title" :lines="2">{{ titleText }}</text>
+					<text v-if="titleText.length > 0" class="nax-dialog__title" :max-lines="2">{{ titleText }}</text>
 				</slot>
 			</view>
 
 			<!-- 内容 -->
 			<view class="nax-dialog__body" :class="bodyClass">
 				<slot>
-					<text v-if="contentText.length > 0" class="nax-dialog__content" :lines="12">{{ contentText }}</text>
+					<text v-if="contentText.length > 0" class="nax-dialog__content" :max-lines="12">{{ contentText }}</text>
 				</slot>
 			</view>
 
@@ -43,7 +43,7 @@
 						:hover-stay-time="70"
 						@click="onCancelClick"
 					>
-						<text class="nax-dialog__btn-text nax-dialog__btn-text--cancel" :lines="1">{{ cancelLabel }}</text>
+						<text class="nax-dialog__btn-text nax-dialog__btn-text--cancel" :max-lines="1">{{ cancelLabel }}</text>
 					</view>
 					<view v-if="cancelVisible && confirmVisible" class="nax-dialog__v-line"></view>
 					<view
@@ -54,7 +54,7 @@
 						:hover-stay-time="70"
 						@click="onConfirmClick"
 					>
-						<text class="nax-dialog__btn-text" :class="confirmTextClass" :lines="1">{{ confirmLabel }}</text>
+						<text class="nax-dialog__btn-text" :max-lines="1" :class="confirmTextClass">{{ confirmLabel }}</text>
 					</view>
 				</slot>
 			</view>

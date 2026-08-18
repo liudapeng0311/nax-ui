@@ -34,7 +34,7 @@
 			@keyboardheightchange="onKeyboardHeightChange"
 			@click="onFieldClick"
 		></textarea>
-		<text v-if="showCountUi" class="nax-textarea__count" :class="countClass">{{ countText }}</text>
+		<text v-if="showCountUi" class="nax-textarea__count" :class="countClass" :max-lines="1">{{ countText }}</text>
 	</view>
 </template>
 
@@ -259,12 +259,12 @@
 		return props.maxlength
 	})
 
-	const isAndroidDarkTheme = computed((): boolean => {
-		// Android 组件隔离下主题变量可能回退，使用 custom-class 传递主题状态。
-		// #ifdef APP-ANDROID
+	const isAppDarkTheme = computed((): boolean => {
+		// App（含蒸汽）：组件隔离下 CSS 变量/后代选择器不可靠，主题状态由 custom-class 传递，用字面量色驱动
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		return props.customClass.indexOf('nax-theme-dark') >= 0
 		// #endif
-		// #ifndef APP-ANDROID
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
 		return false
 		// #endif
 	})
@@ -273,7 +273,7 @@
 		if (props.placeholderStyle.length > 0) {
 			return props.placeholderStyle
 		}
-		if (isAndroidDarkTheme.value) {
+		if (isAppDarkTheme.value) {
 			return 'color: #ffffff61;'
 		}
 		return 'color: #e5e5ea;'
@@ -366,7 +366,7 @@
 	/** 根节点：边框/背景；高度由 field 明确高度撑开（对齐 nax-input 不靠 %） */
 	const rootStyle = computed((): string => {
 		let style = ''
-		if (isAndroidDarkTheme.value) {
+		if (isAppDarkTheme.value) {
 			if (props.disabled || props.readonly) {
 				style += 'background-color:#26272c;'
 			} else if (props.border && props.background.length == 0) {
@@ -399,12 +399,17 @@
 	 */
 	const fieldStyle = computed((): string => {
 		let style = 'font-size:' + fontSizeCss.value + ';'
-		if (isAndroidDarkTheme.value) {
+		if (isAppDarkTheme.value) {
 			if (props.disabled) {
 				style += 'color:#ffffff4d;'
 			} else {
 				style += 'color:#f5f5f5;'
 			}
+		} else {
+			// App（含蒸汽）：原生 textarea 文字颜色用字面量内联，避免蒸汽下 var() 失效退成白色不可见
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			style += 'color:#333639;'
+			// #endif
 		}
 		if (props.autoHeight) {
 			style += 'min-height:' + heightCss.value + ';'
@@ -601,7 +606,6 @@
 		font-size: var(--nax-font-size-xs, 12px);
 		color: var(--nax-color-text-secondary, #767c82);
 		text-align: right;
-		lines: 1;
 	}
 
 	.nax-textarea__count--disabled {
