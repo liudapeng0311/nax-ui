@@ -149,13 +149,13 @@ border 开启且 gap 大于 0 时，子项独立描边。
 ```uvue
 <nax-grid :col="3" @click="onGridClick">
 	<nax-grid-item index="msg">
-		<nax-badge value="9" offset-x="-9" offset-y="9">
+		<nax-badge value="9">
 			<nax-icon name="share" size="22"></nax-icon>
 		</nax-badge>
 		<text class="grid-text">消息</text>
 	</nax-grid-item>
 	<nax-grid-item index="dot">
-		<nax-badge dot offset-x="-4" offset-y="4">
+		<nax-badge dot>
 			<nax-icon name="heart" size="22"></nax-icon>
 		</nax-badge>
 		<text class="grid-text">喜欢</text>
@@ -168,6 +168,8 @@ border 开启且 gap 大于 0 时，子项独立描边。
 ```
 
 复用上一节的 onGridClick。
+
+> 徽标默认位于内容右上角外侧，不遮挡图标；如需微调位置，用 `offset-x` / `offset-y`（正值向右、向下）向外移动。
 
 :::
 

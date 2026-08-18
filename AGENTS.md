@@ -327,6 +327,7 @@ const emit = defineEmits(['click'])
 - [ ] 有可运行 demo 或明确说明为何没有
 - [ ] 除 Web 端外，未主动运行或编译其它端；非 Web 端由用户自行核实
 - [ ] 无无关重构与无关文件打扰
+- [ ] **用户未明确要求发布线上时，未执行任何服务器部署 / 上传操作**（发布流程见 `docs/deploy-docs.md`）
 
 ---
 
@@ -336,6 +337,7 @@ const emit = defineEmits(['click'])
 - 组件清单：`docs/component-inventory.md`
   - 主题接入：`uni_modules/nax-ui-theme/readme.md`
 - 文档索引：`docs/README.md`
+- 线上部署手册（**仅用户明确要求发布时执行**）：`docs/deploy-docs.md`
 - 主题包：`uni_modules/nax-ui-theme`
 - 技能包（AI 使用指南，发布到 GitHub `liudapeng0311/nax-ui-skills`）：`nax-ui-skill-build/`（源目录）、`nax-ui-skill-release/`（发布副本）
 - 官方参考（人工查阅）：

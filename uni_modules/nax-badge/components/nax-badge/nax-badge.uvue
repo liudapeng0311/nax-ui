@@ -1,12 +1,14 @@
 <template>
 	<view class="nax-badge" :class="rootClass">
-		<slot></slot>
-		<view
-			v-if="badgeVisible"
-			class="nax-badge__sup"
-			:class="supClass"
-			:style="supStyle"
-		>
+		<!-- 锚点容器：按内容收缩，气泡定位参照它；根节点交由父级对齐（如宫格居中） -->
+		<view class="nax-badge__anchor">
+			<slot></slot>
+			<view
+				v-if="badgeVisible"
+				class="nax-badge__sup"
+				:class="supClass"
+				:style="supStyle"
+			>
 			<!-- processing 波纹：Web/小程序 CSS 动画；App 端 JS transform 兜底 -->
 			<view
 				v-if="processing"
@@ -22,6 +24,7 @@
 					:lines="1"
 				>{{ displayText }}</text>
 			</slot>
+			</view>
 		</view>
 	</view>
 </template>
@@ -398,7 +401,14 @@
 		position: relative;
 		flex-direction: row;
 		align-items: center;
-		align-self: flex-start;
+		overflow: visible;
+	}
+
+	/* 锚点容器：包裹 slot 内容并承载气泡定位，尺寸跟随内容，避免根节点被父级拉伸后气泡错位 */
+	.nax-badge__anchor {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
 		overflow: visible;
 	}
 

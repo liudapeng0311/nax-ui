@@ -11,6 +11,7 @@
 | [nax-video-headless.md](./nax-video-headless.md) | `nax-video` 无头视频播放器：行为契约、跨端边界、API、demo 与验收规范 | 视频组件作者与后续 AI |
 | [popup-window.md](./popup-window.md) | 压窗屏跨端能力与小程序限制 | 弹层 / 反馈组件作者与业务 |
 | [tabbar-routing.md](./tabbar-routing.md) | 自定义 nax-tabbar + 原生 tabBar/`switchTab` 秒切方案（鸿蒙性能） | 底栏 / 多页 Tab 接入 |
+| [deploy-docs.md](./deploy-docs.md) | **docs-site 线上部署手册**：构建 / 上传 / 验证 / 回滚流程；仅用户明确要求发布时方可执行 | 后续 AI / 协作者 |
 | [../AGENTS.md](../AGENTS.md) | 给 Codex / 协作者的仓库约束（实现时强制遵守） | 所有 AI/贡献者 |
 | [../docs-site/](../docs-site/) | **组件文档站**（VitePress）：`npm run gen` 生成组件页 + `npm run dev` 本地预览 | 组件使用者 / 贡献者 |
 

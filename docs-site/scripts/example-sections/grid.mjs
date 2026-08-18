@@ -17,7 +17,7 @@ export default [
   },
   {
     heading: '徽标组合',
-    body: "徽标只包住图标，文案在下方；容器需 overflow: visible，避免角标被裁切。\n\n```uvue\n<nax-grid :col=\"3\" @click=\"onGridClick\">\n\t<nax-grid-item index=\"msg\">\n\t\t<nax-badge value=\"9\" offset-x=\"-9\" offset-y=\"9\">\n\t\t\t<nax-icon name=\"share\" size=\"22\"></nax-icon>\n\t\t</nax-badge>\n\t\t<text class=\"grid-text\">消息</text>\n\t</nax-grid-item>\n\t<nax-grid-item index=\"dot\">\n\t\t<nax-badge dot offset-x=\"-4\" offset-y=\"4\">\n\t\t\t<nax-icon name=\"heart\" size=\"22\"></nax-icon>\n\t\t</nax-badge>\n\t\t<text class=\"grid-text\">喜欢</text>\n\t</nax-grid-item>\n\t<nax-grid-item index=\"star\">\n\t\t<nax-icon name=\"star\" size=\"22\"></nax-icon>\n\t\t<text class=\"grid-text\">收藏</text>\n\t</nax-grid-item>\n</nax-grid>\n```\n\n复用上一节的 onGridClick。"
+    body: "徽标只包住图标，文案在下方；容器需 overflow: visible，避免角标被裁切。\n\n```uvue\n<nax-grid :col=\"3\" @click=\"onGridClick\">\n\t<nax-grid-item index=\"msg\">\n\t\t<nax-badge value=\"9\">\n\t\t\t<nax-icon name=\"share\" size=\"22\"></nax-icon>\n\t\t</nax-badge>\n\t\t<text class=\"grid-text\">消息</text>\n\t</nax-grid-item>\n\t<nax-grid-item index=\"dot\">\n\t\t<nax-badge dot>\n\t\t\t<nax-icon name=\"heart\" size=\"22\"></nax-icon>\n\t\t</nax-badge>\n\t\t<text class=\"grid-text\">喜欢</text>\n\t</nax-grid-item>\n\t<nax-grid-item index=\"star\">\n\t\t<nax-icon name=\"star\" size=\"22\"></nax-icon>\n\t\t<text class=\"grid-text\">收藏</text>\n\t</nax-grid-item>\n</nax-grid>\n```\n\n复用上一节的 onGridClick。\n\n> 徽标默认位于内容右上角外侧，不遮挡图标；如需微调位置，用 `offset-x` / `offset-y`（正值向右、向下）向外移动。"
   },
   {
     heading: '禁用 · 关闭 hover',

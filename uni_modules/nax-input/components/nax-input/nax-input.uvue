@@ -369,11 +369,11 @@
 	})
 
 	const passwordEyeName = computed((): string => {
-		// 密文中：显示 eye（点击可见）；明文中：显示 eye-off（点击隐藏）
+		// 密文中：显示 eye-off（当前不可见）；明文中：显示 eye（当前可见）
 		if (showPassword.value) {
-			return 'eye-off'
+			return 'eye'
 		}
-		return 'eye'
+		return 'eye-off'
 	})
 
 	const iconSizePx = computed((): string => {
