@@ -31,3 +31,5 @@ features:
     title: 蒸汽模式优先
     details: 组合式 API + 样式隔离 2.0，按 uni-app x 蒸汽模式设计，无历史包袱。
 ---
+
+<Contributors />
