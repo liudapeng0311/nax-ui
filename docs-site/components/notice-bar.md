@@ -4,7 +4,7 @@ demo: notice-bar
 
 # nax-notice-bar
 
-> 当前版本：0.1.19
+> 当前版本：0.1.21
 
 滚动通告栏。提供常用能力。
 

@@ -4,7 +4,7 @@ demo: swiper
 
 # nax-swiper
 
-> 当前版本：0.1.8
+> 当前版本：0.1.9
 
 `nax-ui` 轮播组件（uni-app x / uvue）。
 基于原生 `swiper` / `swiper-item` 封装，提供统一 API、主题圆角与数字指示器。

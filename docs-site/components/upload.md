@@ -4,7 +4,7 @@ demo: upload
 
 # nax-upload
 
-> 当前版本：0.1.12
+> 当前版本：0.1.14
 
 `nax-ui` 上传组件（uni-app x / uvue）。提供文件列表预览、选择、删除与状态展示能力。实际上传由业务在 `afterRead` 中调用 `uni.uploadFile` 等完成。
 

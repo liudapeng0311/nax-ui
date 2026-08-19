@@ -4,7 +4,7 @@ demo: tabbar
 
 # nax-tabbar
 
-> 当前版本：0.1.9
+> 当前版本：0.1.11
 
 自定义底部标签栏（非 pages.json 原生 tabBar）。面向 uni-app x：字体图标优先、轻量徽标、fixed 占位与安全区。
 

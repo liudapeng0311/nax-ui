@@ -4,7 +4,7 @@ demo: icon
 
 # nax-icon
 
-> 当前版本：0.2.13
+> 当前版本：0.2.14
 
 `nax-ui` 字体图标组件（uni-app x / uvue）。
 

@@ -4,7 +4,7 @@ demo: badge
 
 # nax-badge
 
-> 当前版本：0.1.6
+> 当前版本：0.1.8
 
 uni-app x 徽标组件，提供常用能力。
 

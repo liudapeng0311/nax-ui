@@ -4,7 +4,7 @@ demo: button
 
 # nax-button
 
-> 当前版本：0.1.20
+> 当前版本：0.1.23
 
 `nax-ui` 通用按钮组件（uni-app x / uvue）。
 色系与层级：

@@ -4,7 +4,7 @@ demo: avatar
 
 # nax-avatar
 
-> 当前版本：0.1.4
+> 当前版本：0.1.6
 
 uni-app x 头像组件，提供常用能力。
 

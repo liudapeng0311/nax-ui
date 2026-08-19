@@ -4,7 +4,7 @@ demo: checkbox
 
 # nax-checkbox / nax-checkbox-group
 
-> 当前版本：0.1.5
+> 当前版本：0.1.6
 
 uni-app x 复选框 / 复选框组。
 

@@ -4,7 +4,7 @@ demo: dropdown
 
 # nax-dropdown
 
-> 当前版本：0.1.7
+> 当前版本：0.1.9
 
 筛选栏式下拉菜单。
 

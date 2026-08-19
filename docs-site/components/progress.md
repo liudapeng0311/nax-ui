@@ -4,7 +4,7 @@ demo: progress
 
 # nax-progress
 
-> 当前版本：0.1.9
+> 当前版本：0.1.10
 
 进度条。线形 / 圆形统一入口，用 `shape` 切换。
 

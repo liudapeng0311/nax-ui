@@ -4,7 +4,7 @@ demo: image
 
 # nax-image
 
-> 当前版本：0.1.9
+> 当前版本：0.1.12
 
 `nax-ui` 图片组件（uni-app x / uvue）。
 基于原生 `image` 封装，提供统一尺寸/圆角 API，以及**加载中**与**加载失败**占位。

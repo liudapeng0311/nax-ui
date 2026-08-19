@@ -4,7 +4,7 @@ demo: virtual-list
 
 # nax-virtual-list
 
-> 当前版本：0.1.10
+> 当前版本：0.1.13
 
 固定行高**虚拟列表**。使用 `scroll-view` + 上下 spacer，只渲染可视区与缓冲行，适合一次性持有大量数据。
 > 与 `nax-list` 的区别：`nax-list` 是滚动壳（内容自行 `v-for`，不裁剪 DOM）；本组件接管数据源并做窗口裁剪。

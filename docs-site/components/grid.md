@@ -4,7 +4,7 @@ demo: grid
 
 # nax-grid / nax-grid-item
 
-> 当前版本：0.1.4
+> 当前版本：0.1.5
 
 宫格布局：由 `nax-grid` 容器 + `nax-grid-item` 子项组成。
 

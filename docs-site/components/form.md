@@ -4,7 +4,7 @@ demo: form
 
 # nax-form / nax-form-item
 
-> 当前版本：0.1.6
+> 当前版本：0.1.7
 
 uni-app x 表单 / 表单项，功能覆盖常用场景。
 

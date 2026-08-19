@@ -4,7 +4,7 @@ demo: text
 
 # nax-text
 
-> 当前版本：0.1.15
+> 当前版本：0.1.17
 
 uni-app x 文本组件。
 

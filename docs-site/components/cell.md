@@ -4,7 +4,7 @@ demo: cell
 
 # nax-cell / nax-cell-group
 
-> 当前版本：0.1.3
+> 当前版本：0.1.5
 
 单元格与单元格组。
 

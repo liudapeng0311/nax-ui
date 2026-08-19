@@ -4,7 +4,7 @@ demo: select
 
 # nax-select
 
-> 当前版本：0.1.18
+> 当前版本：0.1.22
 
 uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场景。
 
