@@ -11,6 +11,7 @@
 			<view class="section">
 				<text class="section__title">基础</text>
 				<nax-search
+					:custom-class="searchThemeClass"
 					v-model="basic"
 					@search="onSearch"
 					@custom="onCustom"
@@ -22,34 +23,35 @@
 			<view class="section">
 				<text class="section__title">形状 shape</text>
 				<view class="item">
-					<nax-search v-model="shapeRound" shape="round" placeholder="round 胶囊"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="shapeRound" shape="round" placeholder="round 胶囊"></nax-search>
 				</view>
 				<view class="item">
-					<nax-search v-model="shapeSquare" shape="square" placeholder="square 方角"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="shapeSquare" shape="square" placeholder="square 方角"></nax-search>
 				</view>
 			</view>
 
 			<view class="section">
 				<text class="section__title">尺寸 size</text>
 				<view class="item">
-					<nax-search v-model="sizeSm" size="sm" placeholder="sm"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="sizeSm" size="sm" placeholder="sm"></nax-search>
 				</view>
 				<view class="item">
-					<nax-search v-model="sizeMd" size="md" placeholder="md"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="sizeMd" size="md" placeholder="md"></nax-search>
 				</view>
 				<view class="item">
-					<nax-search v-model="sizeLg" size="lg" placeholder="lg"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="sizeLg" size="lg" placeholder="lg"></nax-search>
 				</view>
 			</view>
 
 			<view class="section">
 				<text class="section__title">无右侧按钮</text>
-				<nax-search v-model="noAction" :show-action="false" placeholder="show-action=false"></nax-search>
+				<nax-search :custom-class="searchThemeClass" v-model="noAction" :show-action="false" placeholder="show-action=false"></nax-search>
 			</view>
 
 			<view class="section">
 				<text class="section__title">animation（聚焦才显示操作）</text>
 				<nax-search
+					:custom-class="searchThemeClass"
 					v-model="anim"
 					animation
 					action-text="取消"
@@ -61,6 +63,7 @@
 			<view class="section">
 				<text class="section__title">label + 边框色</text>
 				<nax-search
+					:custom-class="searchThemeClass"
 					v-model="withLabel"
 					label="地址"
 					border-color="#18a058"
@@ -71,16 +74,17 @@
 			<view class="section">
 				<text class="section__title">对齐 input-align</text>
 				<view class="item">
-					<nax-search v-model="alignCenter" input-align="center" :show-action="false" placeholder="居中"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="alignCenter" input-align="center" :show-action="false" placeholder="居中"></nax-search>
 				</view>
 				<view class="item">
-					<nax-search v-model="alignRight" input-align="right" :show-action="false" placeholder="右对齐"></nax-search>
+					<nax-search :custom-class="searchThemeClass" v-model="alignRight" input-align="right" :show-action="false" placeholder="右对齐"></nax-search>
 				</view>
 			</view>
 
 			<view class="section">
 				<text class="section__title">自定义背景 / 图标色</text>
 				<nax-search
+					:custom-class="searchThemeClass"
 					v-model="customBg"
 					background="#e8f5ee"
 					search-icon-color="#18a058"
@@ -92,6 +96,7 @@
 			<view class="section">
 				<text class="section__title">禁用（点击跳转场景）</text>
 				<nax-search
+					:custom-class="searchThemeClass"
 					v-model="disabledVal"
 					disabled
 					placeholder="点击整条触发 click"
@@ -103,6 +108,7 @@
 			<view class="section">
 				<text class="section__title">清除 clearable</text>
 				<nax-search
+					:custom-class="searchThemeClass"
 					v-model="clearable"
 					:show-action="false"
 					@clear="onClear"
@@ -135,6 +141,19 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	const searchThemeClass = computed((): string => {
+		// App（含蒸汽）：将主题状态传入组件，驱动原生 input 字面量颜色
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (darkMode.value) {
+			return 'nax-theme nax-theme-dark'
+		}
+		return 'nax-theme'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	onShow(() => {

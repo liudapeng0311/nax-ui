@@ -304,6 +304,16 @@
 		return props.searchIcon.length > 0
 	})
 
+	const isAppDarkTheme = computed((): boolean => {
+		// App（含蒸汽）：组件隔离下 CSS 变量/后代选择器不可靠，主题状态由 custom-class 传递
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		return props.customClass.indexOf('nax-theme-dark') >= 0
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return false
+		// #endif
+	})
+
 	/**
 	 * 有内容即显示清除，不依赖 focus。
 	 * 原因：鸿蒙等端 input @focus 可能不触发；Web 点击清除会先 blur 卸载按钮导致 click 丢失。
@@ -412,6 +422,9 @@
 		if (props.placeholderStyle.length > 0) {
 			return props.placeholderStyle
 		}
+		if (isAppDarkTheme.value) {
+			return 'color: #ffffff61;'
+		}
 		const c = props.placeholderColor.length > 0 ? props.placeholderColor : '#e5e5ea'
 		return 'color: ' + c + ';'
 	})
@@ -476,6 +489,13 @@
 		style += 'text-align:' + alignName.value + ';'
 		if (props.color.length > 0) {
 			style += 'color:' + props.color + ';'
+		} else if (isAppDarkTheme.value) {
+			style += props.disabled ? 'color:#ffffff4d;' : 'color:#f5f5f5;'
+		} else {
+			// App（含蒸汽）：原生 input 文字颜色用字面量内联，避免 var() 失效退成白色不可见
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			style += props.disabled ? 'color:#e5e5ea;' : 'color:#333639;'
+			// #endif
 		}
 		// #ifdef APP-HARMONY
 		// 鸿蒙原生 input：固定高度 + 等值 line-height 垂直居中

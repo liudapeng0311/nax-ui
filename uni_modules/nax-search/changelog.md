@@ -1,3 +1,5 @@
+## 0.2.3（2026-08-19）
+- 修复蒸汽模式（App Android / iOS / HarmonyOS）输入文字显示为白色不可见：原生 input 默认文字色改为字面量内联样式，并通过 `custom-class` 支持暗色主题；Web / 微信小程序行为保持不变
 ## 0.2.2（2026-08-18）
 - 蒸汽模式兼容：移除 `.nax-search__action-text` 中已废弃的 `lines: 1` 声明（仅 VDOM 支持，Vapor 下告警），改用 `<text>` 的 `:max-lines="1"` 属性
 - 蒸汽模式（`VUE3-VAPOR`）兼容修复：下级选择器规则用 `#ifndef VUE3-VAPOR` 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
