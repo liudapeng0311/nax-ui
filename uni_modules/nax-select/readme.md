@@ -12,7 +12,8 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 
 | 点 | nax-select |
 |----|------------|
-| 弹层绑定 | `v-model:show`（布尔），避免占用表单 `v-model` 语义 |
+| 弹层绑定 | `v-model:show`（布尔）控制显隐 |
+| 选中值绑定 | `v-model`：单列为单项 `value`，多列 / 联动为 `value` 数组；内置触发条据此回显 |
 | mode 拼写 | 推荐 `multi-column` / `multi-column-auto`，兼容历史 `mutil-*` 拼写 |
 | 安全区 | `safe-area-inset-bottom` **默认 true** |
 | 触发条 | 可选 `show-trigger`，表单页可少写一层 Cell/Button |
@@ -45,14 +46,39 @@ function onConfirm(items: UTSJSONObject[]) {
 
 ## 内置触发条
 
+`v-model` 绑定选中值后，触发条会按 `list` 对应项的 `label` 回显；未绑定时仍显示 `placeholder`。有选中值时，下箭头左侧会出现清除按钮（`clearable`，默认开启），点击后清空选中并回写空的 `v-model`。
+
 ```uvue
 <nax-select
+  v-model="city"
   v-model:show="visible"
   show-trigger
   placeholder="请选择城市"
   :list="list"
   @confirm="onConfirm"
 ></nax-select>
+```
+
+```uts
+const city = ref('1')
+const visible = ref(false)
+```
+
+多列 / 联动把 `v-model` 绑成数组：
+
+```uvue
+<nax-select
+  v-model="region"
+  v-model:show="visible"
+  show-trigger
+  mode="multi-column-auto"
+  :list="regionList"
+  placeholder="省 / 市 / 区"
+></nax-select>
+```
+
+```uts
+const region = ref(['zhejiang', 'hangzhou', 'xihu'] as string[])
 ```
 
 ## 模式 mode
@@ -70,6 +96,7 @@ function onConfirm(items: UTSJSONObject[]) {
 | 属性 | 类型 | 默认 | 说明 |
 |------|------|------|------|
 | show | boolean | `false` | `v-model:show` 显隐 |
+| modelValue | string / number / boolean / array | `''` | `v-model` 选中值；单列单项，多列/联动为 value 数组 |
 | list | array | `[]` | 列数据 |
 | mode | string | `single-column` | 见上表 |
 | default-value | number[] | `[]` | 默认选中下标 |
@@ -81,6 +108,7 @@ function onConfirm(items: UTSJSONObject[]) {
 | safe-area-inset-bottom | boolean | `true` | 底部安全区 |
 | preserve-selection | boolean | `true` | 保留上次确认下标 |
 | show-trigger | boolean | `false` | 内置触发条 |
+| clearable | boolean | `true` | 触发条有选中值时显示清除按钮 |
 | placeholder | string | 请选择 | 触发条占位 |
 | disabled | boolean | `false` | 触发条禁用 |
 | separator | string | ` / ` | 多列展示分隔 |
@@ -94,8 +122,10 @@ function onConfirm(items: UTSJSONObject[]) {
 | 事件 | 说明 |
 |------|------|
 | update:show | 显隐 |
+| update:modelValue | 确认后回写选中值（单列单项 / 多列数组）；清除时回写空值 |
 | confirm | 确认，回调选中项数组 |
 | cancel | 取消或遮罩关闭 |
+| clear | 点击触发条清除按钮 |
 | change | 滚轮变化 |
 | open / close | 打开 / 关闭 |
 

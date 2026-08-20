@@ -62,7 +62,8 @@ easycom 自动注册，**无需手动 import**，在模板里直接写 `<nax-but
 ## 常见陷阱
 
 - **v-model 形式**：表单控件（input/checkbox/radio/switch/slider/number-box/rate）用
-  `v-model`；弹层组件（picker/dialog/action-sheet/calendar/datetime-picker）用 `v-model:show`。
+  `v-model`；弹层组件（picker/dialog/action-sheet/calendar）用 `v-model:show`。
+  `nax-select` / `nax-datetime-picker` 同时支持 `v-model:show`（显隐）与 `v-model`（选中值）。
 - **函数式组件**：`nax-toast` 用 `naxToast()` 函数调用，`nax-dialog` 支持
   `naxDialog()`/`naxDialogAlert()`/`naxDialogConfirm()` 命令式调用，需要先挂一次宿主组件
   （见组件卡）。

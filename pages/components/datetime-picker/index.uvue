@@ -31,10 +31,11 @@
 					mode="date"
 					show-trigger
 					title="选择日期"
-					placeholder="请选择日期"
-					@confirm="onDateConfirm"
-				></nax-datetime-picker>
-				<text class="hint">结果：{{ dateText }}</text>
+						placeholder="请选择日期"
+						@confirm="onDateConfirm"
+						@clear="onDateClear"
+					></nax-datetime-picker>
+					<text class="hint">结果：{{ dateText }}（有值时点下箭头左侧清除）</text>
 			</view>
 
 			<view class="section">
@@ -218,10 +219,15 @@
 		lastEvent.value = 'confirm datetime → ' + dtText.value
 	}
 
-	function onDateConfirm(e: UTSJSONObject) {
-		dateText.value = readFormatted(e)
-		lastEvent.value = 'confirm date → ' + dateText.value
-	}
+		function onDateConfirm(e: UTSJSONObject) {
+			dateText.value = readFormatted(e)
+			lastEvent.value = 'confirm date → ' + dateText.value
+		}
+	
+		function onDateClear() {
+			dateText.value = '未选择'
+			lastEvent.value = 'clear date'
+		}
 
 	function onTimeConfirm(e: UTSJSONObject) {
 		timeText.value = readFormatted(e)

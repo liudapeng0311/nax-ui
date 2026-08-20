@@ -46,9 +46,9 @@
 | `nax-input` | 单行输入；`v-model`、clearable、password | [components/nax-input.md](components/nax-input.md) |
 | `nax-textarea` | 多行文本域；`v-model`、count、auto-height | [components/nax-textarea.md](components/nax-textarea.md) |
 | `nax-search` | 搜索框；shape、showAction | [components/nax-search.md](components/nax-search.md) |
-| `nax-select` | 列选择器（底部弹层）；单列/多列/联动 | [components/nax-select.md](components/nax-select.md) |
+| `nax-select` | 列选择器（底部弹层）；单列/多列/联动；`v-model` + `v-model:show`；触发条可清除 | [components/nax-select.md](components/nax-select.md) |
 | `nax-picker` | 通用弹出容器（自定义弹层内容） | [components/nax-picker.md](components/nax-picker.md) |
-| `nax-datetime-picker` | 日期时间滚轮选择；`v-model:show` | [components/nax-datetime-picker.md](components/nax-datetime-picker.md) |
+| `nax-datetime-picker` | 日期时间滚轮选择；`v-model:show` + `v-model`；触发条可清除 | [components/nax-datetime-picker.md](components/nax-datetime-picker.md) |
 | `nax-calendar` | 日历；date/range | [components/nax-calendar.md](components/nax-calendar.md) |
 | `nax-keyboard` | 自定义键盘；number/car/card | [components/nax-keyboard.md](components/nax-keyboard.md) |
 | `nax-switch` | 开关；`v-model` | [components/nax-switch.md](components/nax-switch.md) |

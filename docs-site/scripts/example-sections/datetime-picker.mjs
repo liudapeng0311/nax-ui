@@ -5,7 +5,7 @@ export default [
   },
   {
     heading: '内置触发条 + 日期 date',
-    body: "show-trigger 内置触发条，点击展开弹层。\n\n```uvue\n<nax-datetime-picker\n\tv-model:show=\"dateShow\"\n\tv-model=\"dateValue\"\n\tmode=\"date\"\n\tshow-trigger\n\ttitle=\"选择日期\"\n\tplaceholder=\"请选择日期\"\n\t@confirm=\"onDateConfirm\"\n></nax-datetime-picker>\n```\n\n```uts\nconst dateShow = ref(false)\nconst dateValue = ref(0)\n\nfunction onDateConfirm(e : UTSJSONObject) {\n\tconst s = e.getString('formatted')\n\t// s：如 2026-08-13\n}\n```"
+    body: "show-trigger 内置触发条，点击展开弹层。有选中值时下箭头左侧显示清除按钮（clearable 默认开启）。\n\n```uvue\n<nax-datetime-picker\n\tv-model:show=\"dateShow\"\n\tv-model=\"dateValue\"\n\tmode=\"date\"\n\tshow-trigger\n\ttitle=\"选择日期\"\n\tplaceholder=\"请选择日期\"\n\t@confirm=\"onDateConfirm\"\n\t@clear=\"onDateClear\"\n></nax-datetime-picker>\n```\n\n```uts\nconst dateShow = ref(false)\nconst dateValue = ref(0)\n\nfunction onDateConfirm(e : UTSJSONObject) {\n\tconst s = e.getString('formatted')\n\t// s：如 2026-08-13\n}\n\nfunction onDateClear() {\n\t// 触发条清除，v-model 已回写 0\n}\n```"
   },
   {
     heading: '时间 time + 秒',

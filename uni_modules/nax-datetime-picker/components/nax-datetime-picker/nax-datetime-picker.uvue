@@ -9,12 +9,20 @@
 			:hover-stay-time="70"
 			@click="onTriggerClick"
 		>
-			<slot name="trigger">
-				<text class="nax-datetime-picker__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
-				<view class="nax-datetime-picker__trigger-arrow">
-					<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
-				</view>
-			</slot>
+				<slot name="trigger">
+					<text class="nax-datetime-picker__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+					<view
+						v-if="showClear"
+						class="nax-datetime-picker__trigger-clear"
+						@touchstart.stop.prevent="onClear"
+						@click.stop.prevent="onClear"
+					>
+						<nax-icon name="close" size="12" color="#ffffff"></nax-icon>
+					</view>
+					<view class="nax-datetime-picker__trigger-arrow">
+						<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
+					</view>
+				</slot>
 		</view>
 
 		<view v-if="rootMounted" class="nax-datetime-picker__root" :style="rootOverlayStyle">
@@ -253,9 +261,11 @@
 	 * @property {boolean} showSecond 是否显示秒列（datetime / time）
 	 * @property {boolean} showUnit 列文案是否带单位（年/月/日…）
 	 * @property {string} format 触发条/回传 formatted 自定义格式；空则按 mode 默认
-	 * @property {boolean} showTrigger 内置触发条
-	 * @event update:show / update:modelValue / confirm / cancel / change / open / close
-	 * @slot trigger 自定义触发区（需 showTrigger）
+		 * @property {boolean} showTrigger 内置触发条
+		 * @property {boolean} clearable 触发条有选中值时显示清除按钮，默认 true
+			 * @event update:show / update:modelValue / confirm / cancel / change / open / close
+			 * @event clear 点击触发条清除按钮
+		 * @slot trigger 自定义触发区（需 showTrigger）
 	 */
 	const props = defineProps({
 		show: { type: Boolean, default: false },
@@ -281,8 +291,9 @@
 		safeAreaInsetBottom: { type: Boolean, default: true },
 		zIndex: { type: Number, default: 10076 },
 		preserveSelection: { type: Boolean, default: true },
-		showTrigger: { type: Boolean, default: false },
-		placeholder: { type: String, default: '请选择' },
+			showTrigger: { type: Boolean, default: false },
+			clearable: { type: Boolean, default: true },
+			placeholder: { type: String, default: '请选择' },
 		disabled: { type: Boolean, default: false },
 		border: { type: Boolean, default: true },
 		size: { type: String, default: 'md' },
@@ -296,9 +307,10 @@
 		'confirm',
 		'cancel',
 		'change',
-		'open',
-		'close'
-	])
+			'open',
+			'close',
+			'clear'
+		])
 
 	const rootMounted = ref(false)
 	const panelShow = ref(false)
@@ -308,9 +320,11 @@
 	const columnNum = ref(0)
 	const pickerValue = ref([] as number[])
 	const lastSelectIndex = ref([] as number[])
-	const hasConfirmed = ref(false)
-	const confirmedTimestamp = ref(0)
-	const confirmedFormatted = ref('')
+		const hasConfirmed = ref(false)
+		const confirmedTimestamp = ref(0)
+		const confirmedFormatted = ref('')
+		/** 外部 v-model 曾经有过非空值；用于区分「未绑定 / 默认 0」与「绑定后清空」 */
+		const modelBound = ref(false)
 	const currentParts = ref([0, 0, 0, 0, 0, 0] as number[])
 	const safeBottomPx = ref(0)
 	const ANIM_DURATION = 280
@@ -438,10 +452,17 @@
 		return ''
 	})
 
-	const triggerDisplayText = computed((): string => {
-		if (!hasConfirmed.value || confirmedFormatted.value.length == 0) return props.placeholder
-		return confirmedFormatted.value
-	})
+		const triggerDisplayText = computed((): string => {
+			if (!hasConfirmed.value || confirmedFormatted.value.length == 0) return props.placeholder
+			return confirmedFormatted.value
+		})
+	
+		const showClear = computed((): boolean => {
+			if (!props.clearable) return false
+			if (!props.showTrigger) return false
+			if (props.disabled) return false
+			return hasConfirmed.value && confirmedFormatted.value.length > 0
+		})
 
 	const arrowColor = computed((): string => {
 		if (props.disabled) return 'var(--nax-color-text-disabled, #e5e5ea)'
@@ -1439,11 +1460,22 @@
 		emit('close')
 	}
 
-	function onTriggerClick() {
-		if (props.disabled) return
-		if (rootMounted.value && panelShow.value) return
-		openPicker()
-	}
+		function onTriggerClick() {
+			if (props.disabled) return
+			if (rootMounted.value && panelShow.value) return
+			openPicker()
+		}
+	
+			function onClear() {
+				if (props.disabled) return
+				if (!hasConfirmed.value) return
+				hasConfirmed.value = false
+				confirmedTimestamp.value = 0
+				confirmedFormatted.value = ''
+				modelBound.value = false
+				emit('update:modelValue', 0)
+				emit('clear')
+			}
 
 	function onMaskClick() {
 		if (!canCloseByMask.value) return
@@ -1464,10 +1496,11 @@
 		const result = buildResult(parts)
 		const ts = partsToTimestamp(parts)
 		const formatted = formatCurrent(parts)
-		hasConfirmed.value = true
-		confirmedTimestamp.value = ts
-		confirmedFormatted.value = formatted
-		emit('update:modelValue', ts)
+			hasConfirmed.value = true
+			confirmedTimestamp.value = ts
+			confirmedFormatted.value = formatted
+			modelBound.value = true
+			emit('update:modelValue', ts)
 		emit('confirm', result)
 		closePicker(true)
 	}
@@ -1567,16 +1600,33 @@
 		emit('change', buildResult(currentParts.value))
 	}
 
-		function syncConfirmedFromModel() {
-		const raw = props.modelValue
-		if (raw == null || raw == '' || raw == 0) return
-		const parts = clampParts(parseAnyToParts(raw, nowParts()))
-		const ts = partsToTimestamp(parts)
-		if (ts <= 0) return
-		hasConfirmed.value = true
-		confirmedTimestamp.value = ts
-		confirmedFormatted.value = formatCurrent(parts)
-	}
+				function syncConfirmedFromModel() {
+				const raw = props.modelValue
+				if (raw == null || raw == '' || raw == 0) {
+					if (modelBound.value) {
+						hasConfirmed.value = false
+						confirmedTimestamp.value = 0
+						confirmedFormatted.value = ''
+						modelBound.value = false
+					}
+					return
+				}
+				const parts = clampParts(parseAnyToParts(raw, nowParts()))
+				const ts = partsToTimestamp(parts)
+				if (ts <= 0) {
+					if (modelBound.value) {
+						hasConfirmed.value = false
+						confirmedTimestamp.value = 0
+						confirmedFormatted.value = ''
+						modelBound.value = false
+					}
+					return
+				}
+				hasConfirmed.value = true
+				confirmedTimestamp.value = ts
+				confirmedFormatted.value = formatCurrent(parts)
+				modelBound.value = true
+			}
 
 	watch((): boolean => {
 		return props.show
@@ -1685,13 +1735,25 @@
 	.nax-datetime-picker__trigger-text--placeholder { color: var(--nax-color-text-placeholder, #e5e5ea); }
 	.nax-datetime-picker__trigger-text--disabled { color: var(--nax-color-text-disabled, #e5e5ea); }
 
-	.nax-datetime-picker__trigger-arrow {
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		margin-left: var(--nax-space-2, 8px);
-		flex-shrink: 0;
-	}
+		.nax-datetime-picker__trigger-clear {
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			width: 16px;
+			height: 16px;
+			margin-left: var(--nax-space-2, 8px);
+			border-radius: 100px;
+			background-color: #c6c7cb;
+		}
+	
+		.nax-datetime-picker__trigger-arrow {
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+			margin-left: var(--nax-space-2, 8px);
+			flex-shrink: 0;
+		}
 
 	.nax-datetime-picker__root {
 		position: fixed;

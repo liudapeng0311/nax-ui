@@ -64,6 +64,7 @@ uni-app x 时间选择器（底部弹层 + `picker-view`）。
 | show-unit | true | 列单位 |
 | format | '' | 自定义 formatted |
 | show-trigger | false | 内置触发条 |
+| clearable | true | 触发条有选中值时显示清除按钮 |
 | mask-closable | true | 点遮罩关闭 |
 | safe-area-inset-bottom | true | 底部安全区 |
 
@@ -71,7 +72,9 @@ uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
 confirm 回调字段：value / timestamp / formatted / year / month / day / hour / minute / second / mode。
 
-另有 update:show、update:modelValue、cancel、change、open、close。
+另有 update:show、update:modelValue、cancel、change、open、close、clear。
+
+内置触发条有选中值时，下箭头左侧会出现清除按钮（`clearable`，默认开启），点击后清空选中并回写空的 `v-model`（`0`）。
 
 ## 平台说明
 

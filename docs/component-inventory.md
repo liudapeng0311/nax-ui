@@ -77,9 +77,9 @@
 | 输入框 | `nax-input` | P0 | 单行输入 | `v-model` `type(text/password/number/digit/tel/…；不含 idcard/select/textarea)` `placeholder` `clearable` `disabled` `readonly` `maxlength` `border` `inputAlign` `passwordIcon` `size` `prefixIcon` `suffixIcon` / `input` `change` `focus` `blur` `confirm` `clear` `click` **done** |
 | 搜索框 | `nax-search` | P0 | 搜索输入 | `v-model` `shape(round/square)` `placeholder` `clearable` `showAction` `actionText` `animation` `inputAlign` `disabled` `label` `searchIcon` `size` / `search` `custom` `change` `focus` `blur` `clear` `click` `clickIcon` **done** |
 | 多行输入 | `nax-textarea` | P1 | 多行文本 | `v-model` `placeholder` `height` `auto-height` `maxlength` `count` `disabled` `readonly` `border` `borderType` `confirmType` `focus` / `input` `change` `focus` `blur` `confirm` `linechange` `keyboardheightchange` `click` **done** |
-| 列选择器 | `nax-select` | P0 | 底部列选择 | `v-model:show` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` / `confirm` `cancel` `change` **done** |
+| 列选择器 | `nax-select` | P0 | 底部列选择 | `v-model:show` `v-model` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` `clearable` / `confirm` `cancel` `change` `clear` **done** |
 | 日历 | `nax-calendar` | P1 | 日期/范围选择 | `v-model:show` `mode(date/range)` `isPage` `minDate` `maxDate` `defaultDate` `startDate` `endDate` `readonly` `holidays` `workdays` `festivals` `checkinMode` / `change` `open` `close` **done** |
-| 时间选择 | `nax-datetime-picker` | P1 | 日期时间滚轮选择 | `v-model:show` `v-model` `mode(datetime/date/time/year-month/year/month-day)` `minDate` `maxDate` `showSecond` `showTrigger` / `confirm` `cancel` `change` **done** |
+| 时间选择 | `nax-datetime-picker` | P1 | 日期时间滚轮选择 | `v-model:show` `v-model` `mode(datetime/date/time/year-month/year/month-day)` `minDate` `maxDate` `showSecond` `showTrigger` `clearable` / `confirm` `cancel` `change` `clear` **done** |
 | 键盘 | `nax-keyboard` | P1 | 自定义键盘 | `v-model:show` `mode(number/car/card)` `dotEnabled` `tooltip` `tips` `random` `mask` / `change` `backspace` `confirm` `cancel` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换 | `v-model` `disabled` `loading` `size` `activeColor` `inactiveColor` `vibrateShort` / `change` **done** |
 | 滑动选择器 | `nax-slider` | P1 | 区间滑动选择 | `v-model` `start` `end` `min` `max` `step` `size` `blockWidth` `height` `activeColor` `inactiveColor` `blockColor` `disabled` `useSlot` `showEdgeValue` `edgeValuePosition` / `change` `start` `moving` `end` **done** |
@@ -148,7 +148,7 @@
 | `nax-ui-theme` | done | 默认色使用当前主题 |
 | `nax-avatar` | done | 插件包 `uni_modules/nax-avatar`；图片/文字/尺寸/形状/描边/fallback |
 | `nax-image` | done | 插件包 `uni_modules/nax-image`；统一尺寸/形状；loading/error 占位；demo `pages/components/image` |
-| `nax-select` | done | 插件包 `uni_modules/nax-select`；单列/多列/联动 + showTrigger；弹层动画复用 `nax-transition` |
+| `nax-select` | done | 插件包 `uni_modules/nax-select`；单列/多列/联动 + showTrigger；`v-model` 选中值绑定（单列单项 / 多列数组）；触发条 `clearable` 清除；弹层动画复用 `nax-transition` |
 | `nax-tag` | done | 插件包 `uni_modules/nax-tag`；type/variant/size/closable/checkable/round/bordered |
 | `nax-transition` | done | 插件包 `uni_modules/nax-transition`；fade/slide/zoom 预设；进退场事件 |
 | `nax-picker` | done | 插件包 `uni_modules/nax-picker`；通用弹出容器；position bottom/center/left/right；动画复用 `nax-transition` |
@@ -160,7 +160,7 @@
 | `nax-popup` | done | 插件包 `uni_modules/nax-popup`；压窗屏：App/Web `openDialogPage`；小程序页面级降级；详见 `docs/popup-window.md` |
 | `nax-keyboard` | done | 插件包 `uni_modules/nax-keyboard`；number/car/card、乱序、遮罩弹层、长按退格 |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
-| `nax-datetime-picker` | done | 插件包 `uni_modules/nax-datetime-picker`；mode datetime/date/time/year-month/year/month-day；v-model 时间戳；showSecond；minDate/maxDate；弹层复用 nax-transition |
+| `nax-datetime-picker` | done | 插件包 `uni_modules/nax-datetime-picker`；mode datetime/date/time/year-month/year/month-day；v-model 时间戳；showSecond；minDate/maxDate；触发条 `clearable` 清除；弹层复用 nax-transition |
 | `nax-checkbox` / `nax-checkbox-group` | done | 插件包 `uni_modules/nax-checkbox`；单独布尔 v-model / 组 string[]；provide-inject |
 | `nax-radio` / `nax-radio-group` | done | 插件包 `uni_modules/nax-radio`；单独布尔 v-model / 组 string；provide-inject |
 | `nax-switch` | done | 插件包 `uni_modules/nax-switch`；布尔 v-model；loading 分端旋转；transform 滑动 + 轨道变色过渡 |

@@ -23,18 +23,21 @@
 				></nax-select>
 			</view>
 
-			<view class="section">
-				<text class="section__title">内置触发条 show-trigger</text>
-				<nax-select
-					v-model:show="triggerShow"
-					show-trigger
-					placeholder="请选择城市"
-					:list="cityList"
-					title="城市"
-					@confirm="onTriggerConfirm"
-				></nax-select>
-				<text class="hint">结果：{{ triggerText }}</text>
-			</view>
+				<view class="section">
+					<text class="section__title">内置触发条 + v-model</text>
+					<nax-select
+						v-model="triggerValue"
+						v-model:show="triggerShow"
+						show-trigger
+						placeholder="请选择城市"
+						:list="cityList"
+						title="城市"
+						@confirm="onTriggerConfirm"
+						@clear="onTriggerClear"
+					></nax-select>
+					<text class="hint">v-model：{{ triggerValue }}</text>
+					<text class="hint">结果：{{ triggerText }}（有值时点下箭头左侧清除）</text>
+				</view>
 
 			<view class="section">
 				<text class="section__title">多列 multi-column</text>
@@ -51,18 +54,20 @@
 
 			<view class="section">
 				<text class="section__title">多列联动 multi-column-auto</text>
-				<nax-select
-					v-model:show="cascadeShow"
-					show-trigger
-					mode="multi-column-auto"
-					:list="regionList"
-					title="选择地区"
-					placeholder="省 / 市 / 区"
-					@confirm="onCascadeConfirm"
-					@change="onCascadeChange"
-				></nax-select>
-				<text class="hint">结果：{{ cascadeText }}</text>
-				<text class="hint">滚动中：{{ cascadeLive }}</text>
+					<nax-select
+						v-model="cascadeValue"
+						v-model:show="cascadeShow"
+						show-trigger
+						mode="multi-column-auto"
+						:list="regionList"
+						title="选择地区"
+						placeholder="省 / 市 / 区"
+						@confirm="onCascadeConfirm"
+						@change="onCascadeChange"
+						@clear="onCascadeClear"
+					></nax-select>
+					<text class="hint">结果：{{ cascadeText }}</text>
+					<text class="hint">滚动中：{{ cascadeLive }}</text>
 			</view>
 
 			<view class="section">
@@ -138,8 +143,9 @@
 		{ value: 'mango', label: '芒果' }
 	]
 
-	const triggerShow = ref(false)
-	const triggerText = ref('未选择')
+		const triggerShow = ref(false)
+		const triggerValue = ref('sh')
+		const triggerText = ref('上海(sh)')
 	const cityList = [
 		{ value: 'bj', label: '北京' },
 		{ value: 'sh', label: '上海' },
@@ -165,8 +171,9 @@
 		]
 	]
 
-	const cascadeShow = ref(false)
-	const cascadeText = ref('未选择')
+		const cascadeShow = ref(false)
+		const cascadeValue = ref(['zhejiang', 'hangzhou', 'xihu'] as string[])
+		const cascadeText = ref('浙江(zhejiang) / 杭州(hangzhou) / 西湖(xihu)')
 	const cascadeLive = ref('-')
 	const regionList = [
 		{
@@ -260,20 +267,30 @@
 		lastEvent.value = 'confirm single'
 	}
 
-	function onTriggerConfirm(items: UTSJSONObject[]) {
-		triggerText.value = formatItems(items)
-		lastEvent.value = 'confirm trigger'
-	}
+		function onTriggerConfirm(items: UTSJSONObject[]) {
+			triggerText.value = formatItems(items)
+			lastEvent.value = 'confirm trigger'
+		}
+	
+		function onTriggerClear() {
+			triggerText.value = '未选择'
+			lastEvent.value = 'clear trigger'
+		}
 
 	function onMultiConfirm(items: UTSJSONObject[]) {
 		multiText.value = formatItems(items)
 		lastEvent.value = 'confirm multi'
 	}
 
-	function onCascadeConfirm(items: UTSJSONObject[]) {
-		cascadeText.value = formatItems(items)
-		lastEvent.value = 'confirm cascade'
-	}
+		function onCascadeConfirm(items: UTSJSONObject[]) {
+			cascadeText.value = formatItems(items)
+			lastEvent.value = 'confirm cascade'
+		}
+	
+		function onCascadeClear() {
+			cascadeText.value = '未选择'
+			lastEvent.value = 'clear cascade'
+		}
 
 	function onCascadeChange(items: UTSJSONObject[]) {
 		cascadeLive.value = formatItems(items)

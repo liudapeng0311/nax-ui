@@ -4,7 +4,7 @@ demo: select
 
 # nax-select
 
-> 当前版本：0.1.22
+> 当前版本：0.3.0
 
 uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场景。
 
@@ -46,14 +46,39 @@ function onConfirm(items: UTSJSONObject[]) {
 
 ::: details 内置触发条
 
+`v-model` 绑定选中值后，触发条会按 `list` 对应项的 `label` 回显；未绑定时仍显示 `placeholder`。有选中值时，下箭头左侧会出现清除按钮（`clearable`，默认开启），点击后清空选中并回写空的 `v-model`。
+
 ```uvue
 <nax-select
+  v-model="city"
   v-model:show="visible"
   show-trigger
   placeholder="请选择城市"
   :list="list"
   @confirm="onConfirm"
 ></nax-select>
+```
+
+```uts
+const city = ref('1')
+const visible = ref(false)
+```
+
+多列 / 联动把 `v-model` 绑成数组：
+
+```uvue
+<nax-select
+  v-model="region"
+  v-model:show="visible"
+  show-trigger
+  mode="multi-column-auto"
+  :list="regionList"
+  placeholder="省 / 市 / 区"
+></nax-select>
+```
+
+```uts
+const region = ref(['zhejiang', 'hangzhou', 'xihu'] as string[])
 ```
 
 :::
@@ -101,22 +126,24 @@ function onCancel() {
 
 :::
 
-::: details 内置触发条 show-trigger
+::: details 内置触发条 + v-model
 
 ```uvue
 <nax-select
+	v-model="triggerValue"
 	v-model:show="triggerShow"
 	show-trigger
 	placeholder="请选择城市"
 	:list="cityList"
 	title="城市"
 	@confirm="onTriggerConfirm"
+	@clear="onTriggerClear"
 ></nax-select>
 ```
 
 ```uts
 const triggerShow = ref(false)
-const triggerText = ref('未选择')
+const triggerValue = ref('sh')
 const cityList = [
 	{ value: 'bj', label: '北京' },
 	{ value: 'sh', label: '上海' },
@@ -126,7 +153,11 @@ const cityList = [
 ]
 
 function onTriggerConfirm(items: UTSJSONObject[]) {
-	triggerText.value = '已选择'
+	// 确认后 v-model 已回写选中 value，触发条按 label 回显
+}
+
+function onTriggerClear() {
+	// 触发条清除，v-model 已回写空值
 }
 ```
 
@@ -175,6 +206,7 @@ function onMultiConfirm(items: UTSJSONObject[]) {
 
 ```uvue
 <nax-select
+	v-model="cascadeValue"
 	v-model:show="cascadeShow"
 	show-trigger
 	mode="multi-column-auto"
@@ -188,6 +220,7 @@ function onMultiConfirm(items: UTSJSONObject[]) {
 
 ```uts
 const cascadeShow = ref(false)
+const cascadeValue = ref(['zhejiang', 'hangzhou', 'xihu'] as string[])
 const cascadeText = ref('未选择')
 const cascadeLive = ref('-')
 // 联动数据：children 表示下一级
@@ -326,7 +359,8 @@ const fruitList = [
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| show | boolean | `false` | v-model:show 控制弹层显隐（对齐  的 v-model 布尔用法） |
+| show | boolean | `false` | v-model:show 控制弹层显隐 |
+| modelValue | [String, Number, Boolean, Array] | `'' as any` | v-model 选中值；单列为单项 value，多列/联动为 value 数组 |
 | list | array | `() => [] as any[]` | 列数据；单列一维 / 多列二维 / 联动树形（children） |
 | mode | string | `'single-column'` | `single-column` 单列 \| `multi-column` 多列 \| `multi-column-auto` 多列联动（兼容 `mutil-column` / `mutil-column-auto`） |
 | defaultValue | array | `() => [] as any[]` | 默认选中下标数组，如 [0] / [1, 2] |
@@ -343,6 +377,7 @@ const fruitList = [
 | zIndex | number | `10075` | 弹层层级，默认 10075 |
 | preserveSelection | boolean | `true` | 再次打开是否保留上次确认项，默认 true |
 | showTrigger | boolean | `false` | 是否渲染内置触发条 |
+| clearable | boolean | `true` | 触发条有选中值时显示清除按钮，默认 true |
 | placeholder | string | `'请选择'` | 触发条占位 |
 | disabled | boolean | `false` | 触发条禁用 |
 | separator | string | `' / '` | 多列展示分隔符，默认「 / 」 |
@@ -367,11 +402,13 @@ const fruitList = [
 | 事件 | 说明 |
 |------|------|
 | update:show | 弹层显隐 |
+| update:modelValue | 确认后回写选中值（单列单项 / 多列数组） |
 | confirm | 点确认，回调选中项数组 { value, label, index, extra? } |
 | cancel | 点取消 / 遮罩关闭，回调当前滚轮项 |
 | change | 滚轮变化（当前选中项数组） |
 | open | 弹层打开 |
 | close | 弹层关闭 |
+| clear | 点击触发条清除按钮 |
 
 
 ## Slots

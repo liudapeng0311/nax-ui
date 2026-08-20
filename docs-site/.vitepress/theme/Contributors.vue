@@ -7,6 +7,9 @@ interface Contributor {
 const contributors: Contributor[] = [{
   nickname: 'loy',
   avatar: '/contributors/loy.jpg'
+}, {
+  nickname: '小梁',
+  avatar: '/contributors/xiaoliang.png'
 }]
 </script>
 

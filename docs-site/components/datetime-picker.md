@@ -4,7 +4,7 @@ demo: datetime-picker
 
 # nax-datetime-picker
 
-> 当前版本：0.1.21
+> 当前版本：0.2.0
 
 uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
@@ -68,7 +68,7 @@ function onCancel(name : string) {
 
 ::: details 内置触发条 + 日期 date
 
-show-trigger 内置触发条，点击展开弹层。
+show-trigger 内置触发条，点击展开弹层。有选中值时下箭头左侧显示清除按钮（clearable 默认开启）。
 
 ```uvue
 <nax-datetime-picker
@@ -79,6 +79,7 @@ show-trigger 内置触发条，点击展开弹层。
 	title="选择日期"
 	placeholder="请选择日期"
 	@confirm="onDateConfirm"
+	@clear="onDateClear"
 ></nax-datetime-picker>
 ```
 
@@ -89,6 +90,10 @@ const dateValue = ref(0)
 function onDateConfirm(e : UTSJSONObject) {
 	const s = e.getString('formatted')
 	// s：如 2026-08-13
+}
+
+function onDateClear() {
+	// 触发条清除，v-model 已回写 0
 }
 ```
 
@@ -297,6 +302,7 @@ function onFmtConfirm(e : UTSJSONObject) {
 | zIndex | number | `10076` | 弹层层级 |
 | preserveSelection | boolean | `true` | 重新打开时保留上次确认的选中值 |
 | showTrigger | boolean | `false` | 内置触发条 |
+| clearable | boolean | `true` | 触发条有选中值时显示清除按钮，默认 true |
 | placeholder | string | `'请选择'` | 触发条占位文案 |
 | disabled | boolean | `false` | 禁用（触发条模式） |
 | border | boolean | `true` | 触发条边框 |
@@ -327,6 +333,7 @@ function onFmtConfirm(e : UTSJSONObject) {
 | change | 滚轮变化（当前选中值） |
 | open | 弹层打开 |
 | close | 弹层关闭 |
+| clear | 点击触发条清除按钮 |
 
 
 ## Slots

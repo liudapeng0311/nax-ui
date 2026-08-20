@@ -38,6 +38,7 @@ uni-app x 时间选择器（底部弹层 + `picker-view`）。
 | show-unit | true | 列单位 |
 | format | '' | 自定义 formatted |
 | show-trigger | false | 内置触发条 |
+| clearable | true | 触发条有选中值时显示清除按钮 |
 | mask-closable | true | 点遮罩关闭 |
 | safe-area-inset-bottom | true | 底部安全区 |
 

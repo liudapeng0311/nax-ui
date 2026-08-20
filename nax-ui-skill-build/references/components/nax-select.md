@@ -16,11 +16,23 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 
 ```uvue
 <nax-select
+  v-model="city"
   v-model:show="visible"
   show-trigger
   placeholder="请选择城市"
   :list="list"
   @confirm="onConfirm"
+></nax-select>
+```
+
+```uvue
+<nax-select
+  v-model="region"
+  v-model:show="visible"
+  show-trigger
+  mode="multi-column-auto"
+  :list="regionList"
+  placeholder="省 / 市 / 区"
 ></nax-select>
 ```
 
@@ -37,6 +49,7 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 | 属性 | 类型 | 默认 | 说明 |
 |---|---|---|---|
 | show | boolean | `false` | `v-model:show` 显隐 |
+| modelValue | string / number / boolean / array | `''` | `v-model` 选中值；单列单项，多列/联动为 value 数组 |
 | list | array | `[]` | 列数据 |
 | mode | string | `single-column` | 见上表 |
 | default-value | number[] | `[]` | 默认选中下标 |
@@ -48,6 +61,7 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 | safe-area-inset-bottom | boolean | `true` | 底部安全区 |
 | preserve-selection | boolean | `true` | 保留上次确认下标 |
 | show-trigger | boolean | `false` | 内置触发条 |
+| clearable | boolean | `true` | 触发条有选中值时显示清除按钮 |
 | placeholder | string | 请选择 | 触发条占位 |
 | disabled | boolean | `false` | 触发条禁用 |
 | separator | string | ` / ` | 多列展示分隔 |
@@ -61,8 +75,10 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 | 事件 | 说明 |
 |---|---|
 | update:show | 显隐 |
+| update:modelValue | 确认后回写选中值（单列单项 / 多列数组）；清除时回写空值 |
 | confirm | 确认，回调选中项数组 |
 | cancel | 取消或遮罩关闭 |
+| clear | 点击触发条清除按钮 |
 | change | 滚轮变化 |
 | open / close | 打开 / 关闭 |
 
