@@ -332,6 +332,8 @@
 	/** 程序化改列/下标时忽略 change，避免鸿蒙 remount 死循环 */
 	let suppressPickerEvent: boolean = false
 	let suppressTimer: number = -1
+	const clearSuppress = ref(false)
+	let clearButtonSuppressTimer: number = -1
 
 	const column0 = ref([] as number[])
 	const column1 = ref([] as number[])
@@ -1040,6 +1042,29 @@
 		}, delay)
 	}
 
+	function clearClearSuppressTimer() {
+		if (clearButtonSuppressTimer >= 0) {
+			clearTimeout(clearButtonSuppressTimer)
+			clearButtonSuppressTimer = -1
+		}
+	}
+
+	function armClearSuppress() {
+		clearSuppress.value = true
+		clearClearSuppressTimer()
+		// 鸿蒙原生 picker 异步回抛事件，清空后的触发条点击需保留短暂抑制窗口。
+		// #ifdef APP-HARMONY
+		const delay = 100
+		// #endif
+		// #ifndef APP-HARMONY
+		const delay = 32
+		// #endif
+		clearButtonSuppressTimer = setTimeout(() => {
+			clearButtonSuppressTimer = -1
+			clearSuppress.value = false
+		}, delay)
+	}
+
 	/**
 	 * 重建列数据（不改 picker key）。
 	 * 滚动 change 中禁止 remount：与 nax-select 一致，避免鸿蒙闪 0 再跳目标 / 死循环。
@@ -1443,6 +1468,8 @@
 		if (panelShow.value) return
 		clearSuppressTimer()
 		suppressPickerEvent = false
+		clearClearSuppressTimer()
+		clearSuppress.value = false
 		// #ifdef APP-IOS
 		if (wheelLocateTimer >= 0) {
 			clearTimeout(wheelLocateTimer)
@@ -1462,20 +1489,29 @@
 
 		function onTriggerClick() {
 			if (props.disabled) return
+			// 鸿蒙上清空按钮的点击仍可能冒泡到触发条，不能因此重新打开弹层。
+			// #ifdef APP-HARMONY
+			if (clearSuppress.value) {
+				clearSuppress.value = false
+				clearClearSuppressTimer()
+				return
+			}
+			// #endif
 			if (rootMounted.value && panelShow.value) return
 			openPicker()
 		}
 	
-			function onClear() {
-				if (props.disabled) return
-				if (!hasConfirmed.value) return
-				hasConfirmed.value = false
-				confirmedTimestamp.value = 0
-				confirmedFormatted.value = ''
-				modelBound.value = false
-				emit('update:modelValue', 0)
-				emit('clear')
-			}
+	function onClear() {
+		if (props.disabled) return
+		if (!hasConfirmed.value) return
+		armClearSuppress()
+		hasConfirmed.value = false
+		confirmedTimestamp.value = 0
+		confirmedFormatted.value = ''
+		modelBound.value = false
+		emit('update:modelValue', 0)
+		emit('clear')
+	}
 
 	function onMaskClick() {
 		if (!canCloseByMask.value) return
@@ -1533,6 +1569,11 @@
 	}
 
 	function onColumnChange(e: UniPickerViewChangeEvent) {
+		if (clearSuppress.value) {
+			clearSuppress.value = false
+			clearClearSuppressTimer()
+			return
+		}
 		if (suppressPickerEvent) {
 			return
 		}

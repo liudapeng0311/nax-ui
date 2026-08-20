@@ -416,6 +416,7 @@
 			const modelBound = ref(false)
 	const safeBottomPx = ref(0)
 	const clearSuppress = ref(false)
+	let clearSuppressTimer: number = -1
 	const ANIM_DURATION = 280
 	let openDelayTimer: number = -1
 
@@ -1431,6 +1432,29 @@
 		}
 	}
 
+	function clearClearSuppressTimer() {
+		if (clearSuppressTimer >= 0) {
+			clearTimeout(clearSuppressTimer)
+			clearSuppressTimer = -1
+		}
+	}
+
+	function armClearSuppress() {
+		clearSuppress.value = true
+		clearClearSuppressTimer()
+		// 鸿蒙原生 picker 异步回抛 change，保留足够窗口吞掉清空后的回调。
+		// #ifdef APP-HARMONY
+		const delay = 100
+		// #endif
+		// #ifndef APP-HARMONY
+		const delay = 32
+		// #endif
+		clearSuppressTimer = setTimeout(() => {
+			clearSuppressTimer = -1
+			clearSuppress.value = false
+		}, delay)
+	}
+
 	function openPicker() {
 		if (props.disabled) {
 			return
@@ -1518,6 +1542,8 @@
 		}
 		wheelLocked = false
 		// #endif
+		clearClearSuppressTimer()
+		clearSuppress.value = false
 		rootMounted.value = false
 		readyToRender.value = false
 		moving.value = false
@@ -1528,6 +1554,14 @@
 			if (props.disabled) {
 				return
 			}
+			// 鸿蒙上清空按钮的点击仍可能冒泡到触发条，不能因此重新打开弹层。
+			// #ifdef APP-HARMONY
+			if (clearSuppress.value) {
+				clearSuppress.value = false
+				clearClearSuppressTimer()
+				return
+			}
+			// #endif
 			// 完全展开时忽略；收起动画中允许再次打开
 			if (rootMounted.value && panelShow.value) {
 				return
@@ -1550,7 +1584,7 @@
 					if (confirmedResult.value.length == 0) {
 						return
 					}
-					clearSuppress.value = true
+					armClearSuppress()
 					confirmedResult.value = [] as UTSJSONObject[]
 					savedSelector.value = [] as number[]
 					hasSavedSelector.value = false
@@ -1672,6 +1706,7 @@
 	function onColumnChange(e: UniPickerViewChangeEvent) {
 				if (clearSuppress.value) {
 					clearSuppress.value = false
+					clearClearSuppressTimer()
 					return
 				}
 				const detail = e.detail
