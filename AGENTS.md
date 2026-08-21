@@ -149,36 +149,29 @@ nax-ui/                          # 演示宿主
 
 ---
 
-## 5. 文档同步规则
+## 5. 文档与周边同步规则
 
-以下变更 **必须** 同步文档：
+**默认原则：修改 `uni_modules/nax-*` 组件包（代码 / API / 样式 / 行为 / 兼容性）时，只改组件本身与对应 demo 页；不主动联动更新任何文档、changelog、版本号、套装聚合信息或技能包。**
 
-| 变更 | 更新文件 |
-|------|----------|
-| 新增组件 | `docs/component-inventory.md` 状态看板 |
-| 调整分期/优先级 | `docs/component-inventory.md` |
-| 新增/修改 token | `docs/design-system.md` |
-| 公共 API 原则变化 | `docs/design-system.md` |
-| 组件包代码 / API / 样式 / 行为 / 依赖变化 | 对应组件的 `changelog.md` + `package.json` 版本号；并检查 `uni_modules/nax-ui` 套装是否需要同步 |
-| 新增/移除组件包 | `uni_modules/nax-ui` 套装 `package.json` 的 `uni_modules.dependencies` + `changelog.md` + 版本号 |
-| 组件 API / 主题 token / 组件数量变化 | **必须检查技能包 `nax-ui-skill-build` 是否需要同步更新**（见 5.2） |
-| 仓库协作约束变化 | `AGENTS.md` |
+以下同步动作 **仅在用户明确要求时** 才执行：
 
-完成组件实现后：
+| 用户要求 | 更新文件 |
+|----------|----------|
+| 同步设计规范 / 组件清单 | `docs/design-system.md`、`docs/component-inventory.md` |
+| 记录版本 / 发布说明 | 对应组件包的 `changelog.md` + `package.json` 版本号（按 5.1 规则） |
+| 同步套装聚合信息 | `uni_modules/nax-ui` 套装 `package.json` / `changelog.md` / `readme.md` |
+| 同步技能包 | `nax-ui-skill-build/`（按 5.2 映射，发布走 5.3 流程） |
+| 协作约束变化 | `AGENTS.md` |
 
-- 将看板 `planned` → `done`
-- 补充 demo 页
-- 如有已知端差异，写在组件说明或清单备注
+用户未明确要求时，**不要**为"保持一致"而顺手改动上述文件，避免无关文件打扰。
 
-**不要**只写代码不改清单，导致文档漂移。
+### 5.1 组件版本与 changelog（按用户要求执行）
 
-### 5.1 组件版本与 changelog（硬约束）
-
-凡修改 `uni_modules/nax-*` 组件包（包括组件代码、公共 API、样式、行为、兼容性、依赖或随包发布的文档），必须在同一次任务中：
+仅当用户明确要求记录版本 / 更新 changelog 时，才执行以下操作：
 
 1. 在对应组件包的 `changelog.md` 顶部增加本次改动说明，包含新版本号、日期、主要变化；涉及端差异时写明平台与条件编译宏
-2. 自动更新对应组件包 `package.json` 的 `version`；如包内还有需要保持一致的发布版本字段，也一并同步
-3. 版本号由 AI 根据改动内容按 SemVer 判断，无需等待用户指定：
+2. 更新对应组件包 `package.json` 的 `version`；如包内还有需要保持一致的发布版本字段，也一并同步
+3. 版本号按 SemVer 判断：
 
 | 升级位 | 适用情况 | 示例 |
 |--------|----------|------|
@@ -188,17 +181,15 @@ nax-ui/                          # 演示宿主
 
 补充约定：
 
-- **每次修改任一 `nax-*` 组件包时，必须检查套装 `uni_modules/nax-ui` 是否需要同步更新**（它不收录组件源码，只聚合依赖）：
+- 若用户同时要求同步套装 `uni_modules/nax-ui`（它不收录组件源码，只聚合依赖）：
   - 新增/移除组件包 → 更新套装 `package.json` 的 `uni_modules.dependencies` 列表与 readme 中的组件数量表述
-  - 套装依赖列表、平台支持、聚合说明等变化 → 同步套装 `changelog.md` + `package.json` 版本号（新增组件按 `minor`，修复类同步按 `patch`）
-  - 若仅组件内部实现变化、套装聚合信息无任何变化，可在套装 `changelog.md` 记一条“依赖组件更新”说明并递增 `patch`，或经判断确认无需更新并在任务说明中写明原因
-- 仅修改演示宿主页、且组件包本身未变化时，不强制升级组件版本
-- 为记录本次版本而修改 `changelog.md` / `package.json`，不视为需要再次递增版本号的新一轮组件改动
+  - 依赖组件更新 → 套装 `changelog.md` 记一条说明并递增版本（新增组件按 `minor`，修复类按 `patch`）
 - 同一任务多次修改同一组件包时只确定一个最终版本，changelog 合并记录本次任务的全部变化
+- 为记录版本而修改 `changelog.md` / `package.json`，不视为需要再次递增版本号的新一轮组件改动
 
-### 5.2 技能包同步与发布（硬约束）
+### 5.2 技能包同步（按用户要求执行）
 
-**技能包**（`nax-ui-skill-build/`，发布为 GitHub `liudapeng0311/nax-ui-skills`）是给 AI 编码助手使用的 nax-ui 使用指南。**凡修改任一 `nax-*` 组件包或 `nax-ui-theme` 的公共 API / 样式 / 行为 / 依赖 / 组件数量，必须检查技能包是否需要同步更新**：
+**技能包**（`nax-ui-skill-build/`，发布为 GitHub `liudapeng0311/nax-ui-skills`）是给 AI 编码助手使用的 nax-ui 使用指南。**仅当用户明确要求同步技能包时**，按以下映射更新：
 
 | 组件包变更 | 技能包动作 |
 |-----------|-----------|
@@ -208,7 +199,7 @@ nax-ui/                          # 演示宿主
 | 主题 token 变化 | 检查 `references/theme-guide.md` 及受影响组件卡 token 表是否需同步 |
 | 组件 readme 文档变化 | 重新生成组件卡（脚本以 readme 为数据源） |
 
-判断标准：**组件卡的"用法示例 / Props / Events / Slots / Methods / 依赖"与组件实际 API 不一致时，必须更新**；仅内部实现（不改公共 API）可不更新，但需在任务说明中写明判断依据。
+判断标准：组件卡的"用法示例 / Props / Events / Slots / Methods / 依赖"与组件实际 API 不一致时，更新对应组件卡。
 
 ### 5.3 技能包发布流程
 
@@ -320,11 +311,7 @@ const emit = defineEmits(['click'])
 - [ ] 若需求涉及鸿蒙 / 安卓 / iOS / Web / 小程序等平台表述，端差异已用 `#ifdef` / `#ifndef` 隔离
 - [ ] 命名符合 `nax-` / easycom
 - [ ] 样式符合 ucss / 隔离 2.0 思路
-- [ ] 清单或设计文档已同步
-- [ ] 每个发生变化的组件包均已更新对应 `changelog.md`
-- [ ] 每个发生变化的组件包均已按 SemVer 自动递增并同步 `package.json` 版本号
-- [ ] 已检查套装 `uni_modules/nax-ui` 是否需要同步（依赖列表 / 版本号 / changelog）
-- [ ] **已检查技能包 `nax-ui-skill-build` 是否需要同步**（组件 API / 主题 token / 组件数量变化时，按 5.2 / 5.3 处理；不需要更新时在任务说明写明判断依据）
+- [ ] **未主动改动文档 / changelog / 版本号 / 套装 / 技能包**（除非用户在本次任务中明确要求同步）
 - [ ] 有可运行 demo 或明确说明为何没有
 - [ ] 除 Web 端外，未主动运行或编译其它端；非 Web 端由用户自行核实
 - [ ] 无无关重构与无关文件打扰

@@ -2,7 +2,7 @@
 
 `nax-ui` 是面向 uni-app x 的 UI 组件套装入口。
 
-组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前全部 51 个 `nax-*` 组件包与 `nax-ui-theme`。可以安装整套，也可以只安装需要的独立组件。
+组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前 51 个 `nax-*` 组件包与 `nax-ui-theme`（`nax-video` 独立发布，不在套装内）。可以安装整套，也可以只安装需要的独立组件。
 
 ## 官方文档
 

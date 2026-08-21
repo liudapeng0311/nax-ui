@@ -1,4 +1,4 @@
-# nax-ui 组件索引（50 个）
+# nax-ui 组件索引（51 个）
 
 按需选择组件：**先看这里确定组件名，再读 `components/<name>.md` 获取完整 API**。
 所有组件 easycom 自动注册，模板中直接写 `<nax-xxx>` 即可，无需 import。
@@ -14,6 +14,7 @@
 | `nax-line` | 纯线条（布局分隔）；hairline/sm/md/lg | [components/nax-line.md](components/nax-line.md) |
 | `nax-divider` | 分割线（可带文字） | [components/nax-divider.md](components/nax-divider.md) |
 | `nax-tag` | 标签；type/variant/size/closable/checkable | [components/nax-tag.md](components/nax-tag.md) |
+| `nax-rich-text` | 富文本；HTML 字符串/节点列表、App 渲染模式（web 默认/native 可选，自动回退）、内容点击（图片/链接） | [components/nax-rich-text.md](components/nax-rich-text.md) |
 
 ## 布局与列表单元
 

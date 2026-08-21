@@ -9,7 +9,7 @@
 
 命名统一：`nax-<name>`；组件包目录：`uni_modules/nax-<name>/components/nax-<name>/nax-<name>.uvue`；套装入口为 `uni_modules/nax-ui`，仅聚合依赖。
 
-当前落地：50 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。
+当前落地：51 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。
 
 ---
 
@@ -42,6 +42,7 @@
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
 | 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` `contentPosition` `size` `type` / **done** |
 | 标签 | `nax-tag` | P1 | 状态/分类标记 | `type` `variant` `size` `closable` `round` `bordered` `checkable` `checked` / `close` `click` `update:checked` **done** |
+| 富文本 | `nax-rich-text` | P1 | 内置 rich-text 封装：HTML/节点列表、App 渲染模式、全局样式、内容点击 | `content` `nodes` `mode(native/web)` `userSelect` `space` `size` `color` `lineHeight` `fontFamily` / `click` `itemclick` **done** |
 
 ### 2.2 布局与列表单元
 
@@ -180,6 +181,7 @@
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
 | `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
+| `nax-rich-text` | done | 插件包 `uni_modules/nax-rich-text`；内置 rich-text 封装；content/nodes 双入口；App `mode` 默认 web（native 可选，含 h1-h6/ul/li 等结构标签或 iOS/鸿蒙 user-select 时自动回退 web）；全局 size/color/lineHeight/fontFamily 写在 rich-text 元素上；`itemclick` 小程序端官方不支持 |
 
 | `nax-progress` | done | 插件包 `uni_modules/nax-progress`；shape line/circle；type/status/size/showInfo/textInside/useSlot；双半环圆形 |
 | `nax-steps` | done | 插件包 `uni_modules/nax-steps`；`nax-steps`+`nax-step`；list/组合；horizontal/vertical；number/dot；type；单步 status；clickable；demo `pages/components/steps` |
