@@ -25,17 +25,6 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 ></nax-select>
 ```
 
-```uvue
-<nax-select
-  v-model="region"
-  v-model:show="visible"
-  show-trigger
-  mode="multi-column-auto"
-  :list="regionList"
-  placeholder="省 / 市 / 区"
-></nax-select>
-```
-
 ## Props — 模式 mode
 
 | 值 | 说明 | list 形态 |

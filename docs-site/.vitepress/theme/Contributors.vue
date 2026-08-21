@@ -72,6 +72,11 @@ const contributors: Contributor[] = [{
   list-style: none;
 }
 
+/* 重置 VitePress 全局 .vp-doc li + li 的 margin-top，保证卡片在网格中对齐 */
+.nax-contributors__list > li {
+  margin: 0;
+}
+
 .nax-contributors__item {
   display: flex;
   align-items: center;
