@@ -38,6 +38,7 @@ function onChange(index: number) {
 | keyName | string | `'name'` | 文案优先字段名 |
 | scrollable | boolean | `true` | 横向滚动；`false` 时均分宽度 |
 | scrollAlign | string | 'center' | 可滚动时激活项对齐：left 必要时贴左并露出前一项 / center 居中 |
+| centered | boolean | `false` | 少项居中：内容不满容器宽时整体居中（可滚动模式超宽仍可横滑；均分模式不拉伸、按内容宽居中） |
 | showLine | boolean | `true` | 底部指示条 |
 | lineWidth | string | `'20'` | 指示条宽度（纯数字按 px） |
 | lineHeight | string | `'3'` | 指示条高度（纯数字按 px） |

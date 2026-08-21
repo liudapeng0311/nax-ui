@@ -45,14 +45,15 @@
 			v-else
 			:id="listDomId"
 			class="nax-tabs__list nax-tabs__list--equal"
+			:class="centeredListClass"
 			:style="sizeStyle"
 		>
 			<view
 				v-for="(item, index) in tabItems"
 				:id="itemDomId(index)"
 				:key="index"
-				class="nax-tabs__item nax-tabs__item--equal"
-				:class="itemClass(index, item)"
+				class="nax-tabs__item"
+				:class="equalItemBaseClass + ' ' + itemClass(index, item)"
 				:style="sizeStyle"
 				@click="onItemClick(index)"
 			>
@@ -83,6 +84,7 @@
 	 * @property {string} keyName 文案优先字段，默认 name
 	 * @property {boolean} scrollable 横向滚动，默认 true；false 均分
 	 * @property {string} scrollAlign 激活项滚动对齐 left | center，默认 center；left 为必要时贴左并露出前一项
+	 * @property {boolean} centered 少项居中：内容不满容器宽时整体居中（可滚动模式超宽仍可横滑；均分模式改为按内容宽居中不拉伸），默认 false
 	 * @property {boolean} showLine 指示条，默认 true
 	 * @property {string} lineWidth 指示条宽，默认 20（px）
 	 * @property {string} lineHeight 指示条高，默认 3（px）
@@ -115,6 +117,10 @@
 		scrollAlign: {
 			type: String,
 			default: 'center'
+		},
+		centered: {
+			type: Boolean,
+			default: false
 		},
 		showLine: {
 			type: Boolean,
@@ -333,6 +339,164 @@
 		return 'center'
 	}
 
+	// 布局缓存中的内容总宽（不含滚动余量 1px）
+	function layoutTotalWidth() : number {
+		const ws = itemLayoutWidths.value
+		var total = 0.0
+		var i = 0
+		while (i < ws.length) {
+			total = total + ws[i]
+			i++
+		}
+		return total
+	}
+
+	// 居中实测值：容器宽 / 首项偏移（估算只做首帧判定兜底）
+	const measuredViewWidth = ref(0.0)
+	const measuredCenterPad = ref(-1.0)
+	const centerMeasureListLeft = ref(0.0)
+	const centerMeasureItemLeft = ref(0.0)
+	const centerGotList = ref(false)
+	const centerGotItem = ref(false)
+	const centerMeasureToken = ref(0)
+
+	// 容器宽：优先实测 list（width:100% 即容器实际宽），未测到用窗口宽兜底
+	function currentViewWidth() : number {
+		if (measuredViewWidth.value > 0) {
+			return measuredViewWidth.value
+		}
+		if (scrollViewWidth.value > 0) {
+			return scrollViewWidth.value
+		}
+		const w = uni.getWindowInfo().windowWidth
+		if (w > 0) {
+			return w
+		}
+		return 375.0
+	}
+
+	// 估算留白：仅用于首帧判定能否居中（指示条定位不用它）
+	const centerPadEstimate = computed((): number => {
+		if (!props.centered) {
+			return 0.0
+		}
+		const total = layoutTotalWidth()
+		const vw = currentViewWidth()
+		if (total <= 0 || vw <= 0 || total >= vw) {
+			return 0.0
+		}
+		return (vw - total) / 2.0
+	})
+
+	const centeredActive = computed((): boolean => {
+		if (centerPadEstimate.value <= 0) {
+			return false
+		}
+		// 实测容器宽后纠正判定：装不下则回退滚动/均分
+		const mw = measuredViewWidth.value
+		if (mw > 0) {
+			return layoutTotalWidth() < mw
+		}
+		return true
+	})
+
+	// 生效中的居中留白：优先实测（与 justify-content 的真实居中一致）
+	const centerPadPx = computed((): number => {
+		if (!centeredActive.value) {
+			return 0.0
+		}
+		if (measuredCenterPad.value >= 0) {
+			return measuredCenterPad.value
+		}
+		return centerPadEstimate.value
+	})
+
+	// 实测居中留白：首项左缘相对 list 左缘的偏移（与 CSS 居中结果天然一致）
+	function measureCenterPad() {
+		if (!centeredActive.value) {
+			return
+		}
+		const items = tabItems.value
+		if (items.length == 0) {
+			return
+		}
+		const token = centerMeasureToken.value + 1
+		centerMeasureToken.value = token
+		centerGotList.value = false
+		centerGotItem.value = false
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+		query
+			.select('#' + listDomId)
+			.boundingClientRect((rect : any | null) => {
+				if (token != centerMeasureToken.value) {
+					return
+				}
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.left != null && info.width != null) {
+						centerMeasureListLeft.value = info.left as number
+						measuredViewWidth.value = info.width as number
+					}
+				}
+				centerGotList.value = true
+				tryApplyCenterPad(token)
+			})
+		query
+			.select('#' + itemDomId(0))
+			.boundingClientRect((rect2 : any | null) => {
+				if (token != centerMeasureToken.value) {
+					return
+				}
+				if (rect2 != null) {
+					const info2 = rect2 as NodeInfo
+					if (info2.left != null) {
+						centerMeasureItemLeft.value = info2.left as number
+					}
+				}
+				centerGotItem.value = true
+				tryApplyCenterPad(token)
+			})
+		query.exec()
+	}
+
+	function tryApplyCenterPad(token : number) {
+		if (token != centerMeasureToken.value) {
+			return
+		}
+		if (!centerGotList.value || !centerGotItem.value) {
+			return
+		}
+		if (measuredViewWidth.value <= 0) {
+			return
+		}
+		const pad = centerMeasureItemLeft.value - centerMeasureListLeft.value
+		if (pad < 0) {
+			return
+		}
+		measuredCenterPad.value = pad
+		// 居中模式无滚动动画，动画锁内也可安全落位
+		applyLineFromLayout(activeIndex.value)
+	}
+
+	// 均分分支的 item 基础类：居中时不拉伸，按内容宽排布
+	const equalItemBaseClass = computed((): string => {
+		if (centeredActive.value) {
+			return 'nax-tabs__item--natural'
+		}
+		return 'nax-tabs__item--equal'
+	})
+
+	const centeredListClass = computed((): string => {
+		if (centeredActive.value) {
+			return 'nax-tabs__list--center'
+		}
+		return ''
+	})
+
 	const tabItems = computed((): any[] => {
 		return asAnyArray(props.list as any)
 	})
@@ -429,6 +593,10 @@
 	const scrollListStyle = computed((): string => {
 		if (!props.scrollable) {
 			return ''
+		}
+		// 少项居中：list 占满视口并居中排布，无需滚动
+		if (centeredActive.value) {
+			return 'width:100%;justify-content:center;'
 		}
 		if (listContentWidth.value <= 0) {
 			return ''
@@ -674,13 +842,18 @@
 		if (len == 0 || index < 0 || index >= len || index >= widths.length) {
 			return
 		}
+		// 居中留白未实测前不落位（保持隐藏），避免按估算落点闪跳
+		if (centeredActive.value && measuredCenterPad.value < 0) {
+			return
+		}
 		const itemLeft = lefts[index]
 		const itemW = widths[index]
 		if (itemW <= 0) {
 			return
 		}
 		const w = parsePx(props.lineWidth, 20)
-		var left = itemLeft + (itemW - w) / 2.0
+		// 缓存 left 以 list 起点为 0；居中生效时补上整体左留白
+		var left = itemLeft + centerPadPx.value + (itemW - w) / 2.0
 		if (left < 0) {
 			left = 0
 		}
@@ -710,12 +883,18 @@
 			}
 			selectionAnimLock.value = false
 			lineSnapNoTransition.value = false
+			// 动画锁释放后用精修宽度重定位（居中留白/项宽校准在此生效）
+			applyLineFromLayout(activeIndex.value)
 		}, lockMs)
 	}
 
 	// 预估激活切换是否会触发横向滚动（用于决定滑块瞬切还是过渡）
 	function estimateNeedScrollForActive() : boolean {
 		if (!props.scrollable) {
+			return false
+		}
+		// 居中生效时内容不溢出，无滚动空间
+		if (centeredActive.value) {
 			return false
 		}
 		const index = activeIndex.value
@@ -767,11 +946,11 @@
 		const w = parsePx(props.lineWidth, 20)
 		lineWidthPx.value = w
 		if (!props.scrollable) {
-			lineLeftPx.value = 0
+			lineLeftPx.value = centerPadPx.value
 			return
 		}
 		const approxItem = 72.0
-		const left = approxItem * index + (approxItem - w) / 2
+		const left = centerPadPx.value + approxItem * index + (approxItem - w) / 2
 		if (left < 0) {
 			lineLeftPx.value = 0
 		} else {
@@ -983,6 +1162,12 @@
 	// 用 scroll-left 把激活项滚入可视区（left：必要时贴左并露前项 / center 居中）
 	function syncScrollToActive() {
 		if (!props.scrollable) {
+			scrollLeftPx.value = 0
+			actualScrollLeft.value = 0
+			return
+		}
+		// 居中生效时无滚动空间，归零避免残留偏移
+		if (centeredActive.value) {
 			scrollLeftPx.value = 0
 			actualScrollLeft.value = 0
 			return
@@ -1237,6 +1422,10 @@
 	function scheduleLayout() {
 		// 先同步估算布局并立刻画指示条；只滚动一次，避免二次 scroll 打断动画
 		rebuildEstimatedLayouts()
+		// 居中留白随布局失效需重测（容器宽实测值保留复用）
+		measuredCenterPad.value = -1.0
+		centerGotList.value = false
+		centerGotItem.value = false
 		if (props.scrollable) {
 			beginSelectionAnimLock()
 		}
@@ -1245,6 +1434,8 @@
 			if (props.scrollable) {
 				syncScrollToActive()
 			}
+			// 居中：实测留白（首项相对 list 偏移），测得前指示条不显示
+			measureCenterPad()
 			// 后台精修真实宽度（动画锁内不会改宽/滑块）
 			setTimeout(() => {
 				updateScrollContentWidth()
@@ -1284,6 +1475,26 @@
 
 	watch((): string => props.scrollAlign, (_v : string) => {
 		syncScrollToActive()
+	})
+
+	watch((): boolean => centeredActive.value, (_v : boolean) => {
+		// 估算与实测容器宽不一致时纠正（居中 ↔ 滚动/均分）；不重置已精修宽度，避免来回震荡
+		measuredCenterPad.value = -1.0
+		centerGotList.value = false
+		centerGotItem.value = false
+		lineMeasured.value = false
+		if (centeredActive.value) {
+			// 转为居中：重测留白，测得前指示条保持隐藏
+			nextTick(() => {
+				measureCenterPad()
+			})
+		} else {
+			// 回退滚动/均分：按缓存直接落位并恢复滚动定位
+			applyLineFromLayout(activeIndex.value)
+			if (props.scrollable) {
+				syncScrollToActive()
+			}
+		}
 	})
 
 	watch((): number => tabItems.value.length, (_v : number) => {
@@ -1372,6 +1583,19 @@
 		flex: 1;
 		padding-left: 4px;
 		padding-right: 4px;
+	}
+
+	/* centered：少项不拉伸，list 占满宽、item 按内容宽居中排布 */
+	.nax-tabs__list--center {
+		justify-content: center;
+	}
+
+	.nax-tabs__item--natural {
+		flex-grow: 0;
+		flex-shrink: 0;
+		flex-basis: auto;
+		padding-left: 14px;
+		padding-right: 14px;
 	}
 
 	/* 蒸汽模式：Vapor 不支持后代选择器，尺寸修饰由根节点 CSS 变量下传（VDOM 走下方条件编译规则，值一致） */

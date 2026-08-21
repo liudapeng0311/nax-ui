@@ -49,6 +49,14 @@
 				</view>
 
 				<view class="section">
+					<text class="section__title">少项居中 centered</text>
+					<text class="hint">可滚动 + centered：内容不满一行时整体居中，超宽仍可横滑</text>
+					<nax-tabs v-model="centerScrollCurrent" :list="basicList" :centered="true"></nax-tabs>
+					<text class="hint hint--gap">均分 + centered：不拉伸整行，按内容宽居中</text>
+					<nax-tabs v-model="centerEqualCurrent" :list="sizeList" :scrollable="false" :centered="true"></nax-tabs>
+				</view>
+
+				<view class="section">
 					<text class="section__title">徽标 / 红点 / 禁用</text>
 					<nax-tabs v-model="badgeCurrent" :list="badgeList" :scrollable="false"></nax-tabs>
 					<view class="row">
@@ -122,6 +130,8 @@
 	const scrollCurrent = ref(1)
 	const scrollLeftCurrent = ref(4)
 	const equalCurrent = ref(0)
+	const centerScrollCurrent = ref(0)
+	const centerEqualCurrent = ref(0)
 	const badgeCurrent = ref(0)
 	const sizeCurrent = ref(0)
 	const lineCurrent = ref(1)
