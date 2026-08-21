@@ -1,3 +1,5 @@
+## 0.1.8（2026-08-21）
+- 修复 `TypeError: root.getAny is not a function`（Web 端用户反馈）：对象 props（model / rules / 规则项）在部分场景下不是真实 UTSJSONObject 实例（Web 普通/响应式对象、App 渲染层桥接等），getAny/set 方法丢失导致校验与快照全部失效。
 ## 0.1.7（2026-08-18）
 - 蒸汽模式（`VUE3-VAPOR`）兼容修复：`nax-form-item__label-wrap--top` 的下级选择器规则用 `#ifndef VUE3-VAPOR` 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
 ## 0.1.6（2026-08-14）

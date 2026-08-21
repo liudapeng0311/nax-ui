@@ -78,7 +78,11 @@ function isUrl(s: string): boolean {
 }
 
 function ruleMessage(rule: UTSJSONObject, fallback: string): string {
-	const msg = rule.getString('message')
+	const real = asRealJsonObject(rule)
+	if (real == null) {
+		return fallback
+	}
+	const msg = real.getString('message')
 	if (msg != null && msg.length > 0) {
 		return msg
 	}
@@ -163,18 +167,22 @@ function matchType(value: any | null, typeName: string): boolean {
  * 校验单条规则，失败返回 message，成功返回空串
  */
 export function validateRuleItem(rule: UTSJSONObject, value: any | null): string {
-	const required = rule.getBoolean('required') == true
+	const real = asRealJsonObject(rule)
+	if (real == null) {
+		return ''
+	}
+	const required = real.getBoolean('required') == true
 	const empty = isEmptyValue(value)
 
 	if (required && empty) {
-		return ruleMessage(rule, '必填项不能为空')
+		return ruleMessage(real, '必填项不能为空')
 	}
 	// 非必填且空：跳过后续规则
 	if (empty) {
 		return ''
 	}
 
-	const whitespace = rule.getBoolean('whitespace')
+	const whitespace = real.getBoolean('whitespace')
 	if (whitespace != false && typeof value == 'string') {
 		const s = value as string
 		if (s.trim().length == 0) {
@@ -183,35 +191,35 @@ export function validateRuleItem(rule: UTSJSONObject, value: any | null): string
 			if (whitespace == null || whitespace == true) {
 				// 与 required 组合时常见；无 required 时也拦截纯空格
 				if (required || whitespace == true) {
-					return ruleMessage(rule, '不能为空白字符')
+					return ruleMessage(real, '不能为空白字符')
 				}
 			}
 		}
 	}
 
-	const typeName = rule.getString('type')
+	const typeName = real.getString('type')
 	if (typeName != null && typeName.length > 0) {
 		if (!matchType(value, typeName)) {
-			return ruleMessage(rule, '类型不正确')
+			return ruleMessage(real, '类型不正确')
 		}
 	}
 
-	const pattern = rule.getString('pattern')
+	const pattern = real.getString('pattern')
 	if (pattern != null && pattern.length > 0) {
 		try {
 			const re = new RegExp(pattern)
 			const text = '' + value
 			if (!re.test(text)) {
-				return ruleMessage(rule, '格式不正确')
+				return ruleMessage(real, '格式不正确')
 			}
 		} catch (e) {
 			// 非法正则：忽略该条 pattern
 		}
 	}
 
-	const minAny = rule.getAny('min')
-	const maxAny = rule.getAny('max')
-	const lenAny = rule.getAny('len')
+	const minAny = real.getAny('min')
+	const maxAny = real.getAny('max')
+	const lenAny = real.getAny('len')
 
 	const typeForRange = typeName != null ? typeName : ''
 	const numericRange = typeForRange == 'number' || typeForRange == 'integer' || typeForRange == 'float' || typeof value == 'number'
@@ -219,7 +227,7 @@ export function validateRuleItem(rule: UTSJSONObject, value: any | null): string
 	if (lenAny != null) {
 		const len = asNumber(lenAny)
 		if (len == len && valueLength(value) != len) {
-			return ruleMessage(rule, '长度必须为 ' + len.toString())
+			return ruleMessage(real, '长度必须为 ' + len.toString())
 		}
 	}
 	if (minAny != null) {
@@ -228,10 +236,10 @@ export function validateRuleItem(rule: UTSJSONObject, value: any | null): string
 			if (numericRange) {
 				const n = asNumber(value)
 				if (!(n == n) || n < min) {
-					return ruleMessage(rule, '不能小于 ' + min.toString())
+					return ruleMessage(real, '不能小于 ' + min.toString())
 				}
 			} else if (valueLength(value) < min) {
-				return ruleMessage(rule, '长度不能小于 ' + min.toString())
+				return ruleMessage(real, '长度不能小于 ' + min.toString())
 			}
 		}
 	}
@@ -241,16 +249,16 @@ export function validateRuleItem(rule: UTSJSONObject, value: any | null): string
 			if (numericRange) {
 				const n = asNumber(value)
 				if (!(n == n) || n > max) {
-					return ruleMessage(rule, '不能大于 ' + max.toString())
+					return ruleMessage(real, '不能大于 ' + max.toString())
 				}
 			} else if (valueLength(value) > max) {
-				return ruleMessage(rule, '长度不能大于 ' + max.toString())
+				return ruleMessage(real, '长度不能大于 ' + max.toString())
 			}
 		}
 	}
 
 	// enum: 数组包含
-	const enumList = rule.getArray('enum')
+	const enumList = real.getArray('enum')
 	if (enumList != null && enumList.length > 0) {
 		var hit = false
 		var i = 0
@@ -263,7 +271,7 @@ export function validateRuleItem(rule: UTSJSONObject, value: any | null): string
 			i++
 		}
 		if (!hit) {
-			return ruleMessage(rule, '不在可选范围内')
+			return ruleMessage(real, '不在可选范围内')
 		}
 	}
 
@@ -277,7 +285,11 @@ export function ruleMatchTrigger(rule: UTSJSONObject, event: string): boolean {
 	if (event.length == 0) {
 		return true
 	}
-	const tAny = rule.getAny('trigger')
+	const real = asRealJsonObject(rule)
+	if (real == null) {
+		return true
+	}
+	const tAny = real.getAny('trigger')
 	if (tAny == null) {
 		// 未配置 trigger：全量校验时执行；字段事件时也执行（更宽松）
 		return true
@@ -321,13 +333,34 @@ export function validateRules(rules: any[], value: any | null, event: string): s
 }
 
 /**
+ * 归一化为真实 UTSJSONObject。
+ * App 端对象 props（model / rules / 规则项）经渲染层桥接后会丢失 UTSJSONObject
+ * 方法（getAny/set 不可用），探测失败时用 JSON 往返转换还原；Web/小程序为真实实例，直接返回。
+ */
+function asRealJsonObject(obj: any | null): UTSJSONObject | null {
+	if (obj == null) {
+		return null
+	}
+	try {
+		const o = obj as UTSJSONObject
+		o.getAny('__nax_probe__')
+		return o
+	} catch (e) {
+		return JSON.parse(JSON.stringify(obj)) as UTSJSONObject
+	}
+}
+
+/**
  * 从 model 读取字段（支持 a.b 一级路径）
  */
 export function getModelValue(model: any | null, prop: string): any | null {
 	if (model == null || prop.length == 0) {
 		return null
 	}
-	const root = model as UTSJSONObject
+	const root = asRealJsonObject(model)
+	if (root == null) {
+		return null
+	}
 	if (prop.indexOf('.') < 0) {
 		return root.getAny(prop)
 	}
@@ -338,8 +371,11 @@ export function getModelValue(model: any | null, prop: string): any | null {
 		if (cur == null) {
 			return null
 		}
+		const obj = asRealJsonObject(cur)
+		if (obj == null) {
+			return null
+		}
 		const key = parts[i]
-		const obj = cur as UTSJSONObject
 		if (i == parts.length - 1) {
 			return obj.getAny(key)
 		}
@@ -357,7 +393,10 @@ export function setModelValue(model: any | null, prop: string, value: any | null
 	if (model == null || prop.length == 0) {
 		return
 	}
-	const rootSet = model as UTSJSONObject
+	const rootSet = asRealJsonObject(model)
+	if (rootSet == null) {
+		return
+	}
 	if (prop.indexOf('.') < 0) {
 		rootSet.set(prop, value)
 		return
@@ -369,8 +408,11 @@ export function setModelValue(model: any | null, prop: string, value: any | null
 		if (cur2 == null) {
 			return
 		}
+		const obj2 = asRealJsonObject(cur2)
+		if (obj2 == null) {
+			return
+		}
 		const key2 = parts2[j]
-		const obj2 = cur2 as UTSJSONObject
 		const next2 = obj2.getAny(key2)
 		if (next2 == null) {
 			return
@@ -379,8 +421,10 @@ export function setModelValue(model: any | null, prop: string, value: any | null
 		j++
 	}
 	if (cur2 != null) {
-		const last = parts2[parts2.length - 1]
-		;(cur2 as UTSJSONObject).set(last, value)
+		const real2 = asRealJsonObject(cur2)
+		if (real2 != null) {
+			real2.set(parts2[parts2.length - 1], value)
+		}
 	}
 }
 
@@ -412,12 +456,16 @@ export function rulesOfProp(rules: UTSJSONObject | null, prop: string): any[] {
 	if (rules == null || prop.length == 0) {
 		return empty
 	}
+	const real = asRealJsonObject(rules)
+	if (real == null) {
+		return empty
+	}
 	// 优先 getArray，避免 any 上探测 .push（App 编译失败）
-	const list = rules.getArray(prop)
+	const list = real.getArray(prop)
 	if (list != null) {
 		return list as any[]
 	}
-	const raw = rules.getAny(prop)
+	const raw = real.getAny(prop)
 	if (raw == null) {
 		return empty
 	}
