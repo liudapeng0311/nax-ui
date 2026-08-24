@@ -6,7 +6,7 @@
 
 ## 官方文档
 
-在线文档与组件示例：https://www.nax-ui.cn/
+在线文档与组件示例：[https://www.nax-ui.cn/](https://www.nax-ui.cn/)
 
 ## 安装方式
 

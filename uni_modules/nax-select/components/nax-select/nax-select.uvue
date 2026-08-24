@@ -12,17 +12,17 @@
 		>
 				<slot name="trigger">
 					<text class="nax-select__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
-					<view
-						v-if="showClear"
-						class="nax-select__trigger-clear"
-						@touchstart.stop.prevent="onClear"
-						@click.stop.prevent="onClear"
-					>
-						<nax-icon name="close" size="12" color="#ffffff"></nax-icon>
-					</view>
-					<view class="nax-select__trigger-arrow">
-						<nax-icon name="chevron-down" size="16" :color="arrowColor"></nax-icon>
-					</view>
+				<view
+					v-if="showClear"
+					class="nax-select__trigger-clear"
+					@touchstart.stop.prevent="onClear"
+					@click.stop.prevent="onClear"
+				>
+					<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+				</view>
+				<view v-if="!showClear" class="nax-select__trigger-arrow">
+					<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+				</view>
 				</slot>
 		</view>
 
@@ -599,6 +599,28 @@
 				return false
 			}
 			return confirmedResult.value.length > 0
+		})
+
+		/** 触发条操作图标（清除/箭头）对齐 nax-input：随 size 缩放，保证切换时位置重合 */
+		const actionIconSizePx = computed((): string => {
+			const s = sizeName.value
+			if (s == 'sm') {
+				return '14'
+			}
+			if (s == 'lg') {
+				return '18'
+			}
+			return '16'
+		})
+
+		const actionIconColor = computed((): string => {
+			// App（含蒸汽）：与 nax-input 一致，主题状态由 custom-class 传递，字面量色驱动
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			if (props.customClass.indexOf('nax-theme-dark') >= 0) {
+				return props.disabled ? '#ffffff4d' : '#ffffffa6'
+			}
+			// #endif
+			return props.disabled ? '#e5e5ea' : '#767c82'
 		})
 
 	const cancelTextStyle = computed((): string => {
@@ -2069,25 +2091,36 @@
 		color: var(--nax-color-text-disabled, #e5e5ea);
 	}
 
-		.nax-select__trigger-clear {
-			flex-direction: row;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-			width: 16px;
-			height: 16px;
-			margin-left: var(--nax-space-2, 8px);
-			border-radius: 100px;
-			background-color: #c6c7cb;
-		}
+	.nax-select__trigger-clear {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: var(--nax-space-2, 8px);
+		/* 扩大点击热区，对齐 nax-input 清除按钮 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		position: relative;
+		z-index: 2;
+		cursor: pointer;
+		/* #endif */
+	}
 	
-		.nax-select__trigger-arrow {
-			flex-direction: row;
-			align-items: center;
-			justify-content: center;
-			margin-left: var(--nax-space-2, 8px);
-			flex-shrink: 0;
-		}
+	.nax-select__trigger-arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: var(--nax-space-2, 8px);
+		flex-shrink: 0;
+		/* 热区内边距与清除按钮一致：清除/箭头切换时图标位置不跳动 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
 
 	.nax-select__root {
 		position: fixed;

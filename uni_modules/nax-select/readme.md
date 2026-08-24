@@ -46,7 +46,7 @@ function onConfirm(items: UTSJSONObject[]) {
 
 ## 内置触发条
 
-`v-model` 绑定选中值后，触发条会按 `list` 对应项的 `label` 回显；未绑定时仍显示 `placeholder`。有选中值时，下箭头左侧会出现清除按钮（`clearable`，默认开启），点击后清空选中并回写空的 `v-model`。
+`v-model` 绑定选中值后，触发条会按 `list` 对应项的 `label` 回显；未绑定时仍显示 `placeholder`。有选中值时，右侧显示清除按钮并隐藏下拉箭头（`clearable`，默认开启，二者互斥），点击后清空选中并回写空的 `v-model`。
 
 ```uvue
 <nax-select

@@ -1,8 +1,6 @@
-## 0.2.1（2026-08-21）
-- 依赖组件更新：`nax-rich-text`（0.1.0→0.2.0）修复 App 端（Android / iOS）渲染空白 / 不全：默认渲染模式改为 `web`（与官方一致），`native` 保持可选；显式 `native` 时内容含 h1-h6 / ul / li 等结构标签自动回退 web，iOS / 鸿蒙开启 `user-select` 同样回退 web
-## 0.2.0（2026-08-21）
-- 新增组件包：`nax-rich-text`（0.1.0）富文本；内置 rich-text 封装：`content` HTML 字符串 / `nodes` 节点列表双入口，App 渲染模式 `mode` 默认 native（蒸汽模式 C 实现原生渲染），全局 `size`/`color`/`lineHeight`/`fontFamily`，内容点击 `itemclick`（小程序端官方不支持）
-- 套装依赖新增 `nax-rich-text`，组件包数量 50 → 51
+## 0.1.22（2026-08-24）
+- 依赖组件更新：`nax-select`（0.2.0→0.2.1）、`nax-datetime-picker`（0.2.0→0.2.1）触发条清除按钮样式对齐 nax-input（去圆形底徽、图标随 size 缩放、配色与热区一致），且有选中值时清除按钮与下拉箭头互斥显示
+- readme 官方文档链接改为可点击跳转
 ## 0.1.21（2026-08-21）
 - 依赖组件更新：`nax-tabs`（0.1.16→0.2.0）新增 `centered` 少项居中（内容不满容器宽时整体居中，超宽仍可横滑/均分不拉伸）
 - 依赖组件更新：`nax-form`（0.1.7→0.1.8）修复对象 props 非真实 UTSJSONObject 实例时 `root.getAny is not a function`（Web 端反馈），校验/快照失效

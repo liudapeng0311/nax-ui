@@ -74,7 +74,7 @@ confirm 回调字段：value / timestamp / formatted / year / month / day / hour
 
 另有 update:show、update:modelValue、cancel、change、open、close、clear。
 
-内置触发条有选中值时，下箭头左侧会出现清除按钮（`clearable`，默认开启），点击后清空选中并回写空的 `v-model`（`0`）。
+内置触发条有选中值时，右侧显示清除按钮并隐藏下拉箭头（`clearable`，默认开启，二者互斥），点击后清空选中并回写空的 `v-model`（`0`）。
 
 ## 平台说明
 
