@@ -4,6 +4,7 @@
 		:class="rootClass"
 		:style="rootStyle"
 		@click="onRootClick"
+		@touchstart="onRootTouchStart"
 	>
 		<textarea
 			class="nax-textarea__field"
@@ -446,9 +447,8 @@
 	}
 
 	function onBlur(e: UniTextareaBlurEvent) {
-		setTimeout(() => {
-			isFocused.value = false
-		}, 150)
+		// 同步清除聚焦态（textarea 无 action 按钮，无需点击窗口；对齐 nax-input）
+		isFocused.value = false
 		const val = e.detail.value
 		// 对齐原生 input 语义：失焦时内容与聚焦时不同才触发 change
 		if (val != changeBaseValue) {
@@ -475,6 +475,14 @@
 			return
 		}
 		emit('click')
+	}
+
+	function onRootTouchStart() {
+		if (props.disabled) {
+			return
+		}
+		// App 端 @focus 回调随键盘动画延迟，触摸瞬间提前点亮聚焦样式（对齐 nax-input）
+		isFocused.value = true
 	}
 
 	function onFieldClick() {

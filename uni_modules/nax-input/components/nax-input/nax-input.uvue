@@ -4,6 +4,7 @@
 		:class="rootClass"
 		:style="rootStyle"
 		@click="onRootClick"
+		@touchstart="onRootTouchStart"
 	>
 		<!-- 前缀图标 -->
 		<view v-if="hasPrefixIcon" class="nax-input__icon nax-input__icon--prefix" @click.stop="onPrefixClick">
@@ -627,11 +628,10 @@
 	}
 
 	function onBlur(e: UniInputBlurEvent) {
-		// 延迟失焦态：给清除/眼睛按钮的 touch/mouse 事件留出窗口（Web 上 blur 早于 click）
+		// 同步清除聚焦态：清除/眼睛按钮已由自身 touchstart/click 处理且不再写 isFocused，
+		// 无需为点击窗口保留样式；避免切换输入框时失焦样式慢半拍
+		isFocused.value = false
 		const valFromEvent = e.detail.value
-		setTimeout(() => {
-			isFocused.value = false
-		}, 150)
 		let val = valFromEvent
 		if (props.trim) {
 			const trimmed = val.trim()
@@ -661,8 +661,9 @@
 			return
 		}
 		setValue('')
-		// 清除按钮在 input 外部，点击后真实焦点已失去；取消聚焦态样式，避免未聚焦输入框被强制激活且无 blur 恢复
-		isFocused.value = false
+		// 不干预聚焦态：真实聚焦的输入框点击清除后样式保留（App 端不失焦）；
+		// 已失焦的输入框（多输入框场景）点击清除不点亮样式；
+		// Web 端真实 blur 由 onBlur 延迟重置兜底清除聚焦样式
 		emit('clear')
 	}
 
@@ -671,8 +672,7 @@
 			return
 		}
 		showPassword.value = !showPassword.value
-		// 眼睛按钮在 input 外部，点击后真实焦点已失去；不激活聚焦样式（与 clear 同一规则）
-		isFocused.value = false
+		// 与 clear 同一规则：不干预聚焦态，避免已失焦输入框被点亮样式
 	}
 
 	function onRootClick() {
@@ -680,6 +680,15 @@
 			return
 		}
 		emit('click')
+	}
+
+	function onRootTouchStart() {
+		if (props.disabled) {
+			return
+		}
+		// App 端 @focus 回调随键盘动画延迟（约半秒），触摸瞬间提前点亮聚焦样式；
+		// 清除/密码按钮已 stop.prevent 不冒泡，不会点亮已失焦的输入框
+		isFocused.value = true
 	}
 
 	function onFieldClick() {
