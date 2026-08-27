@@ -1,3 +1,5 @@
+## 0.2.0（2026-08-27）
+- 新增 `labelSize` 标签字号属性：`nax-form` 表单级统一（空串跟随组件默认 15px），`nax-form-item` 可单项覆盖（空跟随 form）
 ## 0.1.8（2026-08-21）
 - 修复 `TypeError: root.getAny is not a function`（Web 端用户反馈）：对象 props（model / rules / 规则项）在部分场景下不是真实 UTSJSONObject 实例（Web 普通/响应式对象、App 渲染层桥接等），getAny/set 方法丢失导致校验与快照全部失效。
 ## 0.1.7（2026-08-18）

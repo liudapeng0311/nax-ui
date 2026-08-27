@@ -4,7 +4,7 @@ demo: form
 
 # nax-form / nax-form-item
 
-> 当前版本：0.1.7
+> 当前版本：0.2.0
 
 uni-app x 表单 / 表单项，功能覆盖常用场景。
 
@@ -376,6 +376,7 @@ function clearManualError() {
 | labelPosition | string | `'left'` | `left` 左侧 \| `top` 顶部 |
 | labelWidth | [String, Number] | `80` | 标签宽度（px），默认 80 |
 | labelAlign | string | `'left'` | `left` 左对齐 \| `center` 居中 \| `right` 右对齐 |
+| labelSize | [String, Number] | `''` | 标签字号（px），空串跟随组件默认 15 |
 | customClass | string | `''` | 根节点扩展 class |
 
 ## 规则字段（常用）
@@ -405,6 +406,7 @@ function clearManualError() {
 | label-position | string | `''` | 覆盖 form |
 | label-width | string \| number | `''` | 覆盖 form（px） |
 | label-align | string | `''` | 覆盖 form |
+| label-size | string \| number | `''` | 覆盖 form（px） |
 | left-icon / right-icon | string | `''` | nax-icon 名 |
 | status | string | `default` | `default` / `success` / `warning` / `error` |
 | error-message | string | `''` | 外部错误文案（优先展示） |

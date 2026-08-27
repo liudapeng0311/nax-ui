@@ -66,6 +66,7 @@ function onSubmit() {
 | label-position | string | `left` | `left` / `top` |
 | label-width | string \| number | `80` | 标签宽度（px） |
 | label-align | string | `left` | `left` / `center` / `right` |
+| label-size | string \| number | `''` | 标签字号（px）；空串跟随组件默认 15 |
 | custom-class | string | `''` | 根节点扩展 class |
 
 ## nax-form Methods（ref）
@@ -105,6 +106,7 @@ function onSubmit() {
 | label-position | string | `''` | 覆盖 form |
 | label-width | string \| number | `''` | 覆盖 form（px） |
 | label-align | string | `''` | 覆盖 form |
+| label-size | string \| number | `''` | 覆盖 form（px）；form 空时跟随组件默认 15 |
 | left-icon / right-icon | string | `''` | nax-icon 名 |
 | status | string | `default` | `default` / `success` / `warning` / `error` |
 | error-message | string | `''` | 外部错误文案（优先展示） |
