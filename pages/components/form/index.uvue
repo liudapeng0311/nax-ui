@@ -19,6 +19,7 @@
 						label-position="left"
 						:label-width="80"
 						label-align="left"
+						:label-size="16"
 						error-type="message"
 						:border-bottom="true"
 					>
@@ -37,7 +38,7 @@
 						<nax-form-item label="简介" prop="intro" label-position="top">
 							<nax-textarea :custom-class="fieldThemeClass" v-model="intro" placeholder="至少 5 个字" height="80" @change="syncFormModel" @blur="syncFormModel"></nax-textarea>
 						</nax-form-item>
-						<nax-form-item label="性别" prop="sex" required>
+						<nax-form-item label="性别" prop="sex" required label-size="18">
 							<nax-radio-group v-model="sex" @change="onSexChange">
 								<nax-radio name="1" label="男"></nax-radio>
 								<nax-radio name="2" label="女"></nax-radio>

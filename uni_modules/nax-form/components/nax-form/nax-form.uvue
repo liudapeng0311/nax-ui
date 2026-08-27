@@ -15,6 +15,7 @@
 	 * @property {string} labelPosition left | top
 	 * @property {string|number} labelWidth 标签宽度（px），默认 80
 	 * @property {string} labelAlign left | center | right
+	 * @property {string|number} labelSize 标签字号（px），空串跟随组件默认 15
 	 * @property {string} customClass 根节点扩展 class
 	 * @method validate 校验全部字段，Promise<boolean>
 	 * @method validateField 校验指定字段
@@ -59,6 +60,10 @@
 			type: String,
 			default: 'left'
 		},
+		labelSize: {
+			type: [String, Number],
+			default: ''
+		},
 		customClass: {
 			type: String,
 			default: ''
@@ -73,6 +78,7 @@
 	const formLabelPositionState = ref(props.labelPosition)
 	const formLabelWidthState = ref('' + props.labelWidth)
 	const formLabelAlignState = ref(props.labelAlign)
+	const formLabelSizeState = ref('' + props.labelSize)
 
 	watch((): string => props.errorType, (value: string) => {
 		formErrorTypeState.value = value
@@ -86,8 +92,11 @@
 	watch((): any => props.labelWidth, (value: any) => {
 		formLabelWidthState.value = '' + value
 	})
-	watch((): string => props.labelAlign, (value: string) => {
+watch((): string => props.labelAlign, (value: string) => {
 		formLabelAlignState.value = value
+	})
+	watch((): any => props.labelSize, (value: any) => {
+		formLabelSizeState.value = '' + value
 	})
 
 	// 内置规则（可 setRules 覆盖）
@@ -437,6 +446,7 @@
 	provide('naxFormLabelPosition', formLabelPositionState)
 	provide('naxFormLabelWidth', formLabelWidthState)
 	provide('naxFormLabelAlign', formLabelAlignState)
+	provide('naxFormLabelSize', formLabelSizeState)
 	provide('naxFormErrorVersion', errorVersion)
 	provide('naxFormGetError', getFieldError)
 	provide('naxFormRegister', registerItem)

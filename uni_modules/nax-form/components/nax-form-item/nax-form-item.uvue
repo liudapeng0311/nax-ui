@@ -44,6 +44,7 @@
 	 * @property {string} labelPosition left | top；空跟随 form
 	 * @property {string|number} labelWidth 标签宽 px；空跟随 form
 	 * @property {string} labelAlign left | center | right；空跟随 form
+	 * @property {string|number} labelSize 标签字号（px）；空跟随 form
 	 * @property {string} leftIcon / rightIcon nax-icon 名
 	 * @property {string} status default | success | warning | error
 	 * @property {string} errorMessage 外部错误文案（优先展示）
@@ -83,6 +84,10 @@
 		},
 		labelAlign: {
 			type: String,
+			default: ''
+		},
+		labelSize: {
+			type: [String, Number],
 			default: ''
 		},
 		leftIcon: {
@@ -128,6 +133,7 @@
 	const formLabelPositionRef = inject('naxFormLabelPosition', ref('left')) as Ref<string>
 	const formLabelWidthRef = inject('naxFormLabelWidth', ref('80')) as Ref<string>
 	const formLabelAlignRef = inject('naxFormLabelAlign', ref('left')) as Ref<string>
+	const formLabelSizeRef = inject('naxFormLabelSize', ref('')) as Ref<string>
 	const formErrorVersionRef = inject('naxFormErrorVersion', ref(0)) as Ref<number>
 	const formGetErrorRaw = inject('naxFormGetError', fallbackGetError) as (prop: string) => string
 	const formRegisterRaw = inject('naxFormRegister', fallbackRegister) as (prop: string) => void
@@ -267,6 +273,39 @@
 		return 80
 	})
 
+	const mergedLabelSize = computed((): number => {
+		const raw = props.labelSize
+		if (typeof raw == 'number') {
+			const n = raw as number
+			if (n > 0) {
+				return n
+			}
+		}
+		if (typeof raw == 'string') {
+			const s = raw as string
+			if (s.length > 0) {
+				const n = parseFloat(s)
+				if (n == n && n > 0) {
+					return n
+				}
+			}
+		}
+		const g = readRefAny(formLabelSizeRef)
+		if (typeof g == 'number') {
+			const n = g as number
+			if (n > 0) {
+				return n
+			}
+		}
+		if (typeof g == 'string') {
+			const n = parseFloat(g as string)
+			if (n == n && n > 0) {
+				return n
+			}
+		}
+		return 0
+	})
+
 	const mergedBorderBottom = computed((): boolean => {
 		// item 显式 false 优先；true 时跟随 form 统一开关
 		if (!props.borderBottom) {
@@ -344,7 +383,10 @@
 	})
 
 	const labelTextStyle = computed((): string => {
-		// 文本对齐靠 class；宽度在 wrap
+		// 字号内联覆盖 class 默认 15px；文本对齐靠 class，宽度在 wrap
+		if (mergedLabelSize.value > 0) {
+			return 'font-size:' + mergedLabelSize.value.toString() + 'px'
+		}
 		return ''
 	})
 
