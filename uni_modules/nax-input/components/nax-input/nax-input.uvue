@@ -661,8 +661,8 @@
 			return
 		}
 		setValue('')
-		// 清除后保持聚焦态样式；真实焦点由端决定
-		isFocused.value = true
+		// 清除按钮在 input 外部，点击后真实焦点已失去；取消聚焦态样式，避免未聚焦输入框被强制激活且无 blur 恢复
+		isFocused.value = false
 		emit('clear')
 	}
 
@@ -671,7 +671,8 @@
 			return
 		}
 		showPassword.value = !showPassword.value
-		isFocused.value = true
+		// 眼睛按钮在 input 外部，点击后真实焦点已失去；不激活聚焦样式（与 clear 同一规则）
+		isFocused.value = false
 	}
 
 	function onRootClick() {
