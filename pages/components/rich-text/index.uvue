@@ -8,92 +8,14 @@
 		></nax-nav-bar>
 		<scroll-view class="page-scroll">
 		<view class="nax-theme page" :class="themeExtraClass">
-			<text class="page__desc">内置 rich-text 封装：HTML / 节点列表 / App 渲染模式 / 全局样式 / 内容点击</text>
+			<text class="page__desc">一篇内容覆盖全部元素：标题 / 首行缩进 / 行内样式 / 引用 / 列表 / 表格 / 图片 / 视频 / 链接</text>
 
-			<view class="section">
-				<text class="section__title">基础 HTML</text>
-				<view class="rich-box">
-					<nax-rich-text :content="basicHtml"></nax-rich-text>
-				</view>
+			<view class="rich-box">
+				<nax-rich-text :content="demoHtml" @itemclick="onItemClick"></nax-rich-text>
 			</view>
-
-			<view class="section">
-				<text class="section__title">标题 / 列表 / 对齐</text>
-				<view class="rich-box">
-					<nax-rich-text :content="structureHtml"></nax-rich-text>
-				</view>
-				<text class="page__hint">App 端内容含 h1-h6 / ul / li 时自动以 web 模式渲染，避免 native 解析空白。</text>
-			</view>
-
-			<view class="section">
-				<text class="section__title">图片与链接（itemclick）</text>
-				<view class="rich-box">
-					<nax-rich-text :content="mediaHtml" @itemclick="onItemClick"></nax-rich-text>
-				</view>
-				<text class="page__hint">{{ itemTip }}</text>
-			</view>
-
-			<view class="section">
-				<text class="section__title">节点列表 nodes</text>
-				<view class="rich-box">
-					<nax-rich-text :nodes="nodeList"></nax-rich-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">全局字号 size</text>
-				<view class="row">
-					<view class="item rich-item">
-						<nax-rich-text size="sm" :content="sizeHtml"></nax-rich-text>
-					</view>
-					<view class="item rich-item">
-						<nax-rich-text size="md" :content="sizeHtml"></nax-rich-text>
-					</view>
-					<view class="item rich-item">
-						<nax-rich-text size="lg" :content="sizeHtml"></nax-rich-text>
-					</view>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">全局颜色 color / 行高 lineHeight</text>
-				<view class="rich-box">
-					<nax-rich-text
-						color="#18a058"
-						line-height="1.8"
-						:content="colorHtml"
-					></nax-rich-text>
-				</view>
-			</view>
-
-			<view class="section">
-				<text class="section__title">渲染模式 mode（App 端）</text>
-				<view class="row">
-					<nax-tag
-						v-for="(m, i) in modeList"
-						:key="'mode-' + i"
-						:type="currentMode == m ? 'primary' : 'default'"
-						variant="light"
-						size="md"
-						:label="m"
-						@click="onPickMode(m)"
-					></nax-tag>
-				</view>
-				<view class="rich-box">
-					<nax-rich-text :mode="currentMode" :content="basicHtml"></nax-rich-text>
-				</view>
-				<text class="page__hint">默认 web：webview 渲染，标签支持最广；native：蒸汽模式原生渲染，性能最佳，内容含结构标签时自动回退 web。Web/小程序端忽略。</text>
-			</view>
-
-			<view class="section">
-				<text class="section__title">可选中 user-select</text>
-				<view class="rich-box">
-					<nax-rich-text user-select :content="selectHtml"></nax-rich-text>
-				</view>
-				<text class="page__hint">长按可选中复制；iOS / 鸿蒙自动以 web 模式渲染以支持选中。</text>
-			</view>
+			<text class="page__hint">{{ itemTip }}</text>
 		</view>
-	</scroll-view>
+		</scroll-view>
 	</view>
 </template>
 
@@ -125,60 +47,51 @@
 		darkMode.value = bindDemoThemePage()
 	})
 
-	const basicHtml = '<p>支持 <strong>加粗</strong>、<i>斜体</i>、<u>下划线</u>、<del>删除线</del> 与 <span style="color:#2080f0;">行内着色</span>、<span style="background-color:#e6f4ff;">背景色</span></p><br/><p>换行后的第二个段落文本。</p>'
+	const demoHtml = '<h2>全市经济运行稳中有进</h2>'
+		+ '<p style="text-indent:2em;">据新华社电，今年以来全市经济运行<strong>稳中有进</strong>、<em>质效向好</em>，主要指标<mark>好于预期</mark>，市场活力持续增强。</p>'
+		+ '<p>支持<u>下划线</u>、<del>删除线</del>、<code>行内代码</code>，以及<span style="color:#2080f0;">行内着色</span>与<span style="background-color:#e6f4ff;">背景色</span>，详情见<a href="https://www.nax-ui.cn">nax-ui 官网</a>。</p>'
+		+ '<blockquote>相关负责人表示：“下一步将持续优化营商环境，巩固经济回升向好势头。”</blockquote>'
+		+ '<h3>数据要点</h3>'
+		+ '<ul><li>工业增加值增长 6.2%</li><li>固定资产投资增长 4.8%<ol><li>制造业投资增长 7.1%</li><li>基础设施投资增长 3.4%</li></ol></li><li>消费市场持续回暖</li></ul>'
+		+ '<p>各项数据对比如下：</p>'
+		+ '<table border="1"><tr><th>指标</th><th>增速</th></tr><tr><td>GDP</td><td>5.2%</td></tr><tr><td>规上工业</td><td>6.2%</td></tr></table>'
+		+ '<p style="text-align:center;"><img src="https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg" width="240"></p>'
+		+ '<hr/>'
+		+ '<p>相关音频报道：</p>'
+		+ '<audio src="https://www.w3school.com.cn/i/horse.mp3" controls></audio>'
+		+ '<p>现场视频实录：</p>'
+		+ '<video src="https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/2minute-demo.mp4" controls></video>'
+		+ '<p style="text-align:right;">（完）</p>'
 
-	const structureHtml = '<h3>三级标题 h3</h3><h5>五级标题 h5</h5><ul><li>列表项一</li><li>列表项二</li><li>列表项三</li></ul><p style="text-align:right;">右对齐段落</p>'
+	const itemTip = ref('点击图片 / 链接 / 视频观察 itemclick')
 
-	const mediaHtml = '<p><a href="https://www.nax-ui.cn">nax-ui 官网链接</a></p><img src="https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg" width="240" height="140"/><p>点击上方链接或图片观察 itemclick 事件。</p>'
-
-	const selectHtml = '<p>这段富文本开启了 user-select，长按可选中复制。</p>'
-
-	const sizeHtml = '<p>全局字号演示文本</p>'
-	const colorHtml = '<p>全局颜色与行高作用于未显式指定样式的文本；行内样式优先级更高。</p>'
-
-	const nodeList = [
-		{
-			name: 'p',
-			attrs: { style: 'color: #18a058;' },
-			children: [{ text: '节点列表渲染：绿色段落' }] as any[]
-		},
-		{
-			name: 'img',
-			attrs: {
-				src: 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/logo2.png',
-				width: '120',
-				height: '120'
-			}
-		},
-		{
-			name: 'a',
-			attrs: { href: 'https://www.nax-ui.cn' },
-			children: [{ text: '节点列表里的链接' }] as any[]
+	function onItemClick(e : any) {
+		const obj = e as UTSJSONObject
+		let src = ''
+		let href = ''
+		let type = ''
+		const srcVal = obj['src']
+		const hrefVal = obj['href']
+		const typeVal = obj['type']
+		if (srcVal != null) {
+			src = srcVal as string
 		}
-	] as any[]
-
-	const modeList = ['native', 'web']
-	const currentMode = ref('web')
-	const itemTip = ref('点击内容中的图片 / 链接触发 itemclick')
-
-	function onItemClick(e : UniRichTextItemClickEvent) {
-		const detail = e.detail
-		const src = detail.src
-		const href = detail.href
+		if (hrefVal != null) {
+			href = hrefVal as string
+		}
+		if (typeVal != null) {
+			type = typeVal as string
+		}
 		let desc = ''
-		if (src != null && src.length > 0) {
+		if (src.length > 0) {
 			desc = '图片 ' + src
-		} else if (href != null && href.length > 0) {
-			desc = '链接 ' + href
+		} else if (href.length > 0) {
+			desc = (type == 'a' ? '链接 ' : type + ' ') + href
 		}
 		if (desc.length == 0) {
 			desc = 'itemclick 已触发'
 		}
 		itemTip.value = 'itemclick: ' + desc
-	}
-
-	function onPickMode(m : string) {
-		currentMode.value = m
 	}
 </script>
 
@@ -213,44 +126,9 @@
 		margin-top: 8px;
 	}
 
-	.section {
-		margin-bottom: 16px;
-		padding: 14px;
-		background-color: var(--nax-color-bg, #ffffff);
-		border-radius: var(--nax-radius-md, 3px);
-		border-width: 1px;
-		border-style: solid;
-		border-color: var(--nax-color-border, #f0f0f3);
-	}
-
-	.section__title {
-		font-size: 14px;
-		font-weight: 500;
-		color: var(--nax-color-text, #333639);
-		margin-bottom: 12px;
-	}
-
-	.row {
-		flex-direction: row;
-		flex-wrap: wrap;
-		align-items: flex-start;
-	}
-
-	.item {
-		margin-right: 12px;
-		margin-bottom: 8px;
-		align-items: center;
-	}
-
-	.rich-item {
-		width: 100%;
-		margin-right: 0;
-	}
-
 	.rich-box {
-		width: 100%;
 		padding: 10px;
-		background-color: var(--nax-color-bg-secondary, #fafafc);
+		background-color: var(--nax-color-bg, #ffffff);
 		border-radius: var(--nax-radius-md, 3px);
 	}
 </style>

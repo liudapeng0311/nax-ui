@@ -5,14 +5,26 @@
 		:class="rootClass"
 		@click="onClick"
 	>
+		<!-- 自研解析渲染器引擎：全端一致，支持视频 / 表格 / 缩进 / 小程序端内容点击 -->
+		<view v-if="useParserEngine" class="nax-rich-text__parser">
+			<nax-rich-text-node
+				v-for="(node, index) in richNodes"
+				:key="index"
+				:node="node"
+				@action="onNodeAction"
+			></nax-rich-text-node>
+		</view>
+
+		<!-- 内置 rich-text 引擎（engine="builtin" 兜底） -->
 		<rich-text
+			v-else
 			class="nax-rich-text__content"
 			:style="contentStyle"
 			:nodes="effectiveNodes"
 			:mode="renderMode"
 			:space="spaceName"
 			:user-select="userSelect"
-			@itemclick="onItemClick"
+			@itemclick="onBuiltinItemClick"
 		></rich-text>
 
 		<slot></slot>
@@ -22,22 +34,36 @@
 <script setup lang="uts">
 	/**
 	 * nax-rich-text
-	 * @description 富文本。基于内置 rich-text 封装：HTML 字符串 / 节点列表双入口，App 渲染模式（native/web），全局字号/颜色/行高/字体，内容点击事件。
+	 * @description 富文本。自研解析渲染器引擎（默认，全端一致）与内置 rich-text 引擎双通道：HTML 字符串 / 节点列表双入口，全局字号/颜色/行高/字体，图片预览，内容点击事件。
 	 * @property {string} content HTML 字符串（nodes 为空时生效）
 	 * @property {any[]} nodes 节点列表（非空时优先于 content）
-	 * @property {string} mode App 渲染模式 web | native；默认 web（webview 渲染，标签支持最广）。native 为蒸汽模式 C 原生渲染（性能最佳），但内容含 h1-h6/ul/li 等结构标签时解析不稳（整块空白），组件检测到即自动回退 web；Web/小程序忽略该属性
-	 * @property {boolean} userSelect 文本是否可选中复制（iOS / 鸿蒙自动回退 web 模式渲染以支持该能力）
-	 * @property {string} space 连续空格显示：ensp | emsp | nbsp
+	 * @property {string} engine 渲染引擎 parser（默认，自研解析渲染器，全端一致）| builtin（内置 rich-text 兜底）
+	 * @property {string} mode 仅 builtin 引擎生效：App 渲染模式 web | native
+	 * @property {boolean} userSelect 仅 builtin 引擎生效：文本是否可选中复制
+	 * @property {string} space 仅 builtin 引擎生效：连续空格显示 ensp | emsp | nbsp
 	 * @property {string} size 全局字号 sm(14) | md(16 默认) | lg(18) | xl(20) | xxl(22) | 数字字符串（px）
 	 * @property {string} color 全局文字色（内容内联样式优先于全局样式）
 	 * @property {string} lineHeight 全局行高，如 1.5 或 22px
 	 * @property {string} fontFamily 全局字体
+	 * @property {string} linkColor 链接颜色（parser 引擎生效，默认主题绿 #18a058）
 	 * @property {boolean} show 是否显示
 	 * @property {string} customClass 根节点扩展 class
 	 * @event click 点击根节点
-	 * @event itemclick 内容点击：img 返回 detail.src，a 返回 detail.href（小程序端 rich-text 不支持子内容点击，该事件不会触发）
+	 * @event itemclick 内容点击：detail.src / detail.href，type 标记来源 img | a | audio | embed（builtin 引擎小程序端不触发）
 	 * @slot default 预留扩展内容
 	 */
+	import {
+		RichNode,
+		parseRichHtml
+	} from './parser.uts'
+	import {
+		BaseStyle,
+		RichNodeAction,
+		resolveTree,
+		collectImageSrcs,
+		nodeListToRich
+	} from './resolve.uts'
+
 	const props = defineProps({
 		content: {
 			type: String,
@@ -46,6 +72,10 @@
 		nodes: {
 			type: Array,
 			default: () => [] as any[]
+		},
+		engine: {
+			type: String,
+			default: 'parser'
 		},
 		mode: {
 			type: String,
@@ -75,6 +105,10 @@
 			type: String,
 			default: ''
 		},
+		linkColor: {
+			type: String,
+			default: '#18a058'
+		},
 		show: {
 			type: Boolean,
 			default: true
@@ -102,7 +136,7 @@
 	}
 
 	/**
-	 * App native 模式（C 自绘）对 HTML 结构标签解析不稳：
+	 * App builtin 引擎 native 模式（C 自绘）对 HTML 结构标签解析不稳：
 	 * 含 h1-h6 / ul / li 等标签时整块内容可能渲染空白，命中即回退 web 渲染。
 	 */
 	const nativeSafeTags : string[] = ['br', 'p', 'span', 'strong', 'i', 'big', 'small', 'a', 'u', 'del', 'img']
@@ -231,8 +265,63 @@
 		return props.nodes != null && (props.nodes as any[]).length > 0
 	})
 
+	/** 全局基础样式：parser 引擎的排版基准 */
+	const baseStyle = computed((): BaseStyle => {
+		const base = new BaseStyle()
+		base.fontSize = fontSizePx.value
+		if (props.color.length > 0) {
+			base.color = props.color
+		}
+		if (props.lineHeight.length > 0) {
+			base.lineHeight = props.lineHeight
+		}
+		if (props.fontFamily.length > 0) {
+			base.fontFamily = props.fontFamily
+		}
+		if (props.linkColor.length > 0) {
+			base.linkColor = props.linkColor
+		}
+		return base
+	})
+
+	/** parser 引擎：解析 + 渲染前处理，产出可渲染节点树 */
+	const resolvedRoot = computed((): RichNode | null => {
+		if (props.engine != 'parser') {
+			return null
+		}
+		let root : RichNode | null = null
+		if (hasNodeList.value) {
+			root = nodeListToRich(props.nodes as any[])
+		} else if (props.content.length > 0) {
+			root = parseRichHtml(props.content)
+		}
+		if (root == null) {
+			return null
+		}
+		resolveTree(root, baseStyle.value)
+		return root
+	})
+
+	const richNodes = computed((): RichNode[] => {
+		const root = resolvedRoot.value
+		return root != null ? root.children : [] as RichNode[]
+	})
+
+	const useParserEngine = computed((): boolean => {
+		return resolvedRoot.value != null
+	})
+
+	/** 全文图片列表：点击预览使用 */
+	const imageList = computed((): string[] => {
+		const root = resolvedRoot.value
+		if (root == null) {
+			return [] as string[]
+		}
+		return collectImageSrcs(root)
+	})
+
 	/**
-	 * 实际渲染模式：期望 native，内容含 native 不可靠的结构标签时自动回退 web；
+	 * builtin 引擎实际渲染模式：期望 native，内容含 native 不可靠的结构标签时自动回退 web；
 	 * iOS / 鸿蒙开启 user-select 时 native 不支持，同样回退 web。
 	 */
 	const renderMode = computed((): string => {
@@ -245,7 +334,7 @@
 			return 'web'
 		}
 		if (hasNodeList.value) {
-			return nodesHaveUnsafeTag(props.nodes) ? 'web' : 'native'
+			return nodesHaveUnsafeTag(props.nodes as any[]) ? 'web' : 'native'
 		}
 		if (htmlHasUnsafeTag(props.content)) {
 			return 'web'
@@ -270,9 +359,8 @@
 	})
 
 	/**
-	 * 全局样式必须写在 rich-text 元素自身（官方约定支持 font-size / font-family / line-height / color）；
+	 * builtin 引擎全局样式必须写在 rich-text 元素自身（官方约定支持 font-size / font-family / line-height / color）；
 	 * uni-app x 文本样式不继承，写在包裹 view 上不生效。
-	 * 全局样式优先级低于内容内样式。
 	 */
 	const contentStyle = computed((): string => {
 		let style = ''
@@ -289,12 +377,47 @@
 		return style
 	})
 
-	function onClick() {
-		emit('click')
+	/** 统一对外派发内容点击：detail 形状与内置 rich-text 事件保持兼容 */
+	function emitItemclick(type : string, src : string, href : string) {
+		emit('itemclick', {
+			type: type,
+			src: src,
+			href: href,
+			detail: {
+				src: src,
+				href: href
+			}
+		})
 	}
 
-	function onItemClick(e : any) {
-		emit('itemclick', e)
+	/** parser 引擎节点动作：图片默认预览，其余交由业务层 */
+	function onNodeAction(action : any) {
+		const item = action as RichNodeAction
+		if (item.type == 'img' && item.src.length > 0 && imageList.value.length > 0) {
+			uni.previewImage({
+				urls: imageList.value,
+				current: item.src
+			})
+		}
+		emitItemclick(item.type, item.src, item.href)
+	}
+
+	/** builtin 引擎原生 itemclick 事件 → 统一形状 */
+	function onBuiltinItemClick(e : UniRichTextItemClickEvent) {
+		const detail = e.detail
+		let src = ''
+		let href = ''
+		if (detail.src != null) {
+			src = detail.src
+		}
+		if (detail.href != null) {
+			href = detail.href
+		}
+		emitItemclick('rich-text', src, href)
+	}
+
+	function onClick() {
+		emit('click')
 	}
 </script>
 
@@ -302,6 +425,12 @@
 	.nax-rich-text {
 		flex-direction: column;
 		align-items: stretch;
+	}
+
+	.nax-rich-text__parser {
+		flex-direction: column;
+		align-items: stretch;
+		width: 100%;
 	}
 
 	.nax-rich-text__content {

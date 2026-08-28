@@ -1,0 +1,781 @@
+/**
+ * nax-rich-text HTML 解析器
+ *
+ * 纯字符串处理，零平台 API 依赖，全端（App / Web / 小程序）可用。
+ * 职责：容错解析 HTML 字符串 → 归一化节点树，供 nax-rich-text 渲染器消费。
+ *
+ * 设计要点：
+ * - 栈式解析：未闭合标签自动闭合、错位闭合标签容错忽略
+ * - 隐式闭合：p / li / dt / dd / td / th / tr 按浏览器规则自动闭合
+ * - 白名单归类：每个元素标注 kind（block / inline / media / list / table 等），
+ *   未知标签降级为 block 或 inline 透传子节点，保证任何输入都可渲染
+ * - 丢弃 script / style / svg / math / head 等无渲染意义或高危内容
+ * - 实体解码：常用命名实体 + 十进制 / 十六进制数字实体
+ * - 表格归一化：table 下直接的 tr 自动包裹进 tbody
+ * - style 属性解析为键值 Map，渲染器直接消费
+ */
+
+/** 节点类型：element 为标签节点，text 为文本节点 */
+export const NODE_TYPE_ELEMENT : string = 'element'
+export const NODE_TYPE_TEXT : string = 'text'
+
+/** 元素归类，渲染器按 kind 决定渲染方式 */
+export const NODE_KIND_ROOT : string = 'root'
+export const NODE_KIND_BLOCK : string = 'block'
+export const NODE_KIND_INLINE : string = 'inline'
+export const NODE_KIND_MEDIA : string = 'media'
+export const NODE_KIND_EMBED : string = 'embed'
+export const NODE_KIND_LIST : string = 'list'
+export const NODE_KIND_LIST_ITEM : string = 'list-item'
+export const NODE_KIND_TABLE : string = 'table'
+export const NODE_KIND_TABLE_SECTION : string = 'table-section'
+export const NODE_KIND_TABLE_ROW : string = 'table-row'
+export const NODE_KIND_TABLE_CELL : string = 'table-cell'
+export const NODE_KIND_TABLE_COL : string = 'table-col'
+export const NODE_KIND_BR : string = 'br'
+export const NODE_KIND_HR : string = 'hr'
+export const NODE_KIND_TEXT : string = 'text'
+/** 渲染前处理（resolve.uts）合成的行内文本串容器 */
+export const NODE_KIND_RUN : string = 'run'
+
+export class RichNode {
+	type : string = NODE_TYPE_ELEMENT
+	/** 标签名（小写）；text 节点为空 */
+	name : string = ''
+	/** text 节点内容（实体已解码） */
+	text : string = ''
+	attrs : Map<string, string> = new Map()
+	/** style 属性解析结果，键为小写，值保留原文 */
+	style : Map<string, string> = new Map()
+	children : RichNode[] = []
+	/** 归一化后的元素分类，text 节点为 NODE_KIND_TEXT */
+	kind : string = NODE_KIND_INLINE
+	/** 是否处于 pre / code 内（保留空白，不做折叠裁剪） */
+	preserveWs : boolean = false
+	/** 渲染前处理产出的最终内联样式串，渲染器直接绑定 :style */
+	styleText : string = ''
+
+	constructor() {}
+}
+
+/** void 元素：无闭合标签 */
+const VOID_TAGS : string[] = [
+	'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+	'link', 'meta', 'param', 'source', 'track', 'wbr'
+]
+
+/** 连同内容一起丢弃的标签（高危或无渲染意义）。iframe 保留：编辑器视频嵌入常见形态，由渲染器决定展示形式 */
+const SKIP_CONTENT_TAGS : string[] = [
+	'script', 'style', 'svg', 'math', 'head', 'title', 'noscript', 'template', 'embed'
+]
+
+/** 打开时会使未闭合 p 自动闭合的块级标签 */
+const P_CLOSERS : string[] = [
+	'p', 'div', 'section', 'article', 'aside', 'header', 'footer', 'nav', 'main',
+	'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+	'blockquote', 'pre', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
+	'figure', 'figcaption', 'hr', 'form', 'fieldset'
+]
+
+const BLOCK_TAGS : string[] = [
+	'p', 'div', 'section', 'article', 'aside', 'header', 'footer', 'nav', 'main',
+	'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'figure', 'figcaption',
+	'address', 'details', 'summary', 'fieldset', 'form', 'center'
+]
+
+const INLINE_TAGS : string[] = [
+	'span', 'a', 'strong', 'b', 'em', 'i', 'u', 's', 'del', 'ins', 'strike',
+	'mark', 'small', 'big', 'sub', 'sup', 'code', 'kbd', 'samp', 'var', 'cite',
+	'q', 'abbr', 'time', 'label', 'font', 'bdi', 'bdo', 'ruby', 'rt', 'rp'
+]
+
+const LIST_TAGS : string[] = ['ul', 'ol', 'li', 'dl', 'dt', 'dd']
+
+const TABLE_TAGS : string[] = ['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption', 'colgroup', 'col']
+
+const MEDIA_TAGS : string[] = ['img', 'video', 'audio', 'source', 'track', 'picture']
+
+/** 常用命名实体表 */
+const ENTITY_NAMES : string[] = [
+	'amp', 'lt', 'gt', 'quot', 'apos', 'nbsp', 'ensp', 'emsp', 'thinsp', 'copy', 'reg', 'trade',
+	'hellip', 'mdash', 'ndash', 'lsquo', 'rsquo', 'ldquo', 'rdquo', 'laquo', 'raquo',
+	'times', 'divide', 'plusmn', 'deg', 'middot', 'bull', 'sect', 'para', 'dagger', 'permil',
+	'larr', 'rarr', 'uarr', 'darr', 'harr', 'minus', 'euro', 'pound', 'yen', 'cent', 'micro',
+	'frac12', 'frac14', 'frac34', 'sup2', 'sup3', 'shy', 'zwnj', 'zwj'
+]
+const ENTITY_VALUES : string[] = [
+	'&', '<', '>', '"', "'", ' ', ' ', ' ', ' ', '©', '®', '™',
+	'…', '—', '–', '‘', '’', '“', '”', '«', '»',
+	'×', '÷', '±', '°', '·', '•', '§', '¶', '†', '‰',
+	'←', '→', '↑', '↓', '↔', '−', '€', '£', '¥', '¢', 'µ',
+	'½', '¼', '¾', '²', '³', '­', '‌', '‍'
+]
+
+const entityMap : Map<string, string> = new Map()
+
+function initEntityMap() {
+	if (entityMap.size > 0) {
+		return
+	}
+	for (let i = 0; i < ENTITY_NAMES.length; i++) {
+		entityMap.set(ENTITY_NAMES[i], ENTITY_VALUES[i])
+	}
+}
+initEntityMap()
+
+function inList(list : string[], name : string) : boolean {
+	for (let i = 0; i < list.length; i++) {
+		if (list[i] == name) {
+			return true
+		}
+	}
+	return false
+}
+
+export function isVoidTag(name : string) : boolean {
+	return inList(VOID_TAGS, name)
+}
+
+/**
+ * 解码文本 / 属性值中的实体：
+ * 命名实体查表（未知保持原文），&#123; 与 &#x1A; 数字实体按码点还原。
+ */
+export function decodeEntities(input : string) : string {
+	if (input.indexOf('&') < 0) {
+		return input
+	}
+	let out = ''
+	let i = 0
+	const n = input.length
+	while (i < n) {
+		const c = input.charAt(i)
+		if (c != '&') {
+			out += c
+			i++
+			continue
+		}
+		// 找实体结束分号，跨度超过 32 视为普通文本
+		const semi = input.indexOf(';', i + 1)
+		if (semi < 0 || semi - i > 32) {
+			out += c
+			i++
+			continue
+		}
+		const body = input.substring(i + 1, semi)
+		if (body.length == 0) {
+			out += c
+			i++
+			continue
+		}
+		// 数字实体
+		if (body.charAt(0) == '#') {
+			let code = -1
+			if (body.length > 1 && (body.charAt(1) == 'x' || body.charAt(1) == 'X')) {
+				const hex = body.substring(2)
+				if (isHexStr(hex)) {
+					code = parseNumByRadix(hex, 16)
+				}
+			} else {
+				const dec = body.substring(1)
+				if (isDecStr(dec)) {
+					code = parseNumByRadix(dec, 10)
+				}
+			}
+			if (code > 0 && code <= 0x10FFFF) {
+				out += String.fromCharCode(code)
+				i = semi + 1
+				continue
+			}
+			out += c
+			i++
+			continue
+		}
+		// 命名实体
+		const named = entityMap.get(body.toLowerCase())
+		if (named != null) {
+			out += named
+			i = semi + 1
+			continue
+		}
+		out += c
+		i++
+	}
+	return out
+}
+
+/** 手动按进制转数字：uts 原生端 parseInt 带进制参数不可靠 */
+function parseNumByRadix(s : string, radix : number) : number {
+	let value = 0
+	for (let i = 0; i < s.length; i++) {
+		const code = s.charCodeAt(i)
+		let digit = -1
+		if (code >= 48 && code <= 57) {
+			digit = code - 48
+		} else if (code >= 97 && code <= 102) {
+			digit = code - 87
+		} else if (code >= 65 && code <= 70) {
+			digit = code - 55
+		}
+		if (digit < 0 || digit >= radix) {
+			return -1
+		}
+		value = value * radix + digit
+	}
+	return value
+}
+
+function isDecStr(s : string) : boolean {
+	if (s.length == 0) {
+		return false
+	}
+	for (let i = 0; i < s.length; i++) {
+		const code = s.charCodeAt(i)
+		if (code < 48 || code > 57) {
+			return false
+		}
+	}
+	return true
+}
+
+function isHexStr(s : string) : boolean {
+	if (s.length == 0) {
+		return false
+	}
+	for (let i = 0; i < s.length; i++) {
+		const code = s.charCodeAt(i)
+		const isDigit = code >= 48 && code <= 57
+		const isUpperHex = code >= 65 && code <= 70
+		const isLowerHex = code >= 97 && code <= 102
+		if (!isDigit && !isUpperHex && !isLowerHex) {
+			return false
+		}
+	}
+	return true
+}
+
+/** 解析 style 属性为键值表（键小写；不使用正则，兼容 uts 原生端限制） */
+export function parseStyleAttr(raw : string) : Map<string, string> {
+	const map : Map<string, string> = new Map()
+	const parts = raw.split(';')
+	for (let i = 0; i < parts.length; i++) {
+		const part = parts[i].trim()
+		if (part.length == 0) {
+			continue
+		}
+		const colon = part.indexOf(':')
+		if (colon <= 0) {
+			continue
+		}
+		const key = part.substring(0, colon).trim().toLowerCase()
+		const value = part.substring(colon + 1).trim()
+		if (key.length == 0 || value.length == 0) {
+			continue
+		}
+		map.set(key, value)
+	}
+	return map
+}
+
+function isAsciiLetter(c : string) : boolean {
+	const code = c.charCodeAt(0)
+	return (code >= 65 && code <= 90) || (code >= 97 && code <= 122)
+}
+
+function isWhitespace(c : string) : boolean {
+	const code = c.charCodeAt(0)
+	return code == 32 || code == 9 || code == 10 || code == 13 || code == 12
+}
+
+/** 标签名解析结果（uts 数组强类型，异构返回用类承载） */
+class TagNameResult {
+	name : string = ''
+	end : number = 0
+
+	constructor(name : string, end : number) {
+		this.name = name
+		this.end = end
+	}
+}
+
+/** 属性解析结果 */
+class AttrResult {
+	name : string = ''
+	value : string = ''
+	end : number = 0
+
+	constructor(name : string, value : string, end : number) {
+		this.name = name
+		this.value = value
+		this.end = end
+	}
+}
+
+/** 从 pos 开始读取标签名 */
+function readTagName(lower : string, pos : number) : TagNameResult {
+	let name = ''
+	let i = pos
+	while (i < lower.length) {
+		const c = lower.charAt(i)
+		if (isAsciiLetter(c) || (c.charCodeAt(0) >= 48 && c.charCodeAt(0) <= 57)) {
+			name += c
+			i++
+		} else {
+			break
+		}
+	}
+	return new TagNameResult(name, i)
+}
+
+/**
+ * 从 pos（属性名起点）解析单个属性。
+ * 值支持双引号 / 单引号 / 无引号（至空白或 > 为止）；无值属性返回空串。
+ */
+function readAttr(html : string, lower : string, pos : number) : AttrResult {
+	const n = html.length
+	let i = pos
+	let name = ''
+	while (i < n) {
+		const c = lower.charAt(i)
+		if (isWhitespace(c) || c == '=' || c == '>' || c == '/') {
+			break
+		}
+		name += c
+		i++
+	}
+	if (name.length == 0) {
+		// 非法字符（如引号开头），跳过一位避免死循环
+		return new AttrResult('', '', i + 1)
+	}
+	let j = i
+	while (j < n && isWhitespace(lower.charAt(j))) {
+		j++
+	}
+	if (j >= n || lower.charAt(j) != '=') {
+		return new AttrResult(name, '', i)
+	}
+	j++
+	while (j < n && isWhitespace(lower.charAt(j))) {
+		j++
+	}
+	if (j >= n) {
+		return new AttrResult(name, '', j)
+	}
+	const quote = lower.charAt(j)
+	if (quote == '"' || quote == "'") {
+		const end = lower.indexOf(quote, j + 1)
+		if (end < 0) {
+			return new AttrResult(name, html.substring(j + 1), n)
+		}
+		return new AttrResult(name, html.substring(j + 1, end), end + 1)
+	}
+	// 无引号值：读到空白或 > 为止（URL 中的 / 属于值的一部分）
+	let k = j
+	while (k < n) {
+		const c = lower.charAt(k)
+		if (isWhitespace(c) || c == '>') {
+			break
+		}
+		k++
+	}
+	return new AttrResult(name, html.substring(j, k), k)
+}
+
+function isPureWhitespace(s : string) : boolean {
+	for (let i = 0; i < s.length; i++) {
+		if (!isWhitespace(s.charAt(i))) {
+			return false
+		}
+	}
+	return true
+}
+
+function makeElement(name : string) : RichNode {
+	const node = new RichNode()
+	node.type = NODE_TYPE_ELEMENT
+	node.name = name
+	node.kind = NODE_KIND_INLINE
+	return node
+}
+
+function makeText(text : string, preserveWs : boolean) : RichNode {
+	const node = new RichNode()
+	node.type = NODE_TYPE_TEXT
+	node.text = text
+	node.kind = NODE_KIND_TEXT
+	node.preserveWs = preserveWs
+	return node
+}
+
+/** 追加文本：解码实体，合并到上一个文本节点，避免碎片 */
+function appendText(parent : RichNode, raw : string, preserveWs : boolean) {
+	if (raw.length == 0) {
+		return
+	}
+	const decoded = decodeEntities(raw)
+	if (decoded.length == 0) {
+		return
+	}
+	const last = parent.children.length > 0 ? parent.children[parent.children.length - 1] : null
+	if (last != null && last.type == NODE_TYPE_TEXT && last.preserveWs == preserveWs) {
+		last.text += decoded
+		return
+	}
+	parent.children.push(makeText(decoded, preserveWs))
+}
+
+/**
+ * 开标签的隐式闭合（对齐浏览器容错行为）：
+ * - 块级标签打开时关闭未闭合的 p
+ * - li / dt / dd / td / th / tr 同级互斥自动闭合
+ * - thead / tbody / tfoot 打开时关闭游离的 tr / td / th
+ */
+function autoCloseBeforeOpen(stack : RichNode[], name : string) {
+	if (inList(P_CLOSERS, name)) {
+		// 先收掉悬在 p 之上的行内元素，再关闭 p（模拟浏览器 generate implied end tags）
+		while (stack.length > 1 && inList(INLINE_TAGS, stack[stack.length - 1].name)) {
+			stack.pop()
+		}
+		while (stack.length > 1 && stack[stack.length - 1].name == 'p') {
+			stack.pop()
+		}
+	}
+	if (name == 'li' || name == 'dt' || name == 'dd') {
+		while (stack.length > 1) {
+			const top = stack[stack.length - 1].name
+			if (top == 'li' || top == 'dt' || top == 'dd') {
+				stack.pop()
+			} else {
+				break
+			}
+		}
+	}
+	if (name == 'td' || name == 'th') {
+		while (stack.length > 1 && (stack[stack.length - 1].name == 'td' || stack[stack.length - 1].name == 'th')) {
+			stack.pop()
+		}
+	}
+	if (name == 'tr') {
+		while (stack.length > 1 && (stack[stack.length - 1].name == 'td' || stack[stack.length - 1].name == 'th' || stack[stack.length - 1].name == 'tr')) {
+			stack.pop()
+		}
+	}
+	if (name == 'tbody' || name == 'thead' || name == 'tfoot') {
+		while (stack.length > 1 && (stack[stack.length - 1].name == 'tr' || stack[stack.length - 1].name == 'td' || stack[stack.length - 1].name == 'th')) {
+			stack.pop()
+		}
+	}
+}
+
+/** 闭标签处理：栈内找到同名则弹出该层及以上；找不到则忽略（容错） */
+function handleClose(stack : RichNode[], name : string) {
+	if (inList(VOID_TAGS, name)) {
+		return
+	}
+	let found = -1
+	for (let i = stack.length - 1; i >= 1; i--) {
+		if (stack[i].name == name) {
+			found = i
+			break
+		}
+	}
+	if (found > 0) {
+		while (stack.length > found) {
+			stack.pop()
+		}
+	}
+}
+
+/** table 下直接的 tr 包裹进 tbody（对齐浏览器隐式补全） */
+function implyTbody(table : RichNode) {
+	let hasDirectTr = false
+	for (let i = 0; i < table.children.length; i++) {
+		const child = table.children[i]
+		if (child.type == NODE_TYPE_ELEMENT && child.name == 'tr') {
+			hasDirectTr = true
+			break
+		}
+	}
+	if (!hasDirectTr) {
+		return
+	}
+	const rebuilt : RichNode[] = []
+	let pending : RichNode[] = []
+	const flush = () => {
+		if (pending.length == 0) {
+			return
+		}
+		const tbody = makeElement('tbody')
+		tbody.kind = NODE_KIND_TABLE_SECTION
+		tbody.children = pending
+		rebuilt.push(tbody)
+		pending = []
+	}
+	for (let i = 0; i < table.children.length; i++) {
+		const child = table.children[i]
+		if (child.type == NODE_TYPE_ELEMENT && child.name == 'tr') {
+			pending.push(child)
+		} else {
+			flush()
+			rebuilt.push(child)
+		}
+	}
+	flush()
+	table.children = rebuilt
+}
+
+/** 后序归类：确定每个节点 kind，未知标签按子内容降级为 block 或 inline */
+function classify(node : RichNode) {
+	for (let i = 0; i < node.children.length; i++) {
+		classify(node.children[i])
+	}
+	if (node.type == NODE_TYPE_TEXT) {
+		node.kind = NODE_KIND_TEXT
+		return
+	}
+	const name = node.name
+	if (inList(MEDIA_TAGS, name)) {
+		node.kind = NODE_KIND_MEDIA
+		return
+	}
+	if (name == 'iframe' || name == 'embed') {
+		// 编辑器常见视频嵌入方式，保留节点由渲染器决定展示形式
+		node.kind = NODE_KIND_EMBED
+		return
+	}
+	if (name == 'ul' || name == 'ol' || name == 'dl') {
+		node.kind = NODE_KIND_LIST
+		return
+	}
+	if (name == 'li' || name == 'dt' || name == 'dd') {
+		node.kind = NODE_KIND_LIST_ITEM
+		return
+	}
+	if (name == 'table') {
+		node.kind = NODE_KIND_TABLE
+		return
+	}
+	if (name == 'thead' || name == 'tbody' || name == 'tfoot') {
+		node.kind = NODE_KIND_TABLE_SECTION
+		return
+	}
+	if (name == 'tr') {
+		node.kind = NODE_KIND_TABLE_ROW
+		return
+	}
+	if (name == 'td' || name == 'th') {
+		node.kind = NODE_KIND_TABLE_CELL
+		return
+	}
+	if (name == 'colgroup' || name == 'col') {
+		node.kind = NODE_KIND_TABLE_COL
+		return
+	}
+	if (name == 'br') {
+		node.kind = NODE_KIND_BR
+		return
+	}
+	if (name == 'hr') {
+		node.kind = NODE_KIND_HR
+		return
+	}
+	if (inList(BLOCK_TAGS, name)) {
+		node.kind = NODE_KIND_BLOCK
+		return
+	}
+	if (inList(INLINE_TAGS, name)) {
+		node.kind = NODE_KIND_INLINE
+		return
+	}
+	// 未知标签：含块级 / 结构性子节点则按块容器降级，否则按行内降级
+	let hasStructured = false
+	for (let i = 0; i < node.children.length; i++) {
+		const childKind = node.children[i].kind
+		if (childKind != NODE_KIND_INLINE && childKind != NODE_KIND_TEXT && childKind != NODE_KIND_BR) {
+			hasStructured = true
+			break
+		}
+	}
+	node.kind = hasStructured ? NODE_KIND_BLOCK : NODE_KIND_INLINE
+}
+
+/** 块级容器下修剪多余空白文本（对齐 HTML 空白折叠语义；pre 内保留） */
+function pruneWhitespace(node : RichNode) {
+	if (node.type == NODE_TYPE_TEXT) {
+		return
+	}
+	const isBlockContainer = node.kind == NODE_KIND_ROOT
+		|| node.kind == NODE_KIND_BLOCK
+		|| node.kind == NODE_KIND_LIST
+		|| node.kind == NODE_KIND_LIST_ITEM
+		|| node.kind == NODE_KIND_TABLE_CELL
+	const kept : RichNode[] = []
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		const isWsText = child.type == NODE_TYPE_TEXT && !child.preserveWs && isPureWhitespace(child.text)
+		if (isWsText && isBlockContainer && !inList(INLINE_TAGS, node.name)) {
+			// 位于首尾或紧邻块级兄弟时丢弃；夹在行内内容之间时折叠为单个空格
+			const prev = kept.length > 0 ? kept[kept.length - 1] : null
+			const next = i + 1 < node.children.length ? node.children[i + 1] : null
+			const prevIsStructured = prev == null || (prev.type == NODE_TYPE_ELEMENT && prev.kind != NODE_KIND_INLINE && prev.kind != NODE_KIND_TEXT && prev.kind != NODE_KIND_BR)
+			const nextIsStructured = next == null || (next.type == NODE_TYPE_ELEMENT && next.kind != NODE_KIND_INLINE && next.kind != NODE_KIND_TEXT && next.kind != NODE_KIND_BR)
+			if (prevIsStructured && nextIsStructured) {
+				continue
+			}
+			if (prevIsStructured || nextIsStructured) {
+				child.text = ' '
+			}
+		}
+		kept.push(child)
+		pruneWhitespace(child)
+	}
+	node.children = kept
+}
+
+/**
+ * 解析入口：HTML 字符串 → 归一化节点树。
+ * 返回虚拟根节点（kind = root），渲染器遍历其 children 即可。
+ */
+export function parseRichHtml(html : string) : RichNode {
+	const root = makeElement('__root')
+	root.kind = NODE_KIND_ROOT
+
+	const source = html != null ? html : ''
+	const lower = source.toLowerCase()
+	const n = source.length
+
+	const stack : RichNode[] = [root]
+	let preDepth = 0
+	let i = 0
+
+	while (i < n) {
+		const lt = lower.indexOf('<', i)
+		if (lt < 0) {
+			appendText(stack[stack.length - 1], source.substring(i), preDepth > 0)
+			break
+		}
+		if (lt > i) {
+			appendText(stack[stack.length - 1], source.substring(i, lt), preDepth > 0)
+		}
+
+		// 注释
+		if (lt + 3 < n && lower.charAt(lt + 1) == '!' && lower.charAt(lt + 2) == '-' && lower.charAt(lt + 3) == '-') {
+			const end = lower.indexOf('-->', lt + 4)
+			i = end < 0 ? n : end + 3
+			continue
+		}
+		// DOCTYPE / 处理指令 / CDATA
+		const nextChar = lt + 1 < n ? lower.charAt(lt + 1) : ''
+		if (nextChar == '!' || nextChar == '?') {
+			const gt = lower.indexOf('>', lt + 1)
+			i = gt < 0 ? n : gt + 1
+			continue
+		}
+		// 闭标签
+		if (nextChar == '/') {
+			const tagRes = readTagName(lower, lt + 2)
+			const closeName = tagRes.name
+			const nameEnd = tagRes.end
+			const gt = lower.indexOf('>', nameEnd)
+			i = gt < 0 ? n : gt + 1
+			if (closeName.length > 0) {
+				handleClose(stack, closeName)
+				if (closeName == 'pre' && preDepth > 0) {
+					preDepth--
+				}
+			}
+			continue
+		}
+		// 开标签
+		if (isAsciiLetter(nextChar)) {
+			const tagRes = readTagName(lower, lt + 1)
+			const name = tagRes.name
+			let j = tagRes.end
+			const attrs : Map<string, string> = new Map()
+			let selfClosing = false
+			while (j < n) {
+				const c = lower.charAt(j)
+				if (isWhitespace(c)) {
+					j++
+					continue
+				}
+				if (c == '>') {
+					j++
+					break
+				}
+				if (c == '/') {
+					if (j + 1 < n && lower.charAt(j + 1) == '>') {
+						selfClosing = true
+						j += 2
+						break
+					}
+					j++
+					continue
+				}
+				const attrRes = readAttr(source, lower, j)
+				j = attrRes.end
+				const attrName = attrRes.name
+				const attrValue = attrRes.value
+				if (attrName.length > 0 && !attrs.has(attrName)) {
+					attrs.set(attrName, decodeEntities(attrValue).trim())
+				}
+			}
+			i = j
+
+			// 高危 / 无渲染意义标签连同内容整体丢弃
+			if (inList(SKIP_CONTENT_TAGS, name)) {
+				if (!inList(VOID_TAGS, name)) {
+					const closeToken = '</' + name
+					const closeAt = lower.indexOf(closeToken, i)
+					if (closeAt >= 0) {
+						const closeGt = lower.indexOf('>', closeAt)
+						i = closeGt < 0 ? n : closeGt + 1
+					} else {
+						i = n
+					}
+				}
+				continue
+			}
+			// pre / code 内容保留空白
+			if (name == 'pre') {
+				preDepth++
+			}
+
+			autoCloseBeforeOpen(stack, name)
+			const node = makeElement(name)
+			node.attrs = attrs
+			const styleRaw = attrs.get('style')
+			if (styleRaw != null && styleRaw.length > 0) {
+				node.style = parseStyleAttr(styleRaw)
+			}
+			const top = stack[stack.length - 1]
+			top.children.push(node)
+			// void 或显式自闭合不进栈
+			if (!inList(VOID_TAGS, name) && !selfClosing) {
+				stack.push(node)
+			}
+			continue
+		}
+		// 孤立的 '<' 按文本处理
+		appendText(stack[stack.length - 1], '<', preDepth > 0)
+		i = lt + 1
+	}
+
+	// 收尾：归一化
+	classify(root)
+	implyWalk(root)
+	pruneWhitespace(root)
+	return root
+}
+
+/** 递归执行表格隐式 tbody 补全 */
+function implyWalk(node : RichNode) {
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.type == NODE_TYPE_ELEMENT) {
+			if (child.name == 'table') {
+				implyTbody(child)
+			}
+			implyWalk(child)
+		}
+	}
+}

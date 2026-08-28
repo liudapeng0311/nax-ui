@@ -1,0 +1,604 @@
+<template>
+	<!-- 文本叶子 -->
+	<text v-if="isText" :style="styleText">{{ textContent }}</text>
+
+	<!-- 换行（嵌套 text 继承父级样式） -->
+	<text v-else-if="isBr">{{ newlineText }}</text>
+
+	<!-- 图片：宽度自适应，点击预览 -->
+	<image
+		v-else-if="isImg"
+		class="nax-rich-text-node__img"
+		:src="imgSrc"
+		mode="widthFix"
+		:style="styleText"
+		@click="onImgTap"
+	></image>
+
+	<!-- 视频 -->
+	<video
+		v-else-if="isVideo"
+		class="nax-rich-text-node__video"
+		:src="videoSrc"
+		:controls="videoControls"
+		:poster="videoPoster"
+		:style="styleText"
+	></video>
+
+	<!-- 音频播放器（createInnerAudioContext 实现，无内建 audio 组件） -->
+	<view v-else-if="isAudio" class="nax-rich-text-node__audio">
+		<view class="nax-rich-text-node__audio-btn" @click="onAudioToggle">
+			<nax-icon
+				:name="audioPlaying ? 'player-pause-filled' : 'player-play-filled'"
+				size="14"
+				color="#ffffff"
+			></nax-icon>
+		</view>
+		<view class="nax-rich-text-node__audio-main">
+			<slider
+				class="nax-rich-text-node__audio-slider"
+				:min="0"
+				:max="audioMax"
+				:step="1"
+				:value="audioSliderValue"
+				activeColor="#18a058"
+				backgroundColor="#e2e4ea"
+				:blockSize="12"
+				@change="onAudioSeek"
+				@changing="onAudioChanging"
+			></slider>
+			<text class="nax-rich-text-node__audio-time">{{ audioTimeText }}</text>
+		</view>
+	</view>
+
+	<!-- 内嵌内容占位（iframe 等编辑器嵌入） -->
+	<view v-else-if="isEmbed" class="nax-rich-text-node__media-card" @click="onEmbedTap">
+		<text class="nax-rich-text-node__media-icon">▶</text>
+		<text class="nax-rich-text-node__media-text">外部内容：{{ embedDomain }}</text>
+	</view>
+
+	<!-- 分隔线 -->
+	<view v-else-if="isHr" :style="styleText"></view>
+
+	<!-- 行内文本串：一个 run 一个 text，内部嵌套行内元素 -->
+	<text v-else-if="isRun" :style="styleText">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</text>
+
+	<!-- 行内元素（span / strong / a 等） -->
+	<text v-else-if="isInline" :style="styleText" @click="onInlineTap">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</text>
+
+	<!-- 列表：标记 + 内容两列 -->
+	<view v-else-if="isList" :style="styleText">
+		<view v-for="(item, index) in children" :key="index" class="nax-rich-text-node__li">
+			<text class="nax-rich-text-node__marker">{{ markerFor(item, index) }}</text>
+			<view class="nax-rich-text-node__li-body">
+				<nax-rich-text-node
+					v-for="(child, j) in item.children"
+					:key="j"
+					:node="child"
+					@action="forwardAction"
+				></nax-rich-text-node>
+			</view>
+		</view>
+	</view>
+
+	<!-- 表格：行扁平化渲染，列宽已在渲染前处理阶段按各列内容最大值对齐 -->
+	<view v-else-if="isTable" :style="styleText">
+		<nax-rich-text-node
+			v-for="(other, oi) in tableOthers"
+			:key="'o' + oi"
+			:node="other"
+			@action="forwardAction"
+		></nax-rich-text-node>
+		<view v-for="(row, ri) in tableRows" :key="'r' + ri" class="nax-rich-text-node__tr">
+			<view
+				v-for="(cell, ci) in row.children"
+				:key="ci"
+				class="nax-rich-text-node__cell"
+				:style="cell.styleText"
+			>
+				<nax-rich-text-node
+					v-for="(c, i) in cell.children"
+					:key="i"
+					:node="c"
+					@action="forwardAction"
+				></nax-rich-text-node>
+			</view>
+		</view>
+	</view>
+
+	<!-- 表格行组 thead / tbody / tfoot -->
+	<view v-else-if="isSection" :style="styleText">
+		<nax-rich-text-node
+			v-for="(row, index) in children"
+			:key="index"
+			:node="row"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</view>
+
+	<!-- 表格行（游离行的兜底路径） -->
+	<view v-else-if="isRow" class="nax-rich-text-node__tr">
+		<view v-for="(cell, index) in children" :key="index" class="nax-rich-text-node__cell">
+			<nax-rich-text-node :node="cell" @action="forwardAction"></nax-rich-text-node>
+		</view>
+	</view>
+
+	<!-- 单元格 -->
+	<view v-else-if="isCell" :style="styleText">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</view>
+
+	<!-- 块容器（p / 标题 / 引用 / div / 被提升的行内结构等） -->
+	<view v-else-if="isBlock" :style="styleText" @click="onBlockTap">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</view>
+
+	<!-- 无渲染节点（source / track / col 等） -->
+	<view v-else class="nax-rich-text-node__skip"></view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-rich-text-node
+	 * nax-rich-text 内部递归渲染节点，解析器 + 渲染前处理产出 RichNode 树后由本组件消费。
+	 * 节点样式已在渲染前处理阶段合并为 styleText，本组件只做结构与事件映射。
+	 */
+	import {
+		RichNode,
+		NODE_TYPE_TEXT,
+		NODE_KIND_BR,
+		NODE_KIND_RUN,
+		NODE_KIND_INLINE,
+		NODE_KIND_MEDIA,
+		NODE_KIND_EMBED,
+		NODE_KIND_HR,
+		NODE_KIND_LIST,
+		NODE_KIND_TABLE,
+		NODE_KIND_TABLE_SECTION,
+		NODE_KIND_TABLE_ROW,
+		NODE_KIND_TABLE_CELL,
+		NODE_KIND_BLOCK
+	} from '../nax-rich-text/parser.uts'
+	import { RichNodeAction, extractDomain } from '../nax-rich-text/resolve.uts'
+	import { pauseCurrentAudio, setCurrentAudio, clearCurrentAudio } from '../nax-rich-text/audio-manager.uts'
+
+	const props = defineProps({
+		node: {
+			type: Object,
+			default: null
+		}
+	})
+	const emit = defineEmits(['action'])
+
+	const richNode = computed((): RichNode | null => {
+		const n = props.node
+		if (n == null) {
+			return null
+		}
+		return n as RichNode
+	})
+
+	const nodeName = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.name : ''
+	})
+
+	const nodeKind = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.kind : ''
+	})
+
+	const styleText = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.styleText : ''
+	})
+
+	const children = computed((): RichNode[] => {
+		const n = richNode.value
+		return n != null ? n.children : [] as RichNode[]
+	})
+
+	const isText = computed((): boolean => {
+		const n = richNode.value
+		return n != null && n.type == NODE_TYPE_TEXT
+	})
+
+	const textContent = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.text : ''
+	})
+
+	const isBr = computed((): boolean => nodeKind.value == NODE_KIND_BR)
+	const isRun = computed((): boolean => nodeKind.value == NODE_KIND_RUN)
+	const isInline = computed((): boolean => nodeKind.value == NODE_KIND_INLINE)
+	const isEmbed = computed((): boolean => nodeKind.value == NODE_KIND_EMBED)
+	const isHr = computed((): boolean => nodeKind.value == NODE_KIND_HR)
+	const isList = computed((): boolean => nodeKind.value == NODE_KIND_LIST)
+	const isTable = computed((): boolean => nodeKind.value == NODE_KIND_TABLE)
+	const isSection = computed((): boolean => nodeKind.value == NODE_KIND_TABLE_SECTION)
+	const isRow = computed((): boolean => nodeKind.value == NODE_KIND_TABLE_ROW)
+	const isCell = computed((): boolean => nodeKind.value == NODE_KIND_TABLE_CELL)
+	const isBlock = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_BLOCK
+			|| (nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'picture')
+	})
+
+	const isImg = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'img'
+	})
+	const isVideo = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'video'
+	})
+	const isAudio = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'audio'
+	})
+
+	const newlineText = '\n'
+
+	function attrValue(key : string) : string {
+		const n = richNode.value
+		if (n == null) {
+			return ''
+		}
+		const v = n.attrs.get(key)
+		return v != null ? v : ''
+	}
+
+	const imgSrc = computed((): string => {
+		let src = attrValue('src')
+		if (src.length == 0) {
+			src = attrValue('data-src')
+		}
+		return src
+	})
+
+	const videoSrc = computed((): string => attrValue('src'))
+	const videoControls = computed((): boolean => {
+		const n = richNode.value
+		return n != null && n.attrs.has('controls')
+	})
+	const videoPoster = computed((): string => attrValue('poster'))
+	const embedDomain = computed((): string => {
+		let src = attrValue('src')
+		if (src.length == 0) {
+			return '外部内容'
+		}
+		const domain = extractDomain(src)
+		return domain.length > 0 ? domain : src
+	})
+
+	// —— 音频播放（uni-app x 无 audio 组件，基于 createInnerAudioContext）——
+	const audioPlaying = ref(false)
+	const audioCurrent = ref(0)
+	const audioDuration = ref(0)
+	const audioError = ref(false)
+	const audioDragging = ref(false)
+	const audioDragValue = ref(0)
+	let audioPlayer : InnerAudioContext | null = null
+
+	function ensureAudioPlayer() : InnerAudioContext | null {
+		if (audioPlayer != null) {
+			return audioPlayer
+		}
+		let src = attrValue('src')
+		if (src.length == 0) {
+			src = attrValue('data-src')
+		}
+		if (src.length == 0) {
+			return null
+		}
+		const ctx = uni.createInnerAudioContext()
+		ctx.src = src
+		ctx.onError((err) => {
+			audioError.value = true
+			audioPlaying.value = false
+		})
+		ctx.onPlay(() => {
+			audioPlaying.value = true
+		})
+		ctx.onPause(() => {
+			audioPlaying.value = false
+		})
+		ctx.onStop(() => {
+			audioPlaying.value = false
+		})
+		ctx.onEnded(() => {
+			audioPlaying.value = false
+		})
+		ctx.onTimeUpdate(() => {
+			const p = audioPlayer
+			if (p == null) {
+				return
+			}
+			audioCurrent.value = p.currentTime
+			const d = p.duration
+			if (d > 0 && d == d) {
+				audioDuration.value = d
+			}
+		})
+		audioPlayer = ctx
+		return ctx
+	}
+
+	function onAudioToggle() {
+		if (audioError.value) {
+			return
+		}
+		const ctx = ensureAudioPlayer()
+		if (ctx == null) {
+			return
+		}
+		if (audioPlaying.value) {
+			ctx.pause()
+			return
+		}
+		pauseCurrentAudio()
+		setCurrentAudio(ctx)
+		ctx.play()
+	}
+
+	function onAudioSeek(e : UniSliderChangeEvent) {
+		const ctx = ensureAudioPlayer()
+		if (ctx == null) {
+			return
+		}
+		audioDragging.value = false
+		const value = e.detail.value
+		ctx.seek(value)
+		audioCurrent.value = value
+	}
+
+	function onAudioChanging(e : UniSliderChangeEvent) {
+		audioDragging.value = true
+		audioDragValue.value = e.detail.value
+	}
+
+	const audioMax = computed((): number => {
+		const d = audioDuration.value
+		return d > 0 ? Math.ceil(d) : 1
+	})
+
+	const audioSliderValue = computed((): number => {
+		const v = audioDragging.value ? audioDragValue.value : audioCurrent.value
+		const max = audioMax.value
+		if (v > max) {
+			return max
+		}
+		return Math.floor(v)
+	})
+
+	function formatAudioTime(sec : number) : string {
+		if (sec <= 0 || sec != sec) {
+			return '00:00'
+		}
+		const total = Math.floor(sec)
+		const m = Math.floor(total / 60)
+		const s = total % 60
+		const mStr = m < 10 ? '0' + m.toString() : m.toString()
+		const sStr = s < 10 ? '0' + s.toString() : s.toString()
+		return mStr + ':' + sStr
+	}
+
+	const audioTimeText = computed((): string => {
+		if (audioError.value) {
+			return '音频加载失败'
+		}
+		return formatAudioTime(audioCurrent.value) + ' / ' + formatAudioTime(audioDuration.value)
+	})
+
+	onUnmounted(() => {
+		const p = audioPlayer
+		if (p != null) {
+			clearCurrentAudio(p)
+			// destroy 不支持微信小程序
+			// #ifndef MP-WEIXIN
+			p.destroy()
+			// #endif
+			audioPlayer = null
+		}
+	})
+
+	/** 列表标记：ol 序号 / ul 圆点 */
+	function markerFor(item : any, index : number) : string {
+		const li = item as RichNode
+		if (li.name == 'ol') {
+			return (index + 1).toString() + '.'
+		}
+		return '•'
+	}
+
+	/** 表格下全部行（穿透 thead / tbody / tfoot），行内仅保留单元格 */
+	const tableRows = computed((): RichNode[] => {
+		const rows : RichNode[] = []
+		const n = richNode.value
+		if (n == null) {
+			return rows
+		}
+		// 队列迭代收集（uts 闭包不可自引用递归）
+		const pending : RichNode[] = []
+		for (let i = 0; i < n.children.length; i++) {
+			pending.push(n.children[i])
+		}
+		while (pending.length > 0) {
+			const child = pending.shift()
+			if (child == null) {
+				continue
+			}
+			if (child.kind == NODE_KIND_TABLE_SECTION) {
+				for (let i = 0; i < child.children.length; i++) {
+					pending.push(child.children[i])
+				}
+			} else if (child.kind == NODE_KIND_TABLE_ROW) {
+				const rowNode = new RichNode()
+				rowNode.name = '__tr'
+				rowNode.kind = NODE_KIND_TABLE_ROW
+				rowNode.children = child.children.filter((c : RichNode): boolean => c.kind == NODE_KIND_TABLE_CELL)
+				rows.push(rowNode)
+			}
+		}
+		return rows
+	})
+
+	/** 表格下非行结构子级（caption 等） */
+	const tableOthers = computed((): RichNode[] => {
+		const out : RichNode[] = []
+		const n = richNode.value
+		if (n == null) {
+			return out
+		}
+		for (let i = 0; i < n.children.length; i++) {
+			const child = n.children[i]
+			if (child.kind == NODE_KIND_TABLE_SECTION || child.kind == NODE_KIND_TABLE_ROW) {
+				continue
+			}
+			if (child.name == 'col' || child.name == 'colgroup') {
+				continue
+			}
+			out.push(child)
+		}
+		return out
+	})
+
+	function newAction(type : string, src : string, href : string) : RichNodeAction {
+		const action = new RichNodeAction()
+		action.type = type
+		action.src = src
+		action.href = href
+		return action
+	}
+
+	function onImgTap() {
+		emit('action', newAction('img', imgSrc.value, ''))
+	}
+
+	function onEmbedTap() {
+		emit('action', newAction('embed', attrValue('src'), ''))
+	}
+
+	function onInlineTap() {
+		if (nodeName.value == 'a') {
+			emit('action', newAction('a', '', attrValue('href')))
+		}
+	}
+
+	function onBlockTap() {
+		// 被提升为块的行内结构（如链接包图片）
+		if (nodeName.value == 'a') {
+			emit('action', newAction('a', '', attrValue('href')))
+		}
+	}
+
+	function forwardAction(action : any) {
+		emit('action', action as RichNodeAction)
+	}
+</script>
+
+<style>
+	.nax-rich-text-node__skip {
+		width: 0;
+		height: 0;
+	}
+
+	.nax-rich-text-node__li {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+
+	.nax-rich-text-node__marker {
+		color: #6b7076;
+		margin-right: 4px;
+	}
+
+	.nax-rich-text-node__li-body {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.nax-rich-text-node__tr {
+		flex-direction: row;
+		align-items: stretch;
+	}
+
+	.nax-rich-text-node__cell {
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+
+	.nax-rich-text-node__media-card {
+		flex-direction: row;
+		align-items: center;
+		padding: 10px 12px;
+		margin-bottom: 12px;
+		background-color: #f7f8fa;
+		border-radius: 4px;
+	}
+
+	.nax-rich-text-node__media-icon {
+		color: #18a058;
+		font-size: 15px;
+		margin-right: 8px;
+	}
+
+	.nax-rich-text-node__media-text {
+		color: #6b7076;
+		font-size: 13px;
+	}
+
+	.nax-rich-text-node__audio {
+		flex-direction: row;
+		align-items: center;
+		padding: 10px 12px;
+		margin-bottom: 12px;
+		background-color: #f7f8fa;
+		border-radius: 4px;
+	}
+
+	.nax-rich-text-node__audio-btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 16px;
+		background-color: #18a058;
+		align-items: center;
+		justify-content: center;
+		margin-right: 10px;
+	}
+
+	.nax-rich-text-node__audio-main {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.nax-rich-text-node__audio-slider {
+		width: 100%;
+	}
+
+	.nax-rich-text-node__audio-time {
+		font-size: 11px;
+		color: #6b7076;
+		margin-top: 2px;
+	}
+</style>

@@ -1,0 +1,23 @@
+/**
+ * nax-rich-text 音频播放管理
+ *
+ * uni-app x 无 audio 组件，渲染器用 createInnerAudioContext 实现播放卡。
+ * 模块级记录当前播放实例：同一时刻只允许一处音频出声（跨递归节点实例互斥）。
+ */
+let current : InnerAudioContext | null = null
+
+export function pauseCurrentAudio() : void {
+	if (current != null) {
+		current.pause()
+	}
+}
+
+export function setCurrentAudio(ctx : InnerAudioContext) : void {
+	current = ctx
+}
+
+export function clearCurrentAudio(ctx : InnerAudioContext) : void {
+	if (current == ctx) {
+		current = null
+	}
+}
