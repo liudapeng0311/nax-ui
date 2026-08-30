@@ -1,0 +1,269 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useValidate 表单校验"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">无头校验：不使用 nax-form，错误文案由业务渲染</text>
+				<view class="field">
+					<nax-input v-model="name" placeholder="姓名（必填）" :clearable="true" @change="syncModel" @blur="syncModel"></nax-input>
+					<text v-if="nameError.length > 0" class="field__error">{{ nameError }}</text>
+				</view>
+				<view class="field field--gap">
+					<nax-input v-model="phone" type="number" placeholder="手机号（必填，1 开头 11 位）" :clearable="true" @change="syncModel" @blur="syncModel"></nax-input>
+					<text v-if="phoneError.length > 0" class="field__error">{{ phoneError }}</text>
+				</view>
+				<view class="field field--gap">
+					<nax-input v-model="email" placeholder="邮箱（选填，填了才校验格式）" :clearable="true" @change="syncModel" @blur="syncModel"></nax-input>
+					<text v-if="emailError.length > 0" class="field__error">{{ emailError }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">校验操作</text>
+				<view class="row">
+					<nax-button size="sm" type="primary" label="校验全部" @click="onValidateAll"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="校验手机号" @click="onValidatePhone"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="Promise 校验" @click="onValidatePromise"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="重置" @click="onReset"></nax-button>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">validateField 结果：{{ syncResult }}</text>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">validate() 结果：{{ promiseResult }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">规则来源（rules）</text>
+				<text class="code">name：required</text>
+				<text class="code">phone：required + pattern ^1\d{10}$</text>
+				<text class="code">email：type email（空值跳过）</text>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed, ref } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useValidate, NaxValidateOptions } from '@/uni_modules/nax-use/composables/use-validate.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	// 字段 ref（控件 v-model）+ UTSJSONObject model（交给 useValidate）
+	const name = ref('')
+	const phone = ref('')
+	const email = ref('')
+
+	const model = {
+		name: '',
+		phone: '',
+		email: ''
+	} as UTSJSONObject
+
+	function syncModel() {
+		model.set('name', name.value)
+		model.set('phone', phone.value)
+		model.set('email', email.value)
+	}
+
+	const rules = {
+		name: [
+			{ required: true, message: '请输入姓名' } as UTSJSONObject
+		],
+		phone: [
+			{ required: true, message: '请输入手机号' } as UTSJSONObject,
+			{ pattern: '^1\\d{10}$', message: '手机号格式不正确' } as UTSJSONObject
+		],
+		email: [
+			{ type: 'email', message: '邮箱格式不正确' } as UTSJSONObject
+		]
+	} as UTSJSONObject
+
+	const opts : NaxValidateOptions = {
+		getModel: (): UTSJSONObject | null => {
+			return model
+		},
+		getRules: (): UTSJSONObject | null => {
+			return rules
+		}
+	}
+	const state = useValidate(opts)
+
+	// 无 form-item 场景：手动注册字段，validate() 才能全量校验
+	state.register('name')
+	state.register('phone')
+	state.register('email')
+
+	// 错误文案：getError 内部读取错误数组（ref），computed 自动跟踪
+	const nameError = computed((): string => {
+		return state.getError('name')
+	})
+	const phoneError = computed((): string => {
+		return state.getError('phone')
+	})
+	const emailError = computed((): string => {
+		return state.getError('email')
+	})
+
+	const syncResult = ref('—')
+	const promiseResult = ref('—')
+
+	function onValidateAll() {
+		syncModel()
+		const errors = state.validateField(null, '')
+		if (errors.length == 0) {
+			syncResult.value = '通过'
+			return
+		}
+		const first = errors[0]
+		const msg = first.getString('message')
+		syncResult.value = '未通过 ' + errors.length.toString() + ' 项，第一项：' + (msg != null ? msg : '')
+	}
+
+	function onValidatePhone() {
+		syncModel()
+		const errors = state.validateField('phone', '')
+		if (errors.length == 0) {
+			syncResult.value = 'phone 通过'
+			return
+		}
+		const first = errors[0]
+		const msg = first.getString('message')
+		syncResult.value = 'phone 未通过：' + (msg != null ? msg : '')
+	}
+
+	function onValidatePromise() {
+		syncModel()
+		state.validate().then((ok: boolean) => {
+			promiseResult.value = 'resolve：' + ok.toString()
+		}, (err: any) => {
+			const errs = err as any[]
+			let tip = 'reject'
+			if (errs != null && typeof errs.length == 'number') {
+				tip = 'reject（' + errs.length.toString() + ' 项未通过）'
+			}
+			promiseResult.value = tip
+		})
+	}
+
+	function onReset() {
+		state.resetFields()
+		// model 已被写回快照，把字段 ref 同步回输入框
+		const n = model.getString('name')
+		name.value = n != null ? n : ''
+		const p = model.getString('phone')
+		phone.value = p != null ? p : ''
+		const e = model.getString('email')
+		email.value = e != null ? e : ''
+		syncResult.value = '已重置'
+		promiseResult.value = '—'
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.field {
+		flex-direction: column;
+	}
+
+	.field--gap {
+		margin-top: 12px;
+	}
+
+	.field__error {
+		margin-top: 4px;
+		font-size: 12px;
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.code {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 4px;
+	}
+</style>

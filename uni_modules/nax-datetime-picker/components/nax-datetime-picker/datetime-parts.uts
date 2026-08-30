@@ -1,0 +1,254 @@
+/**
+ * nax-datetime-picker parts 引擎（无头）：时间戳 ↔ 年月日时分秒 parts、范围 clamp、列可选值、格式化。
+ * 从 nax-datetime-picker.uvue 抽出的纯函数（不读组件状态，全部参数驱动），
+ * 供组件本体与 nax-ui 的 useDatetimeParts 组合式函数共用。本文件属于包内部实现，不对外承诺 API。
+ *
+ * parts 约定：[year, month, day, hour, minute, second]（固定 6 位，缺位补 0）
+ */
+
+export function pad2(n: number): string {
+	if (n < 10) return '0' + n.toString()
+	return n.toString()
+}
+
+export function clamp(n: number, min: number, max: number): number {
+	if (n < min) return min
+	if (n > max) return max
+	return n
+}
+
+export function daysInMonth(y: number, m: number): number {
+	return new Date(y, m, 0).getDate()
+}
+
+export function makeRange(from: number, to: number): number[] {
+	const arr = [] as number[]
+	let i = from
+	while (i <= to) {
+		arr.push(i)
+		i++
+	}
+	return arr
+}
+
+export function copyParts(src: number[]): number[] {
+	const out = [] as number[]
+	let i = 0
+	while (i < 6) {
+		out.push(i < src.length ? src[i] : 0)
+		i++
+	}
+	return out
+}
+
+export function nowParts(): number[] {
+	const d = new Date()
+	const out = [] as number[]
+	out.push(d.getFullYear())
+	out.push(d.getMonth() + 1)
+	out.push(d.getDate())
+	out.push(d.getHours())
+	out.push(d.getMinutes())
+	out.push(d.getSeconds())
+	return out
+}
+
+export function partsFromDate(d: Date): number[] {
+	const out = [] as number[]
+	out.push(d.getFullYear())
+	out.push(d.getMonth() + 1)
+	out.push(d.getDate())
+	out.push(d.getHours())
+	out.push(d.getMinutes())
+	out.push(d.getSeconds())
+	return out
+}
+
+/**
+ * 宽松解析：时间戳（ms）、数字字符串、YYYY-MM-DD[ HH:mm[:ss]]、HH:mm[:ss]（时分补今天）
+ */
+export function parseAnyToParts(value: any | null, fallback: number[]): number[] {
+	if (value == null) return copyParts(fallback)
+	if (typeof value == 'number') {
+		const n = value as number
+		if (n > 0) {
+			const d = new Date(n)
+			const t = d.getTime()
+			if (t == t) return partsFromDate(d)
+		}
+		return copyParts(fallback)
+	}
+	if (typeof value == 'string') {
+		const s = (value as string).trim()
+		if (s.length == 0) return copyParts(fallback)
+		const asNum = parseFloat(s)
+		if (asNum.toString() != 'NaN' && asNum == asNum && asNum > 100000) {
+			const d2 = new Date(asNum)
+			if (d2.getTime() == d2.getTime()) return partsFromDate(d2)
+		}
+		const normalized = s.replace(/-/g, '/')
+		const d3 = new Date(normalized)
+		if (d3.getTime() == d3.getTime()) return partsFromDate(d3)
+		// HH:mm[:ss]
+		const segs = s.split(':')
+		if (segs.length >= 2) {
+			const h = parseInt(segs[0])
+			const mi = parseInt(segs[1])
+			const sec = segs.length >= 3 ? parseInt(segs[2]) : 0
+			if (h == h && mi == mi) {
+				const base = nowParts()
+				base[3] = h
+				base[4] = mi
+				base[5] = sec == sec ? sec : 0
+				return base
+			}
+		}
+	}
+	return copyParts(fallback)
+}
+
+/** 未传 minDate 时默认近 30 年，缩短鸿蒙打开时年列滚动距离（原生动画时长不可控） */
+export function defaultMinParts(): number[] {
+	const now = nowParts()
+	const out = [] as number[]
+	let y = now[0] - 30
+	if (y < 1970) {
+		y = 1970
+	}
+	out.push(y)
+	out.push(1)
+	out.push(1)
+	out.push(0)
+	out.push(0)
+	out.push(0)
+	return out
+}
+
+export function defaultMaxParts(): number[] {
+	const now = nowParts()
+	const out = [] as number[]
+	out.push(now[0] + 10)
+	out.push(12)
+	out.push(31)
+	out.push(23)
+	out.push(59)
+	out.push(59)
+	return out
+}
+
+/** 按 mode 生成列字段序列；未知 mode 回退 datetime 行为 */
+export function buildFieldList(mode: string, showSecond: boolean): string[] {
+	const list = [] as string[]
+	if (mode == 'datetime') {
+		list.push('year'); list.push('month'); list.push('day'); list.push('hour'); list.push('minute')
+		if (showSecond) list.push('second')
+	} else if (mode == 'date') {
+		list.push('year'); list.push('month'); list.push('day')
+	} else if (mode == 'time') {
+		list.push('hour'); list.push('minute')
+		if (showSecond) list.push('second')
+	} else if (mode == 'year-month') {
+		list.push('year'); list.push('month')
+	} else if (mode == 'year') {
+		list.push('year')
+	} else if (mode == 'month-day') {
+		list.push('month'); list.push('day')
+	} else {
+		list.push('year'); list.push('month'); list.push('day'); list.push('hour'); list.push('minute')
+	}
+	return list
+}
+
+export function partsToTimestamp(parts: number[]): number {
+	const y = parts[0]
+	const m = parts[1]
+	const d = parts[2]
+	const h = parts[3]
+	const mi = parts[4]
+	const s = parts[5]
+	const date = new Date(y, m - 1, d, h, mi, s)
+	const t = date.getTime()
+	if (t != t) return 0
+	return t
+}
+
+export function compareParts(a: number[], b: number[]): number {
+	let i = 0
+	while (i < 6) {
+		if (a[i] < b[i]) return -1
+		if (a[i] > b[i]) return 1
+		i++
+	}
+	return 0
+}
+
+/** 先按日历合法域收敛（月 1-12、日 1-当月天数、时分秒范围），再 clamp 到 [minP, maxP] */
+export function clampPartsFor(parts: number[], minP: number[], maxP: number[]): number[] {
+	let out = copyParts(parts)
+	if (out[1] < 1) out[1] = 1
+	if (out[1] > 12) out[1] = 12
+	const dim = daysInMonth(out[0], out[1])
+	if (out[2] < 1) out[2] = 1
+	if (out[2] > dim) out[2] = dim
+	out[3] = clamp(out[3], 0, 23)
+	out[4] = clamp(out[4], 0, 59)
+	out[5] = clamp(out[5], 0, 59)
+	if (compareParts(out, minP) < 0) out = copyParts(minP)
+	if (compareParts(out, maxP) > 0) out = copyParts(maxP)
+	const dim2 = daysInMonth(out[0], out[1])
+	if (out[2] > dim2) out[2] = dim2
+	return out
+}
+
+export function monthRangeFor(parts: number[], minP: number[], maxP: number[]): number[] {
+	let start = 1
+	let end = 12
+	if (parts[0] == minP[0]) start = minP[1]
+	if (parts[0] == maxP[0]) end = maxP[1]
+	if (start > end) start = end
+	return makeRange(start, end)
+}
+
+export function dayRangeFor(parts: number[], minP: number[], maxP: number[]): number[] {
+	const dim = daysInMonth(parts[0], parts[1])
+	let start = 1
+	let end = dim
+	if (parts[0] == minP[0] && parts[1] == minP[1]) start = minP[2]
+	if (parts[0] == maxP[0] && parts[1] == maxP[1]) {
+		if (maxP[2] < end) end = maxP[2]
+	}
+	if (start > end) start = end
+	if (start < 1) start = 1
+	if (end > dim) end = dim
+	return makeRange(start, end)
+}
+
+export function defaultFormatFor(mode: string, showSecond: boolean): string {
+	if (mode == 'datetime') {
+		if (showSecond) return 'YYYY-MM-DD HH:mm:ss'
+		return 'YYYY-MM-DD HH:mm'
+	}
+	if (mode == 'date') return 'YYYY-MM-DD'
+	if (mode == 'time') {
+		if (showSecond) return 'HH:mm:ss'
+		return 'HH:mm'
+	}
+	if (mode == 'year-month') return 'YYYY-MM'
+	if (mode == 'year') return 'YYYY'
+	if (mode == 'month-day') return 'MM-DD'
+	return 'YYYY-MM-DD HH:mm'
+}
+
+export function formatParts(parts: number[], pattern: string): string {
+	let out = pattern
+	out = out.replace('YYYY', parts[0].toString())
+	out = out.replace('MM', pad2(parts[1]))
+	out = out.replace('DD', pad2(parts[2]))
+	out = out.replace('HH', pad2(parts[3]))
+	out = out.replace('mm', pad2(parts[4]))
+	out = out.replace('ss', pad2(parts[5]))
+	// single tokens without pad for rare cases
+	out = out.replace('M', parts[1].toString())
+	out = out.replace('D', parts[2].toString())
+	return out
+}

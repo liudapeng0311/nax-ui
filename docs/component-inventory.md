@@ -9,7 +9,7 @@
 
 命名统一：`nax-<name>`；组件包目录：`uni_modules/nax-<name>/components/nax-<name>/nax-<name>.uvue`；套装入口为 `uni_modules/nax-ui`，仅聚合依赖。
 
-当前落地：51 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。
+当前落地：51 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。组合式函数（无头逻辑复用）见第 6 节。
 
 ---
 
@@ -193,7 +193,25 @@
 
 ---
 
-## 6. 按钮层级速查
+## 6. 组合式函数（composables）
+
+位置：`uni_modules/nax-use/`（独立插件包，套装依赖聚合）；文件 kebab-case（`use-<能力>.uts`），函数名 `use<能力>`，按 uts 严格类型编写。无头形态：只提供状态与控制方法，UI 完全交给业务；与组件共享实现时不维护两套逻辑。
+
+| 函数 | 文件 | 说明 | 依赖 | demo |
+|------|------|------|------|------|
+| `useCountdown` | `use-countdown.uts` | 倒计时：`days / hours / minutes / seconds / milliseconds / total / running / finished / started / status（idle \| running \| paused \| finished）` + `start / pause / reset / dispose`；基于时间戳计算不漂移；整秒显示向上取整（保证 1s 渲染间隔下逐秒不跳号）；组件内使用自动清理定时器 | 无 | `pages/components/use-countdown` |
+| `useValidate` | `use-validate.uts` | 无头表单校验：`register / unregister / setItemRules / validateOne / validateField / validate / clearValidate / resetFields / getError / errorVersion`；规则支持 required / type / min / max / len / pattern / whitespace / enum / trigger / message；与 `nax-form` 组件共用同一实现（`nax-form` 包内 `form-state.uts`） | `nax-form` | `pages/components/use-validate` |
+| `useDebounce` | `use-debounce.uts` | 防抖：窗口内多次调用只执行最后一次；返回 `NaxDebounceHandle`（`call(payload) / cancel() / flush()`）；单载荷 `(payload: any \| null) => void`；组件内使用卸载自动 cancel | 无 | `pages/components/use-debounce` |
+| `useThrottle` | `use-throttle.uts` | 节流：窗口起点立即执行（leading）+ 窗口结束补最后一次（trailing）；返回 `NaxThrottleHandle`（`call(payload) / cancel() / flush()`）；单载荷；组件内使用卸载自动 cancel | 无 | `pages/components/use-throttle` |
+| `useDatetimeParts` | `use-datetime-parts.uts` | 无头日期时间 parts 状态：`columns`（各列可选值，已按 min/max 收敛）/ `indices` / `setTimestamp` / `setParts` / `toTimestamp` / `format` / `applyIndices`，供业务自建 picker-view；与 `nax-datetime-picker` 组件共用同一引擎（组件包内 `datetime-parts.uts`） | `nax-datetime-picker` | `pages/components/use-datetime-parts` |
+| `useInterval` | `use-interval.uts` | 可控轮询：返回 `NaxIntervalState`（`start / stop / running / count`，均响应式）；组件内使用卸载自动 stop | 无 | `pages/components/use-interval` |
+| `useStorage` | `use-storage.uts` | 响应式本地缓存：返回与 uni storage 双向绑定的 `Ref`，改值即写缓存（watch 异步落盘），置 `null` 删除 key；key 不存在时持久化默认值 | 无 | `pages/components/use-storage` |
+
+约定：状态全部为标量 getter 或 `Ref`（uts 响应式友好）；必须在 setup 内同步调用；新代码 script 不写 `lang`（见 AGENTS.md 2.1）。
+
+---
+
+## 7. 按钮层级速查
 
 | 中文 | `variant` | 视觉 |
 |------|-----------|------|

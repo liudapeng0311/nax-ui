@@ -1,0 +1,150 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useDebounce 防抖"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">连点按钮（500ms 防抖）</text>
+				<view class="row">
+					<nax-button size="sm" type="primary" label="快速连点我" @click="onTap"></nax-button>
+					<view class="gap"></view>
+					<text class="row__text">点击 {{ tapCount }} 次 → 实际执行 {{ tapExec }} 次</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">输入防抖（400ms，watch 驱动）</text>
+				<view class="field">
+					<nax-input v-model="keyword" placeholder="输入后停顿 400ms 才同步" :clearable="true"></nax-input>
+					<text class="field__tip">防抖后值：{{ debouncedKw }}</text>
+					<text class="field__tip">输入事件 {{ inputCount }} 次 → 实际执行 {{ inputExec }} 次</text>
+				</view>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed, ref, watch } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useDebounce } from '@/uni_modules/nax-use/composables/use-debounce.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	// 场景1：按钮连点
+	const tapCount = ref(0)
+	const tapExec = ref(0)
+	const onTap = () => {
+		tapCount.value = tapCount.value + 1
+		debouncedTap.call(null)
+	}
+	const debouncedTap = useDebounce((_p : any | null) => {
+		tapExec.value = tapExec.value + 1
+	}, 500)
+
+	// 场景2：输入防抖
+	const keyword = ref('')
+	const debouncedKw = ref('')
+	const inputCount = ref(0)
+	const inputExec = ref(0)
+	watch((): string => keyword.value, (v: string) => {
+		inputCount.value = inputCount.value + 1
+		debouncedInput.call(v)
+	})
+	const debouncedInput = useDebounce((p : any | null) => {
+		debouncedKw.value = p != null ? (p as string) : ''
+		inputExec.value = inputExec.value + 1
+	}, 400)
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.field {
+		flex-direction: column;
+	}
+
+	.field__tip {
+		margin-top: 8px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.gap {
+		width: 8px;
+	}
+</style>

@@ -1,0 +1,37 @@
+/**
+ * useValidate — 表单校验组合式函数（无头：规则与编排复用 nax-form 实现，UI 完全交给业务）
+ *
+ * 用法（必须在 setup 内同步调用）：
+ * ```
+ * import { useValidate, NaxValidateOptions } from '@/uni_modules/nax-use/composables/use-validate.uts'
+ *
+ * const model = { name: '' } as UTSJSONObject
+ * const rules = { name: [{ required: true, message: '请输入姓名' } as UTSJSONObject] } as UTSJSONObject
+ * const opts : NaxValidateOptions = {
+ *   getModel: (): UTSJSONObject | null => model,
+ *   getRules: (): UTSJSONObject | null => rules
+ * }
+ * const form = useValidate(opts)
+ * form.register('name')                      // 无 form-item 时手动注册字段
+ * const errors = form.validateField(null, '') // 校验全部，返回 { prop, message }[]
+ * form.validate().then(...)                   // 或 Promise 风格
+ * // 错误文案：form.getError('name')，依赖 form.errorVersion 触发刷新
+ * // form.resetFields() / form.clearValidate() / form.setItemRules(...)
+ * ```
+ *
+ * 说明：
+ * - 规则引擎与 nax-form 组件同一实现（uni_modules/nax-form/.../form-validator.uts、form-state.uts），行为完全一致
+ * - 依赖 nax-form 包（安装 nax-ui 套装已包含）
+ * - 规则字段：required / type / min / max / len / pattern / whitespace / enum / message / trigger
+ */
+
+import { createFormState, NaxFormState, NaxFormStateOptions } from '@/uni_modules/nax-form/components/nax-form/form-state.uts'
+
+export type NaxValidateOptions = NaxFormStateOptions
+
+/**
+ * 创建无头表单校验状态。必须在 setup 内同步调用。
+ */
+export function useValidate(options : NaxValidateOptions) : NaxFormState {
+	return createFormState(options)
+}

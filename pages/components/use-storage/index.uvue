@@ -1,0 +1,155 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useStorage 缓存"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">响应式缓存（key: nax-demo-nickname）</text>
+				<view class="field">
+					<nax-input v-model="nickname" placeholder="改完即写入本地缓存" :clearable="true"></nax-input>
+					<text class="field__tip">当前 Ref 值：{{ nickname == null ? '（null）' : nickname }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-button size="sm" label="读回缓存原始值" @click="onReadRaw"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="置 null 删除 key" @click="onRemove"></nax-button>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">uni.getStorageSync 读回：{{ rawValue }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">说明</text>
+				<text class="code">const v = useStorage('key', '默认值')</text>
+				<text class="code">v.value 改变即写入缓存；置 null 删除 key</text>
+				<text class="code">杀掉应用重进，值仍在（持久化验证）</text>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed, ref } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useStorage } from '@/uni_modules/nax-use/composables/use-storage.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const nickname = useStorage('nax-demo-nickname', 'nax')
+	const rawValue = ref('（点上方按钮读取）')
+
+	function onReadRaw() {
+		const raw = uni.getStorageSync('nax-demo-nickname')
+		if (raw == null || raw == '') {
+			rawValue.value = '（key 不存在）'
+			return
+		}
+		rawValue.value = '' + raw
+	}
+	function onRemove() {
+		nickname.value = null
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.field {
+		flex-direction: column;
+	}
+
+	.field__tip {
+		margin-top: 8px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.code {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-bottom: 4px;
+	}
+</style>

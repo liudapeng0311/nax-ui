@@ -1,0 +1,173 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useDatetimeParts"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">无头日期时间：自建 picker-view，逻辑来自 useDatetimeParts</text>
+				<text class="field__tip">当前值：{{ dt.format() }}</text>
+				<text class="field__tip">时间戳：{{ dt.toTimestamp() }}</text>
+				<picker-view
+					class="wheel"
+					:value="dt.indices"
+					@change="onPick"
+				>
+					<picker-view-column v-for="(col, ci) in dt.columns" :key="ci">
+						<view v-for="(item, ii) in col" :key="ii" class="wheel__item">
+							<text class="wheel__text">{{ item }}</text>
+						</view>
+					</picker-view-column>
+				</picker-view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">边界 clamp（min = 昨天，max = 明天）</text>
+				<view class="row">
+					<nax-button size="sm" label="设为 2030 年（超界）" @click="onSetFar"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="回到今天" @click="onSetNow"></nax-button>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">超出范围会被自动收敛到边界</text>
+				</view>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	// min = 昨天 0 点，max = 明天 24 点
+	const dayMs = 24 * 60 * 60 * 1000
+	const todayZero = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime()
+	const opts : NaxDatetimePartsOptions = {
+		mode: 'datetime',
+		value: Date.now(),
+		min: todayZero - dayMs,
+		max: todayZero + 2 * dayMs
+	}
+	const dt = useDatetimeParts(opts)
+
+	function onPick(e : UniPickerViewChangeEvent) {
+		dt.applyIndices(e.detail.value)
+	}
+	function onSetFar() {
+		// 2030-01-01 00:00:00，超出 max 会被 clamp 到 max
+		dt.setTimestamp(new Date(2030, 0, 1, 0, 0, 0).getTime())
+	}
+	function onSetNow() {
+		dt.setTimestamp(Date.now())
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.field__tip {
+		margin-bottom: 8px;
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.wheel {
+		height: 180px;
+	}
+
+	.wheel__item {
+		height: 36px;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.wheel__text {
+		font-size: 16px;
+		color: var(--nax-color-text, #333639);
+	}
+</style>

@@ -12,7 +12,8 @@
 - 组件库本体位于 `uni_modules/nax-ui`（单包套装，easycom）。
 - 根工程是 **演示 / 开发宿主**，不是业务 App。
 - 技术主路径：**uvue 前端组件**，不是 uts 原生组件/原生插件。
-- 整个 `nax-ui` 组件库以 **蒸汽模式优先适配**；默认开发环境即为蒸汽模式，组件设计、实现与验证均应以此为基准。
+- 整个 `nax-ui` 组件库定位为 **uni-app x 蒸汽模式组件库**：默认开发环境即为蒸汽模式（演示宿主 `manifest.json` 已开启 `"vapor": true`），组件设计、实现与验证均以蒸汽模式为唯一基准，不承诺 VDOM 渲染模式兼容。
+- App 端版本门槛：HBuilderX 鸿蒙 5.0+ / iOS 5.11+ / Android 5.21+；系统要求 Android 6.0+ / iOS 15+ / 鸿蒙 6.0+（API 20+）。Web 与小程序不受蒸汽模式影响。
 
 权威文档：
 
@@ -29,8 +30,9 @@
 
 ### 2.1 允许
 
-- `*.uvue` 组件 + `<script setup lang="uts">`
+- `*.uvue` 组件 + `<script setup>`：蒸汽模式下 script **不写 `lang`**（官方允许 js/ts/uts 混写）；存量组件的 `lang="uts"` 保留、不批量迁移；外部脚本文件保持 `.uts` 后缀
 - 组合式 API（`ref` / `computed` / `watch` / props / emits 等）
+- 组合式函数（`useXxx`，无头逻辑复用）：放 `uni_modules/nax-use/composables/`，文件名 kebab-case（如 `use-countdown.uts`）
 - `uni_modules/nax-ui/components/nax-*/nax-*.uvue` 结构
 - CSS 变量（`--nax-*`）与 class 修饰符主题化
 - 必要的条件编译：`#ifdef` / `#ifndef`
@@ -109,7 +111,7 @@ nax-ui/                          # 演示宿主
     index/                       # 组件导航
     components/<name>/index.uvue # 单组件 demo
   uni_modules/
-    nax-ui/
+    nax-ui/                      # 套装入口（仅聚合依赖）
       package.json
       readme.md
       changelog.md
@@ -117,7 +119,9 @@ nax-ui/                          # 演示宿主
         nax-button/nax-button.uvue
         nax-text/nax-text.uvue
         ...
-      # 可选：theme、utils、composables
+      # 可选：theme、utils
+    nax-use/                     # 组合式函数包（无头逻辑复用）
+      composables/use-*.uts
 ```
 
 ### 3.2 命名必须
@@ -239,7 +243,7 @@ nax-ui/                          # 演示宿主
 - 不新增版权头，除非用户要求
 - 用户未要求则 **不 git commit**
 - 演示文案默认中文
-- 保持与现有 uni-app x 脚手架风格一致（uvue + uts setup）
+- 保持与现有 uni-app x 脚手架风格一致（uvue + 蒸汽模式 script setup；新代码不写 lang）
 
 ### 组件文件骨架（推荐）
 
@@ -250,7 +254,7 @@ nax-ui/                          # 演示宿主
   </view>
 </template>
 
-<script setup lang="uts">
+<script setup>
 const props = defineProps({
   // 行为 + 语义枚举
 })
@@ -275,7 +279,7 @@ const emit = defineEmits(['click'])
 
 1. 保证 easycom 路径可被页面直接使用
 2. 新增/修改 demo 页，覆盖主 props 与关键状态
-3. 不引入明显的类型/语法问题（`lang="uts"`）
+3. 不引入明显的类型/语法问题（新代码 script 不写 lang；`.uts` 文件按 uts 严格类型检查）
 4. 若用户要求，再补充多端运行验证说明
 5. **仅 Web 端可由 AI 助手按需运行或编译验证。Android、iOS、鸿蒙、小程序等非 Web 端改完代码后，不运行、不编译，由用户自行核实；助手只做代码静态检查并说明影响端与条件编译宏。**
 
@@ -290,7 +294,7 @@ const emit = defineEmits(['click'])
 | 问题 | 默认选择 |
 |------|----------|
 | 兼容范围 | 仅 uni-app x |
-| 渲染模式 | 蒸汽模式优先适配；默认在蒸汽模式下开发 |
+| 渲染模式 | 仅支持蒸汽模式（vapor）；不支持 VDOM 渲染模式 |
 | 主题方案 | `nax-ui-theme` + CSS 变量 `--nax-*`（弱依赖） |
 | 组件粒度 | 清单内 MVP/P0 优先 |
 | 包结构 | 单包 `uni_modules/nax-ui` |
@@ -327,6 +331,7 @@ const emit = defineEmits(['click'])
 - 文档索引：`docs/README.md`
 - 线上部署手册（**仅用户明确要求发布时执行**）：`docs/deploy-docs.md`
 - 主题包：`uni_modules/nax-ui-theme`
+- 组合式函数包：`uni_modules/nax-use`
 - 技能包（AI 使用指南，发布到 GitHub `liudapeng0311/nax-ui-skills`）：`nax-ui-skill-build/`（源目录）、`nax-ui-skill-release/`（发布副本）
 - 官方参考（人工查阅）：
   - uni-app x 文档：https://doc.dcloud.net.cn/uni-app-x/

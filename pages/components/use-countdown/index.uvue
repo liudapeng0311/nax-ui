@@ -1,0 +1,210 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useCountdown 倒计时"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">基础用法（5 分钟，自动开始）</text>
+				<view class="row">
+					<text class="demo-time">{{ basic.days }}天 {{ pad2(basic.hours) }}:{{ pad2(basic.minutes) }}:{{ pad2(basic.seconds) }}</text>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">剩余 {{ basic.total }} ms</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">毫秒级渲染（30 秒）</text>
+				<view class="row">
+					<text class="demo-time">{{ msFloorSec }}.{{ pad3(fast.milliseconds) }} 秒</text>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">millisecond: true，默认 33ms 更新间隔；SS.mmm 按 floor 配对</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">手动控制（10 秒，autostart: false）</text>
+				<view class="row">
+					<text class="demo-time">{{ pad2(manual.minutes) }}:{{ pad2(manual.seconds) }}</text>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">{{ manualStatus }} · 最近操作：{{ lastEvent }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-button size="sm" type="primary" label="开始" @click="doStart"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="暂停" @click="doPause"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="重置" @click="doReset"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="重置为 15 秒" @click="doReset15"></nax-button>
+				</view>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed, ref } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useCountdown, NaxCountdownOptions } from '@/uni_modules/nax-use/composables/use-countdown.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const basicOpts : NaxCountdownOptions = { time: 5 * 60 * 1000 }
+	const basic = useCountdown(basicOpts)
+
+	const fastOpts : NaxCountdownOptions = { time: 30 * 1000, millisecond: true }
+	const fast = useCountdown(fastOpts)
+
+	// 毫秒级 SS.mmm 用 floor 配对（seconds 为 ceil 整秒显示，与小数部分混用会多 1）
+	const msFloorSec = computed((): number => {
+		return Math.floor((fast.total % 60000) / 1000)
+	})
+
+	const lastEvent = ref('—')
+	const manualOpts : NaxCountdownOptions = {
+		time: 10 * 1000,
+		autostart: false,
+		onFinish: () => {
+			lastEvent.value = 'onFinish：时间到'
+		}
+	}
+	const manual = useCountdown(manualOpts)
+
+	const manualStatus = computed((): string => {
+		const s = manual.status
+		if (s == 'finished') {
+			return '已结束'
+		}
+		if (s == 'running') {
+			return '进行中'
+		}
+		if (s == 'paused') {
+			return '已暂停'
+		}
+		return '未开始'
+	})
+
+	function pad2(n : number) : string {
+		return n < 10 ? '0' + n.toString() : n.toString()
+	}
+	function pad3(n : number) : string {
+		if (n < 10) {
+			return '00' + n.toString()
+		}
+		if (n < 100) {
+			return '0' + n.toString()
+		}
+		return n.toString()
+	}
+	function doStart() {
+		manual.start()
+		lastEvent.value = 'start()'
+	}
+	function doPause() {
+		manual.pause()
+		lastEvent.value = 'pause()'
+	}
+	function doReset() {
+		manual.reset()
+		lastEvent.value = 'reset()'
+	}
+	function doReset15() {
+		manual.reset(15 * 1000)
+		lastEvent.value = 'reset(15000)'
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.demo-time {
+		font-size: 28px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+	}
+</style>

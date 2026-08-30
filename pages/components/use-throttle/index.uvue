@@ -1,0 +1,157 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useThrottle 节流"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">连点按钮（1000ms 节流，leading + trailing）</text>
+				<view class="row">
+					<nax-button size="sm" type="primary" label="快速连点我" @click="onTap"></nax-button>
+					<view class="gap"></view>
+					<text class="row__text">点击 {{ tapCount }} 次 → 实际执行 {{ tapExec }} 次</text>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">首次点击立即执行，窗口内点击合并为窗口结束补一次</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">高频模拟（每 100ms 触发一次，节流 500ms）</text>
+				<view class="row">
+					<nax-button size="sm" :label="running ? '停止' : '开始'" @click="onToggle"></nax-button>
+					<view class="gap"></view>
+					<text class="row__text">触发 {{ fireCount }} 次 → 实际执行 {{ fireExec }} 次</text>
+				</view>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed, ref } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useThrottle } from '@/uni_modules/nax-use/composables/use-throttle.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	// 场景1：按钮连点
+	const tapCount = ref(0)
+	const tapExec = ref(0)
+	const onTap = () => {
+		tapCount.value = tapCount.value + 1
+		throttledTap.call(null)
+	}
+	const throttledTap = useThrottle((_p : any | null) => {
+		tapExec.value = tapExec.value + 1
+	}, 1000)
+
+	// 场景2：定时高频触发
+	const running = ref(false)
+	const fireCount = ref(0)
+	const fireExec = ref(0)
+	var fireTimer = -1
+	const throttledFire = useThrottle((_p : any | null) => {
+		fireExec.value = fireExec.value + 1
+	}, 500)
+	const onToggle = () => {
+		if (running.value) {
+			if (fireTimer != -1) {
+				clearInterval(fireTimer)
+				fireTimer = -1
+			}
+			running.value = false
+			return
+		}
+		running.value = true
+		fireTimer = setInterval(() => {
+			fireCount.value = fireCount.value + 1
+			throttledFire.call(null)
+		}, 100)
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.gap {
+		width: 8px;
+	}
+</style>

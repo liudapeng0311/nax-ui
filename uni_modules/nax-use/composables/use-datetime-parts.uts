@@ -1,0 +1,240 @@
+/**
+ * useDatetimeParts — 日期时间 parts 状态组合式函数（无头）：
+ * 持有当前年月日时分秒 parts，按 mode 生成各列可选值（已 clamp 到 min/max），
+ * 供业务自建 picker-view 等自定义 UI；规则引擎与 nax-datetime-picker 组件同一实现。
+ *
+ * 用法（必须在 setup 内同步调用）：
+ * ```
+ * import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'
+ *
+ * const opts : NaxDatetimePartsOptions = { mode: 'datetime', value: Date.now() }
+ * const dt = useDatetimeParts(opts)
+ * // dt.columns: number[][]  每列可选值（已按 min/max 收敛）
+ * // dt.indices: number[]    各列当前选中下标（喂 picker-view 的 value）
+ * // dt.format()             按模式默认格式输出；可传自定义 pattern
+ * // dt.setTimestamp(ms) / dt.setParts(parts) / dt.toTimestamp()
+ * ```
+ *
+ * 说明：
+ * - mode / showSecond / min / max 在创建时固定（MVP 不做响应式变更）
+ * - min/max 为毫秒时间戳；未传时用引擎默认（近 30 年 ~ +10 年）
+ * - 时分秒列无 minHour 等 props 级细粒度边界，仅按 min/max 时间戳收敛
+ */
+
+import { ref, Ref } from 'vue'
+import {
+	pad2,
+	clamp,
+	copyParts,
+	nowParts,
+	parseAnyToParts,
+	defaultMinParts,
+	defaultMaxParts,
+	buildFieldList,
+	clampPartsFor,
+	makeRange,
+	monthRangeFor,
+	dayRangeFor,
+	partsToTimestamp,
+	compareParts,
+	formatParts,
+	defaultFormatFor
+} from '@/uni_modules/nax-datetime-picker/components/nax-datetime-picker/datetime-parts.uts'
+
+export type NaxDatetimePartsOptions = {
+	/** datetime | date | time | year-month | year | month-day；默认 datetime */
+	mode ?: string,
+	/** 初始时间戳（毫秒）；空取当前时间 */
+	value ?: number | null,
+	/** 最小时间戳（毫秒）；空用引擎默认 */
+	min ?: number | null,
+	/** 最大时间戳（毫秒）；空用引擎默认 */
+	max ?: number | null,
+	/** 是否秒列（datetime / time）；默认 false */
+	showSecond ?: boolean
+}
+
+function fieldIndexOf(field : string) : number {
+	if (field == 'year') return 0
+	if (field == 'month') return 1
+	if (field == 'day') return 2
+	if (field == 'hour') return 3
+	if (field == 'minute') return 4
+	if (field == 'second') return 5
+	return 0
+}
+
+export class NaxDatetimePartsState {
+	private _mode : string
+	private _showSecond : boolean
+	private _minParts : number[]
+	private _maxParts : number[]
+	private _parts : Ref<number[]>
+
+	constructor(options : NaxDatetimePartsOptions) {
+		const m = options.mode
+		this._mode = m != null && m.length > 0 ? m : 'datetime'
+		const ss = options.showSecond
+		this._showSecond = ss == true
+
+		const minAny = options.min
+		if (minAny != null && minAny > 0) {
+			this._minParts = parseAnyToParts(minAny, defaultMinParts())
+		} else {
+			this._minParts = defaultMinParts()
+		}
+		const maxAny = options.max
+		if (maxAny != null && maxAny > 0) {
+			this._maxParts = parseAnyToParts(maxAny, defaultMaxParts())
+		} else {
+			this._maxParts = defaultMaxParts()
+		}
+
+		const v = options.value
+		let initParts : number[]
+		if (v != null && v > 0) {
+			initParts = parseAnyToParts(v, nowParts())
+		} else {
+			initParts = nowParts()
+		}
+		this._parts = ref(clampPartsFor(initParts, this._minParts, this._maxParts))
+	}
+
+	get mode() : string {
+		return this._mode
+	}
+
+	/** 当前 parts（副本）；修改请用 setParts / setTimestamp */
+	get parts() : number[] {
+		return copyParts(this._parts.value)
+	}
+
+	/** 每列可选值（已按 min/max 收敛），顺序与 mode 字段序列一致 */
+	get columns() : number[][] {
+		const fields = buildFieldList(this._mode, this._showSecond)
+		const parts = this._parts.value
+		const out = [] as number[][]
+		let i = 0
+		while (i < fields.length) {
+			const field = fields[i]
+			if (field == 'year') {
+				out.push(makeRange(this._minParts[0], this._maxParts[0]))
+			} else if (field == 'month') {
+				out.push(monthRangeFor(parts, this._minParts, this._maxParts))
+			} else if (field == 'day') {
+				out.push(dayRangeFor(parts, this._minParts, this._maxParts))
+			} else if (field == 'hour') {
+				if (this._mode == 'time') {
+					out.push(makeRange(this._minParts[3], this._maxParts[3]))
+				} else {
+					let start = 0
+					let end = 23
+					if (parts[0] == this._minParts[0] && parts[1] == this._minParts[1] && parts[2] == this._minParts[2]) start = this._minParts[3]
+					if (parts[0] == this._maxParts[0] && parts[1] == this._maxParts[1] && parts[2] == this._maxParts[2]) end = this._maxParts[3]
+					if (start > end) start = end
+					out.push(makeRange(start, end))
+				}
+			} else if (field == 'minute') {
+				if (this._mode == 'time') {
+					out.push(makeRange(this._minParts[4], this._maxParts[4]))
+				} else {
+					let start = 0
+					let end = 59
+					const sameMinHour = parts[0] == this._minParts[0] && parts[1] == this._minParts[1] && parts[2] == this._minParts[2] && parts[3] == this._minParts[3]
+					const sameMaxHour = parts[0] == this._maxParts[0] && parts[1] == this._maxParts[1] && parts[2] == this._maxParts[2] && parts[3] == this._maxParts[3]
+					if (sameMinHour) start = this._minParts[4]
+					if (sameMaxHour) end = this._maxParts[4]
+					if (start > end) start = end
+					out.push(makeRange(start, end))
+				}
+			} else if (field == 'second') {
+				out.push(makeRange(0, 59))
+			} else {
+				out.push([] as number[])
+			}
+			i++
+		}
+		return out
+	}
+
+	/** 各列当前选中下标（喂 picker-view 的 value） */
+	get indices() : number[] {
+		const fields = buildFieldList(this._mode, this._showSecond)
+		const cols = this.columns
+		const parts = this._parts.value
+		const out = [] as number[]
+		let i = 0
+		while (i < fields.length) {
+			const list = i < cols.length ? cols[i] : ([] as number[])
+			if (list.length == 0) {
+				out.push(0)
+				i++
+				continue
+			}
+			const field = fields[i]
+			const value = parts[fieldIndexOf(field)]
+			let hit = 0
+			let j = 0
+			while (j < list.length) {
+				if (list[j] == value) {
+					hit = j
+					break
+				}
+				j++
+			}
+			out.push(hit)
+			i++
+		}
+		return out
+	}
+
+	/** 设置 parts（自动 clamp 到 min/max 与日历合法域） */
+	setParts(parts : number[]) {
+		this._parts.value = clampPartsFor(parts, this._minParts, this._maxParts)
+	}
+
+	/** 按时间戳设置（自动 clamp） */
+	setTimestamp(ms : number) {
+		this.setParts(parseAnyToParts(ms, nowParts()))
+	}
+
+	/** 收敛到边界内后的当前时间戳 */
+	toTimestamp() : number {
+		return partsToTimestamp(this._parts.value)
+	}
+
+	/** 按模式默认格式输出；可传自定义 pattern（YYYY MM DD HH mm ss） */
+	format(pattern? : string) : string {
+		let p = pattern
+		if (p == null || p.length == 0) {
+			p = defaultFormatFor(this._mode, this._showSecond)
+		}
+		return formatParts(this._parts.value, p as string)
+	}
+
+	/** 用列下标更新选中值（picker-view change 回调直接传入 value 数组） */
+	applyIndices(indices : number[]) {
+		const fields = buildFieldList(this._mode, this._showSecond)
+		const cols = this.columns
+		const next = copyParts(this._parts.value)
+		let i = 0
+		while (i < fields.length && i < indices.length) {
+			const list = i < cols.length ? cols[i] : ([] as number[])
+			if (list.length == 0) {
+				i++
+				continue
+			}
+			const idx = clamp(indices[i], 0, list.length - 1)
+			next[fieldIndexOf(fields[i])] = list[idx]
+			i++
+		}
+		this.setParts(next)
+	}
+}
+
+/**
+ * 创建日期时间 parts 状态。必须在 setup 内同步调用。
+ */
+export function useDatetimeParts(options : NaxDatetimePartsOptions) : NaxDatetimePartsState {
+	return new NaxDatetimePartsState(options)
+}

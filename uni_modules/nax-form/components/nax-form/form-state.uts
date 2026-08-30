@@ -1,0 +1,397 @@
+/**
+ * nax-form 校验编排状态（无头）：字段注册 / 错误存储 / 初始值快照 / validate 系列。
+ * 从 nax-form.uvue 抽出，供 nax-form 组件与 nax-ui 的 useValidate 组合式函数共用；
+ * 规则匹配引擎见同目录 form-validator.uts。本文件属于 nax-form 包内部实现，不对外承诺 API。
+ */
+import { ref, Ref } from 'vue'
+import {
+	validateRules,
+	getModelValue,
+	setModelValue,
+	rulesOfProp
+} from './form-validator.uts'
+
+export type NaxFormStateOptions = {
+	/** 表单数据对象；用函数返回以保持引用最新（整体替换 model 后仍生效） */
+	getModel : () => UTSJSONObject | null,
+	/** 外部规则（对应组件 rules prop）；可选 */
+	getRules ? : (() => UTSJSONObject | null) | null
+}
+
+export class NaxFormState {
+	private _getModel : () => UTSJSONObject | null
+	private _getRules : (() => UTSJSONObject | null) | null
+	private _rulesState : Ref<UTSJSONObject>
+	// 已注册字段（注册顺序）
+	private _itemProps : Ref<string[]>
+	// 字段级 rules（优先于全局 rules）
+	private _itemRulesMap : Ref<UTSJSONObject>
+	// 错误文案并行存储（保证响应）
+	private _errorProps : Ref<string[]>
+	private _errorTexts : Ref<string[]>
+	/** 错误版本号：任一错误变化 +1，消费方依赖它刷新错误展示 */
+	errorVersion : Ref<number>
+	// 初始值快照
+	private _snapshotProps : Ref<string[]>
+	private _snapshotValues : Ref<any[]>
+	private _snapshotReady : boolean
+
+	constructor(options : NaxFormStateOptions) {
+		this._getModel = options.getModel
+		const rg = options.getRules
+		if (rg != null) {
+			this._getRules = rg
+		} else {
+			this._getRules = null
+		}
+		let initRules = {} as UTSJSONObject
+		const g = this._getRules
+		if (g != null) {
+			const r = g()
+			if (r != null) {
+				initRules = r
+			}
+		}
+		this._rulesState = ref(initRules)
+		this._itemProps = ref([] as string[])
+		this._itemRulesMap = ref({} as UTSJSONObject)
+		this._errorProps = ref([] as string[])
+		this._errorTexts = ref([] as string[])
+		this.errorVersion = ref(0)
+		this._snapshotProps = ref([] as string[])
+		this._snapshotValues = ref([] as any[])
+		this._snapshotReady = false
+	}
+
+	private _model() : UTSJSONObject {
+		const m = this._getModel()
+		if (m != null) {
+			return m
+		}
+		return {} as UTSJSONObject
+	}
+
+	private _listIndexOf(list : string[], key : string) : number {
+		var i = 0
+		while (i < list.length) {
+			if (list[i] == key) {
+				return i
+			}
+			i++
+		}
+		return -1
+	}
+
+	private _setFieldError(prop : string, message : string) {
+		if (prop.length == 0) {
+			return
+		}
+		const idx = this._listIndexOf(this._errorProps.value, prop)
+		if (message.length == 0) {
+			if (idx >= 0) {
+				const nextP = [] as string[]
+				const nextT = [] as string[]
+				var i = 0
+				while (i < this._errorProps.value.length) {
+					if (i != idx) {
+						nextP.push(this._errorProps.value[i])
+						nextT.push(this._errorTexts.value[i])
+					}
+					i++
+				}
+				this._errorProps.value = nextP
+				this._errorTexts.value = nextT
+				this.errorVersion.value = this.errorVersion.value + 1
+			}
+			return
+		}
+		if (idx >= 0) {
+			const nextT = [] as string[]
+			var j = 0
+			while (j < this._errorTexts.value.length) {
+				if (j == idx) {
+					nextT.push(message)
+				} else {
+					nextT.push(this._errorTexts.value[j])
+				}
+				j++
+			}
+			this._errorTexts.value = nextT
+		} else {
+			const nextP = [] as string[]
+			const nextT = [] as string[]
+			var k = 0
+			while (k < this._errorProps.value.length) {
+				nextP.push(this._errorProps.value[k])
+				nextT.push(this._errorTexts.value[k])
+				k++
+			}
+			nextP.push(prop)
+			nextT.push(message)
+			this._errorProps.value = nextP
+			this._errorTexts.value = nextT
+		}
+		this.errorVersion.value = this.errorVersion.value + 1
+	}
+
+	/** 读取字段错误文案（空串表示无错误） */
+	getError(prop : string) : string {
+		const idx = this._listIndexOf(this._errorProps.value, prop)
+		if (idx < 0) {
+			return ''
+		}
+		return this._errorTexts.value[idx]
+	}
+
+	private _clearAllErrors() {
+		this._errorProps.value = [] as string[]
+		this._errorTexts.value = [] as string[]
+		this.errorVersion.value = this.errorVersion.value + 1
+	}
+
+	private _ensureSnapshot() {
+		if (this._snapshotReady) {
+			return
+		}
+		const model = this._model()
+		const propsList = this._itemProps.value
+		const sp = [] as string[]
+		const sv = [] as any[]
+		var i = 0
+		while (i < propsList.length) {
+			const p = propsList[i]
+			if (p.length > 0) {
+				sp.push(p)
+				sv.push(getModelValue(model, p) as any)
+			}
+			i++
+		}
+		if (sp.length > 0) {
+			this._snapshotProps.value = sp
+			this._snapshotValues.value = sv
+			this._snapshotReady = true
+		}
+	}
+
+	/** 注册字段（建立/补全初始值快照）；无 form-item 的无头场景手动调用 */
+	register(prop : string) {
+		if (prop.length == 0) {
+			return
+		}
+		if (this._listIndexOf(this._itemProps.value, prop) >= 0) {
+			return
+		}
+		const next = [] as string[]
+		var i = 0
+		while (i < this._itemProps.value.length) {
+			next.push(this._itemProps.value[i])
+			i++
+		}
+		next.push(prop)
+		this._itemProps.value = next
+		if (!this._snapshotReady) {
+			this._ensureSnapshot()
+		} else {
+			const model = this._model()
+			const sp = [] as string[]
+			const sv = [] as any[]
+			var j = 0
+			while (j < this._snapshotProps.value.length) {
+				sp.push(this._snapshotProps.value[j])
+				sv.push(this._snapshotValues.value[j])
+				j++
+			}
+			sp.push(prop)
+			sv.push(getModelValue(model, prop) as any)
+			this._snapshotProps.value = sp
+			this._snapshotValues.value = sv
+		}
+	}
+
+	/** 注销字段并清空其错误与字段级规则 */
+	unregister(prop : string) {
+		if (prop.length == 0) {
+			return
+		}
+		const next = [] as string[]
+		var i = 0
+		while (i < this._itemProps.value.length) {
+			if (this._itemProps.value[i] != prop) {
+				next.push(this._itemProps.value[i])
+			}
+			i++
+		}
+		this._itemProps.value = next
+		this._setFieldError(prop, '')
+		const map = this._itemRulesMap.value
+		map.set(prop, [] as any[])
+		this._itemRulesMap.value = map
+	}
+
+	/** 设置字段级规则（优先于全局 rules[prop]） */
+	setItemRules(prop : string, rules : any[]) {
+		if (prop.length == 0) {
+			return
+		}
+		const map = this._itemRulesMap.value
+		map.set(prop, rules)
+		this._itemRulesMap.value = map
+	}
+
+	private _getItemRules(prop : string) : any[] {
+		const raw = this._itemRulesMap.value.getAny(prop)
+		if (raw == null) {
+			return [] as any[]
+		}
+		const arr = raw as any[]
+		if (arr != null && typeof arr.length == 'number') {
+			return arr
+		}
+		return [] as any[]
+	}
+
+	private _resolveRules(prop : string) : any[] {
+		const local = this._getItemRules(prop)
+		if (local.length > 0) {
+			return local
+		}
+		return rulesOfProp(this._rulesState.value, prop)
+	}
+
+	/**
+	 * 校验一个字段，返回错误文案（空串表示通过）
+	 */
+	validateOne(prop : string, event : string) : string {
+		if (prop.length == 0) {
+			return ''
+		}
+		const rules = this._resolveRules(prop)
+		if (rules.length == 0) {
+			this._setFieldError(prop, '')
+			return ''
+		}
+		const model = this._model()
+		const value = getModelValue(model, prop)
+		const msg = validateRules(rules, value, event)
+		this._setFieldError(prop, msg)
+		return msg
+	}
+
+	/**
+	 * 校验指定字段；props 为空则校验全部已注册项
+	 * @return 错误列表 { prop, message }[]
+	 */
+	validateField(fieldProps : any | null = null, event : string = '') : UTSJSONObject[] {
+		const targets = [] as string[]
+		if (fieldProps == null) {
+			var i = 0
+			while (i < this._itemProps.value.length) {
+				targets.push(this._itemProps.value[i])
+				i++
+			}
+		} else if (typeof fieldProps == 'string') {
+			const s = fieldProps as string
+			if (s.length > 0) {
+				targets.push(s)
+			}
+		} else {
+			const arr = fieldProps as any[]
+			if (arr != null) {
+				var j = 0
+				while (j < arr.length) {
+					const p = '' + arr[j]
+					if (p.length > 0) {
+						targets.push(p)
+					}
+					j++
+				}
+			}
+		}
+
+		const errors = [] as UTSJSONObject[]
+		var k = 0
+		while (k < targets.length) {
+			const prop = targets[k]
+			const msg = this.validateOne(prop, event)
+			if (msg.length > 0) {
+				errors.push({
+					prop: prop,
+					message: msg
+				} as UTSJSONObject)
+			}
+			k++
+		}
+		return errors
+	}
+
+	/**
+	 * 校验全部已注册字段；通过 resolve(true)，失败 reject({ prop, message }[])
+	 */
+	validate() : Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const errors = this.validateField(null, '')
+			if (errors.length == 0) {
+				resolve(true)
+				return
+			}
+			reject(errors)
+		})
+	}
+
+	/** 清空校验结果；props 为空清全部 */
+	clearValidate(fieldProps : any | null = null) {
+		if (fieldProps == null) {
+			this._clearAllErrors()
+			return
+		}
+		if (typeof fieldProps == 'string') {
+			this._setFieldError(fieldProps as string, '')
+			return
+		}
+		const arr = fieldProps as any[]
+		if (arr != null) {
+			var i = 0
+			while (i < arr.length) {
+				this._setFieldError('' + arr[i], '')
+				i++
+			}
+		}
+	}
+
+	/** 重置为初始快照并清空错误 */
+	resetFields() {
+		this._ensureSnapshot()
+		const model = this._model()
+		var i = 0
+		while (i < this._snapshotProps.value.length) {
+			const p = this._snapshotProps.value[i]
+			const v = this._snapshotValues.value[i]
+			setModelValue(model, p, v)
+			i++
+		}
+		this._clearAllErrors()
+	}
+
+	/** 覆盖全局规则（组件内部同步 rules prop 时调用） */
+	setRules(rules : UTSJSONObject) {
+		this._rulesState.value = rules
+	}
+
+	/** 已注册字段（拷贝） */
+	registeredProps() : string[] {
+		const out = [] as string[]
+		var i = 0
+		while (i < this._itemProps.value.length) {
+			out.push(this._itemProps.value[i])
+			i++
+		}
+		return out
+	}
+}
+
+/**
+ * 创建表单校验状态。nax-form 组件与 useValidate 组合式函数共用此实现。
+ */
+export function createFormState(options : NaxFormStateOptions) : NaxFormState {
+	return new NaxFormState(options)
+}
