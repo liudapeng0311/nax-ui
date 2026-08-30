@@ -74,7 +74,7 @@
 			</view>
 		</view>
 		<view class="nax-rich-text-node__audio-main">
-			<text class="nax-rich-text-node__audio-title">{{ audioTitleText }}</text>
+			<text class="nax-rich-text-node__audio-title" :max-lines="1">{{ audioTitleText }}</text>
 			<view class="nax-rich-text-node__audio-control">
 				<!-- 颜色/尺寸属性供非蒸汽端；鸿蒙蒸汽端忽略这些属性，走 track/thumb class -->
 				<slider
@@ -818,9 +818,18 @@
 	.nax-rich-text-node__audio-title {
 		font-size: 14px;
 		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-HARMONY */
+		/* 鸿蒙蒸汽 CSS 编译器对 lines 报非标准属性警告，鸿蒙端单行省略由 :max-lines 属性 + 定宽裁剪承担 */
 		lines: 1;
+		/* #endif */
 		text-overflow: ellipsis;
 		margin-bottom: 6px;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙端兜底：flex 子项上 lines 可能不生效，定宽裁剪保证单行省略（同 nax-text 先例） */
+		overflow: hidden;
+		width: 100%;
+		max-width: 100%;
+		/* #endif */
 	}
 
 	.nax-rich-text-node__audio-control {
