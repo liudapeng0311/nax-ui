@@ -19,7 +19,7 @@ import { spawnSync } from 'node:child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const root = path.resolve(__dirname, '..')
+const root = __dirname
 
 const catalogPath = path.join(root, 'assets', 'icons', 'catalog.json')
 const tablerCpPath = path.join(root, 'assets', 'icons', 'tabler-codepoints.json')
