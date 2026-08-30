@@ -5,6 +5,8 @@
 		:style="rootStyle"
 		@click="onRootClick"
 		@touchstart="onRootTouchStart"
+		@touchmove="onRootTouchMove"
+		@touchcancel="onRootTouchCancel"
 	>
 		<!-- 前缀图标 -->
 		<view v-if="hasPrefixIcon" class="nax-input__icon nax-input__icon--prefix" @click.stop="onPrefixClick">
@@ -23,7 +25,7 @@
 			:placeholder-style="resolvedPlaceholderStyle"
 			:disabled="isInputDisabled"
 			:maxlength="resolvedMaxlength"
-			:focus="focus"
+			:focus="innerFocus"
 			:confirm-type="confirmType"
 			:confirm-hold="confirmHold"
 			:cursor-spacing="cursorSpacing"
@@ -39,6 +41,19 @@
 		/>
 
 		<!-- 清除：touchstart 优先，避免 Web 先 blur 卸载节点导致 click 丢失 -->
+		<!-- #ifdef WEB -->
+		<!-- 桌面 Web 无 touchstart：mousedown.prevent 阻止点击图标时 input 先失焦（blur 先于 click） -->
+		<view
+			v-if="showClear"
+			class="nax-input__icon nax-input__icon--action"
+			@touchstart.stop.prevent="onClear"
+			@mousedown.stop.prevent="onClear"
+			@click.stop.prevent="onClear"
+		>
+			<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+		</view>
+		<!-- #endif -->
+		<!-- #ifndef WEB -->
 		<view
 			v-if="showClear"
 			class="nax-input__icon nax-input__icon--action"
@@ -47,8 +62,21 @@
 		>
 			<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
 		</view>
+		<!-- #endif -->
 
 		<!-- 密码可见切换 -->
+		<!-- #ifdef WEB -->
+		<view
+			v-if="showPasswordToggle"
+			class="nax-input__icon nax-input__icon--action"
+			@touchstart.stop.prevent="onTogglePassword"
+			@mousedown.stop.prevent="onTogglePassword"
+			@click.stop.prevent="onTogglePassword"
+		>
+			<nax-icon :name="passwordEyeName" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+		</view>
+		<!-- #endif -->
+		<!-- #ifndef WEB -->
 		<view
 			v-if="showPasswordToggle"
 			class="nax-input__icon nax-input__icon--action"
@@ -57,6 +85,7 @@
 		>
 			<nax-icon :name="passwordEyeName" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
 		</view>
+		<!-- #endif -->
 
 		<!-- 后缀图标 -->
 		<view v-if="hasSuffixIcon" class="nax-input__icon nax-input__icon--suffix" @click.stop="onSuffixClick">
@@ -80,7 +109,7 @@
 	 * @property {number} maxlength 最大长度；-1 不限制（默认 140，对齐 ）
 	 * @property {string} placeholderStyle placeholder 样式字符串
 	 * @property {string} confirmType 键盘右下角按钮：done | send | search | next | go
-	 * @property {boolean} focus 是否自动聚焦
+	 * @property {boolean} focus 自动聚焦；运行时置 true 可拉起焦点
 	 * @property {boolean} passwordIcon type=password 时是否显示可见性切换，默认 true
 	 * @property {boolean} border 是否显示边框，默认 false
 	 * @property {string} borderType 边框形态：surround 四边（默认）| bottom 仅下边框
@@ -242,6 +271,15 @@
 	// 聚焦时的内容基准，用于失焦时判断是否触发 change
 	let changeBaseValue: string = ''
 	const showPassword = ref(false)
+	// focus 指令位：真实失焦时复位为 false，后续置 true 才是一次真实的重新聚焦指令
+	const innerFocus = ref(props.focus)
+	// 触摸预亮聚焦样式的临时标记：touchstart 点亮、focus 事件确认转正；
+	// 长按滚动 / 手势被滚动容器接管时撤回，避免未聚焦输入框样式残留
+	let touchPrelit = false
+	let touchPrelitX = 0
+	let touchPrelitY = 0
+	// 本次 click 是否来自输入框自身（field 的 click 先于根节点触发，冒泡前先标记）
+	let clickFromField = false
 
 	watch((): string => {
 		return props.modelValue
@@ -255,6 +293,12 @@
 		return props.type
 	}, (_val: string) => {
 		showPassword.value = false
+	})
+
+	watch((): boolean => {
+		return props.focus
+	}, (val: boolean) => {
+		innerFocus.value = val
 	})
 
 	function normalizeSize(value: string): string {
@@ -621,6 +665,10 @@
 
 	function onFocus(e: UniInputFocusEvent) {
 		isFocused.value = true
+		// 注意：这里不能回写 innerFocus——聚焦后再翻转 focus 属性，
+		// 鸿蒙端会重放聚焦流程导致刚获取的焦点丢失
+		// 真实聚焦到达，触摸预亮转正，后续滚动不再撤回
+		touchPrelit = false
 		const val = e.detail.value
 		// 记录聚焦时内容，作为 change（失焦对比）的基准
 		changeBaseValue = val
@@ -628,9 +676,10 @@
 	}
 
 	function onBlur(e: UniInputBlurEvent) {
-		// 同步清除聚焦态：清除/眼睛按钮已由自身 touchstart/click 处理且不再写 isFocused，
-		// 无需为点击窗口保留样式；避免切换输入框时失焦样式慢半拍
+		// 同步清除聚焦态：避免切换输入框时失焦样式慢半拍
 		isFocused.value = false
+		// 复位 focus 指令位，后续置 true（如点击清除）才是一次真实的重新聚焦
+		innerFocus.value = false
 		const valFromEvent = e.detail.value
 		let val = valFromEvent
 		if (props.trim) {
@@ -656,14 +705,18 @@
 		if (props.disabled || props.readonly) {
 			return
 		}
-		// touchstart + click 可能各触发一次，第二次内容已空则跳过
+		// touchstart / mousedown / click 可能各触发一次，第二次内容已空则跳过
 		if (innerValue.value.length == 0) {
 			return
 		}
 		setValue('')
-		// 不干预聚焦态：真实聚焦的输入框点击清除后样式保留（App 端不失焦）；
-		// 已失焦的输入框（多输入框场景）点击清除不点亮样式；
-		// Web 端真实 blur 由 onBlur 延迟重置兜底清除聚焦样式
+		// 清除后把真实焦点还给输入框（用户通常接着输入）；
+		// 仅在未聚焦时下发 focus 指令：对已聚焦的输入框翻转 focus 属性，
+		// 鸿蒙端会重放聚焦流程导致焦点丢失
+		if (!isFocused.value) {
+			innerFocus.value = true
+			isFocused.value = true
+		}
 		emit('clear')
 	}
 
@@ -672,31 +725,77 @@
 			return
 		}
 		showPassword.value = !showPassword.value
-		// 与 clear 同一规则：不干预聚焦态，避免已失焦输入框被点亮样式
+		// 与 clear 同一规则：仅未聚焦时下发 focus 指令，已聚焦时不碰 focus 属性
+		if (!isFocused.value) {
+			innerFocus.value = true
+			isFocused.value = true
+		}
 	}
 
 	function onRootClick() {
 		if (props.disabled) {
 			return
 		}
+		// 输入框自身的 click 会冒泡到根节点，此时原生聚焦已在进行，
+		// 不再下发 focus 指令（鸿蒙端翻转 focus 属性会导致刚获取的焦点丢失）；
+		// 仅容器空白处（内边距等）的点击补拉真实焦点，并给触摸预亮样式兜底点亮
+		if (!props.readonly && !clickFromField && !innerFocus.value) {
+			innerFocus.value = true
+			isFocused.value = true
+		}
+		clickFromField = false
 		emit('click')
 	}
 
-	function onRootTouchStart() {
-		if (props.disabled) {
+	function onRootTouchStart(e: UniTouchEvent) {
+		if (props.disabled || props.readonly) {
 			return
 		}
 		// App 端 @focus 回调随键盘动画延迟（约半秒），触摸瞬间提前点亮聚焦样式；
+		// 仅在未点亮时预亮并做标记，已被 focus 确认的样式不归本次触摸管；
 		// 清除/密码按钮已 stop.prevent 不冒泡，不会点亮已失焦的输入框
-		isFocused.value = true
+		if (!isFocused.value) {
+			touchPrelit = true
+			isFocused.value = true
+			if (e.touches.length > 0) {
+				touchPrelitX = e.touches[0].clientX
+				touchPrelitY = e.touches[0].clientY
+			}
+		}
+	}
+
+	function onRootTouchMove(e: UniTouchEvent) {
+		// 只撤回本次触摸预亮的样式；真实聚焦已被 focus 事件确认的不受影响
+		if (!touchPrelit || e.touches.length == 0) {
+			return
+		}
+		const dx = e.touches[0].clientX - touchPrelitX
+		const dy = e.touches[0].clientY - touchPrelitY
+		// 位移超阈值视为滚动/滑动手势，输入框不会聚焦，撤回预亮样式
+		if (dx * dx + dy * dy > 36) {
+			touchPrelit = false
+			isFocused.value = false
+		}
+	}
+
+	function onRootTouchCancel() {
+		// 仅复位预亮标记，不撤回样式：部分端（如鸿蒙）点击输入框也可能派发
+		// touchcancel，而其 focus 事件可能缺失，撤回后样式无法恢复；
+		// 滚动撤回已由 onRootTouchMove 的位移阈值覆盖
+		touchPrelit = false
 	}
 
 	function onFieldClick() {
 		if (props.disabled) {
 			return
 		}
-		// 鸿蒙等端 focus 事件可能缺失，点击时补聚焦态
-		isFocused.value = true
+		// 标记本次 click 来自输入框自身（冒泡到根节点时不再重复下发 focus 指令）
+		clickFromField = true
+		// readonly 原生 input 不可聚焦，不点亮聚焦样式（否则无 focus 事件会残留）
+		if (!props.readonly) {
+			// 鸿蒙等端 focus 事件可能缺失，点击时补聚焦态
+			isFocused.value = true
+		}
 		emit('click')
 	}
 
