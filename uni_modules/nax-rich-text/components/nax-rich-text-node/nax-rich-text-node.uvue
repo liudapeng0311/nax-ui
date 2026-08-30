@@ -15,39 +15,85 @@
 		@click="onImgTap"
 	></image>
 
-	<!-- 视频 -->
+	<!-- 视频：封面卡片 + 播放按钮，点击后交给原生 video（App 端原生视频层级最高，无法在其上叠加按钮） -->
+	<view
+		v-else-if="isVideo && !videoStarted"
+		class="nax-rich-text-node__video-card"
+		:style="styleText"
+		@click="onVideoPlay"
+	>
+		<image
+			v-if="videoPosterShow"
+			class="nax-rich-text-node__video-cover"
+			:src="videoPoster"
+			mode="aspectFill"
+			@error="onVideoPosterError"
+		></image>
+		<!-- 无封面 / 封面加载失败：浅主题色兜底 -->
+		<view v-else class="nax-rich-text-node__video-cover-fallback"></view>
+		<view class="nax-rich-text-node__video-btn">
+			<nax-icon name="player-play-filled" size="20" color="#ffffff"></nax-icon>
+		</view>
+	</view>
+
+	<!-- 播放中：原生 video 带控制条接管；关掉原生中部大三角（会闪现），poster 与封面卡片一致避免闪黑屏 -->
 	<video
 		v-else-if="isVideo"
 		class="nax-rich-text-node__video"
 		:src="videoSrc"
-		:controls="videoControls"
 		:poster="videoPoster"
+		:controls="true"
+		:autoplay="true"
+		:show-center-play-btn="false"
 		:style="styleText"
+		@error="onVideoError"
 	></video>
 
 	<!-- 音频播放器（createInnerAudioContext 实现，无内建 audio 组件） -->
 	<view v-else-if="isAudio" class="nax-rich-text-node__audio">
-		<view class="nax-rich-text-node__audio-btn" @click="onAudioToggle">
-			<nax-icon
-				:name="audioPlaying ? 'player-pause-filled' : 'player-play-filled'"
-				size="14"
-				color="#ffffff"
-			></nax-icon>
+		<view class="nax-rich-text-node__audio-cover">
+			<image
+				v-if="audioCoverShow"
+				class="nax-rich-text-node__audio-cover-img"
+				:src="audioCover"
+				mode="aspectFill"
+				@error="onAudioCoverError"
+			></image>
+			<!-- 无封面或封面加载失败：主题色块兜底 -->
+			<view v-else class="nax-rich-text-node__audio-cover-fallback"></view>
+			<view
+				class="nax-rich-text-node__audio-btn"
+				:class="audioPlaying ? '' : 'nax-rich-text-node__audio-btn--play'"
+				@click="onAudioToggle"
+			>
+				<nax-icon
+					:name="audioPlaying ? 'player-pause-filled' : 'player-play-filled'"
+					size="14"
+					color="#ffffff"
+				></nax-icon>
+			</view>
 		</view>
 		<view class="nax-rich-text-node__audio-main">
-			<slider
-				class="nax-rich-text-node__audio-slider"
-				:min="0"
-				:max="audioMax"
-				:step="1"
-				:value="audioSliderValue"
-				activeColor="#18a058"
-				backgroundColor="#e2e4ea"
-				:blockSize="12"
-				@change="onAudioSeek"
-				@changing="onAudioChanging"
-			></slider>
-			<text class="nax-rich-text-node__audio-time">{{ audioTimeText }}</text>
+			<text class="nax-rich-text-node__audio-title">{{ audioTitleText }}</text>
+			<view class="nax-rich-text-node__audio-control">
+				<!-- 颜色/尺寸属性供非蒸汽端；鸿蒙蒸汽端忽略这些属性，走 track/thumb class -->
+				<slider
+					class="nax-rich-text-node__audio-slider"
+					:min="0"
+					:max="audioMax"
+					:step="1"
+					:value="audioSliderValue"
+					activeColor="#18a058"
+					backgroundColor="#e2e4ea"
+					:blockSize="12"
+					track-class="nax-rich-text-node__audio-slider-track"
+					track-active-class="nax-rich-text-node__audio-slider-track-active"
+					thumb-class="nax-rich-text-node__audio-slider-thumb"
+					@change="onAudioSeek"
+					@changing="onAudioChanging"
+				></slider>
+				<text class="nax-rich-text-node__audio-time">{{ audioTimeText }}</text>
+			</view>
 		</view>
 	</view>
 
@@ -277,11 +323,28 @@
 	})
 
 	const videoSrc = computed((): string => attrValue('src'))
-	const videoControls = computed((): boolean => {
-		const n = richNode.value
-		return n != null && n.attrs.has('controls')
-	})
 	const videoPoster = computed((): string => attrValue('poster'))
+
+	// —— 视频播放：默认封面卡片，点击后才挂原生 video（autoplay + controls），失败退回封面 ——
+	const videoStarted = ref(false)
+	const videoPosterFailed = ref(false)
+
+	const videoPosterShow = computed((): boolean => {
+		return videoPosterFailed.value == false && videoPoster.value.length > 0
+	})
+
+	function onVideoPosterError() {
+		videoPosterFailed.value = true
+	}
+
+	function onVideoPlay() {
+		videoStarted.value = true
+	}
+
+	function onVideoError() {
+		// 播放出错退回封面态，避免残留黑屏原生控件
+		videoStarted.value = false
+	}
 	const embedDomain = computed((): string => {
 		let src = attrValue('src')
 		if (src.length == 0) {
@@ -328,6 +391,19 @@
 		})
 		ctx.onEnded(() => {
 			audioPlaying.value = false
+			// 播放完成把进度钉到结尾，避免部分端最后一次 timeupdate 停在半路
+			audioCurrent.value = audioDuration.value
+		})
+		ctx.onCanplay(() => {
+			// 部分端元数据就绪后才上报总时长，先取一次让总时长尽早显示
+			const p = audioPlayer
+			if (p == null) {
+				return
+			}
+			const d = p.duration
+			if (d > 0 && d == d) {
+				audioDuration.value = d
+			}
 		})
 		ctx.onTimeUpdate(() => {
 			const p = audioPlayer
@@ -379,16 +455,17 @@
 
 	const audioMax = computed((): number => {
 		const d = audioDuration.value
-		return d > 0 ? Math.ceil(d) : 1
+		// 步进 1 秒：max 用 round 保证进度能走满（ceil 会让小数秒音频播完仍差一格）
+		return d > 0 ? Math.max(1, Math.round(d)) : 1
 	})
 
 	const audioSliderValue = computed((): number => {
 		const v = audioDragging.value ? audioDragValue.value : audioCurrent.value
 		const max = audioMax.value
-		if (v > max) {
+		if (v >= max) {
 			return max
 		}
-		return Math.floor(v)
+		return Math.round(v)
 	})
 
 	function formatAudioTime(sec : number) : string {
@@ -403,11 +480,85 @@
 		return mStr + ':' + sStr
 	}
 
-	const audioTimeText = computed((): string => {
+	// —— 音频封面 / 标题（来自 audio 标签属性，缺省时主题色块 + 文件名兜底）——
+	const audioCoverFailed = ref(false)
+
+	const audioCover = computed((): string => {
+		let cover = attrValue('poster')
+		if (cover.length == 0) {
+			cover = attrValue('cover')
+		}
+		if (cover.length == 0) {
+			cover = attrValue('data-poster')
+		}
+		if (cover.length == 0) {
+			cover = attrValue('data-cover')
+		}
+		return cover
+	})
+
+	const audioCoverShow = computed((): boolean => {
+		return audioCoverFailed.value == false && audioCover.value.length > 0
+	})
+
+	function onAudioCoverError() {
+		audioCoverFailed.value = true
+	}
+
+	/** 从音频地址提取文件名：去参数与锚点，URI 解码失败时保留原值 */
+	function extractFileName(src : string) : string {
+		if (src.length == 0) {
+			return '音频'
+		}
+		let path = src
+		const queryIndex = path.indexOf('?')
+		if (queryIndex >= 0) {
+			path = path.substring(0, queryIndex)
+		}
+		const hashIndex = path.indexOf('#')
+		if (hashIndex >= 0) {
+			path = path.substring(0, hashIndex)
+		}
+		const slashIndex = path.lastIndexOf('/')
+		const backslashIndex = path.lastIndexOf('\\')
+		const nameIndex = slashIndex > backslashIndex ? slashIndex : backslashIndex
+		let name = nameIndex >= 0 ? path.substring(nameIndex + 1) : path
+		if (name.length == 0) {
+			return '音频'
+		}
+		try {
+			const decoded = decodeURIComponent(name)
+			if (decoded != null && decoded.length > 0) {
+				name = decoded
+			}
+		} catch (e) {
+			// 保留未解码的文件名
+		}
+		return name
+	}
+
+	const audioTitleText = computed((): string => {
 		if (audioError.value) {
 			return '音频加载失败'
 		}
-		return formatAudioTime(audioCurrent.value) + ' / ' + formatAudioTime(audioDuration.value)
+		let title = attrValue('title')
+		if (title.length == 0) {
+			title = attrValue('data-title')
+		}
+		if (title.length > 0) {
+			return title
+		}
+		let src = attrValue('src')
+		if (src.length == 0) {
+			src = attrValue('data-src')
+		}
+		return extractFileName(src)
+	})
+
+	const audioTimeText = computed((): string => {
+		// 拖拽中实时显示拖拽位置对应的时间
+		const v = audioDragging.value ? audioDragValue.value : audioCurrent.value
+		return formatAudioTime(v) + ' / ' + formatAudioTime(audioDuration.value)
 	})
 
 	onUnmounted(() => {
@@ -548,6 +699,49 @@
 		flex-shrink: 0;
 	}
 
+	/* 视频封面卡片：宽高圆角由 styleText 提供，封面铺满，点击整卡开始播放 */
+	.nax-rich-text-node__video-card {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 12px;
+		overflow: hidden;
+	}
+
+	.nax-rich-text-node__video-cover {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	/* 无封面 / 封面加载失败时的占位：比主题色浅一档 */
+	.nax-rich-text-node__video-cover-fallback {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+	}
+
+	/* 播放三角形视觉重心偏左，右移 1px 修正观感 */
+	.nax-rich-text-node__video-btn {
+		width: 48px;
+		height: 48px;
+		border-radius: 24px;
+		background-color: rgba(0, 0, 0, 0.3);
+		align-items: center;
+		justify-content: center;
+		padding-left: 2px;
+	}
+
+	.nax-rich-text-node__video {
+		margin-bottom: 12px;
+	}
+
 	.nax-rich-text-node__media-card {
 		flex-direction: row;
 		align-items: center;
@@ -574,17 +768,46 @@
 		padding: 10px 12px;
 		margin-bottom: 12px;
 		background-color: #f7f8fa;
-		border-radius: 4px;
+		border-radius: 8px;
+	}
+
+	.nax-rich-text-node__audio-cover {
+		position: relative;
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		margin-right: 10px;
+	}
+
+	.nax-rich-text-node__audio-cover-img {
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+	}
+
+	/* 无封面 / 封面加载失败时的占位：比主题色浅一档 */
+	.nax-rich-text-node__audio-cover-fallback {
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		background-color: var(--nax-color-primary-secondary, #daefe4);
 	}
 
 	.nax-rich-text-node__audio-btn {
+		position: absolute;
+		left: 8px;
+		top: 8px;
 		width: 32px;
 		height: 32px;
 		border-radius: 16px;
-		background-color: #18a058;
+		background-color: rgba(0, 0, 0, 0.3);
 		align-items: center;
 		justify-content: center;
-		margin-right: 10px;
+	}
+
+	/* 播放态：三角形视觉重心偏左，右移 1px 修正观感（暂停态双竖条对称，不偏移） */
+	.nax-rich-text-node__audio-btn--play {
+		padding-left: 2px;
 	}
 
 	.nax-rich-text-node__audio-main {
@@ -592,13 +815,42 @@
 		flex-direction: column;
 	}
 
+	.nax-rich-text-node__audio-title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		lines: 1;
+		text-overflow: ellipsis;
+		margin-bottom: 6px;
+	}
+
+	.nax-rich-text-node__audio-control {
+		flex-direction: row;
+		align-items: center;
+	}
+
 	.nax-rich-text-node__audio-slider {
-		width: 100%;
+		flex: 1;
+	}
+
+	/* 蒸汽（vapor）模式下 slider 的颜色/尺寸属性被忽略，以下三个 class 仅鸿蒙 Vapor 端生效 */
+	.nax-rich-text-node__audio-slider-track {
+		background-color: #e2e4ea;
+	}
+
+	.nax-rich-text-node__audio-slider-track-active {
+		background-color: #18a058;
+	}
+
+	.nax-rich-text-node__audio-slider-thumb {
+		width: 12px;
+		height: 12px;
+		border-radius: 6px;
+		background-color: #ffffff;
 	}
 
 	.nax-rich-text-node__audio-time {
 		font-size: 11px;
 		color: #6b7076;
-		margin-top: 2px;
+		margin-left: 8px;
 	}
 </style>
