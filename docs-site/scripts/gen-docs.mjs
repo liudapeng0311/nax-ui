@@ -23,7 +23,7 @@ const SIDEBAR_OUT = path.join(SITE, '.vitepress', 'sidebar-data.mjs')
 const CATEGORIES = [
   {
     text: '基础组件',
-    items: ['button', 'text', 'icon', 'space', 'line', 'divider', 'tag', 'badge', 'avatar']
+    items: ['button', 'text', 'icon', 'space', 'line', 'divider', 'tag', 'badge', 'avatar', 'rich-text']
   },
   {
     text: '布局组件',
@@ -122,7 +122,8 @@ const COMPONENT_LABELS = {
   tabs: '标签页',
   dropdown: '下拉菜单',
   image: '图片',
-  empty: '空状态'
+  empty: '空状态',
+  'rich-text': '富文本'
 }
 
 // 文档站点级覆盖（只影响生成的 docs-site 页面，不改组件包内容）
@@ -1256,8 +1257,20 @@ function englishName(n) {
   return n.split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')
 }
 
+// 组合式函数分区（docs-site/composables/ 下手写页面，此处只维护侧边栏）
+const COMPOSABLES = [
+  { text: '总览', link: '/composables/' },
+  { text: 'useCountdown <span class="nax-sidebar-en">倒计时</span>', link: '/composables/use-countdown' },
+  { text: 'useDebounce <span class="nax-sidebar-en">防抖</span>', link: '/composables/use-debounce' },
+  { text: 'useThrottle <span class="nax-sidebar-en">节流</span>', link: '/composables/use-throttle' },
+  { text: 'useInterval <span class="nax-sidebar-en">轮询</span>', link: '/composables/use-interval' },
+  { text: 'useStorage <span class="nax-sidebar-en">本地缓存</span>', link: '/composables/use-storage' },
+  { text: 'useValidate <span class="nax-sidebar-en">表单校验</span>', link: '/composables/use-validate' },
+  { text: 'useDatetimeParts <span class="nax-sidebar-en">日期时间</span>', link: '/composables/use-datetime-parts' }
+]
+
 function generateSidebar(found) {
-  // 按路径前缀分区：指南页只显示指南侧栏，组件页只显示组件侧栏
+  // 按路径前缀分区：指南页只显示指南侧栏，组合式函数/组件页只显示各自侧栏
   const groups = CATEGORIES.map((c) => ({
     text: c.text,
     items: c.items
@@ -1276,6 +1289,9 @@ function generateSidebar(found) {
         { text: '暗黑模式', link: '/guide/dark-mode' },
         { text: 'AI 技能包', link: '/guide/ai-skill' }
       ] }
+    ],
+    '/composables/': [
+      { text: '组合式函数', items: COMPOSABLES }
     ],
     '/components/': [
       { text: '组件', items: [{ text: '组件总览', link: '/components/' }] },
@@ -1301,7 +1317,7 @@ function buildOverview(found) {
     }
     byCategory[CATEGORY_TEXT[f.name] || '其他'].push({ name: f.name, desc })
   }
-  const parts = ['# 组件总览', '', '> 50 个独立组件包 + 1 个主题包，全部基于 uni-app x / uvue 实现，easycom 自动注册。', '']
+  const parts = ['# 组件总览', '', '> 51 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。', '']
   for (const c of CATEGORIES) {
     const items = byCategory[c.text]
     if (!items || items.length === 0) continue

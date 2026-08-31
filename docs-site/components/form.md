@@ -406,7 +406,7 @@ function clearManualError() {
 | label-position | string | `''` | 覆盖 form |
 | label-width | string \| number | `''` | 覆盖 form（px） |
 | label-align | string | `''` | 覆盖 form |
-| label-size | string \| number | `''` | 覆盖 form（px） |
+| label-size | string \| number | `''` | 覆盖 form（px）；form 空时跟随组件默认 15 |
 | left-icon / right-icon | string | `''` | nax-icon 名 |
 | status | string | `default` | `default` / `success` / `warning` / `error` |
 | error-message | string | `''` | 外部错误文案（优先展示） |

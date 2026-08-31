@@ -1,6 +1,6 @@
 # 组件总览
 
-> 50 个独立组件包 + 1 个主题包，全部基于 uni-app x / uvue 实现，easycom 自动注册。
+> 51 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。
 
 ## 基础组件
 
@@ -15,6 +15,7 @@
 | [nax-tag](/components/tag) | 标签。能力对齐  Tag：类型 / 尺寸 / 边框 / 圆角 / 可关闭 / 可选中。 |
 | [nax-badge](/components/badge) | 徽标。 |
 | [nax-avatar](/components/avatar) | 头像。能力对齐  Avatar：尺寸 / 形状 / 图片 / 文字 / 描边 / 失败回退。 |
+| [nax-rich-text](/components/rich-text) | 富文本。自研解析渲染器引擎（默认，全端一致）与内置 rich-text 引擎双通道：HTML 字符串 / 节点列表双入口，全局字号/颜色/行高/字体，图片预览，内容点击事件。 |
 
 ## 布局组件
 

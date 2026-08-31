@@ -1,3 +1,5 @@
+## 0.2.15（2026-08-31）
+- 新增内置图标：player-play / player-pause 及 filled 变体（player-play-filled / player-pause-filled）、arrows-maximize / arrows-minimize（Tabler outline + filled 合并子集，字体重建）
 ## 0.2.14（2026-08-18）
 - 蒸汽模式兼容：移除 `<style>` 中已废弃的 `lines: 1` 声明（仅 VDOM 支持，Vapor 下告警），行数限制改用 `<text>` 的 `:max-lines="1"` 属性
 ## 0.2.13（2026-08-14）

@@ -1,6 +1,8 @@
-## 0.2.0（2026-08-30）
+## 0.2.0（2026-08-31）
+- 依赖组件更新：`nax-rich-text`（0.2.0→0.3.0）新增自研解析渲染器引擎（默认 `engine="parser"`，App / Web / 小程序渲染一致）：音频 / 视频播放卡、图片点击预览、`itemclick` 统一事件形状（type 标记 img/a/audio/embed）、`linkColor` 链接色；内置 rich-text 封装保留为 `builtin` 兜底
+- 依赖组件更新：`nax-icon`（0.2.14→0.2.15）新增 player-play / player-pause（含 filled）、arrows-maximize / arrows-minimize 图标
+- 依赖组件更新：`nax-input`（0.2.4→0.2.5）聚焦指令位与触摸预亮状态机重构：touchmove/touchcancel 撤回预亮、Web 端清除/密码按钮 mousedown 阻止先失焦（其它端行为不变）
 - 新增 `nax-use` 组合式函数包并纳入套装依赖聚合：`useCountdown` 倒计时、`useValidate` 无头表单校验、`useDebounce` 防抖、`useThrottle` 节流、`useDatetimeParts` 日期时间 parts、`useInterval` 可控轮询、`useStorage` 响应式本地缓存
-- 原 `nax-ui/composables/` 目录移除，导入路径变更为 `@/uni_modules/nax-use/composables/*`（该批函数为新增、未发布过，无存量用户影响）
 ## 0.1.23（2026-08-27）
 - 依赖组件更新：`nax-input`（0.2.3→0.2.4）、`nax-textarea`（0.2.3→0.2.4）修复聚焦样式与实际焦点状态不同步：touchstart 提前点亮聚焦样式、失焦样式同步清除（移除 150ms 延迟）、点击清除/密码可见按钮不再写死聚焦态
 - 依赖组件更新：`nax-form`（0.1.8→0.2.0）新增 `labelSize` 标签字号属性，表单级统一（空串跟随组件默认 15px）+ 单项覆盖（空跟随 form）

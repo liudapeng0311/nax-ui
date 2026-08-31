@@ -62,7 +62,8 @@ export default defineConfig({
     logo: '/logo.png',
     nav: [
       { text: '指南', link: '/guide/intro' },
-      { text: '组件', link: '/components/' }
+      { text: '组件', link: '/components/' },
+      { text: '组合式函数', link: '/composables/' }
     ],
     sidebar,
     outline: { label: '本页目录', level: [2, 3] },

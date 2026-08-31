@@ -12,7 +12,9 @@ search, loading, info, warning, success, error
 user, home, more, edit, delete, star, heart
 settings, eye, eye-off, copy, share, image, image-off, loader, loader-4, square, circle, square-check,
 file-off, notes-off, database-off, message-off,
-category, category-filled, map-pin, map-pin-filled
+category, category-filled, map-pin, map-pin-filled,
+player-play, player-pause, player-play-filled, player-pause-filled,
+arrows-maximize, arrows-minimize
 ```
 
 > 仅以上图标可用；不要使用列表中不存在的图标名，否则渲染为空白。

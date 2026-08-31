@@ -3,20 +3,22 @@ name: nax-ui
 description: >-
   uni-app x UI 组件库 nax-ui 的使用指南。当用户需要在 uni-app x / uvue 项目中使用 nax-ui 组件
   （nax-button、nax-input、nax-form、nax-toast、nax-dialog 等 51 个 nax-* 组件）编写页面、
-  搭建表单、实现弹窗反馈、配置主题，或询问某个 nax-* 组件的 props/事件/用法时，必须使用本技能。
+  搭建表单、实现弹窗反馈、配置主题，或询问某个 nax-* 组件的 props/事件/用法、以及使用 nax-use
+  组合式函数（useCountdown / useValidate / useDebounce 等）时，必须使用本技能。
   也适用于用户提到 nax-ui、nax- 前缀组件、uni-app x 组件库、或要求在 uni-app x 项目中"用组件库写
   xxx 页面"的场景，即使没有明确说"nax-ui"。
 ---
 
 # nax-ui 组件库使用指南
 
-`nax-ui` 是面向 **uni-app x（uvue）** 的 UI 组件库：51 个 `nax-*` 组件包 + 1 个主题包。组件通过
-easycom 自动注册，**无需手动 import**，在模板里直接写 `<nax-button>` 即可。
+`nax-ui` 是面向 **uni-app x（uvue）** 的 UI 组件库：51 个 `nax-*` 组件包 + 1 个主题包 + 1 个组合式函数包（`nax-use`）。组件通过
+easycom 自动注册，**无需手动 import**，在模板里直接写 `<nax-button>` 即可；组合式函数在 `<script setup>` 中 `import` 使用。
 
 ## 使用流程（按顺序执行）
 
 1. **先读索引**：读 `references/component-index.md`，确定要用的组件名与分类（索引里每个组件有一句话说明）。
 2. **再读组件详情**：读 `references/components/<组件名>.md`，获取该组件的完整 Props / Events / Slots / 用法示例。
+   使用组合式函数时读 `references/components/nax-use.md`（函数速查、返回结构与用法）。
    只需要一个组件时，不要读其他组件的详情文件。
 3. **按主题接入章节确认集成方式**（首次集成时必读）：
    - 主题接入：`references/theme-guide.md`
@@ -69,6 +71,9 @@ easycom 自动注册，**无需手动 import**，在模板里直接写 `<nax-but
   （见组件卡）。
 - **nax-form 校验**：提交时调 `ref.validate()` 返回 Promise；小程序端函数规则可能被过滤，需在
   `onReady` 中 `setRules(rules)`。
+- **nax-use 组合式函数**：无头逻辑（不渲染 UI），必须在 `<script setup>` 内同步调用；返回的
+  Handle / State 直接读标量或调方法；`useValidate` 依赖 `nax-form`、`useDatetimeParts` 依赖
+  `nax-datetime-picker`（安装时自动带依赖）；防抖/节流为单载荷设计，多参数请包对象传入。
 - **不要造轮子**：需要哪个能力先查索引——nax-ui 已覆盖按钮/表单/弹窗/列表/导航/反馈等常见场景。
 
 ## 主题定制

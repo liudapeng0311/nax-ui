@@ -1,4 +1,4 @@
-# nax-ui 组件索引（51 个）
+# nax-ui 组件索引（51 个组件 + nax-use 组合式函数）
 
 按需选择组件：**先看这里确定组件名，再读 `components/<name>.md` 获取完整 API**。
 所有组件 easycom 自动注册，模板中直接写 `<nax-xxx>` 即可，无需 import。
@@ -9,12 +9,12 @@
 |------|-----------|--------|
 | `nax-button` | 按钮；`type`(default/primary/info/success/warning/error) × `variant`(solid/secondary/tertiary/quaternary/dashed/outline)、loading、icon | [components/nax-button.md](components/nax-button.md) |
 | `nax-text` | 文本；字号/颜色/行数省略/模式格式化 | [components/nax-text.md](components/nax-text.md) |
-| `nax-icon` | 字体图标（Tabler Icons 语义子集，45+）；`name`/`size`/`color` | [components/nax-icon.md](components/nax-icon.md) |
+| `nax-icon` | 字体图标（Tabler Icons 语义子集，51）；`name`/`size`/`color` | [components/nax-icon.md](components/nax-icon.md) |
 | `nax-space` | 横向/纵向间距容器 + `nax-space-item` | [components/nax-space.md](components/nax-space.md) |
 | `nax-line` | 纯线条（布局分隔）；hairline/sm/md/lg | [components/nax-line.md](components/nax-line.md) |
 | `nax-divider` | 分割线（可带文字） | [components/nax-divider.md](components/nax-divider.md) |
 | `nax-tag` | 标签；type/variant/size/closable/checkable | [components/nax-tag.md](components/nax-tag.md) |
-| `nax-rich-text` | 富文本；HTML 字符串/节点列表、App 渲染模式（web 默认/native 可选，自动回退）、内容点击（图片/链接） | [components/nax-rich-text.md](components/nax-rich-text.md) |
+| `nax-rich-text` | 富文本；双引擎：自研解析渲染器（默认 parser，全端一致：音频/视频播放卡、图片预览、表格对齐）与内置 rich-text 兜底；HTML/节点列表、内容点击 | [components/nax-rich-text.md](components/nax-rich-text.md) |
 
 ## 布局与列表单元
 
@@ -83,6 +83,20 @@
 | `nax-tabs` | 顶部标签导航；数据驱动 | [components/nax-tabs.md](components/nax-tabs.md) |
 | `nax-dropdown` / `nax-dropdown-item` | 筛选栏式下拉菜单 | [components/nax-dropdown.md](components/nax-dropdown.md) |
 | `nax-swipe-action` / `nax-swipe-action-group` | 左滑操作菜单 | [components/nax-swipe-action.md](components/nax-swipe-action.md) |
+
+## 组合式函数（nax-use）
+
+无头逻辑复用（只提供状态与控制方法，不渲染 UI）：在 `<script setup>` 中直接 `import` 使用，不走 easycom。函数速查与用法见 [components/nax-use.md](components/nax-use.md)。
+
+| 函数 | 一句话说明 |
+|------|-----------|
+| `useCountdown` | 倒计时；days/hours/minutes/seconds/milliseconds/status（idle/running/paused/finished）+ start/pause/reset/dispose；整秒向上取整逐秒不跳号 |
+| `useValidate` | 无头表单校验（与 `nax-form` 同一实现，依赖 nax-form 包） |
+| `useDebounce` | 防抖；call/cancel/flush |
+| `useThrottle` | 节流；call/cancel/flush，leading + trailing |
+| `useDatetimeParts` | 日期时间 parts（与 `nax-datetime-picker` 同一引擎，依赖该包；供自建 picker-view） |
+| `useInterval` | 可控轮询；start/stop/running/count（均响应式） |
+| `useStorage` | 响应式本地缓存；改值即写缓存，置 `null` 删除 key |
 
 ## 选择建议（常见需求 → 组件）
 

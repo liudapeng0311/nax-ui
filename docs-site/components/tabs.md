@@ -4,7 +4,7 @@ demo: tabs
 
 # nax-tabs
 
-> 当前版本：0.1.16
+> 当前版本：0.2.0
 
 顶部标签导航（内容切换条）。面向 uni-app x：数据驱动、可横向滚动/均分宽度、主题色指示条、轻量徽标。**只负责导航 UI**，内容区由页面自管。
 
@@ -263,6 +263,7 @@ const keyList = [
 | keyName | string | `'name'` | 文案优先字段，默认 name |
 | scrollable | boolean | `true` | 横向滚动，默认 true；false 均分 |
 | scrollAlign | string | `'center'` | `left` 左对齐 \| `center` 居中；默认 `center`；`left` 为必要时贴左并露出前一项 |
+| centered | boolean | `false` | 少项居中：内容不满容器宽时整体居中（可滚动模式超宽仍可横滑；均分模式改为按内容宽居中不拉伸），默认 false |
 | showLine | boolean | `true` | 指示条，默认 true |
 | lineWidth | string | `'20'` | 指示条宽，默认 20（px） |
 | lineHeight | string | `'3'` | 指示条高，默认 3（px） |

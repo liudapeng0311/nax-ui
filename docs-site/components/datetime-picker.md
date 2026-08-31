@@ -4,7 +4,7 @@ demo: datetime-picker
 
 # nax-datetime-picker
 
-> 当前版本：0.2.0
+> 当前版本：0.2.1
 
 uni-app x 时间选择器（底部弹层 + `picker-view`）。
 

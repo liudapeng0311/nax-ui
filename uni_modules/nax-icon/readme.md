@@ -93,6 +93,8 @@ search, loading, info, warning, success, error
 user, home, more, edit, delete, star, heart
 settings, eye, eye-off, copy, share, image, image-off, loader, loader-4, square, circle, square-check,
 file-off, notes-off, database-off, message-off,
-category, category-filled, map-pin, map-pin-filled
+category, category-filled, map-pin, map-pin-filled,
+player-play, player-pause, player-play-filled, player-pause-filled,
+arrows-maximize, arrows-minimize
 ```
 

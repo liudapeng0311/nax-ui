@@ -4,7 +4,7 @@ demo: input
 
 # nax-input
 
-> 当前版本：0.2.4
+> 当前版本：0.2.5
 
 uni-app x 单行输入框。
 
@@ -196,7 +196,7 @@ const colorBorder = ref('')
 | maxlength | number | `140` | 最大长度；-1 不限制（默认 140，对齐 ） |
 | placeholderStyle | string | `'color: #e5e5ea;'` | placeholder 样式字符串 |
 | confirmType | string | `'done'` | `done` 完成 \| `send` 发送 \| `search` 搜索 \| `next` 下一项 \| `go` 前往 |
-| focus | boolean | `false` | 是否自动聚焦 |
+| focus | boolean | `false` | 自动聚焦；运行时置 true 可拉起焦点 |
 | passwordIcon | boolean | `true` | type=password 时是否显示可见性切换，默认 true |
 | border | boolean | `false` | 是否显示边框，默认 false |
 | borderColor | string | `''` | 边框色 |

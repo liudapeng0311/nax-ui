@@ -1,3 +1,12 @@
+## 0.3.0（2026-08-31）
+- 新增自研解析渲染器引擎，默认 `engine="parser"`，App / Web / 小程序渲染一致：容错 HTML 解析 + 自绘节点树，内置标题 / 列表 / 表格列对齐 / 首行缩进默认排版
+- 内置 rich-text 封装保留为 `engine="builtin"` 兜底；`mode` / `userSelect` / `space` 仅 builtin 引擎生效
+- 多媒体（parser 引擎）：`<audio>` 播放卡（封面 + 播放钮叠放、标题行 title/文件名回退、当前/总时长、拖拽实时跳转，createInnerAudioContext 实现）；`<video>` 封面卡片（poster 封面 + 播放钮，点击后原生 video 接管，关原生中部大三角防闪现）
+- 图片点击自动 `uni.previewImage` 全屏预览（同一段内容内图片可左右切换）
+- `itemclick` 事件统一形状：`detail.type` 标记来源 `img` / `a` / `audio` / `embed`，图片 / 音频卡返回 `detail.src`、链接返回 `detail.href`（parser 引擎小程序端也可用）
+- 新增 `linkColor` 链接颜色 prop（parser 引擎生效，默认主题绿 #18a058）
+- 鸿蒙蒸汽 CSS 编译器警告消除：音频卡标题单行省略改 `:max-lines` 属性 + `lines` 约束 `#ifndef APP-HARMONY` 收窄、鸿蒙端补定宽裁剪双写（同 nax-text 先例），其它端行为不变
+- 同步 readme 与 demo 说明
 ## 0.2.0（2026-08-21）
 - 修复 App 端（Android / iOS）富文本渲染空白 / 不全：内置 rich-text `native` 模式对 h1-h6 / ul / li 等结构标签解析不稳，会导致整块内容丢弃
 - 默认渲染模式 `mode` 由 `native` 调整为 `web`（与官方默认一致，开箱即正确渲染）；`native` 保持可选，适合纯文本长内容的高性能场景

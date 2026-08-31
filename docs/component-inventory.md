@@ -42,7 +42,7 @@
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
 | 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` `contentPosition` `size` `type` / **done** |
 | 标签 | `nax-tag` | P1 | 状态/分类标记 | `type` `variant` `size` `closable` `round` `bordered` `checkable` `checked` / `close` `click` `update:checked` **done** |
-| 富文本 | `nax-rich-text` | P1 | 内置 rich-text 封装：HTML/节点列表、App 渲染模式、全局样式、内容点击 | `content` `nodes` `mode(native/web)` `userSelect` `space` `size` `color` `lineHeight` `fontFamily` / `click` `itemclick` **done** |
+| 富文本 | `nax-rich-text` | P1 | 双引擎：自研解析渲染器（默认 parser，全端一致：音频/视频播放卡、图片预览、表格对齐）与内置 rich-text 兜底；HTML/节点列表双入口、全局样式、内容点击 | `content` `nodes` `engine(parser/builtin)` `mode(native/web)` `userSelect` `space` `size` `color` `lineHeight` `fontFamily` `linkColor` / `click` `itemclick` **done** |
 
 ### 2.2 布局与列表单元
 
@@ -181,7 +181,7 @@
 | `nax-divider` | done | 插件包 `uni_modules/nax-divider`；可带文字分割线；direction/contentPosition/dashed/type/size/length；纯竖线根节点绘制默认 height 100% |
 | `nax-card` | done | 插件包 `uni_modules/nax-card`；title/extra/bordered/size/segmented；cover/footer 需 show-cover/show-footer |
 | `nax-loading` | done | 插件包 `uni_modules/nax-loading`；局部加载；鸿蒙原生 animate；Android/iOS 定时旋转；Web/MP CSS 动画；size/text/vertical/type/icon(loading|loader|loader-4) |
-| `nax-rich-text` | done | 插件包 `uni_modules/nax-rich-text`；内置 rich-text 封装；content/nodes 双入口；App `mode` 默认 web（native 可选，含 h1-h6/ul/li 等结构标签或 iOS/鸿蒙 user-select 时自动回退 web）；全局 size/color/lineHeight/fontFamily 写在 rich-text 元素上；`itemclick` 小程序端官方不支持 |
+| `nax-rich-text` | done | 插件包 `uni_modules/nax-rich-text`；双引擎：自研解析渲染器（默认 engine=parser，全端一致：容错 HTML 解析、标题/列表/表格列对齐/首行缩进默认排版、音频/视频播放卡、图片点击预览、内容点击 type 标记 img/a/audio/embed）；内置 rich-text 保留为 engine=builtin 兜底（App mode 默认 web、native 含结构标签自动回退、userSelect/space 仅此引擎生效）；全局 size/color/lineHeight/fontFamily/linkColor；builtin 引擎 `itemclick` 小程序端官方不支持（parser 引擎支持） |
 
 | `nax-progress` | done | 插件包 `uni_modules/nax-progress`；shape line/circle；type/status/size/showInfo/textInside/useSlot；双半环圆形 |
 | `nax-steps` | done | 插件包 `uni_modules/nax-steps`；`nax-steps`+`nax-step`；list/组合；horizontal/vertical；number/dot；type；单步 status；clickable；demo `pages/components/steps` |

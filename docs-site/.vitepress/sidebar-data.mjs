@@ -27,6 +27,45 @@ export const sidebar = {
       ]
     }
   ],
+  "/composables/": [
+    {
+      "text": "组合式函数",
+      "items": [
+        {
+          "text": "总览",
+          "link": "/composables/"
+        },
+        {
+          "text": "useCountdown <span class=\"nax-sidebar-en\">倒计时</span>",
+          "link": "/composables/use-countdown"
+        },
+        {
+          "text": "useDebounce <span class=\"nax-sidebar-en\">防抖</span>",
+          "link": "/composables/use-debounce"
+        },
+        {
+          "text": "useThrottle <span class=\"nax-sidebar-en\">节流</span>",
+          "link": "/composables/use-throttle"
+        },
+        {
+          "text": "useInterval <span class=\"nax-sidebar-en\">轮询</span>",
+          "link": "/composables/use-interval"
+        },
+        {
+          "text": "useStorage <span class=\"nax-sidebar-en\">本地缓存</span>",
+          "link": "/composables/use-storage"
+        },
+        {
+          "text": "useValidate <span class=\"nax-sidebar-en\">表单校验</span>",
+          "link": "/composables/use-validate"
+        },
+        {
+          "text": "useDatetimeParts <span class=\"nax-sidebar-en\">日期时间</span>",
+          "link": "/composables/use-datetime-parts"
+        }
+      ]
+    }
+  ],
   "/components/": [
     {
       "text": "组件",
@@ -75,6 +114,10 @@ export const sidebar = {
         {
           "text": "头像 <span class=\"nax-sidebar-en\">Avatar</span>",
           "link": "/components/avatar"
+        },
+        {
+          "text": "富文本 <span class=\"nax-sidebar-en\">RichText</span>",
+          "link": "/components/rich-text"
         }
       ]
     },
