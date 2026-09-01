@@ -1,3 +1,8 @@
+## 0.3.1（2026-09-01）
+- 修复 iOS 端视频点击播放不生效：`<video>` 改为常驻挂载、封面卡片覆盖其上（uni-app x 同层级渲染可覆盖），点击在用户手势内 `play()`（规避 iOS 动态挂载 / 非手势播放被拒，消除 `Possible Unhandled Promise Rejection` 告警）；App 端视频预先缓冲，点击通常即点即播；播放超时 4s 未开始自动退回可重试的播放按钮
+- 新增视频加载反馈：点击封面后圆钮显示旋转 loading（复用 nax-loading），`@play` 开始播放后隐藏
+- 修复鸿蒙编译报错：移除视频卡不支持的 `max-width: 100%`（鸿蒙 CSS 仅支持 number/pixel）
+- 修复 iOS 蒸汽 CSS 告警：移除音频卡标题静态 `lines: 1`，行数由 `<text>` 的 `:max-lines` 属性承担（同 nax-text 先例）
 ## 0.3.0（2026-08-31）
 - 新增自研解析渲染器引擎，默认 `engine="parser"`，App / Web / 小程序渲染一致：容错 HTML 解析 + 自绘节点树，内置标题 / 列表 / 表格列对齐 / 首行缩进默认排版
 - 内置 rich-text 封装保留为 `engine="builtin"` 兜底；`mode` / `userSelect` / `space` 仅 builtin 引擎生效

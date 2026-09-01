@@ -1,3 +1,5 @@
+## 0.2.5（2026-09-01）
+- 修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`，同 nax-input 0.2.6 修复）：`useStorage` 置 null 删除 key 等场景下 v-model 传入 null，`innerValue` 在初始化与 `modelValue` watch 双入口统一规整为空串；外部置 null 显示为空串，其它行为不变
 ## 0.2.4（2026-08-27）
 - 聚焦样式时序对齐 nax-input：
   - 根节点 `touchstart` 提前点亮聚焦样式，消除 App 端聚焦回调随键盘动画延迟导致的样式晚亮（约半秒）

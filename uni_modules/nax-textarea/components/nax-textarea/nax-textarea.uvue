@@ -199,7 +199,19 @@
 		'click'
 	])
 
-	const innerValue = ref(props.modelValue)
+	// modelValue 可能被外部置 null（如 useStorage 置 null 删除 key 场景），统一规整为空串，
+	// 保证 innerValue 恒为 string（内部多处直接访问 .length）
+	function normalizeValue(value : any) : string {
+		if (value == null) {
+			return ''
+		}
+		if (typeof value == 'string') {
+			return value
+		}
+		return value.toString()
+	}
+
+	const innerValue = ref(normalizeValue(props.modelValue))
 	const isFocused = ref(false)
 	// 聚焦时的内容基准，用于失焦时判断是否触发 change
 	let changeBaseValue: string = ''
@@ -207,8 +219,9 @@
 	watch((): string => {
 		return props.modelValue
 	}, (val: string) => {
-		if (val != innerValue.value) {
-			innerValue.value = val
+		const normalized = normalizeValue(val)
+		if (normalized != innerValue.value) {
+			innerValue.value = normalized
 		}
 	})
 

@@ -1,3 +1,7 @@
+## 0.2.1（2026-09-01）
+- 依赖组件更新：`nax-input`（0.2.5→0.2.6）、`nax-textarea`（0.2.4→0.2.5）、`nax-search`（0.2.3→0.2.4）修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`，如 `useStorage` 置 null 删除 key 场景）：`innerValue` 初始化与 watch 双入口统一规整为空串，外部置 null 显示为空串，其它行为不变
+- 依赖组件更新：`nax-rich-text`（0.3.0→0.3.1）修复 iOS 端视频点击播放不生效（`<video>` 常驻挂载 + 封面卡覆盖 + 手势内 `play()`，消除 Promise 拒绝告警）、新增视频加载动画与播放超时回退；消除鸿蒙 `max-width: 100%` 编译报错与 iOS 静态 `lines` CSS 告警
+- 套装依赖补齐：`uni_modules.dependencies` 增加此前遗漏的 `nax-rich-text`（聚合组件数恢复为 51）
 ## 0.2.0（2026-08-31）
 - 依赖组件更新：`nax-rich-text`（0.2.0→0.3.0）新增自研解析渲染器引擎（默认 `engine="parser"`，App / Web / 小程序渲染一致）：音频 / 视频播放卡、图片点击预览、`itemclick` 统一事件形状（type 标记 img/a/audio/embed）、`linkColor` 链接色；内置 rich-text 封装保留为 `builtin` 兜底
 - 依赖组件更新：`nax-icon`（0.2.14→0.2.15）新增 player-play / player-pause（含 filled）、arrows-maximize / arrows-minimize 图标

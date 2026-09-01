@@ -4,7 +4,7 @@ demo: search
 
 # nax-search
 
-> 当前版本：0.2.3
+> 当前版本：0.2.4
 
 uni-app x 搜索框，功能覆盖常用搜索场景。
 

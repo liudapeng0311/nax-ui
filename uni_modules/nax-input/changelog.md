@@ -1,3 +1,5 @@
+## 0.2.6（2026-09-01）
+- 修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`）：`useStorage` 置 null 删除 key 等场景下 v-model 传入 null，`innerValue` 在初始化与 `modelValue` watch 双入口统一规整为空串，保证内部 `.length` 访问与原生 value 绑定安全；外部置 null 显示为空串（同清空语义），其它行为不变
 ## 0.2.5（2026-08-31）
 - 聚焦指令位与触摸预亮状态机重构：`innerFocus` 真实失焦复位（不再依赖 blur 时序推断）、`touchmove` / `touchcancel` 撤回预亮（长按滚动列表不残留聚焦样式）
 - 清除 / 密码可见按钮 Web 端 `mousedown` 阻止先失焦（`#ifdef WEB` 条件编译），点击按钮不清除聚焦样式；其它端行为不变

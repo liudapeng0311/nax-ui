@@ -1,3 +1,5 @@
+## 0.2.4（2026-09-01）
+- 修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`，同 nax-input 0.2.6 修复）：`useStorage` 置 null 删除 key 等场景下 v-model 传入 null，`innerValue` 在初始化与 `modelValue` watch 双入口统一规整为空串；外部置 null 显示为空串，其它行为不变
 ## 0.2.3（2026-08-19）
 - 修复蒸汽模式（App Android / iOS / HarmonyOS）输入文字显示为白色不可见：原生 input 默认文字色改为字面量内联样式，并通过 `custom-class` 支持暗色主题；Web / 微信小程序行为保持不变
 ## 0.2.2（2026-08-18）

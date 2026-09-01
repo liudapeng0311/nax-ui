@@ -4,7 +4,7 @@ demo: textarea
 
 # nax-textarea
 
-> 当前版本：0.2.4
+> 当前版本：0.2.5
 
 多行文本域。
 

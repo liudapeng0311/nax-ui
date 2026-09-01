@@ -15,39 +15,47 @@
 		@click="onImgTap"
 	></image>
 
-	<!-- 视频：封面卡片 + 播放按钮，点击后交给原生 video（App 端原生视频层级最高，无法在其上叠加按钮） -->
-	<view
-		v-else-if="isVideo && !videoStarted"
-		class="nax-rich-text-node__video-card"
-		:style="styleText"
-		@click="onVideoPlay"
-	>
-		<image
-			v-if="videoPosterShow"
-			class="nax-rich-text-node__video-cover"
-			:src="videoPoster"
-			mode="aspectFill"
-			@error="onVideoPosterError"
-		></image>
-		<!-- 无封面 / 封面加载失败：浅主题色兜底 -->
-		<view v-else class="nax-rich-text-node__video-cover-fallback"></view>
-		<view class="nax-rich-text-node__video-btn">
-			<nax-icon name="player-play-filled" size="20" color="#ffffff"></nax-icon>
+	<!-- 视频：原生 video 常驻挂载（uni-app x 同层级渲染可被覆盖），封面卡片叠于其上；
+	     点击在用户手势内 play()，规避 iOS 动态挂载 + 非手势播放被拒的问题；App 端视频预先缓冲，点击通常即点即播 -->
+	<view v-else-if="isVideo" class="nax-rich-text-node__video-wrap">
+		<video
+			:id="videoId"
+			class="nax-rich-text-node__video"
+			:src="videoSrc"
+			:poster="videoPoster"
+			:controls="true"
+			:autoplay="false"
+			:show-center-play-btn="true"
+			:show-loading="true"
+			:style="styleText"
+			@play="onVideoPlaying"
+			@pause="onVideoPaused"
+			@error="onVideoError"
+		></video>
+		<!-- 封面卡片：未播放时盖在视频上方，点击开始播放；加载中显示旋转 loading -->
+		<view
+			v-if="!videoPlaying"
+			class="nax-rich-text-node__video-card"
+			:style="styleText"
+			@click="onVideoPlay"
+		>
+			<image
+				v-if="videoPosterShow"
+				class="nax-rich-text-node__video-cover"
+				:src="videoPoster"
+				mode="aspectFill"
+				@error="onVideoPosterError"
+			></image>
+			<!-- 无封面 / 封面加载失败：浅主题色兜底 -->
+			<view v-else class="nax-rich-text-node__video-cover-fallback"></view>
+			<view v-if="videoLoading" class="nax-rich-text-node__video-loading">
+				<nax-loading size="lg" color="#ffffff"></nax-loading>
+			</view>
+			<view v-else class="nax-rich-text-node__video-btn">
+				<nax-icon name="player-play-filled" size="20" color="#ffffff"></nax-icon>
+			</view>
 		</view>
 	</view>
-
-	<!-- 播放中：原生 video 带控制条接管；关掉原生中部大三角（会闪现），poster 与封面卡片一致避免闪黑屏 -->
-	<video
-		v-else-if="isVideo"
-		class="nax-rich-text-node__video"
-		:src="videoSrc"
-		:poster="videoPoster"
-		:controls="true"
-		:autoplay="true"
-		:show-center-play-btn="false"
-		:style="styleText"
-		@error="onVideoError"
-	></video>
 
 	<!-- 音频播放器（createInnerAudioContext 实现，无内建 audio 组件） -->
 	<view v-else-if="isAudio" class="nax-rich-text-node__audio">
@@ -325,12 +333,24 @@
 	const videoSrc = computed((): string => attrValue('src'))
 	const videoPoster = computed((): string => attrValue('poster'))
 
-	// —— 视频播放：默认封面卡片，点击后才挂原生 video（autoplay + controls），失败退回封面 ——
+	// —— 视频播放：原生 video 常驻挂载，封面卡片覆盖其上；点击在用户手势内 play()，规避 iOS 非手势播放被拒 ——
+	// 播放超时未开始则退回可重试的播放按钮；App 端 video 预先缓冲，点击后通常即点即播
+	const instance = getCurrentInstance()
+	const VIDEO_PLAY_TIMEOUT = 4000
 	const videoStarted = ref(false)
 	const videoPosterFailed = ref(false)
+	const videoPlaying = ref(false)
+	const videoId = 'nax-rich-text-video-' + Math.floor(Math.random() * 10000000).toString()
+	let videoFailTimer : number | null = null
+	let videoRetryExhausted = false
 
 	const videoPosterShow = computed((): boolean => {
 		return videoPosterFailed.value == false && videoPoster.value.length > 0
+	})
+
+	// 点击后未开始播放且未超时失败：封面显示 loading
+	const videoLoading = computed((): boolean => {
+		return videoStarted.value && !videoPlaying.value && !videoRetryExhausted
 	})
 
 	function onVideoPosterError() {
@@ -338,13 +358,67 @@
 	}
 
 	function onVideoPlay() {
+		// 视频已常驻挂载，直接在用户手势内 play()（iOS 对非手势播放会拒绝）
 		videoStarted.value = true
+		videoRetryExhausted = false
+		const ctx = ensureVideoContext()
+		if (ctx != null) {
+			ctx.play()
+		}
+		startVideoFailTimer()
+	}
+
+	function ensureVideoContext() : VideoContext | null {
+		const proxy = instance?.proxy
+		if (proxy != null) {
+			return uni.createVideoContext(videoId, proxy)
+		}
+		return uni.createVideoContext(videoId)
+	}
+
+	function startVideoFailTimer() : void {
+		stopVideoFailTimer()
+		videoFailTimer = setTimeout(() => {
+			videoFailTimer = null
+			if (!videoPlaying.value) {
+				// 超时未开始播放：退回可重试的播放按钮
+				videoRetryExhausted = true
+			}
+		}, VIDEO_PLAY_TIMEOUT)
+	}
+
+	function stopVideoFailTimer() : void {
+		if (videoFailTimer != null) {
+			clearTimeout(videoFailTimer)
+			videoFailTimer = null
+		}
+	}
+
+	function onVideoPlaying() {
+		videoPlaying.value = true
+		stopVideoFailTimer()
+	}
+
+	function onVideoPaused() {
+		// 尚未播放过即暂停：视为本次播放失败，退回可重试按钮
+		if (!videoPlaying.value) {
+			videoRetryExhausted = true
+			stopVideoFailTimer()
+		}
 	}
 
 	function onVideoError() {
 		// 播放出错退回封面态，避免残留黑屏原生控件
 		videoStarted.value = false
+		videoPlaying.value = false
+		videoRetryExhausted = false
+		stopVideoFailTimer()
 	}
+
+	onUnmounted(() => {
+		// 节点销毁时清理播放超时定时器
+		stopVideoFailTimer()
+	})
 	const embedDomain = computed((): string => {
 		let src = attrValue('src')
 		if (src.length == 0) {
@@ -699,13 +773,15 @@
 		flex-shrink: 0;
 	}
 
-	/* 视频封面卡片：宽高圆角由 styleText 提供，封面铺满，点击整卡开始播放 */
+	/* 视频封面卡片：绝对定位盖在常驻 video 之上，宽高圆角由 styleText 提供，封面铺满，点击整卡开始播放 */
 	.nax-rich-text-node__video-card {
-		position: relative;
+		position: absolute;
+		left: 0;
+		top: 0;
+		z-index: 1;
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
-		margin-bottom: 12px;
 		overflow: hidden;
 	}
 
@@ -738,8 +814,19 @@
 		padding-left: 2px;
 	}
 
-	.nax-rich-text-node__video {
+	.nax-rich-text-node__video-wrap {
+		position: relative;
 		margin-bottom: 12px;
+	}
+
+	/* 加载圆钮：与播放按钮同尺寸同风格，内容为旋转 loading（nax-loading 内部处理各端旋转） */
+	.nax-rich-text-node__video-loading {
+		width: 48px;
+		height: 48px;
+		border-radius: 24px;
+		background-color: rgba(0, 0, 0, 0.3);
+		align-items: center;
+		justify-content: center;
 	}
 
 	.nax-rich-text-node__media-card {
@@ -818,17 +905,12 @@
 	.nax-rich-text-node__audio-title {
 		font-size: 14px;
 		color: var(--nax-color-text, #333639);
-		/* #ifndef APP-HARMONY */
-		/* 鸿蒙蒸汽 CSS 编译器对 lines 报非标准属性警告，鸿蒙端单行省略由 :max-lines 属性 + 定宽裁剪承担 */
-		lines: 1;
-		/* #endif */
+		overflow: hidden;
 		text-overflow: ellipsis;
 		margin-bottom: 6px;
 		/* #ifdef APP-HARMONY */
-		/* 鸿蒙端兜底：flex 子项上 lines 可能不生效，定宽裁剪保证单行省略（同 nax-text 先例） */
-		overflow: hidden;
+		/* 鸿蒙端兜底：flex 子项定宽裁剪保证单行省略（同 nax-text 先例）；行数由 :max-lines 属性承担 */
 		width: 100%;
-		max-width: 100%;
 		/* #endif */
 	}
 
