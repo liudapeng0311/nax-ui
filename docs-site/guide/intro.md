@@ -87,6 +87,21 @@ uni-app x 生态起步较晚，社区组件大多仍是老 uni-app（Vue2/Vue3 +
 
 如果在使用过程中遇到任何问题，欢迎加入 QQ 交流群一起讨论：**462353434**
 
+## 赞赏支持
+
+如果这个项目对您有帮助，可以请作者喝杯咖啡。
+
+<div class="nax-intro-reward">
+  <div class="nax-intro-reward__item">
+    <img src="/reward/weixin.png" alt="微信收款码" />
+    <p>微信</p>
+  </div>
+  <div class="nax-intro-reward__item">
+    <img src="/reward/zhifubao.png" alt="支付宝收款码" />
+    <p>支付宝</p>
+  </div>
+</div>
+
 ## 下一步
 
 - 想要快速跑起来，见 [快速开始](./)
