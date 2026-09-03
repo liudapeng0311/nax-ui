@@ -90,6 +90,25 @@
 			</view>
 
 			<view class="section">
+				<text class="section__title">自定义图标（glyph / font-family）</text>
+				<view class="row">
+					<view class="item" v-for="item in customIcons" :key="item.code">
+						<nax-icon :glyph="item.code" font-family="iconfont" :color="iconTextColor" @click="onTap('iconfont-' + item.name)"></nax-icon>
+						<text class="item__label" :max-lines="1">{{ item.name }}</text>
+					</view>
+					<view class="item">
+						<nax-icon :glyph="customGlyph" :color="iconTextColor" @click="onTap('glyph')"></nax-icon>
+						<text class="item__label">glyph（内置码位）</text>
+					</view>
+					<view class="item">
+						<nax-icon :glyph="customGlyph" font-family="nax-icon" :color="iconTextColor" @click="onTap('glyph+font-family')"></nax-icon>
+						<text class="item__label">glyph + font-family</text>
+					</view>
+				</view>
+				<text class="page__hint">glyph 可直接粘贴 iconfont 页面显示的 &#xe6cf;，无需转义；font-family 必须与 @font-face 注册名一致</text>
+			</view>
+
+			<view class="section">
 				<text class="section__title">全部图标</text>
 				<view class="grid">
 					<view class="grid__item" v-for="item in icons" :key="item">
@@ -161,6 +180,17 @@
 
 
 	const tip = ref('点击图标查看 name')
+
+	// 自定义字形示例：内置字体中 close 的码位，演示 glyph 跳过 name 映射
+	const customGlyph = '\ueb55'
+
+	// 自备 iconfont 字体的 4 个图标（码位为 iconfont 页面显示的原始写法，直接粘贴）
+	const customIcons = ref([
+		{ name: '047_发泡', code: '&#xe6cf;' },
+		{ name: '047_环保洗', code: '&#xe6d0;' },
+		{ name: '047_机洗', code: '&#xe6d1;' },
+		{ name: '047_家纺', code: '&#xe6d2;' }
+	] as { name: string, code: string }[])
 
 	const icons = ref([
 		'close',

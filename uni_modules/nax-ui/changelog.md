@@ -1,3 +1,5 @@
+## 0.3.0（2026-09-03）
+- 依赖组件更新：`nax-icon`（0.2.15→0.3.0）新增自定义图标能力：`glyph` + `font-family` prop，自备图标字体（iconfont.cn 等）无需改库即可接入；`glyph` 自动识别 iconfont 页面码位（`&#xe6cf;`）等 6 种写法，可直接粘贴无需转义；readme 新增「自定义图标」章节（三步接入 / 平台差异 / 常见问题）
 ## 0.2.1（2026-09-01）
 - 依赖组件更新：`nax-input`（0.2.5→0.2.6）、`nax-textarea`（0.2.4→0.2.5）、`nax-search`（0.2.3→0.2.4）修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`，如 `useStorage` 置 null 删除 key 场景）：`innerValue` 初始化与 watch 双入口统一规整为空串，外部置 null 显示为空串，其它行为不变
 - 依赖组件更新：`nax-rich-text`（0.3.0→0.3.1）修复 iOS 端视频点击播放不生效（`<video>` 常驻挂载 + 封面卡覆盖 + 手势内 `play()`，消除 Promise 拒绝告警）、新增视频加载动画与播放超时回退；消除鸿蒙 `max-width: 100%` 编译报错与 iOS 静态 `lines` CSS 告警

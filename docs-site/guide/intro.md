@@ -82,6 +82,10 @@ uni-app x 生态起步较晚，社区组件大多仍是老 uni-app（Vue2/Vue3 +
 
 - 插件市场（整套套装）：[nax-ui - uni-app x 通用 UI 组件库](https://ext.dcloud.net.cn/plugin?id=29077)
 - 组件文档站：本站点（指南 / 组件 / 主题接入 / 暗黑模式）
+- GitHub：[liudapeng0311/nax-ui](https://github.com/liudapeng0311/nax-ui)
+- Gitee：[liusixsix/nax-ui](https://gitee.com/liusixsix/nax-ui)
+
+> 本项目已完全由国产大模型接管并开源，欢迎 Star、Issue 与 PR 参与共建。
 
 ## 交流群
 

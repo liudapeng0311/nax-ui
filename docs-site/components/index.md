@@ -8,7 +8,7 @@
 |------|------|
 | [nax-button](/components/button) | 通用按钮。色系与层级参考 ：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用。 |
 | [nax-text](/components/text) | 文本 Text：主题色 / 字号 / 省略 / 加粗 / 装饰 / 模式格式化（价格、手机号、姓名、日期、链接）等。 |
-| [nax-icon](/components/icon) | 字体图标。 |
+| [nax-icon](/components/icon) | 字体图标（Tabler 语义子集）；支持 `glyph` + `font-family` 接入自备图标字体（iconfont 码位可直接粘贴）。 |
 | [nax-space](/components/space) | 间距容器。横向/纵向排列子项并统一间距。配合 nax-space-item 使用。 |
 | [nax-line](/components/line) | 纯线条（布局分隔）。横/竖、粗细、虚线、语义色；默认走 --nax-color-divider。 |
 | [nax-divider](/components/divider) | 内容分割线（可带文字）。与 nax-line 分工：line 只画纯线，本组件负责「文案分隔」。 |

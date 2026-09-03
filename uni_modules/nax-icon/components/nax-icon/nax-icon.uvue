@@ -13,6 +13,8 @@
 	 * nax-icon
 	 * @description 字体图标。默认图标集来自 Tabler Icons（MIT）语义子集。
 	 * @property {string} name 图标名（必填），可选值见“当前支持的图标”，如 close / search / arrow-right
+	 * @property {string} glyph 自定义字形字符或码位；可直接粘贴 iconfont 显示的 &#xe6cf;，也支持 e6cf / 0xe6cf / U+E6CF / \ue6cf / 字符本身。非空时优先于 name
+	 * @property {string} fontFamily 自定义字体族名；需自行 @font-face 注册后配合 glyph 使用
 	 * @property {string} size 尺寸：sm（小）/ md（中）/ lg（大），或数字字符串像素值（如 20 表示 20px）
 	 * @property {string} color 可选颜色；默认走 --nax-icon-color / --nax-color-text
 	 * @property {boolean} disabled 禁用点击
@@ -23,6 +25,14 @@
 
 	const props = defineProps({
 		name: {
+			type: String,
+			default: ''
+		},
+		glyph: {
+			type: String,
+			default: ''
+		},
+		fontFamily: {
 			type: String,
 			default: ''
 		},
@@ -46,7 +56,52 @@
 
 	const emit = defineEmits(['click'])
 
+	/**
+	 * 解析用户粘贴的图标码位写法，统一转成字形字符
+	 * 支持：&#xe6cf; / #xe6cf / e6cf / 0xe6cf / U+E6CF / \ue6cf / 字符本身
+	 */
+	function parseGlyph(input : string) : string {
+		const text = input.trim()
+		if (text.length == 0) {
+			return ''
+		}
+		const lower = text.toLowerCase()
+		let hex = ''
+		if (lower.startsWith('&#x') && text.endsWith(';')) {
+			// iconfont 页面显示的 HTML 实体写法
+			hex = text.substring(3, text.length - 1)
+		} else if (lower.startsWith('#x')) {
+			hex = text.substring(2)
+		} else if (lower.startsWith('0x')) {
+			hex = text.substring(2)
+		} else if (lower.startsWith('u+')) {
+			hex = text.substring(2)
+		} else if (lower.startsWith('\\u')) {
+			// \ue6cf 或 \u{e6cf}
+			let rest = text.substring(2)
+			if (rest.startsWith('{')) {
+				const end = rest.indexOf('}')
+				rest = end > 0 ? rest.substring(1, end) : rest.substring(1)
+			}
+			hex = rest
+		} else if (/^[0-9a-f]{4,6}$/.test(lower)) {
+			hex = lower
+		}
+		if (hex.length > 0 && hex.length <= 6) {
+			const code = parseInt(hex, 16)
+			if (code > 0) {
+				return String.fromCharCode(code)
+			}
+		}
+		// 其余情况视为字形字符本身（如直接复制的图标字符）
+		return text
+	}
+
 	const glyph = computed((): string => {
+		// 自定义字形字符优先：兼容多种码位写法，直接渲染，跳过内置 name 映射
+		if (props.glyph.length > 0) {
+			return parseGlyph(props.glyph)
+		}
 		if (props.name.length == 0) {
 			return ''
 		}
@@ -93,6 +148,10 @@
 		style += 'height:' + px + ';'
 		style += 'font-size:' + px + ';'
 		style += 'line-height:' + px + ';'
+		// 自定义字体族：用户自行 @font-face 注册后，用 inline font-family 覆盖内置字体
+		if (props.fontFamily.length > 0) {
+			style += 'font-family:' + props.fontFamily + ';'
+		}
 		// #ifdef APP-ANDROID
 		// Android remove TextView extra padding; inline avoids uvue-css WARNING
 		style += 'include-font-padding:false;'

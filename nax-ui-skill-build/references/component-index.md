@@ -9,7 +9,7 @@
 |------|-----------|--------|
 | `nax-button` | 按钮；`type`(default/primary/info/success/warning/error) × `variant`(solid/secondary/tertiary/quaternary/dashed/outline)、loading、icon | [components/nax-button.md](components/nax-button.md) |
 | `nax-text` | 文本；字号/颜色/行数省略/模式格式化 | [components/nax-text.md](components/nax-text.md) |
-| `nax-icon` | 字体图标（Tabler Icons 语义子集，51）；`name`/`size`/`color` | [components/nax-icon.md](components/nax-icon.md) |
+| `nax-icon` | 字体图标（Tabler Icons 语义子集，51）；`name`/`glyph`/`font-family`/`size`/`color`；`glyph` 支持直接粘贴 iconfont 码位（如 `&#xe6cf;`）接入自定义图标字体 | [components/nax-icon.md](components/nax-icon.md) |
 | `nax-space` | 横向/纵向间距容器 + `nax-space-item` | [components/nax-space.md](components/nax-space.md) |
 | `nax-line` | 纯线条（布局分隔）；hairline/sm/md/lg | [components/nax-line.md](components/nax-line.md) |
 | `nax-divider` | 分割线（可带文字） | [components/nax-divider.md](components/nax-divider.md) |

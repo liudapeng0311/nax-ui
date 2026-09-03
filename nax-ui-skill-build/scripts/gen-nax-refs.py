@@ -283,9 +283,9 @@ def render_component(name, data, extra_note=""):
     if name == "nax-icon":
         readme = os.path.join(ROOT, name, "readme.md")
         lines_ = parse_readme(readme)
-        # 提取"当前支持的图标"章节的 text 代码块
+        # 提取"## 当前支持的图标"章节的 text 代码块（必须匹配二级标题，避免误撞 Props 说明文字）
         for i, ln in enumerate(lines_):
-            if "当前支持的图标" in ln:
+            if ln.strip().startswith("## ") and "当前支持的图标" in ln:
                 seg = lines_[i + 1:]
                 for j, l2 in enumerate(seg):
                     if l2.strip().startswith("```"):
@@ -300,7 +300,7 @@ def render_component(name, data, extra_note=""):
                         parts.extend(buf)
                         parts.append("```")
                         parts.append("")
-                        parts.append("> 仅以上图标可用；不要使用列表中不存在的图标名，否则渲染为空白。")
+                        parts.append("> `name` 仅支持以上图标名，不要使用列表中不存在的名字，否则渲染为空白；自定义图标用 `glyph` + `font-family`（glyph 支持直接粘贴 iconfont 码位，如 `&amp;#xe6cf;`）。")
                         parts.append("")
                         break
                 break

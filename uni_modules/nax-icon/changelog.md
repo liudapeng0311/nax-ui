@@ -1,3 +1,5 @@
+## 0.3.0（2026-09-03）
+- 新增自定义图标能力：`glyph` + `font-family` prop，支持自备图标字体（如 iconfont.cn）接入，无需改库
 ## 0.2.15（2026-08-31）
 - 新增内置图标：player-play / player-pause 及 filled 变体（player-play-filled / player-pause-filled）、arrows-maximize / arrows-minimize（Tabler outline + filled 合并子集，字体重建）
 ## 0.2.14（2026-08-18）

@@ -32,4 +32,11 @@ features:
     details: 组合式 API + 样式隔离 2.0，按 uni-app x 蒸汽模式设计，无历史包袱。
 ---
 
+## 开源说明
+
+本项目已完全由国产大模型接管并开源：
+
+- GitHub：[liudapeng0311/nax-ui](https://github.com/liudapeng0311/nax-ui)
+- Gitee：[liusixsix/nax-ui](https://gitee.com/liusixsix/nax-ui)
+
 <Contributors />

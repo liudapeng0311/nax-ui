@@ -185,7 +185,7 @@ const SKIP_DEP_TABLE = {
 
 // 组件总览表说明覆盖
 const OVERVIEW_DESCS = {
-  icon: '字体图标。',
+  icon: '字体图标（Tabler 语义子集）；支持 `glyph` + `font-family` 接入自备图标字体（iconfont 码位可直接粘贴）。',
   badge: '徽标。'
 }
 
@@ -497,6 +497,8 @@ const PROPS_DESC_OVERRIDES = {
   },
   icon: {
     name: '图标名（必填），可选值见“当前支持的图标”，如 `close` / `search` / `arrow-right`',
+    glyph: '自定义字形字符或码位；可直接粘贴 iconfont 页面显示的 `&amp;#xe6cf;`，无需转义，也支持 `e6cf` / `0xe6cf` / `U+E6CF` / `\\ue6cf` / 字符本身。非空时优先于 `name`',
+    fontFamily: '自定义图标字体族名；需自行 `@font-face` 注册后配合 `glyph` 使用',
     size: '`sm` 小 | `md` 中 | `lg` 大 | 数字字符串像素值（如 20 表示 20px）',
     color: '可选颜色；默认走 `--nax-icon-color` / `--nax-color-text`'
   },

@@ -37,7 +37,7 @@
 |------|------|--------|------|------------------|
 | 按钮 | `nax-button` | P0 | 主操作入口；层级：基础/次要/次次要/次次次要/虚线/禁用 | `type(default/primary/info/success/warning/error)` `variant(solid/secondary/tertiary/quaternary/dashed/outline)` `size` `disabled` `loading` `block` `label` `icon` `iconPosition` / `click` **done** |
 | 文本 | `nax-text` | P0 | 统一字号/颜色/省略/模式格式化 | `type` `size` `lines` `selectable` `mode` `format` `call` `decoration` `bold` `block` / `click` **done** |
-| 图标 | `nax-icon` | P0 | 字体图标壳（Tabler Icons 语义子集） | `name` `size` `color` / `click` **done** |
+| 图标 | `nax-icon` | P0 | 字体图标壳（Tabler Icons 语义子集）；支持自定义图标字体 | `name` `glyph` `font-family` `size` `color` / `click` **done** |
 | 间距 | `nax-space` | P0 | 横向/纵向间距容器；子项 `nax-space-item` | `direction` `size` `wrap` `align` `justify` `fill` **done** |
 | 线条 | `nax-line` | P1 | 布局纯线条（无文字；默认 token 分割线色） | `direction(horizontal/vertical)` `length` `size(hairline/sm/md/lg)` `dashed` `type` `color` `space` `inset` **done** |
 | 分割线 | `nax-divider` | P1 | 内容分隔（可带文字） | `direction` `dashed` `text` `contentPosition` `size` `type` / **done** |
@@ -140,7 +140,7 @@
 |------|------|------|
 | `nax-button` | done | 插件包 `uni_modules/nax-button`；支持 `icon`/`iconPosition`；loading 旋转图标 |
 | `nax-text` | done | 插件包 `uni_modules/nax-text`；鸿蒙省略用 `#ifdef APP-HARMONY` 双写 lines/宽度约束；微信小程序用 `#ifdef MP-WEIXIN` 补充 CSS 省略兜底 |
-| `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（45）；含 `category`/`map-pin` 及 filled 变体 |
+| `nax-icon` | done | 插件包 `uni_modules/nax-icon`；Tabler Icons 语义子集（51）；含 `category`/`map-pin` 及 filled 变体；0.3.0 起支持自定义图标字体（`glyph` 可直接粘贴 iconfont 码位 + `font-family`） |
 | `nax-swiper` | done | 插件包 `uni_modules/nax-swiper`；原生 swiper 封装；dot/number 指示器 |
 | `nax-tabbar` | done | 插件包 `uni_modules/nax-tabbar`；字体图标优先 + 图片/徽标/中间凸起；fixed 占位 + 安全区；**演示宿主**用原生 tabBar+`switchTab`+`hideTabBar` 保活（见 `docs/tabbar-routing.md`） |
 | `nax-tabs` | done | 插件包 `uni_modules/nax-tabs`；list+v-model；可滚动/均分；`scrollAlign` left/center；指示条测量；徽标/红点/禁用；CSS sticky 可选；**不做**独立 tabsSwiper，全屏联动见 demo `pages/components/tabs-swiper` |

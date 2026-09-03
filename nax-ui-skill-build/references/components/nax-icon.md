@@ -17,7 +17,7 @@ player-play, player-pause, player-play-filled, player-pause-filled,
 arrows-maximize, arrows-minimize
 ```
 
-> 仅以上图标可用；不要使用列表中不存在的图标名，否则渲染为空白。
+> `name` 仅支持以上图标名，不要使用列表中不存在的名字，否则渲染为空白；自定义图标用 `glyph` + `font-family`（glyph 支持直接粘贴 iconfont 码位，如 `&amp;#xe6cf;`）。
 
 ## 用法示例
 
@@ -42,6 +42,8 @@ arrows-maximize, arrows-minimize
 | 属性 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
 | name | string | `''` | 图标名（必填），可选值见“当前支持的图标”，如 close / search / arrow-right |
+| glyph | string | `''` | 自定义字形字符或码位；**可直接粘贴 iconfont 页面显示的 `&amp;#xe6cf;`**，无需转义，也支持 `e6cf` / `0xe6cf` / `U+E6CF` / `\ue6cf` / 字符本身。非空时优先于 `name` |
+| font-family | string | `''` | 自定义图标字体族名；需自行 `@font-face` 注册后配合 `glyph` 使用 |
 | size | string | `md` | 尺寸：`sm`（小）/ `md`（中）/ `lg`（大），或数字字符串像素值（如 20 表示 20px） |
 | color | string | `''` | 可选颜色；空则走 CSS 变量 |
 | disabled | boolean | `false` | 禁用点击 |
