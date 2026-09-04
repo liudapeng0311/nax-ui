@@ -4,7 +4,7 @@ demo: cell
 
 # nax-cell / nax-cell-group
 
-> 当前版本：0.1.5
+> 当前版本：0.2.0
 
 单元格与单元格组。
 
@@ -204,7 +204,7 @@ const darkSwitch = ref(false)
 |------|------|--------|------|
 | title | string | `''` | 左侧标题 |
 | label | string | `''` | 标题下方说明 |
-| value | string | `''` | 右侧内容 |
+| value | [String, Number] | `'' as any` | 右侧内容 |
 | icon | string | `''` | 左侧 nax-icon 名 |
 | isLink | boolean | `false` | 展示右侧箭头（兼容 arrow） |
 | arrow | boolean | `false` | 同 isLink（ 兼容） |

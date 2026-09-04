@@ -15,6 +15,8 @@
 					<nax-cell title="单元格" value="内容"></nax-cell>
 					<nax-cell title="单元格" label="描述信息" value="内容"></nax-cell>
 					<nax-cell title="单元格" value="详情" is-link @click="onCellClick('基础链接')"></nax-cell>
+					<nax-cell title="余额（数字类型）" :value="balance"></nax-cell>
+					<nax-cell title="订单数（数字 0）" :value="orderCount"></nax-cell>
 				</nax-cell-group>
 			</view>
 
@@ -136,6 +138,8 @@
 	const pushOn = ref(true)
 	const darkSwitch = ref(false)
 	const lastEvent = ref('无')
+	const balance = ref(688.5)
+	const orderCount = ref(0)
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {

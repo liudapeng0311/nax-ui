@@ -1,5 +1,40 @@
 <template>
 	<view class="nax-datetime-picker" :class="rootClass">
+		<!-- #ifdef MP-WEIXIN -->
+		<!-- 微信小程序可映射模式（date/year/year-month/time 无秒）：系统弹层 picker，贴合微信原生 UI -->
+		<picker
+			v-if="mpShowSystemPicker"
+			:mode="mpPickerMode"
+			:fields="mpPickerFields"
+			:value="mpPickerValue"
+			:start="mpStartValue"
+			:end="mpEndValue"
+			:disabled="disabled"
+			:header-text="title"
+			@change="onMpChange"
+			@cancel="onMpCancel"
+		>
+			<view class="nax-datetime-picker__trigger" :class="triggerClass" :hover-class="triggerHoverClass" :hover-start-time="20" :hover-stay-time="70">
+				<slot name="trigger">
+					<text class="nax-datetime-picker__trigger-text" :max-lines="1" :class="triggerTextClass">{{ triggerDisplayText }}</text>
+					<view
+						v-if="showMpClear"
+						class="nax-datetime-picker__trigger-clear"
+						@touchstart.stop.prevent="onMpClear"
+						@click.stop.prevent="onMpClear"
+					>
+						<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+					</view>
+					<view v-else class="nax-datetime-picker__trigger-arrow">
+						<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+					</view>
+				</slot>
+			</view>
+		</picker>
+		<!-- #endif -->
+
+		<!-- 自建弹层分支：非微信端全部；微信端仅 datetime / month-day / time+秒 等不可映射模式 -->
+		<view v-if="!mpShowSystemPicker" class="nax-datetime-picker__legacy">
 		<view
 			v-if="showTrigger"
 			class="nax-datetime-picker__trigger"
@@ -246,6 +281,7 @@
 				</nax-transition>
 			</view>
 		</view>
+		</view>
 	</view>
 </template>
 
@@ -253,15 +289,15 @@
 	/**
 	 * nax-datetime-picker
 	 * @description 时间选择器（底部弹层 + picker-view）。对齐  DatetimePicker 主能力。
-	 * @property {boolean} show v-model:show 弹层显隐
+	 * @property {boolean} show v-model:show 弹层显隐；微信小程序端系统弹层模式不生效（点触发条弹出，自动回写 false）
 	 * @property {number|string} modelValue v-model 选中值（时间戳 ms，或日期时间字符串）
-	 * @property {string} mode datetime | date | time | year-month | year | month-day
-	 * @property {number|string} minDate / maxDate 可选范围（时间戳或 YYYY-MM-DD[ HH:mm:ss]）
-	 * @property {number} minHour maxHour minMinute maxMinute minSecond maxSecond 时分秒范围
-	 * @property {boolean} showSecond 是否显示秒列（datetime / time）
-	 * @property {boolean} showUnit 列文案是否带单位（年/月/日…）
+	 * @property {string} mode datetime | date | time | year-month | year | month-day；微信小程序端 datetime / month-day / time + show-second 无法映射系统弹层，保持自建弹层
+	 * @property {number|string} minDate / maxDate 可选范围（时间戳或 YYYY-MM-DD[ HH:mm:ss]）；微信小程序端系统弹层模式映射为 start / end
+	 * @property {number} minHour maxHour minMinute maxMinute minSecond maxSecond 时分秒范围；微信小程序端系统弹层 time 模式映射为 start / end
+	 * @property {boolean} showSecond 是否显示秒列（datetime / time）；微信小程序端 time + show-second 退回自建弹层
+	 * @property {boolean} showUnit 列文案是否带单位（年/月/日…）；微信小程序端系统弹层模式不生效（列由微信渲染）
 	 * @property {string} format 触发条/回传 formatted 自定义格式；空则按 mode 默认
-		 * @property {boolean} showTrigger 内置触发条
+		 * @property {boolean} showTrigger 内置触发条；微信小程序端系统弹层模式始终渲染触发条作为弹层触发区域
 		 * @property {boolean} clearable 触发条有选中值时显示清除按钮，默认 true
 			 * @event update:show / update:modelValue / confirm / cancel / change / open / close
 			 * @event clear 点击触发条清除按钮
@@ -333,6 +369,163 @@
 			'close',
 			'clear'
 		])
+
+	// #ifdef MP-WEIXIN
+	// ===== 微信小程序：系统弹层 picker 实现（date / year / year-month / time 无秒）=====
+	/** 系统 picker 的 mode */
+	const mpPickerMode = computed((): string => {
+		return modeName.value == 'time' ? 'time' : 'date'
+	})
+
+	/** date 模式的粒度 */
+	const mpPickerFields = computed((): string => {
+		const m = modeName.value
+		if (m == 'year') {
+			return 'year'
+		}
+		if (m == 'year-month') {
+			return 'month'
+		}
+		return 'day'
+	})
+
+	/** 系统 picker 当前值（字符串：YYYY-MM-DD / YYYY / YYYY-MM / HH:mm） */
+	const mpPickerValue = ref('')
+
+	/** 触发条清除按钮（微信端始终渲染触发条作为 picker 触发区域） */
+	const showMpClear = computed((): boolean => {
+		if (!props.clearable) {
+			return false
+		}
+		if (props.disabled) {
+			return false
+		}
+		return hasConfirmed.value && confirmedFormatted.value.length > 0
+	})
+
+	/** 范围下限：date 系取 minDate，time 取 minHour:minMinute */
+	const mpStartValue = computed((): string => {
+		if (modeName.value == 'time') {
+			return pad2(props.minHour) + ':' + pad2(props.minMinute)
+		}
+		return mpRangeDate(props.minDate)
+	})
+
+	/** 范围上限：date 系取 maxDate，time 取 maxHour:maxMinute */
+	const mpEndValue = computed((): string => {
+		if (modeName.value == 'time') {
+			return pad2(props.maxHour) + ':' + pad2(props.maxMinute)
+		}
+		return mpRangeDate(props.maxDate)
+	})
+
+	/** minDate / maxDate → 微信 date 模式字符串（按粒度截取） */
+	function mpRangeDate(raw: any): string {
+		if (raw == null || raw == '') {
+			return ''
+		}
+		const parts = clampParts(parseAnyToParts(raw, nowParts()))
+		const m = modeName.value
+		if (m == 'year') {
+			return parts[0].toString()
+		}
+		if (m == 'year-month') {
+			return parts[0].toString() + '-' + pad2(parts[1])
+		}
+		return parts[0].toString() + '-' + pad2(parts[1]) + '-' + pad2(parts[2])
+	}
+
+	/** 按已确认值 / v-model 同步系统 picker 的字符串值 */
+	function mpSyncValue() {
+		let ts = 0
+		if (hasConfirmed.value && confirmedTimestamp.value > 0) {
+			ts = confirmedTimestamp.value
+		} else {
+			const raw = props.modelValue
+			if (raw != null && raw != '' && raw != 0) {
+				const parts = clampParts(parseAnyToParts(raw, nowParts()))
+				ts = partsToTimestamp(parts)
+			}
+		}
+		if (ts <= 0) {
+			ts = Date.now()
+		}
+		const parts = partsFromDate(new Date(ts))
+		const m = modeName.value
+		if (m == 'year') {
+			mpPickerValue.value = parts[0].toString()
+		} else if (m == 'year-month') {
+			mpPickerValue.value = parts[0].toString() + '-' + pad2(parts[1])
+		} else if (m == 'time') {
+			mpPickerValue.value = pad2(parts[3]) + ':' + pad2(parts[4])
+		} else {
+			mpPickerValue.value = parts[0].toString() + '-' + pad2(parts[1]) + '-' + pad2(parts[2])
+		}
+	}
+
+	/** 微信端确认：系统弹层点「确定」后回调，值即最终值 */
+	function onMpChange(e: UniPickerChangeEvent) {
+		const val = e.detail.value
+		if (typeof val != 'string') {
+			return
+		}
+		const s = val as string
+		let parts: number[]
+		const m = modeName.value
+		if (m == 'time') {
+			const hm = s.split(':')
+			const baseTs = confirmedTimestamp.value > 0 ? confirmedTimestamp.value : Date.now()
+			const bp = partsFromDate(new Date(baseTs))
+			parts = [bp[0], bp[1], bp[2], parseInt(hm[0]), parseInt(hm[1]), 0]
+		} else {
+			const ymd = s.split('-')
+			if (m == 'year') {
+				parts = [parseInt(ymd[0]), 1, 1, 0, 0, 0]
+			} else if (m == 'year-month') {
+				parts = [parseInt(ymd[0]), parseInt(ymd[1]), 1, 0, 0, 0]
+			} else {
+				parts = [parseInt(ymd[0]), parseInt(ymd[1]), parseInt(ymd[2]), 0, 0, 0]
+			}
+		}
+		const clamped = clampParts(parts)
+		const ts = partsToTimestamp(clamped)
+		const formatted = formatCurrent(clamped)
+		hasConfirmed.value = true
+		confirmedTimestamp.value = ts
+		confirmedFormatted.value = formatted
+		modelBound.value = true
+		emit('update:modelValue', ts)
+		emit('confirm', buildResult(clamped))
+		emit('change', buildResult(clamped))
+		mpPickerValue.value = s
+	}
+
+	/** 微信端取消 */
+	function onMpCancel() {
+		let parts: number[] = nowParts()
+		if (hasConfirmed.value && confirmedTimestamp.value > 0) {
+			parts = partsFromDate(new Date(confirmedTimestamp.value))
+		}
+		emit('cancel', buildResult(clampParts(parts)))
+	}
+
+	/** 微信端清除 */
+	function onMpClear() {
+		if (props.disabled) {
+			return
+		}
+		if (!hasConfirmed.value) {
+			return
+		}
+		hasConfirmed.value = false
+		confirmedTimestamp.value = 0
+		confirmedFormatted.value = ''
+		modelBound.value = false
+		emit('update:modelValue', 0)
+		emit('clear')
+		mpSyncValue()
+	}
+	// #endif
 
 	const rootMounted = ref(false)
 	const panelShow = ref(false)
@@ -431,6 +624,26 @@
 
 	const modeName = computed((): string => normalizeMode(props.mode))
 	const sizeName = computed((): string => normalizeSize(props.size))
+
+	/** 微信端是否启用系统 picker（非微信端恒 false） */
+	const mpShowSystemPicker = computed((): boolean => {
+		// #ifdef MP-WEIXIN
+		const m = modeName.value
+		if (m == 'datetime') {
+			return false
+		}
+		if (m == 'month-day') {
+			return false
+		}
+		if (m == 'time' && props.showSecond) {
+			return false
+		}
+		return true
+		// #endif
+		// #ifndef MP-WEIXIN
+		return false
+		// #endif
+	})
 
 	const cancelTextValue = computed((): string => {
 		if (props.cancelText.length > 0) return props.cancelText
@@ -1249,6 +1462,13 @@
 	}
 
 	function openPicker() {
+		// #ifdef MP-WEIXIN
+		// 微信端系统 picker 模式：点击触发条弹出，无自建弹层；v-model:show 拉回 false
+		if (mpShowSystemPicker.value) {
+			emit('update:show', false)
+			return
+		}
+		// #endif
 		if (props.disabled) {
 			return
 		}
@@ -1523,6 +1743,13 @@
 	watch((): boolean => {
 		return props.show
 	}, (val: boolean) => {
+		// #ifdef MP-WEIXIN
+		// 微信端系统 picker 模式：无自建弹层，v-model:show 不生效
+		if (mpShowSystemPicker.value) {
+			emit('update:show', false)
+			return
+		}
+		// #endif
 		if (val) {
 			// 已完全展开：忽略，避免 v-model 回写二次 open
 			if (rootMounted.value && panelShow.value) {
@@ -1538,11 +1765,17 @@
 		return props.modelValue
 	}, (_: any) => {
 		syncConfirmedFromModel()
+		// #ifdef MP-WEIXIN
+		mpSyncValue()
+		// #endif
 	})
 
 	watch((): string => {
 		return modeName.value
 	}, (_: string) => {
+		// #ifdef MP-WEIXIN
+		mpSyncValue()
+		// #endif
 		if (rootMounted.value && panelShow.value) {
 			// 展示中切 mode：刷新列数据，不 remount
 			rebuildColumns(currentParts.value, false)
@@ -1554,6 +1787,9 @@
 
 	// 初始化触发条文案
 	syncConfirmedFromModel()
+	// #ifdef MP-WEIXIN
+	mpSyncValue()
+	// #endif
 	if (props.show) {
 		openPicker()
 	}

@@ -37,24 +37,24 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 
 | 属性 | 类型 | 默认 | 说明 |
 |---|---|---|---|
-| show | boolean | `false` | `v-model:show` 显隐 |
+| show | boolean | `false` | `v-model:show` 显隐；**微信小程序端不生效**（点触发条弹出，自动回写 false） |
 | modelValue | string / number / boolean / array | `''` | `v-model` 选中值；单列单项，多列/联动为 value 数组 |
 | list | array | `[]` | 列数据 |
 | mode | string | `single-column` | 见上表 |
 | default-value | number[] | `[]` | 默认选中下标 |
-| title | string | `''` | 标题 |
-| confirm-text / cancel-text | string | 确认 / 取消 | 按钮文案 |
+| title | string | `''` | 弹层标题；**微信小程序端仅安卓显示为系统弹层标题** |
+| confirm-text / cancel-text | string | 确认 / 取消 | 按钮文案；**微信小程序端不生效**（系统弹层固定文案） |
 | value-name / label-name | string | value / label | 字段名 |
 | child-name | string | children | 联动子级字段 |
-| mask-closable | boolean | `true` | 点遮罩关闭 |
-| safe-area-inset-bottom | boolean | `true` | 底部安全区 |
+| mask-closable | boolean | `true` | 点遮罩关闭；**微信小程序端不生效**（系统弹层自带遮罩） |
+| safe-area-inset-bottom | boolean | `true` | 底部安全区；**微信小程序端不生效** |
 | preserve-selection | boolean | `true` | 保留上次确认下标 |
-| show-trigger | boolean | `false` | 内置触发条 |
+| show-trigger | boolean | `false` | 内置触发条；**微信小程序端始终渲染触发条作为弹层触发区域** |
 | clearable | boolean | `true` | 触发条有选中值时显示清除按钮 |
 | placeholder | string | 请选择 | 触发条占位 |
 | disabled | boolean | `false` | 触发条禁用 |
 | separator | string | ` / ` | 多列展示分隔 |
-| z-index | number | `10075` | 层级 |
+| z-index | number | `10075` | 层级；**微信小程序端不生效** |
 | size | string | `md` | 触发条 sm/md/lg |
 | border | boolean | `true` | 触发条描边 |
 | custom-class | string | `''` | 根扩展 class |
@@ -86,8 +86,12 @@ uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场
 ## 平台说明
 
 - **iOS**：自研滚轮（原生 `picker-view` 列文字无法垂直居中），滚动停止吸附对齐选中行，支持点选。
-- 其余端（Android / 鸿蒙 / Web / 微信小程序）统一使用原生 `picker-view` 滚轮。
-- **鸿蒙**：原生滚轮；**已禁用选项点选**（点击被吞掉），请滑动选择后点「确认」。
+- **Android / 鸿蒙 / Web**：自建弹层 + 原生 `picker-view` 滚轮。
+- **微信小程序**：使用微信系统弹层 `picker`（`selector` / `multiSelector`），贴合微信原生 UI：
+- 滚动吸附后点「确定」回调，值即最终值，无 change 延迟与确认拦截问题
+- 系统弹层 UI 不可定制：`confirm-text` / `cancel-text` / `confirm-color` / `z-index` / `safe-area-inset-bottom` 等弹层定制 props 在微信端不生效；`title` 仅微信安卓端显示为弹层标题
+- `v-model:show` 程序化打开在微信端不生效，请点击触发条弹出（`show-trigger=false` 时微信端仍会渲染触发条作为触发区域）
+- 暗黑模式：跟随微信宿主深色主题，弹层自动适配（需小程序开启 darkmode）
+- **鸿蒙**：原生滚轮；已禁用选项点选（点击被吞掉），请滑动选择后点「确认」。
 - **鸿蒙暗黑模式**：组件自动移除原生滚轮默认的白色渐变遮罩。
-- 微信小程序滚动未结束时点确认会被忽略（滚动结束后方可确认）。
 - 联动最多 4 列。

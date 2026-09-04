@@ -94,7 +94,7 @@
 	 * @description 文本 Text：主题色 / 字号 / 省略 / 加粗 / 装饰 / 模式格式化（价格、手机号、姓名、日期、链接）等。
 	 * @property {string} type default | primary | info | success | warning | error | secondary | placeholder（兼容 main/content/tips/light/danger）
 	 * @property {boolean} show 是否显示
-	 * @property {string} text 显示文案
+	 * @property {string|number} text 显示文案
 	 * @property {string} prefixIcon 前置 nax-icon 名
 	 * @property {string} suffixIcon 后置 nax-icon 名
 	 * @property {string} mode text | price | phone | name | date | link
@@ -121,7 +121,7 @@
 	const props = defineProps({
 		type: { type: String, default: 'default' },
 		show: { type: Boolean, default: true },
-		text: { type: String, default: '' },
+		text: { type: [String, Number], default: '' as any },
 		prefixIcon: { type: String, default: '' },
 		suffixIcon: { type: String, default: '' },
 		mode: { type: String, default: 'text' },
@@ -361,7 +361,14 @@
 	})
 
 	const hasText = computed((): boolean => {
-		return props.text.length > 0
+		// number 类型直接视为有内容（含 0）
+		if (typeof props.text == 'number') {
+			return true
+		}
+		if (props.text == null) {
+			return false
+		}
+		return (props.text as string).length > 0
 	})
 
 	const hasLines = computed((): boolean => {
@@ -395,7 +402,14 @@
 	})
 
 	const displayValue = computed((): string => {
-		const raw = props.text
+		// number 统一转字符串（date 模式的时间戳数字同样经字符串解析）
+		let raw = props.text
+		if (raw == null) {
+			raw = ''
+		}
+		if (typeof raw == 'number') {
+			raw = (raw as number).toString()
+		}
 		const mode = modeName.value
 		const fmt = props.format
 
@@ -691,7 +705,7 @@
 		emit('click')
 		const mode = modeName.value
 		if (mode == 'phone' && props.call) {
-			const phone = props.text
+			const phone = props.text == null ? '' : '' + props.text
 			if (phone.length > 0) {
 				uni.makePhoneCall({
 					phoneNumber: phone

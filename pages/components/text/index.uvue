@@ -100,6 +100,8 @@
 					</view>
 					<view class="section__body stack">
 						<view class="sample-row"><nax-text mode="price" text="128.5" type="error" bold></nax-text></view>
+						<view class="sample-row"><nax-text mode="price" :text="priceNum" type="error" bold></nax-text></view>
+						<view class="sample-row"><nax-text :text="orderCount" type="primary"></nax-text></view>
 						<view class="sample-row"><nax-text mode="phone" text="13800138000" type="info"></nax-text></view>
 						<view class="sample-row"><nax-text mode="phone" format="encrypt" text="13800138000"></nax-text></view>
 						<view class="sample-row"><nax-text mode="name" format="encrypt" text="张三丰"></nax-text></view>
@@ -201,6 +203,8 @@
 	})
 
 	const lastEvent = ref('无')
+	const priceNum = ref(2999.5)
+	const orderCount = ref(0)
 
 	onShow(() => {
 		darkMode.value = bindDemoThemePage()

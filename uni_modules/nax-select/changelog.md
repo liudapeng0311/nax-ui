@@ -1,3 +1,7 @@
+## 0.3.0（2026-09-04）
+- **微信小程序端（`MP-WEIXIN`）改用微信系统弹层 `picker`**，贴合微信原生 UI：单列映射 `selector`、多列 / 联动映射 `multiSelector`（`columnchange` 实时重建后续列），滚动吸附后点「确定」回调，值即最终值，消除此前 `picker-view` 的 change 延迟与确认拦截问题
+- 微信端限制：系统弹层 UI 不可定制（`confirm-text` / `cancel-text` / `confirm-color` / `z-index` / `safe-area-inset-bottom` 等弹层定制 props 不生效；`title` 仅微信安卓端显示）；`v-model:show` 程序化打开不生效（点击触发条弹出，`show-trigger=false` 时微信端仍渲染触发条作为触发区域）；暗黑模式跟随微信宿主深色主题（需小程序开启 darkmode）
+- 仅影响微信小程序端；Android / iOS / 鸿蒙 / Web 行为不变（仍为自建弹层 + picker-view / iOS 自研滚轮）
 ## 0.2.1（2026-08-24）
 - 触发条清除按钮样式对齐 `nax-input`：移除灰色圆形底徽，改为纯 close 图标；图标随 `size` 缩放（sm 14 / md 16 / lg 18），配色与热区内边距一致；App 深色主题沿用 custom-class `nax-theme-dark` 判定字面量色（`APP-ANDROID` / `APP-IOS` / `APP-HARMONY`），其它端浅色默认不变
 - 有选中值显示清除按钮时隐藏下拉箭头，二者互斥且切换位置精确重合（箭头容器补齐相同热区内边距、图标同尺寸）

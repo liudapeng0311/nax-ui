@@ -1,3 +1,5 @@
+## 0.2.0（2026-09-04）
+- `value` prop 支持 number 类型（`[String, Number]`）：数字值直接渲染（含 `0`）；`hasValue` 数字直接视为有值（仅空串为无值）
 ## 0.1.5（2026-08-18）
 - 蒸汽模式（`VUE3-VAPOR`）兼容修复：`nax-cell-group` inset 模式组头内缩的 1 条下级选择器规则用 CSS 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
 - 蒸汽模式兼容：`lines` CSS 声明改回 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告

@@ -11,7 +11,12 @@
 
 			<view class="section">
 				<text class="section__title">单列 + 按钮打开</text>
+				<!-- #ifdef MP-WEIXIN -->
+				<text class="hint">微信小程序端：nax-select 使用系统弹层 picker，点击下方触发条打开（按钮打开不生效）。</text>
+				<!-- #endif -->
+				<!-- #ifndef MP-WEIXIN -->
 				<nax-button label="选择水果" type="primary" @click="openSingle"></nax-button>
+				<!-- #endif -->
 				<text class="hint">结果：{{ singleText }}</text>
 				<nax-select
 					v-model:show="singleShow"
@@ -41,7 +46,12 @@
 
 			<view class="section">
 				<text class="section__title">多列 multi-column</text>
+				<!-- #ifdef MP-WEIXIN -->
+				<text class="hint">微信小程序端：点下方触发条打开。</text>
+				<!-- #endif -->
+				<!-- #ifndef MP-WEIXIN -->
 				<nax-button label="选择时间段" @click="multiShow = true"></nax-button>
+				<!-- #endif -->
 				<text class="hint">结果：{{ multiText }}</text>
 				<nax-select
 					v-model:show="multiShow"
@@ -72,7 +82,12 @@
 
 			<view class="section">
 				<text class="section__title">自定义字段名</text>
+				<!-- #ifdef MP-WEIXIN -->
+				<text class="hint">微信小程序端：点下方触发条打开。</text>
+				<!-- #endif -->
+				<!-- #ifndef MP-WEIXIN -->
 				<nax-button label="打开（id/name）" size="sm" @click="customShow = true"></nax-button>
+				<!-- #endif -->
 				<text class="hint">结果：{{ customText }}</text>
 				<nax-select
 					v-model:show="customShow"

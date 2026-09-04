@@ -48,7 +48,7 @@
 	 * @description 单元格。设置项 / 列表行基础。对齐  CellItem + 清单 API。
 	 * @property {string} title 左侧标题
 	 * @property {string} label 标题下方说明
-	 * @property {string} value 右侧内容
+	 * @property {string|number} value 右侧内容
 	 * @property {string} icon 左侧 nax-icon 名
 	 * @property {boolean} isLink 展示右侧箭头（兼容 arrow）
 	 * @property {boolean} arrow 同 isLink（ 兼容）
@@ -74,7 +74,7 @@
 	const props = defineProps({
 		title: { type: String, default: '' },
 		label: { type: String, default: '' },
-		value: { type: String, default: '' },
+		value: { type: [String, Number], default: '' as any },
 		icon: { type: String, default: '' },
 		isLink: { type: Boolean, default: false },
 		arrow: { type: Boolean, default: false },
@@ -127,7 +127,11 @@
 	})
 
 	const hasValue = computed((): boolean => {
-		return props.value.length > 0
+		// number 类型直接视为有值（含 0）
+		if (typeof props.value == 'number') {
+			return true
+		}
+		return (props.value as string).length > 0
 	})
 
 	const hasIcon = computed((): boolean => {

@@ -1,3 +1,5 @@
+## 0.2.0（2026-09-04）
+- `text` prop 支持 number 类型（`[String, Number]`）：数字文案直接渲染（含 `0`），price / date 模式同样适用（数字时间戳字符串化后由 `parseFloat` 解析）；`hasText` / `displayValue` / 拨号场景补齐 number 与 undefined 兜底
 ## 0.1.17（2026-08-18）
 - 蒸汽模式兼容：移除 `.nax-text__value--lines-1` 中已废弃的 `lines: 1` 声明（仅 VDOM 支持，Vapor 下告警，App 三端与 Web/小程序两处条件编译分支均迁移），行数限制由 `<text>` 的 `:max-lines="lines"` 属性承担
 ## 0.1.16（2026-08-18）

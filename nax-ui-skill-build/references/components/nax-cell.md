@@ -28,7 +28,7 @@
 |---|---|---|---|
 | title | string | `''` | 左侧标题 |
 | label | string | `''` | 标题下方说明 |
-| value | string | `''` | 右侧内容 |
+| value | string / number | `''` | 右侧内容（支持数字类型，如余额 `0`） |
 | icon | string | `''` | 左侧 `nax-icon` 名 |
 | is-link | boolean | `false` | 展示右侧箭头 |
 | arrow | boolean | `false` | 同 `is-link`（兼容） |

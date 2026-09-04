@@ -1,5 +1,37 @@
 <template>
 	<view class="nax-select" :class="rootClass">
+		<!-- #ifdef MP-WEIXIN -->
+		<!-- 微信小程序：改用系统弹层 picker，贴合微信原生 UI（无自建弹层/动画，滚动确认时机由微信内部处理） -->
+		<picker
+			:mode="mpPickerMode"
+			:range="mpPickerRange"
+			:range-key="mpRangeKey"
+			:value="mpPickerMode == 'selector' ? mpPickerValue[0] : mpPickerValue"
+			:disabled="disabled"
+			:header-text="title"
+			@change="onMpChange"
+			@columnchange="onMpColumnChange"
+		>
+			<view class="nax-select__trigger" :class="triggerClass" :hover-class="triggerHoverClass" :hover-start-time="20" :hover-stay-time="70">
+				<slot name="trigger">
+					<text class="nax-select__trigger-text" :max-lines="1" :class="triggerTextClass">{{ triggerDisplayText }}</text>
+					<view
+						v-if="showMpClear"
+						class="nax-select__trigger-clear"
+						@touchstart.stop.prevent="onMpClear"
+						@click.stop.prevent="onMpClear"
+					>
+						<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+					</view>
+					<view v-else class="nax-select__trigger-arrow">
+						<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+					</view>
+				</slot>
+			</view>
+		</picker>
+		<!-- #endif -->
+
+		<!-- #ifndef MP-WEIXIN -->
 		<!-- 可选触发条：方便表单场景直接选用 -->
 		<view
 			v-if="showTrigger"
@@ -237,6 +269,7 @@
 				</nax-transition>
 			</view>
 		</view>
+		<!-- #endif -->
 	</view>
 </template>
 
@@ -244,25 +277,25 @@
 		/**
 		 * nax-select
 		 * @description 列选择器（底部弹层 + picker-view）。
-		 * @property {boolean} show v-model:show 控制弹层显隐
+		 * @property {boolean} show v-model:show 控制弹层显隐；微信小程序端不生效（点触发条弹出，自动回写 false）
 		 * @property {string|number|boolean|Array} modelValue v-model 选中值；单列为单项 value，多列/联动为 value 数组
 		 * @property {Array} list 列数据；单列一维 / 多列二维 / 联动树形（children）
 		 * @property {string} mode single-column | multi-column | multi-column-auto（兼容 mutil-column / mutil-column-auto）
 		 * @property {Array} defaultValue 默认选中下标数组，如 [0] / [1, 2]
-		 * @property {string} title 顶部标题
-	 * @property {string} confirmText 确认文案，默认「确认」
-	 * @property {string} cancelText 取消文案，默认「取消」
-	 * @property {string} confirmColor 确认色；空则用主题主色
-	 * @property {string} cancelColor 取消色；空则用次文案色
+		 * @property {string} title 顶部标题；微信小程序端仅安卓显示为系统弹层标题
+	 * @property {string} confirmText 确认文案，默认「确认」；微信小程序端不生效（系统弹层固定文案）
+	 * @property {string} cancelText 取消文案，默认「取消」；微信小程序端不生效
+	 * @property {string} confirmColor 确认色；空则用主题主色；微信小程序端不生效
+	 * @property {string} cancelColor 取消色；空则用次文案色；微信小程序端不生效
 	 * @property {string} valueName list 项 value 字段名，默认 value
 	 * @property {string} labelName list 项 label 字段名，默认 label
 	 * @property {string} childName 联动子级字段名，默认 children
-	 * @property {boolean} maskClosable 点击遮罩是否关闭，默认 true（兼容 maskCloseAble）
-	 * @property {boolean} maskCloseAble 兼容  拼写，与 maskClosable 任一为 false 则不可点遮罩关闭
-	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true（比  默认更友好）
-	 * @property {number} zIndex 弹层层级，默认 10075
+	 * @property {boolean} maskClosable 点击遮罩是否关闭，默认 true（兼容 maskCloseAble）；微信小程序端不生效（系统弹层自带遮罩）
+	 * @property {boolean} maskCloseAble 兼容  拼写，与 maskClosable 任一为 false 则不可点遮罩关闭；微信小程序端不生效
+	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true（比  默认更友好）；微信小程序端不生效
+	 * @property {number} zIndex 弹层层级，默认 10075；微信小程序端不生效
 	 * @property {boolean} preserveSelection 再次打开是否保留上次确认项，默认 true
-		 * @property {boolean} showTrigger 是否渲染内置触发条
+		 * @property {boolean} showTrigger 是否渲染内置触发条；微信小程序端始终渲染触发条作为弹层触发区域
 		 * @property {boolean} clearable 触发条有选中值时显示清除按钮，默认 true
 		 * @property {string} placeholder 触发条占位
 	 * @property {boolean} disabled 触发条禁用
@@ -398,13 +431,223 @@
 				'clear'
 			])
 
+	// #ifdef MP-WEIXIN
+	// ===== 微信小程序：系统弹层 picker 实现（贴合微信原生 UI，无自建弹层）=====
+	/** selector | multiSelector（按 nax-select mode 映射） */
+	const mpPickerMode = computed((): string => {
+		if (modeName.value == 'multi-column' || modeName.value == 'multi-column-auto') {
+			return 'multiSelector'
+		}
+		return 'selector'
+	})
+
+	/** range：单列一维 / 多列二维（保留原始 item，range-key 指定 label 字段） */
+	const mpPickerRange = ref([] as any[])
+	/** 受控索引（selector 用 [0]，multi 用多下标） */
+	const mpPickerValue = ref([0] as number[])
+
+	const mpRangeKey = computed((): string => {
+		// 纯字符串列表时 range-key 无效（微信自动忽略）；对象数组时取 label 字段
+		return props.labelName
+	})
+
+	/** 触发条清除按钮（微信端始终渲染触发条作为 picker 触发区域，不依赖 showTrigger） */
+	const showMpClear = computed((): boolean => {
+		if (!props.clearable) {
+			return false
+		}
+		if (props.disabled) {
+			return false
+		}
+		return confirmedResult.value.length > 0
+	})
+
+	/** 构建各列 range（selector 一维 / multiSelector 二维，与 setColumnDataByMode 同构） */
+	function mpBuildRange(prefer: number[]) {
+		const mode = modeName.value
+		const list = props.list as any[]
+		if (mode == 'single-column') {
+			if (is2DList(list)) {
+				mpPickerRange.value = asAnyArray(list[0])
+			} else {
+				mpPickerRange.value = list
+			}
+			return
+		}
+		if (mode == 'multi-column') {
+			if (is2DList(list)) {
+				const rows = [] as any[]
+				let i = 0
+				while (i < list.length && i < 4) {
+					rows.push(asAnyArray(list[i]))
+					i++
+				}
+				mpPickerRange.value = rows
+			} else {
+				mpPickerRange.value = [list] as any[]
+			}
+			return
+		}
+		// multi-column-auto：沿选中路径展开各列
+		const rows = [] as any[]
+		let currentLevel = list
+		let c = 0
+		while (c < 4 && currentLevel.length > 0) {
+			rows.push(currentLevel)
+			const idx = clampIndex(c < prefer.length ? prefer[c] : 0, currentLevel.length)
+			const node = currentLevel.length > 0 ? currentLevel[idx] : null
+			currentLevel = getChildren(node)
+			c++
+		}
+		mpPickerRange.value = rows
+	}
+
+	/** 按 v-model / defaultValue / 上次选择同步索引并构建 range */
+	function mpSyncValue() {
+		let prefer = selectorFromModel(props.modelValue)
+		if (prefer.length == 0 && props.preserveSelection && hasSavedSelector.value && savedSelector.value.length > 0) {
+			prefer = savedSelector.value.slice()
+		}
+		if (prefer.length == 0) {
+			prefer = parseIndexArray(props.defaultValue as any[])
+		}
+		if (prefer.length == 0) {
+			prefer = [0] as number[]
+		}
+		mpBuildRange(prefer)
+		const vals = [] as number[]
+		if (mpPickerMode.value == 'selector') {
+			const col = mpPickerRange.value as any[]
+			vals.push(clampIndex(prefer[0], col.length))
+			mpPickerValue.value = vals
+			return
+		}
+		let i = 0
+		while (i < mpPickerRange.value.length) {
+			const col = mpPickerRange.value[i] as any[]
+			vals.push(clampIndex(i < prefer.length ? prefer[i] : 0, col.length))
+			i++
+		}
+		mpPickerValue.value = vals
+	}
+
+	/** 多列联动：列变化后重建后续列并归零 */
+	function mpRebuildCascade(col: number, vals: number[]) {
+		const rows = mpPickerRange.value.slice(0, col + 1) as any[]
+		let nextLevel = getChildren((mpPickerRange.value[col] as any[])[vals[col]])
+		let c = col + 1
+		while (c < mpPickerRange.value.length) {
+			if (nextLevel.length > 0) {
+				rows.push(nextLevel)
+				vals[c] = 0
+				nextLevel = getChildren(nextLevel[0])
+			} else {
+				rows.push([] as any[])
+				vals[c] = 0
+				break
+			}
+			c++
+		}
+		mpPickerRange.value = rows
+		mpPickerValue.value = vals
+	}
+
+	function onMpColumnChange(e: UniPickerColumnChangeEvent) {
+		const col = e.detail.column
+		const val = e.detail.value
+		const vals = mpPickerValue.value.slice()
+		while (vals.length <= col) {
+			vals.push(0)
+		}
+		vals[col] = val
+		if (modeName.value == 'multi-column-auto' && col < mpPickerRange.value.length - 1) {
+			mpRebuildCascade(col, vals)
+			return
+		}
+		mpPickerValue.value = vals
+	}
+
+	/** 微信端确认：系统弹层点「确定」后回调，值即最终吸附值 */
+	function onMpChange(e: UniPickerChangeEvent) {
+		const raw = e.detail.value
+		const vals = [] as number[]
+		if (mpPickerMode.value == 'selector') {
+			let v = 0
+			if (typeof raw == 'number') {
+				v = raw as number
+			} else if (typeof raw == 'string') {
+				const n = parseInt(raw as string)
+				v = n >= 0 ? n : 0
+			}
+			vals.push(v)
+		} else {
+			const arr = raw as any[]
+			let i = 0
+			while (i < arr.length) {
+				const item = arr[i]
+				if (typeof item == 'number') {
+					vals.push(item as number)
+				} else if (typeof item == 'string') {
+					const n = parseInt(item as string)
+					vals.push(n >= 0 ? n : 0)
+				} else {
+					vals.push(0)
+				}
+				i++
+			}
+		}
+		const result = [] as UTSJSONObject[]
+		if (mpPickerMode.value == 'selector') {
+			const col = mpPickerRange.value as any[]
+			const idx = clampIndex(vals[0], col.length)
+			const item = col.length > 0 ? col[idx] : null
+			result.push(buildResultRow(item, idx))
+		} else {
+			let c = 0
+			while (c < vals.length && c < mpPickerRange.value.length) {
+				const col = mpPickerRange.value[c] as any[]
+				const idx = clampIndex(vals[c], col.length)
+				const item = col.length > 0 ? col[idx] : null
+				result.push(buildResultRow(item, idx))
+				c++
+			}
+		}
+		if (result.length == 0) {
+			return
+		}
+		savedSelector.value = vals.slice()
+		hasSavedSelector.value = true
+		confirmedResult.value = result.slice(0)
+		modelBound.value = true
+		emitModelFromResult(result)
+		emit('confirm', result)
+		emit('change', result)
+		mpPickerValue.value = vals.slice()
+	}
+
+	function onMpClear() {
+		if (props.disabled) {
+			return
+		}
+		if (confirmedResult.value.length == 0) {
+			return
+		}
+		confirmedResult.value = [] as UTSJSONObject[]
+		savedSelector.value = [] as number[]
+		hasSavedSelector.value = false
+		modelBound.value = false
+		emitClearedModel()
+		emit('clear')
+		mpSyncValue()
+	}
+	// #endif
+
 	/** 弹层容器是否挂载（退场动画结束后再卸） */
 	const rootMounted = ref(false)
 	/** 交给 nax-transition 的显隐 */
 	const panelShow = ref(false)
 	const readyToRender = ref(false)
 	const pickerRenderKey = ref(0)
-	const moving = ref(false)
 	const columnNum = ref(1)
 	const pickerValue = ref([] as number[])
 	const lastSelectIndex = ref([] as number[])
@@ -631,12 +874,6 @@
 	})
 
 	const confirmTextStyle = computed((): string => {
-		if (moving.value) {
-			if (props.cancelColor.length > 0) {
-				return 'color:' + props.cancelColor + ';'
-			}
-			return 'color:var(--nax-color-text-disabled, #e5e5ea);'
-		}
 		if (props.confirmColor.length > 0) {
 			return 'color:' + props.confirmColor + ';'
 		}
@@ -1478,6 +1715,11 @@
 	}
 
 	function openPicker() {
+		// #ifdef MP-WEIXIN
+		// 微信端为系统 picker（点击触发条弹出），无自建弹层；v-model:show 拉回 false
+		emit('update:show', false)
+		return
+		// #endif
 		if (props.disabled) {
 			return
 		}
@@ -1568,7 +1810,6 @@
 		clearSuppress.value = false
 		rootMounted.value = false
 		readyToRender.value = false
-		moving.value = false
 		emit('close')
 	}
 
@@ -1633,11 +1874,6 @@
 	}
 
 		function onConfirm() {
-			// #ifdef MP-WEIXIN
-			if (moving.value) {
-				return
-			}
-			// #endif
 			const result = selectResult.value
 			savedSelector.value = pickerValue.value.slice()
 			hasSavedSelector.value = true
@@ -1663,15 +1899,10 @@
 	})
 
 	function onPickStart() {
-		// #ifdef MP-WEIXIN
-		moving.value = true
-		// #endif
+		// 微信端已改用系统 picker，滚动状态不再由组件维护（空壳保留供原生 picker-view 事件绑定）
 	}
 
 	function onPickEnd() {
-		// #ifdef MP-WEIXIN
-		moving.value = false
-		// #endif
 	}
 
 	function findChangedColumn(prev: number[], next: number[]): number {
@@ -1958,6 +2189,11 @@
 	watch((): boolean => {
 		return props.show
 	}, (val: boolean) => {
+		// #ifdef MP-WEIXIN
+		// 微信端为系统 picker，无自建弹层，v-model:show 不生效
+		emit('update:show', false)
+		return
+		// #endif
 		if (val) {
 			if (rootMounted.value && panelShow.value) {
 				return
@@ -1972,6 +2208,9 @@
 			return props.list as any[]
 		}, (_val: any[]) => {
 			syncConfirmedFromModel()
+			// #ifdef MP-WEIXIN
+			mpSyncValue()
+			// #endif
 			if (rootMounted.value) {
 				initPicker()
 			}
@@ -1984,16 +2223,25 @@
 			if (!props.preserveSelection) {
 				hasSavedSelector.value = false
 			}
+			// #ifdef MP-WEIXIN
+			mpSyncValue()
+			// #endif
 		})
 	
 		watch((): any => {
 			return props.modelValue
 		}, (_: any) => {
 			syncConfirmedFromModel()
+			// #ifdef MP-WEIXIN
+			mpSyncValue()
+			// #endif
 		})
 	
 		// 首次若 show 已为 true
 		syncConfirmedFromModel()
+		// #ifdef MP-WEIXIN
+		mpSyncValue()
+		// #endif
 		if (props.show) {
 			openPicker()
 		}

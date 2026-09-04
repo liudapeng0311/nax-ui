@@ -30,6 +30,10 @@ function syncDemoDarkRef() {
 // #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 var osThemeListenerId = -1
 // #endif
+// #ifdef WEB || MP-WEIXIN
+// Web / 微信小程序：宿主主题监听（微信 darkmode 开启后系统组件自动适配，页面样式据此同步）
+var hostThemeListenerId = -1
+// #endif
 
 function readStorage(): string {
 	const raw = uni.getStorageSync(STORAGE_KEY)
@@ -78,6 +82,15 @@ function readSystemDark(): boolean {
 		return false
 	}
 	// #endif
+	// #endif
+	// #ifdef WEB || MP-WEIXIN
+	// Web / 微信小程序：主题来自宿主（浏览器 / 微信），读 hostTheme
+	const baseInfo = uni.getAppBaseInfo()
+	if (baseInfo.hostTheme == 'dark') {
+		return true
+	} else if (baseInfo.hostTheme == 'light') {
+		return false
+	}
 	// #endif
 	// 公共兜底：osTheme 为操作系统主题（GetSystemInfoResult 全端字段）；
 	// hostTheme 仅 web / 微信小程序支持，App 端不可用
@@ -200,6 +213,23 @@ export function initDemoTheme() {
 		console.log('[nax-demo-theme] onOsThemeChange registered, id=' + osThemeListenerId.toString())
 	} catch (e : any) {
 		console.log('[nax-demo-theme] onOsThemeChange failed: ' + (e as Error).message)
+	}
+	// #endif
+	// #ifdef WEB || MP-WEIXIN
+	// 宿主主题变化（微信 / 浏览器）：跟随系统模式时同步页面暗黑态
+	try {
+		hostThemeListenerId = uni.onHostThemeChange((res: OnHostThemeChangeCallbackResult) => {
+			systemDark = res.hostTheme == 'dark'
+			console.log('[nax-demo-theme] hostThemeChange -> ' + res.hostTheme)
+			if (themeMode == 'followSystem') {
+				applyDemoThemeChrome(systemDark)
+				// 更新共享暗黑态：所有页面 computed 依赖 demoDarkRef 即时重渲染
+				syncDemoDarkRef()
+			}
+		})
+		console.log('[nax-demo-theme] onHostThemeChange registered, id=' + hostThemeListenerId.toString())
+	} catch (e : any) {
+		console.log('[nax-demo-theme] onHostThemeChange failed: ' + (e as Error).message)
 	}
 	// #endif
 }

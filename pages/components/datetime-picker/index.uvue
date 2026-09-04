@@ -68,11 +68,16 @@
 
 			<view class="section">
 				<text class="section__title">年 year / 月日 month-day</text>
+				<!-- #ifdef MP-WEIXIN -->
+				<text class="hint">微信端：year 用系统弹层，点下方触发条打开；month-day 保持自建弹层。</text>
+				<!-- #endif -->
+				<!-- #ifndef MP-WEIXIN -->
 				<view class="row">
 					<nax-button size="sm" label="选择年" @click="yearShow = true"></nax-button>
 					<view class="gap"></view>
 					<nax-button size="sm" label="选择月日" @click="mdShow = true"></nax-button>
 				</view>
+				<!-- #endif -->
 				<text class="hint">年：{{ yearText }}</text>
 				<text class="hint">月日：{{ mdText }}</text>
 				<nax-datetime-picker
@@ -93,7 +98,12 @@
 
 			<view class="section">
 				<text class="section__title">范围限制 minDate / maxDate</text>
+				<!-- #ifdef MP-WEIXIN -->
+				<text class="hint">微信端：系统弹层，点下方触发条打开。</text>
+				<!-- #endif -->
+				<!-- #ifndef MP-WEIXIN -->
 				<nax-button label="2020-01-01 ~ 2026-12-31" @click="rangeShow = true"></nax-button>
+				<!-- #endif -->
 				<text class="hint">结果：{{ rangeText }}</text>
 				<nax-datetime-picker
 					v-model:show="rangeShow"

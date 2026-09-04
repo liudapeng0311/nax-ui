@@ -4,7 +4,7 @@ demo: datetime-picker
 
 # nax-datetime-picker
 
-> 当前版本：0.2.1
+> 当前版本：0.3.0
 
 uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
@@ -278,7 +278,7 @@ function onFmtConfirm(e : UTSJSONObject) {
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| show | boolean | `false` | v-model:show 弹层显隐 |
+| show | boolean | `false` | v-model:show 弹层显隐；微信小程序端系统弹层模式不生效（点触发条弹出，自动回写 false） |
 | modelValue | [Number, String] | `0 as any` | v-model 选中值（时间戳 ms，或日期时间字符串） |
 | mode | string | `'datetime'` | `datetime` 日期时间 \| `date` 日期 \| `time` 时间 \| `year-month` 年月 \| `year` 年 \| `month-day` 月日 |
 | minDate | [Number, String] | `'' as any` | 可选范围下限（时间戳或 YYYY-MM-DD[ HH:mm:ss]） |
@@ -289,8 +289,8 @@ function onFmtConfirm(e : UTSJSONObject) {
 | maxMinute | number | `59` | 分钟范围上限 |
 | minSecond | number | `0` | 秒范围下限 |
 | maxSecond | number | `59` | 秒范围上限 |
-| showSecond | boolean | `false` | 是否显示秒列（datetime / time） |
-| showUnit | boolean | `true` | 列文案是否带单位（年/月/日…） |
+| showSecond | boolean | `false` | 是否显示秒列（datetime / time）；微信小程序端 time + show-second 退回自建弹层 |
+| showUnit | boolean | `true` | 列文案是否带单位（年/月/日…）；微信小程序端系统弹层模式不生效（列由微信渲染） |
 | title | string | `''` | 弹层标题 |
 | confirmText | string | `'确认'` | 确认按钮文案 |
 | cancelText | string | `'取消'` | 取消按钮文案 |
@@ -301,7 +301,7 @@ function onFmtConfirm(e : UTSJSONObject) {
 | safeAreaInsetBottom | boolean | `true` | 底部安全区 |
 | zIndex | number | `10076` | 弹层层级 |
 | preserveSelection | boolean | `true` | 重新打开时保留上次确认的选中值 |
-| showTrigger | boolean | `false` | 内置触发条 |
+| showTrigger | boolean | `false` | 内置触发条；微信小程序端系统弹层模式始终渲染触发条作为弹层触发区域 |
 | clearable | boolean | `true` | 触发条有选中值时显示清除按钮，默认 true |
 | placeholder | string | `'请选择'` | 触发条占位文案 |
 | disabled | boolean | `false` | 禁用（触发条模式） |
@@ -344,8 +344,9 @@ function onFmtConfirm(e : UTSJSONObject) {
 
 ## 平台说明
 
+- **微信小程序**：`date` / `year` / `year-month` / `time`（未开 `show-second`）使用微信系统弹层 `picker`（`mode="date"` / `mode="time"`，`min-date` / `max-date` / `min-hour` / `max-hour` 等范围映射 `start` / `end`），滚动吸附后点「确定」回调，值即最终值；系统弹层 UI 不可定制（`confirm-text` / `cancel-text` / 颜色 / `z-index` 等弹层定制 props 不生效，`title` 仅微信安卓端显示为标题），`v-model:show` 程序化打开不生效（点击触发条弹出），暗黑模式跟随微信宿主深色主题（需小程序开启 darkmode）
+- **微信小程序**：`datetime` / `month-day` / `time` + `show-second` 无法映射微信系统弹层，保持自建弹层（picker-view）不变
 - 鸿蒙禁用选项点选，请滑动后确认。
 - 鸿蒙暗黑模式：组件自动移除原生滚轮默认的白色渐变遮罩。
-- 微信小程序滚动中点确认会被忽略。
 
 > 说明：鸿蒙 `picker-view` 打开时的滚到目标动画为原生行为，**无法设置 duration**。未传 `min-date` 时默认近 30 年～当前+10 年，以缩短年列滚动距离。需要更早日期请显式传 `min-date`。

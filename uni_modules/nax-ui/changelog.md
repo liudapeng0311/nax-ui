@@ -1,3 +1,6 @@
+## 0.3.1（2026-09-04）
+- 依赖组件更新：`nax-cell`（0.1.5→0.2.0）`value` 支持数字类型（含 `0` 直接渲染）；`nax-text`（0.1.17→0.2.0）`text` 支持数字类型（含 price / date 模式，数字时间戳同样适用）
+- 依赖组件更新：`nax-select`（0.2.1→0.3.0）、`nax-datetime-picker`（0.2.1→0.3.0）微信小程序端改用微信系统弹层 `picker` 贴合原生 UI：`nax-select` 单列/多列/联动映射 `selector` / `multiSelector`（columnchange 联动）；`nax-datetime-picker` 的 date / year / year-month / time（无秒）映射微信 `date` / `time`（min/max 范围映射 start/end），datetime / month-day / time+秒 保持自建弹层；消除微信端 change 延迟与确认拦截问题；系统弹层模式下弹层定制 props 与 `v-model:show` 不生效、暗黑模式跟随微信宿主（详见组件 readme）
 ## 0.3.0（2026-09-03）
 - 依赖组件更新：`nax-icon`（0.2.15→0.3.0）新增自定义图标能力：`glyph` + `font-family` prop，自备图标字体（iconfont.cn 等）无需改库即可接入；`glyph` 自动识别 iconfont 页面码位（`&#xe6cf;`）等 6 种写法，可直接粘贴无需转义；readme 新增「自定义图标」章节（三步接入 / 平台差异 / 常见问题）
 ## 0.2.1（2026-09-01）
