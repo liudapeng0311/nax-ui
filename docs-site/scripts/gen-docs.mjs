@@ -32,7 +32,7 @@ const CATEGORIES = [
   {
     text: '表单组件',
     items: [
-      'input', 'search', 'textarea', 'select', 'calendar', 'datetime-picker', 'keyboard',
+      'input', 'search', 'textarea', 'select', 'calendar', 'datetime-picker', 'date-strip', 'keyboard',
       'switch', 'slider', 'checkbox', 'radio', 'number-box', 'rate', 'upload', 'form'
     ]
   },
@@ -96,6 +96,7 @@ const COMPONENT_LABELS = {
   select: '选择器',
   calendar: '日历',
   'datetime-picker': '日期时间选择器',
+  'date-strip': '日期横条',
   keyboard: '键盘',
   switch: '开关',
   slider: '滑动选择器',
@@ -673,7 +674,7 @@ function cleanJsdocLine(line) {
 // ---------------------------------------------------------------------------
 function parseUvue(uvuePath) {
   const src = readUtf8(uvuePath)
-  const scriptMatch = src.match(/<script setup lang="uts">([\s\S]*?)<\/script>/)
+  const scriptMatch = src.match(/<script setup(?:\s+lang="uts")?>([\s\S]*?)<\/script>/)
   if (!scriptMatch) {
     throw new Error('未找到 <script setup lang="uts"> 块')
   }
@@ -850,6 +851,7 @@ const SPECIAL_SECTIONS_OVERRIDES = {
   dialog: ['与 nax-picker / toast 的关系'],
   'action-sheet': ['与 nax-picker 的关系'],
   'nav-bar': ['注意'],
+  'date-strip': ['注意'],
   tabbar: ['自定义底栏 + 原生 Tab 路由（推荐方案）'],
   tabs: [{ name: '与内容区联动（全屏选项卡配方）', title: '全屏选项卡方案实现' }]
 }
@@ -862,7 +864,7 @@ const SPECIAL_SECTIONS_OVERRIDES = {
 //   special   特殊说明（如平台说明，放文档末尾）
 //   example   用法示例（进代码示例区，折叠展示）
 function classifySection(name, heading) {
-  if (heading === '主题') return 'theme'
+  if (heading === '主题' || heading === '主题定制') return 'theme'
   if (heading === '平台说明' || heading === '说明') return 'special'
   const specialExtra = SPECIAL_SECTIONS_OVERRIDES[name]
   if (specialExtra) {
@@ -1319,7 +1321,7 @@ function buildOverview(found) {
     }
     byCategory[CATEGORY_TEXT[f.name] || '其他'].push({ name: f.name, desc })
   }
-  const parts = ['# 组件总览', '', '> 51 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。', '']
+  const parts = ['# 组件总览', '', '> 52 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。', '']
   for (const c of CATEGORIES) {
     const items = byCategory[c.text]
     if (!items || items.length === 0) continue

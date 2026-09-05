@@ -39,7 +39,7 @@ uni-app x 生态起步较晚，社区组件大多仍是老 uni-app（Vue2/Vue3 +
 <div class="nax-intro-features">
   <article>
     <h3>组件齐全</h3>
-    <p>51 个独立 <code>nax-*</code> 组件包、<code>nax-ui-theme</code> 主题包与 <code>nax-use</code> 组合式函数包。</p>
+    <p>52 个独立 <code>nax-*</code> 组件包、<code>nax-ui-theme</code> 主题包与 <code>nax-use</code> 组合式函数包。</p>
   </article>
   <article>
     <h3>零配置接入</h3>

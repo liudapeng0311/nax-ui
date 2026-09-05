@@ -2,7 +2,7 @@
 name: nax-ui
 description: >-
   uni-app x UI 组件库 nax-ui 的使用指南。当用户需要在 uni-app x / uvue 项目中使用 nax-ui 组件
-  （nax-button、nax-input、nax-form、nax-toast、nax-dialog 等 51 个 nax-* 组件）编写页面、
+  （nax-button、nax-input、nax-form、nax-toast、nax-dialog 等 52 个 nax-* 组件）编写页面、
   搭建表单、实现弹窗反馈、配置主题，或询问某个 nax-* 组件的 props/事件/用法、以及使用 nax-use
   组合式函数（useCountdown / useValidate / useDebounce 等）时，必须使用本技能。
   也适用于用户提到 nax-ui、nax- 前缀组件、uni-app x 组件库、或要求在 uni-app x 项目中"用组件库写
@@ -11,7 +11,7 @@ description: >-
 
 # nax-ui 组件库使用指南
 
-`nax-ui` 是面向 **uni-app x（uvue）** 的 UI 组件库：51 个 `nax-*` 组件包 + 1 个主题包 + 1 个组合式函数包（`nax-use`）。组件通过
+`nax-ui` 是面向 **uni-app x（uvue）** 的 UI 组件库：52 个 `nax-*` 组件包 + 1 个主题包 + 1 个组合式函数包（`nax-use`）。组件通过
 easycom 自动注册，**无需手动 import**，在模板里直接写 `<nax-button>` 即可；组合式函数在 `<script setup>` 中 `import` 使用。
 
 ## 使用流程（按顺序执行）

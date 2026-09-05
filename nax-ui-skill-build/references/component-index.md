@@ -1,4 +1,4 @@
-# nax-ui 组件索引（51 个组件 + nax-use 组合式函数）
+# nax-ui 组件索引（52 个组件 + nax-use 组合式函数）
 
 按需选择组件：**先看这里确定组件名，再读 `components/<name>.md` 获取完整 API**。
 所有组件 easycom 自动注册，模板中直接写 `<nax-xxx>` 即可，无需 import。
@@ -50,6 +50,7 @@
 | `nax-select` | 列选择器（底部弹层）；单列/多列/联动；`v-model` + `v-model:show`；触发条可清除 | [components/nax-select.md](components/nax-select.md) |
 | `nax-picker` | 通用弹出容器（自定义弹层内容） | [components/nax-picker.md](components/nax-picker.md) |
 | `nax-datetime-picker` | 日期时间滚轮选择；`v-model:show` + `v-model`；触发条可清除 | [components/nax-datetime-picker.md](components/nax-datetime-picker.md) |
+| `nax-date-strip` | 日期横条；单选/多选/范围，横向滚动；`v-model`；禁用/过滤/formatter/农历 | [components/nax-date-strip.md](components/nax-date-strip.md) |
 | `nax-calendar` | 日历；date/range | [components/nax-calendar.md](components/nax-calendar.md) |
 | `nax-keyboard` | 自定义键盘；number/car/card | [components/nax-keyboard.md](components/nax-keyboard.md) |
 | `nax-switch` | 开关；`v-model` | [components/nax-switch.md](components/nax-switch.md) |

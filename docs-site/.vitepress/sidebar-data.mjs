@@ -186,6 +186,10 @@ export const sidebar = {
           "link": "/components/datetime-picker"
         },
         {
+          "text": "日期横条 <span class=\"nax-sidebar-en\">DateStrip</span>",
+          "link": "/components/date-strip"
+        },
+        {
           "text": "键盘 <span class=\"nax-sidebar-en\">Keyboard</span>",
           "link": "/components/keyboard"
         },

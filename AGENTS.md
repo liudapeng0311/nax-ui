@@ -320,6 +320,35 @@ const emit = defineEmits(['click'])
 - [ ] 除 Web 端外，未主动运行或编译其它端；非 Web 端由用户自行核实
 - [ ] 无无关重构与无关文件打扰
 - [ ] **用户未明确要求发布线上时，未执行任何服务器部署 / 上传操作**（发布流程见 `docs/deploy-docs.md`）
+- [ ] **git 提交已同时推送到 Gitee（`origin`）与 GitHub（`github`）双远端**（见 10.1）
+
+---
+
+## 10.1 双远端提交约定（GitHub + Gitee）
+
+**硬约束：任何 git 提交都必须同时推送 Gitee 与 GitHub 两个远端；只推一个不算完成。**
+
+| 远端 | 地址 | 用途 |
+|------|------|------|
+| `origin` | `https://gitee.com/liusixsix/nax-ui.git` | Gitee 主仓库（默认） |
+| `github` | `https://github.com/liudapeng0311/nax-ui.git` | GitHub 镜像（新增组件/文档时保持同步） |
+
+推送命令：
+
+```bash
+git push origin main
+git push github main
+```
+
+注意事项：
+
+1. **GitHub 直连不稳定**：本机直连 github.com 常被重置，推送前先确认 MyClash 代理（`127.0.0.1:7877`）运行中，必要时用：
+   ```bash
+   git -c http.proxy=http://127.0.0.1:7877 -c https.proxy=http://127.0.0.1:7877 push github main
+   ```
+2. **认证方式**：GitHub 用 Personal Access Token（`repo` 权限）或 Git Credential Manager 浏览器授权（代理环境下 device flow 可能无反应，优先 PAT）；token 由用户提供，**不得写入仓库文件或 git 配置**
+3. 推送失败需排查解决后补推成功，并向用户汇报两端 commit 状态
+4. 新增 remote 已配置；若 clone 新机器，执行 `git remote add github https://github.com/liudapeng0311/nax-ui.git`
 
 ---
 

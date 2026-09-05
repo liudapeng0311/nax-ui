@@ -9,7 +9,7 @@
 
 命名统一：`nax-<name>`；组件包目录：`uni_modules/nax-<name>/components/nax-<name>/nax-<name>.uvue`；套装入口为 `uni_modules/nax-ui`，仅聚合依赖。
 
-当前落地：51 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。组合式函数（无头逻辑复用）见第 6 节。
+当前落地：52 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。组合式函数（无头逻辑复用）见第 6 节。
 
 ---
 
@@ -81,6 +81,7 @@
 | 列选择器 | `nax-select` | P0 | 底部列选择 | `v-model:show` `v-model` `list` `mode(single-column/multi-column/multi-column-auto)` `default-value` `title` `show-trigger` `clearable` / `confirm` `cancel` `change` `clear` **done** |
 | 日历 | `nax-calendar` | P1 | 日期/范围选择 | `v-model:show` `mode(date/range)` `isPage` `minDate` `maxDate` `defaultDate` `startDate` `endDate` `readonly` `holidays` `workdays` `festivals` `checkinMode` / `change` `open` `close` **done** |
 | 时间选择 | `nax-datetime-picker` | P1 | 日期时间滚轮选择 | `v-model:show` `v-model` `mode(datetime/date/time/year-month/year/month-day)` `minDate` `maxDate` `showSecond` `showTrigger` `clearable` / `confirm` `cancel` `change` `clear` **done** |
+| 日期横条 | `nax-date-strip` | P1 | 横向日期选择条（单选/多选/范围） | `v-model` `type(single/multiple/range)` `min` `max` `disabledDate` `filter` `maxDays` `overMaxDays` `formatter` `allowSameDay` `valueFormat` `showLunar` `startDateText` `endDateText` / `change` `update:modelValue` **done** |
 | 键盘 | `nax-keyboard` | P1 | 自定义键盘 | `v-model:show` `mode(number/car/card)` `dotEnabled` `tooltip` `tips` `random` `mask` / `change` `backspace` `confirm` `cancel` **done** |
 | 开关 | `nax-switch` | P0 | 布尔切换 | `v-model` `disabled` `loading` `size` `activeColor` `inactiveColor` `vibrateShort` / `change` **done** |
 | 滑动选择器 | `nax-slider` | P1 | 区间滑动选择 | `v-model` `start` `end` `min` `max` `step` `size` `blockWidth` `height` `activeColor` `inactiveColor` `blockColor` `disabled` `useSlot` `showEdgeValue` `edgeValuePosition` / `change` `start` `moving` `end` **done** |
@@ -162,6 +163,7 @@
 | `nax-keyboard` | done | 插件包 `uni_modules/nax-keyboard`；number/car/card、乱序、遮罩弹层、长按退格 |
 | `nax-calendar` | done | 插件包 `uni_modules/nax-calendar`；date/range + 弹层/页面 + 节假日/打卡；弹层动画复用 `nax-transition` |
 | `nax-datetime-picker` | done | 插件包 `uni_modules/nax-datetime-picker`；mode datetime/date/time/year-month/year/month-day；v-model 时间戳；showSecond；minDate/maxDate；触发条 `clearable` 清除；弹层复用 nax-transition |
+| `nax-date-strip` | done | 插件包 `uni_modules/nax-date-strip`；横向日期选择条；单选/多选/范围（`v-model` + `change`）；min/max（默认当前周为中心三周）；disabledDate 禁用 / filter 过滤 / maxDays + overMaxDays；formatter 自定义文案样式 / allowSameDay；value-format 字符串绑定；show-lunar 农历（1900-2100）；主题 token `--nax-date-strip-*`；demo `pages/components/date-strip` |
 | `nax-checkbox` / `nax-checkbox-group` | done | 插件包 `uni_modules/nax-checkbox`；单独布尔 v-model / 组 string[]；provide-inject |
 | `nax-radio` / `nax-radio-group` | done | 插件包 `uni_modules/nax-radio`；单独布尔 v-model / 组 string；provide-inject |
 | `nax-switch` | done | 插件包 `uni_modules/nax-switch`；布尔 v-model；loading 分端旋转；transform 滑动 + 轨道变色过渡 |
@@ -189,7 +191,7 @@
 | `nax-overlay` | done | 插件包 `uni_modules/nax-overlay`；全屏遮罩；v-model:show / zIndex / duration / color / closeOnClick；鸿蒙 opacity 三阶段；默认插槽叠内容 |
 | `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；Web/微信小程序用 `WEB || MP-WEIXIN` 触底锁、剩余距离回差及追加后 scrollTop 恢复；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
 | `nax-video` | done | 插件包 `uni_modules/nax-video`（**独立发布，不聚合进 `nax-ui` 套装**）；无头视频；原生 `<video>` + `VideoContext`；默认 `controls=false`；作用域插槽状态/方法；多实例隔离；能力下限 4.61；iOS 未验证；demo `pages/components/video` |
-| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 50 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
+| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 52 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
 
 ---
 

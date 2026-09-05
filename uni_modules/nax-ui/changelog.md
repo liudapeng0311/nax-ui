@@ -1,3 +1,6 @@
+## 0.3.2（2026-09-05）
+- 新增组件 `nax-date-strip`（0.1.0）并纳入套装依赖聚合：横向日期选择条，单选 / 多选 / 范围选择（`v-model` + `change`）、`min` / `max` 范围、`disabledDate` 禁用、`filter` 过滤、`maxDays` + `overMaxDays`、`formatter` 自定义、`value-format`、`show-lunar` 农历（聚合组件数 51 → 52）
+- 依赖组件更新：`nax-nav-bar`（0.1.6→0.2.0）新增 `centerClickable` 中间区域可点击（仅 Web/小程序需开启，App 端无 pointer-events 限制）；App 端 `type="primary"` 背景与反白文字改内联 CSS 变量兜底（组件隔离下变量失效修复）
 ## 0.3.1（2026-09-04）
 - 依赖组件更新：`nax-cell`（0.1.5→0.2.0）`value` 支持数字类型（含 `0` 直接渲染）；`nax-text`（0.1.17→0.2.0）`text` 支持数字类型（含 price / date 模式，数字时间戳同样适用）
 - 依赖组件更新：`nax-select`（0.2.1→0.3.0）、`nax-datetime-picker`（0.2.1→0.3.0）微信小程序端改用微信系统弹层 `picker` 贴合原生 UI：`nax-select` 单列/多列/联动映射 `selector` / `multiSelector`（columnchange 联动）；`nax-datetime-picker` 的 date / year / year-month / time（无秒）映射微信 `date` / `time`（min/max 范围映射 start/end），datetime / month-day / time+秒 保持自建弹层；消除微信端 change 延迟与确认拦截问题；系统弹层模式下弹层定制 props 与 `v-model:show` 不生效、暗黑模式跟随微信宿主（详见组件 readme）

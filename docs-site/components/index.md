@@ -1,6 +1,6 @@
 # 组件总览
 
-> 51 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。
+> 52 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。
 
 ## 基础组件
 
@@ -40,6 +40,7 @@
 | [nax-select](/components/select) | 列选择器（底部弹层 + picker-view）。 |
 | [nax-calendar](/components/calendar) | 日历选择器。功能主要对齐  Calendar：单选 / 范围、弹层 / 页面内联、节假日与打卡标记。 |
 | [nax-datetime-picker](/components/datetime-picker) | 时间选择器（底部弹层 + picker-view）。对齐  DatetimePicker 主能力。 |
+| [nax-date-strip](/components/date-strip) | 横向日期选择条。以横条方式展示一段连续日期，支持单选 / 多选 / 范围选择。 |
 | [nax-keyboard](/components/keyboard) | 自定义键盘：数字 / 车牌号 / 身份证；支持乱序、遮罩弹层与长按退格 |
 | [nax-switch](/components/switch) | 开关。用于二选一场景。 |
 | [nax-slider](/components/slider) | 滑动选择器。用于表单中选择某一区间值。 |

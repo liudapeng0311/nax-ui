@@ -4,7 +4,7 @@ demo: nav-bar
 
 # nax-nav-bar
 
-> 当前版本：0.1.6
+> 当前版本：0.2.0
 
 自定义顶部导航栏（需页面 `navigationStyle: custom`）。面向 uni-app x：状态栏安全区、fixed 占位、返回栈兜底、微信小程序胶囊预留。
 
@@ -204,6 +204,7 @@ function onBack() {
 | height | string | `'44'` | 内容行高度（纯数字按 px），默认 44 |
 | zIndex | number | `980` | fixed 层级，默认 980 |
 | titleAlign | string | `'center'` | `center` 居中 \| `left` 左对齐；默认 `center` |
+| centerClickable | boolean | `false` | 中间区域（默认插槽）可点击；仅 Web/小程序需要（App 端无 pointer-events 限制），默认 false |
 | show | boolean | `true` | 是否显示，默认 true |
 | customClass | string | `''` | 根扩展 class |
 
@@ -228,3 +229,4 @@ function onBack() {
 1. 页面必须 `navigationStyle: custom`，否则会与系统导航栏叠层。
 2. 微信小程序会为右侧预留胶囊宽度；其它小程序无胶囊 API 时不做错误 margin。
 3. 首页 / tab 页通常设 `show-back=false`，或配置 `home-url` 作为栈底出口。
+4. Web/小程序端中间插槽默认不接收点击（`pointer-events: none`），需开启 `center-clickable` 并在插槽内容上自行绑定 `@click`；App 端无此限制。
