@@ -1,0 +1,1248 @@
+<template>
+	<view class="nax-date-strip" :class="rootClass">
+		<scroll-view
+			:id="scrollDomId"
+			class="nax-date-strip__scroll"
+			direction="horizontal"
+			:show-scrollbar="false"
+			:scroll-left="scrollLeftPx"
+			:scroll-with-animation="scrollWithAnimation"
+			@scroll="onScroll"
+		>
+			<view class="nax-date-strip__list">
+				<view
+					v-for="(day, index) in days"
+					:key="day.key"
+					:id="itemDomId(index)"
+					class="nax-date-strip__item"
+					:class="itemClass(day)"
+					:style="day.style"
+					:hover-class="itemHoverClass(day)"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onDayClick(day)"
+				>
+					<text class="nax-date-strip__week" :class="weekTextClass(day)">{{ topTextOf(day) }}</text>
+					<text class="nax-date-strip__day" :class="dayTextClass(day)" :style="day.style">{{ day.dayText }}</text>
+					<text v-if="hasInfoLine" class="nax-date-strip__info" :class="infoTextClass(day)">{{ infoTextOf(day) || '\u00A0' }}</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	/**
+	 * nax-date-strip
+	 * @description 横向日期选择条。以横条方式展示一段连续日期，支持单选 / 多选 / 范围选择。
+	 * @property {Date|string|Array} modelValue v-model 绑定值；单选为单个 Date/string，多选/范围为数组；空值传 null/[]
+	 * @property {string} type single | multiple | range，默认 single
+	 * @property {Date|string} min 可选最小日期；默认上一周周一
+	 * @property {Date|string} max 可选最大日期；默认下周周日
+	 * @property {Function} disabledDate (date) => boolean，返回 true 禁选
+	 * @property {Function} filter (date) => boolean，返回 true 才展示该日期
+	 * @property {number} maxDays 多选/范围最多可选天数，默认不限
+	 * @property {Function} overMaxDays 超出最多可选天数时回调
+	 * @property {Function} formatter (day) => void，可改写 day.top / day.bottom / day.style / day.className
+	 * @property {boolean} allowSameDay 范围是否允许起止同一天，默认 false
+	 * @property {string} valueFormat 绑定值格式；为空绑定 Date 对象，如 'YYYY-MM-DD' 则绑定字符串
+	 * @property {string} startDateText 开始日期文字，默认「开始」
+	 * @property {string} endDateText 结束日期文字，默认「结束」
+	 * @property {string} sameDateText 同一天文字，默认「开始/结束」
+	 * @property {boolean} showLunar 是否显示农历，默认 false
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue 选中变化
+	 * @event change 选中变化（参数同 update:modelValue）
+	 */
+	const props = defineProps({
+		modelValue: { type: [Object, Array, String], default: null },
+		type: { type: String, default: 'single' },
+		min: { type: [Object, String], default: null },
+		max: { type: [Object, String], default: null },
+		disabledDate: { type: Function, default: null },
+		filter: { type: Function, default: null },
+		maxDays: { type: Number, default: 9007199254740991 },
+		overMaxDays: { type: Function, default: null },
+		formatter: { type: Function, default: null },
+		allowSameDay: { type: Boolean, default: false },
+		valueFormat: { type: String, default: '' },
+		startDateText: { type: String, default: '开始' },
+		endDateText: { type: String, default: '结束' },
+		sameDateText: { type: String, default: '开始/结束' },
+		showLunar: { type: Boolean, default: false },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	type NaxDateStripDay = {
+		key: string
+		date: Date
+		year: number
+		month: number
+		day: number
+		week: number
+		weekText: string
+		dayText: string
+		text: string
+		top: string
+		bottom: string
+		info: string
+		type: string
+		className: string
+		style: string
+		isToday: boolean
+	}
+
+	const days = ref([] as NaxDateStripDay[])
+	const selectedKeys = ref([] as string[])
+	const rangeStart = ref('')
+	const rangeEnd = ref('')
+
+	const uid = 'ds' + Math.floor(Math.random() * 1000000).toString()
+	const scrollDomId = 'nax-date-strip-scroll-' + uid
+	// 选中项居中滚动：scroll-left 定位（scroll-into-view 只能贴左）
+	// 初始定位不做动画（scrollWithAnimation=false），用户点击后再开启动画
+	const scrollWithAnimation = ref(false)
+	const scrollLeftPx = ref(0.0)
+	const actualScrollLeft = ref(0.0)
+	const reportedScrollWidth = ref(0.0)
+	const scrollItemLeft = ref(-1.0)
+	const scrollItemWidth = ref(0.0)
+	const scrollViewLeft = ref(0.0)
+	const scrollViewWidth = ref(0.0)
+	const scrollGotItem = ref(false)
+	const scrollGotView = ref(false)
+	const scrollGotOffset = ref(false)
+	const scrollMeasureToken = ref(0)
+	let pendingScrollIdx = -1
+	let scrollRetryCount = 0
+	let lastScrollKey = ''
+	// 初始定位分阶段调度：用户交互后立即取消，避免后续阶段把滚动拉回初始目标
+	let mountScrollTimer: number = -1
+	let mountScrollDone = false
+	// 初始定位首次成功应用后提前开启动画，避免用户首次点击时动画开关翻转与滚动同帧导致不生效
+	let mountScrollApplied = false
+	const instance = getCurrentInstance()
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	function pad2(n: number): string {
+		if (n < 10) {
+			return '0' + n.toString()
+		}
+		return n.toString()
+	}
+
+	function keyOf(d: Date): string {
+		return d.getFullYear().toString() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+	}
+
+	function dateFromKey(key: string): Date {
+		const parts = key.split('-')
+		const y = parseInt(parts[0])
+		const m = parseInt(parts[1])
+		const d = parseInt(parts[2])
+		return new Date(y, m - 1, d)
+	}
+
+	function todayKey(): string {
+		const now = new Date()
+		return keyOf(now)
+	}
+
+	function toDate(v: any): Date | null {
+		if (v == null) {
+			return null
+		}
+		if (v instanceof Date) {
+			return v as Date
+		}
+		if (typeof v == 'string') {
+			const s = v as string
+			if (s.length == 0) {
+				return null
+			}
+			const d = new Date(s.replace(/-/g, '/'))
+			if (isNaN(d.getTime())) {
+				return null
+			}
+			return d
+		}
+		return null
+	}
+
+	function isArrayValue(val: any): boolean {
+		if (val == null) {
+			return false
+		}
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		return typeof len == 'number'
+	}
+
+	function readModelDates(): Date[] {
+		const out = [] as Date[]
+		const v = props.modelValue
+		if (v == null) {
+			return out
+		}
+		if (typeof v == 'string') {
+			const d = toDate(v)
+			if (d) {
+				out.push(d)
+			}
+			return out
+		}
+		if (v instanceof Date) {
+			out.push(v as Date)
+			return out
+		}
+		if (isArrayValue(v)) {
+			const arr = v as any[]
+			for (let i = 0; i < arr.length; i++) {
+				const d = toDate(arr[i])
+				if (d) {
+					out.push(d)
+				}
+			}
+		}
+		return out
+	}
+
+	function syncFromModel() {
+		const dates = readModelDates()
+		const keys = [] as string[]
+		for (let i = 0; i < dates.length; i++) {
+			keys.push(keyOf(dates[i]))
+		}
+		if (props.type == 'range') {
+			rangeStart.value = keys.length > 0 ? keys[0] : ''
+			rangeEnd.value = keys.length > 1 ? keys[1] : ''
+		}
+		selectedKeys.value = keys
+	}
+
+	function resolveMin(): Date {
+		const v = toDate(props.min)
+		if (v) {
+			return v
+		}
+		const now = new Date()
+		const dow = now.getDay()
+		const diff = dow == 0 ? 6 : dow - 1
+		const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff)
+		return new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - 7)
+	}
+
+	function resolveMax(): Date {
+		const v = toDate(props.max)
+		if (v) {
+			return v
+		}
+		const now = new Date()
+		const dow = now.getDay()
+		const diff = dow == 0 ? 6 : dow - 1
+		const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff)
+		return new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 13)
+	}
+
+	const weekNames = ['日', '一', '二', '三', '四', '五', '六'] as string[]
+
+	function makeDay(d: Date): NaxDateStripDay {
+		const y = d.getFullYear()
+		const m = d.getMonth() + 1
+		const dd = d.getDate()
+		const week = d.getDay()
+		const lunarText = props.showLunar ? lunarFor(d) : ''
+		// 与参考组件一致：中间行显示「月-日」（MM-DD）
+		const dayLabel = formatDateValue(d, 'MM-DD')
+		return {
+			key: keyOf(d),
+			date: d,
+			year: y,
+			month: m,
+			day: dd,
+			week: week,
+			weekText: '周' + weekNames[week],
+			dayText: dayLabel,
+			text: dayLabel,
+			top: '',
+			bottom: '',
+			info: lunarText,
+			type: 'normal',
+			className: '',
+			style: '',
+			isToday: keyOf(d) == todayKey()
+		} as NaxDateStripDay
+	}
+
+	function buildDays() {
+		const minD = resolveMin()
+		const maxD = resolveMax()
+		const maxTime = new Date(maxD.getFullYear(), maxD.getMonth(), maxD.getDate()).getTime()
+		const list = [] as NaxDateStripDay[]
+		let cur = new Date(minD.getFullYear(), minD.getMonth(), minD.getDate())
+		while (true) {
+			const curTime = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate()).getTime()
+			if (curTime > maxTime) {
+				break
+			}
+			const f = props.filter as any
+			if (f == null || typeof f != 'function' || f(cur) == true) {
+				list.push(makeDay(cur))
+			}
+			cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 1)
+		}
+		days.value = list
+	}
+
+	function isDisabledByFn(date: Date): boolean {
+		const fn = props.disabledDate as any
+		if (fn != null && typeof fn == 'function') {
+			return fn(date) == true
+		}
+		return false
+	}
+
+	function computeDayType(day: NaxDateStripDay) {
+		const today = todayKey()
+		let type = 'normal'
+		if (props.type == 'range') {
+			if (rangeStart.value.length > 0 && day.key == rangeStart.value) {
+				type = 'start'
+			} else if (rangeEnd.value.length > 0 && day.key == rangeEnd.value) {
+				type = 'end'
+			} else if (rangeStart.value.length > 0 && rangeEnd.value.length > 0 && day.key > rangeStart.value && day.key < rangeEnd.value) {
+				type = 'middle'
+			} else if (isDisabledByFn(day.date)) {
+				type = 'disabled'
+			} else if (day.key == today) {
+				type = 'today'
+			}
+		} else {
+			if (isDisabledByFn(day.date)) {
+				type = 'disabled'
+			} else if (selectedKeys.value.indexOf(day.key) >= 0) {
+				type = 'selected'
+			} else if (day.key == today) {
+				type = 'today'
+			}
+		}
+		day.type = type
+	}
+
+	function applyFormatter(day: NaxDateStripDay) {
+		day.top = ''
+		day.bottom = ''
+		day.style = ''
+		day.className = ''
+		const fn = props.formatter as any
+		if (fn != null && typeof fn == 'function') {
+			fn(day)
+		}
+	}
+
+	function updateDayStates() {
+		const list = days.value
+		for (let i = 0; i < list.length; i++) {
+			const day = list[i]
+			computeDayType(day)
+			applyFormatter(day)
+		}
+	}
+
+	function indexOfKey(key: string): number {
+		const list = days.value
+		for (let i = 0; i < list.length; i++) {
+			if (list[i].key == key) {
+				return i
+			}
+		}
+		return -1
+	}
+
+	function itemDomId(index: number): string {
+		return 'nax-date-strip-' + uid + '-' + index.toString()
+	}
+
+	function scrollToKey(key: string) {
+		if (key.length == 0) {
+			return
+		}
+		const idx = indexOfKey(key)
+		if (idx < 0) {
+			return
+		}
+		lastScrollKey = key
+		pendingScrollIdx = idx
+		scrollRetryCount = 0
+		measureScrollTo(idx)
+	}
+
+	/** 交互滚动：等一帧让动画开关提交后再定位（鸿蒙首帧动画开关翻转与滚动同帧时不生效） */
+	function scrollToKeyAfterTick(key: string) {
+		nextTick(() => {
+			scrollToKey(key)
+		})
+	}
+
+	/** 测量目标格与滚动容器，计算居中所需的 scroll-left */
+	function measureScrollTo(idx: number) {
+		const itemId = itemDomId(idx)
+		const token = scrollMeasureToken.value + 1
+		scrollMeasureToken.value = token
+		scrollItemLeft.value = -1.0
+		scrollItemWidth.value = 0.0
+		scrollViewLeft.value = 0.0
+		scrollViewWidth.value = 0.0
+		scrollGotItem.value = false
+		scrollGotView.value = false
+		scrollGotOffset.value = false
+
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+
+		query.select('#' + itemId).boundingClientRect((rect: any | null) => {
+			if (token != scrollMeasureToken.value) {
+				return
+			}
+			if (rect != null) {
+				const info = rect as NodeInfo
+				if (info.left != null) {
+					scrollItemLeft.value = info.left as number
+				}
+				if (info.width != null) {
+					scrollItemWidth.value = info.width as number
+				}
+			}
+			scrollGotItem.value = true
+			tryApplyScrollMeasure(token)
+		})
+		query.select('#' + scrollDomId).boundingClientRect((rect2: any | null) => {
+			if (token != scrollMeasureToken.value) {
+				return
+			}
+			if (rect2 != null) {
+				const info2 = rect2 as NodeInfo
+				if (info2.left != null) {
+					scrollViewLeft.value = info2.left as number
+				}
+				if (info2.width != null) {
+					scrollViewWidth.value = info2.width as number
+				}
+			}
+			scrollGotView.value = true
+			tryApplyScrollMeasure(token)
+		})
+		// 读取滚动容器真实滚动位置，避免 @scroll 事件丢失导致 actualScrollLeft 过期
+		query.select('#' + scrollDomId).scrollOffset((off: any | null) => {
+			if (token != scrollMeasureToken.value) {
+				return
+			}
+			if (off != null) {
+				const info3 = off as NodeInfo
+				if (info3.scrollLeft != null) {
+					actualScrollLeft.value = info3.scrollLeft as number
+				}
+			}
+			scrollGotOffset.value = true
+			tryApplyScrollMeasure(token)
+		})
+		query.exec()
+	}
+
+	function tryApplyScrollMeasure(token: number) {
+		if (token != scrollMeasureToken.value) {
+			return
+		}
+		if (!scrollGotItem.value || !scrollGotView.value || !scrollGotOffset.value) {
+			return
+		}
+		const itemWidth = scrollItemWidth.value
+		const viewWidth = scrollViewWidth.value
+		if (itemWidth <= 0 || viewWidth <= 0) {
+			// 首帧未布局完成：稍后重测，保证初始选中项居中
+			if (pendingScrollIdx >= 0 && scrollRetryCount < 5) {
+				scrollRetryCount++
+				setTimeout(() => {
+					if (pendingScrollIdx >= 0) {
+						measureScrollTo(pendingScrollIdx)
+					}
+				}, 80)
+			}
+			return
+		}
+		pendingScrollIdx = -1
+		scrollRetryCount = 0
+		// 初始定位首次成功应用后，稍后再开启动画（让属性先提交），之后的点击滚动带过渡
+		if (!mountScrollDone && !mountScrollApplied) {
+			mountScrollApplied = true
+			setTimeout(() => {
+				scrollWithAnimation.value = true
+			}, 50)
+		}
+		// 内容坐标 = 视口相对位置 + 当前滚动偏移
+		const itemRel = scrollItemLeft.value - scrollViewLeft.value + actualScrollLeft.value
+		var target = itemRel + itemWidth / 2.0 - viewWidth / 2.0
+		if (target < 0) {
+			target = 0
+		}
+		const contentW = contentWidthPx()
+		if (contentW > viewWidth) {
+			const maxScroll = contentW - viewWidth
+			if (target > maxScroll) {
+				target = maxScroll
+			}
+		} else {
+			target = 0
+		}
+		applyScrollLeft(target)
+	}
+
+	/** 内容宽度：取 @scroll 上报值与估算值的较大者，避免上报异常（偏小）时把目标夹到 0 */
+	function contentWidthPx(): number {
+		const count = days.value.length
+		const itemWidth = scrollItemWidth.value
+		const winW = uni.getWindowInfo().windowWidth
+		var estimated = 0
+		if (count > 0 && itemWidth > 0 && winW > 0) {
+			// 默认 --nax-date-strip-item-width 128rpx、--nax-date-strip-column-gap 16rpx、列表左右 padding 8px
+			const gapPx = 16.0 * winW / 750.0
+			estimated = 8.0 + count * (itemWidth + gapPx) - gapPx + 8.0
+		}
+		if (reportedScrollWidth.value > estimated) {
+			return reportedScrollWidth.value
+		}
+		return estimated
+	}
+
+	function applyScrollLeft(target: number) {
+		var next = target
+		if (next < 0) {
+			next = 0
+		}
+		const current = actualScrollLeft.value
+		if (Math.abs(current - next) < 0.5) {
+			return
+		}
+		// prop 已与真实滚动对齐时直接设目标，少一次无效赋值
+		if (Math.abs(scrollLeftPx.value - current) < 0.5) {
+			scrollLeftPx.value = next
+			return
+		}
+		scrollLeftPx.value = current
+		nextTick(() => {
+			scrollLeftPx.value = next
+		})
+	}
+
+	function onScroll(e: UniScrollEvent) {
+		const detail = e.detail
+		actualScrollLeft.value = detail.scrollLeft
+		if (detail.scrollWidth > 0) {
+			reportedScrollWidth.value = detail.scrollWidth
+		}
+	}
+
+	function firstSelectedKey(): string {
+		if (selectedKeys.value.length > 0) {
+			return selectedKeys.value[0]
+		}
+		return ''
+	}
+
+	function isHighlighted(day: NaxDateStripDay): boolean {
+		return day.type == 'selected' || day.type == 'start' || day.type == 'end'
+	}
+
+	function itemClass(day: NaxDateStripDay): string {
+		let cls = ''
+		if (day.type == 'disabled') {
+			cls += ' nax-date-strip__item--disabled'
+		} else if (day.type == 'start') {
+			cls += ' nax-date-strip__item--start'
+		} else if (day.type == 'end') {
+			cls += ' nax-date-strip__item--end'
+		} else if (day.type == 'middle') {
+			cls += ' nax-date-strip__item--middle'
+		} else if (day.type == 'selected') {
+			cls += ' nax-date-strip__item--selected'
+		}
+		if (day.className.length > 0) {
+			cls += ' ' + day.className
+		}
+		return cls.trim()
+	}
+
+	function itemHoverClass(day: NaxDateStripDay): string {
+		if (day.type == 'disabled') {
+			return ''
+		}
+		return 'nax-date-strip__item--hover'
+	}
+
+	function dayTextClass(day: NaxDateStripDay): string {
+		let cls = ''
+		if (day.type == 'disabled') {
+			cls += ' nax-date-strip__day--disabled'
+		} else if (isHighlighted(day)) {
+			cls += ' nax-date-strip__day--active'
+		} else if (day.type == 'today') {
+			cls += ' nax-date-strip__day--today'
+		}
+		return cls.trim()
+	}
+
+	function weekTextClass(day: NaxDateStripDay): string {
+		let cls = ''
+		if (day.type == 'disabled') {
+			cls += ' nax-date-strip__week--disabled'
+		} else if (isHighlighted(day)) {
+			cls += ' nax-date-strip__week--active'
+		}
+		return cls.trim()
+	}
+
+	function infoTextClass(day: NaxDateStripDay): string {
+		let cls = ''
+		if (day.type == 'disabled') {
+			cls += ' nax-date-strip__info--disabled'
+		} else if (isHighlighted(day)) {
+			cls += ' nax-date-strip__info--active'
+		}
+		return cls.trim()
+	}
+
+	function startTextValue(): string {
+		return props.startDateText.length > 0 ? props.startDateText : '开始'
+	}
+
+	function endTextValue(): string {
+		return props.endDateText.length > 0 ? props.endDateText : '结束'
+	}
+
+	function sameDateTextValue(): string {
+		return props.sameDateText.length > 0 ? props.sameDateText : '开始/结束'
+	}
+
+	function topTextOf(day: NaxDateStripDay): string {
+		if (day.top.length > 0) {
+			return day.top
+		}
+		return day.weekText
+	}
+
+	function infoTextOf(day: NaxDateStripDay): string {
+		if (day.bottom.length > 0) {
+			return day.bottom
+		}
+		if (props.type == 'range' && (day.type == 'start' || day.type == 'end')) {
+			if (rangeEnd.value.length > 0 && rangeEnd.value == rangeStart.value) {
+				return sameDateTextValue()
+			}
+			if (day.type == 'start') {
+				return startTextValue()
+			}
+			return endTextValue()
+		}
+		return day.info
+	}
+
+	/** 是否渲染第三行：范围模式或整条有任意底部内容（农历/formatter bottom）时，全部格子预留该行高度 */
+	const hasInfoLine = computed((): boolean => {
+		if (props.type == 'range') {
+			return true
+		}
+		const list = days.value
+		for (let i = 0; i < list.length; i++) {
+			if (infoTextOf(list[i]).length > 0) {
+				return true
+			}
+		}
+		return false
+	})
+
+	function toOutput(key: string): any {
+		const d = dateFromKey(key)
+		if (props.valueFormat.length > 0) {
+			return formatDateValue(d, props.valueFormat)
+		}
+		return d
+	}
+
+	function replaceToken(src: string, token: string, value: string): string {
+		const parts = src.split(token)
+		return parts.join(value)
+	}
+
+	function formatDateValue(d: Date, fmt: string): string {
+		const y = d.getFullYear()
+		const m = d.getMonth() + 1
+		const dd = d.getDate()
+		const h = d.getHours()
+		const min = d.getMinutes()
+		const s = d.getSeconds()
+		const yy = ('' + y).substring(2)
+		let out = fmt
+		out = replaceToken(out, 'YYYY', '' + y)
+		out = replaceToken(out, 'YY', yy)
+		out = replaceToken(out, 'MM', pad2(m))
+		out = replaceToken(out, 'M', '' + m)
+		out = replaceToken(out, 'DD', pad2(dd))
+		out = replaceToken(out, 'D', '' + dd)
+		out = replaceToken(out, 'HH', pad2(h))
+		out = replaceToken(out, 'H', '' + h)
+		out = replaceToken(out, 'mm', pad2(min))
+		out = replaceToken(out, 'ss', pad2(s))
+		return out
+	}
+
+	function buildEmitValue(): any {
+		if (props.type == 'single') {
+			if (selectedKeys.value.length == 0) {
+				return null
+			}
+			return toOutput(selectedKeys.value[0])
+		}
+		const arr = [] as any[]
+		for (let i = 0; i < selectedKeys.value.length; i++) {
+			arr.push(toOutput(selectedKeys.value[i]))
+		}
+		return arr
+	}
+
+	function emitValue() {
+		const value = buildEmitValue()
+		emit('update:modelValue', value)
+		emit('change', value)
+	}
+
+	function onDayClick(day: NaxDateStripDay) {
+		if (day.type == 'disabled') {
+			return
+		}
+		// 用户交互：取消初始定位剩余阶段，居中滚动带过渡动画
+		cancelMountScroll()
+		scrollWithAnimation.value = true
+		const key = day.key
+		if (props.type == 'single') {
+			if (selectedKeys.value.indexOf(key) >= 0) {
+				selectedKeys.value = [] as string[]
+			} else {
+				selectedKeys.value = [key]
+			}
+			emitValue()
+			updateDayStates()
+			scrollToKeyAfterTick(key)
+			return
+		}
+		if (props.type == 'multiple') {
+			const idx = selectedKeys.value.indexOf(key)
+			if (idx >= 0) {
+				const next = [] as string[]
+				for (let i = 0; i < selectedKeys.value.length; i++) {
+					if (i != idx) {
+						next.push(selectedKeys.value[i])
+					}
+				}
+				selectedKeys.value = next
+			} else {
+				if (selectedKeys.value.length >= props.maxDays) {
+					const over = props.overMaxDays as any
+					if (over != null && typeof over == 'function') {
+						over()
+					}
+					return
+				}
+				const next = [] as string[]
+				for (let i = 0; i < selectedKeys.value.length; i++) {
+					next.push(selectedKeys.value[i])
+				}
+				next.push(key)
+				selectedKeys.value = next
+			}
+			emitValue()
+			updateDayStates()
+			scrollToKeyAfterTick(key)
+			return
+		}
+		// range
+		if (rangeStart.value.length == 0) {
+			rangeStart.value = key
+			selectedKeys.value = [key]
+		} else if (rangeEnd.value.length == 0) {
+			if (key == rangeStart.value) {
+				if (props.allowSameDay) {
+					rangeEnd.value = key
+					selectedKeys.value = [rangeStart.value, key]
+				} else {
+					rangeStart.value = key
+					selectedKeys.value = [key]
+				}
+			} else if (key < rangeStart.value) {
+				rangeStart.value = key
+				selectedKeys.value = [key]
+			} else {
+				const count = dayDiff(rangeStart.value, key) + 1
+				if (count > props.maxDays) {
+					const over = props.overMaxDays as any
+					if (over != null && typeof over == 'function') {
+						over()
+					}
+					return
+				}
+				rangeEnd.value = key
+				selectedKeys.value = [rangeStart.value, key]
+			}
+		} else {
+			rangeStart.value = key
+			rangeEnd.value = ''
+			selectedKeys.value = [key]
+		}
+		emitValue()
+		updateDayStates()
+		scrollToKeyAfterTick(key)
+	}
+
+	function dayDiff(keyA: string, keyB: string): number {
+		const a = dateFromKey(keyA)
+		const b = dateFromKey(keyB)
+		return Math.round((b.getTime() - a.getTime()) / 86400000)
+	}
+
+	function configKey(): string {
+		return props.type + '|' + datePropKey(props.min) + '|' + datePropKey(props.max) + '|' + (props.showLunar ? '1' : '0') + '|' + props.valueFormat
+	}
+
+	function datePropKey(v: any): string {
+		const d = toDate(v)
+		if (d) {
+			return keyOf(d)
+		}
+		return ''
+	}
+
+	function keysEqual(a: string[], b: string[]): boolean {
+		if (a.length != b.length) {
+			return false
+		}
+		for (let i = 0; i < a.length; i++) {
+			if (a[i] != b[i]) {
+				return false
+			}
+		}
+		return true
+	}
+
+	function modelKeys(): string[] {
+		const dates = readModelDates()
+		const keys = [] as string[]
+		for (let i = 0; i < dates.length; i++) {
+			keys.push(keyOf(dates[i]))
+		}
+		return keys
+	}
+
+	watch(() => props.modelValue, () => {
+		const keys = modelKeys()
+		if (keysEqual(keys, selectedKeys.value)) {
+			// 点击后 emit 回流的渲染可能重置横向滚动位置：渲染后重新定位到最近点击项
+			if (keys.length > 0 && lastScrollKey.length > 0 && indexOfKey(lastScrollKey) >= 0) {
+				nextTick(() => {
+					scrollToKey(lastScrollKey)
+				})
+			}
+			return
+		}
+		// 外部改值：取消初始定位剩余阶段，同步后定位到最新选中项
+		cancelMountScroll()
+		syncFromModel()
+		updateDayStates()
+		let target = ''
+		if (keys.length > 0) {
+			if (props.type == 'multiple') {
+				target = keys[keys.length - 1]
+			} else {
+				target = keys[0]
+			}
+		}
+		if (target.length > 0 && indexOfKey(target) >= 0) {
+			lastScrollKey = target
+			nextTick(() => {
+				scrollToKey(target)
+			})
+		}
+	})
+
+	watch(() => configKey(), () => {
+		buildDays()
+		syncFromModel()
+		updateDayStates()
+	})
+
+	watch(() => props.filter, () => {
+		buildDays()
+		updateDayStates()
+	})
+
+	watch(() => props.disabledDate, () => {
+		updateDayStates()
+	})
+
+	watch(() => props.formatter, () => {
+		updateDayStates()
+	})
+
+	onMounted(() => {
+		let target = firstSelectedKey()
+		if (target.length == 0) {
+			target = todayKey()
+		}
+		// 分阶段重测：首帧 / 样式与字体就绪 / 慢设备与页面过渡，覆盖布局晚定型场景
+		const stages = [60, 180, 420, 900, 1800] as number[]
+		let stageIdx = 0
+		const attempt = () => {
+			if (mountScrollDone || stageIdx >= stages.length) {
+				// 初始定位全部完成（或被用户交互取消），之后（点击等）的滚动开启动画
+				if (!mountScrollDone) {
+					mountScrollDone = true
+				}
+				scrollWithAnimation.value = true
+				return
+			}
+			const delay = stages[stageIdx]
+			stageIdx++
+			mountScrollTimer = setTimeout(() => {
+				scrollToKey(target)
+				attempt()
+			}, delay)
+		}
+		attempt()
+	})
+
+	/** 取消初始定位剩余阶段（用户交互 / 外部改值后调用） */
+	function cancelMountScroll() {
+		mountScrollDone = true
+		if (mountScrollTimer >= 0) {
+			clearTimeout(mountScrollTimer)
+			mountScrollTimer = -1
+		}
+		scrollWithAnimation.value = true
+	}
+
+	// ==================== 农历 ====================
+
+	const lunarInfo = [
+		0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
+		0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
+		0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
+		0x06566, 0x0d4a0, 0x0ea50, 0x16a95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
+		0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
+		0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5b0, 0x14573, 0x052b0, 0x0a9a8, 0x0e950, 0x06aa0,
+		0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
+		0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b6a0, 0x195a6,
+		0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
+		0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x05ac0, 0x0ab60, 0x096d5, 0x092e0,
+		0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
+		0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
+		0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
+		0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,
+		0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,
+0x14b63, 0x09370, 0x049f8, 0x04970, 0x064b0, 0x168a6, 0x0ea50, 0x06aa0, 0x1a6c4, 0x0aae0,
+0x092e0, 0x0d2e3, 0x0c960, 0x0d557, 0x0d4a0, 0x0da50, 0x05d55, 0x056a0, 0x0a6d0, 0x055d4,
+		0x052d0, 0x0a9b8, 0x0a950, 0x0b4a0, 0x0b6a6, 0x0ad50, 0x055a0, 0x0aba4, 0x0a5b0, 0x052b0,
+		0x0b273, 0x06930, 0x07337, 0x06aa0, 0x0ad50, 0x14b55, 0x04b60, 0x0a570, 0x054e4, 0x0d160,
+		0x0e968, 0x0d520, 0x0daa0, 0x16aa6, 0x056d0, 0x04ae0, 0x0a9d4, 0x0a2d0, 0x0d150, 0x0f252,
+		0x0d520
+	] as number[]
+
+	const lunarMonthNames = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'] as string[]
+	const lunarDayNames = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十', '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'] as string[]
+
+	function lunarLeapMonth(y: number): number {
+		return lunarInfo[y - 1900] & 0xf
+	}
+
+	function lunarLeapDays(y: number): number {
+		if (lunarLeapMonth(y) == 0) {
+			return 0
+		}
+		return (lunarInfo[y - 1900] & 0x10000) != 0 ? 30 : 29
+	}
+
+	function lunarMonthDays(y: number, m: number): number {
+		return (lunarInfo[y - 1900] & (0x10000 >> m)) != 0 ? 30 : 29
+	}
+
+	function lunarYearDays(y: number): number {
+		let sum = 348
+		let i = 0x8000
+		while (i > 0x8) {
+			if ((lunarInfo[y - 1900] & i) != 0) {
+				sum += 1
+			}
+			i = i >> 1
+		}
+		return sum + lunarLeapDays(y)
+	}
+
+	type LunarResult = {
+		year: number
+		month: number
+		day: number
+		leap: boolean
+	}
+
+	function solar2lunar(y: number, m: number, d: number): LunarResult | null {
+		if (y < 1900 || y > 2100) {
+			return null
+		}
+		if (y == 1900 && m == 1 && d < 31) {
+			return null
+		}
+		const base = new Date(1900, 0, 31)
+		const cur = new Date(y, m - 1, d)
+		let offset = Math.round((cur.getTime() - base.getTime()) / 86400000)
+		let i = 1900
+		let temp = 0
+		for (i = 1900; i < 2101 && offset > 0; i++) {
+			temp = lunarYearDays(i)
+			offset -= temp
+		}
+		if (offset < 0) {
+			offset += temp
+			i--
+		}
+		const year = i
+		const leapMon = lunarLeapMonth(year)
+		let isLeap = false
+		for (i = 1; i < 13 && offset > 0; i++) {
+			if (leapMon > 0 && i == leapMon + 1 && !isLeap) {
+				i--
+				isLeap = true
+				temp = lunarLeapDays(year)
+			} else {
+				temp = lunarMonthDays(year, i)
+			}
+			if (isLeap && i == leapMon + 1) {
+				isLeap = false
+			}
+			offset -= temp
+		}
+		if (offset == 0 && leapMon > 0 && i == leapMon + 1) {
+			if (isLeap) {
+				isLeap = false
+			} else {
+				isLeap = true
+				i--
+			}
+		}
+		if (offset < 0) {
+			offset += temp
+			i--
+		}
+		return {
+			year: year,
+			month: i,
+			day: offset + 1,
+			leap: isLeap
+		} as LunarResult
+	}
+
+	function lunarFestival(md: string): string {
+		if (md == '01-01') return '春节'
+		if (md == '01-15') return '元宵'
+		if (md == '02-02') return '龙抬头'
+		if (md == '05-05') return '端午'
+		if (md == '07-07') return '七夕'
+		if (md == '08-15') return '中秋'
+		if (md == '09-09') return '重阳'
+		if (md == '12-08') return '腊八'
+		return ''
+	}
+
+	function lunarFor(d: Date): string {
+		if (!props.showLunar) {
+			return ''
+		}
+		const lunar = solar2lunar(d.getFullYear(), d.getMonth() + 1, d.getDate())
+		if (lunar == null) {
+			return ''
+		}
+		const md = pad2(lunar.month) + '-' + pad2(lunar.day)
+		const fest = lunarFestival(md)
+		if (fest.length > 0) {
+			return fest
+		}
+		if (lunar.day == 1) {
+			const name = lunarMonthNames[lunar.month - 1]
+			if (lunar.leap) {
+				return '闰' + name + '月'
+			}
+			return name + '月'
+		}
+		return lunarDayNames[lunar.day - 1]
+	}
+
+	buildDays()
+	syncFromModel()
+	updateDayStates()
+</script>
+
+<style>
+	.nax-date-strip {
+		flex-direction: column;
+	}
+
+	.nax-date-strip__scroll {
+		width: 100%;
+		flex-direction: row;
+	}
+
+	.nax-date-strip__list {
+		flex-direction: row;
+		align-items: flex-start;
+		padding-top: var(--nax-space-1, 4px);
+		padding-bottom: var(--nax-space-1, 4px);
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-date-strip__item {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: var(--nax-date-strip-item-width, 128rpx);
+		padding-top: var(--nax-date-strip-item-padding-y, 18rpx);
+		padding-bottom: var(--nax-date-strip-item-padding-y, 18rpx);
+		padding-left: var(--nax-date-strip-item-padding-x, 12rpx);
+		padding-right: var(--nax-date-strip-item-padding-x, 12rpx);
+		margin-right: var(--nax-date-strip-column-gap, 16rpx);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-date-strip-item-border-color, transparent);
+		border-radius: var(--nax-radius-md, 3px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		/* App 端不支持嵌套 var 回退，组件 token 覆盖仅 Web/小程序生效 */
+		border-radius: var(--nax-date-strip-item-border-radius, var(--nax-radius-md, 3px));
+		/* #endif */
+		background-color: var(--nax-date-strip-item-bg, transparent);
+	}
+
+	.nax-date-strip__item--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-date-strip__item--disabled {
+		opacity: 0.4;
+	}
+
+	.nax-date-strip__item--selected,
+	.nax-date-strip__item--start,
+	.nax-date-strip__item--end {
+		background-color: var(--nax-color-primary, #18a058);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: var(--nax-date-strip-item-selected-bg, var(--nax-color-primary, #18a058));
+		/* #endif */
+	}
+
+	.nax-date-strip__item--start {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	.nax-date-strip__item--end {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+
+	.nax-date-strip__item--middle {
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		background-color: var(--nax-date-strip-item-middle-bg, var(--nax-color-primary-secondary, #daefe4));
+		/* #endif */
+	}
+
+	.nax-date-strip__week {
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		/* 换序仅 Web/小程序支持；App 端不支持动态 order，保持默认 DOM 顺序 */
+		order: var(--nax-date-strip-item-week-order, 1);
+		/* #endif */
+		font-size: var(--nax-font-size-xs, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		font-size: var(--nax-date-strip-item-week-font-size, var(--nax-font-size-xs, 12px));
+		/* #endif */
+		color: var(--nax-color-text-secondary, #767c82);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		color: var(--nax-date-strip-item-week-color, var(--nax-color-text-secondary, #767c82));
+		/* #endif */
+		text-align: center;
+	}
+
+	.nax-date-strip__day {
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		order: var(--nax-date-strip-item-day-order, 2);
+		/* #endif */
+		margin-top: 2px;
+		font-size: var(--nax-font-size-md, 16px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		font-size: var(--nax-date-strip-item-day-font-size, var(--nax-font-size-md, 16px));
+		/* #endif */
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		color: var(--nax-date-strip-item-day-color, var(--nax-color-text, #333639));
+		/* #endif */
+		text-align: center;
+	}
+
+	.nax-date-strip__info {
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		order: var(--nax-date-strip-item-info-order, 3);
+		/* #endif */
+		margin-top: 2px;
+		font-size: var(--nax-font-size-xs, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		font-size: var(--nax-date-strip-item-info-font-size, var(--nax-font-size-xs, 12px));
+		/* #endif */
+		color: var(--nax-color-text-secondary, #767c82);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		color: var(--nax-date-strip-item-info-color, var(--nax-color-text-secondary, #767c82));
+		/* #endif */
+		text-align: center;
+	}
+
+	.nax-date-strip__week--active,
+	.nax-date-strip__day--active,
+	.nax-date-strip__info--active {
+		color: var(--nax-color-text-inverse, #ffffff);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		color: var(--nax-date-strip-item-selected-color, var(--nax-color-text-inverse, #ffffff));
+		/* #endif */
+	}
+
+	.nax-date-strip__day--today {
+		color: var(--nax-color-primary, #18a058);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		color: var(--nax-date-strip-item-today-color, var(--nax-color-primary, #18a058));
+		/* #endif */
+	}
+
+	.nax-date-strip__week--disabled,
+	.nax-date-strip__day--disabled,
+	.nax-date-strip__info--disabled {
+		color: var(--nax-color-text-disabled, #e5e5ea);
+	}
+</style>

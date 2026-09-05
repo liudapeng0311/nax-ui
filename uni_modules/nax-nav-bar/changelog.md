@@ -1,3 +1,6 @@
+## 0.2.0（2026-09-05）
+- 新增 `centerClickable`：中间区域（default 插槽）可接收点击；仅 Web / 小程序需要开启（`#ifndef APP-ANDROID || APP-IOS || APP-HARMONY` 下 `pointer-events: auto`），App 端无 pointer-events 限制无需处理
+- 修复 App（含蒸汽）组件隔离下 `type="primary"` 时 CSS 变量失效：背景色与反白文字改用内联 `var(--nax-color-*,fallback)` 字符串兜底（`#ifdef APP-ANDROID || APP-IOS || APP-HARMONY`），其它端行为不变
 ## 0.1.6（2026-08-18）
 - 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
 ## 0.1.5（2026-08-18）

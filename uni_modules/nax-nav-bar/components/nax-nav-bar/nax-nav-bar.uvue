@@ -34,24 +34,26 @@
 							:size="backIconSizeText"
 							:color="iconColorValue"
 						></nax-icon>
-					<text
-						v-if="backTextValue.length > 0"
-						class="nax-nav-bar__back-text"
-					:class="backTextClass"
-					:max-lines="1"
-				>{{ backTextValue }}</text>
+<text
+					v-if="backTextValue.length > 0"
+					class="nax-nav-bar__back-text"
+				:class="backTextClass"
+				:style="inverseTextStyle"
+				:max-lines="1"
+			>{{ backTextValue }}</text>
 					</view>
 					<slot name="left"></slot>
 				</view>
 
 				<view class="nax-nav-bar__center" :class="centerClass" :style="centerStyle">
 					<slot>
-					<text
-						v-if="titleValue.length > 0"
-						class="nax-nav-bar__title"
-					:class="titleClass"
-					:max-lines="1"
-				>{{ titleValue }}</text>
+<text
+					v-if="titleValue.length > 0"
+					class="nax-nav-bar__title"
+				:class="titleClass"
+				:style="inverseTextStyle"
+				:max-lines="1"
+			>{{ titleValue }}</text>
 					</slot>
 				</view>
 
@@ -83,6 +85,7 @@
 	 * @property {string} height 内容行高度（纯数字按 px），默认 44
 	 * @property {number} zIndex fixed 层级，默认 980
 	 * @property {string} titleAlign 标题对齐 center | left，默认 center
+	 * @property {boolean} centerClickable 中间区域（默认插槽）可点击；仅 Web/小程序需要（App 端无 pointer-events 限制），默认 false
 	 * @property {boolean} show 是否显示，默认 true
 	 * @property {string} customClass 根扩展 class
 	 * @event back 点击返回（autoBack 前后均会触发）
@@ -154,6 +157,10 @@
 		titleAlign: {
 			type: String,
 			default: 'center'
+		},
+		centerClickable: {
+			type: Boolean,
+			default: false
 		},
 		show: {
 			type: Boolean,
@@ -283,6 +290,12 @@
 		if (props.fixed) {
 			s += 'z-index:' + props.zIndex + ';'
 		}
+		// App（含蒸汽）组件隔离下 CSS 变量不可靠：primary 背景用内联 var 字符串兜底
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (isPrimary.value && !props.immersive) {
+			s += 'background-color:var(--nax-color-primary,#18a058);'
+		}
+		// #endif
 		return s
 	})
 
@@ -330,10 +343,16 @@
 	})
 
 	const centerClass = computed((): string => {
+		var cls = ''
 		if (props.titleAlign == 'left') {
-			return 'nax-nav-bar__center--left'
+			cls += 'nax-nav-bar__center--left'
+		} else {
+			cls += 'nax-nav-bar__center--center'
 		}
-		return 'nax-nav-bar__center--center'
+		if (props.centerClickable) {
+			cls += ' nax-nav-bar__center--clickable'
+		}
+		return cls
 	})
 
 	const centerStyle = computed((): string => {
@@ -353,6 +372,16 @@
 		if (isPrimary.value) {
 			return 'nax-nav-bar__back-text--inverse'
 		}
+		return ''
+	})
+
+	const inverseTextStyle = computed((): string => {
+		// App（含蒸汽）组件隔离下 CSS 变量不可靠：primary 反白文字用内联 var 字符串兜底
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (isPrimary.value) {
+			return 'color:var(--nax-color-text-inverse,#ffffff);'
+		}
+		// #endif
 		return ''
 	})
 
@@ -603,6 +632,13 @@
 	.nax-nav-bar__center--left {
 		justify-content: flex-start;
 	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-nav-bar__center--clickable {
+		/* 开启后中间插槽内容可接收点击；App 端无 pointer-events 限制无需处理 */
+		pointer-events: auto;
+	}
+	/* #endif */
 
 	.nax-nav-bar__title {
 		font-size: var(--nax-font-size-lg, 18px);

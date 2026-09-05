@@ -72,17 +72,26 @@
 				</view>
 
 				<view class="section">
-					<text class="section__title">自定义中间（插槽）</text>
+					<text class="section__title">自定义中间（插槽，可点击切换）</text>
 					<nax-nav-bar
 						:back-icon-color="navBackIconColor"
 						:fixed="false"
 						:safe-area-inset-top="false"
 						:auto-back="false"
+						center-clickable
 						@back="onDemoBack('slot')"
 					>
 						<view class="mid-tabs">
-							<text class="mid-tabs__item mid-tabs__item--on">关注</text>
-							<text class="mid-tabs__item">推荐</text>
+							<text
+								class="mid-tabs__item"
+								:class="activeTab == '关注' ? 'mid-tabs__item--on' : ''"
+								@click="onTabTap('关注')"
+							>关注</text>
+							<text
+								class="mid-tabs__item"
+								:class="activeTab == '推荐' ? 'mid-tabs__item--on' : ''"
+								@click="onTabTap('推荐')"
+							>推荐</text>
 						</view>
 						<template #right>
 							<nax-icon name="plus" size="22"></nax-icon>
@@ -142,6 +151,12 @@
 
 	function onDemoBack(name : string) {
 		lastBack.value = name
+	}
+
+	const activeTab = ref('关注')
+
+	function onTabTap(name : string) {
+		activeTab.value = name
 	}
 
 	function onRightTip() {

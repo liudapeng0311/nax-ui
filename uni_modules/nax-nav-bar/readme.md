@@ -63,6 +63,7 @@
 | height | string | `'44'` | 内容行高度（px；支持 sm/md/lg） |
 | zIndex | number | `980` | fixed 层级 |
 | titleAlign | string | `'center'` | `center` / `left` |
+| centerClickable | boolean | `false` | 中间区域（default 插槽）可接收点击；仅 Web/小程序需开启（App 端无 pointer-events 限制） |
 | show | boolean | `true` | 是否显示 |
 | customClass | string | `''` | 根扩展 class |
 
@@ -77,7 +78,7 @@
 | 插槽 | 说明 |
 |------|------|
 | left | 左侧扩展（位于返回按钮右侧） |
-| default | 中间自定义（覆盖 title） |
+| default | 中间自定义（覆盖 title）；Web/小程序下需 `center-clickable` 才能接收点击 |
 | right | 右侧操作区 |
 
 ## 主题
@@ -102,3 +103,4 @@
 1. 页面必须 `navigationStyle: custom`，否则会与系统导航栏叠层。
 2. 微信小程序会为右侧预留胶囊宽度；其它小程序无胶囊 API 时不做错误 margin。
 3. 首页 / tab 页通常设 `show-back=false`，或配置 `home-url` 作为栈底出口。
+4. Web/小程序端中间插槽默认不接收点击（`pointer-events: none`），需开启 `center-clickable` 并在插槽内容上自行绑定 `@click`；App 端无此限制。

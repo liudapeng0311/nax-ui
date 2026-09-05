@@ -1,0 +1,387 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="nax-date-strip"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+			<view class="nax-theme page" :class="themeExtraClass">
+				<view class="section">
+					<text class="section__title">基础用法（单选）</text>
+					<nax-date-strip v-model="singleValue" @change="onChange"></nax-date-strip>
+					<view class="row">
+						<nax-button size="sm" type="primary" label="设为今天" @click="setToday"></nax-button>
+						<nax-button size="sm" label="清空" @click="clearSingle"></nax-button>
+					</view>
+					<text class="hint">当前值：{{ singleText }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">多选 multiple</text>
+					<nax-date-strip v-model="multipleValue" type="multiple"></nax-date-strip>
+					<text class="hint">当前值：{{ formatValues(multipleValue) }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">范围选择 range</text>
+					<nax-date-strip v-model="rangeValue" type="range"></nax-date-strip>
+					<text class="hint">当前值：{{ formatValues(rangeValue) }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">范围允许同一天</text>
+					<nax-date-strip v-model="sameDayValue" type="range" allow-same-day></nax-date-strip>
+					<text class="hint">当前值：{{ formatValues(sameDayValue) }}（选中后点击同一天收尾）</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">自定义日期范围 min / max</text>
+					<nax-date-strip v-model="rangeValue2" :min="minDate" :max="maxDate"></nax-date-strip>
+					<text class="hint">可选范围：{{ ymd(minDate) }} 至 {{ ymd(maxDate) }}</text>
+					<text class="hint">当前值：{{ singleText2 }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">最多选择天数</text>
+					<text class="hint">多选（最多 3 天）</text>
+					<nax-date-strip
+						v-model="maxMultiValue"
+						type="multiple"
+						:min="jan2024_1"
+						:max="jan2024_15"
+						:max-days="3"
+						:over-max-days="onOverMaxDays"
+					></nax-date-strip>
+					<text class="hint">当前值：{{ formatValues(maxMultiValue) }}</text>
+					<text class="hint">范围（最多 5 天）</text>
+					<nax-date-strip
+						v-model="maxRangeValue"
+						type="range"
+						:min="jan2024_1"
+						:max="jan2024_20"
+						:max-days="5"
+						:over-max-days="onOverMaxDays"
+					></nax-date-strip>
+					<text class="hint">当前值：{{ formatValues(maxRangeValue) }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">禁用日期 disabledDate</text>
+					<text class="hint">仅开放工作日</text>
+					<nax-date-strip
+						v-model="disabledValue"
+						:min="jan2024_1"
+						:max="jan2024_15"
+						:disabled-date="disabledWeekend"
+					></nax-date-strip>
+					<text class="hint">当前值：{{ singleText3 }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">过滤日期 filter</text>
+					<text class="hint">只展示工作日（格子不连续）</text>
+					<nax-date-strip
+						v-model="filterValue"
+						:min="jan2024_1"
+						:max="jan2024_15"
+						:filter="onlyWorkday"
+					></nax-date-strip>
+					<text class="hint">当前值：{{ singleText4 }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">格式化日期 formatter</text>
+					<nax-date-strip
+						v-model="formatterValue"
+						:min="jan2024_1"
+						:max="jan2024_15"
+						:formatter="formatter"
+					></nax-date-strip>
+					<text class="hint">周末显示「休」；8 号显示「今天 / 出发」</text>
+					<text class="hint">当前值：{{ singleText5 }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">展示农历 show-lunar</text>
+					<nax-date-strip
+						v-model="lunarValue"
+						:min="lunarMin"
+						:max="lunarMax"
+						show-lunar
+					></nax-date-strip>
+					<text class="hint">当前值：{{ singleText6 }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">值格式化 value-format</text>
+					<nax-date-strip
+						v-model="strValue"
+						:min="jan2024_1"
+						:max="jan2024_15"
+						value-format="YYYY-MM-DD"
+					></nax-date-strip>
+					<text class="hint">绑定值为字符串：{{ strValueText }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">自定义样式（CSS 变量）</text>
+					<nax-date-strip
+						v-model="customValue"
+						style="--nax-date-strip-column-gap:0px;--nax-date-strip-item-border-radius:0px;--nax-date-strip-item-selected-bg:var(--nax-color-warning);--nax-date-strip-item-today-color:var(--nax-color-warning);--nax-date-strip-item-middle-bg:#fcefda;--nax-date-strip-item-week-order:3;background-color:var(--nax-color-bg, #ffffff);"
+					></nax-date-strip>
+					<text class="hint">当前值：{{ singleText7 }}</text>
+				</view>
+
+				<view class="section">
+					<text class="section__title">最近事件</text>
+					<text class="hint">{{ lastEvent }}</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	function pad2(n: number): string {
+		if (n < 10) {
+			return '0' + n.toString()
+		}
+		return n.toString()
+	}
+
+	function ymd(d: Date): string {
+		return d.getFullYear().toString() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+	}
+
+	function formatSingle(v: Date | null): string {
+		if (v == null) {
+			return 'null'
+		}
+		return ymd(v)
+	}
+
+	function formatValues(value: Date[]): string {
+		if (value.length == 0) {
+			return '[]'
+		}
+		const parts = [] as string[]
+		for (let i = 0; i < value.length; i++) {
+			parts.push(ymd(value[i]))
+		}
+		return '[' + parts.join(', ') + ']'
+	}
+
+	function isArrayValue(val: any): boolean {
+		if (val == null) {
+			return false
+		}
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		return typeof maybe.length == 'number'
+	}
+
+	const lastEvent = ref('无')
+	const onChange = (value: any) => {
+		if (value == null) {
+			lastEvent.value = 'change: null'
+			return
+		}
+		if (value instanceof Date) {
+			lastEvent.value = 'change: ' + ymd(value)
+			return
+		}
+		if (isArrayValue(value)) {
+			const arr = value as Date[]
+			lastEvent.value = 'change: ' + formatValues(arr)
+			return
+		}
+		lastEvent.value = 'change: ' + value.toString()
+	}
+
+	// 基础用法
+	const singleValue = ref<Date | null>(new Date())
+	const singleText = computed((): string => {
+		return formatSingle(singleValue.value)
+	})
+
+	function setToday() {
+		singleValue.value = new Date()
+	}
+
+	function clearSingle() {
+		singleValue.value = null
+	}
+
+	// 多选 / 范围
+	const multipleValue = ref<Date[]>([])
+	const rangeValue = ref<Date[]>([])
+	const sameDayValue = ref<Date[]>([])
+
+	// 自定义范围
+	const minDate = new Date(2024, 0, 5)
+	const maxDate = new Date(2024, 0, 19)
+	const rangeValue2 = ref<Date[]>([])
+	const singleText2 = computed((): string => {
+		return formatValues(rangeValue2.value)
+	})
+
+	// 最多选择天数
+	const jan2024_1 = new Date(2024, 0, 1)
+	const jan2024_15 = new Date(2024, 0, 15)
+	const jan2024_20 = new Date(2024, 0, 20)
+	const maxMultiValue = ref<Date[]>([])
+	const maxRangeValue = ref<Date[]>([])
+
+	function onOverMaxDays() {
+		uni.showToast({
+			title: '已超过最大可选天数',
+			icon: 'none'
+		})
+	}
+
+	// 禁用日期
+	const disabledValue = ref<Date | null>(null)
+	const singleText3 = computed((): string => {
+		return formatSingle(disabledValue.value)
+	})
+
+	function disabledWeekend(date: Date): boolean {
+		const w = date.getDay()
+		return w == 0 || w == 6
+	}
+
+	// 过滤日期
+	const filterValue = ref<Date | null>(null)
+	const singleText4 = computed((): string => {
+		return formatSingle(filterValue.value)
+	})
+
+	function onlyWorkday(date: Date): boolean {
+		const w = date.getDay()
+		return w != 0 && w != 6
+	}
+
+	// 格式化日期
+	const formatterValue = ref<Date | null>(null)
+	const singleText5 = computed((): string => {
+		return formatSingle(formatterValue.value)
+	})
+
+	function formatter(day: any) {
+		if (day.date.getDay() == 0 || day.date.getDay() == 6) {
+			day.bottom = '休'
+			if (day.type != 'selected') {
+				day.style = 'background-color:#fdf3e4;color:#c97c10;border-color:#fcefda;'
+			}
+		}
+		if (day.date.getDate() == 8) {
+			day.top = '今天'
+			day.bottom = '出发'
+		}
+	}
+
+	// 农历
+	const lunarMin = new Date(2024, 1, 8)
+	const lunarMax = new Date(2024, 1, 16)
+	const lunarValue = ref<Date | null>(null)
+	const singleText6 = computed((): string => {
+		return formatSingle(lunarValue.value)
+	})
+
+	// 值格式化
+	const strValue = ref<string | null>(null)
+	const strValueText = computed((): string => {
+		if (strValue.value == null) {
+			return 'null'
+		}
+		return strValue.value
+	})
+
+	// 自定义样式
+	const customValue = ref<Date | null>(new Date())
+	const singleText7 = computed((): string => {
+		return formatSingle(customValue.value)
+	})
+</script>
+
+<style>
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		padding-bottom: 40px;
+		flex-direction: column;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		flex-direction: column;
+		margin-bottom: 16px;
+		padding: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 10px;
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 10px;
+	}
+</style>
