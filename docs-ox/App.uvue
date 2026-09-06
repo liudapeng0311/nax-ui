@@ -1,0 +1,19 @@
+<script lang="uts">
+import { registerOxUniPress, createLocalProvider } from '@/uni_modules/ox-uni-press/utils/runtime.uts'
+import { siteInfo, sitePages, navigation, sidebarGroups, searchIndex } from './content/manifest.uts'
+import { documents } from './content/documents.uts'
+
+export default {
+  onLaunch() {
+    registerOxUniPress({
+      provider: createLocalProvider(siteInfo, sitePages, navigation, sidebarGroups, searchIndex, documents),
+    })
+  },
+}
+</script>
+
+<style>
+/* @import must be first (vite/css) */
+@import "@/uni_modules/nax-ui-theme/theme/default.css";
+@import "@/uni_modules/nax-ui-theme/theme/dark.css";
+</style>

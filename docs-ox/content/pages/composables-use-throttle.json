@@ -1,0 +1,1507 @@
+{
+  "meta": {
+    "id": "composables-use-throttle",
+    "path": "/composables/use-throttle",
+    "source": "composables/use-throttle.md",
+    "title": "useThrottle 节流",
+    "headings": [
+      {
+        "id": "usethrottle-节流",
+        "text": "useThrottle 节流",
+        "level": 1
+      },
+      {
+        "id": "签名",
+        "text": "签名",
+        "level": 2
+      },
+      {
+        "id": "参数",
+        "text": "参数",
+        "level": 2
+      },
+      {
+        "id": "返回-handle",
+        "text": "返回 Handle",
+        "level": 2
+      },
+      {
+        "id": "用法示例",
+        "text": "用法示例",
+        "level": 2
+      },
+      {
+        "id": "注意事项",
+        "text": "注意事项",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T01:55:47.372Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "usethrottle-节流"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "useThrottle 节流",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "无头节流：窗口期内最多执行一次（leading + trailing）。适合滚动、拖拽、按钮连点等需要限频的场景。",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 1
+              },
+              "end": {
+                "line": 3,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 2,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "签名"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "签名",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 5,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "useThrottle(fn : (payload : any | null) => void, wait? : number) : NaxThrottleHandle",
+        "attrs": {
+          "lang": "ts"
+        },
+        "source": {
+          "start": {
+            "line": 7,
+            "column": 1
+          },
+          "end": {
+            "line": 8,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "useThrottle",
+            "c": "fn"
+          },
+          {
+            "t": "(fn : (payload : "
+          },
+          {
+            "t": "any",
+            "c": "kw"
+          },
+          {
+            "t": " | "
+          },
+          {
+            "t": "null",
+            "c": "kw"
+          },
+          {
+            "t": ") => "
+          },
+          {
+            "t": "void",
+            "c": "kw"
+          },
+          {
+            "t": ", wait? : "
+          },
+          {
+            "t": "number",
+            "c": "kw"
+          },
+          {
+            "t": ") : "
+          },
+          {
+            "t": "NaxThrottleHandle",
+            "c": "type"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "必须在 setup 内同步调用。",
+            "source": {
+              "start": {
+                "line": 11,
+                "column": 1
+              },
+              "end": {
+                "line": 11,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 11,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "参数"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "参数",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 13,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 13,
+            "column": 1
+          },
+          "end": {
+            "line": 13,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "参数",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 15,
+                "column": 1
+              },
+              "end": {
+                "line": 15,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "fn",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "(payload: any | null) => void",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "—",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "节流后执行的回调",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 17,
+                "column": 1
+              },
+              "end": {
+                "line": 17,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "wait",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "300",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "窗口期（毫秒）",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 18,
+                "column": 1
+              },
+              "end": {
+                "line": 18,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 15,
+            "column": 1
+          },
+          "end": {
+            "line": 17,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "返回-handle"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "返回 Handle",
+            "source": {
+              "start": {
+                "line": 20,
+                "column": 1
+              },
+              "end": {
+                "line": 20,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 20,
+            "column": 1
+          },
+          "end": {
+            "line": 20,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "成员",
+                    "source": {
+                      "start": {
+                        "line": 22,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 22,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 22,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 22,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 22,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 22,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 22,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 22,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 22,
+                "column": 1
+              },
+              "end": {
+                "line": 22,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "call(payload)",
+                    "source": {
+                      "start": {
+                        "line": 24,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 24,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 24,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 24,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "触发一次调用（payload 为单载荷，多参数请包对象传入）；窗口内首次立即执行，窗口结束后若期间有调用再执行一次尾调用",
+                    "source": {
+                      "start": {
+                        "line": 24,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 24,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 24,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 24,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 24,
+                "column": 1
+              },
+              "end": {
+                "line": 24,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "cancel()",
+                    "source": {
+                      "start": {
+                        "line": 25,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 25,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 25,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 25,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "取消未执行的尾调用",
+                    "source": {
+                      "start": {
+                        "line": 25,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 25,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 25,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 25,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 25,
+                "column": 1
+              },
+              "end": {
+                "line": 25,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "flush()",
+                    "source": {
+                      "start": {
+                        "line": 26,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 26,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 26,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 26,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "立即执行待处理的尾调用并清空",
+                    "source": {
+                      "start": {
+                        "line": 26,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 26,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 26,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 26,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 26,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 22,
+            "column": 1
+          },
+          "end": {
+            "line": 25,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "用法示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "用法示例",
+            "source": {
+              "start": {
+                "line": 28,
+                "column": 1
+              },
+              "end": {
+                "line": 28,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 28,
+            "column": 1
+          },
+          "end": {
+            "line": 28,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "滚动位置上报（每 200ms 至多一次）：",
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 1
+              },
+              "end": {
+                "line": 30,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 30,
+            "column": 1
+          },
+          "end": {
+            "line": 29,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<script setup>\n    import { useThrottle } from '@/uni_modules/nax-use/composables/use-throttle.uts'\n\n    const report = useThrottle((payload : any | null) => {\n        const pos = payload as { scrollTop : number }\n        console.log('上报：', pos.scrollTop)\n    }, 200)\n    // 滚动事件里：report.call({ scrollTop })\n</script>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 32,
+            "column": 1
+          },
+          "end": {
+            "line": 41,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<script",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "setup",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    import { useThrottle } from '@/uni_modules/nax-use/composables/use-throttle.uts'\n\n    const report = useThrottle((payload : any | null) => {\n        const pos = payload as { scrollTop : number }\n        console.log('上报：', pos.scrollTop)\n    }, 200)\n    // 滚动事件里：report.call({ scrollTop })\n"
+          },
+          {
+            "t": "</script>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "按钮防连点（提交订单）：",
+            "source": {
+              "start": {
+                "line": 44,
+                "column": 1
+              },
+              "end": {
+                "line": 44,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 44,
+            "column": 1
+          },
+          "end": {
+            "line": 43,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<script setup>\n    import { useThrottle } from '@/uni_modules/nax-use/composables/use-throttle.uts'\n\n    const submit = useThrottle(() => {\n        // 提交请求（自带首触发 + 尾触发，连点也只发一次）\n    }, 1000)\n\n    function onSubmit() {\n        submit.call(null)\n    }\n</script>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 46,
+            "column": 1
+          },
+          "end": {
+            "line": 57,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<script",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "setup",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    import { useThrottle } from '@/uni_modules/nax-use/composables/use-throttle.uts'\n\n    const submit = useThrottle(() => {\n        // 提交请求（自带首触发 + 尾触发，连点也只发一次）\n    }, 1000)\n\n    function onSubmit() {\n        submit.call(null)\n    }\n"
+          },
+          {
+            "t": "</script>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "注意事项"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "注意事项",
+            "source": {
+              "start": {
+                "line": 60,
+                "column": 1
+              },
+              "end": {
+                "line": 60,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 60,
+            "column": 1
+          },
+          "end": {
+            "line": 60,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "与 ",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "useDebounce",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 3
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 3
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 的区别：节流保证窗口内至多一次执行（leading + trailing），防抖保证停止后执行最后一次",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 16
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 16
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 62,
+                "column": 1
+              },
+              "end": {
+                "line": 62,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "单载荷设计（",
+                    "source": {
+                      "start": {
+                        "line": 63,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 63,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "payload: any | null",
+                    "source": {
+                      "start": {
+                        "line": 63,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 63,
+                        "column": 7
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "），多参数请包对象传入",
+                    "source": {
+                      "start": {
+                        "line": 63,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 63,
+                        "column": 28
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 63,
+                "column": 1
+              },
+              "end": {
+                "line": 63,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "必须在 setup 内同步调用",
+                    "source": {
+                      "start": {
+                        "line": 64,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 64,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 64,
+                "column": 1
+              },
+              "end": {
+                "line": 64,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 62,
+            "column": 1
+          },
+          "end": {
+            "line": 64,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 64,
+        "column": 1
+      }
+    }
+  }
+}

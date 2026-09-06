@@ -1,0 +1,138 @@
+# nax-tabs
+
+顶部标签导航（内容切换条）。面向 uni-app x：数据驱动、可横向滚动/均分宽度、主题色指示条、轻量徽标。**只负责导航 UI**，内容区由页面自管。
+
+## 用法
+
+```uvue
+<template>
+  <view class="page">
+    <nax-tabs v-model="current" :list="tabs" @change="onChange" />
+    <view v-if="current === 0">关注</view>
+    <view v-else-if="current === 1">推荐</view>
+    <view v-else>热榜</view>
+  </view>
+</template>
+
+<script setup lang="uts">
+const current = ref(0)
+const tabs = [
+  { name: '关注', badge: 3 },
+  { name: '推荐' },
+  { name: '热榜', dot: true },
+  { name: '已下线', disabled: true }
+]
+
+function onChange(index: number) {
+  console.log('tab', index)
+}
+</script>
+```
+
+## Props
+
+| 属性 | 类型 | 默认 | 说明 |
+|------|------|------|
+| modelValue | number | `0` | 当前选中下标（v-model） |
+| list | array | `[]` | 标签项列表 |
+| keyName | string | `'name'` | 文案优先字段名 |
+| scrollable | boolean | `true` | 横向滚动；`false` 时均分宽度 |
+| scrollAlign | string | 'center' | 可滚动时激活项对齐：left 必要时贴左并露出前一项 / center 居中 |
+| centered | boolean | `false` | 少项居中：内容不满容器宽时整体居中（可滚动模式超宽仍可横滑；均分模式不拉伸、按内容宽居中） |
+| showLine | boolean | `true` | 底部指示条 |
+| lineWidth | string | `'20'` | 指示条宽度（纯数字按 px） |
+| lineHeight | string | `'3'` | 指示条高度（纯数字按 px） |
+| size | string | `'md'` | `sm` / `md` / `lg` |
+| border | boolean | `true` | 底部分割线 |
+| duration | number | `300` | 指示条过渡 ms |
+| sticky | boolean | `false` | CSS sticky 吸顶（Web/小程序；App 不支持） |
+| offsetTop | string | `'0'` | sticky 时 `top`（纯数字按 px） |
+| badgeMax | number | `99` | 数字徽标上限 |
+| customClass | string | `''` | 根扩展 class |
+
+### list 项字段
+
+| 字段 | 说明 |
+|------|------|
+| name / text / label / title | 文案（`keyName` 优先） |
+| badge / count | 数字或文本徽标 |
+| dot / isDot | 红点 |
+| disabled | 禁用 |
+
+字符串项也可：`list={['关注','推荐']}`。
+
+## 事件
+
+| 事件 | 参数 | 说明 |
+|------|------|------|
+| update:modelValue | number | v-model |
+| change | number | 选中下标变化 |
+| click | number | 点击项（含重复点同一项；禁用项不触发） |
+
+## 主题
+
+通过 CSS 变量覆盖：
+
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 背景色 |
+| `--nax-color-border` | 边框色 |
+| `--nax-color-error` | 错误色 |
+| `--nax-color-primary` | 主题主色 |
+| `--nax-color-text-secondary` | 次要文字色 |
+
+## 依赖
+
+- `nax-ui-theme`（可选，提供统一 token）
+
+## 与内容区联动（全屏选项卡配方）
+
+**不提供**独立的 `nax-tabs-swiper` 组件。全屏选项卡 = `nax-tabs` + 原生 `swiper` 组合：
+
+1. 共用一个 `current`（tabs 用 `v-model`，swiper 用 `:current` + `@change`）
+2. swiper 关闭 `circular`，避免下标与 Tab 语义错位
+3. 内容区高度 = 窗口高度 − tabs 高度；每页内用 `scroll-view` 单独滚动
+4. 业务负责懒加载、嵌套列表、空状态等，不要塞进导航组件
+
+```uvue
+<template>
+  <view class="page">
+    <nax-tabs v-model="current" :list="tabs" />
+    <swiper
+      :current="current"
+      :circular="false"
+      :style="'height:' + contentH + 'px'"
+      @change="onSwiperChange"
+    >
+      <swiper-item>
+        <scroll-view scroll-y :style="'height:' + contentH + 'px'">
+          <!-- 面板 0 -->
+        </scroll-view>
+      </swiper-item>
+      <swiper-item>
+        <scroll-view scroll-y :style="'height:' + contentH + 'px'">
+          <!-- 面板 1 -->
+        </scroll-view>
+      </swiper-item>
+    </swiper>
+  </view>
+</template>
+
+<script setup lang="uts">
+const current = ref(0)
+const contentH = ref(400)
+const tabs = [{ name: '关注' }, { name: '推荐' }]
+
+function onSwiperChange(e: UniSwiperChangeEvent) {
+  current.value = e.detail.current
+}
+</script>
+```
+
+## 与 nax-tabbar
+
+| | nax-tabs | nax-tabbar |
+|--|----------|------------|
+| 位置 | 顶部内容导航 | 底部应用级栏 |
+| 数量 | 可很多（滚动） | 通常 2–5 |
+| 内容 | 页面内切换 | 常配合多页/主框架 |

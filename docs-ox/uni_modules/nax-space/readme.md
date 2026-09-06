@@ -1,0 +1,67 @@
+# nax-space
+
+间距容器：横向 / 纵向排列子项，并统一间距。
+
+> 因 uni-app x **样式隔离 2.0**，父组件无法给任意子节点加 margin。请用 **`nax-space-item`** 包裹每个子项（与 `nax-grid` / `nax-grid-item` 同模式）。
+
+## 用法
+
+```uvue
+<nax-space size="md">
+  <nax-space-item>
+    <nax-button type="primary" label="主要"></nax-button>
+  </nax-space-item>
+  <nax-space-item>
+    <nax-button label="默认"></nax-button>
+  </nax-space-item>
+  <nax-space-item>
+    <nax-button variant="tertiary" label="次要"></nax-button>
+  </nax-space-item>
+</nax-space>
+
+<!-- 纵向 -->
+<nax-space direction="vertical" size="sm" fill>
+  <nax-space-item>
+    <nax-button block label="按钮 A"></nax-button>
+  </nax-space-item>
+  <nax-space-item>
+    <nax-button block label="按钮 B"></nax-button>
+  </nax-space-item>
+</nax-space>
+```
+
+## nax-space Props
+
+| 属性 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| direction | string | `horizontal` | `horizontal` 横向 \| `vertical` 纵向（兼容 `row` / `column`） |
+| size | string | `md` | 间距：`xs` 特小 \| `sm` 小 \| `md` 中 \| `lg` 大 \| `xl` 特大，或 token 档 `1`~`10`，或纯数字 px |
+| wrap | boolean | `false` | 横向是否换行 |
+| align | string | `center` | 交叉轴：`start` 起点 \| `center` 居中 \| `end` 终点 \| `baseline` 基线 \| `stretch` 拉伸 |
+| justify | string | `start` | 主轴：`start` 起点 \| `center` 居中 \| `end` 终点 \| `between` 两端对齐 \| `around` 环绕 \| `evenly` 均匀分布 |
+| fill | boolean | `false` | 子项拉伸（纵向时 item 宽 100%） |
+| custom-class | string | `''` | 根节点扩展 class |
+
+### size 对照
+
+| size | 像素 | 对应 token |
+|------|------|------------|
+| `xs` / `1` | 4 | `--nax-space-1` |
+| `sm` / `2` | 8 | `--nax-space-2` |
+| `md` / `3` | 12 | `--nax-space-3` |
+| `lg` / `4` | 16 | `--nax-space-4` |
+| `xl` / `5` | 20 | `--nax-space-5` |
+| `6` / `8` / `10` | 24 / 32 / 40 | 对应 token |
+| `"10"` / `"12px"` | 按数值 | 自定义 |
+
+## nax-space-item
+
+| 属性 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| custom-class | string | `''` | 根节点扩展 class |
+
+插槽 `default`：实际内容。
+
+## 依赖
+
+- `nax-ui-theme`（可选，设计 token 文档对齐）

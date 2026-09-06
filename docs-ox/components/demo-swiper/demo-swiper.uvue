@@ -1,0 +1,56 @@
+<template>
+  <view class="demo-swiper">
+    <text class="dsec">基础（点指示器）</text>
+    <nax-swiper :list="slides" height="160" class="mb"></nax-swiper>
+
+    <text class="dsec">自动播放 + 循环</text>
+    <nax-swiper :list="slides" height="160" autoplay :interval="2500" circular class="mb"></nax-swiper>
+
+    <text class="dsec">数字指示器</text>
+    <nax-swiper :list="slides" height="160" indicator indicator-type="number" indicator-position="bottom-right" class="mb"></nax-swiper>
+
+    <text class="dsec">受控 current</text>
+    <nax-swiper :list="slides" height="160" v-model:current="current" :indicator="true" class="mb"></nax-swiper>
+    <view class="row">
+      <nax-button size="sm" label="上一页" @click="prev"></nax-button>
+      <nax-button size="sm" type="primary" label="下一页" @click="next"></nax-button>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const current = ref(0)
+const slides = ['/static/logo.png', '/static/logo.png', '/static/logo.png']
+
+function prev() {
+  current.value = current.value === 0 ? 2 : current.value - 1
+}
+
+function next() {
+  current.value = current.value >= 2 ? 0 : current.value + 1
+}
+</script>
+
+<style>
+.demo-swiper {
+  flex-direction: column;
+}
+
+.mb {
+  margin-bottom: 16px;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

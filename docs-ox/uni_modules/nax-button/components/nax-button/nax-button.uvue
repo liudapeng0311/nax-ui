@@ -1,0 +1,969 @@
+<template>
+	<view
+		class="nax-button"
+		:class="rootClass"
+		:hover-class="hoverClassName"
+		:hover-start-time="20"
+		:hover-stay-time="70"
+		@click="onClick"
+	>
+		<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
+		<view
+			v-if="loading"
+			:id="loadingDomId"
+			class="nax-button__loading"
+			:class="loadingClass"
+			:style="loadingStyle"
+		>
+			<nax-icon name="loading" :size="iconSizeName" :color="iconColor"></nax-icon>
+		</view>
+		<!-- #endif -->
+		<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+		<view
+			v-if="loading"
+			class="nax-button__loading"
+			:class="loadingClass"
+		>
+			<nax-icon name="loading" :size="iconSizeName" :color="iconColor"></nax-icon>
+		</view>
+		<!-- #endif -->
+		<view
+			v-if="!loading && hasIcon && iconAtStart"
+			class="nax-button__icon"
+			:class="iconClass"
+		>
+			<nax-icon :name="icon" :size="iconSizeName" :color="iconColor"></nax-icon>
+		</view>
+		<slot v-if="!loading" name="icon"></slot>
+		<!-- #ifndef APP-HARMONY -->
+		<text
+			v-if="label.length > 0"
+			class="nax-button__text"
+			:max-lines="1"
+			:class="textClass"
+		>{{ label }}</text>
+		<!-- #endif -->
+		<!-- #ifdef APP-HARMONY -->
+		<!-- 鸿蒙：max-lines / text-overflow 在无宽度约束的 flex 子项上误省略，保留完整展示 -->
+		<text
+			v-if="label.length > 0"
+			class="nax-button__text"
+			:class="textClass"
+		>{{ label }}</text>
+		<!-- #endif -->
+		<view
+			v-if="!loading && hasIcon && iconAtEnd"
+			class="nax-button__icon nax-button__icon--end"
+			:class="iconClass"
+		>
+			<nax-icon :name="icon" :size="iconSizeName" :color="iconColor"></nax-icon>
+		</view>
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-button
+	 * @description 通用按钮。色系与层级参考 ：基础 / 次要 / 次次要 / 次次次要 / 虚线 / 禁用。
+	 * @property {string} type default | primary | info | success | warning | error（兼容 tertiary / danger）
+	 * @property {string} variant solid | secondary | tertiary | quaternary | outline | dashed | text | light
+	 * @property {string} size sm | md | lg
+	 * @property {string} shape square | round | circle
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} loading 加载中（阻止点击；显示旋转 loading 图标）
+	 * @property {boolean} block 块级宽度
+	 * @property {string} label 文案；也可用默认插槽扩展
+	 * @property {string} icon nax-icon 图标名；空则不渲染内置图标
+	 * @property {string} iconPosition left | right，默认 left
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击（disabled / loading 时不触发）
+	 * @slot default 自定义内容
+	 * @slot icon 自定义前缀图标区域（与 icon prop 可并存；loading 时隐藏）
+	 */
+	const props = defineProps({
+		type: {
+			type: String,
+			default: 'default'
+		},
+		variant: {
+			type: String,
+			default: 'solid'
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		shape: {
+			type: String,
+			default: 'square'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		loading: {
+			type: Boolean,
+			default: false
+		},
+		block: {
+			type: Boolean,
+			default: false
+		},
+		label: {
+			type: String,
+			default: ''
+		},
+		icon: {
+			type: String,
+			default: ''
+		},
+		iconPosition: {
+			type: String,
+			default: 'left'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click'])
+
+	function normalizeType(value : string) : string {
+		// danger 兼容为 error
+		if (value == 'danger') {
+			return 'error'
+		}
+		// type=tertiary 仅表示色系 default，层级由 variant 处理
+		if (value == 'tertiary') {
+			return 'default'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function normalizeVariant(typeValue : string, variantValue : string) : string {
+		// 兼容旧写法：type="tertiary" 等价次次要
+		if (typeValue == 'tertiary' && (variantValue == 'solid' || variantValue.length == 0)) {
+			return 'tertiary'
+		}
+		// light → secondary（次要）
+		if (variantValue == 'light' || variantValue == 'secondary') {
+			return 'secondary'
+		}
+		// text → quaternary（次次次要）
+		if (variantValue == 'text' || variantValue == 'quaternary') {
+			return 'quaternary'
+		}
+		if (
+			variantValue == 'tertiary' ||
+			variantValue == 'outline' ||
+			variantValue == 'dashed'
+		) {
+			return variantValue
+		}
+		return 'solid'
+	}
+
+	function normalizeSize(value : string) : string {
+		if (value == 'sm' || value == 'lg') {
+			return value
+		}
+		return 'md'
+	}
+
+	function normalizeShape(value : string) : string {
+		if (value == 'round' || value == 'circle') {
+			return value
+		}
+		return 'square'
+	}
+
+	function normalizeIconPosition(value : string) : string {
+		if (value == 'right' || value == 'end') {
+			return 'right'
+		}
+		return 'left'
+	}
+
+	function onClick() {
+		if (props.disabled || props.loading) {
+			return
+		}
+		emit('click')
+	}
+
+
+	/**
+	 *  层级映射：
+	 * - solid      基础（主实心 / default 描边底）
+	 * - secondary  次要（浅底填充）
+	 * - tertiary   次次要（更弱浅底）
+	 * - quaternary 次次次要（无底无边）
+	 * - outline    描边
+	 * - dashed     虚线
+	 * - text/light 兼容别名 → quaternary / secondary
+	 */
+	const tone = computed((): string => {
+		const typeName = normalizeType(props.type)
+		const variantName = normalizeVariant(props.type, props.variant)
+		return typeName + '-' + variantName
+	})
+
+	const rootClass = computed((): string => {
+		const sizeName = normalizeSize(props.size)
+		const shapeName = normalizeShape(props.shape)
+		const variantName = normalizeVariant(props.type, props.variant)
+		let cls = 'nax-button--' + tone.value
+		cls += ' nax-button--' + sizeName
+		cls += ' nax-button--shape-' + shapeName
+		cls += ' nax-button--v-' + variantName
+		if (shapeName == 'circle') {
+			cls += ' nax-button--circle-' + sizeName
+		}
+		if (props.block) {
+			cls += ' nax-button--block'
+		}
+		if (props.disabled) {
+			cls += ' nax-button--disabled'
+		}
+		if (props.loading) {
+			cls += ' nax-button--loading'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const textClass = computed((): string => {
+		const sizeName = normalizeSize(props.size)
+		let cls = 'nax-button__text--' + tone.value
+		cls += ' nax-button__text--' + sizeName
+		if (props.disabled) {
+			cls += ' nax-button__text--disabled'
+		}
+		return cls
+	})
+
+	const hasIcon = computed((): boolean => {
+		return props.icon.length > 0
+	})
+
+	const iconSizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const iconAtStart = computed((): boolean => {
+		return normalizeIconPosition(props.iconPosition) == 'left'
+	})
+
+	const iconAtEnd = computed((): boolean => {
+		return normalizeIconPosition(props.iconPosition) == 'right'
+	})
+
+	const iconClass = computed((): string => {
+		let cls = 'nax-button__icon--size-' + iconSizeName.value
+		if (hasIcon.value && props.label.length == 0) {
+			cls += ' nax-button__icon--alone'
+		}
+		return cls
+	})
+
+	const loadingClass = computed((): string => {
+		let cls = 'nax-button__loading--size-' + iconSizeName.value
+		if (props.label.length == 0) {
+			cls += ' nax-button__loading--alone'
+		}
+		return cls
+	})
+
+	/**
+	 * 图标色通过 nax-icon color prop 传入，并与对应文案 token 保持一致。
+	 */
+	const iconColor = computed((): string => {
+		const typeName = normalizeType(props.type)
+		const variantName = normalizeVariant(props.type, props.variant)
+		if (variantName == 'solid' && typeName != 'default') {
+			return 'var(--nax-color-text-inverse, #ffffff)'
+		}
+		if (typeName == 'primary') {
+			return 'var(--nax-color-primary, #18a058)'
+		}
+		if (typeName == 'info') {
+			return 'var(--nax-color-info, #2080f0)'
+		}
+		if (typeName == 'success') {
+			return 'var(--nax-color-success, #18a058)'
+		}
+		if (typeName == 'warning') {
+			return 'var(--nax-color-warning, #f0a020)'
+		}
+		if (typeName == 'error') {
+			return 'var(--nax-color-error, #d03050)'
+		}
+		return 'var(--nax-color-text, #333639)'
+	})
+
+	const loadingDomId = 'nax-btn-ld-' + Math.floor(Math.random() * 10000000).toString()
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	let spinToken = 0
+	let usingNativeSpin = false
+	let cachedSpinEl : UniElement | null = null
+	let spinFallbackTimerId = -1
+	let spinRetryTimerId = -1
+
+	const loadingStyle = computed((): string => {
+		// transform 交由 animate / setProperty 驱动，避免 style 绑定覆盖
+		return ''
+	})
+
+	function getSpinElement() : UniElement | null {
+		if (cachedSpinEl != null) {
+			return cachedSpinEl
+		}
+		// iOS：原生页面未就绪时 getElementById 抛 null 异常，防御性捕获后按未命中处理（重试等待挂载）
+		var el : UniElement | null = null
+		try {
+			el = uni.getElementById(loadingDomId)
+		} catch (e) {
+			el = null
+		}
+		if (el != null) {
+			cachedSpinEl = el
+		}
+		return el
+	}
+
+	function clearSpinTimers() {
+		if (spinFallbackTimerId >= 0) {
+			clearInterval(spinFallbackTimerId)
+			spinFallbackTimerId = -1
+		}
+		if (spinRetryTimerId >= 0) {
+			clearTimeout(spinRetryTimerId)
+			spinRetryTimerId = -1
+		}
+	}
+
+	function stopNativeSpin() {
+		const el = getSpinElement()
+		if (el == null) {
+			return
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 0,
+			fill: 'forwards',
+			iterations: 1,
+			easing: 'linear'
+		} as UniAnimationOption)
+	}
+
+	function startNativeSpin() : boolean {
+		const el = getSpinElement()
+		if (el == null) {
+			return false
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe,
+			{
+				transform: 'rotate(360deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 800,
+			easing: 'linear',
+			iterations: 1000000,
+			fill: 'forwards'
+		} as UniAnimationOption)
+		usingNativeSpin = true
+		return true
+	}
+
+	function startFallbackSpin() {
+		clearSpinTimers()
+		let angle = 0
+		spinFallbackTimerId = setInterval(() => {
+			let next = angle + 45
+			if (next >= 360) {
+				next = next - 360
+			}
+			angle = next
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(' + angle.toString() + 'deg)')
+			}
+		}, 120)
+	}
+
+	function stopLoadingSpin() {
+		spinToken = spinToken + 1
+		clearSpinTimers()
+		if (usingNativeSpin) {
+			stopNativeSpin()
+		} else {
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(0deg)')
+			}
+		}
+		usingNativeSpin = false
+		cachedSpinEl = null
+	}
+
+	function startLoadingSpin() {
+		stopLoadingSpin()
+		const token = spinToken
+		function tryStart(attempt : number) {
+			if (token != spinToken) {
+				return
+			}
+			if (!(props.loading)) {
+				return
+			}
+			if (startNativeSpin()) {
+				return
+			}
+			if (attempt < 10) {
+				spinRetryTimerId = setTimeout(() => {
+					spinRetryTimerId = -1
+					tryStart(attempt + 1)
+				}, 32)
+				return
+			}
+			startFallbackSpin()
+		}
+		tryStart(0)
+	}
+
+	watch((): boolean => {
+		return props.loading
+	}, (val: boolean) => {
+		if (val) {
+			startLoadingSpin()
+		} else {
+			stopLoadingSpin()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopLoadingSpin()
+	})
+	// #endif
+
+	const hoverClassName = computed((): string => {
+		if (props.disabled || props.loading) {
+			return 'none'
+		}
+		const variantName = normalizeVariant(props.type, props.variant)
+		return 'nax-button--hover nax-button--hover-' + variantName
+	})
+
+</script>
+
+<style>
+	.nax-button {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: var(--nax-button-height, 40px);
+		padding-left: var(--nax-button-padding-x, 16px);
+		padding-right: var(--nax-button-padding-x, 16px);
+		border-radius: var(--nax-button-radius, 3px);
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: transparent;
+		background-color: var(--nax-color-bg, #ffffff);
+		opacity: 1;
+	}
+
+	.nax-button--sm {
+		height: 32px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-button--md {
+		height: 40px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-button--lg {
+		height: 48px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.nax-button--shape-square {
+		border-radius: var(--nax-button-radius, 3px);
+	}
+
+	.nax-button--shape-round {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-button--shape-circle {
+		border-radius: var(--nax-radius-full, 999px);
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.nax-button--circle-sm {
+		width: 32px;
+		height: 32px;
+	}
+
+	.nax-button--circle-md {
+		width: 40px;
+		height: 40px;
+	}
+
+	.nax-button--circle-lg {
+		width: 48px;
+		height: 48px;
+	}
+
+	.nax-button--block {
+		align-self: stretch;
+		width: 100%;
+	}
+
+	/* 虚线统一 */
+	.nax-button--v-dashed {
+		border-style: dashed;
+	}
+
+	/* 浅底/无底层级：去掉边框，避免鸿蒙 transparent 边显影 */
+	.nax-button--v-secondary,
+	.nax-button--v-tertiary,
+	.nax-button--v-quaternary {
+		border-width: 0px;
+		border-color: transparent;
+	}
+
+	/* 禁用：整体降透明；无背景的描边/虚线禁用仍保留轮廓 */
+	.nax-button--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	/* 有背景填充的禁用：去边，避免鸿蒙上边框叠在填充色上显影 */
+	.nax-button--disabled.nax-button--v-solid,
+	.nax-button--disabled.nax-button--v-secondary,
+	.nax-button--disabled.nax-button--v-tertiary {
+		border-width: 0px;
+		border-color: transparent;
+	}
+
+	.nax-button--loading {
+		opacity: 0.85;
+	}
+
+	/* #ifdef APP-HARMONY */
+	/* 鸿蒙：有背景填充的 loading 去边，避免边框叠在填充色上显影 */
+	.nax-button--loading.nax-button--v-solid,
+	.nax-button--loading.nax-button--v-secondary,
+	.nax-button--loading.nax-button--v-tertiary {
+		border-width: 0px;
+		border-color: transparent;
+	}
+	/* #endif */
+
+	/* hover：uni-app x 用 hover-class；弱化/加深背景 */
+	.nax-button--hover {
+		opacity: 0.92;
+	}
+
+	.nax-button--hover-solid {
+		opacity: 0.88;
+	}
+
+	.nax-button--hover-secondary,
+	.nax-button--hover-tertiary {
+		opacity: 0.9;
+	}
+
+	.nax-button--hover-quaternary,
+	.nax-button--hover-outline,
+	.nax-button--hover-dashed {
+		opacity: 0.85;
+	}
+
+	/* ========== default 色系 ========== */
+	/* 基础：白底 + 边框 */
+	.nax-button--default-solid {
+		background-color: var(--nax-color-bg, #ffffff);
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	/* 次要：浅灰填充 */
+	.nax-button--default-secondary {
+		background-color: var(--nax-color-button-secondary, #ececed);
+		border-color: transparent;
+	}
+
+	/* 次次要：更弱浅底 */
+	.nax-button--default-tertiary {
+		background-color: var(--nax-color-button-tertiary, #f2f3f3);
+		border-color: transparent;
+	}
+
+	/* 次次次要：无底无边 */
+	.nax-button--default-quaternary {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	/* 描边 */
+	.nax-button--default-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	/* 虚线 */
+	.nax-button--default-dashed {
+		background-color: var(--nax-color-bg, #ffffff);
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	/* ========== primary ========== */
+	.nax-button--primary-solid {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-button--primary-secondary {
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+		border-color: transparent;
+	}
+
+	.nax-button--primary-tertiary {
+		background-color: var(--nax-color-primary-tertiary, #e3f3eb);
+		border-color: transparent;
+	}
+
+	.nax-button--primary-quaternary {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	.nax-button--primary-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-button--primary-dashed {
+		background-color: transparent;
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	/* ========== info ========== */
+	.nax-button--info-solid {
+		background-color: var(--nax-color-info, #2080f0);
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-button--info-secondary {
+		background-color: var(--nax-color-info-secondary, #dbeafc);
+		border-color: transparent;
+	}
+
+	.nax-button--info-tertiary {
+		background-color: var(--nax-color-info-tertiary, #e4effd);
+		border-color: transparent;
+	}
+
+	.nax-button--info-quaternary {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	.nax-button--info-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-button--info-dashed {
+		background-color: transparent;
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	/* ========== success ========== */
+	.nax-button--success-solid {
+		background-color: var(--nax-color-success, #18a058);
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-button--success-secondary {
+		background-color: var(--nax-color-success-secondary, #daefe4);
+		border-color: transparent;
+	}
+
+	.nax-button--success-tertiary {
+		background-color: var(--nax-color-success-tertiary, #e3f3eb);
+		border-color: transparent;
+	}
+
+	.nax-button--success-quaternary {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	.nax-button--success-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-button--success-dashed {
+		background-color: transparent;
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	/* ========== warning ========== */
+	.nax-button--warning-solid {
+		background-color: var(--nax-color-warning, #f0a020);
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-button--warning-secondary {
+		background-color: var(--nax-color-warning-secondary, #fcefda);
+		border-color: transparent;
+	}
+
+	.nax-button--warning-tertiary {
+		background-color: var(--nax-color-warning-tertiary, #fdf3e4);
+		border-color: transparent;
+	}
+
+	.nax-button--warning-quaternary {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	.nax-button--warning-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-button--warning-dashed {
+		background-color: transparent;
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	/* ========== error ========== */
+	.nax-button--error-solid {
+		background-color: var(--nax-color-error, #d03050);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-button--error-secondary {
+		background-color: var(--nax-color-error-secondary, #f7dde3);
+		border-color: transparent;
+	}
+
+	.nax-button--error-tertiary {
+		background-color: var(--nax-color-error-tertiary, #f9e6ea);
+		border-color: transparent;
+	}
+
+	.nax-button--error-quaternary {
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	.nax-button--error-outline {
+		background-color: transparent;
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-button--error-dashed {
+		background-color: transparent;
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	/* ========== 文本 ========== */
+	.nax-button__text {
+		text-align: center;
+		font-weight: var(--nax-font-weight-regular, 400);
+		/* #ifndef APP-HARMONY */
+		/* 鸿蒙：text-overflow 无 max-lines 约束时也会误省略，鸿蒙端不启用 */
+		text-overflow: ellipsis;
+		/* #endif */
+	}
+
+	/* loading 图标：固定方盒 + 旋转中心居中；颜色由 color prop 传入 nax-icon */
+	.nax-button__loading {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 6px;
+		overflow: hidden;
+		transform-origin: center center;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web / 小程序：CSS 动画旋转 */
+	.nax-button__loading {
+		animation-name: nax-button-spin;
+		animation-duration: 0.8s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-button-spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+	/* #endif */
+
+	.nax-button__loading--alone {
+		margin-right: 0;
+	}
+
+
+	.nax-button__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 6px;
+		overflow: hidden;
+	}
+
+	.nax-button__icon--end {
+		margin-right: 0;
+		margin-left: 6px;
+	}
+
+	.nax-button__icon--alone {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	/* 图标/loading 固定正方形，保证单图标按钮与旋转轴居中 */
+	.nax-button__icon--size-sm,
+	.nax-button__loading--size-sm {
+		width: 16px;
+		height: 16px;
+	}
+
+	.nax-button__icon--size-md,
+	.nax-button__loading--size-md {
+		width: 18px;
+		height: 18px;
+	}
+
+	.nax-button__icon--size-lg,
+	.nax-button__loading--size-lg {
+		width: 20px;
+		height: 20px;
+	}
+
+	/* 圆形/仅图标：确保内容盒在按钮内居中 */
+	.nax-button--shape-circle {
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+
+	.nax-button__text--sm {
+		font-size: var(--nax-font-size-sm, 14px);
+	}
+
+	.nax-button__text--md {
+		font-size: var(--nax-font-size-md, 16px);
+	}
+
+	.nax-button__text--lg {
+		font-size: var(--nax-font-size-lg, 18px);
+	}
+
+	/* default 文案色 */
+	.nax-button__text--default-solid,
+	.nax-button__text--default-secondary,
+	.nax-button__text--default-tertiary,
+	.nax-button__text--default-quaternary,
+	.nax-button__text--default-outline,
+	.nax-button__text--default-dashed {
+		color: var(--nax-color-text, #333639);
+	}
+
+	/* solid 反白 */
+	.nax-button__text--primary-solid,
+	.nax-button__text--info-solid,
+	.nax-button__text--success-solid,
+	.nax-button__text--warning-solid,
+	.nax-button__text--error-solid {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	/* primary 非实心 */
+	.nax-button__text--primary-secondary,
+	.nax-button__text--primary-tertiary,
+	.nax-button__text--primary-quaternary,
+	.nax-button__text--primary-outline,
+	.nax-button__text--primary-dashed {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	/* info 非实心 */
+	.nax-button__text--info-secondary,
+	.nax-button__text--info-tertiary,
+	.nax-button__text--info-quaternary,
+	.nax-button__text--info-outline,
+	.nax-button__text--info-dashed {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	/* success 非实心 */
+	.nax-button__text--success-secondary,
+	.nax-button__text--success-tertiary,
+	.nax-button__text--success-quaternary,
+	.nax-button__text--success-outline,
+	.nax-button__text--success-dashed {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	/* warning 非实心 */
+	.nax-button__text--warning-secondary,
+	.nax-button__text--warning-tertiary,
+	.nax-button__text--warning-quaternary,
+	.nax-button__text--warning-outline,
+	.nax-button__text--warning-dashed {
+		color: var(--nax-color-warning, #f0a020);
+	}
+
+	/* error 非实心 */
+	.nax-button__text--error-secondary,
+	.nax-button__text--error-tertiary,
+	.nax-button__text--error-quaternary,
+	.nax-button__text--error-outline,
+	.nax-button__text--error-dashed {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-button__text--disabled {
+		/* 禁用主要靠容器 opacity，文案保持可读色 */
+	}
+</style>

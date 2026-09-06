@@ -1,0 +1,59 @@
+<template>
+  <view class="demo-nav-bar">
+    <text class="dsec">默认 default</text>
+    <nax-nav-bar title="默认标题" :fixed="false" :safe-area-inset-top="false" :auto-back="false"></nax-nav-bar>
+
+    <text class="dsec">主色 primary</text>
+    <nax-nav-bar type="primary" title="主色导航" :fixed="false" :safe-area-inset-top="false" :auto-back="false"></nax-nav-bar>
+
+    <text class="dsec">返回文案 + 无图标</text>
+    <nax-nav-bar title="设置" back-text="关闭" back-icon="" :fixed="false" :safe-area-inset-top="false" :auto-back="false"></nax-nav-bar>
+
+    <text class="dsec">左对齐标题 + 无返回</text>
+    <nax-nav-bar title="首页风格" title-align="left" :show-back="false" :fixed="false" :safe-area-inset-top="false"></nax-nav-bar>
+
+    <text class="dsec">自定义中间（插槽）</text>
+    <nax-nav-bar :fixed="false" :safe-area-inset-top="false" :auto-back="false" :show-back="false">
+      <view class="mid">
+        <text class="mid-on">关注</text>
+        <text class="mid-item">推荐</text>
+      </view>
+    </nax-nav-bar>
+
+    <text class="dsec">沉浸 immersive（预览）</text>
+    <nax-nav-bar title="沉浸标题" type="primary" immersive :fixed="false" :safe-area-inset-top="false" :auto-back="false"></nax-nav-bar>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-nav-bar {
+  flex-direction: column;
+}
+
+.mid {
+  flex-direction: row;
+  align-items: center;
+}
+
+.mid-on {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nax-color-text, #333333);
+  margin-right: 16px;
+}
+
+.mid-item {
+  font-size: 14px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

@@ -1,0 +1,134 @@
+<template>
+  <template v-for="(seg, i) in segments" :key="i">
+    <text v-if="seg.br" class="up-br">\n</text>
+    <text v-else-if="seg.imgSrc !== ''" class="up-img" :style="imgAltStyle()" @click="preview(seg)">{{ seg.text }}</text>
+    <text v-else-if="seg.href !== ''" class="up-link" :style="linkStyle()" @click="onTap(seg)">{{ seg.text }}</text>
+    <text v-else-if="seg.code" class="up-code" :style="codeStyle()" @click="copyCode(seg.text)">{{ seg.text }}</text>
+    <text v-else :style="textStyle(seg)" :user-select="selectable">{{ seg.text }}</text>
+  </template>
+</template>
+
+<script setup lang="uts">
+import { Segment } from '../../utils/flatten.uts'
+import { theme } from '../../utils/theme.uts'
+import { isExternalLink, splitAnchor } from '../../utils/route.uts'
+
+const props = defineProps<{
+  segments: Segment[]
+  selectable: boolean
+  /** 外层标题传入的显式字号：Web 端嵌套 text 不继承字号，需显式设置（空串表示跟随正文） */
+  fontSize?: string
+  /** 同上：标题字重显式传递（空串 = 400 常规） */
+  fontWeight?: string
+  /** 同上：标题文字颜色显式传递（空串 = 常规文字色） */
+  color?: string
+}>()
+
+const emit = defineEmits(['linktap'])
+
+/** Web 端嵌套 text 不继承外层样式，标题上下文需逐项显式传入 */
+function applyInherited(style: UTSJSONObject): void {
+  if (props.fontSize != null && props.fontSize !== '') {
+    style['fontSize'] = props.fontSize
+  }
+  if (props.fontWeight != null && props.fontWeight !== '') {
+    style['fontWeight'] = props.fontWeight
+  }
+  if (props.color != null && props.color !== '') {
+    style['color'] = props.color
+  }
+}
+
+function textStyle(seg: Segment): UTSJSONObject {
+  const s = {
+    color: theme.state.colors.text1,
+    fontWeight: seg.bold ? '650' : '400',
+    fontStyle: seg.italic ? 'italic' : 'normal',
+  } as UTSJSONObject
+  applyInherited(s)
+  if (seg.strike) {
+    s['textDecoration'] = 'line-through'
+    s['color'] = theme.state.colors.text3
+  }
+  return s
+}
+
+function linkStyle(): UTSJSONObject {
+  const s = { color: theme.state.colors.brand, textDecoration: 'underline' } as UTSJSONObject
+  // 链接保持品牌色，只继承字号与字重
+  if (props.fontSize != null && props.fontSize !== '') {
+    s['fontSize'] = props.fontSize
+  }
+  if (props.fontWeight != null && props.fontWeight !== '') {
+    s['fontWeight'] = props.fontWeight
+  }
+  return s
+}
+
+function codeStyle(): UTSJSONObject {
+  return {
+    fontSize: '13px',
+    fontFamily: 'Menlo, Consolas, monospace',
+    color: theme.state.colors.codeText,
+    backgroundColor: theme.state.colors.codeBg,
+    borderRadius: '5px',
+    paddingTop: '1px',
+    paddingBottom: '1px',
+  } as UTSJSONObject
+}
+
+function imgAltStyle(): UTSJSONObject {
+  return { color: theme.state.colors.brand } as UTSJSONObject
+}
+
+function onTap(seg: Segment): void {
+  if (isExternalLink(seg.href)) {
+    openExternal(seg.href)
+    return
+  }
+  let full = seg.href
+  if (seg.anchor !== '') full = `${full}#${seg.anchor}`
+  emit('linktap', full)
+}
+
+function preview(seg: Segment): void {
+  if (seg.imgSrc === '') return
+  uni.previewImage({ urls: [seg.imgSrc] } as PreviewImageOptions)
+}
+
+function copyCode(text: string): void {
+  uni.setClipboardData({
+    data: text,
+    showToast: false,
+    success: () => {
+      uni.showToast({ title: '代码已复制', icon: 'none' } as ShowToastOptions)
+    },
+  } as SetClipboardDataOptions)
+}
+
+function openExternal(href: string): void {
+  // 平台差异隔离：Web 新窗口打开；App 复制链接并提示
+  // #ifdef WEB
+  window.open(href, '_blank')
+  // #endif
+  // #ifndef WEB
+  uni.setClipboardData({
+    data: href,
+    showToast: false,
+    success: () => {
+      uni.showToast({ title: '链接已复制', icon: 'none' } as ShowToastOptions)
+    },
+  } as SetClipboardDataOptions)
+  // #endif
+}
+</script>
+
+<style>
+/* #ifdef WEB */
+.up-link,
+.up-code,
+.up-img {
+  cursor: pointer;
+}
+/* #endif */
+</style>

@@ -1,0 +1,73 @@
+<template>
+  <view class="demo-text">
+    <text class="dsec">基础用法</text>
+    <nax-text text="我用十年青春,赴你最后之约" class="mb"></nax-text>
+    <nax-text text="带图标的文本" prefix-icon="star" type="primary" class="mb"></nax-text>
+    <nax-text text="后缀图标" suffix-icon="arrow-right" type="secondary" class="mb"></nax-text>
+
+    <text class="dsec">主题色</text>
+    <nax-text type="default" text="default 主文案" class="mb"></nax-text>
+    <nax-text type="primary" text="primary 主题" class="mb"></nax-text>
+    <nax-text type="info" text="info 信息" class="mb"></nax-text>
+    <nax-text type="success" text="success 成功" class="mb"></nax-text>
+    <nax-text type="warning" text="warning 警告" class="mb"></nax-text>
+    <nax-text type="error" text="error 错误" class="mb"></nax-text>
+    <nax-text type="secondary" text="secondary 次文案" class="mb"></nax-text>
+    <nax-text type="placeholder" text="placeholder 占位"></nax-text>
+
+    <text class="dsec">文字尺寸</text>
+    <nax-text size="sm" text="sm 14px" class="mb"></nax-text>
+    <nax-text size="md" text="md 16px（默认）" class="mb"></nax-text>
+    <nax-text size="lg" text="lg 18px" class="mb"></nax-text>
+    <nax-text size="xl" text="xl 20px" class="mb"></nax-text>
+    <nax-text size="20" text="数字 20px"></nax-text>
+
+    <text class="dsec">字重与装饰</text>
+    <nax-text bold text="加粗 bold" class="mb"></nax-text>
+    <nax-text decoration="underline" text="下划线 underline" type="info" class="mb"></nax-text>
+    <nax-text decoration="line-through" text="删除线 line-through" type="secondary"></nax-text>
+
+    <text class="dsec">文本省略</text>
+    <nax-text :lines="1" block text="单行省略：这是一段很长很长的文本内容，超出一行后会显示省略号，方便列表场景使用。" class="mb"></nax-text>
+    <nax-text :lines="2" block text="多行省略：这是一段很长很长的文本内容，超过两行后会显示省略号，适合列表摘要、卡片描述等多行截断场景。"></nax-text>
+
+    <text class="dsec">内容格式化</text>
+    <nax-text mode="price" text="128.5" type="error" bold class="mb"></nax-text>
+    <nax-text mode="phone" text="13800138000" type="info" class="mb"></nax-text>
+    <nax-text mode="phone" format="encrypt" text="13800138000" class="mb"></nax-text>
+    <nax-text mode="name" format="encrypt" text="张三丰" class="mb"></nax-text>
+    <nax-text mode="date" text="1710000000" class="mb"></nax-text>
+    <nax-text mode="date" format="yyyy-mm-dd HH:MM" text="1710000000000" type="secondary"></nax-text>
+
+    <text class="dsec">块级对齐</text>
+    <nax-text block align="left" text="左对齐 left" class="mb"></nax-text>
+    <nax-text block align="center" text="居中 center" type="primary" class="mb"></nax-text>
+    <nax-text block align="right" text="右对齐 right" type="secondary"></nax-text>
+
+    <text class="dsec">文本选择</text>
+    <nax-text selectable text="长按可选中复制这段文字" type="info"></nax-text>
+
+    <text class="dsec">自定义颜色</text>
+    <nax-text color="#8a2be2" text="自定义紫色 #8a2be2"></nax-text>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-text {
+  flex-direction: column;
+}
+
+.mb {
+  margin-bottom: 10px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

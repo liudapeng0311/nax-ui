@@ -1,0 +1,93 @@
+<template>
+  <view class="demo-checkbox">
+    <text class="dsec">单独使用</text>
+    <nax-checkbox v-model="alone" label="同意用户协议"></nax-checkbox>
+
+    <text class="dsec">基础组</text>
+    <nax-checkbox-group v-model="basic">
+      <nax-checkbox name="apple" label="苹果"></nax-checkbox>
+      <nax-checkbox name="banana" label="香蕉"></nax-checkbox>
+      <nax-checkbox name="orange" label="橙子"></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">形状 shape</text>
+    <nax-checkbox-group v-model="shapeVals" shape="circle">
+      <nax-checkbox name="a" label="圆形"></nax-checkbox>
+      <nax-checkbox name="b" label="多选"></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">尺寸 size</text>
+    <nax-checkbox-group v-model="sizeSm" size="sm">
+      <nax-checkbox name="s" label="sm"></nax-checkbox>
+    </nax-checkbox-group>
+    <nax-checkbox-group v-model="sizeMd" size="md">
+      <nax-checkbox name="m" label="md"></nax-checkbox>
+    </nax-checkbox-group>
+    <nax-checkbox-group v-model="sizeLg" size="lg">
+      <nax-checkbox name="l" label="lg"></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">禁用 disabled</text>
+    <nax-checkbox-group v-model="disabledVals">
+      <nax-checkbox name="on" label="可选"></nax-checkbox>
+      <nax-checkbox name="off" label="禁用项" disabled></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">文案不可点 labelDisabled</text>
+    <nax-checkbox-group v-model="labelLock" label-disabled>
+      <nax-checkbox name="x" label="只能点左侧方框"></nax-checkbox>
+      <nax-checkbox name="y" label="点文字无效"></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">最多选 2 项 max</text>
+    <nax-checkbox-group v-model="maxVals" :max="2" wrap>
+      <nax-checkbox name="1" label="选项一"></nax-checkbox>
+      <nax-checkbox name="2" label="选项二"></nax-checkbox>
+      <nax-checkbox name="3" label="选项三"></nax-checkbox>
+      <nax-checkbox name="4" label="选项四"></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">自定义颜色 activeColor</text>
+    <nax-checkbox-group v-model="colorVals" active-color="#2080f0">
+      <nax-checkbox name="c1" label="信息色"></nax-checkbox>
+      <nax-checkbox name="c2" label="多选"></nax-checkbox>
+    </nax-checkbox-group>
+
+    <text class="dsec">横向均分 width</text>
+    <nax-checkbox-group v-model="widthVals" width="50%">
+      <nax-checkbox name="w1" label="左侧 50%"></nax-checkbox>
+      <nax-checkbox name="w2" label="右侧 50%"></nax-checkbox>
+      <nax-checkbox name="w3" label="再一行左"></nax-checkbox>
+      <nax-checkbox name="w4" label="再一行右"></nax-checkbox>
+    </nax-checkbox-group>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const alone = ref(false)
+const basic = ref(['apple'])
+const shapeVals = ref(['a'])
+const sizeSm = ref(['s'])
+const sizeMd = ref(['m'])
+const sizeLg = ref(['l'])
+const disabledVals = ref(['on'])
+const labelLock = ref(['x'])
+const maxVals = ref(['1'])
+const colorVals = ref(['c1'])
+const widthVals = ref(['w1', 'w2'])
+</script>
+
+<style>
+.demo-checkbox {
+  flex-direction: column;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

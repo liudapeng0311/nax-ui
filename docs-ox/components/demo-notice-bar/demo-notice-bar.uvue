@@ -1,0 +1,62 @@
+<template>
+  <view class="demo-notice-bar">
+    <text class="dsec">水平衔接（默认）</text>
+    <nax-notice-bar :list="list"></nax-notice-bar>
+
+    <text class="dsec">水平步进 scroll=step</text>
+    <nax-notice-bar scroll="step" :list="list" :duration="2500"></nax-notice-bar>
+
+    <text class="dsec">垂直滚动 mode=vertical</text>
+    <nax-notice-bar mode="vertical" type="info" :list="list" :duration="2000"></nax-notice-bar>
+
+    <text class="dsec">类型 type</text>
+    <nax-notice-bar type="primary" :list="shortList"></nax-notice-bar>
+    <nax-notice-bar type="info" :list="shortList"></nax-notice-bar>
+    <nax-notice-bar type="success" :list="shortList"></nax-notice-bar>
+    <nax-notice-bar type="warning" :list="shortList"></nax-notice-bar>
+    <nax-notice-bar type="error" :list="shortList"></nax-notice-bar>
+
+    <text class="dsec">图标 / 更多</text>
+    <nax-notice-bar :show-icon="false" :list="shortList"></nax-notice-bar>
+    <nax-notice-bar icon="star" type="primary" :list="shortList"></nax-notice-bar>
+    <nax-notice-bar show-more type="info" :list="shortList"></nax-notice-bar>
+
+    <text class="dsec">暂停 / 播放</text>
+    <nax-notice-bar :list="list" :paused="paused" :speed="40"></nax-notice-bar>
+    <view class="row">
+      <nax-button size="sm" label="暂停" @click="paused = true"></nax-button>
+      <nax-button size="sm" type="primary" label="播放" @click="paused = false"></nax-button>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const paused = ref(false)
+const list = [
+  'nax-ui 0.4.0 发布：新增 nax-date-strip 日期横条',
+  '蒸汽模式组件库，全端可用的文档站',
+  '欢迎在插件市场下载整套组件库体验'
+]
+const shortList = ['只有一条公告，滚动一次即停']
+</script>
+
+<style>
+.demo-notice-bar {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

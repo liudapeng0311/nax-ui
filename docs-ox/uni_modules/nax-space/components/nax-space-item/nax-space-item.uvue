@@ -1,0 +1,125 @@
+<template>
+	<view class="nax-space-item" :class="rootClass" :style="rootStyle">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-space-item
+	 * @description 间距子项。放在 nax-space 内，负责吃间距 margin（样式隔离 2.0 兼容）。
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 实际内容
+	 */
+	const props = defineProps({
+		customClass: { type: String, default: '' }
+	})
+
+	const inGroup = inject('naxSpaceInGroup', false) as boolean
+	// Android inject 不能用 null 作为 Ref 默认值，否则 UTS 会推断为 Void。
+	// #ifdef APP-ANDROID
+	const gapRef = inject('naxSpaceGapPx', ref(0)) as Ref<number>
+	const dirRef = inject('naxSpaceDirection', ref('horizontal')) as Ref<string>
+	const wrapRef = inject('naxSpaceWrap', ref(false)) as Ref<boolean>
+	const fillRef = inject('naxSpaceFill', ref(false)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
+	const gapRef = inject('naxSpaceGapPx', null)
+	const dirRef = inject('naxSpaceDirection', null)
+	const wrapRef = inject('naxSpaceWrap', null)
+	const fillRef = inject('naxSpaceFill', null)
+	// #endif
+
+	function readRefNumber(r : any | null, fallback : number) : number {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<number>).value
+	}
+
+	function readRefString(r : any | null, fallback : string) : string {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<string>).value
+	}
+
+	function readRefBool(r : any | null, fallback : boolean) : boolean {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<boolean>).value
+	}
+
+	const gapPx = computed((): number => {
+		if (!inGroup) {
+			return 0
+		}
+		return readRefNumber(gapRef, 0)
+	})
+
+	const directionName = computed((): string => {
+		if (!inGroup) {
+			return 'horizontal'
+		}
+		return readRefString(dirRef, 'horizontal')
+	})
+
+	const wrapValue = computed((): boolean => {
+		if (!inGroup) {
+			return false
+		}
+		return readRefBool(wrapRef, false)
+	})
+
+	const fillValue = computed((): boolean => {
+		if (!inGroup) {
+			return false
+		}
+		return readRefBool(fillRef, false)
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		const gap = gapPx.value
+		const vertical = directionName.value == 'vertical'
+		if (gap > 0) {
+			if (vertical) {
+				style += 'margin-bottom:' + gap + 'px;'
+			} else {
+				style += 'margin-right:' + gap + 'px;'
+				if (wrapValue.value) {
+					style += 'margin-bottom:' + gap + 'px;'
+				}
+			}
+		}
+		if (fillValue.value) {
+			if (vertical) {
+				style += 'width:100%;'
+			} else {
+				style += 'flex-grow:1;'
+				style += 'flex-shrink:1;'
+				style += 'flex-basis:0;'
+			}
+		}
+		// 保证 item 自身是 flex 容器友好
+		style += 'flex-direction:column;'
+		return style
+	})
+</script>
+
+<style>
+	.nax-space-item {
+		flex-direction: column;
+		/* 默认收缩策略交给内容 */
+		flex-shrink: 0;
+	}
+</style>

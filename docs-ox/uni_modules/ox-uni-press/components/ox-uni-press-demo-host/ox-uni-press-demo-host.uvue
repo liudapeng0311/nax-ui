@@ -1,0 +1,321 @@
+<template>
+  <view class="ox-demo-host">
+    <!-- 静态分发链：uni-app x 无动态组件，按名字用 v-if 分发。
+         每个组件对应一个完整演示 wrapper（docs-site 演示页的同源分组），宿主可追加分支。 -->
+    <view v-if="name === 'counter'" class="ox-demo-stage" :style="stageStyle()">
+      <ox-demo-counter :start="numProp('start', 0)" :step="numProp('step', 1)" :title="strProp('title', '')" />
+    </view>
+    <view v-else-if="name === 'theme-swatch'" class="ox-demo-stage" :style="stageStyle()">
+      <ox-demo-theme-swatch />
+    </view>
+    <view v-else-if="name === 'link-test'" class="ox-demo-stage" :style="stageStyle()">
+      <ox-demo-link-test @navigate="emit('navigate', )" />
+    </view>
+    <view v-else-if="name === 'demo-action-sheet'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-action-sheet />
+    </view>
+    <view v-else-if="name === 'demo-alert'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-alert />
+    </view>
+    <view v-else-if="name === 'demo-avatar'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-avatar />
+    </view>
+    <view v-else-if="name === 'demo-badge'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-badge />
+    </view>
+    <view v-else-if="name === 'demo-button'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-button />
+    </view>
+    <view v-else-if="name === 'demo-calendar'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-calendar />
+    </view>
+    <view v-else-if="name === 'demo-card'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-card />
+    </view>
+    <view v-else-if="name === 'demo-cell'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-cell />
+    </view>
+    <view v-else-if="name === 'demo-checkbox'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-checkbox />
+    </view>
+    <view v-else-if="name === 'demo-date-strip'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-date-strip />
+    </view>
+    <view v-else-if="name === 'demo-datetime-picker'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-datetime-picker />
+    </view>
+    <view v-else-if="name === 'demo-dialog'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-dialog />
+    </view>
+    <view v-else-if="name === 'demo-divider'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-divider />
+    </view>
+    <view v-else-if="name === 'demo-dropdown'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-dropdown />
+    </view>
+    <view v-else-if="name === 'demo-empty'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-empty />
+    </view>
+    <view v-else-if="name === 'demo-form'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-form />
+    </view>
+    <view v-else-if="name === 'demo-grid'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-grid />
+    </view>
+    <view v-else-if="name === 'demo-icon'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-icon />
+    </view>
+    <view v-else-if="name === 'demo-image'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-image />
+    </view>
+    <view v-else-if="name === 'demo-input'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-input />
+    </view>
+    <view v-else-if="name === 'demo-keyboard'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-keyboard />
+    </view>
+    <view v-else-if="name === 'demo-line'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-line />
+    </view>
+    <view v-else-if="name === 'demo-list'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-list />
+    </view>
+    <view v-else-if="name === 'demo-loading'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-loading />
+    </view>
+    <view v-else-if="name === 'demo-nav-bar'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-nav-bar />
+    </view>
+    <view v-else-if="name === 'demo-notice-bar'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-notice-bar />
+    </view>
+    <view v-else-if="name === 'demo-number-box'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-number-box />
+    </view>
+    <view v-else-if="name === 'demo-overlay'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-overlay />
+    </view>
+    <view v-else-if="name === 'demo-picker'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-picker />
+    </view>
+    <view v-else-if="name === 'demo-popup'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-popup />
+    </view>
+    <view v-else-if="name === 'demo-progress'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-progress />
+    </view>
+    <view v-else-if="name === 'demo-radio'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-radio />
+    </view>
+    <view v-else-if="name === 'demo-rate'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-rate />
+    </view>
+    <view v-else-if="name === 'demo-rich-text'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-rich-text />
+    </view>
+    <view v-else-if="name === 'demo-search'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-search />
+    </view>
+    <view v-else-if="name === 'demo-select'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-select />
+    </view>
+    <view v-else-if="name === 'demo-skeleton'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-skeleton />
+    </view>
+    <view v-else-if="name === 'demo-slider'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-slider />
+    </view>
+    <view v-else-if="name === 'demo-space'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-space />
+    </view>
+    <view v-else-if="name === 'demo-steps'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-steps />
+    </view>
+    <view v-else-if="name === 'demo-swipe-action'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-swipe-action />
+    </view>
+    <view v-else-if="name === 'demo-swiper'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-swiper />
+    </view>
+    <view v-else-if="name === 'demo-switch'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-switch />
+    </view>
+    <view v-else-if="name === 'demo-tabbar'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-tabbar />
+    </view>
+    <view v-else-if="name === 'demo-tabs'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-tabs />
+    </view>
+    <view v-else-if="name === 'demo-tag'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-tag />
+    </view>
+    <view v-else-if="name === 'demo-text'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-text />
+    </view>
+    <view v-else-if="name === 'demo-textarea'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-textarea />
+    </view>
+    <view v-else-if="name === 'demo-toast'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-toast />
+    </view>
+    <view v-else-if="name === 'demo-upload'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-upload />
+    </view>
+    <view v-else-if="name === 'demo-virtual-list'" class="ox-demo-stage" :style="stageStyle()">
+      <demo-virtual-list />
+    </view>
+    <view v-else class="ox-demo-missing" :style="missingStyle()">
+      <text class="ox-demo-missing-name" :style="missingNameStyle()">未注册的 Demo 组件：{{ name }}</text>
+      <text class="ox-demo-missing-hint" :style="missingHintStyle()">请在 ox-uni-press-demo-host 中注册该组件，或检查组件名拼写</text>
+    </view>
+
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+import { theme } from '../../utils/theme.uts'
+
+const props = defineProps<{
+  /** 注册组件名（demo 围栏第一段） */
+  name: string
+  /** 标量 props（内容侧传递，仅字符串/数字/布尔） */
+  demoProps?: UTSJSONObject
+}>()
+
+const emit = defineEmits(['navigate'])
+
+
+function numProp(key: string, fallback: number): number {
+  if (props.demoProps == null) return fallback
+  const v = props.demoProps[key]
+  if (typeof v === 'number') return v
+  return fallback
+}
+
+function strProp(key: string, fallback: string): string {
+  if (props.demoProps == null) return fallback
+  const v = props.demoProps[key]
+  if (typeof v === 'string') return v
+  return fallback
+}
+
+
+// ---- 样式（颜色走内联，随主题切换）----
+
+function stageStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.surface,
+    borderWidth: '1px',
+    borderColor: theme.state.colors.border,
+    borderStyle: 'solid',
+    borderRadius: '12px',
+    padding: '14px',
+  } as UTSJSONObject
+}
+
+function missingStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.brandSoft,
+    borderRadius: '12px',
+    padding: '14px',
+  } as UTSJSONObject
+}
+
+function missingNameStyle(): UTSJSONObject {
+  return {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: theme.state.colors.danger,
+    marginBottom: '4px',
+  } as UTSJSONObject
+}
+
+function missingHintStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+</script>
+
+<style>
+.ox-demo-host {
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.ox-demo-stage {
+  flex-direction: column;
+}
+
+/* nav-bar 等自带头尾背景的组件演示时抵消 stage 内边距 */
+.ox-demo-stage-flush {
+  padding-left: 0;
+  padding-right: 0;
+  overflow: hidden;
+}
+
+.ox-demo-missing {
+  flex-direction: column;
+}
+
+.ox-demo-missing-name {
+  flex-direction: column;
+}
+
+.ox-demo-missing-hint {
+  flex-direction: column;
+}
+
+
+/* 演示排版辅助：颜色取 nax 主题变量，随站点深浅色联动 */
+.ox-demo-row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ox-demo-mb {
+  margin-bottom: 12px;
+}
+
+.ox-demo-mr {
+  margin-right: 16px;
+}
+
+.ox-demo-panel {
+  background-color: var(--nax-color-bg-secondary, #f2f3f5);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ox-demo-panel-text {
+  font-size: 13px;
+  color: var(--nax-color-text, #333333);
+}
+
+.ox-demo-badge-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: var(--nax-color-bg-secondary, #f2f3f5);
+}
+
+.ox-demo-card-text {
+  font-size: 13px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.ox-demo-grid-text {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 6px;
+}
+
+/* 按压反馈仅触屏端生效 */
+/* #ifndef WEB */
+.up-press {
+  opacity: 0.7;
+}
+/* #endif */
+
+</style>

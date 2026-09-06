@@ -1,0 +1,33 @@
+<template>
+  <view class="demo-select">
+    <nax-button label="打开选择器" @click="show = true"></nax-button>
+    <nax-select
+      v-model:show="show"
+      :list="list"
+      title="请选择"
+      @confirm="onConfirm"
+    ></nax-select>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+const list = [
+  { label: '深圳', value: 'sz' },
+  { label: '广州', value: 'gz' },
+  { label: '杭州', value: 'hz' }
+]
+
+function onConfirm(_payload: UTSJSONObject) {
+  show.value = false
+  uni.showToast({ title: '已确认选择', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-select {
+  flex-direction: column;
+}
+</style>

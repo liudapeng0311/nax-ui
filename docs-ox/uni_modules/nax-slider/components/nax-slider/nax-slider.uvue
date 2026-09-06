@@ -1,0 +1,740 @@
+<template>
+	<view class="nax-slider" :class="rootClass" :style="rootStyle">
+		<view v-if="showEdgeValue && edgeValuePosition == 'top'" class="nax-slider__edges nax-slider__edges--top">
+			<text class="nax-slider__edge-text">{{ startLabel }}</text>
+			<text class="nax-slider__edge-text">{{ endLabel }}</text>
+		</view>
+
+		<view
+			:id="railId"
+			class="nax-slider__body"
+			:style="bodyStyle"
+			@touchstart.stop="onTouchStart"
+			@touchmove.stop.prevent="onTouchMove"
+			@touchend.stop="onTouchEnd"
+			@touchcancel.stop="onTouchEnd"
+			@click.stop="onClick"
+		>
+			<!-- 细轨道：高度独立，不裁切滑块 -->
+			<view class="nax-slider__rail" :style="railStyle">
+				<view class="nax-slider__fill" :style="fillStyle"></view>
+			</view>
+			<!-- 滑块与轨道同级，按百分比定位，避免被轨道高度裁切 -->
+			<view class="nax-slider__thumb-wrap" :style="thumbWrapStyle">
+				<view v-if="useSlot" class="nax-slider__thumb-slot">
+					<slot></slot>
+				</view>
+				<view v-else class="nax-slider__thumb" :style="thumbStyle"></view>
+			</view>
+		</view>
+
+		<view v-if="showEdgeValue && edgeValuePosition == 'bottom'" class="nax-slider__edges nax-slider__edges--bottom">
+			<text class="nax-slider__edge-text">{{ startLabel }}</text>
+			<text class="nax-slider__edge-text">{{ endLabel }}</text>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-slider
+	 * @description 滑动选择器。用于表单中选择某一区间值。
+	 * @property {number} modelValue 当前值（v-model），落在 [start, end] 内
+	 * @property {number} start 整体范围起点
+	 * @property {number} end 整体范围终点
+	 * @property {number} min 可选最小值（夹在 start/end 内）
+	 * @property {number} max 可选最大值（夹在 start/end 内）
+	 * @property {number} step 步长
+	 * @property {string} size sm | md | lg（影响轨道高度与滑块尺寸；可被 blockWidth/height 覆盖）
+	 * @property {number} blockWidth 滑块边长（px）；0 表示跟随 size
+	 * @property {number} height 轨道高度（px）；0 表示跟随 size
+	 * @property {string} inactiveColor 轨道底色；空则主题边框色
+	 * @property {string} activeColor 已选轨道色；空则主题主色
+	 * @property {string} blockColor 滑块颜色；空则主题背景色
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} useSlot 使用默认插槽自定义滑块
+	 * @property {boolean} showEdgeValue 显示起止数值
+	 * @property {string} edgeValuePosition top | bottom
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 值变化（松手/点击后的最终值）
+	 * @event start 开始滑动
+	 * @event moving 滑动中
+	 * @event end 滑动结束
+	 * @slot default 自定义滑块（需 useSlot）
+	 */
+	const props = defineProps({
+		modelValue: { type: Number, default: 0 },
+		start: { type: Number, default: 0 },
+		end: { type: Number, default: 100 },
+		min: { type: Number, default: 0 },
+		max: { type: Number, default: 100 },
+		step: { type: Number, default: 1 },
+		size: { type: String, default: 'md' },
+		blockWidth: { type: Number, default: 0 },
+		height: { type: Number, default: 0 },
+		inactiveColor: { type: String, default: '' },
+		activeColor: { type: String, default: '' },
+		blockColor: { type: String, default: '' },
+		disabled: { type: Boolean, default: false },
+		useSlot: { type: Boolean, default: false },
+		showEdgeValue: { type: Boolean, default: false },
+		edgeValuePosition: { type: String, default: 'top' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change', 'start', 'moving', 'end'])
+	const instance = getCurrentInstance()
+	const railId = 'nax-slider-rail-' + Math.floor(Math.random() * 10000000).toString()
+
+	const innerValue = ref(0)
+	const dragStatus = ref('end')
+	const trackLeft = ref(0.0)
+	const trackWidth = ref(0.0)
+	const barPercent = ref(0.0)
+	const barNoTransition = ref(false)
+	const lastTouchEndAt = ref(0)
+	const pendingClientX = ref(-1.0)
+	const pendingKind = ref('none')
+
+	const normalizedSize = computed((): string => {
+		if (props.size == 'sm' || props.size == 'lg') {
+			return props.size
+		}
+		return 'md'
+	})
+
+	const rangeStart = computed((): number => {
+		return props.start as number
+	})
+
+	const rangeEnd = computed((): number => {
+		return props.end as number
+	})
+
+	const rangeTotal = computed((): number => {
+		const total = rangeEnd.value - rangeStart.value
+		if (total == 0) {
+			return 1
+		}
+		return total
+	})
+
+	const effectiveMin = computed((): number => {
+		const lo = rangeStart.value
+		const hi = rangeEnd.value
+		const m = props.min as number
+		if (m < lo) {
+			return lo
+		}
+		if (m > hi) {
+			return hi
+		}
+		return m
+	})
+
+	const effectiveMax = computed((): number => {
+		const lo = rangeStart.value
+		const hi = rangeEnd.value
+		const m = props.max as number
+		if (m > hi) {
+			return hi
+		}
+		if (m < lo) {
+			return lo
+		}
+		return m
+	})
+
+	function trackHeightPx() : number {
+		if ((props.height as number) > 0) {
+			return props.height as number
+		}
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 4
+		}
+		if (s == 'lg') {
+			return 8
+		}
+		return 6
+	}
+
+	function thumbSizePx() : number {
+		if ((props.blockWidth as number) > 0) {
+			return props.blockWidth as number
+		}
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 16
+		}
+		if (s == 'lg') {
+			return 24
+		}
+		return 20
+	}
+
+	const inactiveColorValue = computed((): string => {
+		if ((props.inactiveColor as string).length > 0) {
+			return props.inactiveColor as string
+		}
+		return 'var(--nax-color-border, #f0f0f3)'
+	})
+
+	const activeColorValue = computed((): string => {
+		if ((props.activeColor as string).length > 0) {
+			return props.activeColor as string
+		}
+		return 'var(--nax-color-primary, #18a058)'
+	})
+
+	const blockColorValue = computed((): string => {
+		if ((props.blockColor as string).length > 0) {
+			return props.blockColor as string
+		}
+		return 'var(--nax-color-bg, #ffffff)'
+	})
+
+	const startLabel = computed((): string => {
+		return '' + rangeStart.value
+	})
+
+	const endLabel = computed((): string => {
+		return '' + rangeEnd.value
+	})
+
+	function readNum(v : number) : number {
+		return v as number
+	}
+
+	function stepDecimals(step : number) : number {
+		if (step <= 0) {
+			return 0
+		}
+		if (Math.abs(step - Math.round(step)) < 1e-10) {
+			return 0
+		}
+		// 用反复乘 10 探测小数位，避免依赖字符串
+		var x = Math.abs(step)
+		var d = 0
+		while (d < 8) {
+			const nearest = Math.round(x)
+			if (Math.abs(x - nearest) < 1e-8) {
+				break
+			}
+			x = x * 10.0
+			d++
+		}
+		return d
+	}
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-slider--' + normalizedSize.value
+		if (props.disabled) {
+			cls += ' nax-slider--disabled'
+		}
+		if (props.showEdgeValue) {
+			cls += ' nax-slider--show-edge'
+			if (props.edgeValuePosition == 'bottom') {
+				cls += ' nax-slider--edge-bottom'
+			} else {
+				cls += ' nax-slider--edge-top'
+			}
+		}
+		if ((props.customClass as string).length > 0) {
+			cls += ' ' + (props.customClass as string)
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		const pad = Math.ceil(thumbSizePx() / 2)
+		return 'padding-left:' + pad.toString() + 'px;padding-right:' + pad.toString() + 'px;'
+	})
+
+	/** 热区高度 = 滑块边长，保证滑块完整可见 */
+	const bodyStyle = computed((): string => {
+		const h = thumbSizePx()
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const railStyle = computed((): string => {
+		const h = trackHeightPx()
+		const bodyH = thumbSizePx()
+		// 轨道垂直居中（不用 transform，App 更稳）
+		var top = Math.floor((bodyH - h) / 2)
+		if (top < 0) {
+			top = 0
+		}
+		var style = ''
+		style += 'height:' + h.toString() + 'px;'
+		style += 'top:' + top.toString() + 'px;'
+		style += 'background-color:' + inactiveColorValue.value + ';'
+		return style
+	})
+
+	const fillStyle = computed((): string => {
+		var style = ''
+		style += 'width:' + barPercent.value.toString() + '%;'
+		style += 'background-color:' + activeColorValue.value + ';'
+		if (barNoTransition.value) {
+			style += 'transition-duration:0ms;'
+		} else {
+			style += 'transition-property:width;'
+			style += 'transition-duration:200ms;'
+			style += 'transition-timing-function:ease;'
+		}
+		return style
+	})
+
+	const thumbStyle = computed((): string => {
+		const n = thumbSizePx()
+		var style = ''
+		style += 'width:' + n.toString() + 'px;'
+		style += 'height:' + n.toString() + 'px;'
+		style += 'background-color:' + blockColorValue.value + ';'
+		return style
+	})
+
+	/** 滑块水平位置：left% + 水平居中 */
+	const thumbWrapStyle = computed((): string => {
+		var style = ''
+		style += 'left:' + barPercent.value.toString() + '%;'
+		if (barNoTransition.value) {
+			style += 'transition-duration:0ms;'
+		} else {
+			style += 'transition-property:left;'
+			style += 'transition-duration:200ms;'
+			style += 'transition-timing-function:ease;'
+		}
+		return style
+	})
+
+	/** step 小数位数（最多 8） */
+	function pow10(digits : number) : number {
+		var factor = 1.0
+		var i = 0
+		while (i < digits) {
+			factor = factor * 10.0
+			i++
+		}
+		return factor
+	}
+
+	/**
+	 * 按 step 吸附。小数步长走整数网格，避免 0.1 浮点误差导致吸附失败/拖不动。
+	 */
+	function formatValue(value : number) : number {
+		const lo = effectiveMin.value
+		const hi = effectiveMax.value
+		var minV = lo
+		var maxV = hi
+		if (minV > maxV) {
+			const t = minV
+			minV = maxV
+			maxV = t
+		}
+		var clipped = value
+		if (clipped < minV) {
+			clipped = minV
+		}
+		if (clipped > maxV) {
+			clipped = maxV
+		}
+		const step = readNum(props.step as number)
+		if (step <= 0) {
+			return clipped
+		}
+		const digits = stepDecimals(step)
+		const factor = pow10(digits)
+		const minInt = Math.round(minV * factor)
+		const stepInt = Math.round(step * factor)
+		if (stepInt <= 0) {
+			return clipped
+		}
+		const clippedInt = Math.round(clipped * factor)
+		const steps = Math.round((clippedInt - minInt) / stepInt)
+		var nextInt = minInt + steps * stepInt
+		const maxInt = Math.round(maxV * factor)
+		if (nextInt < minInt) {
+			nextInt = minInt
+		}
+		if (nextInt > maxInt) {
+			nextInt = maxInt
+		}
+		return nextInt / factor
+	}
+
+	function valueToPercent(v : number) : number {
+		const ratio = (v - rangeStart.value) / rangeTotal.value
+		var percent = ratio * 100
+		if (percent < 0) {
+			percent = 0
+		}
+		if (percent > 100) {
+			percent = 100
+		}
+		return percent
+	}
+
+	function clientXToValue(clientX : number) : number {
+		const w = trackWidth.value
+		if (w <= 0) {
+			return innerValue.value
+		}
+		const ratio = (clientX - trackLeft.value) / w
+		return rangeStart.value + ratio * rangeTotal.value
+	}
+
+	function updateBar(v : number, drag : boolean) {
+		barNoTransition.value = drag
+		barPercent.value = valueToPercent(v)
+	}
+
+	function valuesEqual(a : number, b : number) : boolean {
+		return Math.abs(a - b) < 1e-9
+	}
+
+	function applyValue(value : number, drag : boolean, emitChange : boolean) {
+		const formatted = formatValue(value)
+		innerValue.value = formatted
+		updateBar(formatted, drag)
+		if (!valuesEqual(formatted, props.modelValue as number)) {
+			emit('update:modelValue', formatted)
+		}
+		if (emitChange) {
+			emit('change', formatted)
+		}
+	}
+
+	function applyPending() {
+		const x = pendingClientX.value
+		const kind = pendingKind.value
+		pendingClientX.value = -1.0
+		pendingKind.value = 'none'
+		if (x < 0) {
+			return
+		}
+		const raw = clientXToValue(x)
+		if (kind == 'start') {
+			dragStatus.value = 'start'
+			applyValue(raw, true, false)
+		} else if (kind == 'move') {
+			if (dragStatus.value == 'start') {
+				emit('start')
+				dragStatus.value = 'moving'
+			}
+			if (dragStatus.value == 'moving' || dragStatus.value == 'start') {
+				if (dragStatus.value == 'start') {
+					emit('start')
+					dragStatus.value = 'moving'
+				}
+				applyValue(raw, true, false)
+				emit('moving')
+			}
+		} else if (kind == 'end') {
+			if (dragStatus.value == 'end') {
+				return
+			}
+			const wasMoving = dragStatus.value == 'moving'
+			applyValue(raw, false, true)
+			if (wasMoving) {
+				emit('end')
+			}
+			dragStatus.value = 'end'
+			lastTouchEndAt.value = Date.now()
+		} else if (kind == 'click') {
+			if (dragStatus.value != 'end') {
+				return
+			}
+			applyValue(raw, false, true)
+		}
+	}
+
+	function onRect(left : number, width : number) {
+		trackLeft.value = left
+		trackWidth.value = width
+		applyPending()
+	}
+
+	function measureTrack() {
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+		query
+			.select('#' + railId)
+			.boundingClientRect((rect : any | null) => {
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.width != null && info.left != null) {
+						onRect(info.left as number, info.width as number)
+					}
+				}
+			})
+			.exec()
+	}
+
+	function readTouchClientX(e : UniTouchEvent) : number {
+		if (e.touches.length > 0) {
+			return e.touches[0].clientX
+		}
+		if (e.changedTouches.length > 0) {
+			return e.changedTouches[0].clientX
+		}
+		return 0
+	}
+
+	function onTouchStart(e : UniTouchEvent) {
+		if (props.disabled) {
+			return
+		}
+		const x = readTouchClientX(e)
+		pendingClientX.value = x
+		pendingKind.value = 'start'
+		if (trackWidth.value > 0) {
+			applyPending()
+			// 后台刷新尺寸，不触发 pending
+			const query = uni.createSelectorQuery()
+			const proxy = instance?.proxy
+			if (proxy != null) {
+				query.in(proxy)
+			}
+			query
+				.select('#' + railId)
+				.boundingClientRect((rect : any | null) => {
+					if (rect != null) {
+						const info = rect as NodeInfo
+						if (info.width != null && info.left != null) {
+							trackLeft.value = info.left as number
+							trackWidth.value = info.width as number
+						}
+					}
+				})
+				.exec()
+		} else {
+			measureTrack()
+		}
+	}
+
+	function onTouchMove(e : UniTouchEvent) {
+		if (props.disabled) {
+			return
+		}
+		if (dragStatus.value == 'end' && pendingKind.value != 'start') {
+			return
+		}
+		const x = readTouchClientX(e)
+		if (trackWidth.value > 0) {
+			if (dragStatus.value == 'start') {
+				emit('start')
+				dragStatus.value = 'moving'
+			} else if (dragStatus.value == 'end') {
+				dragStatus.value = 'moving'
+				emit('start')
+			}
+			applyValue(clientXToValue(x), true, false)
+			emit('moving')
+		} else {
+			pendingClientX.value = x
+			pendingKind.value = 'move'
+			measureTrack()
+		}
+	}
+
+	function onTouchEnd(e : UniTouchEvent) {
+		if (props.disabled) {
+			return
+		}
+		if (dragStatus.value == 'end' && pendingKind.value == 'none') {
+			return
+		}
+		const x = readTouchClientX(e)
+		if (trackWidth.value > 0) {
+			const wasMoving = dragStatus.value == 'moving'
+			applyValue(clientXToValue(x), false, true)
+			if (wasMoving) {
+				emit('end')
+			}
+			dragStatus.value = 'end'
+			pendingKind.value = 'none'
+			pendingClientX.value = -1.0
+			lastTouchEndAt.value = Date.now()
+		} else {
+			pendingClientX.value = x
+			pendingKind.value = 'end'
+			measureTrack()
+		}
+	}
+
+	/**
+	 * Web / 小程序：点击选点。App 端由 touch 处理，这里直接返回。
+	 * 使用 UniPointerEvent（clientX），避免 UniEvent 无 detail 在 Web 类型检查报错。
+	 */
+	function onClick(e : UniPointerEvent) {
+		if (props.disabled) {
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// App 点选已由 touch 路径处理，避免 click 重复
+		return
+		// #endif
+
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		const now = Date.now()
+		if (now - lastTouchEndAt.value < 350) {
+			return
+		}
+		if (dragStatus.value != 'end') {
+			return
+		}
+		const x = e.clientX
+		if (x < 0) {
+			return
+		}
+		pendingClientX.value = x
+		pendingKind.value = 'click'
+		if (trackWidth.value > 0) {
+			applyPending()
+		} else {
+			measureTrack()
+		}
+		// #endif
+	}
+
+	watch((): number => {
+		return props.modelValue as number
+	}, (n : number) => {
+		if (dragStatus.value == 'end') {
+			const formatted = formatValue(n)
+			innerValue.value = formatted
+			updateBar(formatted, false)
+		}
+	})
+
+	watch((): string => {
+		return (props.start as number).toString() + ',' + (props.end as number).toString() + ',' + (props.min as number).toString() + ',' + (props.max as number).toString() + ',' + (props.step as number).toString()
+	}, () => {
+		if (dragStatus.value == 'end') {
+			const formatted = formatValue(innerValue.value)
+			innerValue.value = formatted
+			updateBar(formatted, false)
+			if (formatted != (props.modelValue as number)) {
+				emit('update:modelValue', formatted)
+			}
+		}
+	})
+
+	onMounted(() => {
+		const formatted = formatValue(props.modelValue as number)
+		innerValue.value = formatted
+		updateBar(formatted, false)
+		setTimeout(() => {
+			pendingClientX.value = -1.0
+			pendingKind.value = 'none'
+			measureTrack()
+		}, 50)
+	})
+</script>
+
+<style>
+	.nax-slider {
+		flex-direction: column;
+		width: 100%;
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+
+	.nax-slider--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-slider--edge-top {
+		padding-top: 8px;
+	}
+
+	.nax-slider--edge-bottom {
+		padding-bottom: 8px;
+	}
+
+	.nax-slider__edges {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+	}
+
+	.nax-slider__edges--top {
+		margin-bottom: 6px;
+	}
+
+	.nax-slider__edges--bottom {
+		margin-top: 6px;
+	}
+
+	.nax-slider__edge-text {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	/* 触摸与滑块容器：高度=滑块，轨道叠在中间 */
+	.nax-slider__body {
+		position: relative;
+		width: 100%;
+		flex-direction: row;
+		align-items: center;
+		/* 必须 visible，否则圆滑块会被裁成“被轨道限制” */
+		overflow: visible;
+	}
+
+	.nax-slider__rail {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		/* top/height 由 inline 控制 */
+		border-radius: var(--nax-radius-full, 999px);
+		background-color: var(--nax-color-border, #f0f0f3);
+		overflow: hidden;
+	}
+
+	.nax-slider__fill {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		/* width 由 inline 百分比写入 */
+		border-radius: var(--nax-radius-full, 999px);
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-slider__thumb-wrap {
+		position: absolute;
+		top: 50%;
+		/* left 由 inline 百分比写入 */
+		transform: translate(-50%, -50%);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		/* 保证盖在轨道之上 */
+		z-index: 2;
+	}
+
+	.nax-slider__thumb {
+		border-radius: var(--nax-radius-full, 999px);
+		background-color: var(--nax-color-bg, #ffffff);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+		flex-shrink: 0;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+		/* #endif */
+	}
+
+	.nax-slider__thumb-slot {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+</style>

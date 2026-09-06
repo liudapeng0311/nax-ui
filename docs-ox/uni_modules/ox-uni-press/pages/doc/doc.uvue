@@ -1,0 +1,1268 @@
+<template>
+  <view class="page" :style="pageStyle()">
+
+    <ox-uni-press-header
+      :title="siteTitle"
+      :logo="siteLogo"
+      :navigation="manifest?.navigation ?? emptyNav"
+      :current-path="currentPath"
+      :show-menu="!isWide"
+      :top-inset="statusBarHeight"
+      @menu="openSidebar"
+      @search="showSearch = true"
+      @home="goHome"
+      @navigate="openLink"
+    />
+
+    <view class="body">
+
+      <!-- 窄屏抽屉侧边栏：栏目导航在最前，其后为常规侧边栏分组 -->
+      <view v-if="!isWide && sidebarOpen" class="scrim" :style="scrimStyle()" @click="closeSidebar" />
+      <view v-if="!isWide" class="drawer" :class="{ open: sidebarOpen }" :style="drawerStyle()">
+        <ox-uni-press-sidebar
+          :groups="drawerGroups"
+          :current-path="currentPath"
+          @navigate="onNavigate"
+        />
+      </view>
+
+      <!-- 宽屏常驻侧边栏（首页隐藏，与 Web 端一致） -->
+      <view v-if="isWide && !isHome" class="fixed-sidebar">
+        <ox-uni-press-sidebar
+          :groups="filteredSidebar"
+          :current-path="currentPath"
+          @navigate="onNavigate"
+        />
+      </view>
+
+      <!-- 内容区：web 端关闭滚动动画（动画模式会临时隐藏滚动条导致宽度抖动、内容左右轻移） -->
+      <scroll-view
+        class="content"
+        :scroll-y="true"
+        :scroll-top="scrollTopValue"
+        :scroll-with-animation="!isWeb"
+        @scroll="onContentScroll"
+      >
+        <!-- scroll-col：web 端最小高度撑满视口，内容区 flex:1 吸收剩余空间，页脚通栏粘底 -->
+        <view class="scroll-col">
+          <view class="content-inner" :style="contentStyle()">
+
+            <!-- 加载骨架 -->
+            <view v-if="loading" class="state-block">
+              <view class="skeleton-line w60" :style="skeletonStyle()" />
+              <view class="skeleton-line w90" :style="skeletonStyle()" />
+              <view class="skeleton-line w90" :style="skeletonStyle()" />
+              <view class="skeleton-line w40" :style="skeletonStyle()" />
+            </view>
+
+            <!-- 404 -->
+            <view v-else-if="notFound" class="state-block">
+              <text class="code-404" :style="code404Style()">404</text>
+              <text class="state-text" :style="stateTextStyle()">页面不存在</text>
+              <text class="state-path" :style="pathStyle()">{{ currentPath }}</text>
+              <view class="back-home" :style="backHomeStyle()" hover-class="press" @click="goHome">
+                <text :style="backHomeTextStyle()">返回首页</text>
+              </view>
+            </view>
+
+            <!-- 错误 -->
+            <view v-else-if="errorMsg !== ''" class="state-block">
+              <text class="state-text" :style="stateTextStyle()">内容加载失败</text>
+              <text class="state-path" :style="pathStyle()">{{ errorMsg }}</text>
+            </view>
+
+            <!-- 文档 / 首页 -->
+            <template v-else-if="document != null">
+
+              <!-- 首页（layout: home） -->
+              <view v-if="isHome" class="home">
+                <view class="hero">
+                  <text v-if="heroName !== ''" class="hero-name" :style="heroNameStyle()">{{ heroName }}</text>
+                  <text v-if="heroText !== ''" class="hero-text" :style="heroTextStyle()">{{ heroText }}</text>
+                  <text v-if="heroTagline !== ''" class="hero-tagline" :style="heroTaglineStyle()">{{ heroTagline }}</text>
+                  <view v-if="heroActions.length > 0" class="hero-actions">
+                    <view
+                      v-for="(action, index) in heroActions"
+                      :key="index"
+                      class="action-btn"
+                      :class="action.theme === 'alt' ? 'alt' : 'brand'"
+                      :style="actionBtnStyle(action)"
+                      hover-class="press"
+                      @click="onActionTap(action)"
+                    >
+                      <text :style="actionTextStyle(action)">{{ action.text }}</text>
+                    </view>
+                  </view>
+                </view>
+
+                <view v-if="homeFeatures.length > 0" class="features">
+                  <view
+                    v-for="(feature, index) in homeFeatures"
+                    :key="index"
+                    class="feature-card"
+                    :style="featureCardStyle()"
+                    hover-class="card-press"
+                    @click="onFeatureTap(feature)"
+                  >
+                    <text v-if="feature.title != null" class="feature-title" :style="featureTitleStyle()">{{ feature.title }}</text>
+                    <text v-if="feature.details != null" class="feature-details" :style="featureDetailsStyle()">{{ feature.details }}</text>
+                  </view>
+                </view>
+              </view>
+
+              <!-- 普通文档 -->
+              <view v-else class="doc-body">
+                <text class="doc-title" :style="docTitleStyle()">{{ docTitle }}</text>
+                <text v-if="description !== ''" class="doc-desc" :style="descStyle()">{{ description }}</text>
+                <ast-renderer :items="articleItems" @linktap="onLinkTap" />
+
+                <view v-if="lastUpdated !== ''" class="footer-meta">
+                  <text :style="metaStyle()">最后更新于 {{ lastUpdated }}</text>
+                </view>
+
+                <ox-uni-press-pager :prev="prevPage" :next="nextPage" @navigate="onNavigate" />
+              </view>
+
+              <!-- 页脚与正文同列：文字与分页卡水平对齐；首页固定在视口底部 -->
+              <ox-uni-press-footer
+                :class="isHome ? 'footer-fixed' : ''"
+                :footer="siteFooter"
+                @navigate="onNavigate"
+              />
+            </template>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 宽屏交互演示手机框：当前页演示项在真机宽度的滚动容器中渲染（窄于超宽阈值时替代目录栏） -->
+      <view v-if="isWide && !isHome && demoItems.length > 0" class="outline-rail demo-rail" :style="demoRailStyle()">
+        <view class="demo-phone" :style="demoPhoneStyle()">
+          <view class="demo-phone-head" :style="demoPhoneHeadStyle()">
+            <text class="demo-phone-title" :style="demoPhoneTitleStyle()">{{ docTitle }}</text>
+          </view>
+          <scroll-view class="demo-phone-screen" :style="demoPhoneScreenStyle()" scroll-y>
+            <view class="demo-phone-pad">
+              <ast-renderer :items="demoItems" @linktap="onLinkTap" />
+            </view>
+          </scroll-view>
+        </view>
+      </view>
+
+      <!-- 宽屏目录（首页不显示；超宽屏与手机框并存，中间宽度让位手机框）：外层普通 view 承载布局，避免组件虚拟宿主直接参与 flex 行布局 -->
+      <view v-if="isWide && !isHome && outlineHeadings.length > 0 && (demoItems.length === 0 || isUltra)" class="outline-rail" :style="outlineRailStyle()">
+        <ox-uni-press-outline
+          :headings="outlineHeadings"
+          :active-id="activeHeadingId"
+          @jump="jumpToAnchor"
+        />
+      </view>
+    </view>
+
+    <ox-uni-press-search
+      :visible="showSearch"
+      :index="manifest?.search ?? emptySearch"
+      @close="showSearch = false"
+      @navigate="onSearchNavigate"
+    />
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+// onLoad/onBackPress 为 uni-app x 注入的全局生命周期函数，无需 import
+import { SiteManifestData, Document, HeadingMeta, PageMeta, NavigationNode, SidebarGroup, SearchDocument, SiteFooter, HomeLayoutData, HomeHeroAction, HomeFeature } from '../../types/content.uts'
+import { theme, WIDE_BREAKPOINT } from '../../utils/theme.uts'
+import { getProvider, providerErrorMessage } from '../../utils/runtime.uts'
+import { normalizeDocPath, splitAnchor } from '../../utils/route.uts'
+import { flattenBlocks, skipsFirstHeading, RenderItem } from '../../utils/flatten.uts'
+
+const manifest = ref<SiteManifestData | null>(null)
+const document = ref<Document | null>(null)
+const currentPath = ref('/')
+const loading = ref(true)
+const notFound = ref(false)
+const errorMsg = ref('')
+const isWide = ref(false)
+// 超宽屏：目录栏与演示手机框并存（介于之间时手机框替代目录，保证正文列宽）
+const isUltra = ref(false)
+const windowWidth = ref(0)
+const statusBarHeight = ref(0)
+
+let isWeb = false
+// #ifdef WEB
+isWeb = true
+// #endif
+const sidebarOpen = ref(false)
+const showSearch = ref(false)
+const scrollTopValue = ref(0)
+const activeHeadingId = ref('')
+let currentScrollTop = 0
+
+const emptyGroups: SidebarGroup[] = []
+const emptyNav: NavigationNode[] = []
+const emptySearch: SearchDocument[] = []
+
+// ---- 主题与布局 ----
+
+theme.init()
+
+function pageStyle(): UTSJSONObject {
+  const style = { backgroundColor: theme.state.colors.bg } as UTSJSONObject
+  // #ifdef WEB
+  // 特性卡片鼠标悬停背景色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-bg'] = theme.state.colors.surfaceHover
+  // #endif
+  return style
+}
+
+function scrimStyle(): UTSJSONObject {
+  return { backgroundColor: theme.state.colors.scrim } as UTSJSONObject
+}
+
+function drawerStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.bgSubtle,
+    transform: sidebarOpen.value ? 'translateX(0px)' : 'translateX(-100%)',
+  } as UTSJSONObject
+}
+
+function contentStyle(): UTSJSONObject {
+  const style = { backgroundColor: theme.state.colors.bg } as UTSJSONObject
+  // 首页页脚固定悬浮在视口底部，正文预留底部空间避免被遮挡
+  if (isHome.value) {
+    style['paddingBottom'] = '96px'
+  }
+  // 宽屏文档页：正文在"侧边栏~右栏"之间限宽 1200 居中（剩余空间两侧对称留白，空间不足时占满），
+  // 右栏（目录/演示手机框）悬浮于滚动区之上，按其宽度预留
+  if (isWide.value && !isHome.value) {
+    let reserve = 0
+    if (demoItems.value.length > 0) {
+      reserve = isUltra.value ? 588 : 372
+    } else if (outlineHeadings.value.length > 0) {
+      reserve = 216
+    }
+    if (reserve > 0) {
+      // 264 = 左侧固定侧边栏宽度
+      const usable = windowWidth.value - 264 - reserve
+      const over = usable - 40 - 1200
+      const extra = over > 0 ? Math.round(over / 2.0) : 0
+      style['paddingLeft'] = `${40 + extra}px`
+      style['paddingRight'] = `${reserve + extra}px`
+      style['maxWidth'] = '100%'
+    }
+  }
+  return style
+}
+
+/** 目录悬浮层不透明背景：正文从其下方滚过；超宽屏且手机框在场时目录整体左移让出手机框位置 */
+function outlineRailStyle(): UTSJSONObject {
+  const style = { backgroundColor: theme.state.colors.bg } as UTSJSONObject
+  if (isUltra.value && demoItems.value.length > 0) {
+    style['right'] = '372px'
+  }
+  return style
+}
+
+/** 演示手机框悬浮层样式（固定贴右缘，不随目录偏移） */
+function demoRailStyle(): UTSJSONObject {
+  return { backgroundColor: theme.state.colors.bg } as UTSJSONObject
+}
+
+/** 宽屏演示手机框：外框 / 标题栏 / 滚动屏样式（随主题联动） */
+function demoPhoneStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.surface,
+    borderWidth: '1px',
+    borderColor: theme.state.colors.border,
+    borderStyle: 'solid',
+    borderRadius: '24px',
+    padding: '10px',
+  } as UTSJSONObject
+}
+
+function demoPhoneHeadStyle(): UTSJSONObject {
+  return {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '10px',
+    paddingBottom: '10px',
+    marginBottom: '8px',
+    borderBottomWidth: '1px',
+    borderBottomColor: theme.state.colors.border,
+    borderBottomStyle: 'solid',
+  } as UTSJSONObject
+}
+
+function demoPhoneTitleStyle(): UTSJSONObject {
+  return { fontSize: '14px', fontWeight: '600', color: theme.state.colors.text1 } as UTSJSONObject
+}
+
+function demoPhoneScreenStyle(): UTSJSONObject {
+  return { backgroundColor: theme.state.colors.bg } as UTSJSONObject
+}
+
+function skeletonStyle(): UTSJSONObject {
+  return { backgroundColor: theme.state.colors.surfaceHover } as UTSJSONObject
+}
+
+function code404Style(): UTSJSONObject {
+  return { color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+function stateTextStyle(): UTSJSONObject {
+  return { color: theme.state.colors.text2 } as UTSJSONObject
+}
+
+function pathStyle(): UTSJSONObject {
+  return { color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+function backHomeStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.brandSoft,
+    borderRadius: '10px',
+  } as UTSJSONObject
+}
+
+function backHomeTextStyle(): UTSJSONObject {
+  return { color: theme.state.colors.brand, fontSize: '14px', fontWeight: '600' } as UTSJSONObject
+}
+
+function docTitleStyle(): UTSJSONObject {
+  return {
+    fontSize: '26px',
+    fontWeight: '700',
+    lineHeight: '36px',
+    letterSpacing: '-0.5px',
+    color: theme.state.colors.text1,
+    marginBottom: '16px',
+  } as UTSJSONObject
+}
+
+function descStyle(): UTSJSONObject {
+  return { fontSize: '15px', lineHeight: '25px', color: theme.state.colors.text2, marginBottom: '14px' } as UTSJSONObject
+}
+
+function metaStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+// ---- 首页样式 ----
+
+function heroNameStyle(): UTSJSONObject {
+  return {
+    fontSize: isWide.value ? '28px' : '24px',
+    fontWeight: '700',
+    lineHeight: '34px',
+    letterSpacing: '-0.4px',
+    color: theme.state.colors.brand,
+    textAlign: 'center',
+  } as UTSJSONObject
+}
+
+function heroTextStyle(): UTSJSONObject {
+  return {
+    marginTop: '16px',
+    fontSize: isWide.value ? '38px' : '29px',
+    fontWeight: '800',
+    lineHeight: isWide.value ? '48px' : '38px',
+    letterSpacing: '-0.8px',
+    color: theme.state.colors.text1,
+    textAlign: 'center',
+  } as UTSJSONObject
+}
+
+function heroTaglineStyle(): UTSJSONObject {
+  return {
+    marginTop: '12px',
+    fontSize: '15px',
+    lineHeight: '26px',
+    color: theme.state.colors.text2,
+    textAlign: 'center',
+  } as UTSJSONObject
+}
+
+function actionBtnStyle(action: HomeHeroAction): UTSJSONObject {
+  const alt = action.theme === 'alt'
+  return {
+    padding: '10px 22px',
+    borderRadius: '12px',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: alt ? theme.state.colors.borderStrong : theme.state.colors.brand,
+    backgroundColor: alt ? 'transparent' : theme.state.colors.brand,
+  } as UTSJSONObject
+}
+
+function actionTextStyle(action: HomeHeroAction): UTSJSONObject {
+  const alt = action.theme === 'alt'
+  return {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: alt ? theme.state.colors.text1 : theme.state.colors.onBrand,
+  } as UTSJSONObject
+}
+
+function featureCardStyle(): UTSJSONObject {
+  return {
+    width: isWide.value ? '32%' : '100%',
+    padding: '20px 18px',
+    borderRadius: '14px',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: theme.state.colors.border,
+    backgroundColor: theme.state.colors.surface,
+  } as UTSJSONObject
+}
+
+function featureTitleStyle(): UTSJSONObject {
+  return {
+    fontSize: '16px',
+    fontWeight: '650',
+    lineHeight: '24px',
+    paddingBottom: '10px',
+    marginBottom: '10px',
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: theme.state.colors.border,
+    color: theme.state.colors.text1,
+  } as UTSJSONObject
+}
+
+function featureDetailsStyle(): UTSJSONObject {
+  return { fontSize: '14px', lineHeight: '24px', color: theme.state.colors.text2 } as UTSJSONObject
+}
+
+function onActionTap(action: HomeHeroAction): void {
+  openLink(action.link)
+}
+
+function onFeatureTap(feature: HomeFeature): void {
+  if (feature.link != null && feature.link !== '') openLink(feature.link)
+}
+
+/** 首页按钮跳转：内链走路由，外链 Web 新窗口 / App 复制链接 */
+function openLink(link: string): void {
+  if (link.startsWith('/')) {
+    onNavigate(link)
+    return
+  }
+  // #ifdef WEB
+  window.open(link, '_blank')
+  // #endif
+  // #ifndef WEB
+  uni.setClipboardData({
+    data: link,
+    success: () => {
+      uni.showToast({ title: '链接已复制', icon: 'none' } as ShowToastOptions)
+    },
+  })
+  // #endif
+}
+
+// ---- 派生数据 ----
+
+const siteTitle = computed((): string => manifest.value?.site.title ?? 'OxUniPress')
+
+/**
+ * 站点品牌图标：site.logo 未配置时回退到插件内置默认图标，
+ * 保证集成后零配置即有品牌标识，无需宿主工程自行放置图片。
+ */
+const siteLogo = computed((): string => {
+  const logo = manifest.value?.site.logo
+  return logo != null && logo !== '' ? logo : '/uni_modules/ox-uni-press/static/ox-logo.png'
+})
+
+/** 窄屏抽屉内容：栏目导航作为首个分组（无标题），其后为按当前目录过滤的侧边栏分组 */
+const drawerGroups = computed((): SidebarGroup[] => {
+  const groups: SidebarGroup[] = []
+  const nav = manifest.value?.navigation
+  if (nav != null && nav.length > 0) {
+    const items: NavigationNode[] = []
+    for (let i = 0; i < nav.length; i++) {
+      const item = nav[i]
+      if (item != null) items.push(item)
+    }
+    if (items.length > 0) groups.push({ items: items } as SidebarGroup)
+  }
+  const sidebar = filteredSidebar.value
+  for (let i = 0; i < sidebar.length; i++) {
+    const group = sidebar[i]
+    if (group != null) groups.push(group)
+  }
+  return groups
+})
+
+/**
+ * 侧边栏范围：当前路径所在顶层目录（"/guide/quick-start" -> "/guide"）；
+ * 根目录页面（"/deploy"）按精确路径归组；首页/根路径为空串（表示不过滤）。
+ */
+function sidebarScope(path: string): string {
+  const normalized = normalizeDocPath(path)
+  if (normalized === '/') return ''
+  const segments = normalized.split('/').filter((s): boolean => s !== '')
+  if (segments.length > 1) return `/${segments[0]}`
+  return normalized
+}
+
+/**
+ * 按当前目录过滤的侧边栏：顶栏栏目与侧边栏联动，点"指南"只显示指南分组；
+ * 条目级过滤（根页面 nav 跳转后只保留对应条目），无匹配时回退全量。
+ */
+const filteredSidebar = computed((): SidebarGroup[] => {
+  const m = manifest.value
+  if (m == null) return []
+  const scope = sidebarScope(currentPath.value)
+  if (scope === '') return m.sidebar
+  const out: SidebarGroup[] = []
+  for (let g = 0; g < m.sidebar.length; g++) {
+    const group = m.sidebar[g]
+    if (group == null) continue
+    const kept: NavigationNode[] = []
+    for (let i = 0; i < group.items.length; i++) {
+      const item = group.items[i]
+      if (item == null || item.link == null || item.link === '') continue
+      if (sidebarScope(item.link) === scope) kept.push(item)
+    }
+    if (kept.length > 0) {
+      out.push({ text: group.text, items: kept } as SidebarGroup)
+    }
+  }
+  return out.length > 0 ? out : m.sidebar
+})
+
+const siteFooter = computed((): SiteFooter => {
+  const footer = manifest.value?.site.footer
+  return footer != null ? footer : {} as SiteFooter
+})
+
+const docTitle = computed((): string => document.value?.meta.title ?? '')
+
+const description = computed((): string => document.value?.meta.description ?? '')
+
+const lastUpdated = computed((): string => {
+  const iso = document.value?.meta.lastUpdated
+  if (iso == null || iso === '') return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
+})
+
+const renderItems = computed((): RenderItem[] => {
+  const doc = document.value
+  if (doc == null) return []
+  return flattenBlocks(doc.root, doc.meta.title)
+})
+
+// 宽屏时把交互演示拆出到右侧手机框渲染，窄屏仍内联在正文中
+const demoItems = computed((): RenderItem[] => {
+  if (!isWide.value) return []
+  const out: RenderItem[] = []
+  const all = renderItems.value
+  for (let i = 0; i < all.length; i++) {
+    const it = all[i]
+    if (it != null && it.kind === 'demo') out.push(it)
+  }
+  return out
+})
+
+const articleItems = computed((): RenderItem[] => {
+  if (!isWide.value) return renderItems.value
+  const out: RenderItem[] = []
+  const all = renderItems.value
+  for (let i = 0; i < all.length; i++) {
+    const it = all[i]
+    if (it != null && it.kind !== 'demo') out.push(it)
+  }
+  return out
+})
+
+// ---- 首页（layout: home）----
+
+const isHome = computed((): boolean => document.value?.home != null)
+
+const homeData = computed((): HomeLayoutData | null => document.value?.home ?? null)
+
+const heroName = computed((): string => homeData.value?.hero?.name ?? '')
+
+const heroText = computed((): string => homeData.value?.hero?.text ?? '')
+
+const heroTagline = computed((): string => homeData.value?.hero?.tagline ?? '')
+
+const heroActions = computed((): HomeHeroAction[] => {
+  const actions = homeData.value?.hero?.actions
+  if (actions == null) return []
+  const out: HomeHeroAction[] = []
+  for (let i = 0; i < actions.length; i++) {
+    const a = actions[i]
+    if (a != null) out.push(a)
+  }
+  return out
+})
+
+const homeFeatures = computed((): HomeFeature[] => {
+  const features = homeData.value?.features
+  if (features == null) return []
+  const out: HomeFeature[] = []
+  for (let i = 0; i < features.length; i++) {
+    const f = features[i]
+    if (f != null) out.push(f)
+  }
+  return out
+})
+
+const outlineHeadings = computed((): HeadingMeta[] => {
+  const meta = document.value?.meta
+  if (meta == null) return []
+  return meta.headings.filter((h): boolean => h.level >= 2 && h.level <= 3)
+})
+
+/**
+ * 实际渲染出来的标题列表（与 ast-renderer 输出一一对应）。
+ * 渲染层会跳过与文档标题重复的首个一级标题，滚动跟随按索引配对时必须使用本列表。
+ */
+const renderedHeadings = computed((): HeadingMeta[] => {
+  const doc = document.value
+  if (doc == null) return []
+  const hs = doc.meta.headings
+  if (skipsFirstHeading(doc.root, doc.meta.title) && hs.length > 0) {
+    return hs.slice(1)
+  }
+  return hs
+})
+
+const flatPages = computed((): PageMeta[] => {
+  const m = manifest.value
+  if (m == null) return []
+  const out: PageMeta[] = []
+  for (let g = 0; g < m.sidebar.length; g++) {
+    const group = m.sidebar[g]
+    if (group == null) continue
+    for (let i = 0; i < group.items.length; i++) {
+      const item = group.items[i]
+      if (item?.link == null) continue
+      const meta = findMeta(item.link)
+      if (meta != null) out.push(meta)
+    }
+  }
+  if (out.length === 0) return m.pages
+  return out
+})
+
+const prevPage = computed((): PageMeta | null => {
+  const pages = flatPages.value
+  const idx = pages.findIndex((p): boolean => p.id === document.value?.meta.id)
+  if (idx <= 0) return null
+  return pages[idx - 1] ?? null
+})
+
+const nextPage = computed((): PageMeta | null => {
+  const pages = flatPages.value
+  const idx = pages.findIndex((p): boolean => p.id === document.value?.meta.id)
+  if (idx === -1 || idx >= pages.length - 1) return null
+  return pages[idx + 1] ?? null
+})
+
+function findMeta(path: string): PageMeta | null {
+  const m = manifest.value
+  if (m == null) return null
+  const target = normalizeDocPath(path)
+  for (let i = 0; i < m.pages.length; i++) {
+    const p = m.pages[i]
+    if (p != null && normalizeDocPath(p.path) === target) return p
+  }
+  return null
+}
+
+// ---- 数据加载 ----
+
+async function loadAll(path: string, pushUrl: boolean): Promise<void> {
+  const provider = getProvider()
+  if (provider == null) {
+    errorMsg.value = '未注册 ContentProvider：请在 App.uvue 的 onLaunch 中调用 registerOxUniPress'
+    loading.value = false
+    return
+  }
+  loading.value = true
+  notFound.value = false
+  errorMsg.value = ''
+  try {
+    if (manifest.value == null) {
+      manifest.value = await provider.getManifest()
+      applyWebFavicon()
+    }
+    const target = splitAnchor(path)
+    const meta = findMeta(target.path)
+    if (meta == null) {
+      notFound.value = true
+      loading.value = false
+      // 404 不再额外压入历史条目（用户跳转时已 push 过本路径）
+      syncWebUrl(path, false)
+      return
+    }
+    const doc = await provider.getPage(meta.path)
+    document.value = doc
+    currentPath.value = normalizeDocPath(meta.path)
+    activeHeadingId.value = target.anchor
+    scrollTopValue.value = 0
+    currentScrollTop = 0
+    if (target.anchor !== '') {
+      jumpToAnchor(target.anchor)
+    }
+    syncWebUrl(currentPath.value, pushUrl)
+  } catch (err) {
+    if (err instanceof Error) {
+      const codePrefix = 'ox-uni-press:CLIENT_UPGRADE_REQUIRED|'
+      if (err.message.startsWith(codePrefix)) {
+        errorMsg.value = err.message.substring(codePrefix.length) + '（请升级 App 后重试）'
+      } else {
+        errorMsg.value = providerErrorMessage(err)
+      }
+    } else {
+      errorMsg.value = String(err)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+let pendingAnchor = ''
+
+// #ifdef WEB
+/**
+ * Web 端平滑滚动：自驱动逐帧更新 scroll-top。
+ * 不用 scroll-with-animation（其动画模式会隐藏滚动条导致宽度抖动），
+ * 也不用 CSS scroll-behavior（无法确定 uni-scroll-view 内部滚动元素）。
+ */
+let scrollAnimTimer = -1
+
+function animateScrollTo(target: number): void {
+  if (scrollAnimTimer !== -1) clearInterval(scrollAnimTimer)
+  const start = currentScrollTop
+  const delta = target - start
+  if (Math.abs(delta) < 2) {
+    scrollTopValue.value = target
+    return
+  }
+  const duration = 320
+  const t0 = Date.now()
+  scrollAnimTimer = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / duration)
+    const eased = 1 - Math.pow(1 - p, 3)
+    scrollTopValue.value = Math.round(start + delta * eased)
+    if (p >= 1) {
+      clearInterval(scrollAnimTimer)
+      scrollAnimTimer = -1
+    }
+  }, 16)
+}
+// #endif
+
+/**
+ * 锚点定位：CJK 锚点在 CSS 选择器中不可靠，
+ * 改为按 .heading-block 顺序查询位置后用 scroll-top 定位。
+ */
+function jumpToAnchor(anchor: string): void {
+  pendingAnchor = anchor
+  activeHeadingId.value = anchor
+  setTimeout(() => {
+    const index = headingIndexById(pendingAnchor)
+    if (index === -1) return
+    const query = uni.createSelectorQuery()
+    query.selectAll('.heading-block').boundingClientRect()
+    query.exec((results: Array<any | null>) => {
+      const first = results[0]
+      if (first == null) return
+      const rectList = first as Array<NodeInfo>
+      if (index >= rectList.length) return
+      const rect = rectList[index]
+      if (rect != null) {
+        const top = rect.top
+        if (top != null) {
+          const target = Math.max(0, top + currentScrollTop - 84)
+          // #ifdef WEB
+          animateScrollTo(target)
+          // #endif
+          // #ifndef WEB
+          scrollTopValue.value = target
+          // #endif
+        }
+      }
+    })
+  }, 150)
+}
+
+function headingIndexById(anchor: string): number {
+  const headings = renderedHeadings.value
+  for (let i = 0; i < headings.length; i++) {
+    const h = headings[i]
+    if (h != null && h.id === anchor) return i
+  }
+  return -1
+}
+
+/** Web 端同步地址栏（平台差异通过条件编译隔离）：用户跳转 push，初始/回退/404 replace */
+function syncWebUrl(path: string, push: boolean): void {
+  // #ifdef WEB
+  const hash = path === '/' ? '#/' : `#${path}`
+  if (push) {
+    history.pushState(null, '', hash)
+  } else {
+    history.replaceState(null, '', hash)
+  }
+  // #endif
+}
+
+/**
+ * Web 端注入浏览器标签栏图标：优先使用 site.favicon，未配置时回退到插件内置默认图标。
+ * 与 logo 同理，保证集成后零配置即有默认品牌图标，无需宿主工程自行放置图片或改 index.html。
+ * 其他平台（App/小程序）标签图标由宿主工程 manifest 配置，不在此处理。
+ */
+function applyWebFavicon(): void {
+  // #ifdef WEB
+  const favicon =
+    manifest.value?.site.favicon ?? '/uni_modules/ox-uni-press/static/ox-favicon.png'
+  // 注意：本页存在同名 ref `document`，必须经 window.document 取浏览器 DOM
+  const doc = window.document as any
+  let link = doc.querySelector('link[rel~="icon"]')
+  if (link == null) {
+    link = doc.createElement('link')
+    link.rel = 'icon'
+    link.type = 'image/png'
+    doc.head.appendChild(link)
+  }
+  link.href = favicon
+  // #endif
+}
+
+/** Web 端读取地址栏 hash 中的文档路径（#/path 形式），无则返回 '/' */
+function readWebHashPath(): string {
+  // #ifdef WEB
+  const hash = window.location.hash
+  if (hash.startsWith('#/')) {
+    let p = hash.substring(1)
+    // index.html 深链重写后的形态（文档页路径 + ?path=文档路径），还原出文档路径
+    const pagePrefix = '/uni_modules/ox-uni-press/pages/doc/doc'
+    if (p.startsWith(pagePrefix)) {
+      const marker = '?path='
+      const q = p.indexOf(marker)
+      if (q !== -1) {
+        const raw = p.substring(q + marker.length)
+        // UTS Web 端 decodeURIComponent 返回 string | null，判空后还原（与 route.uts 一致）
+        let decoded = raw
+        try {
+          const d = decodeURIComponent(raw)
+          if (d != null) decoded = d
+        } catch (e) {
+          // 保留原值
+        }
+        return normalizeDocPath(decoded)
+      }
+      return '/'
+    }
+    return p
+  }
+  // #endif
+  return '/'
+}
+
+// ---- 导航 ----
+
+/**
+ * 站内文档导航历史：所有站内跳转都在同一原生页面内换数据，
+ * 原生页面栈只有一页，系统返回需在此回退，否则表现为"返回不生效/直接退出"。
+ */
+const docHistory: string[] = []
+const DOC_HISTORY_LIMIT = 50
+
+function navigateTo(link: string): void {
+  const target = normalizeDocPath(splitAnchor(link).path)
+  if (target !== currentPath.value) {
+    docHistory.push(currentPath.value)
+    if (docHistory.length > DOC_HISTORY_LIMIT) docHistory.shift()
+  }
+  loadAll(link, true)
+}
+
+function onNavigate(link: string): void {
+  sidebarOpen.value = false
+  showSearch.value = false
+  navigateTo(link)
+}
+
+function onLinkTap(href: string): void {
+  onNavigate(href)
+}
+
+function onSearchNavigate(path: string): void {
+  showSearch.value = false
+  navigateTo(path)
+}
+
+function goHome(): void {
+  navigateTo('/')
+}
+
+function openSidebar(): void {
+  sidebarOpen.value = true
+}
+
+function closeSidebar(): void {
+  sidebarOpen.value = false
+}
+
+// ---- 滚动监听（目录高亮）----
+
+let scrollTimer = -1
+
+function onContentScroll(e: ScrollEvent): void {
+  currentScrollTop = e.detail.scrollTop
+  if (!isWide.value) return
+  if (scrollTimer !== -1) clearTimeout(scrollTimer)
+  scrollTimer = setTimeout(() => {
+    spyHeadings()
+  }, 100)
+}
+
+function spyHeadings(): void {
+  const headings = renderedHeadings.value
+  if (headings.length === 0) return
+  const query = uni.createSelectorQuery()
+  query.selectAll('.heading-block').boundingClientRect()
+  query.exec((results: Array<any | null>) => {
+    const first = results[0]
+    if (first == null) return
+    const rectList = first as Array<NodeInfo>
+    let currentId = ''
+    for (let i = 0; i < rectList.length && i < headings.length; i++) {
+      const h = headings[i]
+      const rect = rectList[i]
+      if (h == null || rect == null) continue
+      if (h.level < 2 || h.level > 3) continue
+      const top = rect.top
+      if (top != null && top <= 96) currentId = h.id
+    }
+    if (currentId !== '') activeHeadingId.value = currentId
+  })
+}
+
+// ---- 尺寸自适应 ----
+
+function updateWidth(): void {
+  const info = uni.getWindowInfo()
+  isWide.value = info.windowWidth >= WIDE_BREAKPOINT
+  isUltra.value = info.windowWidth >= 1366
+  windowWidth.value = info.windowWidth
+  statusBarHeight.value = info.statusBarHeight
+  if (!isWide.value) sidebarOpen.value = false
+}
+
+defineExpose({
+  load: (path: string): void => {
+    loadAll(path, false)
+  },
+})
+
+// ---- 生命周期 ----
+
+onLoad((options) => {
+  updateWidth()
+  // #ifndef APP-HARMONY
+  // 鸿蒙端未实现 uni.onWindowResize（见 README 平台说明）；部分平台 d.ts 未声明该 API，运行时判定后再挂监听
+  const uniAny = uni as any
+  if (uniAny.onWindowResize != null) {
+    uniAny.onWindowResize(() => {
+      updateWidth()
+    })
+  }
+  // #endif
+  const raw = options?.['path']
+  let initial = typeof raw === 'string' && raw !== '' ? raw : '/'
+  // #ifdef WEB
+  // 深链/刷新恢复：地址栏 hash（#/path）优先于页面参数
+  const hashPath = readWebHashPath()
+  if (hashPath !== '/') initial = hashPath
+  // index.html 深链托管：整页刷新时文档路径暂存于 sessionStorage，此处取回（保证地址栏不出现内部页面路径）
+  try {
+    const stored = window.sessionStorage.getItem('ox-doc-deeplink')
+    if (stored != null && stored !== '') {
+      window.sessionStorage.removeItem('ox-doc-deeplink')
+      initial = normalizeDocPath(stored)
+    }
+  } catch (e) {
+    // 无 sessionStorage（隐私模式等）时忽略，按当前 hash 加载
+  }
+  // 地址栏统一还原为可读的文档路径（书签的内部页面路径形态不停留）
+  if (initial !== '/') {
+    history.replaceState(null, '', '#' + initial)
+  }
+  // 浏览器前进/后退：历史条目由 pushState 产生，popstate 时按地址栏恢复页面（replace，不再入栈）
+  window.addEventListener('popstate', () => {
+    loadAll(readWebHashPath(), false)
+  })
+  // #endif
+  loadAll(initial, false)
+})
+
+onBackPress((_options): boolean => {
+  if (sidebarOpen.value) {
+    sidebarOpen.value = false
+    return true
+  }
+  if (showSearch.value) {
+    showSearch.value = false
+    return true
+  }
+  const prev = docHistory.pop()
+  if (prev != null) {
+    loadAll(prev, false)
+    return true
+  }
+  return false
+})
+</script>
+
+<style>
+.page {
+  flex-direction: column;
+  flex: 1;
+}
+
+.body {
+  flex: 1;
+  flex-direction: row;
+}
+
+.scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 264px;
+  z-index: 31;
+  transition-property: transform;
+  transition-duration: 260ms;
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.fixed-sidebar {
+  width: 264px;
+}
+
+.content {
+  flex: 1;
+  flex-direction: column;
+}
+
+/* 内容区弹性增长：吸收剩余空间，把通栏页脚推到视口底部 */
+.content-inner {
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 24px 0;
+  max-width: 780px;
+  align-self: center;
+  width: 100%;
+}
+
+.state-block {
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 7px;
+  margin-bottom: 12px;
+}
+
+.w60 {
+  width: 60%;
+}
+.w90 {
+  width: 90%;
+}
+.w40 {
+  width: 40%;
+}
+
+.code-404 {
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.state-text {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.state-path {
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.back-home {
+  padding: 9px 20px;
+}
+
+.footer-meta {
+  margin-top: 32px;
+  flex-direction: row;
+}
+
+/* ---- 首页 ---- */
+
+.home {
+  flex-direction: column;
+}
+
+.hero {
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 16px;
+}
+
+.hero-actions {
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.action-btn {
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
+.features {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 28px;
+}
+
+.feature-card {
+  margin-bottom: 14px;
+}
+
+/* 按压反馈仅触屏端生效：Web 端卡片有悬停底色，按压变透明会产生"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.card-press {
+  opacity: 0.75;
+}
+/* #endif */
+
+.doc-body {
+  flex-direction: column;
+}
+
+.tail-space {
+  height: 32px;
+}
+
+/* 内容不足一屏时页脚贴视口底部；内容超长时自然跟随滚动 */
+/* #ifdef WEB */
+.scroll-col {
+  min-height: calc(100vh - 52px);
+}
+/* #endif */
+
+/* 首页页脚固定悬浮在视口底部 */
+.footer-fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Web 端：内容区至少占满视口（100vh - 52px header），页脚贴底 */
+/* #ifdef WEB */
+.content-inner {
+  min-height: calc(100vh - 52px);
+}
+/* #endif */
+
+/* 宽屏目录：悬浮覆盖在滚动区右缘上方，让正文滚动条贴住窗口最右侧 */
+.outline-rail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 200px;
+  padding: 28px 12px 28px 8px;
+}
+
+/* 宽屏演示手机框：比目录栏更宽，内部滚动屏呈现当前页全部交互演示 */
+.demo-rail {
+  width: 356px;
+  padding: 20px 8px 20px 8px;
+}
+
+.demo-phone {
+  flex-direction: column;
+  width: 340px;
+  height: 640px;
+  overflow: hidden;
+}
+
+.demo-phone-head {
+  flex-direction: row;
+}
+
+.demo-phone-title {
+  flex-direction: column;
+}
+
+.demo-phone-screen {
+  flex-direction: column;
+  flex: 1;
+}
+
+.demo-phone-pad {
+  flex-direction: column;
+  padding: 12px;
+}
+
+@media (min-width: 600px) {
+  .content-inner {
+    padding: 40px 40px 0;
+  }
+}
+
+/* #ifdef WEB */
+.back-home,
+.action-btn,
+.feature-card {
+  cursor: pointer;
+}
+
+/* 特性卡片悬停反馈：背景色变量由 pageStyle 下发，随深浅色主题切换 */
+.feature-card {
+  transition-property: background-color;
+  transition-duration: 120ms;
+}
+
+.feature-card:hover {
+  background-color: var(--up-hover-bg, rgba(20, 24, 40, 0.05));
+}
+
+/* 预留滚动条槽位：滚动条显隐不再改变内容区宽度，居中列不左右轻移 */
+.content {
+  scrollbar-gutter: stable;
+}
+/* #endif */
+</style>

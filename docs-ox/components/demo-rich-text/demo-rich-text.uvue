@@ -1,0 +1,33 @@
+<template>
+  <view class="demo-rich-text">
+    <text class="dsec">标题与强调</text>
+    <nax-rich-text :content="c1"></nax-rich-text>
+
+    <text class="dsec">列表与代码</text>
+    <nax-rich-text :content="c2"></nax-rich-text>
+
+    <text class="dsec">引用与表格</text>
+    <nax-rich-text :content="c3"></nax-rich-text>
+  </view>
+</template>
+
+<script setup lang="uts">
+const c1 = '### nax-ui\n支持 **加粗**、*斜体*、~~删除线~~ 与 `行内代码`，也支持 [站内链接](/guide/intro)。'
+
+const c2 = '- 列表项一\n- 列表项二\n- 列表项三\n\n```ts\nconst msg: string = "hello nax-ui"\n```'
+
+const c3 = '> 这是一段引用说明，用于展示 quote 样式。\n\n| 属性 | 类型 |\n|------|------|\n| content | string |\n| mode | string |'
+</script>
+
+<style>
+.demo-rich-text {
+  flex-direction: column;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

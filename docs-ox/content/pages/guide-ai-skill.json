@@ -1,0 +1,1454 @@
+{
+  "meta": {
+    "id": "guide-ai-skill",
+    "path": "/guide/ai-skill",
+    "source": "guide/ai-skill.md",
+    "title": "AI 技能包（Agent Skill）",
+    "headings": [
+      {
+        "id": "ai-技能包agent-skill",
+        "text": "AI 技能包（Agent Skill）",
+        "level": 1
+      },
+      {
+        "id": "一键安装推荐",
+        "text": "一键安装（推荐）",
+        "level": 2
+      },
+      {
+        "id": "手动安装",
+        "text": "手动安装",
+        "level": 2
+      },
+      {
+        "id": "技能包含什么",
+        "text": "技能包含什么",
+        "level": 2
+      },
+      {
+        "id": "验证安装",
+        "text": "验证安装",
+        "level": 2
+      },
+      {
+        "id": "相关链接",
+        "text": "相关链接",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T01:55:47.374Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "ai-技能包agent-skill"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "AI 技能包（Agent Skill）",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "nax-ui 提供官方 ",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Agent 技能包",
+                    "source": {
+                      "start": {
+                        "line": 3,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 3,
+                        "column": 15
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "，让 AI 编码助手（Claude Code、Cursor、OpenCode、Codex 等）更准确地使用 nax-ui 编写页面：组件速查、每组件 API 参考、主题接入指南。",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 26
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 26
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "一键安装推荐"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "一键安装（推荐）",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 5,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "通过 ",
+            "source": {
+              "start": {
+                "line": 7,
+                "column": 1
+              },
+              "end": {
+                "line": 7,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "link",
+            "children": [
+              {
+                "type": "text",
+                "value": "skills.sh",
+                "source": {
+                  "start": {
+                    "line": 7,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 7,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "attrs": {
+              "href": "https://skills.sh/liudapeng0311/nax-ui-skills"
+            },
+            "source": {
+              "start": {
+                "line": 7,
+                "column": 4
+              },
+              "end": {
+                "line": 7,
+                "column": 4
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 生态的 CLI 安装：",
+            "source": {
+              "start": {
+                "line": 7,
+                "column": 62
+              },
+              "end": {
+                "line": 7,
+                "column": 62
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 7,
+            "column": 1
+          },
+          "end": {
+            "line": 6,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "npx skills add liudapeng0311/nax-ui-skills",
+        "attrs": {
+          "lang": "bash"
+        },
+        "source": {
+          "start": {
+            "line": 9,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "npx skills add liudapeng0311/nax-ui-skills\n"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "按提示选择要安装的 AI 代理（或加 ",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 13,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "--yes -g",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 20
+              },
+              "end": {
+                "line": 13,
+                "column": 20
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 跳过交互直接全局安装）：",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 30
+              },
+              "end": {
+                "line": 13,
+                "column": 30
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 13,
+            "column": 1
+          },
+          "end": {
+            "line": 12,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "npx skills add liudapeng0311/nax-ui-skills --yes -g",
+        "attrs": {
+          "lang": "bash"
+        },
+        "source": {
+          "start": {
+            "line": 15,
+            "column": 1
+          },
+          "end": {
+            "line": 16,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "npx skills add liudapeng0311/nax-ui-skills --yes -g\n"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "安装后，AI 在遇到 nax-ui 相关任务时（写页面、查组件 API、配主题）会自动加载本技能。",
+            "source": {
+              "start": {
+                "line": 19,
+                "column": 1
+              },
+              "end": {
+                "line": 19,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 19,
+            "column": 1
+          },
+          "end": {
+            "line": 18,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "手动安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "手动安装",
+            "source": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 21,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 21,
+            "column": 1
+          },
+          "end": {
+            "line": 21,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "不使用 skills CLI 时，将技能目录复制到对应工具的 skills 目录：",
+            "source": {
+              "start": {
+                "line": 23,
+                "column": 1
+              },
+              "end": {
+                "line": 23,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 23,
+            "column": 1
+          },
+          "end": {
+            "line": 22,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "# 克隆技能仓库\ngit clone https://github.com/liudapeng0311/nax-ui-skills.git",
+        "attrs": {
+          "lang": "bash"
+        },
+        "source": {
+          "start": {
+            "line": 25,
+            "column": 1
+          },
+          "end": {
+            "line": 27,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "# 克隆技能仓库",
+            "c": "com"
+          },
+          {
+            "t": "\ngit clone https://github.com/liudapeng0311/nax-ui-skills.git\n"
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "工具",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 30,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "安装目录",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 30,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 1
+              },
+              "end": {
+                "line": 30,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Claude Code",
+                    "source": {
+                      "start": {
+                        "line": 32,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 32,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 32,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "~/.claude/skills/nax-ui/",
+                    "source": {
+                      "start": {
+                        "line": 32,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 32,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 32,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 32,
+                "column": 1
+              },
+              "end": {
+                "line": 32,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "OpenCode / 通用",
+                    "source": {
+                      "start": {
+                        "line": 33,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 33,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 33,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 33,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "~/.agents/skills/nax-ui/",
+                    "source": {
+                      "start": {
+                        "line": 33,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 33,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 33,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 33,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 33,
+                "column": 1
+              },
+              "end": {
+                "line": 33,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "项目级",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 34,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "项目根目录 ",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": ".claude/skills/nax-ui/",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 7
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 或 ",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 31
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 31
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": ".agents/skills/nax-ui/",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 34
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 34
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 34,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 34,
+                "column": 1
+              },
+              "end": {
+                "line": 34,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 30,
+            "column": 1
+          },
+          "end": {
+            "line": 33,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "技能目录 = 仓库中的 ",
+                "source": {
+                  "start": {
+                    "line": 36,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 36,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "SKILL.md",
+                "source": {
+                  "start": {
+                    "line": 36,
+                    "column": 13
+                  },
+                  "end": {
+                    "line": 36,
+                    "column": 13
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " + ",
+                "source": {
+                  "start": {
+                    "line": 36,
+                    "column": 23
+                  },
+                  "end": {
+                    "line": 36,
+                    "column": 23
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "references/",
+                "source": {
+                  "start": {
+                    "line": 36,
+                    "column": 26
+                  },
+                  "end": {
+                    "line": 36,
+                    "column": 26
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "（组件索引、52 个组件 API 卡、nax-use 组合式函数卡、主题指南）。",
+                "source": {
+                  "start": {
+                    "line": 36,
+                    "column": 39
+                  },
+                  "end": {
+                    "line": 36,
+                    "column": 39
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 36,
+            "column": 1
+          },
+          "end": {
+            "line": 36,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "技能包含什么"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "技能包含什么",
+            "source": {
+              "start": {
+                "line": 38,
+                "column": 1
+              },
+              "end": {
+                "line": 38,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 38,
+            "column": 1
+          },
+          "end": {
+            "line": 38,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "SKILL.md                      # 使用流程 + uni-app x 代码规范 + 常见陷阱\nreferences/\n  component-index.md          # 52 个组件分类速查（基础/布局/表单/反馈/导航/展示）+ nax-use 组合式函数\n  theme-guide.md              # 主题接入指南（L0/L1/L2、CSS 变量、暗色模式）\n  components/nax-*.md         # 各组件 API 参考卡（Props/Events/Slots/Methods/用法示例）",
+        "attrs": {
+          "lang": "text"
+        },
+        "source": {
+          "start": {
+            "line": 40,
+            "column": 1
+          },
+          "end": {
+            "line": 45,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "SKILL.md                      # 使用流程 + uni-app x 代码规范 + 常见陷阱\nreferences/\n  component-index.md          # 52 个组件分类速查（基础/布局/表单/反馈/导航/展示）+ nax-use 组合式函数\n  theme-guide.md              # 主题接入指南（L0/L1/L2、CSS 变量、暗色模式）\n  components/nax-*.md         # 各组件 API 参考卡（Props/Events/Slots/Methods/用法示例）"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "验证安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "验证安装",
+            "source": {
+              "start": {
+                "line": 48,
+                "column": 1
+              },
+              "end": {
+                "line": 48,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 48,
+            "column": 1
+          },
+          "end": {
+            "line": 48,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "对 AI 说类似下面的任务，检查它是否使用 nax-ui 真实组件与正确 API：",
+            "source": {
+              "start": {
+                "line": 50,
+                "column": 1
+              },
+              "end": {
+                "line": 50,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 50,
+            "column": 1
+          },
+          "end": {
+            "line": 49,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "在 uni-app x 项目里用 nax-ui 写一个登录页：nax-input 手机号/密码、\nnax-button 登录、校验失败用 naxToast 轻提示、成功用 nax-dialog 提示。",
+        "attrs": {
+          "lang": "text"
+        },
+        "source": {
+          "start": {
+            "line": 52,
+            "column": 1
+          },
+          "end": {
+            "line": 54,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "在 uni-app x 项目里用 nax-ui 写一个登录页：nax-input 手机号/密码、\nnax-button 登录、校验失败用 naxToast 轻提示、成功用 nax-dialog 提示。"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "AI 应主动参考组件卡中的 API（如 ",
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 1
+              },
+              "end": {
+                "line": 57,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "v-model:show",
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 21
+              },
+              "end": {
+                "line": 57,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "、",
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 35
+              },
+              "end": {
+                "line": 57,
+                "column": 35
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "naxToast()",
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 36
+              },
+              "end": {
+                "line": 57,
+                "column": 36
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 函数式调用）而不是凭空猜测。",
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 48
+              },
+              "end": {
+                "line": 57,
+                "column": 48
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 57,
+            "column": 1
+          },
+          "end": {
+            "line": 56,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "相关链接"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "相关链接",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 1
+              },
+              "end": {
+                "line": 59,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 59,
+            "column": 1
+          },
+          "end": {
+            "line": 59,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "skills.sh 页面：",
+                    "source": {
+                      "start": {
+                        "line": 61,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 61,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "link",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "https://skills.sh/liudapeng0311/nax-ui-skills"
+                      }
+                    ],
+                    "attrs": {
+                      "href": "https://skills.sh/liudapeng0311/nax-ui-skills"
+                    },
+                    "source": {
+                      "start": {
+                        "line": 61,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 61,
+                        "column": 14
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 61,
+                "column": 1
+              },
+              "end": {
+                "line": 61,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "技能仓库：",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "link",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "https://github.com/liudapeng0311/nax-ui-skills"
+                      }
+                    ],
+                    "attrs": {
+                      "href": "https://github.com/liudapeng0311/nax-ui-skills"
+                    },
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 6
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 62,
+                "column": 1
+              },
+              "end": {
+                "line": 62,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "组件总览：",
+                    "source": {
+                      "start": {
+                        "line": 63,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 63,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "link",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "组件文档",
+                        "source": {
+                          "start": {
+                            "line": 63,
+                            "column": 1
+                          },
+                          "end": {
+                            "line": 63,
+                            "column": 1
+                          }
+                        }
+                      }
+                    ],
+                    "attrs": {
+                      "href": "../components/"
+                    },
+                    "source": {
+                      "start": {
+                        "line": 63,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 63,
+                        "column": 6
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 63,
+                "column": 1
+              },
+              "end": {
+                "line": 63,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 61,
+            "column": 1
+          },
+          "end": {
+            "line": 63,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 64,
+        "column": 1
+      }
+    }
+  }
+}

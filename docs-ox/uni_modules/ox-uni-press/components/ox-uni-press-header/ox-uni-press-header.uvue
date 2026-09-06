@@ -1,0 +1,356 @@
+<template>
+  <view class="header" :style="headerStyle()">
+    <view v-if="showMenu" class="icon-btn" hover-class="press" @click="emit('menu')">
+      <view class="menu-bar" :style="barStyle()" />
+      <view class="menu-bar" :style="barStyle()" />
+      <view class="menu-bar short" :style="barStyle()" />
+    </view>
+
+    <view v-if="logoPath() !== '' || title !== ''" class="brand-wrap" hover-class="press" @click="emit('home')">
+      <image v-if="logoPath() !== ''" class="brand-logo" :src="logoPath()" mode="aspectFit" :style="logoStyle()" @load="onLogoLoad" />
+      <text v-if="title !== ''" class="brand" :style="brandStyle()">{{ title }}</text>
+    </view>
+
+    <!-- 栏目导航：宽屏内联展示，窄屏收进侧边抽屉（由宿主页面拼接） -->
+    <view v-if="!showMenu && navItems().length > 0" class="nav">
+      <view
+        v-for="(item, index) in navItems()"
+        :key="index"
+        class="nav-item"
+        :style="navItemStyle(item)"
+        @click="onNavTap(item)"
+      >
+        <text class="nav-text" :style="navTextStyle(item)">{{ item.text }}</text>
+      </view>
+    </view>
+
+    <view class="spacer" />
+
+    <view class="icon-btn" hover-class="press" @click="emit('search')">
+      <image class="icon-img" :src="searchIconSrc()" mode="aspectFit" />
+    </view>
+
+    <view class="theme-btn" hover-class="press" @click="onTheme">
+      <image class="icon-img" :src="themeIconSrc()" mode="aspectFit" />
+      <text class="mode-label" :style="modeLabelStyle()">{{ theme.modeLabel() }}</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { theme } from '../../utils/theme.uts'
+import { NavigationNode } from '../../types/content.uts'
+import { normalizeDocPath, splitAnchor } from '../../utils/route.uts'
+
+/** 品牌图展示高度（px）：@load 后按原始宽高比换算宽度，横版长图不再被压进正方形 */
+const LOGO_HEIGHT = 24
+/** 品牌图宽度上限（px）：超过时按宽度缩限，避免过宽挤压导航 */
+const LOGO_MAX_WIDTH = 96
+
+const props = defineProps<{
+  title: string
+  showMenu: boolean
+  /** 状态栏高度（px）：navigationStyle 为 custom 时用于顶部安全区 */
+  topInset?: number
+  /** 头部品牌图路径（site.logo），为空时不渲染图片 */
+  logo?: string
+  /** 栏目导航（manifest.navigation），为空时不渲染 */
+  navigation?: NavigationNode[]
+  /** 当前文档路径，用于栏目高亮 */
+  currentPath?: string
+}>()
+
+const emit = defineEmits(['menu', 'search', 'home', 'navigate'])
+
+function headerStyle(): UTSJSONObject {
+  const style = {
+    backgroundColor: theme.state.colors.bg,
+    paddingTop: `${props.topInset ?? 0}px`,
+    borderBottomWidth: '1px',
+    borderBottomColor: theme.state.colors.border,
+    borderBottomStyle: 'solid',
+  } as UTSJSONObject
+  // #ifdef WEB
+  // 鼠标悬停背景色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-bg'] = theme.state.colors.surfaceHover
+  // #endif
+  return style
+}
+
+function barStyle(): UTSJSONObject {
+  return { backgroundColor: theme.state.colors.text2 } as UTSJSONObject
+}
+
+/** 品牌图路径：未传时返回空串，模板据此不渲染 image */
+function logoPath(): string {
+  return props.logo ?? ''
+}
+
+// ---- 品牌图尺寸 ----
+
+/** 默认 24x24（aspectFit 兜底）；加载完成后按原始比例换算，保证用户自定义 logo 不变形 */
+const logoWidth = ref(24)
+const logoHeight = ref(24)
+
+function logoStyle(): UTSJSONObject {
+  return {
+    width: `${logoWidth.value}px`,
+    height: `${logoHeight.value}px`,
+  } as UTSJSONObject
+}
+
+/** image @load 携带原始尺寸：高度固定 LOGO_HEIGHT，宽度按比例换算并设上限 */
+function onLogoLoad(e: any): void {
+  const detail = e?.detail as UTSJSONObject | null
+  if (detail == null) return
+  const w = detail['width'] as number | null
+  const h = detail['height'] as number | null
+  if (w == null || h == null || w <= 0 || h <= 0) return
+  let width = Math.round((LOGO_HEIGHT * w) / h)
+  if (width > LOGO_MAX_WIDTH) width = LOGO_MAX_WIDTH
+  logoWidth.value = width
+  logoHeight.value = LOGO_HEIGHT
+}
+
+// ---- 栏目导航 ----
+
+/** 可展示的栏目：无 link 时回退到第一个子项的 link，仍为空则跳过 */
+function navItems(): NavigationNode[] {
+  const nav = props.navigation ?? []
+  const out: NavigationNode[] = []
+  for (let i = 0; i < nav.length; i++) {
+    const item = nav[i]
+    if (item == null || item.text === '') continue
+    if (navLink(item) === '') continue
+    out.push(item)
+  }
+  return out
+}
+
+function navLink(item: NavigationNode): string {
+  if (item.link != null && item.link !== '') return item.link
+  const first = item.items != null && item.items!.length > 0 ? item.items![0] : null
+  return first?.link ?? ''
+}
+
+/**
+ * 栏目高亮规则：
+ * - 带子项的下拉栏目：任一子项命中即视为激活；
+ * - 根链接 "/"：仅当前路径为根时激活；
+ * - 页面链接：当前路径精确匹配激活；
+ * - 目录链接（如 "/guide"）：当前路径位于该目录下任意页面时激活。
+ */
+function isNavActive(item: NavigationNode): boolean {
+  if (item.items != null && item.items.length > 0) {
+    for (let i = 0; i < item.items.length; i++) {
+      const child = item.items[i]
+      if (child != null && child.link != null && child.link !== '') {
+        if (linkActive(child.link)) return true
+      }
+    }
+  }
+  const link = navLink(item)
+  if (link === '') return false
+  return linkActive(link)
+}
+
+/** 链接与当前路径匹配：精确匹配，或同属一个一级栏目（顶栏"指南"→/guide/intro 时，/guide/* 全部命中） */
+function linkActive(link: string): boolean {
+  const target = normalizeDocPath(splitAnchor(link).path)
+  const current = normalizeDocPath(props.currentPath ?? '/')
+  if (target === '/') return current === '/'
+  if (current === target) return true
+  return firstSegment(current) === firstSegment(target)
+}
+
+/** 取路径的一级目录：'/guide/theme' -> '/guide'；根路径返回空串 */
+function firstSegment(p: string): string {
+  if (p === '/') return ''
+  const idx = p.indexOf('/', 1)
+  return idx === -1 ? p : p.substring(0, idx)
+}
+
+/**
+ * 栏目样式：仅选中态内联背景色（Web 端 :style 编译为真实内联样式，优先级高于样式表），
+ * 非选中态不写背景色，让 :hover 悬停底色规则得以生效；选中态内联色使悬停不影响选中标记
+ */
+function navItemStyle(item: NavigationNode): UTSJSONObject {
+  const style = {} as UTSJSONObject
+  if (isNavActive(item)) {
+    style['backgroundColor'] = theme.state.colors.brandSoft
+  }
+  return style
+}
+
+/**
+ * 文字只用颜色区分选中：不变更字重，避免 400<->600 重排导致点击切换时文字抖动/闪烁
+ */
+function navTextStyle(item: NavigationNode): UTSJSONObject {
+  const active = isNavActive(item)
+  return {
+    fontSize: '14px',
+    color: active ? theme.state.colors.brand : theme.state.colors.text2,
+  } as UTSJSONObject
+}
+
+function onNavTap(item: NavigationNode): void {
+  const link = navLink(item)
+  if (link !== '') emit('navigate', link)
+}
+
+function brandStyle(): UTSJSONObject {
+  return {
+    fontSize: '16px',
+    fontWeight: '700',
+    letterSpacing: '-0.2px',
+    color: theme.state.colors.text1,
+  } as UTSJSONObject
+}
+
+/** 图标资源：uni_modules static 目录，深色模式使用反色（白描边）变体 */
+function searchIconSrc(): string {
+  return theme.state.resolved === 'dark'
+    ? '/uni_modules/ox-uni-press/static/icons/search-light.png'
+    : '/uni_modules/ox-uni-press/static/icons/search.png'
+}
+
+/** 浅色显示太阳、深色显示月亮 */
+function themeIconSrc(): string {
+  return theme.state.resolved === 'dark'
+    ? '/uni_modules/ox-uni-press/static/icons/moon-light.png'
+    : '/uni_modules/ox-uni-press/static/icons/sun.png'
+}
+
+/** 模式文字与图标同级搭配：12px、text2 色，避免小字暗灰与大图标亮白的失衡感 */
+function modeLabelStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text2 } as UTSJSONObject
+}
+
+function onTheme(): void {
+  theme.cycle()
+}
+</script>
+
+<style>
+.header {
+  flex-direction: row;
+  align-items: center;
+  height: 52px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.icon-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-left: 4px;
+}
+
+/* 按压反馈仅触屏端生效：Web 端已有悬停底色，按压变透明会让图标/文字产生"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.press {
+  opacity: 0.6;
+}
+/* #endif */
+
+.menu-bar {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  margin-top: 2px;
+}
+
+.menu-bar.short {
+  width: 10px;
+}
+
+.brand-wrap {
+  flex-direction: row;
+  align-items: center;
+}
+
+/* 品牌图：高度固定 24px、宽度按原始比例（@load 计算），圆角兼容非圆形徽标 */
+.brand-logo {
+  border-radius: 6px;
+  margin-right: 8px;
+}
+
+.brand {
+  max-width: 220px;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+
+/* 栏目导航：紧跟品牌之后，窄屏隐藏（收进抽屉） */
+.nav {
+  flex-direction: row;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.nav-item {
+  padding: 6px 9px;
+  border-radius: 8px;
+  margin-left: 2px;
+}
+
+.nav-text {
+  font-size: 14px;
+  lines: 1;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* 放大镜/主题图标：使用 static/icons 位图，18px 展示 */
+.icon-img {
+  width: 18px;
+  height: 18px;
+}
+
+/* 主题按钮：横向排列、宽度自适应，避免文字在 36px 按钮内折行 */
+.theme-btn {
+  flex-direction: row;
+  align-items: center;
+  height: 36px;
+  border-radius: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-left: 4px;
+}
+
+.mode-label {
+  margin-left: 6px;
+  font-size: 11px;
+  lines: 1;
+}
+
+/* #ifdef WEB */
+.icon-btn,
+.theme-btn,
+.brand-wrap,
+.nav-item {
+  cursor: pointer;
+}
+
+/* 鼠标悬停反馈：背景色变量由 headerStyle 下发，随深浅色主题切换；文字颜色纳入过渡避免选中切换时跳变 */
+.nav-item,
+.icon-btn,
+.theme-btn {
+  transition-property: background-color, color;
+  transition-duration: 120ms;
+}
+
+.nav-item:hover,
+.icon-btn:hover,
+.theme-btn:hover {
+  background-color: var(--up-hover-bg, rgba(20, 24, 40, 0.05));
+}
+/* #endif */
+</style>

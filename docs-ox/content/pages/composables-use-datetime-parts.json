@@ -1,0 +1,3316 @@
+{
+  "meta": {
+    "id": "composables-use-datetime-parts",
+    "path": "/composables/use-datetime-parts",
+    "source": "composables/use-datetime-parts.md",
+    "title": "useDatetimeParts 日期时间 parts",
+    "headings": [
+      {
+        "id": "usedatetimeparts-日期时间-parts",
+        "text": "useDatetimeParts 日期时间 parts",
+        "level": 1
+      },
+      {
+        "id": "签名",
+        "text": "签名",
+        "level": 2
+      },
+      {
+        "id": "选项",
+        "text": "选项",
+        "level": 2
+      },
+      {
+        "id": "返回状态",
+        "text": "返回状态",
+        "level": 2
+      },
+      {
+        "id": "用法示例",
+        "text": "用法示例",
+        "level": 2
+      },
+      {
+        "id": "注意事项",
+        "text": "注意事项",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T01:55:47.367Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "usedatetimeparts-日期时间-parts"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "useDatetimeParts 日期时间 parts",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "无头日期时间状态：持有当前年月日时分秒 parts，按 mode 生成各列可选值（已 clamp 到 min/max），供业务自建 ",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 1
+              },
+              "end": {
+                "line": 3,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "picker-view",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 67
+              },
+              "end": {
+                "line": 3,
+                "column": 67
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 等自定义 UI。规则引擎与 ",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 80
+              },
+              "end": {
+                "line": 3,
+                "column": 80
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "nax-datetime-picker",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 95
+              },
+              "end": {
+                "line": 3,
+                "column": 95
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 组件同一实现（",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 116
+              },
+              "end": {
+                "line": 3,
+                "column": 116
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "datetime-parts.uts",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 124
+              },
+              "end": {
+                "line": 3,
+                "column": 124
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "）。",
+            "source": {
+              "start": {
+                "line": 3,
+                "column": 144
+              },
+              "end": {
+                "line": 3,
+                "column": 144
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 2,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "签名"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "签名",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 5,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "useDatetimeParts(options : NaxDatetimePartsOptions) : NaxDatetimePartsState",
+        "attrs": {
+          "lang": "ts"
+        },
+        "source": {
+          "start": {
+            "line": 7,
+            "column": 1
+          },
+          "end": {
+            "line": 8,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "useDatetimeParts",
+            "c": "fn"
+          },
+          {
+            "t": "(options : "
+          },
+          {
+            "t": "NaxDatetimePartsOptions",
+            "c": "type"
+          },
+          {
+            "t": ") : "
+          },
+          {
+            "t": "NaxDatetimePartsState",
+            "c": "type"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "必须在 setup 内同步调用。",
+            "source": {
+              "start": {
+                "line": 11,
+                "column": 1
+              },
+              "end": {
+                "line": 11,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 11,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "选项"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "选项",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 13,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 13,
+            "column": 1
+          },
+          "end": {
+            "line": 13,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "字段",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 15,
+                "column": 1
+              },
+              "end": {
+                "line": 15,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "mode",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "datetime",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "datetime",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 日期时间 / ",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 11
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 11
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "date",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 19
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 19
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 日期 / ",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 25
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 25
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "time",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 31
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 31
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 时间 / ",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 37
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 37
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "year-month",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 43
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 43
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 年月 / ",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 55
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 55
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "year",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 61
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 61
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 年 / ",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 67
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 67
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "month-day",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 72
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 72
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 月日",
+                    "source": {
+                      "start": {
+                        "line": 17,
+                        "column": 83
+                      },
+                      "end": {
+                        "line": 17,
+                        "column": 83
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 17,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 17,
+                "column": 1
+              },
+              "end": {
+                "line": 17,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "value",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number | null",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "当前时间",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "初始时间戳（毫秒）",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 18,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 18,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 18,
+                "column": 1
+              },
+              "end": {
+                "line": 18,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "min",
+                    "source": {
+                      "start": {
+                        "line": 19,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 19,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number | null",
+                    "source": {
+                      "start": {
+                        "line": 19,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 19,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "引擎默认",
+                    "source": {
+                      "start": {
+                        "line": 19,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 19,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "最小时间戳（毫秒，近 30 年）",
+                    "source": {
+                      "start": {
+                        "line": 19,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 19,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 19,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 19,
+                "column": 1
+              },
+              "end": {
+                "line": 19,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "max",
+                    "source": {
+                      "start": {
+                        "line": 20,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 20,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 20,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number | null",
+                    "source": {
+                      "start": {
+                        "line": 20,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 20,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 20,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "引擎默认",
+                    "source": {
+                      "start": {
+                        "line": 20,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 20,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 20,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "最大时间戳（毫秒，+10 年）",
+                    "source": {
+                      "start": {
+                        "line": 20,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 20,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 20,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 20,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 20,
+                "column": 1
+              },
+              "end": {
+                "line": 20,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "showSecond",
+                    "source": {
+                      "start": {
+                        "line": 21,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 21,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 21,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 21,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 21,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 21,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 21,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 21,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 21,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 21,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 21,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 21,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否秒列（datetime / time）",
+                    "source": {
+                      "start": {
+                        "line": 21,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 21,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 21,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 21,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 21,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 15,
+            "column": 1
+          },
+          "end": {
+            "line": 20,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "返回状态"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "返回状态",
+            "source": {
+              "start": {
+                "line": 23,
+                "column": 1
+              },
+              "end": {
+                "line": 23,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 23,
+            "column": 1
+          },
+          "end": {
+            "line": 23,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "成员",
+                    "source": {
+                      "start": {
+                        "line": 25,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 25,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 25,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 25,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 25,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 25,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 25,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 25,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 25,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 25,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 25,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 25,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 25,
+                "column": 1
+              },
+              "end": {
+                "line": 25,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "mode",
+                    "source": {
+                      "start": {
+                        "line": 27,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 27,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 27,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 27,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 27,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 27,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "当前模式",
+                    "source": {
+                      "start": {
+                        "line": 27,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 27,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 27,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 27,
+                "column": 1
+              },
+              "end": {
+                "line": 27,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "parts",
+                    "source": {
+                      "start": {
+                        "line": 28,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 28,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 28,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 28,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number[]",
+                    "source": {
+                      "start": {
+                        "line": 28,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 28,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 28,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 28,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "当前 parts（副本，顺序：year/month/day/hour/minute/second）",
+                    "source": {
+                      "start": {
+                        "line": 28,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 28,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 28,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 28,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 28,
+                "column": 1
+              },
+              "end": {
+                "line": 28,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "columns",
+                    "source": {
+                      "start": {
+                        "line": 29,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 29,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 29,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 29,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number[][]",
+                    "source": {
+                      "start": {
+                        "line": 29,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 29,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 29,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 29,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "每列可选值（已按 min/max 收敛），顺序与 mode 字段序列一致",
+                    "source": {
+                      "start": {
+                        "line": 29,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 29,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 29,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 29,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 29,
+                "column": 1
+              },
+              "end": {
+                "line": 29,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "indices",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 30,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number[]",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 30,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "各列当前选中下标（喂 ",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "picker-view",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 12
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 12
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 的 value）",
+                    "source": {
+                      "start": {
+                        "line": 30,
+                        "column": 25
+                      },
+                      "end": {
+                        "line": 30,
+                        "column": 25
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 30,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 30,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 1
+              },
+              "end": {
+                "line": 30,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "setParts(parts)",
+                    "source": {
+                      "start": {
+                        "line": 31,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 31,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 31,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 31,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "—",
+                    "source": {
+                      "start": {
+                        "line": 31,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 31,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 31,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 31,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "设置 parts（自动 clamp 到 min/max 与日历合法域）",
+                    "source": {
+                      "start": {
+                        "line": 31,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 31,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 31,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 31,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 31,
+                "column": 1
+              },
+              "end": {
+                "line": 31,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "setTimestamp(ms)",
+                    "source": {
+                      "start": {
+                        "line": 32,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 32,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 32,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "—",
+                    "source": {
+                      "start": {
+                        "line": 32,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 32,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 32,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "按时间戳设置（自动 clamp）",
+                    "source": {
+                      "start": {
+                        "line": 32,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 32,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 32,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 32,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 32,
+                "column": 1
+              },
+              "end": {
+                "line": 32,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "toTimestamp()",
+                    "source": {
+                      "start": {
+                        "line": 33,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 33,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 33,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 33,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "number",
+                    "source": {
+                      "start": {
+                        "line": 33,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 33,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 33,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 33,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "收敛到边界内后的当前时间戳",
+                    "source": {
+                      "start": {
+                        "line": 33,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 33,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 33,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 33,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 33,
+                "column": 1
+              },
+              "end": {
+                "line": 33,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "format(pattern?)",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 34,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 34,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "按模式默认格式输出；可传自定义 pattern（",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "YYYY MM DD HH mm ss",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 25
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 25
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）",
+                    "source": {
+                      "start": {
+                        "line": 34,
+                        "column": 46
+                      },
+                      "end": {
+                        "line": 34,
+                        "column": 46
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 34,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 34,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 34,
+                "column": 1
+              },
+              "end": {
+                "line": 34,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "applyIndices(indices)",
+                    "source": {
+                      "start": {
+                        "line": 35,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 35,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 35,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 35,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "—",
+                    "source": {
+                      "start": {
+                        "line": 35,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 35,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 35,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 35,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "用列下标更新选中值（picker-view change 回调直接传入 value 数组）",
+                    "source": {
+                      "start": {
+                        "line": 35,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 35,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 35,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 35,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 35,
+                "column": 1
+              },
+              "end": {
+                "line": 35,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 25,
+            "column": 1
+          },
+          "end": {
+            "line": 34,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "用法示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "用法示例",
+            "source": {
+              "start": {
+                "line": 37,
+                "column": 1
+              },
+              "end": {
+                "line": 37,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 37,
+            "column": 1
+          },
+          "end": {
+            "line": 37,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "自建 picker-view（核心组合：",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 1
+              },
+              "end": {
+                "line": 39,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "columns",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 21
+              },
+              "end": {
+                "line": 39,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 渲染列、",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 30
+              },
+              "end": {
+                "line": 39,
+                "column": 30
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "indices",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 35
+              },
+              "end": {
+                "line": 39,
+                "column": 35
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 喂选中、",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 44
+              },
+              "end": {
+                "line": 39,
+                "column": 44
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "applyIndices",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 49
+              },
+              "end": {
+                "line": 39,
+                "column": 49
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 响应滚动）：",
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 63
+              },
+              "end": {
+                "line": 39,
+                "column": 63
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 39,
+            "column": 1
+          },
+          "end": {
+            "line": 38,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<script setup>\n    import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'\n\n    const opts : NaxDatetimePartsOptions = { mode: 'datetime', value: Date.now() }\n    const dt = useDatetimeParts(opts)\n\n    function onChange(e : any) {\n        dt.applyIndices(e.detail.value)\n        // 选中值：dt.format() / dt.toTimestamp()\n    }\n</script>\n\n<template>\n    \n        \n            <view v-for=\"(v, j) in col\" :key=\"j\" class=\"item\">\n                <text>{{ v }}</text>\n            </view>\n        \n    \n</template>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 41,
+            "column": 1
+          },
+          "end": {
+            "line": 62,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<script",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "setup",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'\n\n    const opts : NaxDatetimePartsOptions = { mode: 'datetime', value: Date.now() }\n    const dt = useDatetimeParts(opts)\n\n    function onChange(e : any) {\n        dt.applyIndices(e.detail.value)\n        // 选中值：dt.format() / dt.toTimestamp()\n    }\n"
+          },
+          {
+            "t": "</script>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<template>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    \n        \n            "
+          },
+          {
+            "t": "<view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-for",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"(v, j) in col\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "key",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"j\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"item\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n                "
+          },
+          {
+            "t": "<text>",
+            "c": "kw"
+          },
+          {
+            "t": "{{ v }}"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "</view>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        \n    \n"
+          },
+          {
+            "t": "</template>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "带范围限制（min/max 时间戳收敛各列可选值）：",
+            "source": {
+              "start": {
+                "line": 65,
+                "column": 1
+              },
+              "end": {
+                "line": 65,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 65,
+            "column": 1
+          },
+          "end": {
+            "line": 64,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<script setup>\n    import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'\n\n    const opts : NaxDatetimePartsOptions = {\n        mode: 'date',\n        value: Date.now(),\n        min: new Date(2024, 0, 1).getTime(),\n        max: new Date(2026, 11, 31).getTime()\n    }\n    const dt = useDatetimeParts(opts)\n    // dt.columns 的 年/月/日 列已按边界收敛\n</script>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 67,
+            "column": 1
+          },
+          "end": {
+            "line": 79,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<script",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "setup",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'\n\n    const opts : NaxDatetimePartsOptions = {\n        mode: 'date',\n        value: Date.now(),\n        min: new Date(2024, 0, 1).getTime(),\n        max: new Date(2026, 11, 31).getTime()\n    }\n    const dt = useDatetimeParts(opts)\n    // dt.columns 的 年/月/日 列已按边界收敛\n"
+          },
+          {
+            "t": "</script>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "读取与格式化：",
+            "source": {
+              "start": {
+                "line": 82,
+                "column": 1
+              },
+              "end": {
+                "line": 82,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 82,
+            "column": 1
+          },
+          "end": {
+            "line": 81,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<script setup>\n    import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'\n\n    const dt = useDatetimeParts({ mode: 'datetime' } as NaxDatetimePartsOptions)\n\n    // 默认格式（datetime 无秒）：YYYY-MM-DD HH:mm\n    const text = dt.format()\n    // 自定义格式：YYYY 年 MM 月 DD 日 HH 时 mm 分\n    const custom = dt.format('YYYY年MM月DD日 HH时mm分')\n    // 时间戳：dt.toTimestamp()\n    // 程序化改值：dt.setTimestamp(ms) / dt.setParts([2025, 6, 1, 10, 30, 0])\n</script>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 84,
+            "column": 1
+          },
+          "end": {
+            "line": 96,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<script",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "setup",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    import { useDatetimeParts, NaxDatetimePartsOptions } from '@/uni_modules/nax-use/composables/use-datetime-parts.uts'\n\n    const dt = useDatetimeParts({ mode: 'datetime' } as NaxDatetimePartsOptions)\n\n    // 默认格式（datetime 无秒）：YYYY-MM-DD HH:mm\n    const text = dt.format()\n    // 自定义格式：YYYY 年 MM 月 DD 日 HH 时 mm 分\n    const custom = dt.format('YYYY年MM月DD日 HH时mm分')\n    // 时间戳：dt.toTimestamp()\n    // 程序化改值：dt.setTimestamp(ms) / dt.setParts([2025, 6, 1, 10, 30, 0])\n"
+          },
+          {
+            "t": "</script>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "注意事项"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "注意事项",
+            "source": {
+              "start": {
+                "line": 99,
+                "column": 1
+              },
+              "end": {
+                "line": 99,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 99,
+            "column": 1
+          },
+          "end": {
+            "line": 99,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "mode",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 7
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "showSecond",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 22
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 22
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "min",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 25
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 25
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 30
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 30
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "max",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 33
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 33
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 在创建时固定（MVP 不做响应式变更）",
+                    "source": {
+                      "start": {
+                        "line": 101,
+                        "column": 38
+                      },
+                      "end": {
+                        "line": 101,
+                        "column": 38
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 101,
+                "column": 1
+              },
+              "end": {
+                "line": 101,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "时分秒列无 props 级细粒度边界（如 minHour），仅按 min/max 时间戳收敛",
+                    "source": {
+                      "start": {
+                        "line": 102,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 102,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 102,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "与 ",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "nax-datetime-picker",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 3
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 3
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 共享同一引擎：组件在弹层内滚动、本函数供业务自建 UI，行为一致",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 24
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 24
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 103,
+                "column": 1
+              },
+              "end": {
+                "line": 103,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 101,
+            "column": 1
+          },
+          "end": {
+            "line": 103,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 103,
+        "column": 1
+      }
+    }
+  }
+}

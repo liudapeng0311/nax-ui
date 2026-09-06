@@ -1,0 +1,50 @@
+<template>
+  <view class="demo-image">
+    <text class="dsec">基础 / mode</text>
+    <view class="row">
+      <nax-image src="/static/logo.png" width="100" height="100" mode="aspectFill"></nax-image>
+      <nax-image src="/static/logo.png" width="100" height="100" mode="aspectFit"></nax-image>
+      <nax-image src="/static/logo.png" width="100" height="100" mode="scaleToFill"></nax-image>
+    </view>
+
+    <text class="dsec">形状 shape</text>
+    <view class="row">
+      <nax-image src="/static/logo.png" width="88" height="88" shape="square"></nax-image>
+      <nax-image src="/static/logo.png" width="88" height="88" shape="round"></nax-image>
+      <nax-image src="/static/logo.png" width="88" height="88" shape="circle"></nax-image>
+    </view>
+
+    <text class="dsec">加载中 / 失败</text>
+    <view class="row">
+      <nax-image force-loading width="120" height="120" loading-text="加载中"></nax-image>
+      <nax-image src="https://invalid.invalid/a.png" width="120" height="120" error-text="加载失败"></nax-image>
+      <nax-image src="" width="120" height="120" error-text="无图片"></nax-image>
+    </view>
+
+    <text class="dsec">宽图（块级）</text>
+    <nax-image src="/static/logo.png" width="100%" height="160" shape="round" mode="aspectFill"></nax-image>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-image {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

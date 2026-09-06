@@ -1,0 +1,33 @@
+<template>
+  <view class="demo-date-strip">
+    <text class="dsec">基础（单选）</text>
+    <nax-date-strip v-model="basic" value-format="YYYY-MM-DD"></nax-date-strip>
+
+    <text class="dsec">显示农历 showLunar</text>
+    <nax-date-strip v-model="lunarVal" value-format="YYYY-MM-DD" show-lunar></nax-date-strip>
+
+    <text class="dsec">不同初值</text>
+    <nax-date-strip v-model="today" value-format="YYYY-MM-DD"></nax-date-strip>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const basic = ref('2026-09-06')
+const lunarVal = ref('2026-09-06')
+const today = ref('')
+</script>
+
+<style>
+.demo-date-strip {
+  flex-direction: column;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

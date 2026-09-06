@@ -1,0 +1,49 @@
+<template>
+  <view class="demo-alert">
+    <text class="dsec">基础</text>
+    <nax-alert title="温馨提示" description="请先完成实名认证后再进行提现操作。"></nax-alert>
+
+    <text class="dsec">类型 type</text>
+    <nax-alert type="primary" title="主色提示" description="这是 primary 类型。"></nax-alert>
+    <nax-alert type="info" title="信息提示" description="这是 info 类型。"></nax-alert>
+    <nax-alert type="success" title="成功提示" description="操作已成功完成。"></nax-alert>
+    <nax-alert type="warning" title="警告提示" description="请注意相关风险。"></nax-alert>
+    <nax-alert type="error" title="错误提示" description="提交失败，请稍后重试。"></nax-alert>
+
+    <text class="dsec">实心 variant=solid</text>
+    <nax-alert type="info" variant="solid" title="信息" description="实心填充样式。"></nax-alert>
+    <nax-alert type="success" variant="solid" title="成功" description="实心填充样式。"></nax-alert>
+    <nax-alert type="warning" variant="solid" title="警告" description="实心填充样式。"></nax-alert>
+    <nax-alert type="error" variant="solid" title="错误" description="实心填充样式。"></nax-alert>
+
+    <text class="dsec">仅标题 / 仅描述</text>
+    <nax-alert type="info" title="只有标题"></nax-alert>
+    <nax-alert type="warning" description="只有描述文字，没有标题。"></nax-alert>
+
+    <text class="dsec">图标</text>
+    <nax-alert :show-icon="false" type="info" title="不显示图标" description="show-icon=false"></nax-alert>
+    <nax-alert icon="star" type="primary" title="自定义图标" description="icon=star"></nax-alert>
+
+    <text class="dsec">居中 center</text>
+    <nax-alert center type="success" title="居中展示" description="标题与描述水平居中。"></nax-alert>
+
+    <text class="dsec">可关闭 closable</text>
+    <nax-alert closable type="error" title="账号异常" description="检测到异地登录，建议立即修改密码。"></nax-alert>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-alert {
+  flex-direction: column;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

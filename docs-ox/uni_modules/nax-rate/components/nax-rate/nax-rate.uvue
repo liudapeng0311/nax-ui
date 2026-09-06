@@ -1,0 +1,546 @@
+<template>
+	<view
+		:id="rootId"
+		class="nax-rate"
+		:class="rootClass"
+		@touchstart.stop="onTouchStart"
+		@touchmove.stop.prevent="onTouchMove"
+		@touchend.stop="onTouchEnd"
+		@touchcancel.stop="onTouchEnd"
+	>
+		<view
+			v-for="(item, index) in starList"
+			:key="item"
+			class="nax-rate__item"
+			:style="itemStyle(index as number)"
+			@click.stop="onStarClick(index as number)"
+		>
+			<!-- 底层：未选中图标 -->
+			<view class="nax-rate__icon-wrap" :style="iconWrapStyle">
+				<nax-icon
+					:name="inactiveIconName"
+					:size="iconSizeProp"
+					:color="resolvedInactiveColor"
+				></nax-icon>
+			</view>
+			<!-- 顶层：选中图标，按填充比例裁切 -->
+			<view
+				v-if="starFillRatio(index as number) > 0"
+				class="nax-rate__icon-wrap nax-rate__icon-wrap--active"
+				:style="activeWrapStyle(index as number)"
+			>
+				<view class="nax-rate__icon-inner" :style="iconWrapStyle">
+					<nax-icon
+						:name="activeIconName"
+						:size="iconSizeProp"
+						:color="resolvedActiveColor"
+					></nax-icon>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-rate
+	 * @description 评分。星型满意度评分。
+	 * @property {number} modelValue 当前分值（v-model），支持半星小数
+	 * @property {number} count 星星总数
+	 * @property {boolean} disabled 禁用交互（降低透明度）
+	 * @property {boolean} readonly 只读展示（不触发交互，不降低透明度）
+	 * @property {string} size sm | md | lg | 数字像素字符串
+	 * @property {string} inactiveColor 未选中色；空则占位色 token
+	 * @property {string} activeColor 选中色；空则警告色 token
+	 * @property {number} gutter 星星间距（px）
+	 * @property {number} minCount 最少可选星数
+	 * @property {boolean} allowHalf 允许半星（滑动按位置；点击在半星/整星间切换）
+	 * @property {boolean} touchable 允许滑动打分
+	 * @property {string} activeIcon 选中图标名（nax-icon）
+	 * @property {string} inactiveIcon 未选中图标名（nax-icon）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 分值变化（number）
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: Number,
+			default: 0
+		},
+		count: {
+			type: Number,
+			default: 5
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		readonly: {
+			type: Boolean,
+			default: false
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		inactiveColor: {
+			type: String,
+			default: ''
+		},
+		activeColor: {
+			type: String,
+			default: ''
+		},
+		gutter: {
+			type: Number,
+			default: 6
+		},
+		minCount: {
+			type: Number,
+			default: 0
+		},
+		allowHalf: {
+			type: Boolean,
+			default: false
+		},
+		touchable: {
+			type: Boolean,
+			default: true
+		},
+		activeIcon: {
+			type: String,
+			default: 'star'
+		},
+		inactiveIcon: {
+			type: String,
+			default: 'star'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+	const instance = getCurrentInstance()
+	const rootId = 'nax-rate-' + Math.floor(Math.random() * 10000000).toString()
+
+	const innerValue = ref(0.0)
+	const boxLeft = ref(0.0)
+	const boxWidth = ref(0.0)
+	const dragging = ref(false)
+	const lastTouchEndAt = ref(0)
+	const pendingClientX = ref(-1.0)
+
+	const starCount = computed((): number => {
+		const n = props.count as number
+		if (n < 1) {
+			return 1
+		}
+		if (n > 20) {
+			return 20
+		}
+		return Math.floor(n)
+	})
+
+	const starList = computed((): number[] => {
+		const list : number[] = []
+		const n = starCount.value
+		for (let i = 0; i < n; i++) {
+			list.push(i)
+		}
+		return list
+	})
+
+	const sizePx = computed((): number => {
+		const value = props.size
+		if (value == 'sm') {
+			return 18
+		}
+		if (value == 'lg') {
+			return 28
+		}
+		if (value == 'md') {
+			return 22
+		}
+		const n = parseInt(value)
+		if (n > 0) {
+			return n
+		}
+		return 22
+	})
+
+	const iconSizeProp = computed((): string => {
+		return sizePx.value.toString()
+	})
+
+	const gutterPx = computed((): number => {
+		const g = props.gutter as number
+		if (g < 0) {
+			return 0
+		}
+		return g
+	})
+
+	const resolvedActiveColor = computed((): string => {
+		if (props.activeColor.length > 0) {
+			return props.activeColor
+		}
+		return 'var(--nax-color-warning, #f0a020)'
+	})
+
+	const resolvedInactiveColor = computed((): string => {
+		if (props.inactiveColor.length > 0) {
+			return props.inactiveColor
+		}
+		return 'var(--nax-color-text-placeholder, #e5e5ea)'
+	})
+
+	const activeIconName = computed((): string => {
+		if (props.activeIcon.length > 0) {
+			return props.activeIcon
+		}
+		return 'star'
+	})
+
+	const inactiveIconName = computed((): string => {
+		if (props.inactiveIcon.length > 0) {
+			return props.inactiveIcon
+		}
+		return 'star'
+	})
+
+	const iconWrapStyle = computed((): string => {
+		const px = sizePx.value.toString() + 'px'
+		return 'width:' + px + ';height:' + px + ';'
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.disabled) {
+			cls += ' nax-rate--disabled'
+		}
+		if (props.readonly) {
+			cls += ' nax-rate--readonly'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const interactionLocked = computed((): boolean => {
+		return props.disabled || props.readonly
+	})
+
+	function nearlyEqual(a : number, b : number) : boolean {
+		return Math.abs(a - b) < 0.001
+	}
+
+	function clampScore(v : number) : number {
+		const minV = props.minCount as number
+		const maxV = starCount.value as number
+		let next = v
+		if (props.allowHalf) {
+			next = Math.round(next * 2) / 2
+		} else {
+			next = Math.round(next)
+		}
+		if (next < minV) {
+			next = minV
+		}
+		if (next > maxV) {
+			next = maxV
+		}
+		if (next < 0) {
+			next = 0
+		}
+		return next
+	}
+
+	function syncFromProps() {
+		innerValue.value = clampScore(props.modelValue as number)
+	}
+
+	watch((): number => props.modelValue as number, (_v : number) => {
+		// 拖动中以内部值为准，避免父级回写抖动
+		if (dragging.value) {
+			return
+		}
+		syncFromProps()
+	})
+
+	watch((): number => props.count as number, (_v : number) => {
+		innerValue.value = clampScore(innerValue.value)
+	})
+
+	watch((): number => props.minCount as number, (_v : number) => {
+		innerValue.value = clampScore(innerValue.value)
+	})
+
+	function itemStyle(index : number) : string {
+		const g = gutterPx.value
+		let style = ''
+		style += 'width:' + sizePx.value.toString() + 'px;'
+		style += 'height:' + sizePx.value.toString() + 'px;'
+		if (index < starCount.value - 1 && g > 0) {
+			style += 'margin-right:' + g.toString() + 'px;'
+		}
+		return style
+	}
+
+	function starFillRatio(index : number) : number {
+		const v = innerValue.value
+		const full = Math.floor(v + 0.0001)
+		if (index < full) {
+			return 1
+		}
+		if (index > full) {
+			return 0
+		}
+		const frac = v - full
+		if (frac >= 0.999) {
+			return 1
+		}
+		if (frac >= 0.25) {
+			return 0.5
+		}
+		return 0
+	}
+
+	function activeWrapStyle(index : number) : string {
+		const ratio = starFillRatio(index)
+		const px = sizePx.value.toString() + 'px'
+		const w = (sizePx.value * ratio).toString() + 'px'
+		let style = ''
+		style += 'width:' + w + ';'
+		style += 'height:' + px + ';'
+		return style
+	}
+
+	function commitValue(next : number) {
+		const clamped = clampScore(next)
+		if (nearlyEqual(clamped, innerValue.value)) {
+			return
+		}
+		innerValue.value = clamped
+		emit('update:modelValue', clamped)
+		emit('change', clamped)
+	}
+
+	function scoreFromClientX(clientX : number) : number {
+		const rel = clientX - boxLeft.value
+		const count = starCount.value
+		const size = sizePx.value
+		const gutter = gutterPx.value
+		const unit = size + gutter
+		if (rel <= 0) {
+			return clampScore(0)
+		}
+		const total = count * size + (count - 1) * gutter
+		if (rel >= total) {
+			return clampScore(count as number)
+		}
+		let idx = 0
+		if (unit > 0) {
+			idx = Math.floor(rel / unit)
+		}
+		if (idx >= count) {
+			idx = count - 1
+		}
+		if (idx < 0) {
+			idx = 0
+		}
+		const offset = rel - idx * unit
+		if (offset > size) {
+			return clampScore((idx + 1) as number)
+		}
+		if (props.allowHalf) {
+			if (offset <= size / 2) {
+				return clampScore(idx + 0.5)
+			}
+			return clampScore((idx + 1) as number)
+		}
+		return clampScore((idx + 1) as number)
+	}
+
+	function applyPendingX() {
+		if (pendingClientX.value < 0) {
+			return
+		}
+		commitValue(scoreFromClientX(pendingClientX.value))
+		pendingClientX.value = -1.0
+	}
+
+	function measureBox() {
+		const proxy = instance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
+		}
+		query
+			.select('#' + rootId)
+			.boundingClientRect((rect : any | null) => {
+				if (rect != null) {
+					const info = rect as NodeInfo
+					if (info.left != null && info.width != null) {
+						boxLeft.value = info.left as number
+						boxWidth.value = info.width as number
+						applyPendingX()
+					}
+				}
+			})
+			.exec()
+	}
+
+	function readTouchClientX(e : UniTouchEvent) : number {
+		if (e.touches.length > 0) {
+			return e.touches[0].clientX
+		}
+		if (e.changedTouches.length > 0) {
+			return e.changedTouches[0].clientX
+		}
+		return 0
+	}
+
+	function onTouchStart(e : UniTouchEvent) {
+		if (interactionLocked.value) {
+			return
+		}
+		if (!props.touchable) {
+			return
+		}
+		dragging.value = true
+		const x = readTouchClientX(e)
+		if (boxWidth.value > 0) {
+			commitValue(scoreFromClientX(x))
+			measureBox()
+		} else {
+			pendingClientX.value = x
+			measureBox()
+		}
+	}
+
+	function onTouchMove(e : UniTouchEvent) {
+		if (interactionLocked.value) {
+			return
+		}
+		if (!props.touchable) {
+			return
+		}
+		if (!dragging.value) {
+			return
+		}
+		const x = readTouchClientX(e)
+		if (boxWidth.value > 0) {
+			commitValue(scoreFromClientX(x))
+		} else {
+			pendingClientX.value = x
+			measureBox()
+		}
+	}
+
+	function onTouchEnd(_e : UniTouchEvent) {
+		if (!dragging.value) {
+			return
+		}
+		dragging.value = false
+		lastTouchEndAt.value = Date.now()
+	}
+
+	/**
+	 * 点击打分：
+	 * - 整星：点第 n 星设为 n；点第 1 星且已为 1 时可清零（minCount 允许）
+	 * - 半星：同星在 半星 → 整星 间切换；首星整星再点清零
+	 */
+	function onStarClick(index : number) {
+		if (interactionLocked.value) {
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// App 在 touchable 时点选已由 touch 路径处理，避免 click 重复
+		if (props.touchable) {
+			return
+		}
+		// #endif
+		if (Date.now() - lastTouchEndAt.value < 350) {
+			return
+		}
+		const full = (index + 1) as number
+		const half = index + 0.5
+		const cur = innerValue.value
+		let next = full
+
+		if (props.allowHalf) {
+			if (nearlyEqual(cur, full)) {
+				if (index == 0) {
+					next = 0
+				} else {
+					// 再次点同一满星：降为半星，便于微调
+					next = half
+				}
+			} else if (nearlyEqual(cur, half)) {
+				next = full
+			} else if (cur < half) {
+				next = half
+			} else {
+				next = full
+			}
+		} else {
+			if (index == 0 && nearlyEqual(cur, 1)) {
+				next = 0
+			} else {
+				next = full
+			}
+		}
+		commitValue(next)
+	}
+
+	onMounted(() => {
+		syncFromProps()
+		setTimeout(() => {
+			measureBox()
+		}, 50)
+	})
+</script>
+
+<style>
+	.nax-rate {
+		flex-direction: row;
+		align-items: center;
+		align-self: flex-start;
+	}
+
+	.nax-rate--disabled {
+		opacity: var(--nax-opacity-disabled, 0.5);
+	}
+
+	.nax-rate__item {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-rate__icon-wrap {
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		overflow: hidden;
+	}
+
+	.nax-rate__icon-wrap--active {
+		position: absolute;
+		left: 0;
+		top: 0;
+		overflow: hidden;
+	}
+
+	.nax-rate__icon-inner {
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+	}
+</style>
+
+

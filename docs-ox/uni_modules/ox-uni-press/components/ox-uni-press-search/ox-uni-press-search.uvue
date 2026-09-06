@@ -1,0 +1,269 @@
+<template>
+  <view v-if="visible" class="overlay" :style="overlayStyle()" @click="onScrim">
+    <view class="panel" :style="panelStyle()" @click.stop="noop">
+      <view class="input-row" :style="inputRowStyle()">
+        <image class="hint-icon" :src="hintIconSrc()" mode="aspectFit" />
+        <input
+          class="input"
+          :style="inputStyle()"
+          :value="query"
+          placeholder="搜索标题、章节与正文"
+          placeholder-class="up-search-placeholder"
+          :focus="true"
+          confirm-type="search"
+          @input="onInput"
+          @confirm="noop"
+        />
+        <text class="esc" :style="escStyle()" @click="onCancel">取消</text>
+      </view>
+      <scroll-view class="results" :scroll-y="true" :show-scrollbar="false">
+        <text v-if="query === ''" class="empty" :style="emptyStyle()">输入关键词，回车或点击结果跳转</text>
+        <text v-else-if="results.length === 0" class="empty" :style="emptyStyle()">没有匹配的结果</text>
+        <template v-else>
+          <view
+            v-for="(r, i) in results"
+            :key="i"
+            class="result"
+            hover-class="press"
+            @click="go(r)"
+          >
+            <text class="result-title" :style="titleStyle()">{{ r.doc.title }}</text>
+            <text v-if="r.snippet !== ''" class="result-sub" :style="subStyle()">{{ r.snippet }}</text>
+          </view>
+        </template>
+        <view class="tail-space" />
+      </scroll-view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { SearchDocument } from '../../types/content.uts'
+import { theme } from '../../utils/theme.uts'
+
+const props = defineProps<{
+  visible: boolean
+  index: SearchDocument[]
+}>()
+
+const emit = defineEmits(['close', 'navigate'])
+
+interface ScoredResult {
+  doc: SearchDocument
+  snippet: string
+}
+
+const query = ref('')
+const results = ref<ScoredResult[]>([])
+
+function overlayStyle(): UTSJSONObject {
+  return { backgroundColor: theme.state.colors.scrim } as UTSJSONObject
+}
+
+function panelStyle(): UTSJSONObject {
+  // uni-app x CSS 子集不支持 max-width 百分比（编译报错），改为按窗口宽度动态计算
+  const info = uni.getWindowInfo()
+  const w = Math.max(240, Math.min(560, Math.floor(info.windowWidth * 0.92)))
+  const style = {
+    backgroundColor: theme.state.colors.surface,
+    width: `${w}px`,
+    borderWidth: '1px',
+    borderColor: theme.state.colors.border,
+    borderStyle: 'solid',
+    borderRadius: '16px',
+  } as UTSJSONObject
+  // #ifdef WEB
+  // 结果项鼠标悬停背景色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-bg'] = theme.state.colors.surfaceHover
+  // #endif
+  return style
+}
+
+function inputRowStyle(): UTSJSONObject {
+  return {
+    borderBottomWidth: '1px',
+    borderBottomColor: theme.state.colors.border,
+    borderBottomStyle: 'solid',
+  } as UTSJSONObject
+}
+
+/** 输入框左侧放大镜：与 header 搜索图标同源，深色模式用反色变体 */
+function hintIconSrc(): string {
+  return theme.state.resolved === 'dark'
+    ? '/uni_modules/ox-uni-press/static/icons/search-light.png'
+    : '/uni_modules/ox-uni-press/static/icons/search.png'
+}
+
+function inputStyle(): UTSJSONObject {
+  return {
+    fontSize: '15px',
+    color: theme.state.colors.text1,
+  } as UTSJSONObject
+}
+
+function escStyle(): UTSJSONObject {
+  return { fontSize: '13px', color: theme.state.colors.brand } as UTSJSONObject
+}
+
+function emptyStyle(): UTSJSONObject {
+  return { fontSize: '13px', color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+function titleStyle(): UTSJSONObject {
+  return { fontSize: '14px', fontWeight: '600', color: theme.state.colors.text1 } as UTSJSONObject
+}
+
+function subStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text3, lines: 1, textOverflow: 'ellipsis' } as UTSJSONObject
+}
+
+function onInput(e: InputEvent): void {
+  query.value = e.detail.value
+  search()
+}
+
+function search(): void {
+  const q = query.value.trim().toLowerCase()
+  if (q === '') {
+    results.value = []
+    return
+  }
+  const scored: ScoredResult[] = []
+  for (let i = 0; i < props.index.length; i++) {
+    const doc = props.index[i]
+    if (doc == null) continue
+    let score = 0
+    let snippetAt = -1
+    const titleLower = doc.title.toLowerCase()
+    if (titleLower.includes(q)) score += 100 - titleLower.indexOf(q)
+    for (let h = 0; h < doc.headings.length; h++) {
+      const heading = doc.headings[h]
+      if (heading != null && heading.toLowerCase().includes(q)) {
+        score += 60
+        break
+      }
+    }
+    const textLower = doc.text.toLowerCase()
+    snippetAt = textLower.indexOf(q)
+    if (snippetAt >= 0) score += 30
+    if (score > 0) {
+      const from = Math.max(0, snippetAt - 20)
+      const raw = doc.text.slice(from, from + 60).replace(/\s+/g, ' ')
+      scored.push({ doc, snippet: snippetAt >= 0 ? `…${raw}…` : '' } as ScoredResult)
+    }
+  }
+  scored.sort((a, b) => scoreOf(b) - scoreOf(a))
+  results.value = scored.slice(0, 12)
+}
+
+/** 简化排序：标题命中优先（snippet 长度近似还原打分序） */
+function scoreOf(r: ScoredResult): number {
+  const q = query.value.trim().toLowerCase()
+  if (r.doc.title.toLowerCase().includes(q)) return 200
+  return 100
+}
+
+function go(r: ScoredResult): void {
+  emit('navigate', r.doc.path)
+}
+
+function onScrim(): void {
+  emit('close')
+}
+
+/** 取消按钮：关闭弹层（面板已拦截冒泡，不会二次触发） */
+function onCancel(): void {
+  emit('close')
+}
+
+function noop(): void {}
+</script>
+
+<style>
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.panel {
+  height: 420px;
+  margin-top: 80px;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.input-row {
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 14px;
+}
+
+.hint-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.input {
+  flex: 1;
+}
+
+.esc {
+  margin-left: 10px;
+}
+
+.results {
+  flex: 1;
+  flex-direction: column;
+  padding: 6px;
+}
+
+.empty {
+  padding-top: 32px;
+  padding-bottom: 32px;
+  text-align: center;
+}
+
+.result {
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+
+/* 按压反馈仅触屏端生效：Web 端已有悬停底色，按压变透明会让文字产生"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.press {
+  opacity: 0.7;
+}
+/* #endif */
+
+.result-sub {
+  margin-top: 2px;
+}
+
+.tail-space {
+  height: 24px;
+}
+
+/* #ifdef WEB */
+.esc,
+.result {
+  cursor: pointer;
+}
+
+.result {
+  transition-property: background-color;
+  transition-duration: 120ms;
+}
+
+.result:hover {
+  background-color: var(--up-hover-bg, rgba(20, 24, 40, 0.05));
+}
+/* #endif */
+</style>

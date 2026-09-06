@@ -1,0 +1,124 @@
+<template>
+  <view class="demo-space">
+    <text class="dsec">基础横向</text>
+    <nax-space size="md">
+      <nax-space-item>
+        <nax-button type="primary" size="sm" label="主要"></nax-button>
+      </nax-space-item>
+      <nax-space-item>
+        <nax-button size="sm" label="默认"></nax-button>
+      </nax-space-item>
+      <nax-space-item>
+        <nax-button variant="secondary" size="sm" label="次要"></nax-button>
+      </nax-space-item>
+    </nax-space>
+
+    <text class="dsec">间距 size</text>
+    <nax-space size="xs" class="mb">
+      <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+    </nax-space>
+    <nax-space size="sm" class="mb">
+      <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+    </nax-space>
+    <nax-space size="lg">
+      <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="C"></nax-tag></nax-space-item>
+    </nax-space>
+
+    <text class="dsec">纵向 vertical</text>
+    <nax-space direction="vertical" size="sm">
+      <nax-space-item>
+        <nax-button size="sm" label="第一行"></nax-button>
+      </nax-space-item>
+      <nax-space-item>
+        <nax-button size="sm" type="primary" label="第二行"></nax-button>
+      </nax-space-item>
+    </nax-space>
+
+    <text class="dsec">换行 wrap</text>
+    <nax-space size="sm" wrap>
+      <nax-space-item><nax-tag type="primary" label="标签1"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag type="info" label="标签2"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag type="success" label="标签3"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag type="warning" label="标签4"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag type="error" label="标签5"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="标签6"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="标签7"></nax-tag></nax-space-item>
+    </nax-space>
+
+    <text class="dsec">对齐 align</text>
+    <nax-space align="start" size="md" class="mb">
+      <nax-space-item><view class="box-sm"></view></nax-space-item>
+      <nax-space-item><view class="box-lg"></view></nax-space-item>
+      <nax-space-item><view class="box-md"></view></nax-space-item>
+    </nax-space>
+    <nax-space align="center" size="md">
+      <nax-space-item><view class="box-sm"></view></nax-space-item>
+      <nax-space-item><view class="box-lg"></view></nax-space-item>
+      <nax-space-item><view class="box-md"></view></nax-space-item>
+    </nax-space>
+
+    <text class="dsec">主轴 justify</text>
+    <nax-space justify="between" size="0" fill class="mb">
+      <nax-space-item><nax-tag label="左"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="中"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="右"></nax-tag></nax-space-item>
+    </nax-space>
+    <nax-space justify="center" size="sm" fill>
+      <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item>
+      <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+    </nax-space>
+
+    <text class="dsec">fill 纵向撑满</text>
+    <nax-space direction="vertical" size="sm" fill>
+      <nax-space-item>
+        <nax-button block type="primary" label="通栏按钮 A"></nax-button>
+      </nax-space-item>
+      <nax-space-item>
+        <nax-button block label="通栏按钮 B"></nax-button>
+      </nax-space-item>
+    </nax-space>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-space {
+  flex-direction: column;
+}
+
+.box-sm {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background-color: var(--nax-color-brand, #18a058);
+}
+
+.box-md {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background-color: var(--nax-color-info, #2080f0);
+}
+
+.box-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background-color: var(--nax-color-warning, #f0a020);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

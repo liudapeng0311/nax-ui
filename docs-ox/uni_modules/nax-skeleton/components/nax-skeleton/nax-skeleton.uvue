@@ -1,0 +1,400 @@
+<template>
+	<view class="nax-skeleton" :class="rootClass" :style="rootStyle">
+		<!-- loading=false：真实内容 -->
+		<view v-if="!isLoading" class="nax-skeleton__content">
+			<slot></slot>
+		</view>
+		<!-- loading=true：骨架 -->
+		<template v-else>
+			<slot name="skeleton">
+				<view
+					v-for="(item, index) in itemList"
+					:key="item"
+					class="nax-skeleton__item"
+					:style="itemStyle(index as number)"
+				>
+					<view class="nax-skeleton__main">
+						<view
+							v-if="showAvatar"
+							class="nax-skeleton__avatar nax-skeleton__bone"
+							:class="avatarClass"
+							:style="avatarStyle"
+						></view>
+						<view class="nax-skeleton__body">
+							<view
+								v-if="showTitle"
+								class="nax-skeleton__title nax-skeleton__bone"
+								:style="titleStyle"
+							></view>
+							<view
+								v-for="(row, ri) in rowList"
+								:key="row"
+								class="nax-skeleton__row nax-skeleton__bone"
+								:class="rowClass(ri as number)"
+								:style="rowStyle(ri as number)"
+							></view>
+						</view>
+					</view>
+				</view>
+			</slot>
+		</template>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-skeleton
+	 * @description 骨架屏。头像/标题/段落占位；loading 控制骨架与真实内容切换。
+	 * @property {boolean} loading 是否处于加载中（显示骨架），默认 true
+	 * @property {boolean} animate 是否开启动画，默认 true
+	 * @property {boolean} title 是否显示标题行，默认 true
+	 * @property {boolean} avatar 是否显示头像，默认 false
+	 * @property {string} avatarSize 头像边长，默认 32
+	 * @property {string} avatarShape circle | square，默认 circle
+	 * @property {number} rows 段落行数，默认 3
+	 * @property {string} titleWidth 标题宽度，默认 40%
+	 * @property {string} titleHeight 标题高度，默认 16
+	 * @property {string} rowsWidth 段落宽度；单值或逗号分隔；空则末行约 60%
+	 * @property {string} rowsHeight 段落高度；单值或逗号分隔，默认 16
+	 * @property {number} count 骨架条目重复次数，默认 1
+	 * @property {string} gap 多条目间距，默认 16
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default loading=false 时的真实内容
+	 * @slot skeleton 自定义骨架结构
+	 */
+	const props = defineProps({
+		loading: { type: Boolean, default: true },
+		animate: { type: Boolean, default: true },
+		title: { type: Boolean, default: true },
+		avatar: { type: Boolean, default: false },
+		avatarSize: { type: String, default: '32' },
+		avatarShape: { type: String, default: 'circle' },
+		rows: { type: Number, default: 3 },
+		titleWidth: { type: String, default: '40%' },
+		titleHeight: { type: String, default: '16' },
+		rowsWidth: { type: String, default: '' },
+		rowsHeight: { type: String, default: '16' },
+		count: { type: Number, default: 1 },
+		gap: { type: String, default: '16' },
+		customClass: { type: String, default: '' }
+	})
+
+	function toCssSize(raw: string, fallback: string): string {
+		const v = raw.trim()
+		if (v.length == 0) {
+			return fallback
+		}
+		if (
+			v.indexOf('%') >= 0 ||
+			v.indexOf('px') >= 0 ||
+			v.indexOf('rpx') >= 0 ||
+			v.indexOf('em') >= 0 ||
+			v.indexOf('vw') >= 0
+		) {
+			return v
+		}
+		return v + 'px'
+	}
+
+	function parseCsv(raw: string): string[] {
+		const out = [] as string[]
+		if (raw.length == 0) {
+			return out
+		}
+		const parts = raw.split(',')
+		var i = 0
+		while (i < parts.length) {
+			const p = parts[i].trim()
+			if (p.length > 0) {
+				out.push(p)
+			}
+			i++
+		}
+		return out
+	}
+
+	function clampInt(n: number, min: number, max: number): number {
+		if (n < min) {
+			return min
+		}
+		if (n > max) {
+			return max
+		}
+		return Math.floor(n)
+	}
+
+	const isLoading = computed((): boolean => {
+		return props.loading
+	})
+
+	const showTitle = computed((): boolean => {
+		return props.title
+	})
+
+	const showAvatar = computed((): boolean => {
+		return props.avatar
+	})
+
+	const shapeName = computed((): string => {
+		if (props.avatarShape == 'square') {
+			return 'square'
+		}
+		return 'circle'
+	})
+
+	const itemCount = computed((): number => {
+		return clampInt(props.count as number, 1, 50)
+	})
+
+	const rowCount = computed((): number => {
+		return clampInt(props.rows as number, 0, 20)
+	})
+
+	const itemList = computed((): number[] => {
+		const list: number[] = []
+		const n = itemCount.value
+		for (let i = 0; i < n; i++) {
+			list.push(i)
+		}
+		return list
+	})
+
+	const rowList = computed((): number[] => {
+		const list: number[] = []
+		const n = rowCount.value
+		for (let i = 0; i < n; i++) {
+			list.push(i)
+		}
+		return list
+	})
+
+	const widthParts = computed((): string[] => {
+		return parseCsv(props.rowsWidth)
+	})
+
+	const heightParts = computed((): string[] => {
+		return parseCsv(props.rowsHeight)
+	})
+
+	const gapSize = computed((): string => {
+		return toCssSize(props.gap, '16px')
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.animate && props.loading) {
+			cls += 'nax-skeleton--animate'
+		}
+		if (props.customClass.length > 0) {
+			if (cls.length > 0) {
+				cls += ' '
+			}
+			cls += props.customClass
+		}
+		return cls
+	})
+
+	const avatarClass = computed((): string => {
+		return 'nax-skeleton__avatar--' + shapeName.value
+	})
+
+	const avatarStyle = computed((): string => {
+		const size = toCssSize(props.avatarSize, '32px')
+		return 'width:' + size + ';height:' + size
+	})
+
+	const titleStyle = computed((): string => {
+		const w = toCssSize(props.titleWidth, '40%')
+		const h = toCssSize(props.titleHeight, '16px')
+		return 'width:' + w + ';height:' + h
+	})
+
+	function itemStyle(index: number): string {
+		if (index < itemCount.value - 1) {
+			return 'margin-bottom:' + gapSize.value
+		}
+		return ''
+	}
+
+	function rowClass(index: number): string {
+		// 首行：有标题时加间距；无标题时顶格
+		if (index == 0 && !showTitle.value) {
+			return ''
+		}
+		return 'nax-skeleton__row--gap'
+	}
+
+	function rowWidthAt(index: number): string {
+		const parts = widthParts.value
+		if (parts.length == 0) {
+			if (rowCount.value > 1 && index == rowCount.value - 1) {
+				return '60%'
+			}
+			return '100%'
+		}
+		if (parts.length == 1) {
+			return toCssSize(parts[0], '100%')
+		}
+		if (index < parts.length) {
+			return toCssSize(parts[index], '100%')
+		}
+		return toCssSize(parts[parts.length - 1], '100%')
+	}
+
+	function rowHeightAt(index: number): string {
+		const parts = heightParts.value
+		if (parts.length == 0) {
+			return '16px'
+		}
+		if (parts.length == 1) {
+			return toCssSize(parts[0], '16px')
+		}
+		if (index < parts.length) {
+			return toCssSize(parts[index], '16px')
+		}
+		return toCssSize(parts[parts.length - 1], '16px')
+	}
+
+	function rowStyle(index: number): string {
+		return 'width:' + rowWidthAt(index) + ';height:' + rowHeightAt(index)
+	}
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App：uvue 不支持 @keyframes，用透明度脉冲
+	const pulseOpacity = ref(1.0)
+	let pulseTimerId = -1
+	let pulseDir = -1
+
+	const rootStyle = computed((): string => {
+		if (props.animate && props.loading) {
+			return 'opacity:' + pulseOpacity.value.toString()
+		}
+		return ''
+	})
+
+	function stopPulse() {
+		if (pulseTimerId >= 0) {
+			clearInterval(pulseTimerId)
+			pulseTimerId = -1
+		}
+		pulseOpacity.value = 1.0
+		pulseDir = -1
+	}
+
+	function startPulse() {
+		stopPulse()
+		if (!props.animate || !props.loading) {
+			return
+		}
+		pulseOpacity.value = 1.0
+		pulseDir = -1
+		pulseTimerId = setInterval(() => {
+			let next = pulseOpacity.value + pulseDir * 0.08
+			if (next <= 0.45) {
+				next = 0.45
+				pulseDir = 1
+			} else if (next >= 1.0) {
+				next = 1.0
+				pulseDir = -1
+			}
+			pulseOpacity.value = next
+		}, 50)
+	}
+
+	watch((): boolean => {
+		return props.loading && props.animate
+	}, (val: boolean) => {
+		if (val) {
+			startPulse()
+		} else {
+			stopPulse()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopPulse()
+	})
+	// #endif
+
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	const rootStyle = computed((): string => {
+		return ''
+	})
+	// #endif
+</script>
+
+<style>
+	.nax-skeleton {
+		flex-direction: column;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.nax-skeleton__content {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-skeleton__item {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-skeleton__main {
+		flex-direction: row;
+		align-items: flex-start;
+		width: 100%;
+	}
+
+	.nax-skeleton__avatar {
+		flex-shrink: 0;
+		margin-right: 12px;
+		background-color: var(--nax-color-skeleton, #f2f3f5);
+	}
+
+	.nax-skeleton__avatar--circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-skeleton__avatar--square {
+		border-radius: var(--nax-skeleton-radius, var(--nax-radius-md, 3px));
+	}
+
+	.nax-skeleton__body {
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.nax-skeleton__bone {
+		background-color: var(--nax-color-skeleton, #f2f3f5);
+		border-radius: var(--nax-skeleton-radius, var(--nax-radius-md, 3px));
+		flex-shrink: 0;
+	}
+
+	.nax-skeleton__row--gap {
+		margin-top: 12px;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web / 小程序：根节点脉冲，覆盖预设块与 #skeleton 自定义内容 */
+	.nax-skeleton--animate {
+		animation-name: nax-skeleton-pulse;
+		animation-duration: 1.4s;
+		animation-timing-function: ease-in-out;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-skeleton-pulse {
+		0% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.45;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+	/* #endif */
+</style>

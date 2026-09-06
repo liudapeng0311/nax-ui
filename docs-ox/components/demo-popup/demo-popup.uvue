@@ -1,0 +1,33 @@
+<template>
+  <view class="demo-popup">
+    <nax-button label="底部弹层" @click="show = true"></nax-button>
+    <nax-popup v-model:show="show" position="bottom">
+      <view class="demo-popup__panel">
+        <text class="demo-popup__text">自定义内容（页面级，不盖原生栏）</text>
+      </view>
+    </nax-popup>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+</script>
+
+<style>
+.demo-popup {
+  flex-direction: column;
+}
+
+.demo-popup__panel {
+  padding: 40px 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-popup__text {
+  font-size: 14px;
+  color: var(--nax-color-text, #333333);
+}
+</style>

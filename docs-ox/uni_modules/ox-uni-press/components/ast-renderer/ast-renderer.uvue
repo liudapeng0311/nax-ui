@@ -1,0 +1,521 @@
+<template>
+  <view class="up-renderer">
+    <template v-for="(item, idx) in items" :key="idx">
+
+      <view v-if="item.kind === 'heading'" class="heading-block" :style="headingBlockStyle(item.level)">
+        <view v-if="item.level === 2" class="h2-rule" :style="h2RuleStyle()" />
+        <text :style="headingStyle(item.level)" :user-select="true">
+          <ox-uni-press-inline :segments="item.segments" :selectable="true" :font-size="headingFontSize(item.level)" :font-weight="headingFontWeight(item.level)" :color="headingColor(item.level)" @linktap="emit('linktap', $event)" />
+        </text>
+      </view>
+
+      <view v-else-if="item.kind === 'paragraph' && item.depth > 0" class="quote" :style="quoteStyle()">
+        <text :style="bodyStyle()" :user-select="true">
+          <ox-uni-press-inline :segments="item.segments" :selectable="true" @linktap="emit('linktap', $event)" />
+        </text>
+      </view>
+
+      <view v-else-if="item.kind === 'paragraph'" class="para">
+        <text :style="bodyStyle()" :user-select="true">
+          <ox-uni-press-inline :segments="item.segments" :selectable="true" @linktap="emit('linktap', $event)" />
+        </text>
+      </view>
+
+      <view v-else-if="item.kind === 'list-item'" class="list-row" :style="listIndentStyle(item.depth)">
+        <text class="list-marker" :style="markerStyle(item)">{{ markerText(item) }}</text>
+        <view class="list-body">
+          <text :style="bodyStyle()" :user-select="true">
+            <ox-uni-press-inline :segments="item.segments" :selectable="true" @linktap="emit('linktap', $event)" />
+          </text>
+        </view>
+      </view>
+
+      <view v-else-if="item.kind === 'code-block'" class="code-card" :style="codeCardStyle()">
+        <view class="code-head" :style="codeHeadStyle()">
+          <text :style="langStyle()">{{ item.lang }}</text>
+          <view class="copy-btn" :style="copyBtnStyle()" hover-class="up-press" @click="copyCode(item)">
+            <text :style="copyTextStyle(idx)">{{ copiedIndex === idx ? '已复制' : '复制' }}</text>
+          </view>
+        </view>
+        <scroll-view class="code-scroll" :scroll-x="true">
+          <view class="code-body">
+            <view v-for="(line, li) in item.codeLines" :key="li" class="code-line">
+              <text
+                v-for="(seg, si) in line"
+                :key="si"
+                class="code-text"
+                :style="codeSegStyle(seg)"
+                :user-select="true"
+              >{{ seg.text }}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view v-else-if="item.kind === 'demo'" class="demo-block">
+        <ox-uni-press-demo-host :name="item.demoName" :demo-props="item.demoProps" @navigate="emit('linktap', $event)" />
+      </view>
+
+      <scroll-view v-else-if="item.kind === 'table'" class="table-scroll" :style="tableStyle()" :scroll-x="true">
+        <view class="table">
+          <view
+            v-for="(row, ri) in item.rows"
+            :key="ri"
+            class="table-row"
+            :style="rowStyle(row.header, ri === item.rows.length - 1)"
+          >
+            <view
+              v-for="(cell, ci) in row.cells"
+              :key="ci"
+              class="table-cell"
+              :style="cellStyle(cell, ci, row.cells.length)"
+            >
+              <text :style="cellTextStyle(cell.header)">
+                <ox-uni-press-inline :segments="cell.segments" :selectable="true" @linktap="emit('linktap', $event)" />
+              </text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view v-else-if="item.kind === 'thematic-break'" class="hr" :style="hrStyle()" />
+
+      <view v-else-if="item.kind === 'image-block'" class="img-block">
+        <image class="img" :src="item.src" mode="widthFix" @click="previewImage(item)" />
+      </view>
+
+      <view v-else-if="item.kind === 'image-row'" class="img-row">
+        <image
+          v-for="(src, i) in item.imageList"
+          :key="i"
+          class="img img-row-item"
+          :src="src"
+          mode="widthFix"
+          @click="previewSrc(src)"
+        />
+      </view>
+
+    </template>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { RenderItem, TableCellRender, CodeSeg } from '../../utils/flatten.uts'
+import { theme } from '../../utils/theme.uts'
+
+const props = defineProps<{
+  items: RenderItem[]
+}>()
+
+const emit = defineEmits(['linktap'])
+
+const copiedIndex = ref(-1)
+let copyTimer = -1
+
+// ---- 样式 ----
+
+function bodyStyle(): UTSJSONObject {
+  return {
+    fontSize: '15px',
+    lineHeight: '26px',
+    color: theme.state.colors.text1,
+  } as UTSJSONObject
+}
+
+function headingFontSize(level: number): string {
+  if (level === 1) return '26px'
+  if (level === 2) return '21px'
+  if (level === 3) return '17px'
+  if (level === 4) return '15px'
+  if (level === 5) return '14px'
+  return '13px'
+}
+
+/** 与 headingStyle 保持一致：Web 端嵌套 text 不继承字重，需显式传给行内组件 */
+function headingFontWeight(level: number): string {
+  if (level === 1) return '700'
+  if (level === 2) return '650'
+  if (level === 3) return '600'
+  if (level === 4) return '650'
+  return '600'
+}
+
+/** 与 headingStyle 保持一致：H5/H6 用次级文字色 */
+function headingColor(level: number): string {
+  if (level === 5) return theme.state.colors.text2
+  if (level === 6) return theme.state.colors.text3
+  return theme.state.colors.text1
+}
+
+/** 六级标题完整字号/字重/颜色阶梯 */
+function headingStyle(level: number): UTSJSONObject {
+  const c = theme.state.colors
+  if (level === 1) {
+    return { fontSize: '26px', fontWeight: '700', lineHeight: '36px', letterSpacing: '-0.5px', color: c.text1 } as UTSJSONObject
+  }
+  if (level === 2) {
+    return { fontSize: '21px', fontWeight: '650', lineHeight: '30px', letterSpacing: '-0.3px', color: c.text1 } as UTSJSONObject
+  }
+  if (level === 3) {
+    return { fontSize: '17px', fontWeight: '600', lineHeight: '26px', color: c.text1 } as UTSJSONObject
+  }
+  if (level === 4) {
+    return { fontSize: '15px', fontWeight: '650', lineHeight: '24px', color: c.text1 } as UTSJSONObject
+  }
+  if (level === 5) {
+    return { fontSize: '14px', fontWeight: '600', lineHeight: '22px', color: c.text2 } as UTSJSONObject
+  }
+  return { fontSize: '13px', fontWeight: '600', lineHeight: '20px', color: c.text3 } as UTSJSONObject
+}
+
+/** 标题块间距：级别越高与上文的分隔越大 */
+function headingBlockStyle(level: number): UTSJSONObject {
+  let top = '16px'
+  if (level === 1) top = '20px'
+  else if (level === 2) top = '30px'
+  else if (level === 3) top = '22px'
+  return { marginTop: top } as UTSJSONObject
+}
+
+function h2RuleStyle(): UTSJSONObject {
+  return {
+    height: '1px',
+    backgroundColor: theme.state.colors.border,
+    marginBottom: '12px',
+  } as UTSJSONObject
+}
+
+function quoteStyle(): UTSJSONObject {
+  return {
+    borderLeftWidth: '3px',
+    borderLeftColor: theme.state.colors.brand,
+    borderLeftStyle: 'solid',
+    backgroundColor: theme.state.colors.brandSoft,
+    borderTopRightRadius: '10px',
+    borderBottomRightRadius: '10px',
+    paddingLeft: '14px',
+    paddingRight: '14px',
+    paddingTop: '10px',
+    paddingBottom: '10px',
+    marginBottom: '14px',
+  } as UTSJSONObject
+}
+
+function listIndentStyle(depth: number): UTSJSONObject {
+  const base = 4
+  const per = 18
+  return { paddingLeft: `${base + depth * per}px` } as UTSJSONObject
+}
+
+function markerStyle(item: RenderItem): UTSJSONObject {
+  return {
+    fontSize: '15px',
+    lineHeight: '26px',
+    color: theme.state.colors.text3,
+    width: item.ordered ? '24px' : '16px',
+  } as UTSJSONObject
+}
+
+function markerText(item: RenderItem): string {
+  if (item.ordered) return `${item.index}.`
+  return '•'
+}
+
+function codeCardStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.codeBlockBg,
+    borderRadius: '12px',
+    marginBottom: '16px',
+    borderWidth: '1px',
+    borderColor: theme.state.colors.codeBlockBorder,
+    borderStyle: 'solid',
+    overflow: 'hidden',
+  } as UTSJSONObject
+}
+
+function codeHeadStyle(): UTSJSONObject {
+  return {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingLeft: '14px',
+    paddingRight: '10px',
+    paddingTop: '7px',
+    paddingBottom: '7px',
+    borderBottomWidth: '1px',
+    borderBottomColor: theme.state.colors.codeBlockBorder,
+    borderBottomStyle: 'solid',
+  } as UTSJSONObject
+}
+
+function langStyle(): UTSJSONObject {
+  return {
+    fontSize: '11px',
+    fontFamily: 'Menlo, Consolas, monospace',
+    color: 'rgba(235,238,250,0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  } as UTSJSONObject
+}
+
+function copyBtnStyle(): UTSJSONObject {
+  return {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: '7px',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+  } as UTSJSONObject
+}
+
+function copyTextStyle(idx: number): UTSJSONObject {
+  return {
+    fontSize: '12px',
+    color: copiedIndex.value === idx ? '#4ade80' : 'rgba(235,238,250,0.65)',
+  } as UTSJSONObject
+}
+
+function codeSegStyle(seg: CodeSeg): UTSJSONObject {
+  const colors = theme.state.colors
+  let color = colors.codeBlockText
+  if (seg.c === 'kw') color = colors.tokKw
+  else if (seg.c === 'str') color = colors.tokStr
+  else if (seg.c === 'com') color = colors.tokCom
+  else if (seg.c === 'num') color = colors.tokNum
+  else if (seg.c === 'fn') color = colors.tokFn
+  else if (seg.c === 'type') color = colors.tokType
+  return {
+    fontSize: '13px',
+    lineHeight: '22px',
+    fontFamily: 'Menlo, Consolas, monospace',
+    color: color,
+  } as UTSJSONObject
+}
+
+function tableStyle(): UTSJSONObject {
+  return {
+    marginBottom: '16px',
+    borderWidth: '1px',
+    borderColor: theme.state.colors.border,
+    borderStyle: 'solid',
+    borderRadius: '10px',
+    overflow: 'hidden',
+  } as UTSJSONObject
+}
+
+function rowStyle(head: boolean, isLast: boolean): UTSJSONObject {
+  const style = {
+    flexDirection: 'row',
+    backgroundColor: head ? theme.state.colors.bgSubtle : 'transparent',
+  } as UTSJSONObject
+  // 行分隔线：末行交给表格外框，避免双线
+  if (!isLast) {
+    style['borderBottomWidth'] = '1px'
+    style['borderBottomColor'] = theme.state.colors.border
+    style['borderBottomStyle'] = 'solid'
+  }
+  return style
+}
+
+/**
+ * 单元格：弹性列宽（末列承载"说明"类长文本，权重更高），文本在列宽内自动换行；
+ * 空间不足时 minWidth 兜底 + 表格横向滚动；非末列绘制列分隔线
+ */
+function cellStyle(cell: TableCellRender, ci: number, count: number): UTSJSONObject {
+  const style = {
+    flexDirection: 'column',
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    alignItems: cell.align === 'center' ? 'center' : cell.align === 'right' ? 'flex-end' : 'stretch',
+    flexGrow: ci === count - 1 ? count : 1,
+    flexShrink: 1,
+    flexBasis: '0px',
+    minWidth: '96px',
+  } as UTSJSONObject
+  if (ci < count - 1) {
+    style['borderRightWidth'] = '1px'
+    style['borderRightColor'] = theme.state.colors.border
+    style['borderRightStyle'] = 'solid'
+  }
+  return style
+}
+
+function cellTextStyle(head: boolean): UTSJSONObject {
+  return {
+    fontSize: '13.5px',
+    lineHeight: '21px',
+    fontWeight: head ? '600' : '400',
+    color: head ? theme.state.colors.text1 : theme.state.colors.text2,
+  } as UTSJSONObject
+}
+
+function hrStyle(): UTSJSONObject {
+  return {
+    height: '1px',
+    backgroundColor: theme.state.colors.border,
+    marginTop: '24px',
+    marginBottom: '24px',
+  } as UTSJSONObject
+}
+
+// ---- 交互 ----
+
+function copyCode(item: RenderItem): void {
+  const idx = indexOfItem(item)
+  uni.setClipboardData({
+    data: item.code,
+    showToast: false,
+    success: () => {
+      copiedIndex.value = idx
+      if (copyTimer !== -1) clearTimeout(copyTimer)
+      copyTimer = setTimeout(() => {
+        copiedIndex.value = -1
+      }, 1600)
+    },
+  } as SetClipboardDataOptions)
+}
+
+function indexOfItem(item: RenderItem): number {
+  for (let i = 0; i < props.items.length; i++) {
+    if (props.items[i] === item) return i
+  }
+  return -1
+}
+
+function previewImage(item: RenderItem): void {
+  if (item.src === '') return
+  uni.previewImage({ urls: [item.src] } as PreviewImageOptions)
+}
+
+function previewSrc(src: string): void {
+  if (src === '') return
+  uni.previewImage({ urls: [src] } as PreviewImageOptions)
+}
+</script>
+
+<style>
+.up-renderer {
+  flex-direction: column;
+}
+
+/* 按压反馈仅触屏端生效：Web 端复制点击有"已复制"文字反馈，按压变透明会让文字产生"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.up-press {
+  opacity: 0.7;
+}
+/* #endif */
+
+.heading-block {
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.para {
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.quote {
+  flex-direction: column;
+}
+
+.list-row {
+  flex-direction: row;
+  margin-bottom: 2px;
+}
+
+.list-marker {
+  text-align: right;
+}
+
+.list-body {
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.code-card {
+  flex-direction: column;
+}
+
+.demo-block {
+  flex-direction: column;
+}
+
+.code-head {
+  flex-direction: row;
+}
+
+.copy-btn {
+  flex-direction: row;
+}
+
+.code-body {
+  flex-direction: column;
+  padding: 12px 14px;
+}
+
+.code-line {
+  flex-direction: row;
+  min-height: 22px;
+}
+
+.table-scroll {
+  flex-direction: column;
+}
+
+.table {
+  flex-direction: column;
+}
+
+.table-row {
+  flex-direction: row;
+}
+
+.table-cell {
+  flex-direction: column;
+}
+
+.hr {
+  flex-direction: column;
+}
+
+.img-block {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* 正文图片限宽居中：内容列很宽时图片不再铺满整列（如收款码） */
+.img {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 10px;
+}
+
+/* 相邻图片并排：每张更小，窄屏放不下时自动换行堆叠 */
+.img-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.img-row-item {
+  width: 200px;
+  max-width: 100%;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* #ifdef WEB */
+.copy-btn,
+.img {
+  cursor: pointer;
+}
+/* #endif */
+</style>

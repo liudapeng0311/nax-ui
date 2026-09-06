@@ -1,0 +1,35 @@
+<template>
+  <view class="demo-tabs">
+    <nax-tabs v-model="current" :list="tabs"></nax-tabs>
+    <view class="demo-tabs__panel">
+      <text class="demo-tabs__text">当前选中下标：{{ current }}</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const current = ref(0)
+const tabs = [
+  { name: '关注' },
+  { name: '推荐' },
+  { name: '热榜' }
+]
+</script>
+
+<style>
+.demo-tabs {
+  flex-direction: column;
+}
+
+.demo-tabs__panel {
+  padding: 16px;
+  align-items: center;
+}
+
+.demo-tabs__text {
+  font-size: 13px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+</style>

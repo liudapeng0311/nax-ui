@@ -1,0 +1,88 @@
+/**
+ * useInterval — 可控轮询组合式函数：定时重复执行，支持开始/停止与执行计数。
+ *
+ * 用法（必须在 setup 内同步调用以获得自动清理）：
+ * ```
+ * import { useInterval } from '@/uni_modules/nax-use/composables/use-interval.uts'
+ *
+ * const poller = useInterval(() => {
+ *   // 每 1000ms 执行一次
+ * }, 1000, false)
+ * poller.start()
+ * poller.stop()
+ * // poller.running / poller.count（已执行次数，响应式）
+ * ```
+ *
+ * 说明：
+ * - 组件内使用时卸载自动 stop；页面级使用请自行调 stop
+ * - start 在已运行时为空操作；stop 后可再次 start（计数不清零，reset 计数请自行处理）
+ */
+
+import { ref, Ref, onUnmounted, getCurrentInstance } from 'vue'
+
+export class NaxIntervalState {
+	private _fn : () => void
+	private _wait : number
+	private _timerId : number
+	private _running : Ref<boolean>
+	private _count : Ref<number>
+
+	constructor(fn : () => void, wait : number) {
+		this._fn = fn
+		this._wait = wait
+		this._timerId = -1
+		this._running = ref(false)
+		this._count = ref(0)
+	}
+
+	/** 是否运行中（响应式，可直接驱动模板） */
+	get running() : boolean {
+		return this._running.value
+	}
+
+	/** 已执行次数（响应式） */
+	get count() : number {
+		return this._count.value
+	}
+
+	/** 开始轮询；已在运行时为空操作 */
+	start() : void {
+		if (this._running.value) {
+			return
+		}
+		this._running.value = true
+		this._timerId = setInterval(() => {
+			this._count.value = this._count.value + 1
+			this._fn()
+		}, this._wait)
+	}
+
+	/** 停止轮询；未运行时为空操作 */
+	stop() : void {
+		if (this._timerId != -1) {
+			clearInterval(this._timerId)
+			this._timerId = -1
+		}
+		this._running.value = false
+	}
+}
+
+/**
+ * 创建可控轮询。必须在 setup 内同步调用。
+ * @param wait 轮询间隔毫秒，默认 1000
+ * @param immediate 创建后立即开始，默认 true
+ */
+export function useInterval(fn : () => void, wait? : number, immediate? : boolean) : NaxIntervalState {
+	const resolvedWait = wait != null && wait > 0 ? wait : 1000
+	const state = new NaxIntervalState(fn, resolvedWait)
+	if (getCurrentInstance() != null) {
+		onUnmounted(() => {
+			state.stop()
+		})
+	}
+	const auto = immediate
+	if (auto == null || auto == true) {
+		state.start()
+	}
+	return state
+}

@@ -1,0 +1,30 @@
+<template>
+  <view class="demo-dropdown">
+    <nax-dropdown border-bottom>
+      <nax-dropdown-item v-model="near" title="附近" :options="nearOptions"></nax-dropdown-item>
+      <nax-dropdown-item v-model="sort" title="排序" :options="sortOptions"></nax-dropdown-item>
+    </nax-dropdown>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const near = ref('')
+const sort = ref('')
+const nearOptions = [
+  { label: '不限', value: '' },
+  { label: '1 公里', value: '1km' },
+  { label: '5 公里', value: '5km' }
+]
+const sortOptions = [
+  { label: '默认排序', value: 'default' },
+  { label: '距离最近', value: 'near' }
+]
+</script>
+
+<style>
+.demo-dropdown {
+  flex-direction: column;
+}
+</style>

@@ -1,0 +1,992 @@
+<template>
+	<view v-if="rootMounted" class="nax-keyboard" :class="rootClass" :style="rootOverlayStyle">
+		<view
+			v-if="maskEnabled"
+			class="nax-keyboard__mask"
+			:class="maskClass"
+			:style="maskStyle"
+			@click="onMaskClick"
+		></view>
+
+		<view class="nax-keyboard__panel-layer">
+			<nax-transition
+				:show="panelShow"
+				name="slide-up"
+				:duration="ANIM_DURATION"
+				@after-leave="onOverlayLeave"
+			>
+				<view class="nax-keyboard__panel" :class="panelClass" :style="panelStyle" @click.stop="onPanelClick">
+					<slot></slot>
+
+					<view v-if="tooltip" class="nax-keyboard__toolbar">
+						<view
+							class="nax-keyboard__tool nax-keyboard__tool--cancel"
+							:hover-class="cancelHoverClass"
+							:hover-start-time="20"
+							:hover-stay-time="70"
+							@click.stop="onCancel"
+						>
+							<text class="nax-keyboard__tool-text nax-keyboard__tool-text--cancel" @click.stop="onCancel">{{ cancelLabel }}</text>
+						</view>
+						<view class="nax-keyboard__tool nax-keyboard__tool--tips">
+							<text v-if="showTips" class="nax-keyboard__tool-text nax-keyboard__tool-text--tips">{{ tipsText }}</text>
+						</view>
+						<view
+							v-if="confirmBtn"
+							class="nax-keyboard__tool nax-keyboard__tool--confirm"
+							:hover-class="confirmHoverClass"
+							:hover-start-time="20"
+							:hover-stay-time="70"
+							@click.stop="onConfirm"
+						>
+							<text class="nax-keyboard__tool-text nax-keyboard__tool-text--confirm" @click.stop="onConfirm">{{ confirmLabel }}</text>
+						</view>
+						<view v-else class="nax-keyboard__tool nax-keyboard__tool--confirm"></view>
+					</view>
+
+					<!-- 数字 / 身份证 -->
+					<view v-if="isNumberLike" class="nax-keyboard__grids">
+						<view
+							v-for="(item, index) in numList"
+							:key="'n' + index.toString() + '-' + item"
+							class="nax-keyboard__key"
+							:class="numKeyClass(index)"
+							:style="numKeyStyle(index)"
+							:hover-class="numKeyHoverClass(index)"
+							:hover-start-time="20"
+							:hover-stay-time="70"
+							@click="onNumKeyClick(item)"
+						>
+							<text class="nax-keyboard__key-text">{{ item }}</text>
+						</view>
+						<view
+							class="nax-keyboard__key nax-keyboard__key--gray nax-keyboard__key--back"
+							hover-class="nax-keyboard__key--hover-gray"
+							:hover-start-time="20"
+							:hover-stay-time="70"
+							@touchstart.stop="onBackspaceStart"
+							@touchend.stop="onBackspaceEnd"
+							@touchcancel.stop="onBackspaceEnd"
+							@click.stop="onBackspaceClick"
+						>
+							<nax-icon name="delete" size="22" color="var(--nax-color-text, #333639)"></nax-icon>
+						</view>
+					</view>
+
+					<!-- 车牌 -->
+					<view v-else class="nax-keyboard__car">
+						<view class="nax-keyboard__car-row">
+							<view
+								v-for="(item, index) in carRow0"
+								:key="'c0' + index.toString() + item"
+								class="nax-keyboard__car-key"
+								hover-class="nax-keyboard__car-key--hover"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onCarKeyClick(item)"
+							>
+								<text class="nax-keyboard__car-key-text">{{ item }}</text>
+							</view>
+						</view>
+						<view class="nax-keyboard__car-row">
+							<view
+								v-for="(item, index) in carRow1"
+								:key="'c1' + index.toString() + item"
+								class="nax-keyboard__car-key"
+								hover-class="nax-keyboard__car-key--hover"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onCarKeyClick(item)"
+							>
+								<text class="nax-keyboard__car-key-text">{{ item }}</text>
+							</view>
+						</view>
+						<view class="nax-keyboard__car-row">
+							<view
+								v-for="(item, index) in carRow2"
+								:key="'c2' + index.toString() + item"
+								class="nax-keyboard__car-key"
+								hover-class="nax-keyboard__car-key--hover"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onCarKeyClick(item)"
+							>
+								<text class="nax-keyboard__car-key-text">{{ item }}</text>
+							</view>
+						</view>
+						<view class="nax-keyboard__car-row nax-keyboard__car-row--last">
+							<view
+								class="nax-keyboard__car-action nax-keyboard__car-action--mode"
+								hover-class="nax-keyboard__car-key--hover"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="toggleCarMode"
+							>
+								<text class="nax-keyboard__car-mode" :class="carZhClass">中</text>
+								<text class="nax-keyboard__car-mode-sep">/</text>
+								<text class="nax-keyboard__car-mode" :class="carEnClass">英</text>
+							</view>
+							<view
+								v-for="(item, index) in carRow3"
+								:key="'c3' + index.toString() + item"
+								class="nax-keyboard__car-key"
+								hover-class="nax-keyboard__car-key--hover"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onCarKeyClick(item)"
+							>
+								<text class="nax-keyboard__car-key-text">{{ item }}</text>
+							</view>
+							<view
+								class="nax-keyboard__car-action nax-keyboard__car-action--back"
+								hover-class="nax-keyboard__car-key--hover"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@touchstart.stop="onBackspaceStart"
+								@touchend.stop="onBackspaceEnd"
+								@touchcancel.stop="onBackspaceEnd"
+								@click.stop="onBackspaceClick"
+							>
+								<nax-icon name="delete" size="20" color="var(--nax-color-text, #333639)"></nax-icon>
+							</view>
+						</view>
+					</view>
+				</view>
+			</nax-transition>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-keyboard
+	 * @description 自定义键盘：数字 / 车牌号 / 身份证；支持乱序、遮罩弹层与长按退格
+	 * @property {boolean} show v-model:show 控制显隐
+	 * @property {string} mode number | car | card，默认 number
+	 * @property {boolean} dotEnabled number 模式是否显示小数点，默认 true
+	 * @property {boolean} tooltip 顶部工具条，默认 true
+	 * @property {string} tips 中间提示文案
+	 * @property {boolean} showTips 是否显示中间提示，默认 true
+	 * @property {boolean} cancelBtn 是否显示取消，默认 true
+	 * @property {boolean} confirmBtn 是否显示完成，默认 true
+	 * @property {string} cancelText 取消文案，默认 取消
+	 * @property {string} confirmText 完成文案，默认 完成
+	 * @property {boolean} mask 是否显示遮罩，默认 true
+	 * @property {boolean} maskClosable 点击遮罩是否关闭，默认 true
+	 * @property {boolean} maskCloseAble 同 maskClosable
+	 * @property {number} zIndex 层级，默认 10075
+	 * @property {boolean} random 是否打乱按键，默认 false
+	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:show 显隐变化
+	 * @event change 按键点击（不含退格），参数 string
+	 * @event backspace 退格
+	 * @event confirm 完成
+	 * @event cancel 取消
+	 * @event open 打开
+	 * @event close 关闭完成
+	 * @slot default 键盘上方自定义内容
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		mode: {
+			type: String,
+			default: 'number'
+		},
+		dotEnabled: {
+			type: Boolean,
+			default: true
+		},
+		tooltip: {
+			type: Boolean,
+			default: true
+		},
+		tips: {
+			type: String,
+			default: ''
+		},
+		showTips: {
+			type: Boolean,
+			default: true
+		},
+		cancelBtn: {
+			type: Boolean,
+			default: true
+		},
+		confirmBtn: {
+			type: Boolean,
+			default: true
+		},
+		cancelText: {
+			type: String,
+			default: '取消'
+		},
+		confirmText: {
+			type: String,
+			default: '完成'
+		},
+		mask: {
+			type: Boolean,
+			default: true
+		},
+		maskClosable: {
+			type: Boolean,
+			default: true
+		},
+		maskCloseAble: {
+			type: Boolean,
+			default: true
+		},
+		zIndex: {
+			type: Number,
+			default: 10075
+		},
+		random: {
+			type: Boolean,
+			default: false
+		},
+		safeAreaInsetBottom: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'change',
+		'backspace',
+		'confirm',
+		'cancel',
+		'open',
+		'close'
+	])
+
+	const ANIM_DURATION = 280
+	const rootMounted = ref(false)
+	const panelShow = ref(false)
+	const safeBottomPx = ref(0)
+	const carAbc = ref(false)
+	const shuffleSeed = ref(0)
+	let openDelayTimer: number = -1
+	let backspaceDelayTimer: number = -1
+	let backspaceIntervalTimer: number = -1
+	const lastBackspaceTouchAt = ref(0)
+
+	const maskEnabled = computed((): boolean => {
+		return props.mask
+	})
+
+	const isNumberLike = computed((): boolean => {
+		return props.mode != 'car'
+	})
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+
+	const rootOverlayStyle = computed((): string => {
+		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const maskClass = computed((): string => {
+		if (panelShow.value) {
+			return 'nax-keyboard__mask--show'
+		}
+		return ''
+	})
+
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (panelShow.value) {
+			return 'background-color:rgba(0,0,0,0.45);opacity:1;'
+		}
+		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	const panelClass = computed((): string => {
+		if (props.safeAreaInsetBottom) {
+			return 'nax-keyboard__panel--safe'
+		}
+		return ''
+	})
+
+	const panelStyle = computed((): string => {
+		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+			return 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+		}
+		return ''
+	})
+
+	const cancelLabel = computed((): string => {
+		if (!props.cancelBtn) {
+			return ''
+		}
+		if (props.cancelText.length > 0) {
+			return props.cancelText
+		}
+		return '取消'
+	})
+
+	const confirmLabel = computed((): string => {
+		if (props.confirmText.length > 0) {
+			return props.confirmText
+		}
+		return '完成'
+	})
+
+	const tipsText = computed((): string => {
+		if (props.tips.length > 0) {
+			return props.tips
+		}
+		if (props.mode == 'card') {
+			return '身份证键盘'
+		}
+		if (props.mode == 'car') {
+			return '车牌号键盘'
+		}
+		return '数字键盘'
+	})
+
+	const cancelHoverClass = computed((): string => {
+		if (!props.cancelBtn) {
+			return 'none'
+		}
+		return 'nax-keyboard__tool--hover'
+	})
+
+	const confirmHoverClass = computed((): string => {
+		return 'nax-keyboard__tool--hover'
+	})
+
+	const carZhClass = computed((): string => {
+		if (!carAbc.value) {
+			return 'nax-keyboard__car-mode--active'
+		}
+		return 'nax-keyboard__car-mode--inactive'
+	})
+
+	const carEnClass = computed((): string => {
+		if (carAbc.value) {
+			return 'nax-keyboard__car-mode--active'
+		}
+		return 'nax-keyboard__car-mode--inactive'
+	})
+
+	function shuffleStrings(list: string[]): string[] {
+		const result = list.slice(0)
+		var i = result.length - 1
+		while (i > 0) {
+			const j = Math.floor(Math.random() * (i + 1))
+			const tmp = result[i]
+			result[i] = result[j]
+			result[j] = tmp
+			i--
+		}
+		return result
+	}
+
+	function buildNumberKeys(): string[] {
+		const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as string[]
+		if (props.mode == 'card') {
+			keys.push('X')
+			keys.push('0')
+		} else if (props.dotEnabled) {
+			keys.push('.')
+			keys.push('0')
+		} else {
+			keys.push('0')
+		}
+		if (props.random) {
+			return shuffleStrings(keys)
+		}
+		return keys
+	}
+
+	const numList = computed((): string[] => {
+		// 依赖 seed，打开时刷新乱序
+		const _seed = shuffleSeed.value
+		if (_seed < 0) {
+			return [] as string[]
+		}
+		return buildNumberKeys()
+	})
+
+	function buildAreaKeys(): string[] {
+		// 顺序对齐  car-keyboard
+		const keys = [
+			'京', '沪', '粤', '津', '冀', '豫', '云', '辽', '黑', '湘',
+			'皖', '鲁', '苏', '浙', '赣', '鄂', '桂', '甘', '晋', '陕',
+			'蒙', '吉', '闽', '贵', '渝', '川', '青', '琼', '宁', '挂',
+			'藏', '港', '澳', '新', '使', '学'
+		] as string[]
+		if (props.random) {
+			return shuffleStrings(keys)
+		}
+		return keys
+	}
+
+	function buildEngKeys(): string[] {
+		const keys = [
+			'1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+			'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+			'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z',
+			'X', 'C', 'V', 'B', 'N', 'M'
+		] as string[]
+		if (props.random) {
+			return shuffleStrings(keys)
+		}
+		return keys
+	}
+
+	function sliceKeys(list: string[], start: number, end: number): string[] {
+		const out = [] as string[]
+		var i = start
+		while (i < end && i < list.length) {
+			out.push(list[i])
+			i++
+		}
+		return out
+	}
+
+	const carAllKeys = computed((): string[] => {
+		const _seed = shuffleSeed.value
+		if (_seed < 0) {
+			return [] as string[]
+		}
+		if (carAbc.value) {
+			return buildEngKeys()
+		}
+		return buildAreaKeys()
+	})
+
+	const carRow0 = computed((): string[] => {
+		return sliceKeys(carAllKeys.value, 0, 10)
+	})
+
+	const carRow1 = computed((): string[] => {
+		return sliceKeys(carAllKeys.value, 10, 20)
+	})
+
+	const carRow2 = computed((): string[] => {
+		return sliceKeys(carAllKeys.value, 20, 30)
+	})
+
+	const carRow3 = computed((): string[] => {
+		return sliceKeys(carAllKeys.value, 30, 36)
+	})
+
+	function isWideZeroKey(index: number): boolean {
+		if (props.random) {
+			return false
+		}
+		if (props.mode != 'number') {
+			return false
+		}
+		if (props.dotEnabled) {
+			return false
+		}
+		return index == 9
+	}
+
+	function isGraySpecialKey(index: number): boolean {
+		if (props.random) {
+			return false
+		}
+		if (index != 9) {
+			return false
+		}
+		if (props.mode == 'card') {
+			return true
+		}
+		if (props.mode == 'number' && props.dotEnabled) {
+			return true
+		}
+		return false
+	}
+
+	function numKeyClass(index: number): string {
+		let cls = ''
+		if (isWideZeroKey(index)) {
+			cls += ' nax-keyboard__key--wide'
+		}
+		if (isGraySpecialKey(index)) {
+			cls += ' nax-keyboard__key--gray'
+		}
+		return cls.trim()
+	}
+
+	function numKeyStyle(index: number): string {
+		if (isWideZeroKey(index)) {
+			return 'flex-grow:0;flex-shrink:0;flex-basis:66.6667%;'
+		}
+		return ''
+	}
+
+	function numKeyHoverClass(index: number): string {
+		if (isGraySpecialKey(index)) {
+			return 'nax-keyboard__key--hover-gray'
+		}
+		return 'nax-keyboard__key--hover'
+	}
+
+	function onNumKeyClick(item: string) {
+		emit('change', item)
+	}
+
+	function onCarKeyClick(item: string) {
+		emit('change', item)
+	}
+
+	function toggleCarMode() {
+		carAbc.value = !carAbc.value
+	}
+
+	function clearBackspaceTimer() {
+		if (backspaceDelayTimer >= 0) {
+			clearTimeout(backspaceDelayTimer)
+			backspaceDelayTimer = -1
+		}
+		if (backspaceIntervalTimer >= 0) {
+			clearInterval(backspaceIntervalTimer)
+			backspaceIntervalTimer = -1
+		}
+	}
+
+	function onBackspaceStart() {
+		lastBackspaceTouchAt.value = Date.now()
+		emit('backspace')
+		clearBackspaceTimer()
+		backspaceDelayTimer = setTimeout(() => {
+			backspaceDelayTimer = -1
+			backspaceIntervalTimer = setInterval(() => {
+				emit('backspace')
+			}, 120)
+		}, 400)
+	}
+
+	function onBackspaceEnd() {
+		lastBackspaceTouchAt.value = Date.now()
+		clearBackspaceTimer()
+	}
+
+	function onBackspaceClick() {
+		// touch 路径已处理时跳过 click，避免双触发
+		const now = Date.now()
+		if (now - lastBackspaceTouchAt.value < 350) {
+			return
+		}
+		emit('backspace')
+	}
+
+	function canCloseByMask(): boolean {
+		return props.mask && props.maskClosable && props.maskCloseAble
+	}
+
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function closeKeyboard(emitUpdate: boolean) {
+		clearBackspaceTimer()
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		if (!panelShow.value) {
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+	}
+
+	function onMaskClick() {
+		if (!canCloseByMask()) {
+			return
+		}
+		closeKeyboard(true)
+	}
+
+	function onPanelClick() {
+		// 阻止冒泡到遮罩
+	}
+
+	function onCancel() {
+		if (!props.cancelBtn) {
+			return
+		}
+		emit('cancel')
+		closeKeyboard(true)
+	}
+
+	function onConfirm() {
+		if (!props.confirmBtn) {
+			return
+		}
+		emit('confirm')
+		closeKeyboard(true)
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function openKeyboard() {
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		if (openDelayTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
+		refreshSafeArea()
+		if (props.random) {
+			shuffleSeed.value = shuffleSeed.value + 1
+		}
+		if (props.mode == 'car') {
+			carAbc.value = false
+		}
+		rootMounted.value = true
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		const openDelay = 50
+		// #endif
+		// #ifndef APP-HARMONY
+		const openDelay = 30
+		// #endif
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+		}, openDelay)
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function onOverlayLeave() {
+		if (panelShow.value) {
+			return
+		}
+		rootMounted.value = false
+		emit('close')
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val) {
+			openKeyboard()
+		} else {
+			closeKeyboard(false)
+		}
+	})
+
+	watch((): string => {
+		return props.mode + '|' + props.dotEnabled.toString() + '|' + props.random.toString()
+	}, (_v: string) => {
+		if (props.random && rootMounted.value) {
+			shuffleSeed.value = shuffleSeed.value + 1
+		}
+	})
+
+	onMounted(() => {
+		if (props.show) {
+			openKeyboard()
+		}
+	})
+
+	onUnmounted(() => {
+		clearOpenDelayTimer()
+		clearBackspaceTimer()
+	})
+</script>
+
+<style>
+	.nax-keyboard {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	.nax-keyboard__panel-layer {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-keyboard__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		background-color: rgba(0, 0, 0, 0.45);
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-keyboard__mask {
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+	/* #endif */
+
+	.nax-keyboard__mask--show {
+		opacity: 1;
+	}
+
+	.nax-keyboard__panel {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-keyboard__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-keyboard__toolbar {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 44px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-keyboard__tool {
+		flex: 1;
+		height: 44px;
+		flex-direction: row;
+		align-items: center;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.nax-keyboard__tool--cancel {
+		justify-content: flex-start;
+	}
+
+	.nax-keyboard__tool--tips {
+		flex: 1.2;
+		justify-content: center;
+	}
+
+	.nax-keyboard__tool--confirm {
+		justify-content: flex-end;
+	}
+
+	.nax-keyboard__tool--hover {
+		opacity: 0.7;
+	}
+
+	.nax-keyboard__tool-text {
+		font-size: 15px;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.nax-keyboard__tool-text--cancel {
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-keyboard__tool-text--tips {
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	.nax-keyboard__tool-text--confirm {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+	}
+
+	.nax-keyboard__grids {
+		flex-direction: row;
+		flex-wrap: wrap;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-keyboard__key {
+		flex-grow: 0;
+		flex-shrink: 0;
+		flex-basis: 33.3333%;
+		height: 52px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-divider, #f5f5f7);
+		border-right-width: 1px;
+		border-right-style: solid;
+		border-right-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-keyboard__key--wide {
+		flex-basis: 66.6667%;
+	}
+
+	.nax-keyboard__key--gray {
+		background-color: var(--nax-color-bg-secondary, #f5f5f7);
+	}
+
+	.nax-keyboard__key--back {
+		/* 与数字键同宽 */
+	}
+
+	.nax-keyboard__key--hover {
+		background-color: var(--nax-color-bg-secondary, #ebebed);
+	}
+
+	.nax-keyboard__key--hover-gray {
+		background-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-keyboard__key-text {
+		font-size: 22px;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	.nax-keyboard__car {
+		flex-direction: column;
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 4px;
+		padding-right: 4px;
+		background-color: var(--nax-color-bg-secondary, #d7d7d9);
+	}
+
+	.nax-keyboard__car-row {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 6px;
+	}
+
+	.nax-keyboard__car-row--last {
+		margin-bottom: 0;
+	}
+
+	.nax-keyboard__car-key {
+		width: 32px;
+		height: 40px;
+		margin-left: 2px;
+		margin-right: 2px;
+		border-radius: 4px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-keyboard__car-key--hover {
+		background-color: rgb(185, 188, 195);
+	}
+
+	.nax-keyboard__car-key-text {
+		font-size: 15px;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+		font-weight: 500;
+	}
+
+	.nax-keyboard__car-action {
+		width: 48px;
+		height: 40px;
+		margin-left: 2px;
+		margin-right: 2px;
+		border-radius: 4px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-keyboard__car-action--mode {
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-keyboard__car-action--back {
+		background-color: rgb(185, 188, 195);
+	}
+
+	.nax-keyboard__car-mode {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-keyboard__car-mode--active {
+		font-size: 14px;
+		color: var(--nax-color-warning, #f0a020);
+		font-weight: 600;
+	}
+
+	.nax-keyboard__car-mode--inactive {
+		font-size: 11px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-keyboard__car-mode-sep {
+		font-size: 11px;
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-left: 1px;
+		margin-right: 1px;
+	}
+</style>

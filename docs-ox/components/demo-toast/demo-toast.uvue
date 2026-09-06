@@ -1,0 +1,58 @@
+<template>
+  <view class="demo-toast">
+    <nax-toast></nax-toast>
+    <view class="demo-toast__row">
+      <view class="demo-toast__mr">
+        <nax-button size="sm" type="primary" label="成功" @click="onSuccess"></nax-button>
+      </view>
+      <view class="demo-toast__mr">
+        <nax-button size="sm" type="error" label="失败" @click="onError"></nax-button>
+      </view>
+      <view>
+        <nax-button size="sm" label="加载" @click="onLoading"></nax-button>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+// 函数与 <nax-toast /> 同页挂载时需设置本地别名，避免与组件标签映射到同一驼峰名
+import {
+  naxToast as showNaxToast,
+  hideNaxToast,
+  naxToastSuccess,
+  naxToastError,
+  naxToastLoading
+} from '@/uni_modules/nax-toast/index.uts'
+
+function onSuccess() {
+  naxToastSuccess('操作成功')
+}
+
+function onError() {
+  naxToastError('网络异常')
+}
+
+function onLoading() {
+  naxToastLoading('提交中…')
+  setTimeout(() => {
+    hideNaxToast()
+    naxToastSuccess('提交成功')
+  }, 1500)
+}
+</script>
+
+<style>
+.demo-toast {
+  flex-direction: column;
+}
+
+.demo-toast__row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.demo-toast__mr {
+  margin-right: 12px;
+}
+</style>

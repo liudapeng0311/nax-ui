@@ -1,0 +1,119 @@
+<template>
+  <view class="demo-button">
+    <text class="dsec">层级与类型（default / primary）</text>
+    <view class="wrow">
+      <view class="wi"><nax-button label="基础"></nax-button></view>
+      <view class="wi"><nax-button variant="secondary" label="次要"></nax-button></view>
+      <view class="wi"><nax-button variant="tertiary" label="次次要"></nax-button></view>
+      <view class="wi"><nax-button variant="quaternary" label="次次次要"></nax-button></view>
+      <view class="wi"><nax-button variant="dashed" label="虚线"></nax-button></view>
+      <view class="wi"><nax-button disabled label="禁用"></nax-button></view>
+      <view class="wi"><nax-button type="primary" label="基础"></nax-button></view>
+      <view class="wi"><nax-button type="primary" variant="secondary" label="次要"></nax-button></view>
+      <view class="wi"><nax-button type="primary" variant="tertiary" label="次次要"></nax-button></view>
+      <view class="wi"><nax-button type="primary" variant="quaternary" label="次次次要"></nax-button></view>
+      <view class="wi"><nax-button type="primary" variant="dashed" label="虚线"></nax-button></view>
+      <view class="wi"><nax-button type="primary" disabled label="禁用"></nax-button></view>
+    </view>
+
+    <text class="dsec">类型 type</text>
+    <view class="wrow">
+      <view class="wi"><nax-button label="Default"></nax-button></view>
+      <view class="wi"><nax-button type="primary" label="Primary"></nax-button></view>
+      <view class="wi"><nax-button type="info" label="Info"></nax-button></view>
+      <view class="wi"><nax-button type="success" label="Success"></nax-button></view>
+      <view class="wi"><nax-button type="warning" label="Warning"></nax-button></view>
+      <view class="wi"><nax-button type="error" label="Error"></nax-button></view>
+    </view>
+
+    <text class="dsec">类型 × secondary</text>
+    <view class="wrow">
+      <view class="wi"><nax-button variant="secondary" label="Default"></nax-button></view>
+      <view class="wi"><nax-button type="primary" variant="secondary" label="Primary"></nax-button></view>
+      <view class="wi"><nax-button type="info" variant="secondary" label="Info"></nax-button></view>
+      <view class="wi"><nax-button type="success" variant="secondary" label="Success"></nax-button></view>
+      <view class="wi"><nax-button type="warning" variant="secondary" label="Warning"></nax-button></view>
+      <view class="wi"><nax-button type="error" variant="secondary" label="Error"></nax-button></view>
+    </view>
+
+    <text class="dsec">禁用 disabled × type</text>
+    <view class="wrow">
+      <view class="wi"><nax-button disabled label="Default"></nax-button></view>
+      <view class="wi"><nax-button type="primary" disabled label="Primary"></nax-button></view>
+      <view class="wi"><nax-button type="info" disabled label="Info"></nax-button></view>
+      <view class="wi"><nax-button type="success" disabled label="Success"></nax-button></view>
+      <view class="wi"><nax-button type="warning" disabled label="Warning"></nax-button></view>
+      <view class="wi"><nax-button type="error" disabled label="Error"></nax-button></view>
+    </view>
+
+    <text class="dsec">描边 outline（兼容）</text>
+    <view class="wrow">
+      <view class="wi"><nax-button type="primary" variant="outline" label="outline"></nax-button></view>
+      <view class="wi"><nax-button type="error" variant="outline" label="outline error"></nax-button></view>
+    </view>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="wrow">
+      <view class="wi"><nax-button type="primary" size="sm" label="small"></nax-button></view>
+      <view class="wi"><nax-button type="primary" size="md" label="medium"></nax-button></view>
+      <view class="wi"><nax-button type="primary" size="lg" label="large"></nax-button></view>
+    </view>
+
+    <text class="dsec">形状 shape</text>
+    <view class="wrow">
+      <view class="wi"><nax-button type="primary" shape="square" label="square"></nax-button></view>
+      <view class="wi"><nax-button type="primary" shape="round" label="round"></nax-button></view>
+      <view class="wi"><nax-button type="primary" shape="circle" label="好"></nax-button></view>
+    </view>
+
+    <text class="dsec">图标 icon（nax-icon）</text>
+    <view class="wrow">
+      <view class="wi"><nax-button type="primary" icon="search" label="搜索"></nax-button></view>
+      <view class="wi"><nax-button type="primary" icon="arrow-right" icon-position="right" label="下一步"></nax-button></view>
+      <view class="wi"><nax-button type="success" variant="secondary" icon="check" label="完成"></nax-button></view>
+      <view class="wi"><nax-button type="error" variant="outline" icon="delete" label="删除"></nax-button></view>
+      <view class="wi"><nax-button type="primary" shape="circle" icon="plus"></nax-button></view>
+    </view>
+
+    <text class="dsec">状态 loading 动画</text>
+    <view class="wrow">
+      <view class="wi"><nax-button type="primary" label="正常"></nax-button></view>
+      <view class="wi"><nax-button type="primary" loading label="加载"></nax-button></view>
+      <view class="wi"><nax-button type="success" variant="secondary" loading label="保存中"></nax-button></view>
+      <view class="wi"><nax-button type="primary" shape="circle" loading></nax-button></view>
+    </view>
+
+    <text class="dsec">块级 block</text>
+    <nax-button type="primary" block label="块级主按钮"></nax-button>
+    <nax-button type="error" variant="secondary" block label="块级次要错误按钮"></nax-button>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-button {
+  flex-direction: column;
+}
+
+.wrow {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-left: -8px;
+  margin-bottom: -8px;
+}
+
+.wi {
+  margin-left: 8px;
+  margin-bottom: 8px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

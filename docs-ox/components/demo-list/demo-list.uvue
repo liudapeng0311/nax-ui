@@ -1,0 +1,17 @@
+<template>
+  <view class="demo-list">
+    <nax-list height="300px" :finished="true">
+      <nax-cell v-for="(item, i) in items" :key="i" :title="item" :value="'' + (i + 1)"></nax-cell>
+    </nax-list>
+  </view>
+</template>
+
+<script setup lang="uts">
+const items = ['列表项一', '列表项二', '列表项三', '列表项四', '列表项五', '列表项六', '列表项七', '列表项八']
+</script>
+
+<style>
+.demo-list {
+  flex-direction: column;
+}
+</style>

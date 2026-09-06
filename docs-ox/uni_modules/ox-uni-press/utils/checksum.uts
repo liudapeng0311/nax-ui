@@ -1,0 +1,188 @@
+// 客户端 checksum 校验：与服务端（packages/adapters）同一语义。
+// - 稳定序列化：对象键排序，跳过 undefined，标量走 JSON.stringify
+// - checksum = sha256(hex) of utf8(stable(value))
+// 注意：数字序列化依赖 UTS JSON.stringify 与 Node 的输出一致性，
+// 真机验证前若出现 CHECKSUM_MISMATCH，可在 Provider 选项中关闭校验。
+
+const K: number[] = [
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+]
+
+const HEX: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+
+/** 字符串 -> UTF-8 字节（正确处理代理对） */
+export function utf8Bytes(input: string): number[] {
+  const out: number[] = []
+  let i = 0
+  while (i < input.length) {
+    let code = input.charCodeAt(i)
+    if (code >= 0xd800 && code <= 0xdbff && i + 1 < input.length) {
+      const lo = input.charCodeAt(i + 1)
+      if (lo >= 0xdc00 && lo <= 0xdfff) {
+        code = 0x10000 + ((code - 0xd800) << 10) + (lo - 0xdc00)
+        i += 2
+      } else {
+        i += 1
+      }
+    } else {
+      i += 1
+    }
+    if (code < 0x80) {
+      out.push(code)
+    } else if (code < 0x800) {
+      out.push(0xc0 | (code >> 6))
+      out.push(0x80 | (code & 0x3f))
+    } else if (code < 0x10000) {
+      out.push(0xe0 | (code >> 12))
+      out.push(0x80 | ((code >> 6) & 0x3f))
+      out.push(0x80 | (code & 0x3f))
+    } else {
+      out.push(0xf0 | (code >> 18))
+      out.push(0x80 | ((code >> 12) & 0x3f))
+      out.push(0x80 | ((code >> 6) & 0x3f))
+      out.push(0x80 | (code & 0x3f))
+    }
+  }
+  return out
+}
+
+export function sha256Hex(bytes: number[]): string {
+  const h: number[] = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]
+  const bitLen = bytes.length * 8
+  const msg: number[] = bytes.slice()
+  msg.push(0x80)
+  while (msg.length % 64 !== 56) {
+    msg.push(0)
+  }
+  // 64 位大端长度（JS 安全整数范围内高 32 位为 0）
+  msg.push(0, 0, 0, 0, (bitLen >>> 24) & 0xff, (bitLen >>> 16) & 0xff, (bitLen >>> 8) & 0xff, bitLen & 0xff)
+
+  const w: number[] = []
+  for (let i = 0; i < 64; i++) {
+    w.push(0)
+  }
+  for (let block = 0; block < msg.length; block += 64) {
+    for (let t = 0; t < 16; t++) {
+      const j = block + t * 4
+      w[t] = ((msg[j]! << 24) | (msg[j + 1]! << 16) | (msg[j + 2]! << 8) | msg[j + 3]!) | 0
+    }
+    for (let t = 16; t < 64; t++) {
+      const s0 = rotr(w[t - 15]!, 7) ^ rotr(w[t - 15]!, 18) ^ (w[t - 15]! >>> 3)
+      const s1 = rotr(w[t - 2]!, 17) ^ rotr(w[t - 2]!, 19) ^ (w[t - 2]! >>> 10)
+      w[t] = (w[t - 16]! + s0 + w[t - 7]! + s1) | 0
+    }
+    let a = h[0]!
+    let b = h[1]!
+    let c = h[2]!
+    let d = h[3]!
+    let e = h[4]!
+    let f = h[5]!
+    let g = h[6]!
+    let hh = h[7]!
+    for (let t = 0; t < 64; t++) {
+      const s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)
+      const ch = (e & f) ^ (~e & g)
+      const temp1 = (hh + s1 + ch + K[t]! + w[t]!) | 0
+      const s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)
+      const maj = (a & b) ^ (a & c) ^ (b & c)
+      const temp2 = (s0 + maj) | 0
+      hh = g
+      g = f
+      f = e
+      e = (d + temp1) | 0
+      d = c
+      c = b
+      b = a
+      a = (temp1 + temp2) | 0
+    }
+    h[0] = (h[0]! + a) | 0
+    h[1] = (h[1]! + b) | 0
+    h[2] = (h[2]! + c) | 0
+    h[3] = (h[3]! + d) | 0
+    h[4] = (h[4]! + e) | 0
+    h[5] = (h[5]! + f) | 0
+    h[6] = (h[6]! + g) | 0
+    h[7] = (h[7]! + hh) | 0
+  }
+
+  let out = ''
+  for (let i = 0; i < 8; i++) {
+    const v = h[i]!
+    out += HEX[(v >>> 28) & 0xf]!
+    out += HEX[(v >>> 24) & 0xf]!
+    out += HEX[(v >>> 20) & 0xf]!
+    out += HEX[(v >>> 16) & 0xf]!
+    out += HEX[(v >>> 12) & 0xf]!
+    out += HEX[(v >>> 8) & 0xf]!
+    out += HEX[(v >>> 4) & 0xf]!
+    out += HEX[v & 0xf]!
+  }
+  return out
+}
+
+function rotr(x: number, n: number): number {
+  return ((x >>> n) | (x << (32 - n))) | 0
+}
+
+/** 遍历 UTSJSONObject 键值：参数为非空类型，避免 as 强转来源触发可空调用警告 */
+function forEachEntry(obj: UTSJSONObject, action: (key: string, value: any | null) => void): void {
+  // 部分版本类型定义将 forEach 声明为可空成员，用可选调用消警（行为等价：forEach 存在时必然执行）
+  obj.forEach?.(action)
+}
+
+/** 与 packages/adapters/src/stable-stringify.ts 同语义：键排序、跳过 undefined */
+export function stableStringify(value: any | null): string {
+  if (value == null) return 'null'
+  if (typeof value === 'string') return JSON.stringify(value)
+  if (typeof value === 'number' || typeof value === 'boolean') return JSON.stringify(value)
+  if (value instanceof UTSJSONObject) {
+    const keys: string[] = []
+    const values: any[] = []
+    forEachEntry(value, (key: string, v: any | null): void => {
+      if (v === undefined) return
+      keys.push(key)
+      values.push(v)
+    })
+    // 插入排序：UTSJSONObject 的键数量有限，避免依赖排序 API 的平台差异
+    for (let i = 1; i < keys.length; i++) {
+      const k = keys[i]!
+      const v = values[i]!
+      let j = i - 1
+      while (j >= 0 && keys[j]! > k) {
+        keys[j + 1] = keys[j]!
+        values[j + 1] = values[j]!
+        j -= 1
+      }
+      keys[j + 1] = k
+      values[j + 1] = v
+    }
+    let out = '{'
+    for (let i = 0; i < keys.length; i++) {
+      if (i > 0) out += ','
+      out += `${JSON.stringify(keys[i]!)}:${stableStringify(values[i]!)}`
+    }
+    return `${out}}`
+  }
+  if (Array.isArray(value)) {
+    const arr = value as Array<any>
+    let out = '['
+    for (let i = 0; i < arr.length; i++) {
+      if (i > 0) out += ','
+      out += stableStringify(arr[i]!)
+    }
+    return `${out}]`
+  }
+  return JSON.stringify(value)
+}
+
+/** 校验 UTSJSONObject 数据的 checksum（envelope/release 同一算法） */
+export function verifyChecksum(value: UTSJSONObject, expected: string): boolean {
+  return sha256Hex(utf8Bytes(stableStringify(value))) === expected
+}

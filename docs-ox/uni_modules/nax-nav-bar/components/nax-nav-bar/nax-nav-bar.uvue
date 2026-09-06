@@ -1,0 +1,657 @@
+<template>
+	<view class="nax-nav-bar-host" :class="hostClass">
+		<!-- fixed 时占位，避免内容被顶栏遮挡；immersive 不占位 -->
+		<view
+			v-if="showPlaceholder"
+			class="nax-nav-bar__placeholder"
+			:class="placeholderClass"
+			:style="placeholderStyle"
+		></view>
+
+		<view class="nax-nav-bar" :class="rootClass" :style="rootStyle">
+			<!-- 状态栏 / 顶部安全区 -->
+			<view
+				v-if="safeAreaInsetTop"
+				class="nax-nav-bar__status"
+				:class="statusClass"
+				:style="statusStyle"
+			></view>
+
+			<!-- 内容行：左 | 中 | 右（flex，标题区可绝对居中） -->
+			<view class="nax-nav-bar__inner" :style="innerStyle">
+				<view class="nax-nav-bar__side nax-nav-bar__side--left">
+					<view
+						v-if="showBack"
+						class="nax-nav-bar__back"
+						hover-class="nax-nav-bar__back--hover"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onBackClick"
+					>
+						<nax-icon
+							v-if="backIconName.length > 0"
+							:name="backIconName"
+							:size="backIconSizeText"
+							:color="iconColorValue"
+						></nax-icon>
+<text
+					v-if="backTextValue.length > 0"
+					class="nax-nav-bar__back-text"
+				:class="backTextClass"
+				:style="inverseTextStyle"
+				:max-lines="1"
+			>{{ backTextValue }}</text>
+					</view>
+					<slot name="left"></slot>
+				</view>
+
+				<view class="nax-nav-bar__center" :class="centerClass" :style="centerStyle">
+					<slot>
+<text
+					v-if="titleValue.length > 0"
+					class="nax-nav-bar__title"
+				:class="titleClass"
+				:style="inverseTextStyle"
+				:max-lines="1"
+			>{{ titleValue }}</text>
+					</slot>
+				</view>
+
+				<view class="nax-nav-bar__side nax-nav-bar__side--right" :style="rightSideStyle">
+					<slot name="right"></slot>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-nav-bar
+	 * @description 自定义顶部导航栏。状态栏安全区 + fixed 占位 + 返回栈兜底；微信小程序预留胶囊右侧空间。
+	 * @property {string} title 标题文案
+	 * @property {boolean} showBack 是否显示返回区，默认 true
+	 * @property {string} backText 返回文案（可选）
+	 * @property {string} backIcon 返回图标名（nax-icon），默认 chevron-left；空字符串则不显示图标
+	 * @property {string} backIconColor 返回图标颜色；空串时跟随导航栏 type / 主题
+	 * @property {boolean} autoBack 点击返回是否自动 navigateBack，默认 true
+	 * @property {string} homeUrl 栈底无法返回时 reLaunch 目标；空则仅 emit
+	 * @property {boolean} fixed 是否固定顶部，默认 true
+	 * @property {boolean} placeholder fixed 且非 immersive 时是否占位，默认 true
+	 * @property {boolean} immersive 沉浸：fixed 时不占位（内容可滚入顶栏下）
+	 * @property {boolean} border 底部分割线，默认 true
+	 * @property {boolean} safeAreaInsetTop 顶部状态栏安全区，默认 true
+	 * @property {string} type 外观 default | primary，默认 default
+	 * @property {string} height 内容行高度（纯数字按 px），默认 44
+	 * @property {number} zIndex fixed 层级，默认 980
+	 * @property {string} titleAlign 标题对齐 center | left，默认 center
+	 * @property {boolean} centerClickable 中间区域（默认插槽）可点击；仅 Web/小程序需要（App 端无 pointer-events 限制），默认 false
+	 * @property {boolean} show 是否显示，默认 true
+	 * @property {string} customClass 根扩展 class
+	 * @event back 点击返回（autoBack 前后均会触发）
+	 * @slot left 左侧扩展（在返回按钮右侧）
+	 * @slot default 中间自定义（覆盖 title）
+	 * @slot right 右侧操作区
+	 */
+	const props = defineProps({
+		title: {
+			type: String,
+			default: ''
+		},
+		showBack: {
+			type: Boolean,
+			default: true
+		},
+		backText: {
+			type: String,
+			default: ''
+		},
+		backIcon: {
+			type: String,
+			default: 'chevron-left'
+		},
+		backIconColor: {
+			type: String,
+			default: ''
+		},
+		autoBack: {
+			type: Boolean,
+			default: true
+		},
+		homeUrl: {
+			type: String,
+			default: ''
+		},
+		fixed: {
+			type: Boolean,
+			default: true
+		},
+		placeholder: {
+			type: Boolean,
+			default: true
+		},
+		immersive: {
+			type: Boolean,
+			default: false
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		safeAreaInsetTop: {
+			type: Boolean,
+			default: true
+		},
+		type: {
+			type: String,
+			default: 'default'
+		},
+		height: {
+			type: String,
+			default: '44'
+		},
+		zIndex: {
+			type: Number,
+			default: 980
+		},
+		titleAlign: {
+			type: String,
+			default: 'center'
+		},
+		centerClickable: {
+			type: Boolean,
+			default: false
+		},
+		show: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['back'])
+
+	const statusBarPx = ref(0)
+	const capsuleRightPx = ref(0)
+
+	function parsePx(value : string, fallback : number) : number {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (value == 'sm') {
+			return 40
+		}
+		if (value == 'md') {
+			return 44
+		}
+		if (value == 'lg') {
+			return 48
+		}
+		const n = parseFloat(value)
+		if (isNaN(n) || n <= 0) {
+			return fallback
+		}
+		return n
+	}
+
+	function normalizeType(raw : string) : string {
+		if (raw == 'primary') {
+			return 'primary'
+		}
+		return 'default'
+	}
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const isPrimary = computed((): boolean => {
+		return typeName.value == 'primary'
+	})
+
+	const contentHeightPx = computed((): number => {
+		return parsePx(props.height, 44)
+	})
+
+	const titleValue = computed((): string => {
+		return props.title
+	})
+
+	const backTextValue = computed((): string => {
+		return props.backText
+	})
+
+	const backIconName = computed((): string => {
+		return props.backIcon
+	})
+
+	const backIconSizeText = computed((): string => {
+		return '22'
+	})
+
+	const iconColorValue = computed((): string => {
+		if (props.backIconColor.length > 0) {
+			return props.backIconColor
+		}
+		if (isPrimary.value) {
+			return '#ffffff'
+		}
+		// Android ucss 对 nax-icon 内部嵌套 var fallback 解析不稳定，显式传入单层主题变量。
+		// #ifdef APP-ANDROID
+		return 'var(--nax-color-text,#333639)'
+		// #endif
+		// 空串交给 nax-icon 走主题 token
+		return ''
+	})
+
+	const showPlaceholder = computed((): boolean => {
+		if (!props.show) {
+			return false
+		}
+		if (!props.fixed) {
+			return false
+		}
+		if (props.immersive) {
+			return false
+		}
+		return props.placeholder
+	})
+
+	const hostClass = computed((): string => {
+		var cls = ''
+		if (!props.show) {
+			cls += ' nax-nav-bar-host--hidden'
+		}
+		return cls.trim()
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-nav-bar--' + typeName.value
+		if (props.fixed) {
+			cls += ' nax-nav-bar--fixed'
+		}
+		if (props.border && !props.immersive) {
+			cls += ' nax-nav-bar--border'
+		}
+		if (props.immersive) {
+			cls += ' nax-nav-bar--immersive'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		var s = ''
+		if (props.fixed) {
+			s += 'z-index:' + props.zIndex + ';'
+		}
+		// App（含蒸汽）组件隔离下 CSS 变量不可靠：primary 背景用内联 var 字符串兜底
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (isPrimary.value && !props.immersive) {
+			s += 'background-color:var(--nax-color-primary,#18a058);'
+		}
+		// #endif
+		return s
+	})
+
+	const statusClass = computed((): string => {
+		// Web 在 JS 高度为 0 时用 env 兜底
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (statusBarPx.value <= 0) {
+			return 'nax-nav-bar__status--css'
+		}
+		// #endif
+		return ''
+	})
+
+	const statusStyle = computed((): string => {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		return 'height:' + statusBarPx.value + 'px;'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (statusBarPx.value > 0) {
+			return 'height:' + statusBarPx.value + 'px;'
+		}
+		return ''
+		// #endif
+	})
+
+	const innerStyle = computed((): string => {
+		return 'height:' + contentHeightPx.value + 'px;'
+	})
+
+	const rightSideStyle = computed((): string => {
+		if (capsuleRightPx.value > 0) {
+			// 右侧预留胶囊宽度，避免操作区与微信胶囊重叠
+			return 'padding-right:' + capsuleRightPx.value + 'px;'
+		}
+		return ''
+	})
+
+	const sideInsetPx = computed((): number => {
+		// 左右侧栏最小宽度，与 CSS min-width 对齐；有胶囊时右侧再加大
+		const base = 72
+		if (capsuleRightPx.value > base) {
+			return capsuleRightPx.value
+		}
+		return base
+	})
+
+	const centerClass = computed((): string => {
+		var cls = ''
+		if (props.titleAlign == 'left') {
+			cls += 'nax-nav-bar__center--left'
+		} else {
+			cls += 'nax-nav-bar__center--center'
+		}
+		if (props.centerClickable) {
+			cls += ' nax-nav-bar__center--clickable'
+		}
+		return cls
+	})
+
+	const centerStyle = computed((): string => {
+		const left = 72
+		const right = sideInsetPx.value
+		return 'left:' + left + 'px;right:' + right + 'px;'
+	})
+
+	const titleClass = computed((): string => {
+		if (isPrimary.value) {
+			return 'nax-nav-bar__title--inverse'
+		}
+		return ''
+	})
+
+	const backTextClass = computed((): string => {
+		if (isPrimary.value) {
+			return 'nax-nav-bar__back-text--inverse'
+		}
+		return ''
+	})
+
+	const inverseTextStyle = computed((): string => {
+		// App（含蒸汽）组件隔离下 CSS 变量不可靠：primary 反白文字用内联 var 字符串兜底
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (isPrimary.value) {
+			return 'color:var(--nax-color-text-inverse,#ffffff);'
+		}
+		// #endif
+		return ''
+	})
+
+
+	const placeholderClass = computed((): string => {
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (props.safeAreaInsetTop && statusBarPx.value <= 0) {
+			return 'nax-nav-bar__placeholder--safe'
+		}
+		// #endif
+		return ''
+	})
+
+	const placeholderStyle = computed((): string => {
+		var h = contentHeightPx.value
+		if (props.safeAreaInsetTop) {
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			h = h + statusBarPx.value
+			// #endif
+			// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+			if (statusBarPx.value > 0) {
+				h = h + statusBarPx.value
+			}
+			// #endif
+		}
+		return 'height:' + h + 'px;'
+	})
+
+	function readStatusBarHeight() : number {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		const win = uni.getWindowInfo()
+		if (win.statusBarHeight != null && win.statusBarHeight > 0) {
+			return win.statusBarHeight as number
+		}
+		// #endif
+		const sys = uni.getSystemInfoSync()
+		if (sys.statusBarHeight != null && sys.statusBarHeight > 0) {
+			return sys.statusBarHeight as number
+		}
+		return 0
+	}
+
+	function readCapsuleRightInset() : number {
+		// 仅有官方胶囊 API 的小程序端才预留；其它端保持 0，避免 NaN 布局
+		// #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
+		const win = uni.getWindowInfo()
+		const windowWidth = win.windowWidth as number
+		const rect = uni.getMenuButtonBoundingClientRect()
+		if (rect != null && rect.left != null && rect.left > 0 && windowWidth > 0) {
+			const gap = windowWidth - (rect.left as number)
+			if (gap > 0) {
+				return gap
+			}
+		}
+		// #endif
+		return 0
+	}
+
+	function refreshMetrics() {
+		if (props.safeAreaInsetTop) {
+			statusBarPx.value = readStatusBarHeight()
+		} else {
+			statusBarPx.value = 0
+		}
+		capsuleRightPx.value = readCapsuleRightInset()
+	}
+
+	function navigateHome() {
+		if (props.homeUrl.length == 0) {
+			return
+		}
+		uni.reLaunch({
+			url: props.homeUrl
+		})
+	}
+
+	function doAutoBack() {
+		const pages = getCurrentPages()
+		if (pages.length > 1) {
+			uni.navigateBack({
+				delta: 1
+			})
+			return
+		}
+		// 栈底：有 homeUrl 则 reLaunch，否则仅已 emit back
+		navigateHome()
+	}
+
+	function onBackClick() {
+		emit('back')
+		if (!props.autoBack) {
+			return
+		}
+		doAutoBack()
+	}
+
+	onMounted(() => {
+		refreshMetrics()
+		// #ifdef APP-HARMONY
+		// 鸿蒙偶发首帧安全区为 0，短延迟再读一次
+		setTimeout(() => {
+			refreshMetrics()
+		}, 50)
+		// #endif
+	})
+
+	watch((): boolean => props.safeAreaInsetTop, (_v : boolean) => {
+		refreshMetrics()
+	})
+</script>
+
+<style>
+	.nax-nav-bar-host {
+		flex-direction: column;
+	}
+
+	.nax-nav-bar-host--hidden {
+		height: 0;
+		overflow: hidden;
+	}
+
+	.nax-nav-bar__placeholder {
+		width: 100%;
+		flex-direction: column;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-nav-bar__placeholder--safe {
+		/* JS 无状态栏高度时，占位叠加顶部 env */
+		padding-top: constant(safe-area-inset-top);
+		padding-top: env(safe-area-inset-top);
+	}
+	/* #endif */
+
+	.nax-nav-bar {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-nav-bar--fixed {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+	}
+
+	.nax-nav-bar--border {
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-nav-bar--primary {
+		background-color: var(--nax-color-primary, #18a058);
+		border-bottom-width: 0;
+	}
+
+	.nax-nav-bar--immersive {
+		background-color: transparent;
+		border-bottom-width: 0;
+	}
+
+	.nax-nav-bar__status {
+		width: 100%;
+		flex-direction: column;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-nav-bar__status--css {
+		height: constant(safe-area-inset-top);
+		height: env(safe-area-inset-top);
+	}
+	/* #endif */
+
+	.nax-nav-bar__inner {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+		/* 相对定位：中间标题可 absolute 居中，左右侧叠在上层可点 */
+		position: relative;
+	}
+
+	.nax-nav-bar__side {
+		flex-direction: row;
+		align-items: center;
+		flex-shrink: 0;
+		/* 保证左右最小可点区域，并平衡视觉 */
+		min-width: 72px;
+		height: 100%;
+		padding-left: 8px;
+		padding-right: 8px;
+		z-index: 2;
+	}
+
+	.nax-nav-bar__side--left {
+		justify-content: flex-start;
+	}
+
+	.nax-nav-bar__side--right {
+		justify-content: flex-end;
+		margin-left: auto;
+	}
+
+	.nax-nav-bar__back {
+		flex-direction: row;
+		align-items: center;
+		height: 100%;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.nax-nav-bar__back--hover {
+		opacity: 0.7;
+	}
+
+	.nax-nav-bar__back-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		text-overflow: ellipsis;
+		margin-left: 2px;
+	}
+
+	.nax-nav-bar__back-text--inverse {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	.nax-nav-bar__center {
+		/* 绝对居中：不受左右宽度差影响，避免标题偏斜 */
+		position: absolute;
+		left: 72px;
+		right: 72px;
+		top: 0;
+		bottom: 0;
+		flex-direction: row;
+		align-items: center;
+		/* 不拦截左右点击 */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		pointer-events: none;
+		/* #endif */
+		z-index: 1;
+	}
+
+	.nax-nav-bar__center--center {
+		justify-content: center;
+	}
+
+	.nax-nav-bar__center--left {
+		justify-content: flex-start;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-nav-bar__center--clickable {
+		/* 开启后中间插槽内容可接收点击；App 端无 pointer-events 限制无需处理 */
+		pointer-events: auto;
+	}
+	/* #endif */
+
+	.nax-nav-bar__title {
+		font-size: var(--nax-font-size-lg, 18px);
+		font-weight: var(--nax-font-weight-medium, 500);
+		color: var(--nax-color-text, #333639);
+		text-overflow: ellipsis;
+		text-align: center;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		pointer-events: auto;
+		/* #endif */
+	}
+
+	.nax-nav-bar__title--inverse {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+</style>

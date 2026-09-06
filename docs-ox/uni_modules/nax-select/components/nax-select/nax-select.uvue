@@ -1,0 +1,2665 @@
+<template>
+	<view class="nax-select" :class="rootClass">
+		<!-- #ifdef MP-WEIXIN -->
+		<!-- 微信小程序：改用系统弹层 picker，贴合微信原生 UI（无自建弹层/动画，滚动确认时机由微信内部处理） -->
+		<picker
+			:mode="mpPickerMode"
+			:range="mpPickerRange"
+			:range-key="mpRangeKey"
+			:value="mpPickerMode == 'selector' ? mpPickerValue[0] : mpPickerValue"
+			:disabled="disabled"
+			:header-text="title"
+			@change="onMpChange"
+			@columnchange="onMpColumnChange"
+		>
+			<view class="nax-select__trigger" :class="triggerClass" :hover-class="triggerHoverClass" :hover-start-time="20" :hover-stay-time="70">
+				<slot name="trigger">
+					<text class="nax-select__trigger-text" :max-lines="1" :class="triggerTextClass">{{ triggerDisplayText }}</text>
+					<view
+						v-if="showMpClear"
+						class="nax-select__trigger-clear"
+						@touchstart.stop.prevent="onMpClear"
+						@click.stop.prevent="onMpClear"
+					>
+						<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+					</view>
+					<view v-else class="nax-select__trigger-arrow">
+						<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+					</view>
+				</slot>
+			</view>
+		</picker>
+		<!-- #endif -->
+
+		<!-- #ifndef MP-WEIXIN -->
+		<!-- 可选触发条：方便表单场景直接选用 -->
+		<view
+			v-if="showTrigger"
+			class="nax-select__trigger"
+			:class="triggerClass"
+			:hover-class="triggerHoverClass"
+			:hover-start-time="20"
+			:hover-stay-time="70"
+			@click="onTriggerClick"
+		>
+				<slot name="trigger">
+					<text class="nax-select__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+				<view
+					v-if="showClear"
+					class="nax-select__trigger-clear"
+					@touchstart.stop.prevent="onClear"
+					@click.stop.prevent="onClear"
+				>
+					<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+				</view>
+				<view v-if="!showClear" class="nax-select__trigger-arrow">
+					<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+				</view>
+				</slot>
+		</view>
+
+		<!-- 弹层：遮罩独立全屏（鸿蒙勿包在 fade opacity 外壳里，否则易透明/零尺寸）；面板 slide-up 走 nax-transition -->
+		<view v-if="rootMounted" class="nax-select__root" :style="rootOverlayStyle">
+			<!-- 遮罩：直挂 root，保证全屏可点；z-index 低于面板 -->
+			<view
+				class="nax-select__mask"
+				:class="maskClass"
+				:style="maskStyle"
+				@click="onMaskClick"
+			></view>
+			<!-- 面板层必须在父组件样式作用域内设 z-index，避免样式隔离后被遮罩盖住 -->
+			<view class="nax-select__panel-layer">
+				<nax-transition
+					:show="panelShow"
+					name="slide-up"
+					:duration="ANIM_DURATION"
+					@after-leave="onOverlayLeave"
+				>
+					<view class="nax-select__panel" :class="panelClass" :style="panelStyle">
+				<view class="nax-select__header">
+					<!-- 鸿蒙：text 不冒泡，按钮与文字都绑定点击 -->
+					<view
+						class="nax-select__btn nax-select__btn--cancel"
+						:hover-class="btnHoverClass"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click.stop="onCancel"
+					>
+						<text class="nax-select__btn-text" :style="cancelTextStyle" @click.stop="onCancel">{{ cancelTextValue }}</text>
+					</view>
+					<view class="nax-select__title-wrap">
+						<text v-if="title.length > 0" class="nax-select__title" :max-lines="1">{{ title }}</text>
+					</view>
+					<view
+						class="nax-select__btn nax-select__btn--confirm"
+						:hover-class="btnHoverClass"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click.stop="onConfirm"
+					>
+						<text class="nax-select__btn-text nax-select__btn-text--confirm" :style="confirmTextStyle" @click.stop="onConfirm">{{ confirmTextValue }}</text>
+					</view>
+				</view>
+				<!-- #ifdef APP-IOS -->
+				<!-- iOS 上 border-color 不生效（退化黑色）且 1px 高度 view 不可见，标题分割线用 inline 背景色 2px 线 -->
+				<view class="nax-select__header-line" :style="headerLineStyle"></view>
+				<!-- #endif -->
+
+				<view class="nax-select__body">
+					<!-- #ifdef APP-IOS -->
+					<!-- iOS 自研滚轮：原生 picker-view 列 CSS 不生效（选中文字无法垂直居中），改用框架渲染滚轮 -->
+					<view v-if="readyToRender" class="nax-select__wheel">
+						<view
+							v-for="idx in wheelCols"
+							:key="'wc-' + idx.toString()"
+							class="nax-select__wheel-col-wrap"
+						>
+							<view class="nax-select__wheel-indicator">
+								<view class="nax-select__wheel-indicator-line" :style="wheelIndicatorLineStyle"></view>
+								<view class="nax-select__wheel-indicator-line" :style="wheelIndicatorLineStyle"></view>
+							</view>
+							<scroll-view
+								:id="wheelColId(idx)"
+								class="nax-select__wheel-col"
+								direction="vertical"
+								:bounces="false"
+								:show-scrollbar="false"
+								@scrollend="onWheelEnd(idx)"
+							>
+								<view class="nax-select__wheel-track">
+									<view
+										v-for="(label, i) in wheelItems(idx)"
+										:key="'wi-' + idx.toString() + '-' + i.toString()"
+										class="nax-select__wheel-item"
+										:class="wheelItemClassAt(idx, i)"
+										@click="onWheelTap(idx, i)"
+									>
+										<text class="nax-select__wheel-text" :max-lines="1" :class="wheelTextClassAt(idx, i)">{{ label }}</text>
+									</view>
+								</view>
+							</scroll-view>
+						</view>
+					</view>
+					<!-- #endif -->
+
+					<!-- #ifndef APP-IOS -->
+					<!-- 其它端原生滚轮 -->
+					<!-- #ifdef APP-ANDROID || APP-HARMONY -->
+					<picker-view
+						v-if="readyToRender"
+						:key="pickerRenderKey"
+						class="nax-select__picker"
+						:class="pickerClass"
+						:style="pickerWheelStyle"
+						:value="pickerValue"
+						:indicator-style="indicatorStyle"
+						:mask-style="pickerMaskStyle"
+						:mask-top-style="pickerMaskTopStyle"
+						:mask-bottom-style="pickerMaskBottomStyle"
+						@change="onColumnChange"
+						@pickstart="onPickStart"
+						@pickend="onPickEnd"
+					>
+					<!-- #endif -->
+					<!-- #ifndef APP-ANDROID || APP-HARMONY -->
+					<picker-view
+						v-if="readyToRender"
+						:key="pickerRenderKey"
+						class="nax-select__picker"
+						:class="pickerClass"
+						:style="pickerWheelStyle"
+						:value="pickerValue"
+						:indicator-style="indicatorStyle"
+						:mask-style="pickerMaskStyle"
+						@change="onColumnChange"
+						@pickstart="onPickStart"
+						@pickend="onPickEnd"
+					>
+					<!-- #endif -->
+						<!-- #ifdef APP-HARMONY -->
+						<!-- 鸿蒙：选项 click 直接吞掉，不提供点选；滑动仍由原生滚轮处理 -->
+						<picker-view-column v-if="columnNum > 0" class="nax-select__column">
+							<view
+								v-for="(item, index) in column0"
+								:key="colItemKey(0, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
+							<view
+								v-for="(item, index) in column1"
+								:key="colItemKey(1, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
+							<view
+								v-for="(item, index) in column2"
+								:key="colItemKey(2, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
+							<view
+								v-for="(item, index) in column3"
+								:key="colItemKey(3, index, item)"
+								class="nax-select__item nax-select__item--no-tap"
+								hover-class="none"
+								@click.stop.prevent="onWheelItemClickBlock"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)" @click.stop.prevent="onWheelItemClickBlock">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<!-- #endif -->
+
+						<!-- #ifndef APP-HARMONY -->
+						<picker-view-column v-if="columnNum > 0" class="nax-select__column">
+							<view
+								v-for="(item, index) in column0"
+								:key="colItemKey(0, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 1" class="nax-select__column">
+							<view
+								v-for="(item, index) in column1"
+								:key="colItemKey(1, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 2" class="nax-select__column">
+							<view
+								v-for="(item, index) in column2"
+								:key="colItemKey(2, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<picker-view-column v-if="columnNum > 3" class="nax-select__column">
+							<view
+								v-for="(item, index) in column3"
+								:key="colItemKey(3, index, item)"
+								class="nax-select__item"
+							>
+								<text class="nax-select__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)">{{ resolveLabel(item) }}</text>
+							</view>
+						</picker-view-column>
+						<!-- #endif -->
+					</picker-view>
+					<!-- #endif -->
+				</view>
+				</view>
+				</nax-transition>
+			</view>
+		</view>
+		<!-- #endif -->
+	</view>
+</template>
+
+<script setup lang="uts">
+		/**
+		 * nax-select
+		 * @description 列选择器（底部弹层 + picker-view）。
+		 * @property {boolean} show v-model:show 控制弹层显隐；微信小程序端不生效（点触发条弹出，自动回写 false）
+		 * @property {string|number|boolean|Array} modelValue v-model 选中值；单列为单项 value，多列/联动为 value 数组
+		 * @property {Array} list 列数据；单列一维 / 多列二维 / 联动树形（children）
+		 * @property {string} mode single-column | multi-column | multi-column-auto（兼容 mutil-column / mutil-column-auto）
+		 * @property {Array} defaultValue 默认选中下标数组，如 [0] / [1, 2]
+		 * @property {string} title 顶部标题；微信小程序端仅安卓显示为系统弹层标题
+	 * @property {string} confirmText 确认文案，默认「确认」；微信小程序端不生效（系统弹层固定文案）
+	 * @property {string} cancelText 取消文案，默认「取消」；微信小程序端不生效
+	 * @property {string} confirmColor 确认色；空则用主题主色；微信小程序端不生效
+	 * @property {string} cancelColor 取消色；空则用次文案色；微信小程序端不生效
+	 * @property {string} valueName list 项 value 字段名，默认 value
+	 * @property {string} labelName list 项 label 字段名，默认 label
+	 * @property {string} childName 联动子级字段名，默认 children
+	 * @property {boolean} maskClosable 点击遮罩是否关闭，默认 true（兼容 maskCloseAble）；微信小程序端不生效（系统弹层自带遮罩）
+	 * @property {boolean} maskCloseAble 兼容  拼写，与 maskClosable 任一为 false 则不可点遮罩关闭；微信小程序端不生效
+	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true（比  默认更友好）；微信小程序端不生效
+	 * @property {number} zIndex 弹层层级，默认 10075；微信小程序端不生效
+	 * @property {boolean} preserveSelection 再次打开是否保留上次确认项，默认 true
+		 * @property {boolean} showTrigger 是否渲染内置触发条；微信小程序端始终渲染触发条作为弹层触发区域
+		 * @property {boolean} clearable 触发条有选中值时显示清除按钮，默认 true
+		 * @property {string} placeholder 触发条占位
+	 * @property {boolean} disabled 触发条禁用
+	 * @property {string} separator 多列展示分隔符，默认「 / 」
+	 * @property {boolean} border 触发条是否描边，默认 true
+	 * @property {string} size 触发条尺寸 sm | md | lg
+	 * @property {string} customClass 根节点扩展 class
+		 * @event update:show 弹层显隐
+		 * @event update:modelValue 确认后回写选中值（单列单项 / 多列数组）
+		 * @event confirm 点确认，回调选中项数组 { value, label, index, extra? }
+		 * @event clear 点击触发条清除按钮
+	 * @event cancel 点取消 / 遮罩关闭，回调当前滚轮项
+	 * @event change 滚轮变化（当前选中项数组）
+	 * @event open / close 打开 / 关闭
+	 * @slot trigger 自定义触发区域（需 showTrigger）
+	 */
+	const props = defineProps({
+			show: {
+				type: Boolean,
+				default: false
+			},
+				modelValue: {
+					type: [String, Number, Boolean, Array],
+					default: '' as any
+				},
+			list: {
+				type: Array,
+				default: () => [] as any[]
+			},
+		mode: {
+			type: String,
+			default: 'single-column'
+		},
+		defaultValue: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		confirmText: {
+			type: String,
+			default: '确认'
+		},
+		cancelText: {
+			type: String,
+			default: '取消'
+		},
+		confirmColor: {
+			type: String,
+			default: ''
+		},
+		cancelColor: {
+			type: String,
+			default: ''
+		},
+		valueName: {
+			type: String,
+			default: 'value'
+		},
+		labelName: {
+			type: String,
+			default: 'label'
+		},
+		childName: {
+			type: String,
+			default: 'children'
+		},
+		maskClosable: {
+			type: Boolean,
+			default: true
+		},
+		/** 兼容  拼写 */
+		maskCloseAble: {
+			type: Boolean,
+			default: true
+		},
+		safeAreaInsetBottom: {
+			type: Boolean,
+			default: true
+		},
+		zIndex: {
+			type: Number,
+			default: 10075
+		},
+		preserveSelection: {
+			type: Boolean,
+			default: true
+		},
+			showTrigger: {
+				type: Boolean,
+				default: false
+			},
+			clearable: {
+				type: Boolean,
+				default: true
+			},
+			placeholder: {
+			type: String,
+			default: '请选择'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		separator: {
+			type: String,
+			default: ' / '
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+			const emit = defineEmits([
+				'update:show',
+				'update:modelValue',
+				'confirm',
+				'cancel',
+				'change',
+				'open',
+				'close',
+				'clear'
+			])
+
+	// #ifdef MP-WEIXIN
+	// ===== 微信小程序：系统弹层 picker 实现（贴合微信原生 UI，无自建弹层）=====
+	/** selector | multiSelector（按 nax-select mode 映射） */
+	const mpPickerMode = computed((): string => {
+		if (modeName.value == 'multi-column' || modeName.value == 'multi-column-auto') {
+			return 'multiSelector'
+		}
+		return 'selector'
+	})
+
+	/** range：单列一维 / 多列二维（保留原始 item，range-key 指定 label 字段） */
+	const mpPickerRange = ref([] as any[])
+	/** 受控索引（selector 用 [0]，multi 用多下标） */
+	const mpPickerValue = ref([0] as number[])
+
+	const mpRangeKey = computed((): string => {
+		// 纯字符串列表时 range-key 无效（微信自动忽略）；对象数组时取 label 字段
+		return props.labelName
+	})
+
+	/** 触发条清除按钮（微信端始终渲染触发条作为 picker 触发区域，不依赖 showTrigger） */
+	const showMpClear = computed((): boolean => {
+		if (!props.clearable) {
+			return false
+		}
+		if (props.disabled) {
+			return false
+		}
+		return confirmedResult.value.length > 0
+	})
+
+	/** 构建各列 range（selector 一维 / multiSelector 二维，与 setColumnDataByMode 同构） */
+	function mpBuildRange(prefer: number[]) {
+		const mode = modeName.value
+		const list = props.list as any[]
+		if (mode == 'single-column') {
+			if (is2DList(list)) {
+				mpPickerRange.value = asAnyArray(list[0])
+			} else {
+				mpPickerRange.value = list
+			}
+			return
+		}
+		if (mode == 'multi-column') {
+			if (is2DList(list)) {
+				const rows = [] as any[]
+				let i = 0
+				while (i < list.length && i < 4) {
+					rows.push(asAnyArray(list[i]))
+					i++
+				}
+				mpPickerRange.value = rows
+			} else {
+				mpPickerRange.value = [list] as any[]
+			}
+			return
+		}
+		// multi-column-auto：沿选中路径展开各列
+		const rows = [] as any[]
+		let currentLevel = list
+		let c = 0
+		while (c < 4 && currentLevel.length > 0) {
+			rows.push(currentLevel)
+			const idx = clampIndex(c < prefer.length ? prefer[c] : 0, currentLevel.length)
+			const node = currentLevel.length > 0 ? currentLevel[idx] : null
+			currentLevel = getChildren(node)
+			c++
+		}
+		mpPickerRange.value = rows
+	}
+
+	/** 按 v-model / defaultValue / 上次选择同步索引并构建 range */
+	function mpSyncValue() {
+		let prefer = selectorFromModel(props.modelValue)
+		if (prefer.length == 0 && props.preserveSelection && hasSavedSelector.value && savedSelector.value.length > 0) {
+			prefer = savedSelector.value.slice()
+		}
+		if (prefer.length == 0) {
+			prefer = parseIndexArray(props.defaultValue as any[])
+		}
+		if (prefer.length == 0) {
+			prefer = [0] as number[]
+		}
+		mpBuildRange(prefer)
+		const vals = [] as number[]
+		if (mpPickerMode.value == 'selector') {
+			const col = mpPickerRange.value as any[]
+			vals.push(clampIndex(prefer[0], col.length))
+			mpPickerValue.value = vals
+			return
+		}
+		let i = 0
+		while (i < mpPickerRange.value.length) {
+			const col = mpPickerRange.value[i] as any[]
+			vals.push(clampIndex(i < prefer.length ? prefer[i] : 0, col.length))
+			i++
+		}
+		mpPickerValue.value = vals
+	}
+
+	/** 多列联动：列变化后重建后续列并归零 */
+	function mpRebuildCascade(col: number, vals: number[]) {
+		const rows = mpPickerRange.value.slice(0, col + 1) as any[]
+		let nextLevel = getChildren((mpPickerRange.value[col] as any[])[vals[col]])
+		let c = col + 1
+		while (c < mpPickerRange.value.length) {
+			if (nextLevel.length > 0) {
+				rows.push(nextLevel)
+				vals[c] = 0
+				nextLevel = getChildren(nextLevel[0])
+			} else {
+				rows.push([] as any[])
+				vals[c] = 0
+				break
+			}
+			c++
+		}
+		mpPickerRange.value = rows
+		mpPickerValue.value = vals
+	}
+
+	function onMpColumnChange(e: UniPickerColumnChangeEvent) {
+		const col = e.detail.column
+		const val = e.detail.value
+		const vals = mpPickerValue.value.slice()
+		while (vals.length <= col) {
+			vals.push(0)
+		}
+		vals[col] = val
+		if (modeName.value == 'multi-column-auto' && col < mpPickerRange.value.length - 1) {
+			mpRebuildCascade(col, vals)
+			return
+		}
+		mpPickerValue.value = vals
+	}
+
+	/** 微信端确认：系统弹层点「确定」后回调，值即最终吸附值 */
+	function onMpChange(e: UniPickerChangeEvent) {
+		const raw = e.detail.value
+		const vals = [] as number[]
+		if (mpPickerMode.value == 'selector') {
+			let v = 0
+			if (typeof raw == 'number') {
+				v = raw as number
+			} else if (typeof raw == 'string') {
+				const n = parseInt(raw as string)
+				v = n >= 0 ? n : 0
+			}
+			vals.push(v)
+		} else {
+			const arr = raw as any[]
+			let i = 0
+			while (i < arr.length) {
+				const item = arr[i]
+				if (typeof item == 'number') {
+					vals.push(item as number)
+				} else if (typeof item == 'string') {
+					const n = parseInt(item as string)
+					vals.push(n >= 0 ? n : 0)
+				} else {
+					vals.push(0)
+				}
+				i++
+			}
+		}
+		const result = [] as UTSJSONObject[]
+		if (mpPickerMode.value == 'selector') {
+			const col = mpPickerRange.value as any[]
+			const idx = clampIndex(vals[0], col.length)
+			const item = col.length > 0 ? col[idx] : null
+			result.push(buildResultRow(item, idx))
+		} else {
+			let c = 0
+			while (c < vals.length && c < mpPickerRange.value.length) {
+				const col = mpPickerRange.value[c] as any[]
+				const idx = clampIndex(vals[c], col.length)
+				const item = col.length > 0 ? col[idx] : null
+				result.push(buildResultRow(item, idx))
+				c++
+			}
+		}
+		if (result.length == 0) {
+			return
+		}
+		savedSelector.value = vals.slice()
+		hasSavedSelector.value = true
+		confirmedResult.value = result.slice(0)
+		modelBound.value = true
+		emitModelFromResult(result)
+		emit('confirm', result)
+		emit('change', result)
+		mpPickerValue.value = vals.slice()
+	}
+
+	function onMpClear() {
+		if (props.disabled) {
+			return
+		}
+		if (confirmedResult.value.length == 0) {
+			return
+		}
+		confirmedResult.value = [] as UTSJSONObject[]
+		savedSelector.value = [] as number[]
+		hasSavedSelector.value = false
+		modelBound.value = false
+		emitClearedModel()
+		emit('clear')
+		mpSyncValue()
+	}
+	// #endif
+
+	/** 弹层容器是否挂载（退场动画结束后再卸） */
+	const rootMounted = ref(false)
+	/** 交给 nax-transition 的显隐 */
+	const panelShow = ref(false)
+	const readyToRender = ref(false)
+	const pickerRenderKey = ref(0)
+	const columnNum = ref(1)
+	const pickerValue = ref([] as number[])
+	const lastSelectIndex = ref([] as number[])
+	const savedSelector = ref([] as number[])
+	const hasSavedSelector = ref(false)
+	const selectResult = ref([] as UTSJSONObject[])
+			const confirmedResult = ref([] as UTSJSONObject[])
+			/** 外部 v-model 曾经有过非空值；用于区分「未绑定」与「绑定后清空」 */
+			const modelBound = ref(false)
+	const safeBottomPx = ref(0)
+	const clearSuppress = ref(false)
+	let clearSuppressTimer: number = -1
+	const ANIM_DURATION = 280
+	let openDelayTimer: number = -1
+
+
+
+	// #ifdef APP-IOS
+	// iOS 自研滚轮：原生 picker-view 列 CSS 不生效（选中文字无法垂直居中），改用框架渲染滚轮（scrollTo 直接定位）
+	const WHEEL_ITEM_H = 40
+	const WHEEL_PAD_ITEMS = 3
+	const wheelBaseId = 'nax-sel-w-' + Math.floor(Math.random() * 10000000).toString()
+	/** 挂载/定位期间忽略 scrollend，防止初始位置反推污染选中值 */
+	let wheelLocked: boolean = false
+	let wheelLocateTimer: number = -1
+	let wheelUnlockTimer: number = -1
+
+	// iOS 暗黑主题：iOS 上自定义 CSS 变量不可靠（var 失效），用官方主题 API 驱动字面量颜色
+	const iosDark = ref(false)
+	let iosThemeChangeId: number = -1
+
+	function refreshIosTheme() {
+		try {
+			const info = uni.getAppBaseInfo()
+			const t = info.appTheme
+			if (t == 'dark' || t == 'light') {
+				iosDark.value = t == 'dark'
+				return
+			}
+		} catch (e) {
+		}
+		try {
+			const dev = uni.getDeviceInfo()
+			if (dev.osTheme == 'dark') {
+				iosDark.value = true
+			}
+		} catch (e) {
+		}
+	}
+
+	const iosThemeClass = computed((): string => {
+		if (iosDark.value) {
+			return 'nax-select--ios-dark'
+		}
+		return 'nax-select--ios-light'
+	})
+	// #endif
+
+	/** 最多 4 列，覆盖省市区等常见联动 */
+	const column0 = ref([] as any[])
+	const column1 = ref([] as any[])
+	const column2 = ref([] as any[])
+	const column3 = ref([] as any[])
+
+	function normalizeMode(value: string): string {
+		if (value == 'mutil-column' || value == 'multi-column') {
+			return 'multi-column'
+		}
+		if (value == 'mutil-column-auto' || value == 'multi-column-auto' || value == 'cascade') {
+			return 'multi-column-auto'
+		}
+		return 'single-column'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	const modeName = computed((): string => {
+		return normalizeMode(props.mode)
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const cancelTextValue = computed((): string => {
+		if (props.cancelText.length > 0) {
+			return props.cancelText
+		}
+		return '取消'
+	})
+
+	const confirmTextValue = computed((): string => {
+		if (props.confirmText.length > 0) {
+			return props.confirmText
+		}
+		return '确认'
+	})
+
+	const canCloseByMask = computed((): boolean => {
+		return props.maskClosable && props.maskCloseAble
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		// #ifdef APP-IOS
+		// iOS 主题 class：样式块内按字面量覆盖弹窗内颜色（不依赖 CSS 变量）
+		cls += ' ' + iosThemeClass.value
+		// #endif
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const triggerClass = computed((): string => {
+		let cls = 'nax-select__trigger--' + sizeName.value
+		if (props.border) {
+			cls += ' nax-select__trigger--border'
+		}
+		if (props.disabled) {
+			cls += ' nax-select__trigger--disabled'
+		}
+		return cls
+	})
+
+	const triggerHoverClass = computed((): string => {
+		if (props.disabled) {
+			return ''
+		}
+		return 'nax-select__trigger--hover'
+	})
+
+	const btnHoverClass = computed((): string => {
+		return 'nax-select__btn--hover'
+	})
+
+	const triggerTextClass = computed((): string => {
+		if (confirmedResult.value.length == 0) {
+			return 'nax-select__trigger-text--placeholder'
+		}
+		if (props.disabled) {
+			return 'nax-select__trigger-text--disabled'
+		}
+		return ''
+	})
+
+		const triggerDisplayText = computed((): string => {
+			if (confirmedResult.value.length == 0) {
+				return props.placeholder
+			}
+			let text = ''
+			let i = 0
+			while (i < confirmedResult.value.length) {
+				const row = confirmedResult.value[i]
+				const label = row.getString('label')
+				const part = label != null ? label : ''
+				if (i > 0) {
+					text += props.separator
+				}
+				text += part
+				i++
+			}
+			if (text.length == 0) {
+				return props.placeholder
+			}
+			return text
+		})
+	
+			const arrowColor = computed((): string => {
+			if (props.disabled) {
+				return 'var(--nax-color-text-disabled, #e5e5ea)'
+			}
+			return 'var(--nax-color-text-secondary, #767c82)'
+		})
+	
+		const showClear = computed((): boolean => {
+			if (!props.clearable) {
+				return false
+			}
+			if (!props.showTrigger) {
+				return false
+			}
+			if (props.disabled) {
+				return false
+			}
+			return confirmedResult.value.length > 0
+		})
+
+		/** 触发条操作图标（清除/箭头）对齐 nax-input：随 size 缩放，保证切换时位置重合 */
+		const actionIconSizePx = computed((): string => {
+			const s = sizeName.value
+			if (s == 'sm') {
+				return '14'
+			}
+			if (s == 'lg') {
+				return '18'
+			}
+			return '16'
+		})
+
+		const actionIconColor = computed((): string => {
+			// App（含蒸汽）：与 nax-input 一致，主题状态由 custom-class 传递，字面量色驱动
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			if (props.customClass.indexOf('nax-theme-dark') >= 0) {
+				return props.disabled ? '#ffffff4d' : '#ffffffa6'
+			}
+			// #endif
+			return props.disabled ? '#e5e5ea' : '#767c82'
+		})
+
+	const cancelTextStyle = computed((): string => {
+		if (props.cancelColor.length > 0) {
+			return 'color:' + props.cancelColor + ';'
+		}
+		return ''
+	})
+
+	const confirmTextStyle = computed((): string => {
+		if (props.confirmColor.length > 0) {
+			return 'color:' + props.confirmColor + ';'
+		}
+		return 'color:var(--nax-color-primary, #18a058);'
+	})
+
+	const rootOverlayStyle = computed((): string => {
+		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const maskClass = computed((): string => {
+		if (panelShow.value) {
+			return 'nax-select__mask--show'
+		}
+		return ''
+	})
+
+	/** 鸿蒙：背景色 + opacity 走 inline，避免 class/var 不生效导致看不见遮罩 */
+	/** iOS：联动弹窗打开期间宿主页重渲染后 class 背景偶发丢失，同样用 inline 兜底 */
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (panelShow.value) {
+			return 'background-color:rgba(0,0,0,0.45);opacity:1;'
+		}
+		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
+		// #endif
+		// #ifdef APP-IOS
+		if (panelShow.value) {
+			return 'background-color:' + (iosDark.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
+		}
+		return 'background-color:' + (iosDark.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY || APP-IOS
+		return ''
+		// #endif
+	})
+
+	const panelClass = computed((): string => {
+		if (props.safeAreaInsetBottom) {
+			return 'nax-select__panel--safe'
+		}
+		return ''
+	})
+
+	const panelStyle = computed((): string => {
+		let style = ''
+		// #ifdef APP-IOS
+		// iOS 不支持自定义 CSS 变量（var 声明整体失效→背景透明），用官方主题 API 驱动的字面量兜底
+		style += 'background-color:' + (iosDark.value ? '#101014' : '#ffffff') + ';'
+		// #endif
+		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+			style += 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+		}
+		return style
+	})
+
+	const indicatorStyle = computed((): string => {
+		// #ifdef APP-ANDROID
+		// Android 原生 picker-view 不会为已设置宽度的边框补默认 solid 样式。
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-top-style:solid;border-top-color:var(--nax-color-divider,#f5f5f7);border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:var(--nax-color-divider,#f5f5f7);'
+		// #endif
+		// #ifndef APP-ANDROID
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-bottom-width:1px;border-color:var(--nax-color-divider,#f5f5f7);'
+		// #endif
+	})
+
+	const pickerMaskStyle = computed((): string => {
+		// 原生 picker-view 默认白色渐隐遮罩在暗黑模式下会形成亮色块
+		// #ifdef APP-ANDROID || APP-HARMONY
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID || APP-HARMONY
+		return 'background:none;'
+		// #endif
+	})
+
+	const pickerMaskTopStyle = computed((): string => {
+		// Android / 鸿蒙需分别覆盖原生上下遮罩，避免白色渐变覆盖暗色面板。
+		return 'background-image:linear-gradient(to bottom,transparent,transparent);'
+	})
+
+	const pickerMaskBottomStyle = computed((): string => {
+		return 'background-image:linear-gradient(to top,transparent,transparent);'
+	})
+
+	const pickerWheelStyle = computed((): string => {
+		// 原生 picker-view 高度需内联显式指定（App 蒸汽/VDOM 下 CSS height 均不可靠，曾出现只显示一条选项高度）
+		return 'flex:1;height:240px;'
+	})
+
+	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
+		if (columnIndex < 0 || columnIndex >= pickerValue.value.length) {
+			return false
+		}
+		return pickerValue.value[columnIndex] == itemIndex
+	}
+
+	function pickerItemTextClass(columnIndex: number, itemIndex: number): string {
+		if (isPickerItemSelected(columnIndex, itemIndex)) {
+			return 'nax-select__item-text--selected'
+		}
+		return ''
+	}
+
+	function asObject(item: any | null): UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function isArrayValue(val: any | null): boolean {
+		if (val == null) {
+			return false
+		}
+		// #ifdef APP-ANDROID
+		// Android 的数组强转会在读取 length 前抛异常，先用运行时类型判断。
+		return Array.isArray(val)
+		// #endif
+		// #ifndef APP-ANDROID
+		// 排除基础类型与 UTSJSONObject（无 length）
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		if (typeof len != 'number') {
+			return false
+		}
+		return true
+		// #endif
+	}
+
+	function asAnyArray(val: any | null): any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		if (!isArrayValue(val)) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function is2DList(list: any[]): boolean {
+		if (list.length == 0) {
+			return false
+		}
+		return isArrayValue(list[0])
+	}
+
+	function resolveLabel(item: any | null): string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		if (typeof item == 'number') {
+			return (item as number).toString()
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const key = props.labelName
+		const s = obj.getString(key)
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const n = obj.getNumber(key)
+		if (n != null) {
+			return n.toString()
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null) {
+			if (typeof anyVal == 'string') {
+				return anyVal as string
+			}
+			if (typeof anyVal == 'number') {
+				return (anyVal as number).toString()
+			}
+		}
+		// 兼容 text / name
+		const text = obj.getString('text')
+		if (text != null && text.length > 0) {
+			return text
+		}
+		const name = obj.getString('name')
+		if (name != null && name.length > 0) {
+			return name
+		}
+		return ''
+	}
+
+	function resolveValue(item: any | null): any | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return item
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return null
+		}
+		const key = props.valueName
+		const anyVal = obj.getAny(key)
+		if (anyVal != null) {
+			return anyVal
+		}
+		// 无 value 时回落 label，便于纯文案列表
+		const label = resolveLabel(item)
+		if (label.length > 0) {
+			return label
+		}
+		return null
+	}
+
+	function resolveExtra(item: any | null): any | null {
+		const obj = asObject(item)
+		if (obj == null) {
+			return null
+		}
+		return obj.getAny('extra')
+	}
+
+	function copyAnyArray(list: any[]): any[] {
+		const out = [] as any[]
+		let i = 0
+		while (i < list.length) {
+			out.push(list[i])
+			i++
+		}
+		return out
+	}
+
+	function getChildren(item: any | null): any[] {
+		if (item == null) {
+			return [] as any[]
+		}
+		// 已是数组则直接用（容错）
+		if (isArrayValue(item)) {
+			return item as any[]
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return [] as any[]
+		}
+		const key = props.childName
+		// 1) getArray
+		const arr = obj.getArray(key)
+		if (arr != null && arr.length >= 0) {
+			return arr as any[]
+		}
+		// 2) getAny + 数组判断（鸿蒙嵌套字段常见）
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && isArrayValue(anyVal)) {
+			return anyVal as any[]
+		}
+		// 3) 兼容 children / child / list
+		if (key != 'children') {
+			const arr2 = obj.getArray('children')
+			if (arr2 != null) {
+				return arr2 as any[]
+			}
+			const any2 = obj.getAny('children')
+			if (any2 != null && isArrayValue(any2)) {
+				return any2 as any[]
+			}
+		}
+		return [] as any[]
+	}
+
+	function getColumnList(colIndex: number): any[] {
+		if (colIndex == 0) {
+			return column0.value
+		}
+		if (colIndex == 1) {
+			return column1.value
+		}
+		if (colIndex == 2) {
+			return column2.value
+		}
+		if (colIndex == 3) {
+			return column3.value
+		}
+		return [] as any[]
+	}
+
+	function setColumnList(colIndex: number, list: any[]) {
+		// 拷贝新数组，保证响应式与鸿蒙 picker-view 能感知列数据变化
+		const next = copyAnyArray(list)
+		if (colIndex == 0) {
+			column0.value = next
+			return
+		}
+		if (colIndex == 1) {
+			column1.value = next
+			return
+		}
+		if (colIndex == 2) {
+			column2.value = next
+			return
+		}
+		if (colIndex == 3) {
+			column3.value = next
+		}
+	}
+
+	function clearColumnsFrom(start: number) {
+		let i = start
+		while (i < 4) {
+			setColumnList(i, [] as any[])
+			i++
+		}
+	}
+
+	function colItemKey(colIndex: number, itemIndex: number, item: any | null): string {
+		// 带上 label，避免子列数据替换后节点被错误复用
+		const label = resolveLabel(item)
+		return colIndex.toString() + '-' + itemIndex.toString() + '-' + label
+	}
+
+	function parseIndexArray(raw: any[]): number[] {
+		const result = [] as number[]
+		let i = 0
+		while (i < raw.length) {
+			const item = raw[i]
+			if (typeof item == 'number') {
+				result.push(item as number)
+			} else if (typeof item == 'string') {
+				const n = parseInt(item as string)
+				if (n.toString() == (item as string) || n >= 0) {
+					result.push(n)
+				} else {
+					result.push(0)
+				}
+			} else {
+				result.push(0)
+			}
+			i++
+		}
+		return result
+	}
+
+	function clampIndex(index: number, len: number): number {
+		if (len <= 0) {
+			return 0
+		}
+		if (index < 0) {
+			return 0
+		}
+		if (index >= len) {
+			return len - 1
+		}
+		return index
+	}
+
+	function buildIndexArray(len: number, prefer: number[]): number[] {
+		const result = [] as number[]
+		let i = 0
+		while (i < len) {
+			if (i < prefer.length) {
+				result.push(prefer[i])
+			} else {
+				result.push(0)
+			}
+			i++
+		}
+		return result
+	}
+
+	function computeColumnNum(): number {
+		const mode = modeName.value
+		const list = props.list as any[]
+		if (mode == 'single-column') {
+			return 1
+		}
+		if (mode == 'multi-column') {
+			if (is2DList(list)) {
+				const n = list.length
+				if (n > 4) {
+					return 4
+				}
+				if (n < 1) {
+					return 1
+				}
+				return n
+			}
+			return 1
+		}
+		// multi-column-auto：沿首条链路数 children 深度
+		let num = 1
+		if (list.length == 0) {
+			return 1
+		}
+		let column: any | null = list[0]
+		while (column != null) {
+			const children = getChildren(column)
+			if (children.length == 0) {
+				break
+			}
+			num++
+			if (num >= 4) {
+				break
+			}
+			column = children[0]
+		}
+		return num
+	}
+
+		function valuesEqual(a: any | null, b: any | null): boolean {
+			if (a == null && b == null) {
+				return true
+			}
+			if (a == null || b == null) {
+				return false
+			}
+			if (typeof a == 'number' && typeof b == 'number') {
+				return (a as number) == (b as number)
+			}
+			if (typeof a == 'boolean' && typeof b == 'boolean') {
+				return (a as boolean) == (b as boolean)
+			}
+			return valueToText(a) == valueToText(b)
+		}
+	
+		function valueToText(val: any | null): string {
+			if (val == null) {
+				return ''
+			}
+			if (typeof val == 'string') {
+				return val as string
+			}
+			if (typeof val == 'number') {
+				return (val as number).toString()
+			}
+			if (typeof val == 'boolean') {
+				if (val as boolean) {
+					return 'true'
+				}
+				return 'false'
+			}
+			return ''
+		}
+	
+		function isEmptyModel(raw: any | null): boolean {
+			if (raw == null) {
+				return true
+			}
+			if (typeof raw == 'string') {
+				return (raw as string).length == 0
+			}
+			if (isArrayValue(raw)) {
+				return (raw as any[]).length == 0
+			}
+			return false
+		}
+	
+		function findIndexByValue(col: any[], target: any | null): number {
+			if (target == null) {
+				return -1
+			}
+			let i = 0
+			while (i < col.length) {
+				if (valuesEqual(resolveValue(col[i]), target)) {
+					return i
+				}
+				i++
+			}
+			return -1
+		}
+	
+		function modelToValueList(raw: any | null): any[] {
+			if (raw == null) {
+				return [] as any[]
+			}
+			if (isArrayValue(raw)) {
+				return asAnyArray(raw)
+			}
+			const out = [] as any[]
+			out.push(raw)
+			return out
+		}
+	
+		function selectorFromModel(raw: any | null): number[] {
+			if (isEmptyModel(raw)) {
+				return [] as number[]
+			}
+			const values = modelToValueList(raw)
+			if (values.length == 0) {
+				return [] as number[]
+			}
+			const mode = modeName.value
+			const list = props.list as any[]
+			const selector = [] as number[]
+			if (mode == 'single-column') {
+				let col = list
+				if (is2DList(list)) {
+					col = asAnyArray(list[0])
+				}
+				const idx = findIndexByValue(col, values[0])
+				if (idx < 0) {
+					return [] as number[]
+				}
+				selector.push(idx)
+				return selector
+			}
+				if (mode == 'multi-column') {
+					if (!is2DList(list)) {
+						const idx = findIndexByValue(list, values[0])
+						if (idx < 0) {
+							return [] as number[]
+						}
+						selector.push(idx)
+						return selector
+					}
+					let i = 0
+					while (i < list.length && i < 4 && i < values.length) {
+						const col = asAnyArray(list[i])
+						const idx = findIndexByValue(col, values[i])
+						if (idx < 0) {
+							return [] as number[]
+						}
+						selector.push(idx)
+						i++
+					}
+					return selector
+				}
+				// multi-column-auto
+				let currentLevel = list
+				let c = 0
+				while (c < 4 && c < values.length && currentLevel.length > 0) {
+					const idx = findIndexByValue(currentLevel, values[c])
+					if (idx < 0) {
+						return [] as number[]
+					}
+					selector.push(idx)
+					const node = currentLevel[idx]
+					const children = getChildren(node)
+					if (children.length == 0) {
+						break
+					}
+					currentLevel = children
+					c++
+				}
+				return selector
+		}
+	
+		function resultFromSelectorOnList(selector: number[]): UTSJSONObject[] {
+			if (selector.length == 0) {
+				return [] as UTSJSONObject[]
+			}
+			const mode = modeName.value
+			const list = props.list as any[]
+			const result = [] as UTSJSONObject[]
+			if (mode == 'single-column') {
+				let col = list
+				if (is2DList(list)) {
+					col = asAnyArray(list[0])
+				}
+				const idx = clampIndex(selector[0], col.length)
+				const item = col.length > 0 ? col[idx] : null
+				if (item == null) {
+					return [] as UTSJSONObject[]
+				}
+				result.push(buildResultRow(item, idx))
+				return result
+			}
+			if (mode == 'multi-column') {
+				if (!is2DList(list)) {
+					const idx = clampIndex(selector[0], list.length)
+					const item = list.length > 0 ? list[idx] : null
+					if (item == null) {
+						return [] as UTSJSONObject[]
+					}
+					result.push(buildResultRow(item, idx))
+					return result
+				}
+				let i = 0
+				while (i < selector.length && i < list.length && i < 4) {
+					const col = asAnyArray(list[i])
+					const idx = clampIndex(selector[i], col.length)
+					const item = col.length > 0 ? col[idx] : null
+					if (item == null) {
+						return [] as UTSJSONObject[]
+					}
+					result.push(buildResultRow(item, idx))
+					i++
+				}
+				return result
+			}
+			let currentLevel = list
+			let c = 0
+			while (c < selector.length && currentLevel.length > 0) {
+				const idx = clampIndex(selector[c], currentLevel.length)
+				const item = currentLevel[idx]
+				if (item == null) {
+					return [] as UTSJSONObject[]
+				}
+				result.push(buildResultRow(item, idx))
+				currentLevel = getChildren(item)
+				c++
+			}
+			return result
+		}
+	
+		function buildResultRow(item: any | null, idx: number): UTSJSONObject {
+			const value = resolveValue(item)
+			const label = resolveLabel(item)
+			const extra = resolveExtra(item)
+			if (extra != null) {
+				return {
+					value: value,
+					label: label,
+					index: idx,
+					extra: extra
+				} as UTSJSONObject
+			}
+			return {
+				value: value,
+				label: label,
+				index: idx
+			} as UTSJSONObject
+		}
+	
+		function emitModelFromResult(result: UTSJSONObject[]) {
+			if (result.length == 0) {
+				return
+			}
+			if (modeName.value == 'single-column') {
+				emit('update:modelValue', result[0].getAny('value'))
+				return
+			}
+				const values = [] as any[]
+				let i = 0
+				while (i < result.length) {
+					values.push(result[i].getAny('value'))
+					i++
+				}
+			emit('update:modelValue', values)
+		}
+	
+					function syncConfirmedFromModel() {
+						const raw = props.modelValue
+						if (isEmptyModel(raw)) {
+							if (modelBound.value) {
+								confirmedResult.value = [] as UTSJSONObject[]
+								savedSelector.value = [] as number[]
+								hasSavedSelector.value = false
+								modelBound.value = false
+							}
+							return
+						}
+					const selector = selectorFromModel(raw)
+					if (selector.length == 0) {
+						return
+					}
+							const result = resultFromSelectorOnList(selector)
+							if (result.length == 0) {
+								return
+							}
+							confirmedResult.value = result
+							savedSelector.value = selector.slice()
+							hasSavedSelector.value = true
+							modelBound.value = true
+						}
+	
+		function pickPreferSelector(): number[] {
+			const fromModel = selectorFromModel(props.modelValue)
+			if (fromModel.length > 0) {
+				return fromModel
+			}
+			if (props.preserveSelection && hasSavedSelector.value && savedSelector.value.length > 0) {
+				return savedSelector.value.slice()
+			}
+			const def = parseIndexArray(props.defaultValue as any[])
+			if (def.length > 0) {
+				return def
+			}
+			if (hasSavedSelector.value && savedSelector.value.length > 0) {
+				return savedSelector.value.slice()
+			}
+			return [] as number[]
+		}
+
+	function setColumnDataByMode(selector: number[]) {
+		const mode = modeName.value
+		const list = props.list as any[]
+		const num = columnNum.value
+		clearColumnsFrom(0)
+
+		if (mode == 'single-column') {
+			if (is2DList(list)) {
+				setColumnList(0, asAnyArray(list[0]))
+			} else {
+				setColumnList(0, list)
+			}
+			return
+		}
+
+		if (mode == 'multi-column') {
+			if (is2DList(list)) {
+				let i = 0
+				while (i < num) {
+					setColumnList(i, asAnyArray(list[i]))
+					i++
+				}
+			} else {
+				setColumnList(0, list)
+			}
+			return
+		}
+
+		// multi-column-auto
+		let currentLevel = list
+		let i = 0
+		while (i < num) {
+			setColumnList(i, currentLevel)
+			if (i >= num - 1) {
+				break
+			}
+			const idx = clampIndex(i < selector.length ? selector[i] : 0, currentLevel.length)
+			const node = currentLevel.length > 0 ? currentLevel[idx] : null
+			currentLevel = getChildren(node)
+			i++
+		}
+	}
+
+	function buildSelectResult(selector: number[]): UTSJSONObject[] {
+		const result = [] as UTSJSONObject[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			const idx = clampIndex(i < selector.length ? selector[i] : 0, col.length)
+			const item = col.length > 0 ? col[idx] : null
+			const value = resolveValue(item)
+			const label = resolveLabel(item)
+			const extra = resolveExtra(item)
+			if (extra != null) {
+				const rowWithExtra = {
+					value: value,
+					label: label,
+					index: idx,
+					extra: extra
+				} as UTSJSONObject
+				result.push(rowWithExtra)
+			} else {
+				const row = {
+					value: value,
+					label: label,
+					index: idx
+				} as UTSJSONObject
+				result.push(row)
+			}
+			i++
+		}
+		return result
+	}
+
+	function syncPickerValue(selector: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			const idx = clampIndex(i < selector.length ? selector[i] : 0, col.length)
+			next.push(idx)
+			i++
+		}
+		pickerValue.value = next
+		lastSelectIndex.value = next.slice()
+		selectResult.value = buildSelectResult(next)
+	}
+
+	function initPicker() {
+		columnNum.value = computeColumnNum()
+		const prefer = pickPreferSelector()
+		const selector = buildIndexArray(columnNum.value, prefer)
+		setColumnDataByMode(selector)
+		// 联动时再刷一遍，保证子列与父选中一致
+		if (modeName.value == 'multi-column-auto') {
+			setColumnDataByMode(selector)
+		}
+		// 打开时换 key，避免沿用上一次原生列缓存（鸿蒙等）
+		pickerRenderKey.value = pickerRenderKey.value + 1
+		syncPickerValue(selector)
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function clearClearSuppressTimer() {
+		if (clearSuppressTimer >= 0) {
+			clearTimeout(clearSuppressTimer)
+			clearSuppressTimer = -1
+		}
+	}
+
+	function armClearSuppress() {
+		clearSuppress.value = true
+		clearClearSuppressTimer()
+		// 鸿蒙原生 picker 异步回抛 change，保留足够窗口吞掉清空后的回调。
+		// #ifdef APP-HARMONY
+		const delay = 100
+		// #endif
+		// #ifndef APP-HARMONY
+		const delay = 32
+		// #endif
+		clearSuppressTimer = setTimeout(() => {
+			clearSuppressTimer = -1
+			clearSuppress.value = false
+		}, delay)
+	}
+
+	function openPicker() {
+		// #ifdef MP-WEIXIN
+		// 微信端为系统 picker（点击触发条弹出），无自建弹层；v-model:show 拉回 false
+		emit('update:show', false)
+		return
+		// #endif
+		if (props.disabled) {
+			return
+		}
+		// 已完全展开：只同步 v-model
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		// 已在进场排队：勿二次 open（触发条会 emit 导致 watch 再进一次，冲掉 delay 后无动画）
+		if (openDelayTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
+		refreshSafeArea()
+		rootMounted.value = true
+		readyToRender.value = false
+		initPicker()
+		// 等数据就绪再挂载 picker-view，避免首帧空列
+		readyToRender.value = true
+		// 始终先 false 再 true：保证 nax-transition 先以 show=false 挂载，再进场
+		// （若首挂即 show=true 且 appear=false，会直接展开无动画；鸿蒙上触发条路径尤其容易踩中）
+		panelShow.value = false
+		// #ifdef APP-HARMONY || APP-IOS
+		// 鸿蒙/iOS：DOM 就绪偏慢，延迟略加长
+		const openDelay = 50
+		// #endif
+		// #ifndef APP-HARMONY || APP-IOS
+		const openDelay = 30
+		// #endif
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			// 先挂载面板：nax-transition 为 v-if 渲染，panelShow 之前 scroll-view 不在 DOM，定位会全部落空
+			panelShow.value = true
+			// #ifdef APP-IOS
+			// 挂载完成后再定位滚轮；定位期间锁定 scrollend，避免挂载初始位置被当成选中值
+			if (wheelLocateTimer >= 0) {
+				clearTimeout(wheelLocateTimer)
+			}
+			wheelLocateTimer = setTimeout(() => {
+				wheelLocateTimer = -1
+				locateWheelsWhenReady(0)
+			}, 30)
+			// #endif
+		}, openDelay)
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function closePicker(emitUpdate: boolean) {
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		// 已在收起：只同步 v-model
+		if (!panelShow.value) {
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+	}
+
+	/** 面板 transition after-leave 后再卸容器 */
+	function onOverlayLeave() {
+		if (panelShow.value) {
+			return
+		}
+		// #ifdef APP-IOS
+		if (wheelLocateTimer >= 0) {
+			clearTimeout(wheelLocateTimer)
+			wheelLocateTimer = -1
+		}
+		if (wheelUnlockTimer >= 0) {
+			clearTimeout(wheelUnlockTimer)
+			wheelUnlockTimer = -1
+		}
+		wheelLocked = false
+		// #endif
+		clearClearSuppressTimer()
+		clearSuppress.value = false
+		rootMounted.value = false
+		readyToRender.value = false
+		emit('close')
+	}
+
+		function onTriggerClick() {
+			if (props.disabled) {
+				return
+			}
+			// 鸿蒙上清空按钮的点击仍可能冒泡到触发条，不能因此重新打开弹层。
+			// #ifdef APP-HARMONY
+			if (clearSuppress.value) {
+				clearSuppress.value = false
+				clearClearSuppressTimer()
+				return
+			}
+			// #endif
+			// 完全展开时忽略；收起动画中允许再次打开
+			if (rootMounted.value && panelShow.value) {
+				return
+			}
+			openPicker()
+		}
+	
+		function emitClearedModel() {
+			if (modeName.value == 'single-column') {
+				emit('update:modelValue', '')
+				return
+			}
+			emit('update:modelValue', [] as any[])
+		}
+	
+	function onClear() {
+					if (props.disabled) {
+						return
+					}
+					if (confirmedResult.value.length == 0) {
+						return
+					}
+					armClearSuppress()
+					confirmedResult.value = [] as UTSJSONObject[]
+					savedSelector.value = [] as number[]
+					hasSavedSelector.value = false
+					modelBound.value = false
+					emitClearedModel()
+					emit('clear')
+				}
+
+
+
+
+
+	function onMaskClick() {
+		if (!canCloseByMask.value) {
+			return
+		}
+		emit('cancel', selectResult.value)
+		closePicker(true)
+	}
+
+	function onCancel() {
+		emit('cancel', selectResult.value)
+		closePicker(true)
+	}
+
+		function onConfirm() {
+			const result = selectResult.value
+			savedSelector.value = pickerValue.value.slice()
+			hasSavedSelector.value = true
+				confirmedResult.value = result.slice(0)
+				modelBound.value = true
+				emitModelFromResult(result)
+				emit('confirm', result)
+			closePicker(true)
+		}
+	
+		/** 鸿蒙：吞掉滚轮选项点击，避免误以为可点选；不影响滑动 */
+	function onWheelItemClickBlock() {
+		// no-op
+	}
+
+	const pickerClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		return 'nax-select__picker--harmony'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	function onPickStart() {
+		// 微信端已改用系统 picker，滚动状态不再由组件维护（空壳保留供原生 picker-view 事件绑定）
+	}
+
+	function onPickEnd() {
+	}
+
+	function findChangedColumn(prev: number[], next: number[]): number {
+		const len = prev.length < next.length ? prev.length : next.length
+		let i = 0
+		while (i < len) {
+			if (prev[i] != next[i]) {
+				return i
+			}
+			i++
+		}
+		if (prev.length != next.length) {
+			return 0
+		}
+		return -1
+	}
+
+	function rebuildCascadeColumns(selector: number[]) {
+		const list = props.list as any[]
+		let currentLevel = list
+		let c = 0
+		while (c < columnNum.value) {
+			setColumnList(c, currentLevel)
+			if (c >= columnNum.value - 1) {
+				break
+			}
+			const idx = clampIndex(c < selector.length ? selector[c] : 0, currentLevel.length)
+			const node = currentLevel.length > 0 ? currentLevel[idx] : null
+			currentLevel = getChildren(node)
+			c++
+		}
+	}
+
+	/**
+	 * 写入选中下标。
+	 * 禁止在滚动过程中整表 remount picker-view：鸿蒙会先闪第 0 项再跳到目标项。
+	 */
+	function applyPickerIndexes(next: number[]) {
+		const fixed = buildIndexArray(columnNum.value, next)
+		let k = 0
+		while (k < fixed.length) {
+			fixed[k] = clampIndex(fixed[k], getColumnList(k).length)
+			k++
+		}
+		pickerValue.value = fixed.slice()
+		lastSelectIndex.value = fixed.slice()
+		selectResult.value = buildSelectResult(fixed)
+		emit('change', selectResult.value)
+	}
+
+	/**
+	 * 点击某一列某一项（补齐鸿蒙 picker-view 点选不触发 change 的情况）
+	 */
+	function onColumnChange(e: UniPickerViewChangeEvent) {
+				if (clearSuppress.value) {
+					clearSuppress.value = false
+					clearClearSuppressTimer()
+					return
+				}
+				const detail = e.detail
+				const columnIndex = detail.value
+				const mode = modeName.value
+				const next = [] as number[]
+				let n = 0
+				while (n < columnIndex.length) {
+					const raw = columnIndex[n]
+					if (typeof raw == 'number') {
+						next.push(raw as number)
+					} else if (typeof raw == 'string') {
+						const parsed = parseInt(raw as string)
+						next.push(parsed >= 0 ? parsed : 0)
+					} else {
+						next.push(0)
+					}
+					n++
+				}
+				if (next.length == 0) {
+					return
+				}
+
+				if (mode == 'multi-column-auto') {
+					const changed = findChangedColumn(lastSelectIndex.value, next)
+					// 只有父列变化才重建子列；最后一列滚动只更新选中
+					if (changed >= 0 && changed < columnNum.value - 1) {
+						let j = changed + 1
+						while (j < columnNum.value) {
+							if (j < next.length) {
+								next[j] = 0
+							} else {
+								next.push(0)
+							}
+							j++
+						}
+						rebuildCascadeColumns(next)
+						applyPickerIndexes(next)
+						return
+					}
+					applyPickerIndexes(next)
+					return
+				}
+
+				applyPickerIndexes(next)
+			}
+
+
+
+	// #ifdef APP-IOS
+	// ===== iOS 自研滚轮逻辑（框架渲染，CSS 完全可控）=====
+
+	function wheelColId(colIndex: number): string {
+		return wheelBaseId + '-' + colIndex.toString()
+	}
+
+	const wheelCols = computed((): number[] => {
+		const out = [] as number[]
+		var i = 0
+		while (i < columnNum.value) {
+			out.push(i)
+			i++
+		}
+		return out
+	})
+
+	/** iOS：分割线用官方主题 API 驱动的字面量 inline 背景色（iOS 上 var 声明会整体失效） */
+	const headerLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (iosDark.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+
+	const wheelIndicatorLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (iosDark.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+
+	function wheelItems(colIndex: number): string[] {
+		const col = getColumnList(colIndex)
+		const total = col.length + WHEEL_PAD_ITEMS * 2
+		const items = [] as string[]
+		var i = 0
+		while (i < total) {
+			const real = i - WHEEL_PAD_ITEMS
+			if (real >= 0 && real < col.length) {
+				items.push(resolveLabel(col[real]))
+			} else {
+				items.push('')
+			}
+			i++
+		}
+		return items
+	}
+
+	function wheelRealIndex(colIndex: number, itemIndex: number): number {
+		return itemIndex - WHEEL_PAD_ITEMS
+	}
+
+	function wheelItemClassAt(colIndex: number, itemIndex: number): string {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		if (real >= 0 && real == pickerValue.value[colIndex]) {
+			return 'nax-select__wheel-item--selected'
+		}
+		return ''
+	}
+
+	function wheelTextClassAt(colIndex: number, itemIndex: number): string {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		if (real >= 0 && real == pickerValue.value[colIndex]) {
+			return 'nax-select__wheel-text--selected'
+		}
+		return ''
+	}
+
+	/** 定位列到指定下标（无动画直接跳转，避免原生长距离滚动卡顿） */
+	function locateWheelCol(colIndex: number, index: number) {
+		const el = uni.getElementById(wheelColId(colIndex))
+		if (el == null) {
+			return
+		}
+		const sv = el as UniScrollViewElement
+		// 选中项（content index = WHEEL_PAD_ITEMS + index）对准可视区第 4 行，上方 3 行留白与下方对称
+		const top = index * WHEEL_ITEM_H
+		sv.scrollTo(0, top)
+	}
+
+	/** 按当前选中值定位全部列 */
+	function locateAllWheels() {
+		const next = pickerValue.value.slice()
+		var c = 0
+		while (c < next.length) {
+			locateWheelCol(c, next[c])
+			c++
+		}
+	}
+
+	/** 等所有滚轮列挂载就绪后定位；未就绪则重试（最多 6 次） */
+	function locateWheelsWhenReady(attempt: number) {
+		var c = 0
+		while (c < columnNum.value) {
+			if (uni.getElementById(wheelColId(c)) == null) {
+				if (attempt < 6) {
+					wheelLocateTimer = setTimeout(() => {
+						wheelLocateTimer = -1
+						locateWheelsWhenReady(attempt + 1)
+					}, 40)
+				}
+				return
+			}
+			c++
+		}
+		wheelLocked = true
+		locateAllWheels()
+		if (wheelUnlockTimer >= 0) {
+			clearTimeout(wheelUnlockTimer)
+		}
+		// scrollTo 触发的 scrollend 为异步派发，等其落地后再解锁
+		wheelUnlockTimer = setTimeout(() => {
+			wheelUnlockTimer = -1
+			wheelLocked = false
+		}, 80)
+	}
+
+	/** 列停止后正式生效：联动上级列或更新选中值（next 已含本次滚动到的新下标） */
+	function applyWheelSelection(colIndex: number, next: number[]) {
+		if (modeName.value == 'multi-column-auto' && colIndex < columnNum.value - 1) {
+			var j = colIndex + 1
+			while (j < next.length) {
+				next[j] = 0
+				j++
+			}
+			rebuildCascadeColumns(next)
+			applyPickerIndexes(next)
+			// 列数据重建会重渲染当前列内容，重新吸附当前位置，防止 iOS 内容重建后 scrollTop 重置
+			locateWheelCol(colIndex, next[colIndex])
+			var k = colIndex + 1
+			while (k < columnNum.value) {
+				locateWheelCol(k, 0)
+				k++
+			}
+		} else {
+			applyPickerIndexes(next)
+		}
+	}
+
+	function onWheelEnd(colIndex: number) {
+		// 挂载/程序化定位期间忽略 scrollend，避免初始位置反推污染选中值
+		if (wheelLocked) {
+			return
+		}
+		const el = uni.getElementById(wheelColId(colIndex))
+		if (el == null) {
+			return
+		}
+		const top = el.scrollTop
+		// 与 locateWheelCol 对齐：选中项居中于可视区第 4 行，反推 idx = scrollTop / 行高
+		var idx = Math.round(top / WHEEL_ITEM_H)
+		const col = getColumnList(colIndex)
+		if (idx < 0) {
+			idx = 0
+		}
+		if (col.length > 0 && idx >= col.length) {
+			idx = col.length - 1
+		}
+		const aligned = Math.abs(top - idx * WHEEL_ITEM_H) <= 1
+		if (!aligned) {
+			// 未对齐：先吸附，吸附后 scrollend 再次进入正式生效分支
+			locateWheelCol(colIndex, idx)
+			return
+		}
+		if (idx != pickerValue.value[colIndex]) {
+			const next = pickerValue.value.slice()
+			next[colIndex] = idx
+			applyWheelSelection(colIndex, next)
+		}
+	}
+
+	function onWheelTap(colIndex: number, itemIndex: number) {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		const col = getColumnList(colIndex)
+		if (real < 0 || real >= col.length) {
+			return
+		}
+		locateWheelCol(colIndex, real)
+		// 跳转后 scrollend 触发正式生效
+	}
+	// #endif
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		// #ifdef MP-WEIXIN
+		// 微信端为系统 picker，无自建弹层，v-model:show 不生效
+		emit('update:show', false)
+		return
+		// #endif
+		if (val) {
+			if (rootMounted.value && panelShow.value) {
+				return
+			}
+			openPicker()
+		} else {
+			closePicker(false)
+		}
+	})
+
+		watch((): any[] => {
+			return props.list as any[]
+		}, (_val: any[]) => {
+			syncConfirmedFromModel()
+			// #ifdef MP-WEIXIN
+			mpSyncValue()
+			// #endif
+			if (rootMounted.value) {
+				initPicker()
+			}
+		})
+
+		// 外部 defaultValue 变化且不保留选择时，下次打开会吃到新默认值
+		watch((): any[] => {
+			return props.defaultValue as any[]
+		}, (_val: any[]) => {
+			if (!props.preserveSelection) {
+				hasSavedSelector.value = false
+			}
+			// #ifdef MP-WEIXIN
+			mpSyncValue()
+			// #endif
+		})
+	
+		watch((): any => {
+			return props.modelValue
+		}, (_: any) => {
+			syncConfirmedFromModel()
+			// #ifdef MP-WEIXIN
+			mpSyncValue()
+			// #endif
+		})
+	
+		// 首次若 show 已为 true
+		syncConfirmedFromModel()
+		// #ifdef MP-WEIXIN
+		mpSyncValue()
+		// #endif
+		if (props.show) {
+			openPicker()
+		}
+
+	// #ifdef APP-IOS
+	// 官方主题 API：App 端 4.18+ 支持；监听 appTheme 变化驱动弹窗字面量颜色
+	refreshIosTheme()
+	try {
+		iosThemeChangeId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			iosDark.value = res.appTheme == 'dark'
+		})
+	} catch (e) {
+		iosThemeChangeId = -1
+	}
+	onUnmounted(() => {
+		if (iosThemeChangeId >= 0) {
+			try {
+				uni.offAppThemeChange(iosThemeChangeId)
+			} catch (e) {
+			}
+			iosThemeChangeId = -1
+		}
+	})
+	// #endif
+</script>
+
+<style>
+	.nax-select {
+		flex-direction: column;
+	}
+
+	.nax-select__trigger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+	}
+
+	.nax-select__trigger--sm {
+		height: 32px;
+	}
+
+	.nax-select__trigger--md {
+		height: 40px;
+	}
+
+	.nax-select__trigger--lg {
+		height: 48px;
+	}
+
+	.nax-select__trigger--border {
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-select__trigger--disabled {
+		opacity: 0.5;
+	}
+
+	.nax-select__trigger--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-select__trigger-text {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		/* #endif */
+	}
+
+	/* #ifndef VUE3-VAPOR */
+	.nax-select__trigger--sm .nax-select__trigger-text {
+		font-size: var(--nax-font-size-sm, 14px);
+	}
+
+	.nax-select__trigger--lg .nax-select__trigger-text {
+		font-size: var(--nax-font-size-lg, 18px);
+	}
+	/* #endif */
+
+	.nax-select__trigger-text--placeholder {
+		color: var(--nax-color-text-placeholder, #e5e5ea);
+	}
+
+	.nax-select__trigger-text--disabled {
+		color: var(--nax-color-text-disabled, #e5e5ea);
+	}
+
+	.nax-select__trigger-clear {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: var(--nax-space-2, 8px);
+		/* 扩大点击热区，对齐 nax-input 清除按钮 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		position: relative;
+		z-index: 2;
+		cursor: pointer;
+		/* #endif */
+	}
+	
+	.nax-select__trigger-arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: var(--nax-space-2, 8px);
+		flex-shrink: 0;
+		/* 热区内边距与清除按钮一致：清除/箭头切换时图标位置不跳动 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-select__root {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	/* 面板层：父作用域 z-index，保证压在遮罩之上（勿写在子组件 custom-class 上） */
+	.nax-select__panel-layer {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-select__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		/* 低于面板层；遮罩勿盖住确认/取消 */
+		z-index: 1;
+		/* 默认半透明黑；鸿蒙另有 inline 兜底 */
+		background-color: rgba(0, 0, 0, 0.45);
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-select__mask {
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+	/* #endif */
+
+	.nax-select__mask--show {
+		opacity: 1;
+	}
+
+	.nax-select__panel {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	/* Web 用 env 兜底安全区；App 用 inline padding-bottom */
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-select__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-select__header {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 48px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	/* iOS 上 border-color 不生效（退化黑色），标题分割线改用普通流布局的背景色线（inline 兜底） */
+	/* #ifdef APP-IOS */
+	.nax-select__header {
+		border-bottom-width: 0;
+		border-bottom-color: transparent;
+	}
+
+	.nax-select__header-line {
+		background-color: #f5f5f7;
+	}
+	/* #endif */
+
+	.nax-select__btn {
+		min-width: 72px;
+		height: 48px;
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-select__btn--hover {
+		opacity: 0.7;
+	}
+
+	.nax-select__btn-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-select__btn-text--confirm {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+	}
+
+	.nax-select__title-wrap {
+		flex: 1;
+		min-width: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-select__title {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		text-align: center;
+	}
+
+	.nax-select__body {
+		height: 240px;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+
+
+	.nax-select__picker {
+		flex: 1;
+		height: 240px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-select__column {
+		flex: 1;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-select__item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-select__item-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-select__item-text--selected {
+		color: var(--nax-color-text-black, #000000);
+	}
+
+	/* iOS 自研滚轮样式（框架渲染，可正常控制文字居中） */
+	/* #ifdef APP-IOS */
+	.nax-select__wheel {
+		flex: 1;
+		height: 240px;
+		flex-direction: row;
+		/* 滚轮区域显式底色，避免联动重建列数据后透出页面（iOS 用字面量，var 不可靠） */
+		background-color: #ffffff;
+	}
+
+	/* iOS 主题 class：按暗黑/浅色用字面量覆盖弹窗内颜色（不依赖 CSS 变量） */
+	/* #ifndef VUE3-VAPOR */
+	.nax-select--ios-light .nax-select__wheel {
+		background-color: #ffffff;
+	}
+
+	.nax-select--ios-dark .nax-select__wheel {
+		background-color: #101014;
+	}
+
+	.nax-select--ios-light .nax-select__title {
+		color: #333639;
+	}
+
+	.nax-select--ios-dark .nax-select__title {
+		color: #ffffffd1;
+	}
+
+	.nax-select--ios-light .nax-select__btn-text {
+		color: #767c82;
+	}
+
+	.nax-select--ios-dark .nax-select__btn-text {
+		color: #ffffffa6;
+	}
+
+	.nax-select--ios-light .nax-select__btn-text--confirm {
+		color: #18a058;
+	}
+
+	.nax-select--ios-dark .nax-select__btn-text--confirm {
+		color: #63e2b7;
+	}
+
+	.nax-select--ios-light .nax-select__wheel-text {
+		color: #767c82;
+	}
+
+	.nax-select--ios-dark .nax-select__wheel-text {
+		color: #ffffffa6;
+	}
+
+	.nax-select--ios-light .nax-select__wheel-text--selected {
+		color: #000000;
+	}
+
+	.nax-select--ios-dark .nax-select__wheel-text--selected {
+		color: #ffffff;
+	}
+	/* #endif */
+
+	.nax-select__wheel-col-wrap {
+		flex: 1;
+		flex-direction: column;
+		height: 240px;
+		position: relative;
+	}
+
+	/* 固定选中行指示器（上下边框）：独立于滚动内容，滑动/点击时始终停在可视区中间，不随 item 移动 */
+	/* iOS 上 border-color 与 1px 高度均不可靠：容器 absolute 定位，两条线 flex 流布局 + inline 背景色 2px */
+	.nax-select__wheel-indicator {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 120px;
+		height: 40px;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+
+	.nax-select__wheel-indicator-line {
+		background-color: #f5f5f7;
+	}
+
+	.nax-select__wheel-col {
+		flex: 1;
+		height: 240px;
+	}
+
+	.nax-select__wheel-track {
+		flex-direction: column;
+	}
+
+	.nax-select__wheel-item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-select__wheel-item--selected {}
+
+	.nax-select__wheel-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		/* iOS 单行 text 基线不随父级居中，显式对齐行高 */
+		height: 40px;
+		line-height: 40px;
+	}
+
+	.nax-select__wheel-text--selected {
+		color: var(--nax-color-text-black, #000000);
+	}
+	/* #endif */
+
+	/* 鸿蒙：选项不可点选（仅视觉/点击吞掉；勿 pointer-events:none，以免影响滑动） */
+	/* #ifdef APP-HARMONY */
+	.nax-select__item--no-tap {
+		/* 保持可滑动区域 */
+	}
+
+	.nax-select__picker--harmony {
+		/* 占位：与其它端同滚轮，仅行为上禁点选 */
+	}
+	/* #endif */
+</style>

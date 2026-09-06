@@ -1,0 +1,65 @@
+// 路由工具：路径规范化与页面查找（与 Node 构建端的规范化规则一致）
+
+import { SiteManifestData, PageMeta } from '../types/content.uts'
+
+/** 规范化文档路径：解码、统一 / 前缀、去除尾部斜杠（根路径除外） */
+export function normalizeDocPath(input: string): string {
+  let p = input.trim()
+  if (p === '') return '/'
+  // 去除协议外的反斜杠与查询参数
+  if (p.startsWith('#')) p = p.slice(1)
+  if (p.startsWith('?')) p = '/'
+  try {
+    const decoded = decodeURIComponent(p)
+    if (decoded != null) {
+      p = decoded
+    }
+  } catch (e) {
+    // 保留原值
+  }
+  if (!p.startsWith('/')) p = `/${p}`
+  while (p.length > 1 && p.endsWith('/')) {
+    p = p.slice(0, -1)
+  }
+  return p === '' ? '/' : p
+}
+
+/** 拆分 "路径#锚点" */
+export function splitAnchor(raw: string): PathWithAnchor {
+  const idx = raw.indexOf('#')
+  if (idx === -1) return new PathWithAnchor(normalizeDocPath(raw), '')
+  return new PathWithAnchor(normalizeDocPath(raw.slice(0, idx)), raw.slice(idx + 1))
+}
+
+export class PathWithAnchor {
+  path: string
+  anchor: string
+  constructor(path: string, anchor: string) {
+    this.path = path
+    this.anchor = anchor
+  }
+}
+
+/** 在 manifest 中查找页面：精确 -> 尾斜杠 -> 无尾斜杠 */
+export function findPageMeta(manifest: SiteManifestData, path: string): PageMeta | null {
+  const target = normalizeDocPath(path)
+  for (let i = 0; i < manifest.pages.length; i++) {
+    const meta = manifest.pages[i]
+    if (meta != null && meta.path === target) return meta
+  }
+  for (let i = 0; i < manifest.pages.length; i++) {
+    const meta = manifest.pages[i]
+    if (meta != null && normalizeDocPath(meta.path) === target) return meta
+  }
+  return null
+}
+
+/** 判断链接是否为外部链接 */
+export function isExternalLink(href: string): boolean {
+  return (
+    href.startsWith('http://') ||
+    href.startsWith('https://') ||
+    href.startsWith('mailto:') ||
+    href.startsWith('tel:')
+  )
+}

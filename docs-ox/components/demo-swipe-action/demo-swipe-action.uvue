@@ -1,0 +1,24 @@
+<template>
+  <view class="demo-swipe-action">
+    <nax-swipe-action :options="options" @click="onAction">
+      <nax-cell title="左滑删除" value="试试滑动"></nax-cell>
+    </nax-swipe-action>
+  </view>
+</template>
+
+<script setup lang="uts">
+const options = [
+  { text: '置顶' },
+  { text: '删除', type: 'error' }
+]
+
+function onAction(_payload: UTSJSONObject) {
+  uni.showToast({ title: '点击了操作按钮', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-swipe-action {
+  flex-direction: column;
+}
+</style>

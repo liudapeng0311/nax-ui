@@ -1,0 +1,91 @@
+<template>
+  <view class="demo-steps">
+    <text class="dsec">基础（list + current）</text>
+    <nax-steps :list="basicList" :current="basicCurrent"></nax-steps>
+    <view class="row">
+      <nax-button size="sm" label="上一步" :disabled="basicCurrent <= 0" @click="prevBasic"></nax-button>
+      <nax-button size="sm" type="primary" label="下一步" :disabled="basicCurrent >= 2" @click="nextBasic"></nax-button>
+    </view>
+
+    <text class="dsec">点状 mode=dot</text>
+    <nax-steps :list="basicList" :current="1" mode="dot"></nax-steps>
+
+    <text class="dsec">语义色 type</text>
+    <nax-steps :list="typeList" :current="2" type="info" class="mb"></nax-steps>
+    <nax-steps :list="typeList" :current="2" type="warning" class="mb"></nax-steps>
+    <nax-steps :list="typeList" :current="2" type="error"></nax-steps>
+
+    <text class="dsec">尺寸 size</text>
+    <nax-steps :list="basicList" :current="1" size="sm" class="mb"></nax-steps>
+    <nax-steps :list="basicList" :current="1" size="md" class="mb"></nax-steps>
+    <nax-steps :list="basicList" :current="1" size="lg"></nax-steps>
+
+    <text class="dsec">纵向 + 描述</text>
+    <nax-steps :list="verticalList" :current="1" direction="vertical"></nax-steps>
+
+    <text class="dsec">单步 status（含失败）</text>
+    <nax-steps :list="statusList" :current="1"></nax-steps>
+
+    <text class="dsec">组合式 nax-step</text>
+    <nax-steps :current="1" direction="vertical" type="success">
+      <nax-step title="提交资料" desc="已完成"></nax-step>
+      <nax-step title="人工审核" desc="进行中"></nax-step>
+      <nax-step title="开通成功" desc="等待中"></nax-step>
+    </nax-steps>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const basicList = [
+  { name: '注册账号' },
+  { name: '完善信息' },
+  { name: '开通成功' }
+]
+const basicCurrent = ref(1)
+const typeList = [
+  { name: '第一步' },
+  { name: '第二步' },
+  { name: '第三步' },
+  { name: '第四步' }
+]
+const verticalList = [
+  { name: '提交申请', desc: '2026-09-01' },
+  { name: '平台审核', desc: '预计 1 个工作日' },
+  { name: '审核通过', desc: '等待中' }
+]
+const statusList = [
+  { name: '已完成', status: 'success' },
+  { name: '打包失败', status: 'error' },
+  { name: '发布' }
+]
+
+function prevBasic() {
+  if (basicCurrent.value > 0) basicCurrent.value = basicCurrent.value - 1
+}
+
+function nextBasic() {
+  if (basicCurrent.value < 2) basicCurrent.value = basicCurrent.value + 1
+}
+</script>
+
+<style>
+.demo-steps {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

@@ -1,0 +1,5445 @@
+{
+  "meta": {
+    "id": "guide-dark-mode",
+    "path": "/guide/dark-mode",
+    "source": "guide/dark-mode.md",
+    "title": "暗黑模式接入",
+    "headings": [
+      {
+        "id": "暗黑模式接入",
+        "text": "暗黑模式接入",
+        "level": 1
+      },
+      {
+        "id": "功能",
+        "text": "功能",
+        "level": 2
+      },
+      {
+        "id": "先完成主题基础l1",
+        "text": "先完成主题基础（L1）",
+        "level": 2
+      },
+      {
+        "id": "核心原理一句话版",
+        "text": "核心原理（一句话版）",
+        "level": 2
+      },
+      {
+        "id": "第-1-步创建全局主题状态模块",
+        "text": "第 1 步：创建全局主题状态模块",
+        "level": 2
+      },
+      {
+        "id": "第-2-步app.uvue-启动时初始化",
+        "text": "第 2 步：App.uvue 启动时初始化",
+        "level": 2
+      },
+      {
+        "id": "第-3-步页面接入每个页面只需-2-行",
+        "text": "第 3 步：页面接入（每个页面只需 2 行）",
+        "level": 2
+      },
+      {
+        "id": "第-4-步可选设置页加三态选择",
+        "text": "第 4 步（可选）：设置页加三态选择",
+        "level": 2
+      },
+      {
+        "id": "平台差异为什么这么写",
+        "text": "平台差异（为什么这么写）",
+        "level": 2
+      },
+      {
+        "id": "常见问题",
+        "text": "常见问题",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T01:55:47.376Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "暗黑模式接入"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "暗黑模式接入",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "本文面向",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "使用 nax-ui 的业务开发者",
+                    "source": {
+                      "start": {
+                        "line": 3,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 3,
+                        "column": 7
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "，介绍如何给应用接入\"跟随系统 / 浅色 / 深色\"三态暗黑模式。",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 25
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 25
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "功能"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "功能",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 5,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "能力",
+                    "source": {
+                      "start": {
+                        "line": 7,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 7,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 7,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 7,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 7,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 7,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 7,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 7,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 7,
+                "column": 1
+              },
+              "end": {
+                "line": 7,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "跟随系统",
+                    "source": {
+                      "start": {
+                        "line": 9,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 9,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 9,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 9,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "系统切深色，App 立即跟着变（前台实时、无需重启）",
+                    "source": {
+                      "start": {
+                        "line": 9,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 9,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 9,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 9,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 9,
+                "column": 1
+              },
+              "end": {
+                "line": 9,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "手动选择",
+                    "source": {
+                      "start": {
+                        "line": 10,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 10,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 10,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "用户手动选了\"浅色/深色\"后，系统怎么切都不受影响",
+                    "source": {
+                      "start": {
+                        "line": 10,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 10,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 10,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 10,
+                "column": 1
+              },
+              "end": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "三态切换",
+                    "source": {
+                      "start": {
+                        "line": 11,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 11,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 11,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 11,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "跟随系统 / 浅色 / 深色，随意来回切",
+                    "source": {
+                      "start": {
+                        "line": 11,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 11,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 11,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 11,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 11,
+                "column": 1
+              },
+              "end": {
+                "line": 11,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全端一致",
+                    "source": {
+                      "start": {
+                        "line": 12,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 12,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 12,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 12,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "鸿蒙、Android、iOS、Web、小程序都能用",
+                    "source": {
+                      "start": {
+                        "line": 12,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 12,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 12,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 12,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 1
+              },
+              "end": {
+                "line": 12,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 7,
+            "column": 1
+          },
+          "end": {
+            "line": 11,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "先完成主题基础l1"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "先完成主题基础（L1）",
+            "source": {
+              "start": {
+                "line": 14,
+                "column": 1
+              },
+              "end": {
+                "line": 14,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 14,
+            "column": 1
+          },
+          "end": {
+            "line": 14,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "暗黑模式建立在 CSS 变量主题之上，请先按",
+            "source": {
+              "start": {
+                "line": 16,
+                "column": 1
+              },
+              "end": {
+                "line": 16,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "link",
+            "children": [
+              {
+                "type": "text",
+                "value": "主题接入",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "attrs": {
+              "href": "./theme"
+            },
+            "source": {
+              "start": {
+                "line": 16,
+                "column": 23
+              },
+              "end": {
+                "line": 16,
+                "column": 23
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "完成 L1：",
+            "source": {
+              "start": {
+                "line": 16,
+                "column": 38
+              },
+              "end": {
+                "line": 16,
+                "column": 38
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 16,
+            "column": 1
+          },
+          "end": {
+            "line": 15,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {
+          "ordered": true
+        },
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "App.uvue",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 引入 ",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 11
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 11
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "default.css",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 15
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 和 ",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 28
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "dark.css",
+                    "source": {
+                      "start": {
+                        "line": 18,
+                        "column": 31
+                      },
+                      "end": {
+                        "line": 18,
+                        "column": 31
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 18,
+                "column": 1
+              },
+              "end": {
+                "line": 18,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "应用根节点挂载 ",
+                    "source": {
+                      "start": {
+                        "line": 19,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "class=\"nax-theme\"",
+                    "source": {
+                      "start": {
+                        "line": 19,
+                        "column": 9
+                      },
+                      "end": {
+                        "line": 19,
+                        "column": 9
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 19,
+                "column": 1
+              },
+              "end": {
+                "line": 19,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 18,
+            "column": 1
+          },
+          "end": {
+            "line": 19,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "核心原理一句话版"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "核心原理（一句话版）",
+            "source": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 21,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 21,
+            "column": 1
+          },
+          "end": {
+            "line": 21,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "用一个",
+                "source": {
+                  "start": {
+                    "line": 23,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 23,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全局状态",
+                    "source": {
+                      "start": {
+                        "line": 23,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 23,
+                        "column": 6
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "记录\"当前是不是暗黑\"，页面根节点的 ",
+                "source": {
+                  "start": {
+                    "line": 23,
+                    "column": 12
+                  },
+                  "end": {
+                    "line": 23,
+                    "column": 12
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "nax-theme-dark",
+                "source": {
+                  "start": {
+                    "line": 23,
+                    "column": 31
+                  },
+                  "end": {
+                    "line": 23,
+                    "column": 31
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " class 由它驱动。 系统主题变了 → 全局状态更新 → 所有页面自动换肤。",
+                "source": {
+                  "start": {
+                    "line": 23,
+                    "column": 47
+                  },
+                  "end": {
+                    "line": 23,
+                    "column": 47
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 23,
+            "column": 1
+          },
+          "end": {
+            "line": 24,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "全局状态用 Vue 的 ",
+            "source": {
+              "start": {
+                "line": 26,
+                "column": 1
+              },
+              "end": {
+                "line": 26,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "ref",
+            "source": {
+              "start": {
+                "line": 26,
+                "column": 13
+              },
+              "end": {
+                "line": 26,
+                "column": 13
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 实现（模块级共享），",
+            "source": {
+              "start": {
+                "line": 26,
+                "column": 18
+              },
+              "end": {
+                "line": 26,
+                "column": 18
+              }
+            }
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "不需要引入 Pinia 等状态库",
+                "source": {
+                  "start": {
+                    "line": 26,
+                    "column": 31
+                  },
+                  "end": {
+                    "line": 26,
+                    "column": 31
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "——uni-app x 蒸汽模式也不建议引入。",
+            "source": {
+              "start": {
+                "line": 26,
+                "column": 49
+              },
+              "end": {
+                "line": 26,
+                "column": 49
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 26,
+            "column": 1
+          },
+          "end": {
+            "line": 25,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "第-1-步创建全局主题状态模块"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "第 1 步：创建全局主题状态模块",
+            "source": {
+              "start": {
+                "line": 28,
+                "column": 1
+              },
+              "end": {
+                "line": 28,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 28,
+            "column": 1
+          },
+          "end": {
+            "line": 28,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "新建 ",
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 1
+              },
+              "end": {
+                "line": 30,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "common/theme-manager.uts",
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 4
+              },
+              "end": {
+                "line": 30,
+                "column": 4
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "，内容如下（可直接复制）：",
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 30
+              },
+              "end": {
+                "line": 30,
+                "column": 30
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 30,
+            "column": 1
+          },
+          "end": {
+            "line": 29,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "/**\n * 全局主题状态（三态）：followSystem 跟随系统 / light 浅色 / dark 深色\n * 手动选择后不再跟随系统；切回 followSystem 恢复联动。\n */\nconst STORAGE_KEY = 'app_theme_mode'\n\nvar themeMode = 'followSystem'\nvar systemDark = false\nvar themeInited = false\n\n/** 页面共享的暗黑状态：页面 computed 依赖它即可自动换肤 */\nexport const darkRef = ref(false)\n\nfunction syncDark() {\n    darkRef.value = isDark()\n}\n\nfunction readStorage(): string {\n    const raw = uni.getStorageSync(STORAGE_KEY)\n    if (raw != null) {\n        const s = '' + raw\n        if (s == 'followSystem' || s == 'light' || s == 'dark') {\n            return s\n        }\n    }\n    return 'followSystem'\n}\n\nfunction writeStorage(mode: string) {\n    uni.setStorageSync(STORAGE_KEY, mode)\n}\n\n/** 当前系统主题是不是暗色（各平台读取方式不同，见文末\"平台差异\"） */\nfunction readSystemDark(): boolean {\n    // 鸿蒙：uni API 拿不到系统主题，用原生能力（无需 import）\n    // #ifdef APP-HARMONY\n    const osTheme = UTSHarmony.getOsTheme()\n    if ((osTheme as string) == 'dark') {\n        return true\n    } else if ((osTheme as string) == 'light') {\n        return false\n    }\n    // #endif\n    // Android：uni API 没有可用字段，用原生能力（无需 import）\n    // 注意：蒸汽模式（Vapor）下 Android 的 uvue 页面里 UTSAndroid 不可用，需改用下方 osTheme 字段\n    // #ifdef APP-ANDROID\n    // #ifndef VUE3-VAPOR\n    const osThemeAndroid = UTSAndroid.getOsTheme()\n    if ((osThemeAndroid as string) == 'dark') {\n        return true\n    } else if ((osThemeAndroid as string) == 'light') {\n        return false\n    }\n    // #endif\n    // #endif\n    // iOS / Web / 小程序：osTheme 是系统主题字段（全端可用）\n    const info = uni.getSystemInfoSync()\n    if (info.osTheme == 'dark') {\n        return true\n    }\n    return false\n}\n\n/** 切换 App 原生层主题（避免页面转场闪白/闪黑） */\nfunction applyAppTheme(mode: string) {\n    // #ifdef APP-ANDROID || APP-IOS || APP-HARMONY\n    var theme = 'light'\n    if (mode == 'dark') {\n        theme = 'dark'\n    } else if (mode == 'followSystem') {\n        theme = 'auto'\n    }\n    try {\n        uni.setAppTheme({\n            theme: theme as 'light' | 'dark' | 'auto'\n        })\n    } catch (e : any) {\n        // 低版本不支持时保持 manifest 默认配置即可\n    }\n    // #endif\n}\n\n/** 应用启动时调用一次：读取存档 + 注册系统主题监听 */\nexport function initTheme() {\n    if (themeInited) {\n        return\n    }\n    themeMode = readStorage()\n    themeInited = true\n    systemDark = readSystemDark()\n    applyAppTheme(themeMode)\n    syncDark()\n\n    // Android：没有 onOsThemeChange，用 onAppThemeChange 当\"触发信号\"，\n    // 系统主题真值仍用原生 API 读取\n    // #ifdef APP-ANDROID\n    try {\n        uni.onAppThemeChange((res: AppThemeChangeResult) => {\n            // 蒸汽模式：UTSAndroid 不可用，回调 appTheme（4.19+ 仅返回 light/dark）即真实主题\n            // #ifndef VUE3-VAPOR\n            const osTheme = UTSAndroid.getOsTheme()\n            systemDark = (osTheme as string) == 'dark'\n            // #endif\n            // #ifdef VUE3-VAPOR\n            systemDark = res.appTheme == 'dark'\n            // #endif\n            if (themeMode == 'followSystem') {\n                applyAppTheme('followSystem')\n                syncDark()\n            }\n        })\n    } catch (e : any) {\n    }\n    // #endif\n\n    // iOS / 鸿蒙：onOsThemeChange 监听系统主题切换\n    // #ifdef APP-IOS || APP-HARMONY\n    try {\n        uni.onOsThemeChange((res: OnOsThemeChangeCallbackResult) => {\n            // 鸿蒙回调不带主题值，用原生 API；iOS 回调可能为空，用 osTheme 兜底\n            // #ifdef APP-HARMONY\n            const osTheme = UTSHarmony.getOsTheme()\n            systemDark = (osTheme as string) == 'dark'\n            // #endif\n            // #ifndef APP-HARMONY\n            if (res.theme == null || res.theme.length == 0) {\n                const info = uni.getSystemInfoSync()\n                systemDark = info.osTheme == 'dark'\n            } else {\n                systemDark = res.theme == 'dark'\n            }\n            // #endif\n            if (themeMode == 'followSystem') {\n                applyAppTheme('followSystem')\n                syncDark()\n            }\n        })\n    } catch (e : any) {\n    }\n    // #endif\n}\n\n/** 当前三态：followSystem / light / dark */\nexport function getThemeMode(): string {\n    if (!themeInited) {\n        initTheme()\n    }\n    return themeMode\n}\n\n/** 设置三态 */\nexport function setThemeMode(mode: string) {\n    themeMode = mode\n    themeInited = true\n    writeStorage(mode)\n    applyAppTheme(mode)\n    syncDark()\n}\n\n/** 当前实际生效的暗黑状态（followSystem 时取系统主题） */\nexport function isDark(): boolean {\n    if (!themeInited) {\n        initTheme()\n    }\n    if (themeMode == 'followSystem') {\n        return systemDark\n    }\n    return themeMode == 'dark'\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 32,
+            "column": 1
+          },
+          "end": {
+            "line": 201,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "/**\n * 全局主题状态（三态）：followSystem 跟随系统 / light 浅色 / dark 深色\n * 手动选择后不再跟随系统；切回 followSystem 恢复联动。\n */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "STORAGE_KEY",
+            "c": "type"
+          },
+          {
+            "t": " = "
+          },
+          {
+            "t": "'app_theme_mode'",
+            "c": "str"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "var",
+            "c": "kw"
+          },
+          {
+            "t": " themeMode = "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "var",
+            "c": "kw"
+          },
+          {
+            "t": " systemDark = "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "var",
+            "c": "kw"
+          },
+          {
+            "t": " themeInited = "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "/** 页面共享的暗黑状态：页面 computed 依赖它即可自动换肤 */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "export",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " darkRef = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "syncDark",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    darkRef.value = "
+          },
+          {
+            "t": "isDark",
+            "c": "fn"
+          },
+          {
+            "t": "()\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "readStorage",
+            "c": "fn"
+          },
+          {
+            "t": "(): "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": " {\n    "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " raw = uni."
+          },
+          {
+            "t": "getStorageSync",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "STORAGE_KEY",
+            "c": "type"
+          },
+          {
+            "t": ")\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (raw != "
+          },
+          {
+            "t": "null",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " s = "
+          },
+          {
+            "t": "''",
+            "c": "str"
+          },
+          {
+            "t": " + raw\n        "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (s == "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": " || s == "
+          },
+          {
+            "t": "'light'",
+            "c": "str"
+          },
+          {
+            "t": " || s == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n            "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " s\n        }\n    }\n    "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": "\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "writeStorage",
+            "c": "fn"
+          },
+          {
+            "t": "(mode: "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    uni."
+          },
+          {
+            "t": "setStorageSync",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "STORAGE_KEY",
+            "c": "type"
+          },
+          {
+            "t": ", mode)\n}\n\n"
+          },
+          {
+            "t": "/** 当前系统主题是不是暗色（各平台读取方式不同，见文末\"平台差异\"） */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "readSystemDark",
+            "c": "fn"
+          },
+          {
+            "t": "(): "
+          },
+          {
+            "t": "boolean",
+            "c": "kw"
+          },
+          {
+            "t": " {\n    "
+          },
+          {
+            "t": "// 鸿蒙：uni API 拿不到系统主题，用原生能力（无需 import）",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// #ifdef APP-HARMONY",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " osTheme = "
+          },
+          {
+            "t": "UTSHarmony",
+            "c": "type"
+          },
+          {
+            "t": "."
+          },
+          {
+            "t": "getOsTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " ((osTheme "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "else",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " ((osTheme "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") == "
+          },
+          {
+            "t": "'light'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n    }\n    "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// Android：uni API 没有可用字段，用原生能力（无需 import）",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// 注意：蒸汽模式（Vapor）下 Android 的 uvue 页面里 UTSAndroid 不可用，需改用下方 osTheme 字段",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// #ifdef APP-ANDROID",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// #ifndef VUE3-VAPOR",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " osThemeAndroid = "
+          },
+          {
+            "t": "UTSAndroid",
+            "c": "type"
+          },
+          {
+            "t": "."
+          },
+          {
+            "t": "getOsTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " ((osThemeAndroid "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "else",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " ((osThemeAndroid "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") == "
+          },
+          {
+            "t": "'light'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n    }\n    "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// iOS / Web / 小程序：osTheme 是系统主题字段（全端可用）",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " info = uni."
+          },
+          {
+            "t": "getSystemInfoSync",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (info.osTheme == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    }\n    "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n}\n\n"
+          },
+          {
+            "t": "/** 切换 App 原生层主题（避免页面转场闪白/闪黑） */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "applyAppTheme",
+            "c": "fn"
+          },
+          {
+            "t": "(mode: "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    "
+          },
+          {
+            "t": "// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "var",
+            "c": "kw"
+          },
+          {
+            "t": " theme = "
+          },
+          {
+            "t": "'light'",
+            "c": "str"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (mode == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        theme = "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "else",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (mode == "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        theme = "
+          },
+          {
+            "t": "'auto'",
+            "c": "str"
+          },
+          {
+            "t": "\n    }\n    "
+          },
+          {
+            "t": "try",
+            "c": "kw"
+          },
+          {
+            "t": " {\n        uni."
+          },
+          {
+            "t": "setAppTheme",
+            "c": "fn"
+          },
+          {
+            "t": "({\n            theme: theme "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'light'",
+            "c": "str"
+          },
+          {
+            "t": " | "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": " | "
+          },
+          {
+            "t": "'auto'",
+            "c": "str"
+          },
+          {
+            "t": "\n        })\n    } "
+          },
+          {
+            "t": "catch",
+            "c": "kw"
+          },
+          {
+            "t": " (e : "
+          },
+          {
+            "t": "any",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "// 低版本不支持时保持 manifest 默认配置即可",
+            "c": "com"
+          },
+          {
+            "t": "\n    }\n    "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n}\n\n"
+          },
+          {
+            "t": "/** 应用启动时调用一次：读取存档 + 注册系统主题监听 */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "export",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "initTheme",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (themeInited) {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": "\n    }\n    themeMode = "
+          },
+          {
+            "t": "readStorage",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    themeInited = "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    systemDark = "
+          },
+          {
+            "t": "readSystemDark",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    "
+          },
+          {
+            "t": "applyAppTheme",
+            "c": "fn"
+          },
+          {
+            "t": "(themeMode)\n    "
+          },
+          {
+            "t": "syncDark",
+            "c": "fn"
+          },
+          {
+            "t": "()\n\n    "
+          },
+          {
+            "t": "// Android：没有 onOsThemeChange，用 onAppThemeChange 当\"触发信号\"，",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// 系统主题真值仍用原生 API 读取",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// #ifdef APP-ANDROID",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "try",
+            "c": "kw"
+          },
+          {
+            "t": " {\n        uni."
+          },
+          {
+            "t": "onAppThemeChange",
+            "c": "fn"
+          },
+          {
+            "t": "((res: "
+          },
+          {
+            "t": "AppThemeChangeResult",
+            "c": "type"
+          },
+          {
+            "t": ") => {\n            "
+          },
+          {
+            "t": "// 蒸汽模式：UTSAndroid 不可用，回调 appTheme（4.19+ 仅返回 light/dark）即真实主题",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #ifndef VUE3-VAPOR",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " osTheme = "
+          },
+          {
+            "t": "UTSAndroid",
+            "c": "type"
+          },
+          {
+            "t": "."
+          },
+          {
+            "t": "getOsTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n            systemDark = (osTheme "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #ifdef VUE3-VAPOR",
+            "c": "com"
+          },
+          {
+            "t": "\n            systemDark = res.appTheme == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (themeMode == "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n                "
+          },
+          {
+            "t": "applyAppTheme",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": ")\n                "
+          },
+          {
+            "t": "syncDark",
+            "c": "fn"
+          },
+          {
+            "t": "()\n            }\n        })\n    } "
+          },
+          {
+            "t": "catch",
+            "c": "kw"
+          },
+          {
+            "t": " (e : "
+          },
+          {
+            "t": "any",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    }\n    "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n\n    "
+          },
+          {
+            "t": "// iOS / 鸿蒙：onOsThemeChange 监听系统主题切换",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "// #ifdef APP-IOS || APP-HARMONY",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "try",
+            "c": "kw"
+          },
+          {
+            "t": " {\n        uni."
+          },
+          {
+            "t": "onOsThemeChange",
+            "c": "fn"
+          },
+          {
+            "t": "((res: "
+          },
+          {
+            "t": "OnOsThemeChangeCallbackResult",
+            "c": "type"
+          },
+          {
+            "t": ") => {\n            "
+          },
+          {
+            "t": "// 鸿蒙回调不带主题值，用原生 API；iOS 回调可能为空，用 osTheme 兜底",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #ifdef APP-HARMONY",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " osTheme = "
+          },
+          {
+            "t": "UTSHarmony",
+            "c": "type"
+          },
+          {
+            "t": "."
+          },
+          {
+            "t": "getOsTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n            systemDark = (osTheme "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "// #ifndef APP-HARMONY",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (res.theme == "
+          },
+          {
+            "t": "null",
+            "c": "kw"
+          },
+          {
+            "t": " || res.theme.length == "
+          },
+          {
+            "t": "0",
+            "c": "num"
+          },
+          {
+            "t": ") {\n                "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " info = uni."
+          },
+          {
+            "t": "getSystemInfoSync",
+            "c": "fn"
+          },
+          {
+            "t": "()\n                systemDark = info.osTheme == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n            } "
+          },
+          {
+            "t": "else",
+            "c": "kw"
+          },
+          {
+            "t": " {\n                systemDark = res.theme == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n            }\n            "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (themeMode == "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n                "
+          },
+          {
+            "t": "applyAppTheme",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": ")\n                "
+          },
+          {
+            "t": "syncDark",
+            "c": "fn"
+          },
+          {
+            "t": "()\n            }\n        })\n    } "
+          },
+          {
+            "t": "catch",
+            "c": "kw"
+          },
+          {
+            "t": " (e : "
+          },
+          {
+            "t": "any",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    }\n    "
+          },
+          {
+            "t": "// #endif",
+            "c": "com"
+          },
+          {
+            "t": "\n}\n\n"
+          },
+          {
+            "t": "/** 当前三态：followSystem / light / dark */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "export",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "getThemeMode",
+            "c": "fn"
+          },
+          {
+            "t": "(): "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": " {\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (!themeInited) {\n        "
+          },
+          {
+            "t": "initTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    }\n    "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " themeMode\n}\n\n"
+          },
+          {
+            "t": "/** 设置三态 */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "export",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "setThemeMode",
+            "c": "fn"
+          },
+          {
+            "t": "(mode: "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    themeMode = mode\n    themeInited = "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "writeStorage",
+            "c": "fn"
+          },
+          {
+            "t": "(mode)\n    "
+          },
+          {
+            "t": "applyAppTheme",
+            "c": "fn"
+          },
+          {
+            "t": "(mode)\n    "
+          },
+          {
+            "t": "syncDark",
+            "c": "fn"
+          },
+          {
+            "t": "()\n}\n\n"
+          },
+          {
+            "t": "/** 当前实际生效的暗黑状态（followSystem 时取系统主题） */",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "export",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "isDark",
+            "c": "fn"
+          },
+          {
+            "t": "(): "
+          },
+          {
+            "t": "boolean",
+            "c": "kw"
+          },
+          {
+            "t": " {\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (!themeInited) {\n        "
+          },
+          {
+            "t": "initTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n    }\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (themeMode == "
+          },
+          {
+            "t": "'followSystem'",
+            "c": "str"
+          },
+          {
+            "t": ") {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " systemDark\n    }\n    "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": " themeMode == "
+          },
+          {
+            "t": "'dark'",
+            "c": "str"
+          },
+          {
+            "t": "\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "第-2-步app.uvue-启动时初始化"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "第 2 步：App.uvue 启动时初始化",
+            "source": {
+              "start": {
+                "line": 204,
+                "column": 1
+              },
+              "end": {
+                "line": 204,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 204,
+            "column": 1
+          },
+          "end": {
+            "line": 204,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "import { initTheme } from '@/common/theme-manager.uts'\n\nonLaunch(() => {\n    initTheme()\n})",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 206,
+            "column": 1
+          },
+          "end": {
+            "line": 211,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "import",
+            "c": "kw"
+          },
+          {
+            "t": " { initTheme } "
+          },
+          {
+            "t": "from",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'@/common/theme-manager.uts'",
+            "c": "str"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "onLaunch",
+            "c": "fn"
+          },
+          {
+            "t": "(() => {\n    "
+          },
+          {
+            "t": "initTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n})"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "第-3-步页面接入每个页面只需-2-行"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "第 3 步：页面接入（每个页面只需 2 行）",
+            "source": {
+              "start": {
+                "line": 214,
+                "column": 1
+              },
+              "end": {
+                "line": 214,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 214,
+            "column": 1
+          },
+          "end": {
+            "line": 214,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "在页面 ",
+            "source": {
+              "start": {
+                "line": 216,
+                "column": 1
+              },
+              "end": {
+                "line": 216,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "<script setup lang=\"uts\">",
+            "source": {
+              "start": {
+                "line": 216,
+                "column": 5
+              },
+              "end": {
+                "line": 216,
+                "column": 5
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 中：",
+            "source": {
+              "start": {
+                "line": 216,
+                "column": 32
+              },
+              "end": {
+                "line": 216,
+                "column": 32
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 216,
+            "column": 1
+          },
+          "end": {
+            "line": 215,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "import { initTheme, darkRef } from '@/common/theme-manager.uts'\n\ninitTheme()\nconst darkMode = darkRef",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 218,
+            "column": 1
+          },
+          "end": {
+            "line": 222,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "import",
+            "c": "kw"
+          },
+          {
+            "t": " { initTheme, darkRef } "
+          },
+          {
+            "t": "from",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'@/common/theme-manager.uts'",
+            "c": "str"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "initTheme",
+            "c": "fn"
+          },
+          {
+            "t": "()\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " darkMode = darkRef"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "模板根节点（已有 ",
+            "source": {
+              "start": {
+                "line": 225,
+                "column": 1
+              },
+              "end": {
+                "line": 225,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "nax-theme",
+            "source": {
+              "start": {
+                "line": 225,
+                "column": 10
+              },
+              "end": {
+                "line": 225,
+                "column": 10
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 的地方）绑定暗色 class：",
+            "source": {
+              "start": {
+                "line": 225,
+                "column": 21
+              },
+              "end": {
+                "line": 225,
+                "column": 21
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 225,
+            "column": 1
+          },
+          "end": {
+            "line": 224,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<view class=\"page-root nax-theme\" :class=\"darkMode ? 'nax-theme-dark' : ''\">\n    <!-- 页面内容 -->\n</view>",
+        "attrs": {
+          "lang": "html"
+        },
+        "source": {
+          "start": {
+            "line": 227,
+            "column": 1
+          },
+          "end": {
+            "line": 230,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"page-root nax-theme\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"darkMode ? 'nax-theme-dark' : ''\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<!-- 页面内容 -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</view>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "inline-code",
+            "value": "darkMode",
+            "source": {
+              "start": {
+                "line": 233,
+                "column": 1
+              },
+              "end": {
+                "line": 233,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 是共享 ref：系统切主题 / 用户手动切换时，它自动变化，",
+            "source": {
+              "start": {
+                "line": 233,
+                "column": 11
+              },
+              "end": {
+                "line": 233,
+                "column": 11
+              }
+            }
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "所有页面",
+                "source": {
+                  "start": {
+                    "line": 233,
+                    "column": 44
+                  },
+                  "end": {
+                    "line": 233,
+                    "column": 44
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "的 class 一起更新，无需页面自己监听。",
+            "source": {
+              "start": {
+                "line": 233,
+                "column": 50
+              },
+              "end": {
+                "line": 233,
+                "column": 50
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 233,
+            "column": 1
+          },
+          "end": {
+            "line": 232,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "第-4-步可选设置页加三态选择"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "第 4 步（可选）：设置页加三态选择",
+            "source": {
+              "start": {
+                "line": 235,
+                "column": 1
+              },
+              "end": {
+                "line": 235,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 235,
+            "column": 1
+          },
+          "end": {
+            "line": 235,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-cell title=\"外观模式\" label=\"手动选择后不再跟随系统\"></nax-cell>\n<nax-cell title=\"跟随系统\" @click=\"onMode('followSystem')\">\n    <template #right>\n        <nax-icon v-if=\"themeMode == 'followSystem'\" name=\"check\" color=\"#18a058\" :size=\"'18'\"></nax-icon>\n    </template>\n</nax-cell>\n<nax-cell title=\"浅色\" @click=\"onMode('light')\">\n    <template #right>\n        <nax-icon v-if=\"themeMode == 'light'\" name=\"check\" color=\"#18a058\" :size=\"'18'\"></nax-icon>\n    </template>\n</nax-cell>\n<nax-cell title=\"深色\" @click=\"onMode('dark')\">\n    <template #right>\n        <nax-icon v-if=\"themeMode == 'dark'\" name=\"check\" color=\"#18a058\" :size=\"'18'\"></nax-icon>\n    </template>\n</nax-cell>",
+        "attrs": {
+          "lang": "html"
+        },
+        "source": {
+          "start": {
+            "line": 237,
+            "column": 1
+          },
+          "end": {
+            "line": 253,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-cell",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "title",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"外观模式\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"手动选择后不再跟随系统\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-cell>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-cell",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "title",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"跟随系统\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onMode('followSystem')\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<template",
+            "c": "kw"
+          },
+          {
+            "t": " #"
+          },
+          {
+            "t": "right",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-if",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"themeMode == 'followSystem'\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"check\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "color",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"#18a058\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"'18'\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</template>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-cell>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-cell",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "title",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"浅色\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onMode('light')\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<template",
+            "c": "kw"
+          },
+          {
+            "t": " #"
+          },
+          {
+            "t": "right",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-if",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"themeMode == 'light'\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"check\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "color",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"#18a058\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"'18'\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</template>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-cell>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-cell",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "title",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"深色\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onMode('dark')\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<template",
+            "c": "kw"
+          },
+          {
+            "t": " #"
+          },
+          {
+            "t": "right",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-if",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"themeMode == 'dark'\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"check\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "color",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"#18a058\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"'18'\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</template>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-cell>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "import { getThemeMode, setThemeMode } from '@/common/theme-manager.uts'\n\nconst themeMode = ref(getThemeMode())\n\nfunction onMode(mode : string) {\n    setThemeMode(mode)\n    themeMode.value = mode\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 256,
+            "column": 1
+          },
+          "end": {
+            "line": 264,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "import",
+            "c": "kw"
+          },
+          {
+            "t": " { getThemeMode, setThemeMode } "
+          },
+          {
+            "t": "from",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'@/common/theme-manager.uts'",
+            "c": "str"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " themeMode = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "getThemeMode",
+            "c": "fn"
+          },
+          {
+            "t": "())\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onMode",
+            "c": "fn"
+          },
+          {
+            "t": "(mode : "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    "
+          },
+          {
+            "t": "setThemeMode",
+            "c": "fn"
+          },
+          {
+            "t": "(mode)\n    themeMode.value = mode\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "平台差异为什么这么写"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "平台差异（为什么这么写）",
+            "source": {
+              "start": {
+                "line": 267,
+                "column": 1
+              },
+              "end": {
+                "line": 267,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 267,
+            "column": 1
+          },
+          "end": {
+            "line": 267,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "不同平台拿到\"系统是暗还是亮\"的方式不一样，本方案已按平台自动适配：",
+            "source": {
+              "start": {
+                "line": 269,
+                "column": 1
+              },
+              "end": {
+                "line": 269,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 269,
+            "column": 1
+          },
+          "end": {
+            "line": 268,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "平台",
+                    "source": {
+                      "start": {
+                        "line": 271,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 271,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 271,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 271,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "怎么知道系统是暗的",
+                    "source": {
+                      "start": {
+                        "line": 271,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 271,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 271,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 271,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "系统切换时如何感知",
+                    "source": {
+                      "start": {
+                        "line": 271,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 271,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 271,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 271,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 271,
+                "column": 1
+              },
+              "end": {
+                "line": 271,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "鸿蒙",
+                    "source": {
+                      "start": {
+                        "line": 273,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 273,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 273,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 273,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "UTSHarmony.getOsTheme()",
+                    "source": {
+                      "start": {
+                        "line": 273,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 273,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "（原生）",
+                    "source": {
+                      "start": {
+                        "line": 273,
+                        "column": 26
+                      },
+                      "end": {
+                        "line": 273,
+                        "column": 26
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 273,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 273,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "onOsThemeChange",
+                    "source": {
+                      "start": {
+                        "line": 273,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 273,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 回调",
+                    "source": {
+                      "start": {
+                        "line": 273,
+                        "column": 18
+                      },
+                      "end": {
+                        "line": 273,
+                        "column": 18
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 273,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 273,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 273,
+                "column": 1
+              },
+              "end": {
+                "line": 273,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Android",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "UTSAndroid.getOsTheme()",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "（原生）；",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 26
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 26
+                      }
+                    }
+                  },
+                  {
+                    "type": "strong",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "蒸汽模式下 uvue 页面不可用",
+                        "source": {
+                          "start": {
+                            "line": 274,
+                            "column": 33
+                          },
+                          "end": {
+                            "line": 274,
+                            "column": 33
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "value": "，改用 ",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 51
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 51
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "getSystemInfoSync().osTheme",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 55
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 55
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "onAppThemeChange",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 回调（平台没有 ",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 19
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 19
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "onOsThemeChange",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 28
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 45
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 45
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 274,
+                "column": 1
+              },
+              "end": {
+                "line": 274,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "iOS",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "getSystemInfoSync().osTheme",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "onOsThemeChange",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 回调",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 18
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 18
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 275,
+                "column": 1
+              },
+              "end": {
+                "line": 275,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Web / 小程序",
+                    "source": {
+                      "start": {
+                        "line": 276,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 276,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 276,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 276,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "getSystemInfoSync().osTheme",
+                    "source": {
+                      "start": {
+                        "line": 276,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 276,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 276,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 276,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "无实时通知，回到页面时 ",
+                    "source": {
+                      "start": {
+                        "line": 276,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 276,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "onShow",
+                    "source": {
+                      "start": {
+                        "line": 276,
+                        "column": 13
+                      },
+                      "end": {
+                        "line": 276,
+                        "column": 13
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 刷新即可",
+                    "source": {
+                      "start": {
+                        "line": 276,
+                        "column": 21
+                      },
+                      "end": {
+                        "line": 276,
+                        "column": 21
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 276,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 276,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 276,
+                "column": 1
+              },
+              "end": {
+                "line": 276,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 271,
+            "column": 1
+          },
+          "end": {
+            "line": 275,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "为什么不用 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni.getAppBaseInfo().hostTheme",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 7
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 7
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "？官方文档明确：",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 39
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 39
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "hostTheme",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 47
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 47
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 58
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 58
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "仅 Web 和微信小程序支持",
+                    "source": {
+                      "start": {
+                        "line": 278,
+                        "column": 61
+                      },
+                      "end": {
+                        "line": 278,
+                        "column": 61
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "，App 端拿不到（实测返回 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 77
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 77
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "undefined",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 92
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 92
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "）。 为什么不用 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 103
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 103
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "getSystemInfoSync().theme",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 112
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 112
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "？该字段在 Android 端类型中不存在（编译报错），鸿蒙端返回 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 139
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 139
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "undefined",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 173
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 173
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "；请统一使用 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 184
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 184
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "osTheme",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 191
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 191
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 字段。 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 200
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 200
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "蒸汽模式（Vapor）注意",
+                    "source": {
+                      "start": {
+                        "line": 278,
+                        "column": 207
+                      },
+                      "end": {
+                        "line": 278,
+                        "column": 207
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "：官方限制 Android 蒸汽模式的 uvue 页面中 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 222
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 222
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "UTSAndroid",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 251
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 251
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 不可用（需在 uts 插件中调用），本方案已用 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 263
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 263
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "#ifdef VUE3-VAPOR",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 288
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 288
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 自动切换为 uni API 读取（",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 307
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 307
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "osTheme",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 325
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 325
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 字段 / ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 334
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 334
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "onAppThemeChange",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 340
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 340
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 回调的 ",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 358
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 358
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "appTheme",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 363
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 363
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "），非蒸汽模式行为不变。",
+                "source": {
+                  "start": {
+                    "line": 278,
+                    "column": 373
+                  },
+                  "end": {
+                    "line": 278,
+                    "column": 373
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 2,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 278,
+            "column": 1
+          },
+          "end": {
+            "line": 280,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "常见问题"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "常见问题",
+            "source": {
+              "start": {
+                "line": 282,
+                "column": 1
+              },
+              "end": {
+                "line": 282,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 282,
+            "column": 1
+          },
+          "end": {
+            "line": 282,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Q：系统切了深色，App 在前台没变？",
+                "source": {
+                  "start": {
+                    "line": 284,
+                    "column": 3
+                  },
+                  "end": {
+                    "line": 284,
+                    "column": 3
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " A：鸿蒙/Android 有实时监听会自动变；如果没变，先确认 ",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 24
+              },
+              "end": {
+                "line": 284,
+                "column": 24
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "initTheme()",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 57
+              },
+              "end": {
+                "line": 284,
+                "column": 57
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 已在 ",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 70
+              },
+              "end": {
+                "line": 284,
+                "column": 70
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "App.uvue",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 74
+              },
+              "end": {
+                "line": 284,
+                "column": 74
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 调用、页面用的是共享 ",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 84
+              },
+              "end": {
+                "line": 284,
+                "column": 84
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "darkRef",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 96
+              },
+              "end": {
+                "line": 284,
+                "column": 96
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 而不是本地 ",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 105
+              },
+              "end": {
+                "line": 284,
+                "column": 105
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "ref",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 112
+              },
+              "end": {
+                "line": 284,
+                "column": 112
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "。",
+            "source": {
+              "start": {
+                "line": 284,
+                "column": 117
+              },
+              "end": {
+                "line": 284,
+                "column": 117
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 284,
+            "column": 1
+          },
+          "end": {
+            "line": 284,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Q：用户手动选\"深色\"后，系统切浅色会被覆盖吗？",
+                "source": {
+                  "start": {
+                    "line": 287,
+                    "column": 3
+                  },
+                  "end": {
+                    "line": 287,
+                    "column": 3
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " A：不会。只有 ",
+            "source": {
+              "start": {
+                "line": 287,
+                "column": 29
+              },
+              "end": {
+                "line": 287,
+                "column": 29
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "followSystem",
+            "source": {
+              "start": {
+                "line": 287,
+                "column": 38
+              },
+              "end": {
+                "line": 287,
+                "column": 38
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 模式下系统切换才生效，手动选择优先（主流 App 的标准行为）。",
+            "source": {
+              "start": {
+                "line": 287,
+                "column": 52
+              },
+              "end": {
+                "line": 287,
+                "column": 52
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 287,
+            "column": 1
+          },
+          "end": {
+            "line": 287,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Q：弹窗 / dialogPage 不跟随主题？",
+                "source": {
+                  "start": {
+                    "line": 290,
+                    "column": 3
+                  },
+                  "end": {
+                    "line": 290,
+                    "column": 3
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " A：",
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 29
+              },
+              "end": {
+                "line": 290,
+                "column": 29
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "dialogPage",
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 32
+              },
+              "end": {
+                "line": 290,
+                "column": 32
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 是独立页面，无法继承触发页的主题 class。在弹层页根节点挂相同的 ",
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 44
+              },
+              "end": {
+                "line": 290,
+                "column": 44
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "nax-theme nax-theme-dark",
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 80
+              },
+              "end": {
+                "line": 290,
+                "column": 80
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " class（按当前暗黑状态），详见 ",
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 106
+              },
+              "end": {
+                "line": 290,
+                "column": 106
+              }
+            }
+          },
+          {
+            "type": "link",
+            "children": [
+              {
+                "type": "text",
+                "value": "主题接入",
+                "source": {
+                  "start": {
+                    "line": 290,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 290,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "attrs": {
+              "href": "./theme#dialogpage-主题同步"
+            },
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 125
+              },
+              "end": {
+                "line": 290,
+                "column": 125
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 的\"dialogPage 主题同步\"章节。",
+            "source": {
+              "start": {
+                "line": 290,
+                "column": 156
+              },
+              "end": {
+                "line": 290,
+                "column": 156
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 290,
+            "column": 1
+          },
+          "end": {
+            "line": 290,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 292,
+        "column": 1
+      }
+    }
+  }
+}

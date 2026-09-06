@@ -1,0 +1,98 @@
+<template>
+  <view class="demo-cell">
+    <text class="dsec">基础</text>
+    <nax-cell-group>
+      <nax-cell title="单元格" value="内容"></nax-cell>
+      <nax-cell title="单元格" label="描述信息" value="内容"></nax-cell>
+      <nax-cell title="单元格" value="详情" is-link></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">分组标题</text>
+    <nax-cell-group title="个人信息">
+      <nax-cell title="昵称" value="Nax" is-link></nax-cell>
+      <nax-cell title="手机号" value="138****0000"></nax-cell>
+      <nax-cell title="个性签名" label="一句话介绍自己" value="写点什么" is-link></nax-cell>
+    </nax-cell-group>
+    <nax-cell-group title="其他设置">
+      <nax-cell title="消息通知" is-link></nax-cell>
+      <nax-cell title="关于我们" is-link></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">图标</text>
+    <nax-cell-group>
+      <nax-cell icon="user" title="个人中心" is-link></nax-cell>
+      <nax-cell icon="settings" title="系统设置" value="通用" is-link></nax-cell>
+      <nax-cell icon="search" title="搜索" label="全局搜索入口" is-link></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">inset 圆角卡片</text>
+    <nax-cell-group title="账户" inset>
+      <nax-cell title="账号安全" is-link></nax-cell>
+      <nax-cell title="支付设置" is-link></nax-cell>
+      <nax-cell title="隐私" value="已保护" is-link></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">insetBorder 外框</text>
+    <nax-cell-group title="all 四边" inset inset-border="all">
+      <nax-cell title="默认外框" value="all" is-link></nax-cell>
+    </nax-cell-group>
+    <nax-cell-group title="horizontal 上下" inset inset-border="horizontal">
+      <nax-cell title="无左右边框" value="horizontal" is-link></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">尺寸 size</text>
+    <nax-cell-group>
+      <nax-cell size="sm" title="小号 sm" value="紧凑" is-link></nax-cell>
+      <nax-cell size="md" title="中号 md" value="默认" is-link></nax-cell>
+      <nax-cell size="lg" title="大号 lg" value="宽松" is-link></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">状态</text>
+    <nax-cell-group>
+      <nax-cell title="必填项" required value="请填写" is-link></nax-cell>
+      <nax-cell title="禁用" value="不可点" disabled is-link></nax-cell>
+      <nax-cell title="无箭头可点" clickable></nax-cell>
+      <nax-cell title="无分割线" value="border=false" :border="false"></nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">右侧插槽（开关）</text>
+    <nax-cell-group>
+      <nax-cell title="消息推送" center>
+        <template #right>
+          <nax-switch v-model="pushOn"></nax-switch>
+        </template>
+      </nax-cell>
+      <nax-cell title="深色模式" label="仅演示绑定" center>
+        <template #right>
+          <nax-switch v-model="darkOn"></nax-switch>
+        </template>
+      </nax-cell>
+    </nax-cell-group>
+
+    <text class="dsec">自定义颜色</text>
+    <nax-cell-group>
+      <nax-cell title="标题色" title-color="#18a058" value="主色" value-color="#18a058" is-link></nax-cell>
+      <nax-cell icon="user" icon-color="#2080f0" title="图标色" value="info" is-link></nax-cell>
+    </nax-cell-group>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const pushOn = ref(true)
+const darkOn = ref(false)
+</script>
+
+<style>
+.demo-cell {
+  flex-direction: column;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

@@ -1,0 +1,439 @@
+<template>
+	<view v-if="visible" class="nax-loading" :class="rootClass" :style="rootStyle">
+		<view
+			:id="spinnerDomId"
+			class="nax-loading__spinner"
+			:class="spinnerClass"
+			:style="spinnerStyle"
+		>
+			<slot name="icon">
+				<nax-icon :name="iconName" :size="iconSizePx" :color="resolvedColor"></nax-icon>
+			</slot>
+		</view>
+		<slot>
+			<text
+				v-if="hasText"
+				class="nax-loading__text"
+				:class="textClass"
+				:style="textStyle"
+			>{{ text }}</text>
+		</slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-loading
+	 * @description 局部/区块加载指示。App 端用原生 animate 旋转；Web/小程序用 CSS 动画。
+	 * @property {boolean} show 是否显示，默认 true
+	 * @property {string} size sm | md | lg
+	 * @property {string} text 文案；也可用默认插槽
+	 * @property {boolean} vertical 纵向：图标在上、文案在下；默认 false（横向）
+	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
+	 * @property {string} color 自定义颜色（覆盖 type）
+	 * @property {string} icon 旋转图标：loading | loader | loader-4，默认 loading
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 自定义文案区
+	 * @slot icon 自定义图标
+	 */
+	const props = defineProps({
+		show: { type: Boolean, default: true },
+		size: { type: String, default: 'md' },
+		text: { type: String, default: '' },
+		vertical: { type: Boolean, default: false },
+		type: { type: String, default: 'default' },
+		color: { type: String, default: '' },
+		icon: { type: String, default: 'loading' },
+		customClass: { type: String, default: '' }
+	})
+
+
+	function normalizeIcon(value: string): string {
+		const name = value.trim()
+		if (name == 'loader' || name == 'loader-4' || name == 'loading') {
+			return name
+		}
+		// 兼容别名
+		if (name == 'loader-2' || name == 'spinner') {
+			return 'loading'
+		}
+		return 'loading'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeType(value: string): string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function typeColor(name: string): string {
+		if (name == 'primary' || name == 'success') {
+			return 'var(--nax-color-primary, #18a058)'
+		}
+		if (name == 'info') {
+			return 'var(--nax-color-info, #2080f0)'
+		}
+		if (name == 'warning') {
+			return 'var(--nax-color-warning, #f0a020)'
+		}
+		if (name == 'error') {
+			return 'var(--nax-color-error, #d03050)'
+		}
+		// default：次级文案色，避免过抢眼
+		return 'var(--nax-color-text-secondary, #767c82)'
+	}
+
+	const visible = computed((): boolean => {
+		return props.show
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const hasText = computed((): boolean => {
+		return props.text.trim().length > 0
+	})
+
+	const iconName = computed((): string => {
+		return normalizeIcon(props.icon)
+	})
+
+	const iconSizePx = computed((): string => {
+		if (sizeName.value == 'sm') {
+			return '16'
+		}
+		if (sizeName.value == 'lg') {
+			return '32'
+		}
+		return '24'
+	})
+
+	// nax-icon 的 color 需要可解析色值；CSS 变量在部分端可能原样传递，提供兜底实色
+	const resolvedColor = computed((): string => {
+		if (props.color.length > 0) {
+			return props.color
+		}
+		if (typeName.value == 'primary' || typeName.value == 'success') {
+			return '#18a058'
+		}
+		if (typeName.value == 'info') {
+			return '#2080f0'
+		}
+		if (typeName.value == 'warning') {
+			return '#f0a020'
+		}
+		if (typeName.value == 'error') {
+			return '#d03050'
+		}
+		return '#767c82'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-loading--size-' + sizeName.value
+		if (props.vertical) {
+			cls += ' nax-loading--vertical'
+		} else {
+			cls += ' nax-loading--horizontal'
+		}
+		cls += ' nax-loading--' + typeName.value
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		return ''
+	})
+
+	const spinnerClass = computed((): string => {
+		return 'nax-loading__spinner--size-' + sizeName.value
+	})
+
+	const textClass = computed((): string => {
+		var cls = 'nax-loading__text--size-' + sizeName.value
+		if (props.vertical) {
+			cls += ' nax-loading__text--vertical'
+		} else {
+			cls += ' nax-loading__text--horizontal'
+		}
+		return cls
+	})
+
+	const textStyle = computed((): string => {
+		if (props.color.length > 0) {
+			return 'color:' + props.color + ';'
+		}
+		return 'color:' + typeColor(typeName.value) + ';'
+	})
+
+	const spinnerDomId = 'nax-ld-' + Math.floor(Math.random() * 10000000).toString()
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App 端：原生 animate 无限旋转，避免 setInterval + 响应式 transform 掉帧
+	let spinToken = 0
+	let usingNativeSpin = false
+	let cachedSpinEl : UniElement | null = null
+	let spinFallbackTimerId = -1
+	let spinRetryTimerId = -1
+
+	const spinnerStyle = computed((): string => {
+		// transform 交由 animate / setProperty 驱动，避免 style 绑定覆盖
+		return ''
+	})
+
+	function getSpinElement() : UniElement | null {
+		if (cachedSpinEl != null) {
+			return cachedSpinEl
+		}
+		const el = uni.getElementById(spinnerDomId)
+		if (el != null) {
+			cachedSpinEl = el
+		}
+		return el
+	}
+
+	function clearSpinTimers() {
+		if (spinFallbackTimerId >= 0) {
+			clearInterval(spinFallbackTimerId)
+			spinFallbackTimerId = -1
+		}
+		if (spinRetryTimerId >= 0) {
+			clearTimeout(spinRetryTimerId)
+			spinRetryTimerId = -1
+		}
+	}
+
+	function stopNativeSpin() {
+		const el = getSpinElement()
+		if (el == null) {
+			return
+		}
+		// 不返回动画实例：0 时长 forwards 复位并顶掉循环
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 0,
+			fill: 'forwards',
+			iterations: 1,
+			easing: 'linear'
+		} as UniAnimationOption)
+	}
+
+	function startNativeSpin() : boolean {
+		const el = getSpinElement()
+		if (el == null) {
+			return false
+		}
+		el.animate([
+			{
+				transform: 'rotate(0deg)'
+			} as UniAnimationKeyframe,
+			{
+				transform: 'rotate(360deg)'
+			} as UniAnimationKeyframe
+		], {
+			duration: 800,
+			easing: 'linear',
+			// 部分 UTS 端 Infinity 不稳定，用足够大的有限次数
+			iterations: 1000000,
+			fill: 'forwards'
+		} as UniAnimationOption)
+		usingNativeSpin = true
+		return true
+	}
+
+	function startFallbackSpin() {
+		clearSpinTimers()
+		let angle = 0
+		// 元素级 setProperty，不走 Vue 响应式
+		spinFallbackTimerId = setInterval(() => {
+			let next = angle + 45
+			if (next >= 360) {
+				next = next - 360
+			}
+			angle = next
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(' + angle.toString() + 'deg)')
+			}
+		}, 120)
+	}
+
+	function stopSpin() {
+		spinToken = spinToken + 1
+		clearSpinTimers()
+		if (usingNativeSpin) {
+			stopNativeSpin()
+		} else {
+			const el = getSpinElement()
+			if (el != null) {
+				el.style.setProperty('transform', 'rotate(0deg)')
+			}
+		}
+		usingNativeSpin = false
+		cachedSpinEl = null
+	}
+
+	function startSpin() {
+		stopSpin()
+		const token = spinToken
+		function tryStart(attempt : number) {
+			if (token != spinToken) {
+				return
+			}
+			if (!props.show) {
+				return
+			}
+			if (startNativeSpin()) {
+				return
+			}
+			if (attempt < 10) {
+				spinRetryTimerId = setTimeout(() => {
+					spinRetryTimerId = -1
+					tryStart(attempt + 1)
+				}, 32)
+				return
+			}
+			// 原生 animate 不可用时的低频兜底
+			startFallbackSpin()
+		}
+		tryStart(0)
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (val) {
+			startSpin()
+		} else {
+			stopSpin()
+		}
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		stopSpin()
+	})
+	// #endif
+
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	const spinnerStyle = computed((): string => {
+		return ''
+	})
+	// #endif
+</script>
+
+<style>
+	.nax-loading {
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+	}
+
+	.nax-loading--horizontal {
+		flex-direction: row;
+	}
+
+	.nax-loading--vertical {
+		flex-direction: column;
+	}
+
+	.nax-loading__spinner {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		overflow: hidden;
+		transform-origin: center center;
+	}
+
+	.nax-loading__spinner--size-sm {
+		width: 16px;
+		height: 16px;
+	}
+
+	.nax-loading__spinner--size-md {
+		width: 24px;
+		height: 24px;
+	}
+
+	.nax-loading__spinner--size-lg {
+		width: 32px;
+		height: 32px;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web / 小程序：CSS 动画旋转 */
+	.nax-loading__spinner {
+		animation-name: nax-loading-spin;
+		animation-duration: 0.8s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-loading-spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+	/* #endif */
+
+	.nax-loading__text {
+		flex-shrink: 0;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-loading__text--horizontal {
+		margin-left: 8px;
+	}
+
+	.nax-loading__text--vertical {
+		margin-top: 8px;
+	}
+
+	.nax-loading__text--size-sm {
+		font-size: 12px;
+		line-height: 16px;
+	}
+
+	.nax-loading__text--size-md {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-loading__text--size-lg {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+</style>

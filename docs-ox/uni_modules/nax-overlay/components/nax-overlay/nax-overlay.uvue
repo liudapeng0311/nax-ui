@@ -1,0 +1,343 @@
+﻿<template>
+	<view v-if="rootMounted" class="nax-overlay" :class="rootClass" :style="rootStyle">
+		<!-- 遮罩层：opacity 动画只作用于此，内容为兄弟节点不吃透明度 -->
+		<view
+			class="nax-overlay__mask"
+			:class="maskClass"
+			:style="maskStyle"
+			@click="onMaskClick"
+		></view>
+		<view class="nax-overlay__content" @click.stop="onContentClick">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-overlay
+	 * @description 全屏遮罩层（弹层底层）。半透明蒙层 + 可选默认插槽内容；支持淡入淡出。
+	 * @property {boolean} show v-model:show 控制显隐，默认 false
+	 * @property {number} zIndex 层级，默认 1000
+	 * @property {number} duration 淡入淡出时长 ms，默认 280；0 为无动画
+	 * @property {string} color 遮罩颜色；空则用 --nax-color-mask（鸿蒙未传 color 时用 #000 + opacity 0.4）
+	 * @property {boolean} closeOnClick 点击遮罩是否关闭（emit update:show false），默认 false
+	 * @property {string} customClass 根节点扩展 class
+	 * @property {string} customStyle 根节点扩展 style
+	 * @event update:show 显隐变更
+	 * @event click 点击遮罩
+	 * @event open 打开（进场开始）
+	 * @event opened 打开完成
+	 * @event close 关闭完成（DOM 已卸载）
+	 * @slot default 叠在遮罩上的内容（如 loading）；点击内容不冒泡到遮罩
+	 *
+	 * 鸿蒙：mask opacity 三阶段（先落 0 → 开 transition → 切结束态），避免首帧闪黑。
+	 */
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		zIndex: {
+			type: Number,
+			default: 1000
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		color: {
+			type: String,
+			default: ''
+		},
+		closeOnClick: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		},
+		customStyle: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:show', 'click', 'open', 'opened', 'close'])
+
+	const rootMounted = ref(false)
+	/** 遮罩是否处于展开结束态 */
+	const maskOn = ref(false)
+	/** 鸿蒙：是否允许 CSS transition */
+	const hmAnimReady = ref(false)
+
+	let openDelayTimer: number = -1
+	let readyTimer: number = -1
+	let leaveTimer: number = -1
+	let openedTimer: number = -1
+
+	function resolveDuration(): number {
+		const d = props.duration
+		if (d < 0) {
+			return 0
+		}
+		return d
+	}
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+
+	const rootStyle = computed((): string => {
+		let style = 'z-index:' + props.zIndex.toString() + ';'
+		if (props.customStyle.length > 0) {
+			style += props.customStyle
+		}
+		return style
+	})
+
+	const maskClass = computed((): string => {
+		// #ifndef APP-HARMONY
+		if (maskOn.value) {
+			return 'nax-overlay__mask--show'
+		}
+		return ''
+		// #endif
+		// #ifdef APP-HARMONY
+		if (maskOn.value) {
+			return 'nax-overlay__mask--show'
+		}
+		return ''
+		// #endif
+	})
+
+	const maskStyle = computed((): string => {
+		let style = ''
+		const d = resolveDuration()
+		const hasColor = props.color.length > 0
+
+		if (hasColor) {
+			style += 'background-color:' + props.color + ';'
+		}
+
+		// #ifdef APP-HARMONY
+		if (!hasColor) {
+			style += 'background-color:#000000;'
+		}
+		if (hmAnimReady.value && d > 0) {
+			style += 'transition-property:opacity;'
+			style += 'transition-duration:' + d.toString() + 'ms;'
+			style += 'transition-timing-function:ease-out;'
+		} else {
+			style += 'transition-property:none;'
+			style += 'transition-duration:0ms;'
+		}
+		if (maskOn.value) {
+			if (hasColor) {
+				style += 'opacity:1;'
+			} else {
+				style += 'opacity:0.4;'
+			}
+		} else {
+			style += 'opacity:0;'
+		}
+		// #endif
+
+		// #ifndef APP-HARMONY
+		if (d > 0) {
+			style += 'transition-property:opacity;'
+			style += 'transition-duration:' + d.toString() + 'ms;'
+			style += 'transition-timing-function:ease-out;'
+		} else {
+			style += 'transition-duration:0ms;'
+		}
+		// #endif
+
+		return style
+	})
+
+	function clearTimers() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+		if (readyTimer >= 0) {
+			clearTimeout(readyTimer)
+			readyTimer = -1
+		}
+		if (leaveTimer >= 0) {
+			clearTimeout(leaveTimer)
+			leaveTimer = -1
+		}
+		if (openedTimer >= 0) {
+			clearTimeout(openedTimer)
+			openedTimer = -1
+		}
+	}
+
+	function openOverlay() {
+		clearTimers()
+		rootMounted.value = true
+		maskOn.value = false
+		// #ifdef APP-HARMONY
+		hmAnimReady.value = false
+		// #endif
+		emit('open')
+
+		const d = resolveDuration()
+		if (d <= 0) {
+			// #ifdef APP-HARMONY
+			hmAnimReady.value = true
+			// #endif
+			maskOn.value = true
+			emit('opened')
+			return
+		}
+
+		// #ifdef APP-HARMONY
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			hmAnimReady.value = true
+			readyTimer = setTimeout(() => {
+				readyTimer = -1
+				maskOn.value = true
+				openedTimer = setTimeout(() => {
+					openedTimer = -1
+					emit('opened')
+				}, d)
+			}, 16)
+		}, 16)
+		// #endif
+
+		// #ifndef APP-HARMONY
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			maskOn.value = true
+			openedTimer = setTimeout(() => {
+				openedTimer = -1
+				emit('opened')
+			}, d)
+		}, 16)
+		// #endif
+	}
+
+	function closeOverlay() {
+		clearTimers()
+		if (!rootMounted.value) {
+			return
+		}
+		maskOn.value = false
+		// #ifdef APP-HARMONY
+		hmAnimReady.value = true
+		// #endif
+
+		const d = resolveDuration()
+		if (d <= 0) {
+			rootMounted.value = false
+			// #ifdef APP-HARMONY
+			hmAnimReady.value = false
+			// #endif
+			emit('close')
+			return
+		}
+
+		leaveTimer = setTimeout(() => {
+			leaveTimer = -1
+			rootMounted.value = false
+			// #ifdef APP-HARMONY
+			hmAnimReady.value = false
+			// #endif
+			emit('close')
+		}, d)
+	}
+
+	watch(
+		(): boolean => {
+			return props.show
+		},
+		(val: boolean) => {
+			if (val) {
+				openOverlay()
+			} else {
+				closeOverlay()
+			}
+		},
+		{ immediate: true }
+	)
+
+	onUnmounted(() => {
+		clearTimers()
+	})
+
+	function onMaskClick() {
+		emit('click')
+		if (props.closeOnClick) {
+			emit('update:show', false)
+		}
+	}
+
+	function onContentClick() {
+		// 阻止冒泡，避免点内容触发遮罩 click
+	}
+</script>
+
+<style>
+	.nax-overlay {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-overlay__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		/* #ifndef APP-HARMONY */
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		/* 实色黑 + opacity，保证淡入淡出可用 */
+		background-color: #000000;
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+		/* #endif */
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-overlay__mask--show {
+		opacity: 1;
+	}
+	/* #endif */
+
+	/* #ifdef APP-HARMONY */
+	.nax-overlay__mask--show {
+		opacity: 0.4;
+	}
+	/* #endif */
+
+	.nax-overlay__content {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+</style>

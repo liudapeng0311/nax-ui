@@ -1,0 +1,122 @@
+<template>
+  <view class="demo-tag">
+    <text class="dsec">基础</text>
+    <view class="row">
+      <nax-tag label="标签"></nax-tag>
+      <nax-tag type="info" label="标签文案"></nax-tag>
+      <nax-tag icon="star" label="图标"></nax-tag>
+      <nax-tag strong label="加粗"></nax-tag>
+    </view>
+
+    <text class="dsec">类型 type</text>
+    <view class="row">
+      <nax-tag type="default" label="default"></nax-tag>
+      <nax-tag type="primary" label="primary"></nax-tag>
+      <nax-tag type="info" label="info"></nax-tag>
+      <nax-tag type="success" label="success"></nax-tag>
+      <nax-tag type="warning" label="warning"></nax-tag>
+      <nax-tag type="error" label="error"></nax-tag>
+    </view>
+
+    <text class="dsec">层级 variant</text>
+    <view class="row">
+      <nax-tag type="primary" variant="light" label="light"></nax-tag>
+      <nax-tag type="primary" variant="solid" label="solid"></nax-tag>
+      <nax-tag type="primary" variant="outline" label="outline"></nax-tag>
+      <nax-tag type="primary" variant="text" label="text"></nax-tag>
+    </view>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="row">
+      <nax-tag size="tiny" type="info" label="tiny"></nax-tag>
+      <nax-tag size="sm" type="info" label="sm"></nax-tag>
+      <nax-tag size="md" type="info" label="md"></nax-tag>
+      <nax-tag size="lg" type="info" label="lg"></nax-tag>
+      <nax-tag size="large" type="info" label="large"></nax-tag>
+    </view>
+
+    <text class="dsec">圆角 / 无边框</text>
+    <view class="row">
+      <nax-tag round type="success" label="round"></nax-tag>
+      <nax-tag :bordered="false" type="success" label="no border"></nax-tag>
+      <nax-tag round :bordered="false" type="warning" label="round+无边"></nax-tag>
+    </view>
+
+    <text class="dsec">可关闭 closable</text>
+    <view class="row">
+      <nax-tag closable type="error" label="关闭我"></nax-tag>
+      <nax-tag closable type="warning" label="关闭不触发 click" :trigger-click-on-close="false"></nax-tag>
+    </view>
+
+    <text class="dsec">可选中 checkable</text>
+    <view class="row">
+      <nax-tag checkable type="primary" label="可选 primary" :checked="checkedPrimary" @update:checked="onCheckedPrimary"></nax-tag>
+      <nax-tag checkable type="info" label="可选 info" :checked="checkedInfo" @update:checked="onCheckedInfo"></nax-tag>
+      <nax-tag checkable type="success" variant="outline" label="outline 可选" :checked="checkedOutline" @update:checked="onCheckedOutline"></nax-tag>
+    </view>
+
+    <text class="dsec">禁用 disabled</text>
+    <view class="row">
+      <nax-tag disabled label="禁用"></nax-tag>
+      <nax-tag disabled type="primary" label="禁用 primary"></nax-tag>
+      <nax-tag disabled closable type="error" label="禁用关闭"></nax-tag>
+    </view>
+
+    <text class="dsec">自定义 color</text>
+    <view class="row">
+      <nax-tag color="#8a2be2" label="紫 light"></nax-tag>
+      <nax-tag color="#8a2be2" variant="solid" label="紫 solid"></nax-tag>
+      <nax-tag color="#ff6b00" text-color="#ff6b00" :bordered="false" label="橙字"></nax-tag>
+    </view>
+
+    <text class="dsec">solid × type</text>
+    <view class="row">
+      <nax-tag variant="solid" label="default"></nax-tag>
+      <nax-tag type="primary" variant="solid" label="primary"></nax-tag>
+      <nax-tag type="info" variant="solid" label="info"></nax-tag>
+      <nax-tag type="success" variant="solid" label="success"></nax-tag>
+      <nax-tag type="warning" variant="solid" label="warning"></nax-tag>
+      <nax-tag type="error" variant="solid" label="error"></nax-tag>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const checkedPrimary = ref(true)
+const checkedInfo = ref(false)
+const checkedOutline = ref(true)
+
+function onCheckedPrimary(v: boolean) {
+  checkedPrimary.value = v
+}
+
+function onCheckedInfo(v: boolean) {
+  checkedInfo.value = v
+}
+
+function onCheckedOutline(v: boolean) {
+  checkedOutline.value = v
+}
+</script>
+
+<style>
+.demo-tag {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

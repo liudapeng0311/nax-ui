@@ -1,0 +1,429 @@
+<template>
+	<view class="nax-image" :class="rootClass" :style="rootStyle" @click="onClick">
+		<!-- #ifndef VUE3-VAPOR -->
+		<image
+			v-if="showImage"
+			class="nax-image__img"
+			:class="imgClass"
+			:src="src"
+			:mode="mode"
+			:lazy-load="lazyLoad"
+			:fade-show="fadeShow"
+			:webp="webp"
+			:draggable="draggable"
+			:show-menu-by-longpress="showMenuByLongpress"
+			@load="onLoad"
+			@error="onError"
+		></image>
+		<!-- #endif -->
+		<!-- #ifdef VUE3-VAPOR -->
+		<!-- 蒸汽模式原生渲染器不支持以下属性（webp App 默认开启 / draggable 仅 H5 / 长按菜单仅小程序） -->
+		<image
+			v-if="showImage"
+			class="nax-image__img"
+			:class="imgClass"
+			:src="src"
+			:mode="mode"
+			:lazy-load="lazyLoad"
+			:fade-show="fadeShow"
+			@load="onLoad"
+			@error="onError"
+		></image>
+		<!-- #endif -->
+
+		<view v-if="showLoadingLayer" class="nax-image__status" :style="statusLayerStyle">
+			<slot name="loading">
+				<view class="nax-image__status-icon">
+					<nax-icon name="image" :size="iconSizeName" :color="statusIconColor"></nax-icon>
+				</view>
+				<text v-if="loadingText.length > 0" class="nax-image__status-text" :max-lines="1">{{ loadingText }}</text>
+			</slot>
+		</view>
+
+		<view v-if="showErrorLayer" class="nax-image__status" :style="statusLayerStyle">
+			<slot name="error">
+				<view class="nax-image__status-icon">
+					<nax-icon name="image-off" :size="iconSizeName" :color="statusIconColor"></nax-icon>
+				</view>
+				<text v-if="errorText.length > 0" class="nax-image__status-text" :max-lines="1">{{ errorText }}</text>
+			</slot>
+		</view>
+
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-image
+	 * @description 图片。基于原生 image 封装，支持加载中 / 失败占位。
+	 * @property {string} src 图片地址
+	 * @property {string} mode 裁剪/缩放模式，同原生 image
+	 * @property {string} width 宽度；纯数字按 px
+	 * @property {string} height 高度；纯数字按 px
+	 * @property {string} shape square | round | circle
+	 * @property {boolean} lazyLoad 懒加载
+	 * @property {boolean} fadeShow 加载完成淡入（App 等端）
+	 * @property {boolean} webp 是否解析 webp（按端支持）
+	 * @property {boolean} draggable 是否可拖拽（Web）
+	 * @property {boolean} showMenuByLongpress 长按菜单（小程序）
+	 * @property {boolean} showLoading 是否展示加载占位
+	 * @property {boolean} showError 是否展示失败占位
+	 * @property {string} loadingText 加载文案
+	 * @property {string} errorText 失败文案
+	 * @property {string} customClass 根节点扩展 class
+	 * @event load 加载成功
+	 * @event error 加载失败
+	 * @event click 点击
+	 * @slot default 覆盖内容
+	 * @slot loading 自定义加载占位
+	 * @slot error 自定义失败占位
+	 */
+	const props = defineProps({
+		src: {
+			type: String,
+			default: ''
+		},
+		mode: {
+			type: String,
+			default: 'aspectFill'
+		},
+		width: {
+			type: String,
+			default: '100%'
+		},
+		height: {
+			type: String,
+			default: '200'
+		},
+		shape: {
+			type: String,
+			default: 'square'
+		},
+		lazyLoad: {
+			type: Boolean,
+			default: false
+		},
+		fadeShow: {
+			type: Boolean,
+			default: true
+		},
+		webp: {
+			type: Boolean,
+			default: false
+		},
+		draggable: {
+			type: Boolean,
+			default: true
+		},
+		showMenuByLongpress: {
+			type: Boolean,
+			default: false
+		},
+		showLoading: {
+			type: Boolean,
+			default: true
+		},
+		showError: {
+			type: Boolean,
+			default: true
+		},
+		loadingText: {
+			type: String,
+			default: ''
+		},
+		errorText: {
+			type: String,
+			default: '加载失败'
+		},
+		timeout: {
+			type: Number,
+			default: 0
+		},
+		/** 强制显示加载占位（不发起/不展示真实图，便于演示） */
+		forceLoading: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['load', 'error', 'click'])
+
+	// loading | loaded | error
+	const status = ref('loading')
+
+
+	function normalizeShape(value: string): string {
+		if (value == 'round' || value == 'circle') {
+			return value
+		}
+		return 'square'
+	}
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		let i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	function toCssSize(value: string, fallback: string): string {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (isDigits(value)) {
+			return value + 'px'
+		}
+		return value
+	}
+
+	const hasSrc = computed((): boolean => {
+		return props.src.length > 0
+	})
+
+	const showImage = computed((): boolean => {
+		if (props.forceLoading) {
+			return false
+		}
+		return hasSrc.value && status.value != 'error'
+	})
+
+	const showLoadingLayer = computed((): boolean => {
+		if (!props.showLoading) {
+			return false
+		}
+		if (props.forceLoading) {
+			return true
+		}
+		if (!hasSrc.value) {
+			return false
+		}
+		return status.value == 'loading'
+	})
+
+	const showErrorLayer = computed((): boolean => {
+		if (props.forceLoading) {
+			return false
+		}
+		if (!props.showError) {
+			return false
+		}
+		if (!hasSrc.value) {
+			return true
+		}
+		return status.value == 'error'
+	})
+
+	const iconSizeName = computed((): string => {
+		return 'lg'
+	})
+
+	const statusIconColor = computed((): string => {
+		// 鸿蒙内联解析主题色，变量不可用时回退中性灰
+		// #ifdef APP-HARMONY
+		return 'var(--nax-color-text-placeholder,#c2c2c7)'
+		// #endif
+		// #ifndef APP-HARMONY
+		return 'var(--nax-color-text-placeholder, #e5e5ea)'
+		// #endif
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		const shapeName = normalizeShape(props.shape)
+		cls += ' nax-image--shape-' + shapeName
+		if (props.forceLoading || status.value == 'loading') {
+			cls += ' nax-image--loading'
+		}
+		if (status.value == 'error' || !hasSrc.value) {
+			cls += ' nax-image--error'
+		}
+		if (status.value == 'loaded') {
+			cls += ' nax-image--loaded'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const imgClass = computed((): string => {
+		const shapeName = normalizeShape(props.shape)
+		return 'nax-image__img--shape-' + shapeName
+	})
+
+	const widthCss = computed((): string => {
+		return toCssSize(props.width, '100%')
+	})
+
+	const heightCss = computed((): string => {
+		return toCssSize(props.height, '200px')
+	})
+
+	const rootStyle = computed((): string => {
+		let style = 'width:' + widthCss.value + ';height:' + heightCss.value + ';'
+		// 鸿蒙内联解析主题背景，变量不可用时回退浅色占位底
+		// #ifdef APP-HARMONY
+		style += 'background-color:var(--nax-color-bg-secondary,#fafafc);'
+		// #endif
+		return style
+	})
+
+	const statusLayerStyle = computed((): string => {
+		let style = 'width:100%;height:100%;'
+		// 鸿蒙绝对定位层显式解析主题背景，避免背景透明
+		// #ifdef APP-HARMONY
+		style += 'background-color:var(--nax-color-bg-secondary,#fafafc);'
+		// #endif
+		return style
+	})
+
+
+	let loadTimerId = -1
+
+	function clearLoadTimer() {
+		if (loadTimerId >= 0) {
+			clearTimeout(loadTimerId)
+			loadTimerId = -1
+		}
+	}
+
+	function armLoadTimer() {
+		clearLoadTimer()
+		const ms = props.timeout
+		if (ms <= 0) {
+			return
+		}
+		if (!hasSrc.value) {
+			return
+		}
+		loadTimerId = setTimeout(() => {
+			loadTimerId = -1
+			if (status.value == 'loading') {
+				status.value = 'error'
+				emit('error', null)
+			}
+		}, ms)
+	}
+
+	function resetStatus() {
+		clearLoadTimer()
+		if (!hasSrc.value) {
+			status.value = 'error'
+			return
+		}
+		status.value = 'loading'
+		armLoadTimer()
+	}
+
+	function onLoad(e: any) {
+		clearLoadTimer()
+		status.value = 'loaded'
+		emit('load', e)
+	}
+
+	function onError(e: any) {
+		clearLoadTimer()
+		status.value = 'error'
+		emit('error', e)
+	}
+
+	function onClick() {
+		emit('click')
+	}
+
+	watch((): string => {
+		return props.src
+	}, () => {
+		resetStatus()
+	}, { immediate: true })
+
+	onUnmounted(() => {
+		clearLoadTimer()
+	})
+
+</script>
+
+<style>
+	.nax-image {
+		position: relative;
+		overflow: hidden;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: center;
+	}
+
+	.nax-image--shape-round {
+		border-radius: var(--nax-image-radius, var(--nax-radius-md, 3px));
+	}
+
+	.nax-image--shape-circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-image__img {
+		width: 100%;
+		height: 100%;
+	}
+
+	.nax-image__img--shape-round {
+		border-radius: var(--nax-image-radius, var(--nax-radius-md, 3px));
+	}
+
+	.nax-image__img--shape-circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-image__status {
+		position: absolute;
+		left: 0;
+		top: 0;
+		/* Harmony: explicit 100% size for absolute layer */
+		width: 100%;
+		height: 100%;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.nax-image__status-icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+	}
+
+	.nax-image__status-text {
+		margin-top: 8px;
+		font-size: var(--nax-font-size-xs, 12px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	/* #ifdef APP-HARMONY */
+	/* 鸿蒙：显式声明主题色，CSS 变量不可用时仍有可读 fallback */
+	.nax-image {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+	.nax-image__status {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+	.nax-image__status-text {
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+	/* #endif */
+</style>

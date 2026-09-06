@@ -1,0 +1,470 @@
+// AST 扁平化：把 Document 树展开为 RenderItem / Segment 渲染列表。
+// 采用扁平化而非递归组件，规避 UTS 平台对组件自引用的支持差异。
+
+import { AstNode, CodeToken } from '../types/content.uts'
+
+/** 行内片段：一段带样式标记的纯文本 */
+export class Segment {
+  text: string = ''
+  bold: boolean = false
+  italic: boolean = false
+  strike: boolean = false
+  code: boolean = false
+  /** 非空表示链接 */
+  href: string = ''
+  internal: boolean = false
+  anchor: string = ''
+  /** 该片段前存在硬换行 */
+  br: boolean = false
+  /** 行内图片降级：非空时可点击预览 */
+  imgSrc: string = ''
+
+  constructor() {}
+}
+
+export class TableCellRender {
+  align: string = 'left'
+  header: boolean = false
+  segments: Array<Segment> = []
+
+  constructor() {}
+}
+
+export class TableRowRender {
+  header: boolean = false
+  cells: Array<TableCellRender> = []
+
+  constructor() {}
+}
+
+/**
+ * 扁平渲染项。
+ * depth > 0 表示处于引用块内（paragraph）或列表嵌套层级（list-item）。
+ */
+export class RenderItem {
+  kind: string = 'paragraph'
+  level: number = 0
+  id: string = ''
+  depth: number = 0
+  ordered: boolean = false
+  index: number = 0
+  lang: string = ''
+  code: string = ''
+  /** 代码高亮：按行切分的着色片段（与 code 内容一致，仅用于显示） */
+  codeLines: Array<Array<CodeSeg>> = []
+  src: string = ''
+  alt: string = ''
+  /** 交互 Demo：注册组件名（分发链键） */
+  demoName: string = ''
+  /** 交互 Demo：标量 props（内容侧传递，仅字符串/数字/布尔） */
+  demoProps: UTSJSONObject = {} as UTSJSONObject
+  /** 交互 Demo：源码文本（折叠展示；未注册时降级展示） */
+  demoCode: string = ''
+  /** 相邻图片行：连续 image-block 合并后的图片地址列表（kind = 'image-row' 时使用） */
+  imageList: Array<string> = []
+  segments: Array<Segment> = []
+  rows: Array<TableRowRender> = []
+
+  constructor() {}
+}
+
+/** 代码着色片段：c 为语义类别（kw/str/com/num/fn/type），空串表示普通文本 */
+export class CodeSeg {
+  text: string = ''
+  c: string = ''
+
+  constructor(text: string, c: string) {
+    this.text = text
+    this.c = c
+  }
+}
+
+class InlineStyle {
+  bold: boolean = false
+  italic: boolean = false
+  strike: boolean = false
+  href: string = ''
+  internal: boolean = false
+  anchor: string = ''
+
+  constructor() {}
+
+  static clone(s: InlineStyle): InlineStyle {
+    const c = new InlineStyle()
+    c.bold = s.bold
+    c.italic = s.italic
+    c.strike = s.strike
+    c.href = s.href
+    c.internal = s.internal
+    c.anchor = s.anchor
+    return c
+  }
+}
+
+/**
+ * 入口：root 的 children 展开为渲染列表（保持文档顺序，标题顺序与 meta.headings 一致）。
+ * title 非空时，若首个块级节点为与其文本相同的一级标题则跳过，
+ * 避免页面头部已渲染的文档标题在正文中重复出现。
+ * 是否跳过可通过 skipsFirstHeading 查询（供滚动跟随等按索引配对的调用方对齐）。
+ */
+export function flattenBlocks(root: AstNode, title: string): Array<RenderItem> {
+  const children = root.children ?? []
+  let start = 0
+  if (title !== '' && children.length > 0) {
+    const first = children[0]
+    if (first != null && first.type === 'heading' && attrNum(first, 'level', 0) === 1) {
+      if (inlinePlainText(first.children ?? []) === title) start = 1
+    }
+  }
+  const items: Array<RenderItem> = []
+  walkBlocks(children.slice(start), items, 0)
+  return mergeImageRows(items)
+}
+
+/** 连续的图片块合并为一行并排渲染（如收款码），其余项原样保留 */
+function mergeImageRows(items: Array<RenderItem>): Array<RenderItem> {
+  const out: Array<RenderItem> = []
+  let pending: Array<string> = []
+  const flush = () => {
+    if (pending.length === 0) return
+    if (pending.length === 1) {
+      const single = new RenderItem()
+      single.kind = 'image-block'
+      single.src = pending[0]
+      out.push(single)
+    } else {
+      const row = new RenderItem()
+      row.kind = 'image-row'
+      row.imageList = pending
+      out.push(row)
+    }
+    pending = []
+  }
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i]
+    if (it != null && it.kind === 'image-block') {
+      pending.push(it.src)
+      continue
+    }
+    flush()
+    out.push(it)
+  }
+  flush()
+  return out
+}
+
+/**
+ * 判断 flattenBlocks 是否会跳过首个一级标题。
+ * 跳过的必然是文档顺序中的第一个标题（root 首块），
+ * 因此调用方可从 meta.headings 中移除第一项来保持索引对齐。
+ */
+export function skipsFirstHeading(root: AstNode, title: string): boolean {
+  if (title === '') return false
+  const children = root.children ?? []
+  if (children.length === 0) return false
+  const first = children[0]
+  if (first == null) return false
+  if (first.type !== 'heading' || attrNum(first, 'level', 0) !== 1) return false
+  return inlinePlainText(first.children ?? []) === title
+}
+
+/** 提取行内节点的纯文本（递归拼接 value） */
+function inlinePlainText(nodes: Array<AstNode>): string {
+  let out = ''
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i]
+    if (n == null) continue
+    if (n.type === 'break') continue
+    if (n.value != null) {
+      out += n.value
+    } else if (n.children != null) {
+      out += inlinePlainText(n.children!)
+    }
+  }
+  return out
+}
+
+/** Web 端 HTML 会折叠行首/连续空白导致缩进丢失，代码展示文本中的空白替换为不换行空格（等宽字体下宽度一致） */
+function codeSafeText(text: string): string {
+  return text.replace(/\t/g, '\u00A0\u00A0').replace(/ /g, '\u00A0')
+}
+
+/** 将构建端 token 按换行切分为逐行片段；无 token 时整行按普通文本处理，空行以空格占位保持行高 */
+export function buildCodeLines(tokens: CodeToken[] | null, code: string): Array<Array<CodeSeg>> {
+  const lines: Array<Array<CodeSeg>> = []
+  const push = (line: Array<CodeSeg>, text: string, c: string): void => {
+    if (text === '') return
+    line.push(new CodeSeg(codeSafeText(text), c))
+  }
+  if (tokens == null || tokens.length === 0) {
+    for (const line of code.split('\n')) {
+      lines.push([new CodeSeg(line === '' ? '\u00A0' : codeSafeText(line), '')])
+    }
+    return lines
+  }
+  let current: Array<CodeSeg> = []
+  for (let i = 0; i < tokens.length; i++) {
+    const tk = tokens[i]
+    if (tk == null) continue
+    const parts = tk.t.split('\n')
+    for (let p = 0; p < parts.length; p++) {
+      if (p > 0) {
+        if (current.length === 0) current.push(new CodeSeg('\u00A0', ''))
+        lines.push(current)
+        current = []
+      }
+      push(current, parts[p]!, tk.c ?? '')
+    }
+  }
+  if (current.length === 0) current.push(new CodeSeg('\u00A0', ''))
+  lines.push(current)
+  return lines
+}
+
+function walkBlocks(nodes: Array<AstNode>, items: Array<RenderItem>, depth: number): void {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (node == null) continue
+    switch (node.type) {
+      case 'heading': {
+        const item = new RenderItem()
+        item.kind = 'heading'
+        item.level = attrNum(node, 'level', 1)
+        item.id = attrStr(node, 'id')
+        item.segments = flattenInline(node.children ?? [])
+        items.push(item)
+        break
+      }
+      case 'paragraph': {
+        const children = node.children ?? []
+        if (children.length === 1) {
+          const only = children[0]
+          if (only != null && only.type === 'image') {
+            const img = new RenderItem()
+            img.kind = 'image-block'
+            img.src = attrStr(only, 'src')
+            img.alt = only.value ?? ''
+            items.push(img)
+            break
+          }
+        }
+        const p = new RenderItem()
+        p.kind = 'paragraph'
+        p.depth = depth
+        p.segments = flattenInline(children)
+        items.push(p)
+        break
+      }
+      case 'code-block': {
+        const c = new RenderItem()
+        c.kind = 'code-block'
+        let lang = attrStr(node, 'lang')
+        if (lang === '') lang = 'text'
+        c.lang = lang
+        c.code = node.value ?? ''
+        c.codeLines = buildCodeLines(node.tokens, c.code)
+        items.push(c)
+        break
+      }
+      case 'demo': {
+        const d = new RenderItem()
+        d.kind = 'demo'
+        d.demoName = attrStr(node, 'name')
+        d.demoProps = node.props ?? ({} as UTSJSONObject)
+        d.demoCode = node.value ?? ''
+        items.push(d)
+        break
+      }
+      case 'blockquote': {
+        walkBlocks(node.children ?? [], items, depth + 1)
+        break
+      }
+      case 'list': {
+        walkList(node, items, depth)
+        break
+      }
+      case 'table': {
+        items.push(buildTable(node))
+        break
+      }
+      case 'thematic-break': {
+        const hr = new RenderItem()
+        hr.kind = 'thematic-break'
+        items.push(hr)
+        break
+      }
+      default:
+        // html-block 等默认禁用
+        break
+    }
+  }
+}
+
+function walkList(list: AstNode, items: Array<RenderItem>, depth: number): void {
+  const ordered = list.attrs?.['ordered'] == true
+  const start = attrNum(list, 'start', 1)
+  const children = list.children ?? []
+  for (let i = 0; i < children.length; i++) {
+    const li = children[i]
+    if (li == null) continue
+    const index = start + i
+    const liChildren = li.children ?? []
+    for (let j = 0; j < liChildren.length; j++) {
+      const child = liChildren[j]
+      if (child == null) continue
+      if (child.type === 'list-item-text') {
+        const item = new RenderItem()
+        item.kind = 'list-item'
+        item.depth = depth
+        item.ordered = ordered
+        item.index = index
+        item.segments = flattenInline(child.children ?? [])
+        items.push(item)
+      } else if (child.type === 'list') {
+        walkList(child, items, depth + 1)
+      } else {
+        walkBlocks([child], items, depth)
+      }
+    }
+  }
+}
+
+function buildTable(table: AstNode): RenderItem {
+  const item = new RenderItem()
+  item.kind = 'table'
+  const aligns = attrStr(table, 'align').split(',')
+  const rows = table.children ?? []
+  for (let r = 0; r < rows.length; r++) {
+    const rowNode = rows[r]
+    if (rowNode == null) continue
+    const row = new TableRowRender()
+    row.header = rowNode.attrs?.['head'] == true
+    const cells = rowNode.children ?? []
+    for (let c = 0; c < cells.length; c++) {
+      const cellNode = cells[c]
+      if (cellNode == null) continue
+      const cell = new TableCellRender()
+      cell.header = row.header
+      const align = aligns[c]
+      cell.align = align ?? 'left'
+      cell.segments = flattenInline(cellNode.children ?? [])
+      row.cells.push(cell)
+    }
+    item.rows.push(row)
+  }
+  return item
+}
+
+function flattenInline(nodes: Array<AstNode>): Array<Segment> {
+  return inlineWalk(nodes, new InlineStyle())
+}
+
+/** Array.pushAll 为非标准扩展，鸿蒙 ArkTS 运行时未实现，统一走显式循环 */
+function appendAll(out: Array<Segment>, parts: Array<Segment>): void {
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i]
+    if (p == null) continue
+    out.push(p)
+  }
+}
+
+function inlineWalk(nodes: Array<AstNode>, style: InlineStyle): Array<Segment> {
+  const out: Array<Segment> = []
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i]
+    if (n == null) continue
+    switch (n.type) {
+      case 'text': {
+        pushText(out, style, n.value ?? '')
+        break
+      }
+      case 'strong': {
+        const s = InlineStyle.clone(style)
+        s.bold = true
+        appendAll(out, inlineWalk(n.children ?? [], s))
+        break
+      }
+      case 'emphasis': {
+        const s = InlineStyle.clone(style)
+        s.italic = true
+        appendAll(out, inlineWalk(n.children ?? [], s))
+        break
+      }
+      case 'strikethrough': {
+        const s = InlineStyle.clone(style)
+        s.strike = true
+        appendAll(out, inlineWalk(n.children ?? [], s))
+        break
+      }
+      case 'link': {
+        const s = InlineStyle.clone(style)
+        s.href = attrStr(n, 'href')
+        s.internal = n.attrs?.['internal'] == true
+        s.anchor = attrStr(n, 'anchor')
+        appendAll(out, inlineWalk(n.children ?? [], s))
+        break
+      }
+      case 'inline-code': {
+        const seg = styledSegment(style)
+        seg.code = true
+        seg.text = n.value ?? ''
+        out.push(seg)
+        break
+      }
+      case 'break': {
+        const seg = new Segment()
+        seg.br = true
+        out.push(seg)
+        break
+      }
+      case 'image': {
+        const seg = styledSegment(style)
+        seg.text = n.value ?? '图片'
+        seg.imgSrc = attrStr(n, 'src')
+        out.push(seg)
+        break
+      }
+      case 'html-inline':
+        // 默认禁用
+        break
+      default: {
+        if (n.value != null) pushText(out, style, n.value ?? '')
+        else appendAll(out, inlineWalk(n.children ?? [], style))
+      }
+    }
+  }
+  return out
+}
+
+function pushText(out: Array<Segment>, style: InlineStyle, text: string): void {
+  if (text === '') return
+  const seg = styledSegment(style)
+  seg.text = text
+  out.push(seg)
+}
+
+function styledSegment(style: InlineStyle): Segment {
+  const seg = new Segment()
+  seg.bold = style.bold
+  seg.italic = style.italic
+  seg.strike = style.strike
+  seg.href = style.href
+  seg.internal = style.internal
+  seg.anchor = style.anchor
+  return seg
+}
+
+// ---- 工具 ----
+
+export function attrStr(node: AstNode, key: string): string {
+  const v = node.attrs?.[key]
+  if (v == null) return ''
+  return v.toString()
+}
+
+export function attrNum(node: AstNode, key: string, fallback: number): number {
+  const v = node.attrs?.[key]
+  if (v == null) return fallback
+  const num = parseFloat(v.toString())
+  return isNaN(num) ? fallback : num
+}

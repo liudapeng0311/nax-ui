@@ -1,0 +1,389 @@
+// 运行时注册中心：宿主工程在 App 启动时注入 ContentProvider，
+// 文档页只依赖该接口，不感知内容来自内置数据还是 uniCloud。
+
+import { SiteInfo, PageMeta, NavigationNode, SidebarGroup, SearchDocument, SiteManifestData, Document } from '../types/content.uts'
+import { normalizeDocPath } from './route.uts'
+import { CACHE_MANIFEST_KEY, pageCacheKey, cacheGetJson, cacheSetJson, cacheRemove, cachePurgePages } from './cache.uts'
+import { verifyChecksum } from './checksum.uts'
+
+export interface ContentProvider {
+  getManifest(): Promise<SiteManifestData>
+  getPage(path: string): Promise<Document>
+}
+
+export interface OxUniPressRuntimeOptions {
+  provider: ContentProvider
+  clientVersion?: string
+}
+
+class OxUniPressRuntime {
+  provider: ContentProvider | null = null
+  clientVersion: string = '0.1.0'
+}
+
+const runtime = new OxUniPressRuntime()
+
+/** 宿主工程在 App.uvue onLaunch 中调用 */
+export function registerOxUniPress(options: OxUniPressRuntimeOptions): void {
+  runtime.provider = options.provider
+  if (options.clientVersion != null) runtime.clientVersion = options.clientVersion
+}
+
+export function getProvider(): ContentProvider | null {
+  return runtime.provider
+}
+
+/** 客户端支持的内容 schema 版本 */
+const SUPPORTED_SCHEMA_VERSION = 1
+
+// ---------------- 错误码 ----------------
+
+/**
+ * Provider 错误消息统一携带 "ox-uni-press:<CODE>|" 前缀，
+ * 宿主用 providerErrorCode(err) 提取后可做升级引导等差异化处理。
+ * 已知错误码：
+ * - OFFLINE_NO_CACHE          断网且无缓存/兜底可用
+ * - CLIENT_UPGRADE_REQUIRED   内容要求更高客户端版本
+ * - SCHEMA_TOO_NEW            内容 schema 高于客户端支持
+ * - CHECKSUM_MISMATCH         页面 checksum 校验失败
+ * - PAGE_NOT_FOUND            页面不存在
+ */
+export function providerError(code: string, message: string): Error {
+  return new Error(`ox-uni-press:${code}|${message}`)
+}
+
+export function providerErrorCode(err: Error | null): string {
+  if (err == null) return ''
+  const msg = err.message
+  if (!msg.startsWith('ox-uni-press:') || !msg.includes('|')) return ''
+  return msg.substring('ox-uni-press:'.length, msg.indexOf('|'))
+}
+
+/** 提取面向用户的错误文案（剥离 ox-uni-press:<CODE>| 前缀） */
+export function providerErrorMessage(err: Error | null): string {
+  if (err == null) return ''
+  const msg = err.message
+  const idx = msg.indexOf('|')
+  if (msg.startsWith('ox-uni-press:') && idx >= 0) return msg.substring(idx + 1)
+  return msg
+}
+
+// ---------------- 内置内容 Provider ----------------
+
+/**
+ * 内置模式：消费 CLI 生成的数据文件（content/manifest.uts 与 content/documents.uts）。
+ * 数据由构建端生成为强类型字面量，运行时零解析成本。
+ */
+export class LocalContentProvider implements ContentProvider {
+  private data: SiteManifestData
+  private documents: Document[]
+
+  constructor(
+    siteInfo: SiteInfo,
+    pages: PageMeta[],
+    navigation: NavigationNode[],
+    sidebar: SidebarGroup[],
+    search: SearchDocument[],
+    documents: Document[],
+  ) {
+    this.data = { site: siteInfo, pages: pages, navigation: navigation, sidebar: sidebar, search: search } as SiteManifestData
+    this.documents = documents
+  }
+
+  getManifest(): Promise<SiteManifestData> {
+    return Promise.resolve(this.data)
+  }
+
+  getPage(path: string): Promise<Document> {
+    const target = normalizeDocPath(path)
+    for (let i = 0; i < this.documents.length; i++) {
+      const doc = this.documents[i]
+      if (doc != null && normalizeDocPath(doc.meta.path) === target) {
+        return Promise.resolve(doc)
+      }
+    }
+    return Promise.reject(providerError('PAGE_NOT_FOUND', `页面不存在：${target}`))
+  }
+}
+
+export function createLocalProvider(
+  siteInfo: SiteInfo,
+  pages: PageMeta[],
+  navigation: NavigationNode[],
+  sidebar: SidebarGroup[],
+  search: SearchDocument[],
+  documents: Document[],
+): ContentProvider {
+  return new LocalContentProvider(siteInfo, pages, navigation, sidebar, search, documents)
+}
+
+// ---------------- uniCloud 远程内容 Provider ----------------
+
+export interface UniCloudProviderOptions {
+  /** 云对象名称，默认 ox-uni-press-reader */
+  objectName?: string
+  siteId?: string
+  clientVersion?: string
+  /**
+   * 断网且无缓存时的兜底内容源，通常传内置快照 Provider：
+   * createUniCloudProvider({ fallback: createLocalProvider(...) })
+   */
+  fallback?: ContentProvider | null
+  /** 持久缓存开关，默认开启 */
+  cache?: boolean
+  /**
+   * 页面 checksum 校验开关，默认开启。
+   * 若真机出现 CHECKSUM_MISMATCH（UTS 与 Node 序列化差异），可临时关闭并反馈。
+   */
+  verifyChecksum?: boolean
+}
+
+interface CachedManifest {
+  releaseId: string
+  manifest: SiteManifestData
+}
+
+/**
+ * 远程模式：通过 uniCloud 云函数读取发布包。
+ * 读取顺序（manifest 与页面一致）：
+ * 1. 网络（成功后写缓存；releaseId 变化时清理旧版本页面缓存）
+ * 2. 内存缓存
+ * 3. 持久缓存（页面按 releaseId 隔离，读取时校验 checksum，损坏视为未命中）
+ * 4. fallback 兜底内容源（通常为内置快照）
+ * 全部失败时抛出带错误码的 Provider 错误。
+ */
+export class UniCloudContentProvider implements ContentProvider {
+  private objectName: string
+  private siteId: string
+  private clientVersion: string
+  private fallback: ContentProvider | null
+  private cacheEnabled: boolean
+  private checksumEnabled: boolean
+
+  private memoryManifest: CachedManifest | null = null
+  private memoryPages: Map<string, Document> = new Map()
+
+  constructor(options: UniCloudProviderOptions) {
+    this.objectName = options.objectName ?? 'ox-uni-press-reader'
+    this.siteId = options.siteId ?? 'default'
+    this.clientVersion = options.clientVersion ?? '0.1.0'
+    this.fallback = options.fallback ?? null
+    this.cacheEnabled = options.cache !== false
+    this.checksumEnabled = options.verifyChecksum !== false
+  }
+
+  private call(action: string, path: string | null): Promise<UTSJSONObject> {
+    // path 为 null 表示无附加参数（getManifest）；避免对 UTSJSONObject 做可空遍历
+    const payload = { action: action, siteId: this.siteId, clientVersion: this.clientVersion } as UTSJSONObject
+    if (path != null) {
+      payload['path'] = path
+    }
+    // uni-app x 的 callFunction 为 Promise 风格（无 success/fail 回调）
+    return uniCloud.callFunction({
+      name: this.objectName,
+      data: payload,
+    }).then((res) => {
+      const result = res.result
+      if (!(result instanceof UTSJSONObject)) {
+        throw providerError('CLOUD_EMPTY', '云函数返回为空')
+      }
+      const ok = result['ok']
+      if (ok == false) {
+        const code = result['code']
+        const message = result['message']
+        const codeStr = code == null ? 'CLOUD_ERROR' : code.toString()
+        throw providerError(codeStr, message?.toString() ?? '云端接口错误')
+      }
+      const payloadData = result['data']
+      if (payloadData instanceof UTSJSONObject) {
+        return payloadData
+      }
+      throw providerError('CLOUD_BAD_RESPONSE', '云函数返回数据格式错误')
+    }).catch((err: any | null) => {
+      // 业务错误（已带 ox-uni-press 前缀）原样上抛，其余归一为 CLOUD_UNREACHABLE
+      if (err instanceof Error && providerErrorCode(err) != '') {
+        throw err
+      }
+      const message = err?.toString() ?? 'uniCloud 调用失败'
+      throw providerError('CLOUD_UNREACHABLE', `uniCloud 调用失败：${message}`)
+    })
+  }
+
+  getManifest(): Promise<SiteManifestData> {
+    if (this.memoryManifest != null) {
+      return Promise.resolve(this.memoryManifest!.manifest)
+    }
+    return this.fetchManifest().then((fresh) => {
+      return fresh.manifest
+    }).catch((networkErr: Error | null) => {
+      // 网络/云端失败：内存 -> 持久缓存 -> fallback
+      const cached = this.readCachedManifest()
+      if (cached != null) {
+        this.memoryManifest = cached
+        return cached.manifest
+      }
+      if (this.fallback != null) {
+        return this.fallback.getManifest()
+      }
+      return Promise.reject(networkErr ?? providerError('OFFLINE_NO_CACHE', '内容加载失败且无本地缓存'))
+    })
+  }
+
+  private fetchManifest(): Promise<CachedManifest> {
+    return this.call('getManifest', null).then((data) => {
+      const releaseIdRaw = data['releaseId']
+      const manifestJson = JSON.stringify(data['manifest'])
+      const manifest = JSON.parse<SiteManifestData>(manifestJson)
+      if (releaseIdRaw == null || manifest == null) {
+        throw providerError('CLOUD_BAD_RESPONSE', 'manifest 数据格式错误')
+      }
+      const releaseId = releaseIdRaw.toString()
+      const previous = this.memoryManifest?.releaseId ?? this.readCachedManifest()?.releaseId ?? ''
+      if (previous !== '' && previous !== releaseId) {
+        // 发布指针切换：旧版本页面缓存全部失效
+        this.memoryPages.clear()
+        if (this.cacheEnabled) cachePurgePages(releaseId)
+      }
+      this.memoryManifest = { releaseId: releaseId, manifest: manifest } as CachedManifest
+      if (this.cacheEnabled) {
+        const record = { releaseId: releaseId, manifestJson: manifestJson } as UTSJSONObject
+        cacheSetJson(CACHE_MANIFEST_KEY, record)
+      }
+      return this.memoryManifest!
+    })
+  }
+
+  private readCachedManifest(): CachedManifest | null {
+    if (!this.cacheEnabled) return null
+    const record = cacheGetJson(CACHE_MANIFEST_KEY)
+    if (record == null) return null
+    const releaseId = record['releaseId']
+    const manifestJson = record['manifestJson']
+    if (releaseId == null || typeof manifestJson !== 'string') return null
+    const manifest = JSON.parse<SiteManifestData>(manifestJson as string)
+    if (manifest == null) return null
+    return { releaseId: releaseId.toString(), manifest: manifest } as CachedManifest
+  }
+
+  private currentReleaseId(): string {
+    if (this.memoryManifest != null) return this.memoryManifest!.releaseId
+    return this.readCachedManifest()?.releaseId ?? ''
+  }
+
+  getPage(path: string): Promise<Document> {
+    const target = normalizeDocPath(path)
+    // 1. 内存缓存
+    const mem = this.memoryPages.get(target)
+    if (mem != null) {
+      return Promise.resolve(mem)
+    }
+    // 2. 持久缓存（按当前 releaseId 隔离，读取时校验 checksum，损坏视为未命中）
+    const releaseId = this.currentReleaseId()
+    if (this.cacheEnabled && releaseId !== '') {
+      const cachedDoc = this.readCachedPage(releaseId, target)
+      if (cachedDoc != null) {
+        this.memoryPages.set(target, cachedDoc)
+        return Promise.resolve(cachedDoc)
+      }
+    }
+    // 3. 网络
+    return this.fetchPage(target).then((doc) => {
+      return doc
+    }).catch((networkErr: Error | null) => {
+      // 4. 缓存兜底（getManifest 失败时 releaseId 可能为空，尝试持久缓存中已有版本）
+      if (this.cacheEnabled) {
+        const cachedDoc = this.readCachedPageAnyRelease(target)
+        if (cachedDoc != null) {
+          this.memoryPages.set(target, cachedDoc)
+          return cachedDoc
+        }
+      }
+      if (this.fallback != null) {
+        return this.fallback.getPage(target)
+      }
+      return Promise.reject(networkErr ?? providerError('OFFLINE_NO_CACHE', `页面加载失败且无本地缓存：${target}`))
+    })
+  }
+
+  private fetchPage(path: string): Promise<Document> {
+    return this.call('getPage', path).then((result) => {
+      const envelope = result['envelope']
+      if (!(envelope instanceof UTSJSONObject)) {
+        throw providerError('CLOUD_BAD_RESPONSE', '页面信封格式错误')
+      }
+      const env = envelope as UTSJSONObject
+      const schemaRaw = env['schemaVersion']
+      const schemaVersion = schemaRaw == null ? SUPPORTED_SCHEMA_VERSION : parseFloat(schemaRaw.toString())
+      if (schemaVersion > SUPPORTED_SCHEMA_VERSION) {
+        throw providerError('SCHEMA_TOO_NEW', `内容 schema 版本 ${schemaVersion} 高于客户端支持的 ${SUPPORTED_SCHEMA_VERSION}，请升级 App`)
+      }
+      const checksum = env['checksum']
+      const documentJson = JSON.stringify(env['document'])
+      const doc = JSON.parse<Document>(documentJson)
+      if (doc == null) {
+        throw providerError('CLOUD_BAD_RESPONSE', '页面数据格式错误')
+      }
+      if (this.checksumEnabled && checksum != null) {
+        const documentObj = JSON.parse<UTSJSONObject>(documentJson)
+        if (documentObj == null || !verifyChecksum(documentObj, checksum.toString())) {
+          throw providerError('CHECKSUM_MISMATCH', `页面 checksum 校验失败：${path}`)
+        }
+      }
+      const envRelease = env['releaseId']
+      const releaseId = envRelease == null ? '' : envRelease.toString()
+      if (this.cacheEnabled && releaseId !== '') {
+        const record = { checksum: checksum?.toString() ?? '', documentJson: documentJson } as UTSJSONObject
+        cacheSetJson(pageCacheKey(releaseId, path), record)
+      }
+      return doc
+    })
+  }
+
+  private readCachedPage(releaseId: string, path: string): Document | null {
+    const key = pageCacheKey(releaseId, path)
+    const record = cacheGetJson(key)
+    if (record == null) return null
+    return this.parseCachedRecord(record, path, key)
+  }
+
+  private readCachedPageAnyRelease(path: string): Document | null {
+    if (!this.cacheEnabled) return null
+    try {
+      const info = uni.getStorageInfoSync()
+      const keys = info.keys
+      const suffix = `.${path}`
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i]!
+        if (!key.startsWith('up.page.') || !key.endsWith(suffix)) continue
+        const record = cacheGetJson(key)
+        if (record == null) continue
+        const doc = this.parseCachedRecord(record, path, key)
+        if (doc != null) return doc
+      }
+    } catch {
+      // 忽略
+    }
+    return null
+  }
+
+  /** 缓存记录 -> Document；checksum 不匹配视为缓存损坏，删除记录返回 null */
+  private parseCachedRecord(record: UTSJSONObject, path: string, cacheKey: string): Document | null {
+    const documentJson = record['documentJson']
+    if (typeof documentJson !== 'string') return null
+    const doc = JSON.parse<Document>(documentJson as string)
+    if (doc == null) return null
+    const checksum = record['checksum']
+    if (this.checksumEnabled && checksum != null && checksum.toString() !== '') {
+      const documentObj = JSON.parse<UTSJSONObject>(documentJson as string)
+      if (documentObj == null || !verifyChecksum(documentObj, checksum.toString())) {
+        cacheRemove(cacheKey)
+        return null
+      }
+    }
+    return doc
+  }
+}
+
+export function createUniCloudProvider(options: UniCloudProviderOptions): ContentProvider {
+  return new UniCloudContentProvider(options)
+}

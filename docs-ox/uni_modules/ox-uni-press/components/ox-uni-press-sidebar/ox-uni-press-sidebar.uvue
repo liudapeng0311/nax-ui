@@ -1,0 +1,150 @@
+<template>
+  <view class="sidebar" :style="sidebarStyle()">
+    <scroll-view class="scroll" :scroll-y="true" :show-scrollbar="false">
+      <view v-for="(group, gi) in groups" :key="gi" class="group">
+        <text v-if="group.text != null && group.text !== ''" class="group-title" :style="groupTitleStyle(groupActive(group))">{{ group.text }}</text>
+        <view
+          v-for="(item, ii) in group.items"
+          :key="ii"
+          class="side-item"
+          :style="itemStyle(isActive(item))"
+          hover-class="press"
+          @click="onTap(item)"
+        >
+          <text class="side-text" :style="textStyle(isActive(item))">{{ item.text }}</text>
+        </view>
+      </view>
+      <view class="tail-space" />
+    </scroll-view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { SidebarGroup, NavigationNode } from '../../types/content.uts'
+import { theme } from '../../utils/theme.uts'
+import { normalizeDocPath } from '../../utils/route.uts'
+
+const props = defineProps<{
+  groups: SidebarGroup[]
+  currentPath: string
+}>()
+
+const emit = defineEmits(['navigate'])
+
+function sidebarStyle(): UTSJSONObject {
+  const style = {
+    backgroundColor: theme.state.colors.bgSubtle,
+    borderRightWidth: '1px',
+    borderRightColor: theme.state.colors.border,
+    borderRightStyle: 'solid',
+  } as UTSJSONObject
+  // #ifdef WEB
+  // 鼠标悬停背景色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-bg'] = theme.state.colors.surfaceHover
+  // #endif
+  return style
+}
+
+/** 分组标题是否处于激活态：组内任一条目为当前页时跟随高亮（与 docs-site 行为一致） */
+function groupActive(group: SidebarGroup): boolean {
+  for (let i = 0; i < group.items.length; i++) {
+    const it = group.items[i]
+    if (it != null && isActive(it)) return true
+  }
+  return false
+}
+
+function groupTitleStyle(active: boolean): UTSJSONObject {
+  return {
+    fontSize: '12px',
+    fontWeight: '600',
+    letterSpacing: '0.5px',
+    color: active ? theme.state.colors.brand : theme.state.colors.text3,
+  } as UTSJSONObject
+}
+
+function isActive(item: NavigationNode): boolean {
+  if (item.link == null) return false
+  return normalizeDocPath(item.link) === normalizeDocPath(props.currentPath)
+}
+
+/**
+ * 条目样式：仅选中态内联背景色（Web 端 :style 编译为真实内联样式，优先级高于样式表），
+ * 非选中态不写背景色，让 :hover 悬停底色规则得以生效；圆角始终内联，保证悬停底色为圆角
+ */
+function itemStyle(active: boolean): UTSJSONObject {
+  const style = { borderRadius: '8px' } as UTSJSONObject
+  if (active) {
+    style['backgroundColor'] = theme.state.colors.brandSoft
+  }
+  return style
+}
+
+function textStyle(active: boolean): UTSJSONObject {
+  return {
+    fontSize: '14px',
+    lineHeight: '24px',
+    fontWeight: active ? '600' : '400',
+    color: active ? theme.state.colors.brand : theme.state.colors.text2,
+  } as UTSJSONObject
+}
+
+function onTap(item: NavigationNode): void {
+  if (item.link != null) emit('navigate', item.link)
+}
+</script>
+
+<style>
+.sidebar {
+  flex-direction: column;
+  /* 填满父容器（宽屏 fixed-sidebar / 窄屏 drawer），否则背景高度塌成内容高度 */
+  flex: 1;
+}
+
+.scroll {
+  flex: 1;
+  flex-direction: column;
+}
+
+.group {
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.group-title {
+  margin-left: 12px;
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+.side-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-bottom: 2px;
+}
+
+/* #ifdef WEB */
+.side-item {
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 120ms;
+}
+
+.side-item:hover {
+  background-color: var(--up-hover-bg, rgba(20, 24, 40, 0.05));
+}
+/* #endif */
+
+/* 按压反馈仅触屏端生效：Web 端已有悬停底色，按压变透明会在点击时产生文字"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.press {
+  opacity: 0.7;
+}
+/* #endif */
+
+.tail-space {
+  height: 40px;
+}
+</style>

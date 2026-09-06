@@ -1,0 +1,37 @@
+/**
+ * useStorage — 响应式 uni storage 组合式函数：返回与本地缓存双向绑定的 Ref，改值即写缓存。
+ *
+ * 用法（必须在 setup 内同步调用）：
+ * ```
+ * import { useStorage } from '@/uni_modules/nax-use/composables/use-storage.uts'
+ *
+ * const nickname = useStorage('nax-nickname', '默认昵称')
+ * nickname.value = '新昵称'   // 自动写入 uni storage（watch 异步落盘）
+ * nickname.value = null      // 约定：置 null 即删除该 key
+ * ```
+ *
+ * 说明：
+ * - key 不存在时返回 defaultValue 并立即持久化，保证下次创建直接读到
+ * - uni 缓存缺失 key 时 getStorageSync 返回空串，因此空串视为"不存在"（同 defaultValue 处理）
+ * - 写入经 watch（pre 时序）异步落盘；写后立刻同步读缓存的场景请直接用 uni.setStorageSync
+ * - 相同 key 的多个实例各自持有独立 Ref，互相不联动
+ */
+
+import { ref, watch, Ref } from 'vue'
+
+export function useStorage(key : string, defaultValue : any | null = null) : Ref<any> {
+	let init : any = uni.getStorageSync(key)
+	if (init == null || init == '') {
+		init = defaultValue
+		uni.setStorageSync(key, init)
+	}
+	const state = ref(init)
+	watch(state, (v : any) => {
+		if (v == null) {
+			uni.removeStorageSync(key)
+			return
+		}
+		uni.setStorageSync(key, v)
+	})
+	return state
+}

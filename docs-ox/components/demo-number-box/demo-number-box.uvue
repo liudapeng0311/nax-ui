@@ -1,0 +1,98 @@
+<template>
+  <view class="demo-number-box">
+    <text class="dsec">基础用法</text>
+    <nax-number-box v-model="basic"></nax-number-box>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="row">
+      <nax-number-box v-model="sizeSm" size="sm"></nax-number-box>
+      <nax-number-box v-model="sizeMd" size="md"></nax-number-box>
+      <nax-number-box v-model="sizeLg" size="lg"></nax-number-box>
+    </view>
+
+    <text class="dsec">范围 min / max / step</text>
+    <nax-number-box v-model="rangeVal" :min="1" :max="10" :step="1" class="mb"></nax-number-box>
+    <nax-number-box v-model="stepVal" :min="0" :max="5" :step="0.5" class="mb"></nax-number-box>
+
+    <text class="dsec">仅整数 integer</text>
+    <nax-number-box v-model="intVal" integer :min="0" :max="99"></nax-number-box>
+
+    <text class="dsec">禁用</text>
+    <view class="col">
+      <nax-number-box v-model="disabledAll" disabled class="mb"></nax-number-box>
+      <nax-number-box v-model="disabledInputVal" disabled-input class="mb"></nax-number-box>
+      <nax-number-box v-model="disableBtnVal" disable-plus disable-minus class="mb"></nax-number-box>
+    </view>
+
+    <text class="dsec">长按 longPress</text>
+    <view class="row">
+      <nax-number-box v-model="longPressOn" :long-press="true"></nax-number-box>
+      <nax-number-box v-model="longPressOff" :long-press="false"></nax-number-box>
+    </view>
+
+    <text class="dsec">自定义颜色 / 宽度</text>
+    <nax-number-box v-model="colorVal" bg-color="#e8f5ee" color="#18a058" :button-size="36" :input-width="56"></nax-number-box>
+
+    <text class="dsec">自定义插槽</text>
+    <nax-number-box v-model="slotVal">
+      <template #minus>
+        <text class="stxt">减</text>
+      </template>
+      <template #plus>
+        <text class="stxt">加</text>
+      </template>
+    </nax-number-box>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const basic = ref(1)
+const sizeSm = ref(1)
+const sizeMd = ref(1)
+const sizeLg = ref(1)
+const rangeVal = ref(1)
+const stepVal = ref(2.5)
+const intVal = ref(0)
+const disabledAll = ref(1)
+const disabledInputVal = ref(1)
+const disableBtnVal = ref(1)
+const longPressOn = ref(1)
+const longPressOff = ref(1)
+const colorVal = ref(1)
+const slotVal = ref(1)
+</script>
+
+<style>
+.demo-number-box {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.col {
+  flex-direction: column;
+}
+
+.mb {
+  margin-bottom: 12px;
+}
+
+.stxt {
+  font-size: 13px;
+  color: var(--nax-color-text, #333333);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

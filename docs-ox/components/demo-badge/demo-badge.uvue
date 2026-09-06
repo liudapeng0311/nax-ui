@@ -1,0 +1,95 @@
+<template>
+  <view class="demo-badge">
+    <text class="dsec">基础 value</text>
+    <view class="row">
+      <nax-badge value="5"><view class="bx"><text class="bxt">消息</text></view></nax-badge>
+      <nax-badge value="15"><view class="bx"><text class="bxt">通知</text></view></nax-badge>
+      <nax-badge value="hot"><view class="bx"><text class="bxt">文本</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">红点 dot</text>
+    <view class="row">
+      <nax-badge dot><view class="bx"><text class="bxt">未读</text></view></nax-badge>
+      <nax-badge dot type="success"><view class="bx"><text class="bxt">在线</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">类型 type</text>
+    <view class="row">
+      <nax-badge value="6" type="default"><view class="bx"><text class="bxt">default</text></view></nax-badge>
+      <nax-badge value="6" type="error"><view class="bx"><text class="bxt">error</text></view></nax-badge>
+      <nax-badge value="6" type="info"><view class="bx"><text class="bxt">info</text></view></nax-badge>
+      <nax-badge value="6" type="success"><view class="bx"><text class="bxt">success</text></view></nax-badge>
+      <nax-badge value="6" type="warning"><view class="bx"><text class="bxt">warning</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">最大值 max</text>
+    <view class="row">
+      <nax-badge value="100" :max="99"><view class="bx"><text class="bxt">99+</text></view></nax-badge>
+      <nax-badge value="1000" :max="999"><view class="bx"><text class="bxt">999+</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">show-zero</text>
+    <view class="row">
+      <nax-badge value="0"><view class="bx"><text class="bxt">隐藏 0</text></view></nax-badge>
+      <nax-badge value="0" show-zero><view class="bx"><text class="bxt">显示 0</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">processing 处理中</text>
+    <view class="row">
+      <nax-badge value="3" processing><view class="bx"><text class="bxt">同步</text></view></nax-badge>
+      <nax-badge dot processing type="info"><view class="bx"><text class="bxt">点</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">自定义 color / 偏移 offset</text>
+    <view class="row">
+      <nax-badge value="8" color="#8a2be2"><view class="bx"><text class="bxt">紫</text></view></nax-badge>
+      <nax-badge dot color="#f0a020"><view class="bx"><text class="bxt">橙点</text></view></nax-badge>
+      <nax-badge value="6" offset-x="8" offset-y="-4"><view class="bx"><text class="bxt">偏移</text></view></nax-badge>
+    </view>
+
+    <text class="dsec">独立 alone</text>
+    <view class="row">
+      <nax-badge alone value="15"></nax-badge>
+      <nax-badge alone value="99+" type="success"></nax-badge>
+      <nax-badge alone dot></nax-badge>
+      <nax-badge alone value="NEW" type="warning"></nax-badge>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-badge {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.bx {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: var(--nax-color-bg-secondary, #f2f3f5);
+  align-items: center;
+  justify-content: center;
+}
+
+.bxt {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

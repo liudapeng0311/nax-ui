@@ -1,0 +1,404 @@
+<template>
+	<view class="nax-avatar" :class="rootClass" :style="rootStyle" @click="onClick">
+		<image
+			v-if="showImage"
+			class="nax-avatar__img"
+			:class="imgClass"
+			:src="currentSrc"
+			:mode="imageMode"
+			@load="onLoad"
+			@error="onImageError"
+		></image>
+		<text
+			v-else-if="showText"
+			class="nax-avatar__text"
+			:max-lines="1"
+			:style="textStyle"
+		>{{ displayText }}</text>
+		<view v-else class="nax-avatar__slot">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-avatar
+	 * @description 头像。能力对齐  Avatar：尺寸 / 形状 / 图片 / 文字 / 描边 / 失败回退。
+	 * @property {string} src 图片地址
+	 * @property {string} text 文字头像内容（无图或加载失败时展示）
+	 * @property {string} size sm | md | lg | 数字字符串（如 48）；兼容 small/medium/large（）
+	 * @property {string} shape circle | square | round； round 对应 circle
+	 * @property {boolean} bordered 是否显示描边
+	 * @property {string} borderColor 描边颜色；有值时可单独开启描边
+	 * @property {string} color 背景色（文字头像常用）
+	 * @property {string} textColor 文字颜色
+	 * @property {string} mode 图片 mode，同原生 image；默认 aspectFill（≈ cover）
+	 * @property {string} objectFit fill | contain | cover | none | scale-down； 兼容，优先于 mode
+	 * @property {string} fallbackSrc 图片加载失败后的回退地址
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击
+	 * @event load 图片加载成功
+	 * @event error 图片加载失败（含 fallback 仍失败）
+	 * @slot default 无图 / 最终失败时的自定义内容（如图标）
+	 */
+	const props = defineProps({
+		src: {
+			type: String,
+			default: ''
+		},
+		text: {
+			type: String,
+			default: ''
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		shape: {
+			type: String,
+			default: 'circle'
+		},
+		bordered: {
+			type: Boolean,
+			default: false
+		},
+		borderColor: {
+			type: String,
+			default: ''
+		},
+		color: {
+			type: String,
+			default: ''
+		},
+		textColor: {
+			type: String,
+			default: ''
+		},
+		mode: {
+			type: String,
+			default: 'aspectFill'
+		},
+		objectFit: {
+			type: String,
+			default: ''
+		},
+		fallbackSrc: {
+			type: String,
+			default: ''
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click', 'load', 'error'])
+
+	/** loading | loaded | error */
+	const status = ref('loading')
+	/** 当前实际加载的地址（主图或 fallback） */
+	const currentSrc = ref('')
+	const usingFallback = ref(false)
+
+	function normalizeShape(value: string): string {
+		if (value == 'square') {
+			return 'square'
+		}
+		if (value == 'round') {
+			return 'round'
+		}
+		// 默认 / circle /  round=true
+		return 'circle'
+	}
+
+	function isDigits(s: string): boolean {
+		if (s.length == 0) {
+			return false
+		}
+		var i = 0
+		while (i < s.length) {
+			const c = s.charAt(i)
+			if (c < '0' || c > '9') {
+				return false
+			}
+			i++
+		}
+		return true
+	}
+
+	/**
+	 * size → 边长 px
+	 * 对齐 ：small 28 / medium 34 / large 40
+	 */
+	function resolveSizePx(value: string): number {
+		if (value == 'sm' || value == 'small') {
+			return 28
+		}
+		if (value == 'lg' || value == 'large') {
+			return 40
+		}
+		if (value == 'md' || value == 'medium' || value.length == 0) {
+			return 34
+		}
+		if (isDigits(value)) {
+			const n = parseInt(value)
+			if (n > 0) {
+				return n
+			}
+		}
+		const f = parseFloat(value)
+		if (!isNaN(f) && f > 0) {
+			return Math.floor(f)
+		}
+		return 34
+	}
+
+	function sizeToken(): string {
+		const v = props.size
+		if (v == 'sm' || v == 'small') {
+			return 'sm'
+		}
+		if (v == 'lg' || v == 'large') {
+			return 'lg'
+		}
+		if (v == 'md' || v == 'medium' || v.length == 0) {
+			return 'md'
+		}
+		return 'custom'
+	}
+
+	/** object-fit → 原生 image mode */
+	function fitToMode(fit: string): string {
+		if (fit == 'contain' || fit == 'scale-down') {
+			return 'aspectFit'
+		}
+		if (fit == 'cover') {
+			return 'aspectFill'
+		}
+		if (fit == 'fill') {
+			return 'scaleToFill'
+		}
+		if (fit == 'none') {
+			return 'center'
+		}
+		return ''
+	}
+
+	const sizePx = computed((): number => {
+		return resolveSizePx(props.size)
+	})
+
+	const shapeName = computed((): string => {
+		return normalizeShape(props.shape)
+	})
+
+	const imageMode = computed((): string => {
+		if (props.objectFit.length > 0) {
+			const mapped = fitToMode(props.objectFit)
+			if (mapped.length > 0) {
+				return mapped
+			}
+		}
+		if (props.mode.length > 0) {
+			return props.mode
+		}
+		return 'aspectFill'
+	})
+
+	const showImage = computed((): boolean => {
+		if (currentSrc.value.length == 0) {
+			return false
+		}
+		return status.value != 'error'
+	})
+
+	const showText = computed((): boolean => {
+		if (showImage.value) {
+			return false
+		}
+		return props.text.length > 0
+	})
+
+	const displayText = computed((): string => {
+		return props.text
+	})
+
+	const fontSizePx = computed((): number => {
+		const box = sizePx.value
+		var fs = Math.floor(box * 0.42)
+		if (fs < 10) {
+			fs = 10
+		}
+		if (fs > 28) {
+			fs = 28
+		}
+		return fs
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-avatar--' + shapeName.value
+		cls += ' nax-avatar--size-' + sizeToken()
+		if (props.bordered || props.borderColor.length > 0) {
+			cls += ' nax-avatar--bordered'
+		}
+		if (showImage.value) {
+			cls += ' nax-avatar--image'
+		} else if (showText.value) {
+			cls += ' nax-avatar--text'
+		} else {
+			cls += ' nax-avatar--slot'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const imgClass = computed((): string => {
+		return 'nax-avatar__img--' + shapeName.value
+	})
+
+	const rootStyle = computed((): string => {
+		const px = '' + sizePx.value + 'px'
+		var style = 'width:' + px + ';height:' + px + ';'
+		if (props.color.length > 0) {
+			style += 'background-color:' + props.color + ';'
+		}
+		// default bg via class/token for dark mode
+		if (props.borderColor.length > 0) {
+			style += 'border-color:' + props.borderColor + ';'
+		} else if (props.bordered) {
+			// #ifdef APP-HARMONY
+			// Harmony: CSS var often fails -> native default black border
+			style += 'border-color:#f0f0f3;'
+			// #endif
+		}
+		return style
+	})
+
+	const textStyle = computed((): string => {
+		const fs = '' + fontSizePx.value + 'px'
+		var style = 'font-size:' + fs + ';line-height:' + fs + ';'
+		if (props.textColor.length > 0) {
+			style += 'color:' + props.textColor + ';'
+		} else if (props.color.length > 0) {
+			// custom bg: inverse text like  letter avatar
+			style += 'color:#ffffff;'
+		}
+		// else: color from class token (dark-mode friendly)
+		return style
+	})
+
+	function resetImageState() {
+		usingFallback.value = false
+		if (props.src.length == 0) {
+			currentSrc.value = ''
+			status.value = 'error'
+			return
+		}
+		currentSrc.value = props.src
+		status.value = 'loading'
+	}
+
+	function onLoad(e: any) {
+		status.value = 'loaded'
+		emit('load', e)
+	}
+
+	function onImageError(e: any) {
+		// 主图失败 → 尝试 fallbackSrc
+		if (!usingFallback.value && props.fallbackSrc.length > 0 && props.fallbackSrc != currentSrc.value) {
+			usingFallback.value = true
+			currentSrc.value = props.fallbackSrc
+			status.value = 'loading'
+			return
+		}
+		status.value = 'error'
+		currentSrc.value = ''
+		emit('error', e)
+	}
+
+	function onClick() {
+		emit('click')
+	}
+
+	watch((): string => {
+		return props.src + '\n' + props.fallbackSrc
+	}, () => {
+		resetImageState()
+	}, { immediate: true })
+</script>
+
+<style>
+	.nax-avatar {
+		position: relative;
+		overflow: hidden;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--nax-avatar-color, var(--nax-color-bg-hover, #f3f3f5));
+	}
+
+	.nax-avatar--square {
+		border-radius: var(--nax-avatar-radius-square, 0px);
+	}
+
+	.nax-avatar--round {
+		border-radius: var(--nax-avatar-radius, var(--nax-radius-md, 3px));
+	}
+
+	.nax-avatar--circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-avatar--bordered {
+		border-width: 1px;
+		border-style: solid;
+		/* single-level var: nested var() is unreliable on App Harmony */
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-avatar__img {
+		width: 100%;
+		height: 100%;
+	}
+
+	.nax-avatar__img--square {
+		border-radius: var(--nax-avatar-radius-square, 0px);
+	}
+
+	.nax-avatar__img--round {
+		border-radius: var(--nax-avatar-radius, var(--nax-radius-md, 3px));
+	}
+
+	.nax-avatar__img--circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-avatar__text {
+		font-weight: var(--nax-font-weight-medium, 500);
+		color: var(--nax-avatar-text-color, var(--nax-color-text-secondary, #767c82));
+		text-align: center;
+	}
+
+	.nax-avatar__slot {
+		width: 100%;
+		height: 100%;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* #ifdef APP-HARMONY */
+	/* Harmony: solid fallback when CSS vars fail (avoid native black border) */
+	.nax-avatar {
+		background-color: #f3f3f5;
+	}
+	.nax-avatar--bordered {
+		border-width: 1px;
+		border-style: solid;
+		border-color: #f0f0f3;
+	}
+	/* #endif */
+</style>

@@ -1,0 +1,195 @@
+// OxUniPress 设计系统 "Aurora"
+// 颜色 token 与 Web 预览器保持一致；排版遵循字号相关字距（大标题负字距）。
+// 通过响应式状态驱动，深色模式切换即时生效，无需重建样式。
+
+export type ThemeMode = 'light' | 'dark'
+
+export class ColorTokens {
+  bg: string = ''
+  bgSubtle: string = ''
+  surface: string = ''
+  surfaceHover: string = ''
+  border: string = ''
+  borderStrong: string = ''
+  text1: string = ''
+  text2: string = ''
+  text3: string = ''
+  brand: string = ''
+  brandSoft: string = ''
+  onBrand: string = ''
+  codeBg: string = ''
+  codeText: string = ''
+  codeBlockBg: string = ''
+  codeBlockBorder: string = ''
+  codeBlockText: string = ''
+  codeBlockBar: string = ''
+  danger: string = ''
+  success: string = ''
+  scrim: string = ''
+  shadow: string = ''
+  tokKw: string = ''
+  tokStr: string = ''
+  tokCom: string = ''
+  tokNum: string = ''
+  tokFn: string = ''
+  tokType: string = ''
+
+  constructor(light: boolean) {
+    if (light) {
+      this.bg = '#ffffff'
+      this.bgSubtle = '#f7f8fa'
+      this.surface = '#ffffff'
+      this.surfaceHover = '#f1f2f6'
+      this.border = 'rgba(20,24,40,0.08)'
+      this.borderStrong = 'rgba(20,24,40,0.16)'
+      this.text1 = '#191c24'
+      this.text2 = '#565d6e'
+      this.text3 = '#8b91a3'
+      this.brand = '#6d2ac2'
+      this.brandSoft = 'rgba(109,42,194,0.09)'
+      this.onBrand = '#ffffff'
+      this.codeBg = 'rgba(109,42,194,0.08)'
+      this.codeText = '#5d2fae'
+      this.codeBlockBg = '#161a26'
+      this.codeBlockBorder = 'rgba(255,255,255,0.06)'
+      this.codeBlockText = '#dbe1f5'
+      this.codeBlockBar = 'rgba(255,255,255,0.45)'
+      this.danger = '#e5484d'
+      this.success = '#30a46c'
+      this.scrim = 'rgba(15,18,30,0.45)'
+      this.shadow = 'rgba(16,20,34,0.10)'
+      this.tokKw = '#c792ea'
+      this.tokStr = '#c3e88d'
+      this.tokCom = '#7a84b0'
+      this.tokNum = '#f78c6c'
+      this.tokFn = '#82aaff'
+      this.tokType = '#ffcb6b'
+    } else {
+      this.bg = '#0e1016'
+      this.bgSubtle = '#12141d'
+      this.surface = '#161927'
+      this.surfaceHover = '#1c2030'
+      this.border = 'rgba(255,255,255,0.08)'
+      this.borderStrong = 'rgba(255,255,255,0.18)'
+      this.text1 = '#e8eaf2'
+      this.text2 = '#a2a8ba'
+      this.text3 = '#6d7385'
+      this.brand = '#a87ef2'
+      this.brandSoft = 'rgba(168,126,242,0.14)'
+      this.onBrand = '#0e1016'
+      this.codeBg = 'rgba(168,126,242,0.13)'
+      this.codeText = '#c3a4fb'
+      this.codeBlockBg = '#131624'
+      this.codeBlockBorder = 'rgba(255,255,255,0.06)'
+      this.codeBlockText = '#dbe1f5'
+      this.codeBlockBar = 'rgba(255,255,255,0.45)'
+      this.danger = '#ff6369'
+      this.success = '#3dd68c'
+      this.scrim = 'rgba(0,0,0,0.55)'
+      this.shadow = 'rgba(0,0,0,0.40)'
+      this.tokKw = '#c792ea'
+      this.tokStr = '#c3e88d'
+      this.tokCom = '#6f7aa8'
+      this.tokNum = '#f78c6c'
+      this.tokFn = '#82aaff'
+      this.tokType = '#ffcb6b'
+    }
+  }
+}
+
+interface ThemeState {
+  mode: ThemeMode
+  resolved: 'light' | 'dark'
+  colors: ColorTokens
+}
+
+function resolveMode(mode: ThemeMode): 'light' | 'dark' {
+  return mode
+}
+
+const THEME_STORAGE_KEY = 'ox-uni-press-theme-mode'
+
+class ThemeStore {
+  state: ThemeState = reactive({
+    mode: 'light',
+    resolved: 'light',
+    colors: new ColorTokens(true),
+  })
+
+  init(): void {
+    let saved = uni.getStorageSync(THEME_STORAGE_KEY) as string | null
+    if (saved !== 'light' && saved !== 'dark') saved = 'light'
+    this.apply(saved as ThemeMode)
+  }
+
+  apply(mode: ThemeMode): void {
+    this.state.mode = mode
+    this.state.resolved = resolveMode(mode)
+    this.state.colors = new ColorTokens(this.state.resolved === 'light')
+    uni.setStorageSync(THEME_STORAGE_KEY, mode)
+  }
+
+  /** light -> dark 循环切换 */
+  cycle(): void {
+    if (this.state.mode === 'light') this.apply('dark')
+    else this.apply('light')
+  }
+
+  modeLabel(): string {
+    if (this.state.mode === 'light') return '浅色'
+    return '深色'
+  }
+}
+
+export const theme = new ThemeStore()
+
+// ---- 排版与间距 token（不随主题变化）----
+
+export class TypeTokens {
+  h1Size = '26px'
+  h1Weight = '700'
+  h1Line = '34px'
+  h1Tracking = '-0.5px'
+
+  h2Size = '21px'
+  h2Weight = '650'
+  h2Line = '28px'
+  h2Tracking = '-0.3px'
+
+  h3Size = '17px'
+  h3Weight = '600'
+  h3Line = '24px'
+
+  bodySize = '15px'
+  bodyLine = '26px'
+
+  smallSize = '13px'
+  miniSize = '11px'
+
+  monoSize = '13px'
+  monoLine = '22px'
+}
+
+export const type = new TypeTokens()
+
+export class SpaceTokens {
+  xs = '4px'
+  s = '8px'
+  m = '12px'
+  l = '16px'
+  xl = '24px'
+  xxl = '32px'
+}
+
+export const space = new SpaceTokens()
+
+export class RadiusTokens {
+  sm = '6px'
+  md = '10px'
+  lg = '14px'
+}
+
+export const radius = new RadiusTokens()
+
+/** 宽屏断点：>= 该值时侧边栏常驻、目录显示 */
+export const WIDE_BREAKPOINT = 960

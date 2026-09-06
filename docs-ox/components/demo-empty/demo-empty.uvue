@@ -1,0 +1,64 @@
+<template>
+  <view class="demo-empty">
+    <text class="dsec">基础</text>
+    <nax-empty></nax-empty>
+
+    <text class="dsec">标题 + 描述</text>
+    <nax-empty icon="notes-off" title="暂无订单" description="下单后，订单会出现在这里"></nax-empty>
+
+    <text class="dsec">图标语义</text>
+    <nax-empty icon="file-off" description="暂无相关文件"></nax-empty>
+    <nax-empty icon="database-off" description="暂无数据"></nax-empty>
+    <nax-empty icon="message-off" description="消息箱是空的"></nax-empty>
+
+    <text class="dsec">操作按钮</text>
+    <nax-empty icon="notes-off" title="列表为空" description="试着新建一条数据吧">
+      <template #action>
+        <nax-button type="primary" size="sm" label="新建"></nax-button>
+      </template>
+    </nax-empty>
+
+    <text class="dsec">多个操作</text>
+    <nax-empty icon="search" description="换个关键词试试">
+      <template #action>
+        <nax-space size="sm">
+          <nax-space-item>
+            <nax-button size="sm" label="清空筛选"></nax-button>
+          </nax-space-item>
+          <nax-space-item>
+            <nax-button type="primary" size="sm" label="重新搜索"></nax-button>
+          </nax-space-item>
+        </nax-space>
+      </template>
+    </nax-empty>
+
+    <text class="dsec">隐藏插图</text>
+    <nax-empty :show-image="false" description="仅文案的空状态"></nax-empty>
+
+    <text class="dsec">自定义插图槽</text>
+    <nax-empty description="使用 #image 自定义">
+      <template #image>
+        <nax-icon name="star" size="40" color="#f0a020"></nax-icon>
+      </template>
+      <template #action>
+        <nax-button size="sm" type="warning" label="去收藏"></nax-button>
+      </template>
+    </nax-empty>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-empty {
+  flex-direction: column;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

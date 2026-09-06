@@ -1,0 +1,1035 @@
+<template>
+	<view class="nax-tabbar-host" :class="hostClass">
+		<!-- fixed 时占位，避免页面内容被底栏遮挡 -->
+		<view
+			v-if="showPlaceholder"
+			class="nax-tabbar__placeholder"
+			:class="placeholderClass"
+			:style="placeholderStyle"
+		></view>
+
+		<view class="nax-tabbar" :class="rootClass" :style="rootStyle">
+			<!-- 主内容区：图标/文案；不含底部安全区 -->
+			<view class="nax-tabbar__main" :style="mainStyle">
+				<!-- 底栏背景层：边框贴在此层顶边；凸起圆钮压住中段 -->
+				<view class="nax-tabbar__bar-bg" :class="barBgClass" :style="barBgStyle"></view>
+				<view class="nax-tabbar__inner" :style="innerStyle">
+					<view
+						v-for="(item, index) in tabItems"
+						:key="index"
+						class="nax-tabbar__item"
+						:class="itemRootClass(index, item)"
+						:style="itemBoxStyle(item)"
+						:hover-class="itemHoverClass(item)"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onItemClick(index)"
+					>
+						<!-- 图标区：字体图标优先（更轻），图片次之 -->
+						<view class="nax-tabbar__icon-box" :class="iconBoxClass(index, item)">
+							<image
+								v-if="resolveImageSrc(index, item).length > 0"
+								class="nax-tabbar__image"
+								:style="imageStyle"
+								:src="resolveImageSrc(index, item)"
+								mode="aspectFit"
+							></image>
+							<nax-icon
+								v-else-if="resolveIconName(index, item).length > 0"
+								:name="resolveIconName(index, item)"
+								:size="iconSizePxText"
+								:color="resolveIconColor(index, item)"
+								:disabled="resolveDisabled(item)"
+							></nax-icon>
+							<!-- 轻量徽标：避免再嵌 nax-badge 增加节点 -->
+							<view
+								v-if="resolveShowDot(item)"
+								class="nax-tabbar__dot"
+							></view>
+							<view
+								v-else-if="resolveBadgeText(item).length > 0"
+								class="nax-tabbar__badge"
+							>
+								<text class="nax-tabbar__badge-text" :max-lines="1">{{ resolveBadgeText(item) }}</text>
+							</view>
+						</view>
+					<text
+						v-if="resolveText(item).length > 0"
+						class="nax-tabbar__text"
+						:class="textClass(index, item)"
+					:style="textStyle(index, item)"
+					:max-lines="1"
+				>{{ resolveText(item) }}</text>
+					</view>
+				</view>
+			</view>
+			<!-- 底部安全区：真实抬高内容；App/鸿蒙 JS 高度，Web CSS env -->
+			<view
+				v-if="showSafeArea"
+				class="nax-tabbar__safe"
+				:class="safeClass"
+				:style="safeSpacerStyle"
+			></view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-tabbar
+	 * @description 自定义底部标签栏。图标字体优先、图片次之；轻量徽标；fixed + 占位 + 安全区。
+	 * @property {number} modelValue 当前选中下标（v-model）
+	 * @property {Array} list 项列表（text/name、icon/selectedIcon、iconPath/selectedIconPath、badge/dot、disabled、midButton、pagePath）
+	 * @property {boolean} fixed 是否 fixed 贴底，默认 true
+	 * @property {boolean} placeholder fixed 时是否占位，默认 true
+	 * @property {boolean} border 顶部分割线，默认 true
+	 * @property {boolean} safeAreaInsetBottom 底部安全区，默认 true
+	 * @property {string} activeColor 选中色；空则 --nax-color-primary
+	 * @property {string} inactiveColor 未选中色；空则 --nax-color-text-secondary
+	 * @property {string} iconSize 图标尺寸（sm/md/lg 或数字 px），默认 22
+	 * @property {string} height 栏内容高度（纯数字按 px），默认 50
+	 * @property {number} zIndex fixed 层级，默认 98
+	 * @property {number} badgeMax 徽标数字上限，默认 99
+	 * @property {boolean} show 是否显示，默认 true
+	 * @property {string} customClass 根扩展 class
+	 * @event update:modelValue 选中下标变化
+	 * @event change 选中变化（number 下标）
+	 * @event click 点击项（number 下标；含重复点同一项）
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: Number,
+			default: 0
+		},
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		fixed: {
+			type: Boolean,
+			default: true
+		},
+		placeholder: {
+			type: Boolean,
+			default: true
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		safeAreaInsetBottom: {
+			type: Boolean,
+			default: true
+		},
+		activeColor: {
+			type: String,
+			default: ''
+		},
+		inactiveColor: {
+			type: String,
+			default: ''
+		},
+		iconSize: {
+			type: String,
+			default: '22'
+		},
+		height: {
+			type: String,
+			default: '50'
+		},
+		zIndex: {
+			type: Number,
+			default: 98
+		},
+		badgeMax: {
+			type: Number,
+			default: 99
+		},
+		show: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change', 'click'])
+
+	const safeBottomPx = ref(0)
+
+	function isArrayValue(val : any | null) : boolean {
+		if (val == null) {
+			return false
+		}
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		if (typeof len != 'number') {
+			return false
+		}
+		return true
+	}
+
+	function asAnyArray(val : any | null) : any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		if (!isArrayValue(val)) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function asObject(item : any | null) : UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function readString(obj : UTSJSONObject, key : string) : string {
+		const s = obj.getString(key)
+		if (s != null && s.length > 0) {
+			return s
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'string') {
+			const str = anyVal as string
+			if (str.length > 0) {
+				return str
+			}
+		}
+		return ''
+	}
+
+	function readBoolean(obj : UTSJSONObject, key : string) : boolean {
+		const b = obj.getBoolean(key)
+		if (b != null) {
+			return b as boolean
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null && typeof anyVal == 'boolean') {
+			return anyVal as boolean
+		}
+		return false
+	}
+
+	function readNumberLike(obj : UTSJSONObject, key : string) : number {
+		const n = obj.getNumber(key)
+		if (n != null) {
+			return n as number
+		}
+		const anyVal = obj.getAny(key)
+		if (anyVal != null) {
+			if (typeof anyVal == 'number') {
+				return anyVal as number
+			}
+			if (typeof anyVal == 'string') {
+				const s = (anyVal as string).trim()
+				if (s.length == 0) {
+					return NaN
+				}
+				const p = parseFloat(s)
+				return p
+			}
+		}
+		return NaN
+	}
+
+	function parsePx(value : string, fallback : number) : number {
+		if (value.length == 0) {
+			return fallback
+		}
+		if (value == 'sm') {
+			return 18
+		}
+		if (value == 'md') {
+			return 22
+		}
+		if (value == 'lg') {
+			return 26
+		}
+		const n = parseFloat(value)
+		if (isNaN(n) || n <= 0) {
+			return fallback
+		}
+		return n
+	}
+
+	const tabItems = computed((): any[] => {
+		return asAnyArray(props.list as any)
+	})
+
+	const activeIndex = computed((): number => {
+		return Math.floor(props.modelValue)
+	})
+
+	const barHeightPx = computed((): number => {
+		return parsePx(props.height, 50)
+	})
+
+	const iconSizePx = computed((): number => {
+		return parsePx(props.iconSize, 22)
+	})
+
+	const iconSizePxText = computed((): string => {
+		return '' + Math.floor(iconSizePx.value)
+	})
+
+	const activeColorValue = computed((): string => {
+		if (props.activeColor.length > 0) {
+			return props.activeColor
+		}
+		return ''
+	})
+
+	const inactiveColorValue = computed((): string => {
+		if (props.inactiveColor.length > 0) {
+			return props.inactiveColor
+		}
+		return ''
+	})
+
+	const showPlaceholder = computed((): boolean => {
+		if (!props.show) {
+			return false
+		}
+		return props.fixed && props.placeholder
+	})
+
+	function resolveText(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const text = readString(obj, 'text')
+		if (text.length > 0) {
+			return text
+		}
+		const name = readString(obj, 'name')
+		if (name.length > 0) {
+			return name
+		}
+		const label = readString(obj, 'label')
+		if (label.length > 0) {
+			return label
+		}
+		const title = readString(obj, 'title')
+		if (title.length > 0) {
+			return title
+		}
+		return ''
+	}
+
+	function resolveDisabled(item : any | null) : boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		return readBoolean(obj, 'disabled')
+	}
+
+	function resolveMidButton(item : any | null) : boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		if (readBoolean(obj, 'midButton')) {
+			return true
+		}
+		return readBoolean(obj, 'mid')
+	}
+
+	function resolveShowDot(item : any | null) : boolean {
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		if (readBoolean(obj, 'dot')) {
+			return true
+		}
+		return readBoolean(obj, 'isDot')
+	}
+
+	function formatBadgeNumber(num : number) : string {
+		if (num <= 0) {
+			return ''
+		}
+		if (props.badgeMax > 0 && num > props.badgeMax) {
+			return '' + props.badgeMax + '+'
+		}
+		if (num == Math.floor(num)) {
+			return '' + Math.floor(num)
+		}
+		return '' + num
+	}
+
+	function resolveBadgeText(item : any | null) : string {
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const badgeStr = readString(obj, 'badge')
+		if (badgeStr.length > 0) {
+			const n = parseFloat(badgeStr)
+			if (!isNaN(n)) {
+				return formatBadgeNumber(n)
+			}
+			return badgeStr
+		}
+		const countStr = readString(obj, 'count')
+		if (countStr.length > 0) {
+			const n = parseFloat(countStr)
+			if (!isNaN(n)) {
+				return formatBadgeNumber(n)
+			}
+			return countStr
+		}
+		const badgeNum = readNumberLike(obj, 'badge')
+		if (!isNaN(badgeNum)) {
+			return formatBadgeNumber(badgeNum)
+		}
+		const countNum = readNumberLike(obj, 'count')
+		if (!isNaN(countNum)) {
+			return formatBadgeNumber(countNum)
+		}
+		return ''
+	}
+
+	function isPathLike(value : string) : boolean {
+		if (value.length == 0) {
+			return false
+		}
+		if (value.indexOf('/') >= 0) {
+			return true
+		}
+		if (value.indexOf('.') >= 0) {
+			return true
+		}
+		return false
+	}
+
+	function resolveImageSrc(index : number, item : any | null) : string {
+		const active = index == activeIndex.value
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		if (active) {
+			const selectedIconPath = readString(obj, 'selectedIconPath')
+			if (selectedIconPath.length > 0) {
+				return selectedIconPath
+			}
+			const activeIconPath = readString(obj, 'activeIconPath')
+			if (activeIconPath.length > 0) {
+				return activeIconPath
+			}
+			const selectedIcon = readString(obj, 'selectedIcon')
+			if (isPathLike(selectedIcon)) {
+				return selectedIcon
+			}
+		}
+		const iconPath = readString(obj, 'iconPath')
+		if (iconPath.length > 0) {
+			return iconPath
+		}
+		const icon = readString(obj, 'icon')
+		if (isPathLike(icon)) {
+			return icon
+		}
+		return ''
+	}
+
+	function resolveIconName(index : number, item : any | null) : string {
+		// 配置了图片路径则走 image，不渲染字体图标
+		if (resolveImageSrc(index, item).length > 0) {
+			return ''
+		}
+		const active = index == activeIndex.value
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		if (active) {
+			const selectedIcon = readString(obj, 'selectedIcon')
+			if (selectedIcon.length > 0 && !isPathLike(selectedIcon)) {
+				return selectedIcon
+			}
+			const activeIcon = readString(obj, 'activeIcon')
+			if (activeIcon.length > 0 && !isPathLike(activeIcon)) {
+				return activeIcon
+			}
+			const selectedIconName = readString(obj, 'selectedIconName')
+			if (selectedIconName.length > 0) {
+				return selectedIconName
+			}
+		}
+		const icon = readString(obj, 'icon')
+		if (icon.length > 0 && !isPathLike(icon)) {
+			return icon
+		}
+		const iconName = readString(obj, 'iconName')
+		if (iconName.length > 0) {
+			return iconName
+		}
+		return ''
+	}
+
+	function resolveIconColor(index : number, item : any | null) : string {
+		// 中间凸起钮：图标固定浅色，衬托主色底
+		if (resolveMidButton(item)) {
+			return '#ffffff'
+		}
+		if (resolveDisabled(item)) {
+			if (inactiveColorValue.value.length > 0) {
+				return inactiveColorValue.value
+			}
+			return 'var(--nax-color-text-secondary, #909399)'
+		}
+		const active = index == activeIndex.value
+		if (active) {
+			if (activeColorValue.value.length > 0) {
+				return activeColorValue.value
+			}
+			return 'var(--nax-color-primary, #18a058)'
+		}
+		if (inactiveColorValue.value.length > 0) {
+			return inactiveColorValue.value
+		}
+		return 'var(--nax-color-text-secondary, #909399)'
+	}
+
+	const hasMidButton = computed((): boolean => {
+		const items = tabItems.value
+		var i = 0
+		while (i < items.length) {
+			if (resolveMidButton(items[i])) {
+				return true
+			}
+			i++
+		}
+		return false
+	})
+
+	// 中间凸起相对栏顶多出的高度，给圆钮预留，避免被裁切
+	const midLiftPx = computed((): number => {
+		if (!hasMidButton.value) {
+			return 0
+		}
+		// 圆钮约一半探出底栏顶边（48/2）+ 白描边，形成贴合凸起的视觉
+		return 28
+	})
+
+	const hostClass = computed((): string => {
+		var cls = ''
+		if (!props.show) {
+			cls += ' nax-tabbar-host--hidden'
+		}
+		if (hasMidButton.value) {
+			cls += ' nax-tabbar-host--mid'
+		}
+		return cls.trim()
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.fixed) {
+			cls += ' nax-tabbar--fixed'
+		}
+		// 顶边框统一由 bar-bg 绘制（凸起时不会穿过空区）
+		if (props.safeAreaInsetBottom) {
+			cls += ' nax-tabbar--safe'
+		}
+		if (hasMidButton.value) {
+			cls += ' nax-tabbar--mid'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const showSafeArea = computed((): boolean => {
+		return props.safeAreaInsetBottom
+	})
+
+	const barBgClass = computed((): string => {
+		var cls = ''
+		if (props.border) {
+			cls += ' nax-tabbar__bar-bg--border'
+		}
+		if (hasMidButton.value) {
+			cls += ' nax-tabbar__bar-bg--mid'
+		}
+		return cls.trim()
+	})
+
+	const barBgStyle = computed((): string => {
+		// 只铺主内容栏高，安全区由下方 nax-tabbar__safe 承担
+		return 'height:' + barHeightPx.value.toString() + 'px;'
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		if (props.fixed) {
+			style += 'z-index:' + props.zIndex.toString() + ';'
+		}
+		return style
+	})
+
+	const mainStyle = computed((): string => {
+		const h = barHeightPx.value + midLiftPx.value
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const innerStyle = computed((): string => {
+		const h = barHeightPx.value + midLiftPx.value
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const safeClass = computed((): string => {
+		var cls = ''
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		cls += ' nax-tabbar__safe--css'
+		// #endif
+		return cls.trim()
+	})
+
+	// App 实测安全区高度；Web 为 0（走 CSS env）
+	const effectiveSafeBottomPx = computed((): number => {
+		if (!props.safeAreaInsetBottom) {
+			return 0
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (safeBottomPx.value > 0) {
+			return safeBottomPx.value
+		}
+		// #ifdef APP-HARMONY
+		// 鸿蒙 insets 暂为 0 时最小兜底，避免文案贴系统手势条
+		return 16
+		// #endif
+		// #ifndef APP-HARMONY
+		return 0
+		// #endif
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return 0
+		// #endif
+	})
+
+	const safeSpacerStyle = computed((): string => {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const h = effectiveSafeBottomPx.value
+		return 'height:' + h.toString() + 'px;'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// Web/小程序高度由 .nax-tabbar__safe--css 的 env 控制
+		return ''
+		// #endif
+	})
+
+	const placeholderClass = computed((): string => {
+		if (props.safeAreaInsetBottom) {
+			return 'nax-tabbar__placeholder--safe'
+		}
+		return ''
+	})
+
+	const placeholderStyle = computed((): string => {
+		// 内容高(+凸起) + 安全区，与 fixed 底栏总高一致
+		var h = barHeightPx.value + midLiftPx.value
+		if (props.safeAreaInsetBottom) {
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			h = h + effectiveSafeBottomPx.value
+			// #endif
+		}
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const imageStyle = computed((): string => {
+		const px = iconSizePx.value.toString() + 'px'
+		return 'width:' + px + ';height:' + px + ';'
+	})
+
+	function itemBoxStyle(item : any | null) : string {
+		if (resolveMidButton(item)) {
+			const h = barHeightPx.value + midLiftPx.value
+			return 'height:' + h.toString() + 'px;'
+		}
+		return 'height:' + barHeightPx.value.toString() + 'px;'
+	}
+
+	function itemRootClass(index : number, item : any | null) : string {
+		var cls = ''
+		if (index == activeIndex.value) {
+			cls += ' nax-tabbar__item--active'
+		}
+		if (resolveDisabled(item)) {
+			cls += ' nax-tabbar__item--disabled'
+		}
+		if (resolveMidButton(item)) {
+			cls += ' nax-tabbar__item--mid'
+		}
+		return cls.trim()
+	}
+
+	function itemHoverClass(item : any | null) : string {
+		if (resolveDisabled(item)) {
+			return 'none'
+		}
+		return 'nax-tabbar__item--hover'
+	}
+
+	function iconBoxClass(index : number, item : any | null) : string {
+		var cls = ''
+		if (resolveMidButton(item)) {
+			cls += ' nax-tabbar__icon-box--mid'
+			if (index == activeIndex.value) {
+				cls += ' nax-tabbar__icon-box--mid-active'
+			}
+		}
+		return cls.trim()
+	}
+
+	function textClass(index : number, item : any | null) : string {
+		var cls = ''
+		if (index == activeIndex.value) {
+			cls += ' nax-tabbar__text--active'
+		}
+		if (resolveDisabled(item)) {
+			cls += ' nax-tabbar__text--disabled'
+		}
+		return cls.trim()
+	}
+
+	function textStyle(index : number, item : any | null) : string {
+		var style = ''
+		if (resolveDisabled(item)) {
+			if (inactiveColorValue.value.length > 0) {
+				style += 'color:' + inactiveColorValue.value + ';'
+			}
+			return style
+		}
+		const active = index == activeIndex.value
+		if (active) {
+			if (activeColorValue.value.length > 0) {
+				style += 'color:' + activeColorValue.value + ';'
+			}
+		} else {
+			if (inactiveColorValue.value.length > 0) {
+				style += 'color:' + inactiveColorValue.value + ';'
+			}
+		}
+		return style
+	}
+
+	function onItemClick(index : number) {
+		const items = tabItems.value
+		if (index < 0 || index >= items.length) {
+			return
+		}
+		const item = items[index]
+		if (resolveDisabled(item)) {
+			return
+		}
+		// 重复点击同一项仍抛 click，便于「回顶」等业务
+		emit('click', index)
+		if (activeIndex.value == index) {
+			return
+		}
+		emit('update:modelValue', index)
+		emit('change', index)
+	}
+
+	function readSafeBottomFromWindow() : number {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null && insets.bottom > 0) {
+			return insets.bottom
+		}
+		// insets.bottom=0 时用 screenHeight - safeArea.bottom
+		const sa = info.safeArea
+		if (sa != null) {
+			const gap = info.screenHeight - sa.bottom
+			if (gap > 0) {
+				return gap
+			}
+		}
+		if (info.windowBottom > 0) {
+			return info.windowBottom
+		}
+		// #endif
+		return 0
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		var bottom = readSafeBottomFromWindow()
+		// #ifdef APP-HARMONY
+		// 鸿蒙：windowInfo 偶发 0，再兜底 systemInfo
+		if (bottom <= 0) {
+			const sys = uni.getSystemInfoSync()
+			if (sys.safeAreaInsets != null && sys.safeAreaInsets.bottom > 0) {
+				bottom = sys.safeAreaInsets.bottom
+			} else if (sys.safeArea != null) {
+				const gap2 = sys.screenHeight - sys.safeArea.bottom
+				if (gap2 > 0) {
+					bottom = gap2
+				}
+			}
+		}
+		// #endif
+		safeBottomPx.value = bottom
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// Web/小程序：高度走 CSS env（nax-tabbar__safe--css）
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	onMounted(() => {
+		refreshSafeArea()
+		// #ifdef APP-HARMONY
+		// 鸿蒙首帧窗口信息可能未就绪，短延迟再测
+		setTimeout(() => {
+			refreshSafeArea()
+		}, 64)
+		// #endif
+	})
+
+	watch((): boolean => props.safeAreaInsetBottom, (_v : boolean) => {
+		refreshSafeArea()
+	})
+</script>
+
+<style>
+	.nax-tabbar-host {
+		flex-direction: column;
+		width: 100%;
+		/* 默认裁掉角标越界；有中间凸起时再放开 */
+		overflow: hidden;
+	}
+
+	.nax-tabbar-host--hidden {
+		height: 0;
+		overflow: hidden;
+	}
+
+	.nax-tabbar-host--mid {
+		overflow: visible;
+	}
+
+	.nax-tabbar__placeholder {
+		width: 100%;
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web/小程序：占位叠加安全区，与 fixed 栏 padding 对齐 */
+	.nax-tabbar__placeholder--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-tabbar {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+		/* 背景交给 bar-bg，凸起空区保持透明 */
+		background-color: rgba(0, 0, 0, 0);
+		/* 默认裁剪角标，避免画出顶边框上方 */
+		overflow: hidden;
+	}
+
+	.nax-tabbar--mid {
+		overflow: visible;
+	}
+
+	.nax-tabbar--fixed {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		overflow: hidden;
+	}
+
+	.nax-tabbar--fixed.nax-tabbar--mid {
+		overflow: visible;
+	}
+
+	.nax-tabbar--border {
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-tabbar__main {
+		position: relative;
+		flex-direction: column;
+		width: 100%;
+		overflow: visible;
+	}
+
+	.nax-tabbar__bar-bg {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-tabbar__bar-bg--border {
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-tabbar__inner {
+		position: relative;
+		flex-direction: row;
+		align-items: flex-end;
+		justify-content: space-around;
+		width: 100%;
+		overflow: visible;
+		z-index: 1;
+	}
+
+	/* 底部安全区条：抬高图标/文案，背景与底栏一致 */
+	.nax-tabbar__safe {
+		width: 100%;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* Web/小程序：CSS 环境变量安全区高度 */
+	.nax-tabbar__safe--css {
+		height: constant(safe-area-inset-bottom);
+		height: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-tabbar__item {
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		/* height 由 itemBoxStyle 控制，兼容自定义 height */
+		/* 顶部留白给角标，避免徽标顶穿 bar-bg 顶边 */
+		padding-top: 6px;
+		padding-bottom: 2px;
+		overflow: visible;
+	}
+
+	/* 中间项：圆钮探出底栏顶边，盖住中段 border */
+	.nax-tabbar__item--mid {
+		justify-content: flex-end;
+		padding-top: 0;
+		z-index: 2;
+	}
+
+	.nax-tabbar__item--hover {
+		opacity: 0.72;
+	}
+
+	.nax-tabbar__item--disabled {
+		opacity: var(--nax-opacity-disabled, 0.45);
+	}
+
+	.nax-tabbar__icon-box {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		overflow: visible;
+		min-width: 24px;
+		min-height: 24px;
+		margin-bottom: 2px;
+	}
+
+	.nax-tabbar__icon-box--mid {
+		width: 48px;
+		height: 48px;
+		border-radius: 24px;
+		background-color: var(--nax-color-primary, #18a058);
+		/* 白描边：盖住底栏顶边，形成贴合凸起的弧线观感 */
+		border-width: 4px;
+		border-style: solid;
+		border-color: var(--nax-color-bg, #ffffff);
+		margin-top: 0;
+		margin-bottom: 2px;
+	}
+
+	.nax-tabbar__icon-box--mid-active {
+		background-color: var(--nax-color-primary-deep, #0c7a43);
+	}
+
+	.nax-tabbar__text {
+		font-size: var(--nax-font-size-xs, 12px);
+		line-height: 16px;
+		color: var(--nax-color-text-secondary, #909399);
+		text-align: center;
+	}
+
+	.nax-tabbar__text--active {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: var(--nax-font-weight-medium, 500);
+	}
+
+	.nax-tabbar__text--disabled {
+		color: var(--nax-color-text-secondary, #909399);
+	}
+
+	.nax-tabbar__dot {
+		position: absolute;
+		/* 不超出栏顶边：贴在图标右上角内侧 */
+		top: 0;
+		right: -2px;
+		width: 8px;
+		height: 8px;
+		border-radius: 4px;
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-tabbar__badge {
+		position: absolute;
+		/* 不超出栏顶边：取消负 top，角标落在图标盒内 */
+		top: 0;
+		right: -10px;
+		min-width: 16px;
+		height: 16px;
+		padding-left: 4px;
+		padding-right: 4px;
+		border-radius: 8px;
+		background-color: var(--nax-color-error, #d03050);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-tabbar__badge-text {
+		font-size: 10px;
+		line-height: 14px;
+		color: #ffffff;
+		text-align: center;
+	}
+</style>

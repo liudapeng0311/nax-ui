@@ -1,0 +1,18 @@
+<template>
+  <view class="demo-overlay">
+    <nax-button label="显示遮罩" @click="show = true"></nax-button>
+    <nax-overlay :show="show" @click="show = false"></nax-overlay>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+</script>
+
+<style>
+.demo-overlay {
+  flex-direction: column;
+}
+</style>

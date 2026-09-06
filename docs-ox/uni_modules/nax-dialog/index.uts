@@ -1,0 +1,341 @@
+/**
+ * nax-dialog 命令式 API
+ * 业务：import { naxDialog, naxDialogAlert, naxDialogConfirm, hideNaxDialog } from '@/uni_modules/nax-dialog/index.uts'
+ * 宿主：全局挂一次 <nax-dialog />，组件内 bind/unbind
+ */
+
+type NaxDialogShowHandler = (
+	title: string,
+	content: string,
+	showCancel: boolean,
+	showConfirm: boolean,
+	cancelText: string,
+	confirmText: string,
+	confirmType: string,
+	maskClosable: boolean,
+	asyncClose: boolean,
+	width: string
+) => void
+type NaxDialogHideHandler = () => void
+type NaxDialogResolveFn = (res: UTSJSONObject) => void
+
+var showHandler: NaxDialogShowHandler | null = null
+var hideHandler: NaxDialogHideHandler | null = null
+var hostBound: boolean = false
+var hostSeq: number = 0
+var activeHostId: number = 0
+
+var pendingResolve: NaxDialogResolveFn | null = null
+var pendingActive: boolean = false
+
+/**
+ * 宿主挂载时绑定；返回 hostId，卸载时原样传回 unbind
+ */
+export function bindNaxDialogHost(show: NaxDialogShowHandler, hide: NaxDialogHideHandler): number {
+	hostSeq = hostSeq + 1
+	const id = hostSeq
+	activeHostId = id
+	showHandler = show
+	hideHandler = hide
+	hostBound = true
+	return id
+}
+
+/**
+ * 仅当仍是当前宿主时解绑，避免多实例互相踩
+ */
+export function unbindNaxDialogHost(hostId: number = 0) {
+	if (hostId > 0 && hostId != activeHostId) {
+		return
+	}
+	showHandler = null
+	hideHandler = null
+	hostBound = false
+	activeHostId = 0
+	// 宿主卸载时若仍有挂起结果，按取消收口
+	if (pendingActive) {
+		finishPending('cancel')
+	}
+}
+
+export function isNaxDialogHostBound(): boolean {
+	return hostBound
+}
+
+function buildResult(action: string): UTSJSONObject {
+	const confirm = action == 'confirm'
+	const cancel = action == 'cancel'
+	return {
+		confirm: confirm,
+		cancel: cancel,
+		action: action
+	} as UTSJSONObject
+}
+
+function clearPending() {
+	pendingResolve = null
+	pendingActive = false
+}
+
+/**
+ * 宿主确认/取消/遮罩关闭后回调
+ */
+export function notifyNaxDialogResult(action: string) {
+	finishPending(action)
+}
+
+function finishPending(action: string) {
+	if (!pendingActive) {
+		return
+	}
+	const res = buildResult(action)
+	const resolveFn = pendingResolve
+	clearPending()
+	if (resolveFn != null) {
+		resolveFn!(res)
+	}
+}
+
+function normalizeConfirmType(raw: string): string {
+	if (raw == 'danger') {
+		return 'error'
+	}
+	if (
+		raw == 'primary' ||
+		raw == 'info' ||
+		raw == 'success' ||
+		raw == 'warning' ||
+		raw == 'error' ||
+		raw == 'default'
+	) {
+		return raw
+	}
+	return 'primary'
+}
+
+function readString(obj: UTSJSONObject, key: string, fallback: string): string {
+	const v = obj.getString(key)
+	if (v != null) {
+		return v as string
+	}
+	return fallback
+}
+
+function readBool(obj: UTSJSONObject, key: string, fallback: boolean): boolean {
+	const v = obj.getBoolean(key)
+	if (v != null) {
+		return v as boolean
+	}
+	return fallback
+}
+
+function parseOptions(input: any | null, defaultShowCancel: boolean): UTSJSONObject {
+	var title = ''
+	var content = ''
+	var showCancel = defaultShowCancel
+	var showConfirm = true
+	var cancelText = '取消'
+	var confirmText = '确定'
+	var confirmType = 'primary'
+	var maskClosable = false
+	var asyncClose = false
+	var width = ''
+
+	if (input == null) {
+		return {
+			title: title,
+			content: content,
+			showCancel: showCancel,
+			showConfirm: showConfirm,
+			cancelText: cancelText,
+			confirmText: confirmText,
+			confirmType: confirmType,
+			maskClosable: maskClosable,
+			asyncClose: asyncClose,
+			width: width
+		} as UTSJSONObject
+	}
+
+	if (typeof input == 'string') {
+		content = input as string
+		return {
+			title: title,
+			content: content,
+			showCancel: showCancel,
+			showConfirm: showConfirm,
+			cancelText: cancelText,
+			confirmText: confirmText,
+			confirmType: confirmType,
+			maskClosable: maskClosable,
+			asyncClose: asyncClose,
+			width: width
+		} as UTSJSONObject
+	}
+
+	const obj = input as UTSJSONObject
+	title = readString(obj, 'title', '')
+	content = readString(obj, 'content', '')
+	if (content.length == 0) {
+		content = readString(obj, 'message', '')
+	}
+	showCancel = readBool(obj, 'showCancel', defaultShowCancel)
+	showConfirm = readBool(obj, 'showConfirm', true)
+	cancelText = readString(obj, 'cancelText', '取消')
+	if (cancelText.length == 0) {
+		cancelText = '取消'
+	}
+	confirmText = readString(obj, 'confirmText', '确定')
+	if (confirmText.length == 0) {
+		confirmText = '确定'
+	}
+	var ct = readString(obj, 'confirmType', '')
+	if (ct.length == 0) {
+		ct = readString(obj, 'confirmButtonType', 'primary')
+	}
+	if (ct.length == 0) {
+		ct = 'primary'
+	}
+	confirmType = normalizeConfirmType(ct)
+	maskClosable = readBool(obj, 'maskClosable', false)
+	const closeOverlay = obj.getBoolean('closeOnClickOverlay')
+	if (closeOverlay != null) {
+		maskClosable = closeOverlay as boolean
+	}
+	const closeMask = obj.getBoolean('closeOnMask')
+	if (closeMask != null) {
+		maskClosable = closeMask as boolean
+	}
+	asyncClose = readBool(obj, 'asyncClose', false)
+	width = readString(obj, 'width', '')
+
+	return {
+		title: title,
+		content: content,
+		showCancel: showCancel,
+		showConfirm: showConfirm,
+		cancelText: cancelText,
+		confirmText: confirmText,
+		confirmType: confirmType,
+		maskClosable: maskClosable,
+		asyncClose: asyncClose,
+		width: width
+	} as UTSJSONObject
+}
+
+function fallbackUniModal(
+	title: string,
+	content: string,
+	showCancel: boolean,
+	cancelText: string,
+	confirmText: string,
+	resolveFn: NaxDialogResolveFn | null
+) {
+	uni.showModal({
+		title: title,
+		content: content,
+		showCancel: showCancel,
+		cancelText: cancelText,
+		confirmText: confirmText,
+		success: (res) => {
+			var action = 'cancel'
+			if (res.confirm) {
+				action = 'confirm'
+			}
+			const payload = buildResult(action)
+			if (resolveFn != null) {
+				resolveFn!(payload)
+			}
+		},
+		fail: (_err) => {
+			const payload = buildResult('cancel')
+			if (resolveFn != null) {
+				resolveFn!(payload)
+			}
+		}
+	})
+}
+
+function showCore(opts: UTSJSONObject): Promise<UTSJSONObject> {
+	const title = readString(opts, 'title', '')
+	const content = readString(opts, 'content', '')
+	const showCancel = readBool(opts, 'showCancel', true)
+	const showConfirm = readBool(opts, 'showConfirm', true)
+	const cancelText = readString(opts, 'cancelText', '取消')
+	const confirmText = readString(opts, 'confirmText', '确定')
+	const confirmType = normalizeConfirmType(readString(opts, 'confirmType', 'primary'))
+	const maskClosable = readBool(opts, 'maskClosable', false)
+	const asyncClose = readBool(opts, 'asyncClose', false)
+	const width = readString(opts, 'width', '')
+
+	return new Promise<UTSJSONObject>((resolve, _reject) => {
+		// 新的一次调用覆盖旧挂起（避免泄漏）
+		if (pendingActive) {
+			finishPending('cancel')
+		}
+		pendingResolve = (res: UTSJSONObject) => {
+			resolve(res)
+		}
+		pendingActive = true
+
+		if (hostBound && showHandler != null) {
+			showHandler!(
+				title,
+				content,
+				showCancel,
+				showConfirm,
+				cancelText,
+				confirmText,
+				confirmType,
+				maskClosable,
+				asyncClose,
+				width
+			)
+			return
+		}
+
+		// 未挂宿主：回退系统 modal，并立刻收口 pending（系统回调里 resolve）
+		const r = pendingResolve
+		clearPending()
+		fallbackUniModal(title, content, showCancel, cancelText, confirmText, r)
+	})
+}
+
+/**
+ * 打开对话框（默认双按钮确认框）。
+ * - string：作为 content
+ * - object：title/content/message/showCancel/confirmText/cancelText/confirmType/maskClosable/asyncClose/width
+ * 返回 Promise，结果：{ confirm, cancel, action }
+ */
+export function naxDialog(input: any | null = null): Promise<UTSJSONObject> {
+	return showCore(parseOptions(input, true))
+}
+
+/**
+ * 告警框（默认仅确定）
+ */
+export function naxDialogAlert(input: any | null = null): Promise<UTSJSONObject> {
+	return showCore(parseOptions(input, false))
+}
+
+/**
+ * 确认框（默认取消 + 确定）
+ */
+export function naxDialogConfirm(input: any | null = null): Promise<UTSJSONObject> {
+	return showCore(parseOptions(input, true))
+}
+
+/**
+ * 关闭当前命令式对话框（asyncClose 场景常用）
+ */
+export function hideNaxDialog() {
+	if (hostBound && hideHandler != null) {
+		hideHandler!()
+	}
+}
+
+/**
+ * hideNaxDialog 别名
+ */
+export function closeNaxDialog() {
+	hideNaxDialog()
+}

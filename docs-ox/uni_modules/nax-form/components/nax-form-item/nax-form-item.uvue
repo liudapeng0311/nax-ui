@@ -1,0 +1,705 @@
+<template>
+	<view class="nax-form-item" :class="rootClass" @click="onClick">
+		<view class="nax-form-item__body" :class="bodyClass">
+			<!-- 标签区 -->
+			<view v-if="showLabel" class="nax-form-item__label-wrap" :class="labelWrapClass" :style="labelWrapStyle">
+				<text class="nax-form-item__required" :class="requiredClass">{{ requiredText }}</text>
+				<view v-if="hasLeftIcon" class="nax-form-item__left-icon" @click.stop="onLeftIconClick">
+					<nax-icon :name="leftIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
+				</view>
+				<slot name="label">
+					<text v-if="labelText.length > 0" class="nax-form-item__label" :class="labelClass" :style="labelTextStyle">{{ labelText }}</text>
+				</slot>
+			</view>
+
+			<!-- 内容区 -->
+			<view class="nax-form-item__content" :class="contentClass">
+				<view class="nax-form-item__control">
+					<slot></slot>
+					<view v-if="hasRightIcon" class="nax-form-item__right-icon" @click.stop="onRightIconClick">
+						<nax-icon :name="rightIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
+					</view>
+				</view>
+				<!-- 错误文案 -->
+				<text
+					v-if="showMessage"
+					class="nax-form-item__message"
+				>{{ displayMessage }}</text>
+			</view>
+		</view>
+		<!-- 下边框 -->
+		<view v-if="showBorder" class="nax-form-item__border" :class="borderClass"></view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-form-item
+	 * @description 表单项。标签 + 控件插槽 + 错误提示。需配合 nax-form。
+	 * @property {string} label 左侧/上方标签
+	 * @property {string} prop 对应 form.model 字段名（校验必填）
+	 * @property {Array} rules 本项规则（优先于 form.rules[prop]）
+	 * @property {boolean} required 显示必填星号（仅展示，校验请配 rules）
+	 * @property {boolean} borderBottom 是否下边框；true 时跟随 form 开关
+	 * @property {string} labelPosition left | top；空跟随 form
+	 * @property {string|number} labelWidth 标签宽 px；空跟随 form
+	 * @property {string} labelAlign left | center | right；空跟随 form
+	 * @property {string|number} labelSize 标签字号（px）；空跟随 form
+	 * @property {string} leftIcon / rightIcon nax-icon 名
+	 * @property {string} status default | success | warning | error
+	 * @property {string} errorMessage 外部错误文案（优先展示）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击表单项
+	 * @slot default 表单控件
+	 * @slot label 自定义标签
+	 */
+	const props = defineProps({
+		label: {
+			type: String,
+			default: ''
+		},
+		prop: {
+			type: String,
+			default: ''
+		},
+		rules: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		required: {
+			type: Boolean,
+			default: false
+		},
+		borderBottom: {
+			type: Boolean,
+			default: true
+		},
+		labelPosition: {
+			type: String,
+			default: ''
+		},
+		labelWidth: {
+			type: [String, Number],
+			default: ''
+		},
+		labelAlign: {
+			type: String,
+			default: ''
+		},
+		labelSize: {
+			type: [String, Number],
+			default: ''
+		},
+		leftIcon: {
+			type: String,
+			default: ''
+		},
+		rightIcon: {
+			type: String,
+			default: ''
+		},
+		status: {
+			type: String,
+			default: 'default'
+		},
+		errorMessage: {
+			type: String,
+			default: ''
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click'])
+
+	function fallbackGetError(_prop: string): string {
+		return ''
+	}
+
+	function fallbackRegister(_prop: string) {
+	}
+
+	function fallbackUnregister(_prop: string) {
+	}
+
+	function fallbackSetItemRules(_prop: string, _rules: any[]) {
+	}
+
+	const inForm = inject('naxFormInForm', false) as boolean
+	const formErrorTypeRef = inject('naxFormErrorType', ref('message')) as Ref<string>
+	const formBorderBottomRef = inject('naxFormBorderBottom', ref(true)) as Ref<boolean>
+	const formLabelPositionRef = inject('naxFormLabelPosition', ref('left')) as Ref<string>
+	const formLabelWidthRef = inject('naxFormLabelWidth', ref('80')) as Ref<string>
+	const formLabelAlignRef = inject('naxFormLabelAlign', ref('left')) as Ref<string>
+	const formLabelSizeRef = inject('naxFormLabelSize', ref('')) as Ref<string>
+	const formErrorVersionRef = inject('naxFormErrorVersion', ref(0)) as Ref<number>
+	const formGetErrorRaw = inject('naxFormGetError', fallbackGetError) as (prop: string) => string
+	const formRegisterRaw = inject('naxFormRegister', fallbackRegister) as (prop: string) => void
+	const formUnregisterRaw = inject('naxFormUnregister', fallbackUnregister) as (prop: string) => void
+	const formSetItemRulesRaw = inject('naxFormSetItemRules', fallbackSetItemRules) as (prop: string, rules: any[]) => void
+
+	function readRefString(r: any | null, fallback: string): string {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<string>).value
+	}
+
+	function readRefBool(r: any | null, fallback: boolean): boolean {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<boolean>).value
+	}
+
+	function readRefAny(r: any | null): any | null {
+		if (r == null) {
+			return null
+		}
+		return (r as Ref<any>).value
+	}
+
+	function callGetError(prop: string): string {
+		return formGetErrorRaw(prop)
+	}
+
+	function callRegister(prop: string) {
+		formRegisterRaw(prop)
+	}
+
+	function callUnregister(prop: string) {
+		formUnregisterRaw(prop)
+	}
+
+	function callSetItemRules(prop: string, rules: any[]) {
+		formSetItemRulesRaw(prop, rules)
+	}
+
+	const labelText = computed((): string => {
+		return props.label
+	})
+
+	const hasLeftIcon = computed((): boolean => {
+		return props.leftIcon.length > 0
+	})
+
+	const hasRightIcon = computed((): boolean => {
+		return props.rightIcon.length > 0
+	})
+
+	const showLabel = computed((): boolean => {
+		if (labelText.value.length > 0) {
+			return true
+		}
+		if (hasLeftIcon.value) {
+			return true
+		}
+		// 有 label 插槽时仍渲染包裹（插槽可能有内容；无插槽检测时靠 label）
+		return props.required
+	})
+
+	const requiredMark = computed((): boolean => {
+		return props.required
+	})
+
+	const requiredText = computed((): string => {
+		if (requiredMark.value) {
+			return '*'
+		}
+		return ''
+	})
+
+	const requiredClass = computed((): string => {
+		if (requiredMark.value) {
+			return 'nax-form-item__required--on'
+		}
+		return ''
+	})
+
+	const mergedLabelPosition = computed((): string => {
+		if (props.labelPosition == 'left' || props.labelPosition == 'top') {
+			return props.labelPosition
+		}
+		const g = readRefString(formLabelPositionRef, 'left')
+		if (g == 'top') {
+			return 'top'
+		}
+		return 'left'
+	})
+
+	const mergedLabelAlign = computed((): string => {
+		if (props.labelAlign == 'left' || props.labelAlign == 'center' || props.labelAlign == 'right') {
+			return props.labelAlign
+		}
+		const g = readRefString(formLabelAlignRef, 'left')
+		if (g == 'center' || g == 'right') {
+			return g
+		}
+		return 'left'
+	})
+
+	const mergedLabelWidth = computed((): number => {
+		const raw = props.labelWidth
+		if (typeof raw == 'number') {
+			const n = raw as number
+			if (n > 0) {
+				return n
+			}
+		}
+		if (typeof raw == 'string') {
+			const s = raw as string
+			if (s.length > 0) {
+				const n = parseFloat(s)
+				if (n == n && n > 0) {
+					return n
+				}
+			}
+		}
+		const g = readRefAny(formLabelWidthRef)
+		if (typeof g == 'number') {
+			const n = g as number
+			if (n > 0) {
+				return n
+			}
+		}
+		if (typeof g == 'string') {
+			const n = parseFloat(g as string)
+			if (n == n && n > 0) {
+				return n
+			}
+		}
+		return 80
+	})
+
+	const mergedLabelSize = computed((): number => {
+		const raw = props.labelSize
+		if (typeof raw == 'number') {
+			const n = raw as number
+			if (n > 0) {
+				return n
+			}
+		}
+		if (typeof raw == 'string') {
+			const s = raw as string
+			if (s.length > 0) {
+				const n = parseFloat(s)
+				if (n == n && n > 0) {
+					return n
+				}
+			}
+		}
+		const g = readRefAny(formLabelSizeRef)
+		if (typeof g == 'number') {
+			const n = g as number
+			if (n > 0) {
+				return n
+			}
+		}
+		if (typeof g == 'string') {
+			const n = parseFloat(g as string)
+			if (n == n && n > 0) {
+				return n
+			}
+		}
+		return 0
+	})
+
+	const mergedBorderBottom = computed((): boolean => {
+		// item 显式 false 优先；true 时跟随 form 统一开关
+		if (!props.borderBottom) {
+			return false
+		}
+		return readRefBool(formBorderBottomRef, true)
+	})
+
+	const mergedErrorType = computed((): string => {
+		return readRefString(formErrorTypeRef, 'message')
+	})
+
+	const formErrorMessage = computed((): string => {
+		// 依赖 errorVersion 触发更新
+		if (formErrorVersionRef != null) {
+			const _v = (formErrorVersionRef as Ref<number>).value
+			if (_v < 0) {
+				// no-op keep dependency
+			}
+		}
+		return callGetError(props.prop)
+	})
+
+	const displayMessage = computed((): string => {
+		if (props.errorMessage.length > 0) {
+			return props.errorMessage
+		}
+		return formErrorMessage.value
+	})
+
+	const showMessage = computed((): boolean => {
+		const et = mergedErrorType.value
+		if (et == 'none' || et == 'toast') {
+			// toast 模式仍可在字段下不展示；none 不展示
+			if (et == 'none') {
+				return false
+			}
+			// toast：默认不展示行内，除非外部 errorMessage
+			if (props.errorMessage.length > 0) {
+				return true
+			}
+			return false
+		}
+		// message / message-toast / border-bottom 等：有文案则展示（border-bottom 也常配 message）
+		if (et == 'border-bottom') {
+			// 仅红线时也可同时出文案，更清晰：有 message 也显示
+		}
+		return displayMessage.value.length > 0
+	})
+
+	const showBorder = computed((): boolean => {
+		return mergedBorderBottom.value
+	})
+
+	const statusName = computed((): string => {
+		if (displayMessage.value.length > 0) {
+			return 'error'
+		}
+		if (props.status == 'success' || props.status == 'warning' || props.status == 'error') {
+			return props.status
+		}
+		return 'default'
+	})
+
+	const iconSizePx = '16'
+	const iconColor = computed((): string => {
+		return ''
+	})
+
+	const labelWrapStyle = computed((): string => {
+		if (mergedLabelPosition.value == 'top') {
+			return ''
+		}
+		return 'width:' + mergedLabelWidth.value.toString() + 'px'
+	})
+
+	const labelTextStyle = computed((): string => {
+		// 字号内联覆盖 class 默认 15px；文本对齐靠 class，宽度在 wrap
+		if (mergedLabelSize.value > 0) {
+			return 'font-size:' + mergedLabelSize.value.toString() + 'px'
+		}
+		return ''
+	})
+
+	const bodyClass = computed((): string => {
+		if (mergedLabelPosition.value == 'top') {
+			return 'nax-form-item__body--top'
+		}
+		return 'nax-form-item__body--left'
+	})
+
+	const labelWrapClass = computed((): string => {
+		var cls = ''
+		if (mergedLabelPosition.value == 'top') {
+			cls += ' nax-form-item__label-wrap--top'
+		} else {
+			cls += ' nax-form-item__label-wrap--left'
+		}
+		if (mergedLabelAlign.value == 'center') {
+			cls += ' nax-form-item__label-wrap--align-center'
+		} else if (mergedLabelAlign.value == 'right') {
+			cls += ' nax-form-item__label-wrap--align-right'
+		} else {
+			cls += ' nax-form-item__label-wrap--align-left'
+		}
+		return cls.trim()
+	})
+
+	const labelClass = computed((): string => {
+		return ''
+	})
+
+	const contentClass = computed((): string => {
+		return ''
+	})
+
+	const borderClass = computed((): string => {
+		const et = mergedErrorType.value
+		if ((et == 'border-bottom' || et == 'message') && displayMessage.value.length > 0) {
+			return 'nax-form-item__border--error'
+		}
+		if (statusName.value == 'error') {
+			return 'nax-form-item__border--error'
+		}
+		if (statusName.value == 'success') {
+			return 'nax-form-item__border--success'
+		}
+		if (statusName.value == 'warning') {
+			return 'nax-form-item__border--warning'
+		}
+		return ''
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-form-item--' + statusName.value
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	function syncItemRules() {
+		if (!inForm) {
+			return
+		}
+		if (props.prop.length == 0) {
+			return
+		}
+		callSetItemRules(props.prop, props.rules as any[])
+	}
+
+	onMounted(() => {
+		if (inForm && props.prop.length > 0) {
+			callRegister(props.prop)
+			syncItemRules()
+		}
+	})
+
+	onUnmounted(() => {
+		if (inForm && props.prop.length > 0) {
+			callUnregister(props.prop)
+		}
+	})
+
+	watch((): any => {
+		return props.prop
+	}, (n: any, o: any) => {
+		if (!inForm) {
+			return
+		}
+		const oldP = o != null ? ('' + o) : ''
+		const newP = n != null ? ('' + n) : ''
+		if (oldP.length > 0) {
+			callUnregister(oldP)
+		}
+		if (newP.length > 0) {
+			callRegister(newP)
+			syncItemRules()
+		}
+	})
+
+	watch((): any => {
+		return props.rules
+	}, (_: any) => {
+		syncItemRules()
+	})
+
+	function onClick() {
+		emit('click')
+	}
+
+	function onLeftIconClick() {
+		// 图标点击冒泡到 item click 已 stop；保留空实现便于扩展
+	}
+
+	function onRightIconClick() {
+	}
+
+	// 供父级手动触发本项校验时可在后续版本暴露；当前校验入口在 form
+	defineExpose({
+		prop: props.prop
+	})
+</script>
+
+<style>
+	.nax-form-item {
+		flex-direction: column;
+		/* #ifdef APP-ANDROID */
+		align-self: stretch;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-form-item__body {
+		flex-direction: row;
+		align-items: flex-start;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+
+	.nax-form-item__body--top {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.nax-form-item__body--left {
+		flex-direction: row;
+		/* 顶对齐：标签区与控件行同高（Web 40 / 鸿蒙 48），与 nax-input md 一致 */
+		align-items: flex-start;
+	}
+
+	.nax-form-item__label-wrap {
+		flex-direction: row;
+		align-items: center;
+		padding-right: 12px;
+		flex-shrink: 0;
+	}
+
+	.nax-form-item__label-wrap--top {
+		padding-right: 0;
+		padding-bottom: 8px;
+		min-height: 0;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	/* #ifndef VUE3-VAPOR */
+	.nax-form-item__label-wrap--top .nax-form-item__required {
+		line-height: 22px;
+		height: 22px;
+	}
+
+	.nax-form-item__label-wrap--top .nax-form-item__label {
+		line-height: 22px;
+		height: 22px;
+	}
+	/* #endif */
+
+	.nax-form-item__label-wrap--left {
+		/* 与 nax-input md 默认高度对齐：Web/小程序 40；鸿蒙 input 为 48 */
+		/* #ifndef APP-HARMONY */
+		height: 40px;
+		min-height: 40px;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		height: 48px;
+		min-height: 48px;
+		/* #endif */
+		align-items: center;
+	}
+
+	.nax-form-item__label-wrap--align-left {
+		justify-content: flex-start;
+	}
+
+	.nax-form-item__label-wrap--align-center {
+		justify-content: center;
+	}
+
+	.nax-form-item__label-wrap--align-right {
+		justify-content: flex-end;
+	}
+
+	/* 固定宽度占位：无 required 时留空，保证 label 文字左缘对齐且星号始终可见 */
+	.nax-form-item__required {
+		width: 12px;
+		flex-shrink: 0;
+		font-size: 14px;
+		color: transparent;
+		/* #ifndef APP-HARMONY */
+		line-height: 40px;
+		height: 40px;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		line-height: 22px;
+		/* #endif */
+	}
+
+	.nax-form-item__required--on {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-form-item__left-icon {
+		margin-right: 4px;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-form-item__label {
+		color: var(--nax-color-text, #333639);
+		font-size: 15px;
+		/* #ifndef APP-HARMONY */
+		line-height: 40px;
+		height: 40px;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙 text：用父级 align-items 居中，避免固定 height 行高错位 */
+		line-height: 22px;
+		/* #endif */
+	}
+
+	.nax-form-item__content {
+		flex: 1;
+		flex-direction: column;
+		justify-content: flex-start;
+		/* #ifdef APP-ANDROID */
+		min-width: 0;
+		align-self: stretch;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		min-width: 0;
+		/* #endif */
+	}
+
+	.nax-form-item__control {
+		flex-direction: row;
+		align-items: center;
+		flex: 1;
+		/* #ifdef APP-ANDROID */
+		width: 100%;
+		align-self: stretch;
+		/* #endif */
+		/* #ifndef APP-HARMONY */
+		height: 40px;
+		min-height: 40px;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		/* 对齐鸿蒙 nax-input md = 48px */
+		height: 48px;
+		min-height: 48px;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-form-item__right-icon {
+		margin-left: 8px;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-form-item__message {
+		margin-top: 6px;
+		color: var(--nax-color-error, #d03050);
+		font-size: 12px;
+		line-height: 16px;
+	}
+
+	.nax-form-item__border {
+		height: 1px;
+		background-color: var(--nax-color-border, #f0f0f3);
+		/* #ifdef APP-ANDROID */
+		width: 100%;
+		align-self: stretch;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-form-item__border--error {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-form-item__border--success {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-form-item__border--warning {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+</style>
+

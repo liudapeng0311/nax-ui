@@ -1,0 +1,26 @@
+## 0.2.5（2026-08-18）
+- 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
+## 0.2.4（2026-08-18）
+- 蒸汽模式兼容：移除 `<text>` 上不支持的 `lines` 属性，改为 CSS `lines` 声明（各文本 class 补齐 `lines: N;`），消除 App 蒸汽模式 warning
+## 0.2.3（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+## 0.2.2（2026-08-11）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
+## 0.2.1（2026-08-07）
+- 支持IOS端。
+## 0.2.0（2026-08-01）
+- 新增 `openNaxPopup({ themeClass })`：内置 dialogPage host 可应用传入的主题 class，解决独立页面无法继承触发页暗色主题的问题。
+- 演示：window 模式传递当前 `nax-theme-dark`；自定义 `demo-dialog` 同步演示工程的暗色状态。
+## 0.1.1（2026-07-21）
+
+- 鸿蒙：压窗遮罩对齐 nax-picker 三阶段动画，修复半透明背景闪动
+- 内置 host 默认 dialogPage animationType 改为 none，避免与内部淡入叠闪
+- 关闭时先退场再 closeDialogPage
+
+## 0.1.0（2026-07-21）
+
+- 首版：压窗屏 `nax-popup`
+- App / Web：`openNaxPopup()` 走 `uni.openDialogPage`，可盖住原生导航栏与 tabBar
+- 内置 host 页：`uni_modules/nax-popup/pages/host/index`（简易 title/content）
+- 声明式 `<nax-popup v-model:show>`：页面级插槽弹层（薄封装 nax-picker）
+- 微信小程序：无 dialogPage，降级页面级宿主并在 readme 说明限制

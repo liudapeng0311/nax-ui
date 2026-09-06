@@ -1,0 +1,637 @@
+<template>
+	<nax-picker
+		:show="visible"
+		position="center"
+		:round="roundEnabled"
+		:mask="maskEnabled"
+		:mask-closable="effectiveMaskClosable"
+		:close-on-mask="effectiveMaskClosable"
+		:close-on-click-overlay="effectiveMaskClosable"
+		:z-index="zIndexValue"
+		:duration="durationValue"
+		:width="widthValue"
+		:custom-class="pickerRootClass"
+		@update:show="onPickerUpdateShow"
+		@open="onOpen"
+		@opened="onOpened"
+		@close="onClose"
+		@click-mask="onClickMask"
+	>
+		<view class="nax-dialog" :class="rootClass">
+			<!-- 标题 -->
+			<view v-if="hasHeader" class="nax-dialog__header">
+				<slot name="title">
+					<text v-if="titleText.length > 0" class="nax-dialog__title" :max-lines="2">{{ titleText }}</text>
+				</slot>
+			</view>
+
+			<!-- 内容 -->
+			<view class="nax-dialog__body" :class="bodyClass">
+				<slot>
+					<text v-if="contentText.length > 0" class="nax-dialog__content" :max-lines="12">{{ contentText }}</text>
+				</slot>
+			</view>
+
+			<!-- 底部按钮 -->
+			<view v-if="hasFooter" class="nax-dialog__footer" :class="footerClass">
+				<slot name="footer">
+					<view
+						v-if="cancelVisible"
+						class="nax-dialog__btn nax-dialog__btn--cancel"
+						hover-class="nax-dialog__btn--hover"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onCancelClick"
+					>
+						<text class="nax-dialog__btn-text nax-dialog__btn-text--cancel" :max-lines="1">{{ cancelLabel }}</text>
+					</view>
+					<view v-if="cancelVisible && confirmVisible" class="nax-dialog__v-line"></view>
+					<view
+						v-if="confirmVisible"
+						class="nax-dialog__btn nax-dialog__btn--confirm"
+						hover-class="nax-dialog__btn--hover"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onConfirmClick"
+					>
+						<text class="nax-dialog__btn-text" :max-lines="1" :class="confirmTextClass">{{ confirmLabel }}</text>
+					</view>
+				</slot>
+			</view>
+		</view>
+	</nax-picker>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-dialog
+	 * @description 居中对话框：声明式 v-model:show + 命令式 naxDialog()/naxDialogAlert()/naxDialogConfirm()。
+	 * 薄封装 nax-picker（position=center）。自定义复杂内容可用默认插槽，或直接用 nax-picker。
+	 * @property {boolean} show v-model:show 显隐（声明式）
+	 * @property {string} title 标题
+	 * @property {string} content 内容文案
+	 * @property {string} message 同 content（兼容）
+	 * @property {boolean} showCancel 显示取消，默认 true
+	 * @property {boolean} showConfirm 显示确定，默认 true
+	 * @property {string} cancelText 取消文案
+	 * @property {string} confirmText 确定文案
+	 * @property {string} confirmType primary/info/success/warning/error/default，默认 primary
+	 * @property {boolean} asyncClose 点确定不自动关闭，业务自行关
+	 * @property {boolean} mask 遮罩，默认 true
+	 * @property {boolean} maskClosable 点遮罩关闭，默认 false
+	 * @property {boolean} closeOnMask 同 maskClosable
+	 * @property {boolean} closeOnClickOverlay 同 maskClosable
+	 * @property {boolean} round 圆角，默认 true
+	 * @property {string} width 面板宽度
+	 * @property {number} zIndex 层级，默认 10085
+	 * @property {number} duration 动画 ms，默认 280
+	 * @property {string} customClass 根扩展 class
+	 * @event update:show 显隐变更
+	 * @event confirm 点确定
+	 * @event cancel 点取消 / 遮罩关闭（声明式）
+	 * @event open 打开开始
+	 * @event opened 打开完成
+	 * @event close 关闭完成
+	 * @event click-mask 点遮罩
+	 * @slot default 自定义内容区
+	 * @slot title 自定义标题
+	 * @slot footer 自定义底部
+	 */
+	import {
+		bindNaxDialogHost,
+		unbindNaxDialogHost,
+		notifyNaxDialogResult
+	} from '../../index.uts'
+
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		content: {
+			type: String,
+			default: ''
+		},
+		message: {
+			type: String,
+			default: ''
+		},
+		showCancel: {
+			type: Boolean,
+			default: true
+		},
+		showConfirm: {
+			type: Boolean,
+			default: true
+		},
+		cancelText: {
+			type: String,
+			default: '取消'
+		},
+		confirmText: {
+			type: String,
+			default: '确定'
+		},
+		confirmType: {
+			type: String,
+			default: 'primary'
+		},
+		asyncClose: {
+			type: Boolean,
+			default: false
+		},
+		mask: {
+			type: Boolean,
+			default: true
+		},
+		maskClosable: {
+			type: Boolean,
+			default: false
+		},
+		closeOnMask: {
+			type: Boolean,
+			default: false
+		},
+		closeOnClickOverlay: {
+			type: Boolean,
+			default: false
+		},
+		round: {
+			type: Boolean,
+			default: true
+		},
+		width: {
+			type: String,
+			default: ''
+		},
+		zIndex: {
+			type: Number,
+			default: 10085
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'confirm',
+		'cancel',
+		'open',
+		'opened',
+		'close',
+		'click-mask'
+	])
+
+	// —— 命令式宿主态 ——
+	const hostOpen = ref(false)
+	const hostTitle = ref('')
+	const hostContent = ref('')
+	const hostShowCancel = ref(true)
+	const hostShowConfirm = ref(true)
+	const hostCancelText = ref('取消')
+	const hostConfirmText = ref('确定')
+	const hostConfirmType = ref('primary')
+	const hostMaskClosable = ref(false)
+	const hostAsyncClose = ref(false)
+	const hostWidth = ref('')
+
+	const visible = computed((): boolean => {
+		return props.show || hostOpen.value
+	})
+
+	const titleText = computed((): string => {
+		if (hostOpen.value) {
+			return hostTitle.value
+		}
+		return props.title
+	})
+
+	const contentText = computed((): string => {
+		if (hostOpen.value) {
+			return hostContent.value
+		}
+		if (props.content.length > 0) {
+			return props.content
+		}
+		return props.message
+	})
+
+	const cancelVisible = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostShowCancel.value
+		}
+		return props.showCancel
+	})
+
+	const confirmVisible = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostShowConfirm.value
+		}
+		return props.showConfirm
+	})
+
+	const cancelLabel = computed((): string => {
+		if (hostOpen.value) {
+			return hostCancelText.value
+		}
+		if (props.cancelText.length > 0) {
+			return props.cancelText
+		}
+		return '取消'
+	})
+
+	const confirmLabel = computed((): string => {
+		if (hostOpen.value) {
+			return hostConfirmText.value
+		}
+		if (props.confirmText.length > 0) {
+			return props.confirmText
+		}
+		return '确定'
+	})
+
+	function normalizeConfirmType(raw: string): string {
+		if (raw == 'danger') {
+			return 'error'
+		}
+		if (
+			raw == 'primary' ||
+			raw == 'info' ||
+			raw == 'success' ||
+			raw == 'warning' ||
+			raw == 'error' ||
+			raw == 'default'
+		) {
+			return raw
+		}
+		return 'primary'
+	}
+
+	const confirmTypeName = computed((): string => {
+		if (hostOpen.value) {
+			return normalizeConfirmType(hostConfirmType.value)
+		}
+		return normalizeConfirmType(props.confirmType)
+	})
+
+	const confirmTextClass = computed((): string => {
+		const t = confirmTypeName.value
+		if (t == 'error') {
+			return 'nax-dialog__btn-text--error'
+		}
+		if (t == 'warning') {
+			return 'nax-dialog__btn-text--warning'
+		}
+		if (t == 'success') {
+			return 'nax-dialog__btn-text--success'
+		}
+		if (t == 'info') {
+			return 'nax-dialog__btn-text--info'
+		}
+		if (t == 'default') {
+			return 'nax-dialog__btn-text--default'
+		}
+		return 'nax-dialog__btn-text--primary'
+	})
+
+	const isAsyncClose = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostAsyncClose.value
+		}
+		return props.asyncClose
+	})
+
+	const effectiveMaskClosable = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostMaskClosable.value
+		}
+		// 三者任一为 true 即可关（与 picker 约定一致）
+		if (props.maskClosable || props.closeOnMask || props.closeOnClickOverlay) {
+			return true
+		}
+		return false
+	})
+
+	const maskEnabled = computed((): boolean => {
+		return props.mask
+	})
+
+	const roundEnabled = computed((): boolean => {
+		return props.round
+	})
+
+	const zIndexValue = computed((): number => {
+		return props.zIndex
+	})
+
+	const durationValue = computed((): number => {
+		return props.duration
+	})
+
+	const widthValue = computed((): string => {
+		if (hostOpen.value && hostWidth.value.length > 0) {
+			return hostWidth.value
+		}
+		return props.width
+	})
+
+	const hasHeader = computed((): boolean => {
+		return titleText.value.length > 0
+	})
+
+	const hasFooter = computed((): boolean => {
+		return cancelVisible.value || confirmVisible.value
+	})
+
+	const bodyClass = computed((): string => {
+		if (titleText.value.length == 0) {
+			return 'nax-dialog__body--alone'
+		}
+		return ''
+	})
+
+	const footerClass = computed((): string => {
+		if (cancelVisible.value && confirmVisible.value) {
+			return 'nax-dialog__footer--double'
+		}
+		return 'nax-dialog__footer--single'
+	})
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+
+	const pickerRootClass = computed((): string => {
+		return 'nax-dialog__picker'
+	})
+
+	function hostShow(
+		title: string,
+		content: string,
+		showCancel: boolean,
+		showConfirm: boolean,
+		cancelText: string,
+		confirmText: string,
+		confirmType: string,
+		maskClosable: boolean,
+		asyncClose: boolean,
+		width: string
+	) {
+		hostTitle.value = title
+		hostContent.value = content
+		hostShowCancel.value = showCancel
+		hostShowConfirm.value = showConfirm
+		hostCancelText.value = cancelText
+		hostConfirmText.value = confirmText
+		hostConfirmType.value = confirmType
+		hostMaskClosable.value = maskClosable
+		hostAsyncClose.value = asyncClose
+		hostWidth.value = width
+		hostOpen.value = true
+	}
+
+	function hostHide() {
+		hostOpen.value = false
+	}
+
+	function closeDeclarative() {
+		emit('update:show', false)
+	}
+
+	function onConfirmClick() {
+		if (hostOpen.value) {
+			// 先通知结果再关，避免 picker 反向 update:show 抢先按 cancel 收口
+			notifyNaxDialogResult('confirm')
+			if (!isAsyncClose.value) {
+				hostOpen.value = false
+			}
+			return
+		}
+		emit('confirm')
+		if (!isAsyncClose.value) {
+			closeDeclarative()
+		}
+	}
+
+	function onCancelClick() {
+		if (hostOpen.value) {
+			notifyNaxDialogResult('cancel')
+			hostOpen.value = false
+			return
+		}
+		emit('cancel')
+		closeDeclarative()
+	}
+
+	function onPickerUpdateShow(v: boolean) {
+		if (v) {
+			// 打开态由 props / host 驱动，忽略 picker 反向 true
+			return
+		}
+		// 关闭（含遮罩）；若按钮已 notify 过，pending 已清空，此处为 no-op
+		if (hostOpen.value) {
+			hostOpen.value = false
+			notifyNaxDialogResult('cancel')
+			return
+		}
+		if (props.show) {
+			emit('cancel')
+			emit('update:show', false)
+		}
+	}
+
+	function onOpen() {
+		emit('open')
+	}
+
+	function onOpened() {
+		emit('opened')
+	}
+
+	function onClose() {
+		emit('close')
+	}
+
+	function onClickMask() {
+		emit('click-mask')
+	}
+
+	let boundHostId: number = 0
+
+	onMounted(() => {
+		boundHostId = bindNaxDialogHost(hostShow, hostHide)
+	})
+
+	onUnmounted(() => {
+		if (hostOpen.value) {
+			hostOpen.value = false
+			notifyNaxDialogResult('cancel')
+		}
+		unbindNaxDialogHost(boundHostId)
+		boundHostId = 0
+	})
+</script>
+
+<style>
+	.nax-dialog {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: hidden;
+	}
+
+	.nax-dialog__header {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 22px;
+		padding-left: 20px;
+		padding-right: 20px;
+		padding-bottom: 0px;
+	}
+
+	.nax-dialog__title {
+		font-size: 17px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	.nax-dialog__body {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 12px;
+		padding-bottom: 22px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.nax-dialog__body--alone {
+		padding-top: 24px;
+	}
+
+	.nax-dialog__content {
+		font-size: 14px;
+		line-height: 21px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-dialog__footer {
+		flex-direction: row;
+		align-items: center;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-dialog__footer--single {
+		flex-direction: row;
+	}
+
+	.nax-dialog__footer--double {
+		flex-direction: row;
+	}
+
+	.nax-dialog__btn {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		/* 高度用 padding 控制，避免 min-height + padding 在部分端叠加 */
+		height: 48px;
+		padding-top: 0px;
+		padding-bottom: 0px;
+		padding-left: 8px;
+		padding-right: 8px;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-dialog__btn--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-dialog__v-line {
+		width: 1px;
+		height: 48px;
+		background-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-dialog__btn-text {
+		font-size: 16px;
+		font-weight: 500;
+		line-height: 22px;
+		height: 22px;
+		text-align: center;
+	}
+
+	/* #ifdef APP-HARMONY */
+	/* 鸿蒙：按钮区易被默认行高/内边距撑高，单独收紧 */
+	.nax-dialog__footer {
+		align-items: center;
+	}
+
+	.nax-dialog__btn {
+		height: 44px;
+		min-height: 0px;
+		padding-top: 0px;
+		padding-bottom: 0px;
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	.nax-dialog__v-line {
+		height: 44px;
+		align-self: center;
+	}
+
+	.nax-dialog__btn-text {
+		font-size: 15px;
+		line-height: 20px;
+		height: 20px;
+	}
+	/* #endif */
+
+	.nax-dialog__btn-text--cancel {
+		color: var(--nax-color-text, #333639);
+		font-weight: 400;
+	}
+
+	.nax-dialog__btn-text--primary {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-dialog__btn-text--info {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-dialog__btn-text--success {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-dialog__btn-text--warning {
+		color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-dialog__btn-text--error {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-dialog__btn-text--default {
+		color: var(--nax-color-text, #333639);
+	}
+</style>

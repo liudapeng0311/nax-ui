@@ -1,0 +1,744 @@
+﻿<template>
+	<view class="nax-progress" :class="rootClass">
+		<!-- 线形 -->
+		<template v-if="isLine">
+			<view class="nax-progress__track" :style="lineTrackStyle">
+				<!-- #ifndef APP-HARMONY -->
+				<view :id="fillDomId" class="nax-progress__fill" :style="lineFillStyle">
+					<text
+						v-if="showInfo && textInside && !useSlot"
+						class="nax-progress__info nax-progress__info--inside"
+						:max-lines="1"
+						:style="insideInfoStyle"
+					>{{ displayText }}</text>
+					<view v-if="showInfo && textInside && useSlot" class="nax-progress__slot-inside">
+						<slot></slot>
+					</view>
+				</view>
+				<!-- #endif -->
+				<!-- #ifdef APP-HARMONY -->
+				<!-- 鸿蒙用 transform 缩放独立色块，避开百分比 width transition 的满宽闪烁。 -->
+				<view :id="fillDomId" class="nax-progress__fill" :style="lineFillStyle"></view>
+				<view
+					v-if="showInfo && textInside"
+					class="nax-progress__inside-layer"
+					:style="lineInsideStyle"
+				>
+					<text
+						v-if="!useSlot"
+						class="nax-progress__info nax-progress__info--inside"
+						:max-lines="1"
+						:style="insideInfoStyle"
+					>{{ displayText }}</text>
+					<view v-if="useSlot" class="nax-progress__slot-inside">
+						<slot></slot>
+					</view>
+				</view>
+				<!-- #endif -->
+			</view>
+			<text
+				v-if="showInfo && !textInside && !useSlot"
+				class="nax-progress__info nax-progress__info--outer"
+				:max-lines="1"
+				:style="outerInfoStyle"
+			>{{ displayText }}</text>
+			<view v-if="showInfo && !textInside && useSlot" class="nax-progress__slot-outer">
+				<slot></slot>
+			</view>
+		</template>
+
+		<!-- 圆形 -->
+		<template v-else>
+			<view class="nax-progress__circle" :style="circleBoxStyle">
+				<view class="nax-progress__ring nax-progress__ring--track" :style="circleTrackRingStyle"></view>
+				<view
+					v-if="isCircleFull"
+					class="nax-progress__ring nax-progress__ring--full"
+					:style="circleFullRingStyle"
+				></view>
+				<template v-if="!isCircleFull && percentValue > 0">
+					<view class="nax-progress__half nax-progress__half--right">
+						<view class="nax-progress__ring nax-progress__ring--active" :style="rightActiveRingStyle"></view>
+					</view>
+					<view v-if="percentValue > 50" class="nax-progress__half nax-progress__half--left">
+						<view class="nax-progress__ring nax-progress__ring--active" :style="leftActiveRingStyle"></view>
+					</view>
+				</template>
+				<view class="nax-progress__circle-inner" :style="circleInnerStyle">
+					<slot v-if="useSlot"></slot>
+					<text
+						v-else-if="showInfo"
+						class="nax-progress__info nax-progress__info--circle"
+						:max-lines="1"
+						:style="circleInfoStyle"
+					>{{ displayText }}</text>
+				</view>
+			</view>
+		</template>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-progress
+	 * @description 进度条。线形 / 圆形统一入口；props 管行为，外观走 type/size + CSS 变量。
+	 * @property {number} percent 进度 0–100
+	 * @property {string} shape line | circle
+	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
+	 * @property {string} status success | warning | error；有值时覆盖 type 色
+	 * @property {string} size sm | md | lg
+	 * @property {boolean} showInfo 是否显示百分比/文案
+	 * @property {boolean} textInside 线形文案是否在条内
+	 * @property {boolean} useSlot 使用默认插槽自定义信息区
+	 * @property {number} strokeWidth 线形高度 / 圆形描边（px）；0 跟随 size
+	 * @property {number} width 圆形直径（px）；0 跟随 size
+	 * @property {string} color 激活色覆盖
+	 * @property {string} trackColor 轨道色覆盖
+	 * @property {string} pivotText 自定义文案；空则 percent%
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 自定义信息区（需 useSlot）
+	 */
+	const props = defineProps({
+		percent: { type: Number, default: 0 },
+		shape: { type: String, default: 'line' },
+		type: { type: String, default: 'primary' },
+		status: { type: String, default: '' },
+		size: { type: String, default: 'md' },
+		showInfo: { type: Boolean, default: true },
+		textInside: { type: Boolean, default: false },
+		useSlot: { type: Boolean, default: false },
+		strokeWidth: { type: Number, default: 0 },
+		width: { type: Number, default: 0 },
+		color: { type: String, default: '' },
+		trackColor: { type: String, default: '' },
+		pivotText: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	const fillDomId = 'nax-progress-fill-' + Math.floor(Math.random() * 10000000).toString()
+
+	function normalizeShape(value: string): string {
+		if (value == 'circle' || value == 'round') {
+			return 'circle'
+		}
+		return 'line'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeType(value: string): string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'default' ||
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'primary'
+	}
+
+	function normalizeStatus(value: string): string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (value == 'success' || value == 'warning' || value == 'error') {
+			return value
+		}
+		return ''
+	}
+
+	function clampPercent(value: number): number {
+		if (value < 0) {
+			return 0
+		}
+		if (value > 100) {
+			return 100
+		}
+		return value
+	}
+
+	function typeColorToken(name: string): string {
+		if (name == 'info') {
+			return 'var(--nax-color-info, #2080f0)'
+		}
+		if (name == 'warning') {
+			return 'var(--nax-color-warning, #f0a020)'
+		}
+		if (name == 'error') {
+			return 'var(--nax-color-error, #d03050)'
+		}
+		if (name == 'success') {
+			return 'var(--nax-color-success, #18a058)'
+		}
+		return 'var(--nax-color-primary, #18a058)'
+	}
+
+	const shapeName = computed((): string => {
+		return normalizeShape(props.shape)
+	})
+
+	const isLine = computed((): boolean => {
+		return shapeName.value == 'line'
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const typeName = computed((): string => {
+		const st = normalizeStatus(props.status)
+		if (st.length > 0) {
+			return st
+		}
+		return normalizeType(props.type)
+	})
+
+	const percentValue = computed((): number => {
+		return clampPercent(props.percent as number)
+	})
+
+	const isCircleFull = computed((): boolean => {
+		return percentValue.value >= 100
+	})
+
+	const activeColorValue = computed((): string => {
+		if (props.color.length > 0) {
+			return props.color
+		}
+		return typeColorToken(typeName.value)
+	})
+
+	const trackColorValue = computed((): string => {
+		if (props.trackColor.length > 0) {
+			return props.trackColor
+		}
+		return 'var(--nax-color-divider, #f5f5f7)'
+	})
+
+	const displayText = computed((): string => {
+		if (props.pivotText.length > 0) {
+			return props.pivotText
+		}
+		const rounded = Math.round(percentValue.value)
+		return rounded.toString() + '%'
+	})
+
+	function lineHeightPx(): number {
+		const custom = props.strokeWidth as number
+		if (custom > 0) {
+			return custom
+		}
+		if (sizeName.value == 'sm') {
+			return 4
+		}
+		if (sizeName.value == 'lg') {
+			return 12
+		}
+		return 8
+	}
+
+	function lineEffectiveHeightPx(): number {
+		var h = lineHeightPx()
+		if (props.textInside && props.showInfo) {
+			if (h < 16) {
+				h = 16
+			}
+		}
+		return h
+	}
+
+	function circleDiameterPx(): number {
+		const custom = props.width as number
+		if (custom > 0) {
+			return custom
+		}
+		if (sizeName.value == 'sm') {
+			return 64
+		}
+		if (sizeName.value == 'lg') {
+			return 128
+		}
+		return 96
+	}
+
+	function circleStrokePx(): number {
+		const custom = props.strokeWidth as number
+		if (custom > 0) {
+			return custom
+		}
+		if (sizeName.value == 'sm') {
+			return 4
+		}
+		if (sizeName.value == 'lg') {
+			return 8
+		}
+		return 6
+	}
+
+	function rightRotateDeg(): number {
+		const p = percentValue.value
+		if (p <= 0) {
+			return -135
+		}
+		if (p >= 50) {
+			return 45
+		}
+		return -135 + (p / 50) * 180
+	}
+
+	function leftRotateDeg(): number {
+		const p = percentValue.value
+		if (p <= 50) {
+			return -135
+		}
+		if (p >= 100) {
+			return 45
+		}
+		return -135 + ((p - 50) / 50) * 180
+	}
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-progress--' + shapeName.value
+		cls += ' nax-progress--' + sizeName.value
+		cls += ' nax-progress--' + typeName.value
+		if (props.textInside && isLine.value) {
+			cls += ' nax-progress--text-inside'
+		}
+		if (props.showInfo && isLine.value && !props.textInside) {
+			cls += ' nax-progress--with-outer-info'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const lineTrackStyle = computed((): string => {
+		const h = lineEffectiveHeightPx()
+		var style = ''
+		style += 'height:' + h.toString() + 'px;'
+		style += 'background-color:' + trackColorValue.value + ';'
+		style += 'border-radius:' + Math.ceil(h / 2).toString() + 'px;'
+		return style
+	})
+
+	// #ifndef APP-HARMONY
+	const lineFillStyle = computed((): string => {
+		const h = lineEffectiveHeightPx()
+		var style = ''
+		style += 'width:' + percentValue.value.toString() + '%;'
+		style += 'height:' + h.toString() + 'px;'
+		style += 'background-color:' + activeColorValue.value + ';'
+		style += 'border-radius:' + Math.ceil(h / 2).toString() + 'px;'
+		style += 'transition-property:width;'
+		style += 'transition-duration:200ms;'
+		style += 'transition-timing-function:ease;'
+		return style
+	})
+	// #endif
+
+	// #ifdef APP-HARMONY
+	/**
+	 * 鸿蒙线形动画：
+	 * 百分比 width 开启 transition 时会短暂按满宽布局，因此固定满宽后只动画 scaleX。
+	 * 条内文案使用独立覆盖层，避免被 transform 一起横向缩放。
+	 */
+	let lineVisualPercent = 0.0
+	let lineAnimToken = 0
+	let cachedFillEl : UniElement | null = null
+	let lineAnimTimerId = -1
+	let lineRetryTimerId = -1
+
+	const lineFillStyle = computed((): string => {
+		const h = lineEffectiveHeightPx()
+		var style = ''
+		style += 'height:' + h.toString() + 'px;'
+		style += 'background-color:' + activeColorValue.value + ';'
+		style += 'border-radius:' + Math.ceil(h / 2).toString() + 'px;'
+		return style
+	})
+
+	const lineInsideStyle = computed((): string => {
+		const h = lineEffectiveHeightPx()
+		var style = ''
+		style += 'width:' + percentValue.value.toString() + '%;'
+		style += 'height:' + h.toString() + 'px;'
+		return style
+	})
+
+	function getFillElement() : UniElement | null {
+		if (cachedFillEl != null) {
+			return cachedFillEl
+		}
+		const el = uni.getElementById(fillDomId)
+		if (el != null) {
+			cachedFillEl = el
+		}
+		return el
+	}
+
+	function clearLineAnimTimers() {
+		if (lineAnimTimerId >= 0) {
+			clearTimeout(lineAnimTimerId)
+			lineAnimTimerId = -1
+		}
+		if (lineRetryTimerId >= 0) {
+			clearTimeout(lineRetryTimerId)
+			lineRetryTimerId = -1
+		}
+	}
+
+	function fillScaleValue(p : number) : string {
+		return 'scaleX(' + (p / 100.0).toString() + ')'
+	}
+
+	function setFillScaleInstant(el : UniElement, p : number) {
+		el.style.setProperty('transition-property', 'none')
+		el.style.setProperty('transition-duration', '0ms')
+		el.style.setProperty('transform', fillScaleValue(p))
+	}
+
+	function transitionFillScale(el : UniElement, from : number, to : number, token : number) {
+		setFillScaleInstant(el, from)
+		lineAnimTimerId = setTimeout(() => {
+			lineAnimTimerId = -1
+			if (token != lineAnimToken) {
+				return
+			}
+			el.style.setProperty('transition-property', 'transform')
+			el.style.setProperty('transition-duration', '200ms')
+			el.style.setProperty('transition-timing-function', 'ease')
+			el.style.setProperty('transform', fillScaleValue(to))
+		}, 16)
+	}
+
+	function syncLineFill(to : number, withAnim : boolean) {
+		if (!isLine.value) {
+			lineVisualPercent = to
+			return
+		}
+		const from = lineVisualPercent
+		const el = getFillElement()
+		if (el == null) {
+			lineVisualPercent = to
+			return
+		}
+		lineAnimToken = lineAnimToken + 1
+		const token = lineAnimToken
+		clearLineAnimTimers()
+
+		if (!withAnim || from == to) {
+			setFillScaleInstant(el, to)
+			lineVisualPercent = to
+			return
+		}
+
+		// 先钉旧 scale，下一帧再过渡到新 scale，避免响应式重绑覆盖动画起点。
+		transitionFillScale(el, from, to, token)
+		lineVisualPercent = to
+	}
+
+	function trySyncLineFill(to : number, withAnim : boolean, attempt : number) {
+		if (!isLine.value) {
+			return
+		}
+		const el = getFillElement()
+		if (el != null) {
+			syncLineFill(to, withAnim)
+			return
+		}
+		if (attempt >= 12) {
+			lineVisualPercent = to
+			return
+		}
+		lineRetryTimerId = setTimeout(() => {
+			lineRetryTimerId = -1
+			trySyncLineFill(to, withAnim, attempt + 1)
+		}, 16)
+	}
+
+	watch(
+		(): number => {
+			return percentValue.value
+		},
+		(n : number) => {
+			if (!isLine.value) {
+				return
+			}
+			trySyncLineFill(n, true, 0)
+		}
+	)
+
+	watch(
+		(): string => {
+			return shapeName.value
+		},
+		(s : string) => {
+			if (s == 'line') {
+				cachedFillEl = null
+				trySyncLineFill(percentValue.value, false, 0)
+			}
+		}
+	)
+
+	onMounted(() => {
+		// 首帧无动画钉到初始值
+		trySyncLineFill(percentValue.value, false, 0)
+	})
+
+	onUnmounted(() => {
+		clearLineAnimTimers()
+		cachedFillEl = null
+	})
+	// #endif
+
+	const insideInfoStyle = computed((): string => {
+		var style = ''
+		style += 'color:var(--nax-color-text-inverse, #ffffff);'
+		style += 'font-size:var(--nax-font-size-xs, 12px);'
+		return style
+	})
+
+	const outerInfoStyle = computed((): string => {
+		var style = ''
+		style += 'color:var(--nax-color-text-secondary, #767c82);'
+		style += 'font-size:var(--nax-font-size-xs, 12px);'
+		return style
+	})
+
+	const circleBoxStyle = computed((): string => {
+		const d = circleDiameterPx()
+		var style = ''
+		style += 'width:' + d.toString() + 'px;'
+		style += 'height:' + d.toString() + 'px;'
+		return style
+	})
+
+	function ringBaseStyle(stroke: number, diameter: number): string {
+		var style = ''
+		style += 'width:' + diameter.toString() + 'px;'
+		style += 'height:' + diameter.toString() + 'px;'
+		style += 'border-width:' + stroke.toString() + 'px;'
+		style += 'border-style:solid;'
+		style += 'border-radius:' + Math.ceil(diameter / 2).toString() + 'px;'
+		style += 'box-sizing:border-box;'
+		style += 'transform-origin:center center;'
+		return style
+	}
+
+	const circleTrackRingStyle = computed((): string => {
+		const d = circleDiameterPx()
+		const s = circleStrokePx()
+		var style = ringBaseStyle(s, d)
+		style += 'border-color:' + trackColorValue.value + ';'
+		style += 'left:0px;top:0px;'
+		return style
+	})
+
+	const circleFullRingStyle = computed((): string => {
+		const d = circleDiameterPx()
+		const s = circleStrokePx()
+		const color = activeColorValue.value
+		var style = ringBaseStyle(s, d)
+		style += 'border-color:' + color + ';'
+		style += 'left:0px;top:0px;'
+		return style
+	})
+
+	const rightActiveRingStyle = computed((): string => {
+		const d = circleDiameterPx()
+		const s = circleStrokePx()
+		const color = activeColorValue.value
+		var style = ringBaseStyle(s, d)
+		style += 'right:0px;'
+		style += 'left:auto;'
+		style += 'top:0px;'
+		style += 'border-color:transparent;'
+		style += 'border-top-color:' + color + ';'
+		style += 'border-right-color:' + color + ';'
+		style += 'transform:rotate(' + rightRotateDeg().toString() + 'deg);'
+		return style
+	})
+
+	const leftActiveRingStyle = computed((): string => {
+		const d = circleDiameterPx()
+		const s = circleStrokePx()
+		const color = activeColorValue.value
+		var style = ringBaseStyle(s, d)
+		style += 'left:0px;'
+		style += 'top:0px;'
+		style += 'border-color:transparent;'
+		style += 'border-bottom-color:' + color + ';'
+		style += 'border-left-color:' + color + ';'
+		style += 'transform:rotate(' + leftRotateDeg().toString() + 'deg);'
+		return style
+	})
+
+	const circleInnerStyle = computed((): string => {
+		const d = circleDiameterPx()
+		const s = circleStrokePx()
+		const pad = s
+		const inner = d - pad * 2
+		var style = ''
+		style += 'left:' + pad.toString() + 'px;'
+		style += 'top:' + pad.toString() + 'px;'
+		style += 'width:' + inner.toString() + 'px;'
+		style += 'height:' + inner.toString() + 'px;'
+		style += 'border-radius:' + Math.ceil(inner / 2).toString() + 'px;'
+		style += 'background-color:var(--nax-color-bg, #ffffff);'
+		return style
+	})
+
+	const circleInfoStyle = computed((): string => {
+		var style = ''
+		style += 'color:var(--nax-color-text, #333639);'
+		if (sizeName.value == 'sm') {
+			style += 'font-size:var(--nax-font-size-xs, 12px);'
+		} else if (sizeName.value == 'lg') {
+			style += 'font-size:var(--nax-font-size-md, 16px);'
+		} else {
+			style += 'font-size:var(--nax-font-size-sm, 14px);'
+		}
+		return style
+	})
+</script>
+
+<style>
+	.nax-progress {
+		flex-direction: column;
+	}
+
+	.nax-progress--line {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+	}
+
+	.nax-progress__track {
+		flex: 1;
+		flex-direction: row;
+		overflow: hidden;
+	}
+
+	.nax-progress__fill {
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		overflow: hidden;
+	}
+
+	/* #ifdef APP-HARMONY */
+	.nax-progress__track {
+		position: relative;
+	}
+
+	.nax-progress__fill {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		transform: scaleX(0);
+		transform-origin: left center;
+	}
+
+	.nax-progress__inside-layer {
+		position: absolute;
+		left: 0;
+		top: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		overflow: hidden;
+	}
+	/* #endif */
+
+	.nax-progress__info {
+		flex-shrink: 0;
+	}
+
+	.nax-progress__info--outer {
+		margin-left: 8px;
+		min-width: 36px;
+		text-align: right;
+	}
+
+	.nax-progress__info--inside {
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-progress__slot-outer {
+		margin-left: 8px;
+		flex-direction: row;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.nax-progress__slot-inside {
+		flex-direction: row;
+		align-items: center;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-progress--circle {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-progress__circle {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border-radius: 9999px;
+	}
+
+	.nax-progress__half {
+		position: absolute;
+		top: 0;
+		width: 51%;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.nax-progress__half--left {
+		left: 0;
+	}
+
+	.nax-progress__half--right {
+		right: 0;
+		left: auto;
+	}
+
+	.nax-progress__ring {
+		position: absolute;
+	}
+
+	.nax-progress__circle-inner {
+		position: absolute;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-progress__info--circle {
+		text-align: center;
+	}
+</style>

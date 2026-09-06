@@ -1,0 +1,7137 @@
+{
+  "meta": {
+    "id": "components-grid",
+    "path": "/components/grid",
+    "source": "components/grid.md",
+    "title": "nax-grid / nax-grid-item",
+    "headings": [
+      {
+        "id": "nax-grid-nax-grid-item",
+        "text": "nax-grid / nax-grid-item",
+        "level": 1
+      },
+      {
+        "id": "安装",
+        "text": "安装",
+        "level": 2
+      },
+      {
+        "id": "代码示例",
+        "text": "代码示例",
+        "level": 2
+      },
+      {
+        "id": "用法",
+        "text": "用法",
+        "level": 3
+      },
+      {
+        "id": "边框与间距",
+        "text": "边框与间距",
+        "level": 3
+      },
+      {
+        "id": "基础-3-列-边框",
+        "text": "基础 · 3 列 + 边框",
+        "level": 3
+      },
+      {
+        "id": "4-列-无边框",
+        "text": "4 列 · 无边框",
+        "level": 3
+      },
+      {
+        "id": "间距-gap-卡片描边",
+        "text": "间距 gap + 卡片描边",
+        "level": 3
+      },
+      {
+        "id": "对齐-align仅-2-项",
+        "text": "对齐 align（仅 2 项）",
+        "level": 3
+      },
+      {
+        "id": "徽标组合",
+        "text": "徽标组合",
+        "level": 3
+      },
+      {
+        "id": "禁用-关闭-hover",
+        "text": "禁用 · 关闭 hover",
+        "level": 3
+      },
+      {
+        "id": "自动-index不传-index",
+        "text": "自动 index（不传 index）",
+        "level": 3
+      },
+      {
+        "id": "主题",
+        "text": "主题",
+        "level": 2
+      },
+      {
+        "id": "props",
+        "text": "Props",
+        "level": 2
+      },
+      {
+        "id": "props-griditem",
+        "text": "Props · GridItem",
+        "level": 2
+      },
+      {
+        "id": "events",
+        "text": "Events",
+        "level": 2
+      },
+      {
+        "id": "slots",
+        "text": "Slots",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T08:31:21.112Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "nax-grid-nax-grid-item"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "nax-grid / nax-grid-item",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "当前版本：0.1.5",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "宫格布局：由 ",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "nax-grid",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 8
+              },
+              "end": {
+                "line": 5,
+                "column": 8
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 容器 + ",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 18
+              },
+              "end": {
+                "line": 5,
+                "column": 18
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "nax-grid-item",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 24
+              },
+              "end": {
+                "line": 5,
+                "column": 24
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 子项组成。",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 39
+              },
+              "end": {
+                "line": 5,
+                "column": 39
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 4,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "安装",
+            "source": {
+              "start": {
+                "line": 7,
+                "column": 1
+              },
+              "end": {
+                "line": 7,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 7,
+            "column": 1
+          },
+          "end": {
+            "line": 7,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "uni_modules/nax-grid",
+        "attrs": {
+          "lang": "text"
+        },
+        "source": {
+          "start": {
+            "line": 9,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "uni_modules/nax-grid"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "easycom 自动生效，页面直接使用 ",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 1
+              },
+              "end": {
+                "line": 13,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "<nax-grid />",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 21
+              },
+              "end": {
+                "line": 13,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 即可。",
+            "source": {
+              "start": {
+                "line": 13,
+                "column": 35
+              },
+              "end": {
+                "line": 13,
+                "column": 35
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 13,
+            "column": 1
+          },
+          "end": {
+            "line": 12,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "建议同时安装主题包 ",
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni_modules/nax-ui-theme",
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 11
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 11
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 并在 ",
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 37
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 37
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "App.uvue",
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 41
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 41
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引入主题变量，详见 ",
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 51
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 51
+                  }
+                }
+              },
+              {
+                "type": "link",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "主题接入",
+                    "source": {
+                      "start": {
+                        "line": 15,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 15,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "attrs": {
+                  "href": "/guide/theme"
+                },
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 62
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 62
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。",
+                "source": {
+                  "start": {
+                    "line": 15,
+                    "column": 82
+                  },
+                  "end": {
+                    "line": 15,
+                    "column": 82
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 15,
+            "column": 1
+          },
+          "end": {
+            "line": 15,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "代码示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "代码示例",
+            "source": {
+              "start": {
+                "line": 17,
+                "column": 1
+              },
+              "end": {
+                "line": 17,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 17,
+            "column": 1
+          },
+          "end": {
+            "line": 17,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "用法"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "用法",
+            "source": {
+              "start": {
+                "line": 19,
+                "column": 1
+              },
+              "end": {
+                "line": 19,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 19,
+            "column": 1
+          },
+          "end": {
+            "line": 19,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "demo",
+        "value": "<nax-grid :col=\"3\" @click=\"onGridClick\">\n  <nax-grid-item v-for=\"(item, i) in list\" :key=\"i\" :index=\"'' + i\">\n    <nax-icon name=\"home\" size=\"22\"></nax-icon>\n    <text class=\"grid-text\">{{ item }}</text>\n  </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "name": "demo-grid"
+        },
+        "source": {
+          "start": {
+            "line": 20,
+            "column": 1
+          },
+          "end": {
+            "line": 26,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "无边框 + 间距：",
+            "source": {
+              "start": {
+                "line": 29,
+                "column": 1
+              },
+              "end": {
+                "line": 29,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 29,
+            "column": 1
+          },
+          "end": {
+            "line": 28,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"4\" :border=\"false\" gap=\"8\">\n  <nax-grid-item>...</nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 31,
+            "column": 1
+          },
+          "end": {
+            "line": 34,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"4\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "border",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"false\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "gap",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"8\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n  "
+          },
+          {
+            "t": "<nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "..."
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "边框与间距"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "边框与间距",
+            "source": {
+              "start": {
+                "line": 37,
+                "column": 1
+              },
+              "end": {
+                "line": 37,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 37,
+            "column": 1
+          },
+          "end": {
+            "line": 37,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "border=true",
+                    "source": {
+                      "start": {
+                        "line": 38,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 38,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 且 ",
+                    "source": {
+                      "start": {
+                        "line": 38,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 38,
+                        "column": 14
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "gap=0",
+                    "source": {
+                      "start": {
+                        "line": 38,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 38,
+                        "column": 17
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "：经典九宫格连线（父上/左 + 子右/下）",
+                    "source": {
+                      "start": {
+                        "line": 38,
+                        "column": 24
+                      },
+                      "end": {
+                        "line": 38,
+                        "column": 24
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 38,
+                "column": 1
+              },
+              "end": {
+                "line": 38,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "border=true",
+                    "source": {
+                      "start": {
+                        "line": 39,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 39,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 且 ",
+                    "source": {
+                      "start": {
+                        "line": 39,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 39,
+                        "column": 14
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "gap>0",
+                    "source": {
+                      "start": {
+                        "line": 39,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 39,
+                        "column": 17
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "：子项独立描边 + 圆角卡片感",
+                    "source": {
+                      "start": {
+                        "line": 39,
+                        "column": 24
+                      },
+                      "end": {
+                        "line": 39,
+                        "column": 24
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 39,
+                "column": 1
+              },
+              "end": {
+                "line": 39,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "border=false",
+                    "source": {
+                      "start": {
+                        "line": 40,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 40,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "：纯内容格，可用 ",
+                    "source": {
+                      "start": {
+                        "line": 40,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 40,
+                        "column": 15
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "gap",
+                    "source": {
+                      "start": {
+                        "line": 40,
+                        "column": 24
+                      },
+                      "end": {
+                        "line": 40,
+                        "column": 24
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 控制疏密",
+                    "source": {
+                      "start": {
+                        "line": 40,
+                        "column": 29
+                      },
+                      "end": {
+                        "line": 40,
+                        "column": 29
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 40,
+                "column": 1
+              },
+              "end": {
+                "line": 40,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 38,
+            "column": 1
+          },
+          "end": {
+            "line": 40,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "基础-3-列-边框"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "基础 · 3 列 + 边框",
+            "source": {
+              "start": {
+                "line": 42,
+                "column": 1
+              },
+              "end": {
+                "line": 42,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 42,
+            "column": 1
+          },
+          "end": {
+            "line": 42,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"3\" @click=\"onGridClick\">\n    <nax-grid-item v-for=\"(icon, i) in basicIcons\" :key=\"i\" :index=\"'' + i\">\n        <nax-icon :name=\"icon\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">{{ basicLabels[i] }}</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 43,
+            "column": 1
+          },
+          "end": {
+            "line": 49,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onGridClick\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-for",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"(icon, i) in basicIcons\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "key",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"i\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"'' + i\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"icon\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "{{ basicLabels[i] }}"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const basicIcons = ['home', 'user', 'image', 'search', 'settings', 'star']\nconst basicLabels = ['首页', '我的', '相册', '搜索', '设置', '收藏']\n\nfunction onGridClick(index : string) {\n    // index：grid-item 的 index\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 52,
+            "column": 1
+          },
+          "end": {
+            "line": 58,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " basicIcons = ["
+          },
+          {
+            "t": "'home'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'user'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'image'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'search'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'settings'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'star'",
+            "c": "str"
+          },
+          {
+            "t": "]\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " basicLabels = ["
+          },
+          {
+            "t": "'首页'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'我的'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'相册'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'搜索'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'设置'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "'收藏'",
+            "c": "str"
+          },
+          {
+            "t": "]\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onGridClick",
+            "c": "fn"
+          },
+          {
+            "t": "(index : "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    "
+          },
+          {
+            "t": "// index：grid-item 的 index",
+            "c": "com"
+          },
+          {
+            "t": "\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "4-列-无边框"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "4 列 · 无边框",
+            "source": {
+              "start": {
+                "line": 61,
+                "column": 1
+              },
+              "end": {
+                "line": 61,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 61,
+            "column": 1
+          },
+          "end": {
+            "line": 61,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"4\" :border=\"false\" @click=\"onGridClick\">\n    <nax-grid-item v-for=\"(icon, i) in basicIcons\" :key=\"i\" :index=\"'noborder-' + i\">\n        <nax-icon :name=\"icon\" size=\"20\"></nax-icon>\n        <text class=\"grid-text\">{{ basicLabels[i] }}</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 62,
+            "column": 1
+          },
+          "end": {
+            "line": 68,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"4\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "border",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"false\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onGridClick\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-for",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"(icon, i) in basicIcons\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "key",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"i\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"'noborder-' + i\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"icon\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"20\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "{{ basicLabels[i] }}"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "复用上一节的 basicIcons / basicLabels / onGridClick。",
+            "source": {
+              "start": {
+                "line": 71,
+                "column": 1
+              },
+              "end": {
+                "line": 71,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 71,
+            "column": 1
+          },
+          "end": {
+            "line": 70,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "间距-gap-卡片描边"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "间距 gap + 卡片描边",
+            "source": {
+              "start": {
+                "line": 73,
+                "column": 1
+              },
+              "end": {
+                "line": 73,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 73,
+            "column": 1
+          },
+          "end": {
+            "line": 73,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "border 开启且 gap 大于 0 时，子项独立描边。",
+            "source": {
+              "start": {
+                "line": 74,
+                "column": 1
+              },
+              "end": {
+                "line": 74,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 74,
+            "column": 1
+          },
+          "end": {
+            "line": 73,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"3\" gap=\"8\" @click=\"onGridClick\">\n    <nax-grid-item v-for=\"(icon, i) in basicIcons\" :key=\"i\" :index=\"'gap-' + i\">\n        <nax-icon :name=\"icon\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">{{ basicLabels[i] }}</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 76,
+            "column": 1
+          },
+          "end": {
+            "line": 82,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "gap",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"8\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onGridClick\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-for",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"(icon, i) in basicIcons\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "key",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"i\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"'gap-' + i\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"icon\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "{{ basicLabels[i] }}"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "复用上一节的 basicIcons / basicLabels / onGridClick。",
+            "source": {
+              "start": {
+                "line": 85,
+                "column": 1
+              },
+              "end": {
+                "line": 85,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 85,
+            "column": 1
+          },
+          "end": {
+            "line": 84,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "对齐-align仅-2-项"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "对齐 align（仅 2 项）",
+            "source": {
+              "start": {
+                "line": 87,
+                "column": 1
+              },
+              "end": {
+                "line": 87,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 87,
+            "column": 1
+          },
+          "end": {
+            "line": 87,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"3\" align=\"left\" :border=\"false\" gap=\"8\">\n    <nax-grid-item index=\"a1\">\n        <nax-icon name=\"home\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">首页</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"a2\">\n        <nax-icon name=\"user\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">我的</text>\n    </nax-grid-item>\n</nax-grid>\n\n<nax-grid :col=\"3\" align=\"center\" :border=\"false\" gap=\"8\">\n    <nax-grid-item index=\"b1\">\n        <nax-icon name=\"home\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">首页</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"b2\">\n        <nax-icon name=\"user\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">我的</text>\n    </nax-grid-item>\n</nax-grid>\n\n<nax-grid :col=\"3\" align=\"right\" :border=\"false\" gap=\"8\">\n    <nax-grid-item index=\"c1\">\n        <nax-icon name=\"home\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">首页</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"c2\">\n        <nax-icon name=\"user\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">我的</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 88,
+            "column": 1
+          },
+          "end": {
+            "line": 120,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "align",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"left\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "border",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"false\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "gap",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"8\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"a1\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"home\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "首页"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"a2\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"user\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "我的"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "align",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"center\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "border",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"false\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "gap",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"8\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"b1\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"home\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "首页"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"b2\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"user\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "我的"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "align",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"right\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "border",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"false\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "gap",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"8\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"c1\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"home\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "首页"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"c2\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"user\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "我的"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "徽标组合"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "徽标组合",
+            "source": {
+              "start": {
+                "line": 123,
+                "column": 1
+              },
+              "end": {
+                "line": 123,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 123,
+            "column": 1
+          },
+          "end": {
+            "line": 123,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "徽标只包住图标，文案在下方；容器需 overflow: visible，避免角标被裁切。",
+            "source": {
+              "start": {
+                "line": 124,
+                "column": 1
+              },
+              "end": {
+                "line": 124,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 124,
+            "column": 1
+          },
+          "end": {
+            "line": 123,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"3\" @click=\"onGridClick\">\n    <nax-grid-item index=\"msg\">\n        <nax-badge value=\"9\">\n            <nax-icon name=\"share\" size=\"22\"></nax-icon>\n        </nax-badge>\n        <text class=\"grid-text\">消息</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"dot\">\n        <nax-badge dot>\n            <nax-icon name=\"heart\" size=\"22\"></nax-icon>\n        </nax-badge>\n        <text class=\"grid-text\">喜欢</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"star\">\n        <nax-icon name=\"star\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">收藏</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 126,
+            "column": 1
+          },
+          "end": {
+            "line": 144,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onGridClick\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"msg\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-badge",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "value",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"9\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"share\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "</nax-badge>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "消息"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"dot\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-badge",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "dot",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n            "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"heart\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "</nax-badge>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "喜欢"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"star\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"star\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "收藏"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "复用上一节的 onGridClick。",
+            "source": {
+              "start": {
+                "line": 147,
+                "column": 1
+              },
+              "end": {
+                "line": 147,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 147,
+            "column": 1
+          },
+          "end": {
+            "line": 146,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "徽标默认位于内容右上角外侧，不遮挡图标；如需微调位置，用 ",
+                "source": {
+                  "start": {
+                    "line": 149,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 149,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "offset-x",
+                "source": {
+                  "start": {
+                    "line": 149,
+                    "column": 30
+                  },
+                  "end": {
+                    "line": 149,
+                    "column": 30
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " / ",
+                "source": {
+                  "start": {
+                    "line": 149,
+                    "column": 40
+                  },
+                  "end": {
+                    "line": 149,
+                    "column": 40
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "offset-y",
+                "source": {
+                  "start": {
+                    "line": 149,
+                    "column": 43
+                  },
+                  "end": {
+                    "line": 149,
+                    "column": 43
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "（正值向右、向下）向外移动。",
+                "source": {
+                  "start": {
+                    "line": 149,
+                    "column": 53
+                  },
+                  "end": {
+                    "line": 149,
+                    "column": 53
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 149,
+            "column": 1
+          },
+          "end": {
+            "line": 149,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "禁用-关闭-hover"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "禁用 · 关闭 hover",
+            "source": {
+              "start": {
+                "line": 151,
+                "column": 1
+              },
+              "end": {
+                "line": 151,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 151,
+            "column": 1
+          },
+          "end": {
+            "line": 151,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "整表 hover=false；单项 disabled 不触发 click。",
+            "source": {
+              "start": {
+                "line": 152,
+                "column": 1
+              },
+              "end": {
+                "line": 152,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 152,
+            "column": 1
+          },
+          "end": {
+            "line": 151,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"3\" :hover=\"false\" @click=\"onGridClick\">\n    <nax-grid-item index=\"ok\">\n        <nax-icon name=\"check\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">可用</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"off\" disabled>\n        <nax-icon name=\"close\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">禁用</text>\n    </nax-grid-item>\n    <nax-grid-item index=\"set\">\n        <nax-icon name=\"settings\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">设置</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 154,
+            "column": 1
+          },
+          "end": {
+            "line": 168,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "hover",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"false\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onGridClick\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"ok\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"check\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "可用"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"off\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "disabled",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"close\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "禁用"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "index",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"set\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"settings\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "设置"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "复用上一节的 onGridClick。",
+            "source": {
+              "start": {
+                "line": 171,
+                "column": 1
+              },
+              "end": {
+                "line": 171,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 171,
+            "column": 1
+          },
+          "end": {
+            "line": 170,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "自动-index不传-index"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "自动 index（不传 index）",
+            "source": {
+              "start": {
+                "line": 173,
+                "column": 1
+              },
+              "end": {
+                "line": 173,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 173,
+            "column": 1
+          },
+          "end": {
+            "line": 173,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "不传 index 时自动按 0, 1, 2... 递增。",
+            "source": {
+              "start": {
+                "line": 174,
+                "column": 1
+              },
+              "end": {
+                "line": 174,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 174,
+            "column": 1
+          },
+          "end": {
+            "line": 173,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-grid :col=\"3\" @click=\"onGridClick\">\n    <nax-grid-item>\n        <nax-icon name=\"image\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">自动0</text>\n    </nax-grid-item>\n    <nax-grid-item>\n        <nax-icon name=\"search\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">自动1</text>\n    </nax-grid-item>\n    <nax-grid-item>\n        <nax-icon name=\"edit\" size=\"22\"></nax-icon>\n        <text class=\"grid-text\">自动2</text>\n    </nax-grid-item>\n</nax-grid>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 176,
+            "column": 1
+          },
+          "end": {
+            "line": 190,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-grid",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "col",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"3\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onGridClick\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"image\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "自动0"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"search\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "自动1"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-icon",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "name",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"edit\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"22\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-icon>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<text",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"grid-text\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "自动2"
+          },
+          {
+            "t": "</text>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-grid-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-grid>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "复用上一节的 onGridClick。",
+            "source": {
+              "start": {
+                "line": 193,
+                "column": 1
+              },
+              "end": {
+                "line": 193,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 193,
+            "column": 1
+          },
+          "end": {
+            "line": 192,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "主题"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "主题",
+            "source": {
+              "start": {
+                "line": 195,
+                "column": 1
+              },
+              "end": {
+                "line": 195,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 195,
+            "column": 1
+          },
+          "end": {
+            "line": 195,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "通过 CSS 变量覆盖：",
+            "source": {
+              "start": {
+                "line": 197,
+                "column": 1
+              },
+              "end": {
+                "line": 197,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 197,
+            "column": 1
+          },
+          "end": {
+            "line": 196,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Token",
+                    "source": {
+                      "start": {
+                        "line": 199,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 199,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 199,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 199,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "用途",
+                    "source": {
+                      "start": {
+                        "line": 199,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 199,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 199,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 199,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 199,
+                "column": 1
+              },
+              "end": {
+                "line": 199,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-bg",
+                    "source": {
+                      "start": {
+                        "line": 201,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 201,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 201,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 201,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "背景色",
+                    "source": {
+                      "start": {
+                        "line": 201,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 201,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 201,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 201,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 201,
+                "column": 1
+              },
+              "end": {
+                "line": 201,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-bg-hover",
+                    "source": {
+                      "start": {
+                        "line": 202,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 202,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 202,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 202,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "按压/悬停背景色",
+                    "source": {
+                      "start": {
+                        "line": 202,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 202,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 202,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 202,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 202,
+                "column": 1
+              },
+              "end": {
+                "line": 202,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-border",
+                    "source": {
+                      "start": {
+                        "line": 203,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 203,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 203,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 203,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "边框色",
+                    "source": {
+                      "start": {
+                        "line": 203,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 203,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 203,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 203,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 203,
+                "column": 1
+              },
+              "end": {
+                "line": 203,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-divider",
+                    "source": {
+                      "start": {
+                        "line": 204,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 204,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 204,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 204,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "分割线色",
+                    "source": {
+                      "start": {
+                        "line": 204,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 204,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 204,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 204,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 204,
+                "column": 1
+              },
+              "end": {
+                "line": 204,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-opacity-disabled",
+                    "source": {
+                      "start": {
+                        "line": 205,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 205,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 205,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 205,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "禁用透明度",
+                    "source": {
+                      "start": {
+                        "line": 205,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 205,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 205,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 205,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 205,
+                "column": 1
+              },
+              "end": {
+                "line": 205,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 199,
+            "column": 1
+          },
+          "end": {
+            "line": 204,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "props"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Props",
+            "source": {
+              "start": {
+                "line": 207,
+                "column": 1
+              },
+              "end": {
+                "line": 207,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 207,
+            "column": 1
+          },
+          "end": {
+            "line": 207,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 209,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 209,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 209,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 209,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 209,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 209,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 209,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 209,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认值",
+                    "source": {
+                      "start": {
+                        "line": 209,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 209,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 209,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 209,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 209,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 209,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 209,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 209,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 209,
+                "column": 1
+              },
+              "end": {
+                "line": 209,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "col",
+                    "source": {
+                      "start": {
+                        "line": 211,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 211,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 211,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 211,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "number",
+                    "source": {
+                      "start": {
+                        "line": 211,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 211,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 211,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 211,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "3",
+                    "source": {
+                      "start": {
+                        "line": 211,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 211,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 211,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 211,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "列数（默认 3，最小 1）",
+                    "source": {
+                      "start": {
+                        "line": 211,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 211,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 211,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 211,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 211,
+                "column": 1
+              },
+              "end": {
+                "line": 211,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "border",
+                    "source": {
+                      "start": {
+                        "line": 212,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 212,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 212,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 212,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 212,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 212,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 212,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 212,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "true",
+                    "source": {
+                      "start": {
+                        "line": 212,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 212,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 212,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 212,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否显示边框（默认 true）",
+                    "source": {
+                      "start": {
+                        "line": 212,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 212,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 212,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 212,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 212,
+                "column": 1
+              },
+              "end": {
+                "line": 212,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "align",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 213,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 213,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 213,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 213,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'left'",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 213,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 213,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "left",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 左对齐 | ",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 7
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "center",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 14
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 居中 | ",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 22
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 22
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "right",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 28
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 右对齐；默认 ",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 35
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 35
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "left",
+                    "source": {
+                      "start": {
+                        "line": 213,
+                        "column": 43
+                      },
+                      "end": {
+                        "line": 213,
+                        "column": 43
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 213,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 213,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 213,
+                "column": 1
+              },
+              "end": {
+                "line": 213,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "gap",
+                    "source": {
+                      "start": {
+                        "line": 214,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 214,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 214,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 214,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 214,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 214,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 214,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 214,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'0'",
+                    "source": {
+                      "start": {
+                        "line": 214,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 214,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 214,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 214,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "子项间距；纯数字按 px（默认 0）",
+                    "source": {
+                      "start": {
+                        "line": 214,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 214,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 214,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 214,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 214,
+                "column": 1
+              },
+              "end": {
+                "line": 214,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "hover",
+                    "source": {
+                      "start": {
+                        "line": 215,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 215,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 215,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 215,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 215,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 215,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 215,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 215,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "true",
+                    "source": {
+                      "start": {
+                        "line": 215,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 215,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 215,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 215,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否启用按压反馈（默认 true）",
+                    "source": {
+                      "start": {
+                        "line": 215,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 215,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 215,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 215,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 215,
+                "column": 1
+              },
+              "end": {
+                "line": 215,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "customClass",
+                    "source": {
+                      "start": {
+                        "line": 216,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 216,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 216,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 216,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 216,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 216,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 216,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 216,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 216,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 216,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 216,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 216,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 216,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 216,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 216,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 216,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 216,
+                "column": 1
+              },
+              "end": {
+                "line": 216,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 209,
+            "column": 1
+          },
+          "end": {
+            "line": 215,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "props-griditem"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Props · GridItem",
+            "source": {
+              "start": {
+                "line": 218,
+                "column": 1
+              },
+              "end": {
+                "line": 218,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 218,
+            "column": 1
+          },
+          "end": {
+            "line": 218,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 220,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 220,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 220,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 220,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 220,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 220,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 220,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 220,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认",
+                    "source": {
+                      "start": {
+                        "line": 220,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 220,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 220,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 220,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 220,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 220,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 220,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 220,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 220,
+                "column": 1
+              },
+              "end": {
+                "line": 220,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "index",
+                    "source": {
+                      "start": {
+                        "line": 222,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 222,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 222,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 222,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 222,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 222,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 222,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 222,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 222,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 222,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 222,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 222,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "点击回传值；空则按挂载顺序自动编号",
+                    "source": {
+                      "start": {
+                        "line": 222,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 222,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 222,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 222,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 222,
+                "column": 1
+              },
+              "end": {
+                "line": 222,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "disabled",
+                    "source": {
+                      "start": {
+                        "line": 223,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 223,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 223,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 223,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 223,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 223,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 223,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 223,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 223,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 223,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 223,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 223,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "禁用点击",
+                    "source": {
+                      "start": {
+                        "line": 223,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 223,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 223,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 223,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 223,
+                "column": 1
+              },
+              "end": {
+                "line": 223,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "custom-class",
+                    "source": {
+                      "start": {
+                        "line": 224,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 224,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 224,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 224,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 224,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 224,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 224,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 224,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 224,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 224,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 224,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 224,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 224,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 224,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 224,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 224,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 224,
+                "column": 1
+              },
+              "end": {
+                "line": 224,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 220,
+            "column": 1
+          },
+          "end": {
+            "line": 223,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "events"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Events",
+            "source": {
+              "start": {
+                "line": 226,
+                "column": 1
+              },
+              "end": {
+                "line": 226,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 226,
+            "column": 1
+          },
+          "end": {
+            "line": 226,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "事件",
+                    "source": {
+                      "start": {
+                        "line": 228,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 228,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 228,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 228,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 228,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 228,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 228,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 228,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 228,
+                "column": 1
+              },
+              "end": {
+                "line": 228,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "click",
+                    "source": {
+                      "start": {
+                        "line": 230,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 230,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 230,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 230,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "点击子项；参数为 index（string）",
+                    "source": {
+                      "start": {
+                        "line": 230,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 230,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 230,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 230,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 230,
+                "column": 1
+              },
+              "end": {
+                "line": 230,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 228,
+            "column": 1
+          },
+          "end": {
+            "line": 229,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "slots"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Slots",
+            "source": {
+              "start": {
+                "line": 232,
+                "column": 1
+              },
+              "end": {
+                "line": 232,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 232,
+            "column": 1
+          },
+          "end": {
+            "line": 232,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "插槽",
+                    "source": {
+                      "start": {
+                        "line": 234,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 234,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 234,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 234,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 234,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 234,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 234,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 234,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 234,
+                "column": 1
+              },
+              "end": {
+                "line": 234,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "default",
+                    "source": {
+                      "start": {
+                        "line": 236,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 236,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 236,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 236,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "放置 nax-grid-item",
+                    "source": {
+                      "start": {
+                        "line": 236,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 236,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 236,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 236,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 236,
+                "column": 1
+              },
+              "end": {
+                "line": 236,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 234,
+            "column": 1
+          },
+          "end": {
+            "line": 235,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 237,
+        "column": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,272 @@
+##### date-strip: ERR Cannot find module 'F:\work\mine\nax-ui\docs-site\scripts\example-sections\date-strip.mjs' imported from F:\work\mine\nax-ui\docs-ox\[eval]
+##### rich-text: ERR Cannot find module 'F:\work\mine\nax-ui\docs-site\scripts\example-sections\rich-text.mjs' imported from F:\work\mine\nax-ui\docs-ox\[eval]
+##### alert (8 组)
+  [ 基础 ] <nax-alert ∥ title="温馨提示" ∥ description="请先完成实名认证后再进行提现操作。" ∥ ></nax-alert>
+  [ 类型 type ] <nax-alert type="primary" title="主色提示" description="这是 primary 类型。"></nax-alert> ∥ <nax-alert type="info" title="信息提示" description="这是 info 类型。"></nax-alert> ∥ <nax-alert type="success" title="成功提示" description="操作已成功完成。"></nax-alert> ∥ <nax-alert type="warning" title="警告提示" description="请注意相关风险。"></nax-alert> ∥ <nax-alert type="error" title="错误提示" description="提交失败，请稍后重试。"></nax-alert>
+  [ 实心 variant=solid ] <nax-alert type="info" variant="solid" title="信息" description="实心填充样式。"></nax-alert> ∥ <nax-alert type="success" variant="solid" title="成功" description="实心填充样式。"></nax-alert> ∥ <nax-alert type="warning" variant="solid" title="警告" description="实心填充样式。"></nax-alert> ∥ <nax-alert type="error" variant="solid" title="错误" description="实心填充样式。"></nax-alert>
+  [ 仅标题 / 仅描述 ] <nax-alert type="info" title="只有标题"></nax-alert> ∥ <nax-alert type="warning" description="只有描述文字，没有标题。"></nax-alert>
+  [ 无图标 / 自定义图标 ] <nax-alert :show-icon="false" type="info" title="不显示图标" description="show-icon=false"></nax-alert> ∥ <nax-alert icon="star" type="primary" title="自定义图标" description="icon=star"></nax-alert>
+  [ 居中 center ] <nax-alert ∥ center ∥ type="success" ∥ title="居中展示" ∥ description="标题与描述水平居中。" ∥ ></nax-alert>
+  [ 可关闭 closable ] <nax-alert ∥ v-if="showCloseA" ∥ closable ∥ type="error" ∥ title="账号异常" ∥ description="检测到异地登录，建议立即修改密码。" ∥ @close="onCloseA" ∥ ></nax-alert>
+  [ 默认插槽 ] <nax-alert type="info" title="自定义描述"> ∥ <text>描述可用默认插槽自定义，例如补充链接说明文案。</text> ∥ </nax-alert>
+##### avatar (9 组)
+  [ 基础图片 ] <nax-avatar :src="okSrc"></nax-avatar> ∥ <nax-avatar :src="okSrc" bordered></nax-avatar> ∥ <nax-avatar :src="okSrc" @click="onAvatarClick"></nax-avatar>
+  [ 描边色 border-color ] <nax-avatar :src="okSrc" bordered></nax-avatar> ∥ <nax-avatar :src="okSrc" border-color="#18a058"></nax-avatar> ∥ <nax-avatar :src="okSrc" border-color="#2080f0" size="48"></nax-avatar> ∥ <nax-avatar text="NA" color="#18a058" border-color="#0c7a43" size="48"></nax-avatar>
+  [ 尺寸 size ] <nax-avatar :src="okSrc" size="sm"></nax-avatar> ∥ <nax-avatar :src="okSrc" size="md"></nax-avatar> ∥ <nax-avatar :src="okSrc" size="lg"></nax-avatar> ∥ <nax-avatar :src="okSrc" size="56"></nax-avatar>
+  [ 形状 shape ] <nax-avatar :src="okSrc" shape="circle" size="48"></nax-avatar> ∥ <nax-avatar :src="okSrc" shape="round" size="48"></nax-avatar> ∥ <nax-avatar :src="okSrc" shape="square" size="48"></nax-avatar>
+  [ 文字头像 text + color ] <nax-avatar text="A"></nax-avatar> ∥ <nax-avatar text="NA" color="#18a058"></nax-avatar> ∥ <nax-avatar text="UI" color="#2080f0"></nax-avatar> ∥ <nax-avatar text="!" color="#d03050" size="lg"></nax-avatar> ∥ <nax-avatar text="文" color="#f0a020" text-color="#333639"></nax-avatar>
+  [ object-fit ] <nax-avatar :src="okSrc" size="56" object-fit="cover"></nax-avatar> ∥ <nax-avatar :src="okSrc" size="56" object-fit="contain"></nax-avatar> ∥ <nax-avatar :src="okSrc" size="56" object-fit="fill"></nax-avatar>
+  [ 失败回退 fallback-src / text ] <nax-avatar ∥ :src="badSrc" ∥ :fallback-src="okSrc" ∥ size="48" ∥ @error="onError" ∥ ></nax-avatar> ∥ <nax-avatar ∥ :src="badSrc"
+  [ 仅插槽（无图无字） ] <nax-avatar size="48"> ∥ <nax-icon name="user" size="22" color="#767c82"></nax-icon> ∥ </nax-avatar> ∥ <nax-avatar size="48" color="#18a058"> ∥ <nax-icon name="user" size="22" color="#ffffff"></nax-icon> ∥ </nax-avatar>
+  [ 与 nax-badge 组合 ] <nax-badge value="8" offset-x="3" offset-y="-3"> ∥ <nax-avatar :src="okSrc" size="48"></nax-avatar> ∥ </nax-badge> ∥ <nax-badge dot type="success" offset-x="3" offset-y="-3"> ∥ <nax-avatar text="在" color="#2080f0" size="48"></nax-avatar> ∥ </nax-badge> ∥ <nax-badge value="99+" type="error" offset-x="3" offset-y="-3"> ∥ <nax-avatar :src="okSrc" size="48" shape="round"></nax-avatar>
+##### badge (11 组)
+  [ 基础 value ] <nax-badge value="5"> ∥ <view class="avatar"><text class="avatar__text">消息</text></view> ∥ </nax-badge> ∥ <nax-badge value="15"> ∥ <view class="avatar"><text class="avatar__text">通知</text></view> ∥ </nax-badge> ∥ <nax-badge value="hot"> ∥ <view class="avatar"><text class="avatar__text">文本</text></view>
+  [ 红点 dot ] <nax-badge dot> ∥ <view class="avatar"><text class="avatar__text">未读</text></view> ∥ </nax-badge> ∥ <nax-badge dot type="success"> ∥ <view class="avatar"><text class="avatar__text">在线</text></view> ∥ </nax-badge>
+  [ 类型 type ] <nax-badge value="6" type="default"> ∥ <view class="avatar"><text class="avatar__text">default</text></view> ∥ </nax-badge> ∥ <nax-badge value="6" type="error"> ∥ <view class="avatar"><text class="avatar__text">error</text></view> ∥ </nax-badge> ∥ <nax-badge value="6" type="info"> ∥ <view class="avatar"><text class="avatar__text">info</text></view>
+  [ 最大值 max ] <nax-badge value="100" :max="99"> ∥ <view class="avatar"><text class="avatar__text">99+</text></view> ∥ </nax-badge> ∥ <nax-badge value="1000" :max="999"> ∥ <view class="avatar"><text class="avatar__text">999+</text></view> ∥ </nax-badge> ∥ <nax-badge :value="countText" :max="99"> ∥ <view class="avatar"><text class="avatar__text">动态</text></view>
+  [ show-zero ] <nax-badge value="0"> ∥ <view class="avatar"><text class="avatar__text">隐藏 0</text></view> ∥ </nax-badge> ∥ <nax-badge value="0" show-zero> ∥ <view class="avatar"><text class="avatar__text">显示 0</text></view> ∥ </nax-badge>
+  [ show 开关 ] <nax-badge value="8" :show="badgeShow"> ∥ <view class="avatar"><text class="avatar__text">可控</text></view> ∥ </nax-badge> ∥ <nax-button size="sm" :label="badgeShow ? '隐藏' : '显示'" @click="toggleShow"></nax-button>
+  [ processing 处理中 ] <nax-badge value="3" processing> ∥ <view class="avatar"><text class="avatar__text">同步</text></view> ∥ </nax-badge> ∥ <nax-badge dot processing type="info"> ∥ <view class="avatar"><text class="avatar__text">点</text></view> ∥ </nax-badge>
+  [ 自定义 color ] <nax-badge value="8" color="#8a2be2"> ∥ <view class="avatar"><text class="avatar__text">紫</text></view> ∥ </nax-badge> ∥ <nax-badge dot color="#f0a020"> ∥ <view class="avatar"><text class="avatar__text">橙点</text></view> ∥ </nax-badge>
+  [ 偏移 offset ] <nax-badge value="6" offset-x="0" offset-y="0"> ∥ <view class="avatar"><text class="avatar__text">默认</text></view> ∥ </nax-badge> ∥ <nax-badge value="6" offset-x="8" offset-y="-4"> ∥ <view class="avatar"><text class="avatar__text">偏移</text></view> ∥ </nax-badge>
+  [ 独立 alone ] <nax-badge alone value="15"></nax-badge> ∥ <nax-badge alone value="99+" type="success"></nax-badge> ∥ <nax-badge alone dot></nax-badge> ∥ <nax-badge alone value="NEW" type="warning"></nax-badge>
+  [ 自定义 value 插槽 ] <nax-badge value="VIP"> ∥ <view class="avatar"><text class="avatar__text">插槽</text></view> ∥ <template #value> ∥ <text class="custom-value">VIP</text> ∥ </template> ∥ </nax-badge>
+##### card (7 组)
+  [ 基础 ] <nax-card title="基础卡片" extra="更多"> ∥ <text>用卡片承载一段说明、列表摘要或操作入口。</text> ∥ </nax-card>
+  [ 仅正文 ] <nax-card> ∥ <text>没有标题时，正文自动吃掉上下内边距，适合纯内容块。</text> ∥ </nax-card>
+  [ 尺寸 size ] <nax-card size="sm" title="小号 sm" extra="sm"> ∥ <text>更紧凑的内边距</text> ∥ </nax-card> ∥ <nax-card size="md" title="中号 md" extra="md"> ∥ <text>默认档</text> ∥ </nax-card> ∥ <nax-card size="lg" title="大号 lg" extra="lg"> ∥ <text>更宽松</text>
+  [ 分割线 segmented ] <nax-card title="订单摘要" extra="详情" segmented :show-footer="true"> ∥ <text>商品合计 ¥128.00</text> ∥ <text>含运费 ¥8.00</text> ∥ <template #footer> ∥ <nax-button type="primary" size="sm" label="去支付" @click="onPay"></nax-button> ∥ </template> ∥ </nax-card>
+  [ 封面 cover ] <nax-card title="风景推荐" extra="2.3k" :show-cover="true" :show-footer="true" segmented> ∥ <template #cover> ∥ <view class="cover"><text>Cover</text></view> ∥ </template> ∥ <text>周末短途：湖边步道与日落观景点。</text> ∥ <template #footer> ∥ <nax-space size="sm"> ∥ <nax-space-item>
+  [ 可点击 hoverable ] <nax-card title="设置项入口" hoverable @click="onCardClick"> ∥ <template #extra> ∥ <nax-icon name="chevron-right" size="18" color="var(--nax-color-text-secondary, #767c82)"></nax-icon> ∥ </template> ∥ <text>开启 hoverable 后有按压反馈</text> ∥ </nax-card>
+  [ 无边框 ] <nax-card title="无边框" :bordered="false"> ∥ <text>bordered=false，适合嵌在已有面板里</text> ∥ </nax-card>
+##### cell (9 组)
+  [ 基础 ] <nax-cell-group> ∥ <nax-cell title="单元格" value="内容"></nax-cell> ∥ <nax-cell title="单元格" label="描述信息" value="内容"></nax-cell> ∥ <nax-cell title="单元格" value="详情" is-link @click="onCellClick('基础链接')"></nax-cell> ∥ </nax-cell-group>
+  [ 分组标题 ] <nax-cell-group title="个人信息"> ∥ <nax-cell title="昵称" value="Nax" is-link @click="onCellClick('昵称')"></nax-cell> ∥ <nax-cell title="手机号" value="138****0000"></nax-cell> ∥ <nax-cell title="个性签名" label="一句话介绍自己" value="写点什么" is-link></nax-cell> ∥ </nax-cell-group> ∥ <nax-cell-group title="其他设置"> ∥ <nax-cell title="消息通知" is-link></nax-cell> ∥ <nax-cell title="关于我们" is-link></nax-cell>
+  [ 图标 ] <nax-cell-group> ∥ <nax-cell icon="user" title="个人中心" is-link @click="onCellClick('个人中心')"></nax-cell> ∥ <nax-cell icon="settings" title="系统设置" value="通用" is-link></nax-cell> ∥ <nax-cell icon="search" title="搜索" label="全局搜索入口" is-link></nax-cell> ∥ </nax-cell-group>
+  [ inset 圆角卡片 ] <nax-cell-group title="账户" inset> ∥ <nax-cell title="账号安全" is-link></nax-cell> ∥ <nax-cell title="支付设置" is-link></nax-cell> ∥ <nax-cell title="隐私" value="已保护" is-link></nax-cell> ∥ </nax-cell-group>
+  [ insetBorder 外框（inset 时） ] <nax-cell-group title="all 四边" inset inset-border="all"> ∥ <nax-cell title="默认外框" value="all" is-link></nax-cell> ∥ </nax-cell-group> ∥ <nax-cell-group title="none 无外框" inset inset-border="none"> ∥ <nax-cell title="仅圆角白底" value="none" is-link></nax-cell> ∥ </nax-cell-group> ∥ <nax-cell-group title="horizontal 上下" inset inset-border="horizontal"> ∥ <nax-cell title="无左右边框" value="horizontal" is-link></nax-cell>
+  [ 尺寸 size ] <nax-cell-group> ∥ <nax-cell size="sm" title="小号 sm" value="紧凑" is-link></nax-cell> ∥ <nax-cell size="md" title="中号 md" value="默认" is-link></nax-cell> ∥ <nax-cell size="lg" title="大号 lg" value="宽松" is-link></nax-cell> ∥ </nax-cell-group>
+  [ 状态 ] <nax-cell-group> ∥ <nax-cell title="必填项" required value="请填写" is-link></nax-cell> ∥ <nax-cell title="禁用" value="不可点" disabled is-link></nax-cell> ∥ <nax-cell title="无箭头可点" clickable @click="onCellClick('可点')"></nax-cell> ∥ <nax-cell title="无分割线" value="border=false" :border="false"></nax-cell> ∥ </nax-cell-group>
+  [ 右侧插槽（开关） ] <nax-cell-group> ∥ <nax-cell title="消息推送" center> ∥ <template #right> ∥ <nax-switch v-model="pushOn"></nax-switch> ∥ </template> ∥ </nax-cell> ∥ <nax-cell title="深色模式" label="仅演示绑定" center> ∥ <template #right>
+  [ 自定义颜色 ] <nax-cell-group> ∥ <nax-cell title="标题色" title-color="#18a058" value="主色" value-color="#18a058" is-link></nax-cell> ∥ <nax-cell icon="user" icon-color="#2080f0" title="图标色" value="info" is-link></nax-cell> ∥ </nax-cell-group>
+##### checkbox (9 组)
+  [ 单独使用 ] <nax-checkbox v-model="alone" label="同意用户协议" @change="onAloneChange"></nax-checkbox>
+  [ 基础组 ] <nax-checkbox-group v-model="basic" @change="onGroupChange"> ∥ <nax-checkbox name="apple" label="苹果"></nax-checkbox> ∥ <nax-checkbox name="banana" label="香蕉"></nax-checkbox> ∥ <nax-checkbox name="orange" label="橙子"></nax-checkbox> ∥ </nax-checkbox-group>
+  [ 形状 shape ] <nax-checkbox-group v-model="shapeVals" shape="circle"> ∥ <nax-checkbox name="a" label="圆形"></nax-checkbox> ∥ <nax-checkbox name="b" label="多选"></nax-checkbox> ∥ </nax-checkbox-group>
+  [ 尺寸 size ] <nax-checkbox-group v-model="sizeSm" size="sm"> ∥ <nax-checkbox name="s" label="sm"></nax-checkbox> ∥ </nax-checkbox-group> ∥ <nax-checkbox-group v-model="sizeMd" size="md"> ∥ <nax-checkbox name="m" label="md"></nax-checkbox> ∥ </nax-checkbox-group> ∥ <nax-checkbox-group v-model="sizeLg" size="lg"> ∥ <nax-checkbox name="l" label="lg"></nax-checkbox>
+  [ 禁用 disabled ] <nax-checkbox-group v-model="disabledVals"> ∥ <nax-checkbox name="on" label="可选"></nax-checkbox> ∥ <nax-checkbox name="off" label="禁用项" disabled></nax-checkbox> ∥ </nax-checkbox-group> ∥ <nax-checkbox-group v-model="disabledGroup" disabled> ∥ <nax-checkbox name="g1" label="整组禁用"></nax-checkbox> ∥ <nax-checkbox name="g2" label="不可点"></nax-checkbox> ∥ </nax-checkbox-group>
+  [ 文案不可点 labelDisabled ] <nax-checkbox-group v-model="labelLock" label-disabled> ∥ <nax-checkbox name="x" label="只能点左侧方框"></nax-checkbox> ∥ <nax-checkbox name="y" label="点文字无效"></nax-checkbox> ∥ </nax-checkbox-group>
+  [ 最多选 2 项 max ] <nax-checkbox-group v-model="maxVals" :max="2" wrap> ∥ <nax-checkbox name="1" label="选项一"></nax-checkbox> ∥ <nax-checkbox name="2" label="选项二"></nax-checkbox> ∥ <nax-checkbox name="3" label="选项三"></nax-checkbox> ∥ <nax-checkbox name="4" label="选项四"></nax-checkbox> ∥ </nax-checkbox-group>
+  [ 自定义颜色 activeColor ] <nax-checkbox-group v-model="colorVals" active-color="#2080f0"> ∥ <nax-checkbox name="c1" label="信息色"></nax-checkbox> ∥ <nax-checkbox name="c2" label="多选"></nax-checkbox> ∥ </nax-checkbox-group>
+  [ 横向均分 width ] <nax-checkbox-group v-model="widthVals" width="50%"> ∥ <nax-checkbox name="w1" label="左侧 50%"></nax-checkbox> ∥ <nax-checkbox name="w2" label="右侧 50%"></nax-checkbox> ∥ <nax-checkbox name="w3" label="再一行左"></nax-checkbox> ∥ <nax-checkbox name="w4" label="再一行右"></nax-checkbox> ∥ </nax-checkbox-group>
+##### divider (6 组)
+  [ 基础 ] <nax-divider></nax-divider>
+  [ 带文字 ] <nax-divider text="或者" space="8"></nax-divider> ∥ <nax-divider text="更多内容" space="8"></nax-divider>
+  [ 位置 content-position ] <nax-divider text="居中" content-position="center" space="8"></nax-divider> ∥ <nax-divider text="左侧" content-position="left" space="8"></nax-divider> ∥ <nax-divider text="右侧" content-position="right" space="8"></nax-divider>
+  [ 虚线 / 类型 ] <nax-divider dashed text="虚线" space="8"></nax-divider> ∥ <nax-divider text="主色" type="primary" space="8"></nax-divider> ∥ <nax-divider text="警告" type="warning" space="8"></nax-divider> ∥ <nax-divider text="错误" type="error" space="8"></nax-divider>
+  [ 粗细 size ] <nax-divider text="hairline" size="hairline" space="8"></nax-divider> ∥ <nax-divider text="sm" size="sm" space="8"></nax-divider> ∥ <nax-divider text="md" size="md" space="8"></nax-divider>
+  [ 竖向 ] <view class="v-box"> ∥ <text>左</text> ∥ <nax-divider direction="vertical" space="12"></nax-divider> ∥ <text>中</text> ∥ <nax-divider direction="vertical" space="12" type="primary" size="sm"></nax-divider> ∥ <text>右</text> ∥ </view> ∥ <view class="v-inline">
+##### empty (8 组)
+  [ 基础 ] <nax-empty></nax-empty>
+  [ 标题 + 描述 ] <nax-empty icon="notes-off" title="暂无订单" description="下单后，订单会出现在这里"></nax-empty>
+  [ 图标语义 ] <nax-empty icon="file-off" description="暂无相关文件"></nax-empty> ∥ <nax-empty icon="notes-off" description="暂无列表"></nax-empty> ∥ <nax-empty icon="database-off" description="暂无数据"></nax-empty> ∥ <nax-empty icon="message-off" description="消息箱是空的"></nax-empty>
+  [ 操作按钮 ] <nax-empty icon="notes-off" title="列表为空" description="试着新建一条数据吧"> ∥ <template #action> ∥ <nax-button type="primary" size="sm" label="新建" @click="onCreate"></nax-button> ∥ </template> ∥ </nax-empty>
+  [ 多个操作 ] <nax-empty icon="search" description="换个关键词试试"> ∥ <template #action> ∥ <nax-space size="sm"> ∥ <nax-space-item> ∥ <nax-button size="sm" label="清空筛选" @click="onClear"></nax-button> ∥ </nax-space-item> ∥ <nax-space-item> ∥ <nax-button type="primary" size="sm" label="重新搜索" @click="onSearch"></nax-button>
+  [ 尺寸 image-size ] <nax-empty image-size="sm" description="小号 sm"></nax-empty> ∥ <nax-empty image-size="md" description="中号 md（默认档）"></nax-empty>
+  [ 隐藏插图 ] <nax-empty :show-image="false" description="仅文案的空状态"></nax-empty>
+  [ 自定义插图槽 ] <nax-empty description="使用 #image 自定义"> ∥ <template #image> ∥ <nax-icon name="star" size="40" color="#f0a020"></nax-icon> ∥ </template> ∥ <template #action> ∥ <nax-button size="sm" type="warning" label="去收藏" @click="onStar"></nax-button> ∥ </template> ∥ </nax-empty>
+##### grid (7 组)
+  [ 基础 · 3 列 + 边框 ] <nax-grid :col="3" @click="onGridClick"> ∥ <nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'' + i"> ∥ <nax-icon :name="icon" size="22"></nax-icon> ∥ <text class="grid-text">{{ basicLabels[i] }}</text> ∥ </nax-grid-item> ∥ </nax-grid>
+  [ 4 列 · 无边框 ] <nax-grid :col="4" :border="false" @click="onGridClick"> ∥ <nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'noborder-' + i"> ∥ <nax-icon :name="icon" size="20"></nax-icon> ∥ <text class="grid-text">{{ basicLabels[i] }}</text> ∥ </nax-grid-item> ∥ </nax-grid>
+  [ 间距 gap + 卡片描边 ] <nax-grid :col="3" gap="8" @click="onGridClick"> ∥ <nax-grid-item v-for="(icon, i) in basicIcons" :key="i" :index="'gap-' + i"> ∥ <nax-icon :name="icon" size="22"></nax-icon> ∥ <text class="grid-text">{{ basicLabels[i] }}</text> ∥ </nax-grid-item> ∥ </nax-grid>
+  [ 对齐 align（仅 2 项） ] <nax-grid :col="3" align="left" :border="false" gap="8"> ∥ <nax-grid-item index="a1"> ∥ <nax-icon name="home" size="22"></nax-icon> ∥ <text class="grid-text">首页</text> ∥ </nax-grid-item> ∥ <nax-grid-item index="a2"> ∥ <nax-icon name="user" size="22"></nax-icon> ∥ <text class="grid-text">我的</text>
+  [ 徽标组合 ] <nax-grid :col="3" @click="onGridClick"> ∥ <nax-grid-item index="msg"> ∥ <nax-badge value="9"> ∥ <nax-icon name="share" size="22"></nax-icon> ∥ </nax-badge> ∥ <text class="grid-text">消息</text> ∥ </nax-grid-item> ∥ <nax-grid-item index="dot">
+  [ 禁用 · 关闭 hover ] <nax-grid :col="3" :hover="false" @click="onGridClick"> ∥ <nax-grid-item index="ok"> ∥ <nax-icon name="check" size="22"></nax-icon> ∥ <text class="grid-text">可用</text> ∥ </nax-grid-item> ∥ <nax-grid-item index="off" disabled> ∥ <nax-icon name="close" size="22"></nax-icon> ∥ <text class="grid-text">禁用</text>
+  [ 自动 index（不传 index） ] <nax-grid :col="3" @click="onGridClick"> ∥ <nax-grid-item> ∥ <nax-icon name="image" size="22"></nax-icon> ∥ <text class="grid-text">自动0</text> ∥ </nax-grid-item> ∥ <nax-grid-item> ∥ <nax-icon name="search" size="22"></nax-icon> ∥ <text class="grid-text">自动1</text>
+##### icon (4 组)
+  [ 尺寸 size ] <nax-icon name="search" size="sm"></nax-icon> ∥ <nax-icon name="search" size="md"></nax-icon> ∥ <nax-icon name="search" size="lg"></nax-icon> ∥ <nax-icon name="search" size="28"></nax-icon>
+  [ 颜色 color ] <nax-icon name="heart" color="#d03050"></nax-icon> ∥ <nax-icon name="star" color="#f0a020"></nax-icon> ∥ <nax-icon name="success" color="#18a058"></nax-icon> ∥ <nax-icon name="info" color="#2080f0"></nax-icon>
+  [ 状态 ] <nax-icon name="settings" @click="onTap"></nax-icon> ∥ <nax-icon name="settings" disabled @click="onTap"></nax-icon>
+  [ 配合 nax-button ] <nax-button type="primary" label="搜索"> ∥ <template #icon> ∥ <nax-icon name="search" size="sm"></nax-icon> ∥ </template> ∥ </nax-button> ∥ <nax-button type="error" variant="outline" label="删除"> ∥ <template #icon> ∥ <nax-icon name="delete" size="sm" color="#d03050"></nax-icon>
+##### image (5 组)
+  [ 基础 / mode ] <nax-image :src="okSrc" width="100" height="100" mode="aspectFill"></nax-image> ∥ <nax-image :src="okSrc" width="100" height="100" mode="aspectFit"></nax-image> ∥ <nax-image :src="okSrc" width="100" height="100" mode="scaleToFill"></nax-image>
+  [ 形状 shape ] <nax-image :src="okSrc" width="88" height="88" shape="square"></nax-image> ∥ <nax-image :src="okSrc" width="88" height="88" shape="round"></nax-image> ∥ <nax-image :src="okSrc" width="88" height="88" shape="circle"></nax-image>
+  [ 加载中 / 失败 ] <nax-image force-loading width="120" height="120" loading-text="加载中"></nax-image> ∥ <nax-image :src="badSrc" width="120" height="120" :timeout="8000" error-text="加载失败" @error="onError"></nax-image> ∥ <nax-image src="" width="120" height="120" error-text="无图片"></nax-image>
+  [ 自定义插槽 ] <nax-image :src="badSrc" :timeout="8000" width="100%" height="140" shape="round"> ∥ <template #error> ∥ <view class="slot-box"> ∥ <text class="slot-box__text">自定义失败插槽</text> ∥ </view> ∥ </template> ∥ </nax-image>
+  [ 宽图（块级） ] <nax-image :src="okSrc" width="100%" height="160" shape="round" mode="aspectFill" @click="onClickImage"></nax-image>
+##### input (10 组)
+  [ 边框 border / 无边框 ] <nax-input v-model="basic" border placeholder="请输入内容" @change="onChange"></nax-input> ∥ <nax-input v-model="plain" placeholder="无边框输入"></nax-input> ∥ <nax-input v-model="plainBg" background="#f3f3f5" placeholder="无边框 + 背景色"></nax-input>
+  [ 尺寸 size ] <nax-input v-model="sizeSm" size="sm" border placeholder="sm"></nax-input> ∥ <nax-input v-model="sizeMd" size="md" border placeholder="md"></nax-input> ∥ <nax-input v-model="sizeLg" size="lg" border placeholder="lg"></nax-input>
+  [ 类型 type ] <nax-input v-model="typeText" type="text" border placeholder="text"></nax-input> ∥ <nax-input v-model="typeNumber" type="number" border placeholder="number"></nax-input> ∥ <nax-input v-model="typeDigit" type="digit" border placeholder="digit"></nax-input> ∥ <nax-input v-model="typeTel" type="tel" border placeholder="tel"></nax-input>
+  [ 密码 password ] <nax-input v-model="password" type="password" border placeholder="请输入密码" :password-icon="true"></nax-input>
+  [ 可清除 clearable ] <nax-input v-model="clearable" border clearable placeholder="有内容时可清除" @clear="onClear"></nax-input>
+  [ 对齐 input-align ] <nax-input v-model="alignLeft" border input-align="left" placeholder="left"></nax-input> ∥ <nax-input v-model="alignCenter" border input-align="center" placeholder="center"></nax-input> ∥ <nax-input v-model="alignRight" border input-align="right" placeholder="right"></nax-input>
+  [ 前后缀图标 ] <nax-input v-model="withIcon" border prefix-icon="search" suffix-icon="user" placeholder="搜索用户"></nax-input>
+  [ maxlength + confirm ] <nax-input v-model="limited" border :maxlength="10" confirm-type="search" placeholder="最多 10 字，键盘 search" @confirm="onConfirm"></nax-input>
+  [ 禁用 / 只读 ] <nax-input v-model="disabledVal" border disabled></nax-input> ∥ <nax-input v-model="readonlyVal" border readonly></nax-input>
+  [ border-type / border-color ] <nax-input v-model="bottomBorder" border border-type="bottom" placeholder="下划线风格输入"></nax-input> ∥ <nax-input v-model="colorBorder" border border-color="#18a058" placeholder="border-color primary"></nax-input>
+##### line (8 组)
+  [ 基础 ] <nax-line></nax-line>
+  [ 长度 length ] <nax-line length="100%" space="8"></nax-line> ∥ <nax-line length="200" space="8"></nax-line> ∥ <nax-line length="50%" space="8"></nax-line>
+  [ 粗细 size ] <nax-line size="hairline"></nax-line> ∥ <nax-line size="sm"></nax-line> ∥ <nax-line size="md"></nax-line> ∥ <nax-line size="lg"></nax-line>
+  [ 虚线 dashed ] <nax-line dashed space="8"></nax-line> ∥ <nax-line dashed size="md" type="primary" space="8"></nax-line> ∥ <nax-line dashed size="lg" type="warning" space="8"></nax-line>
+  [ 类型 type ] <nax-line type="default" space="8"></nax-line> ∥ <nax-line type="primary" space="8"></nax-line> ∥ <nax-line type="info" space="8"></nax-line> ∥ <nax-line type="success" space="8"></nax-line> ∥ <nax-line type="warning" space="8"></nax-line> ∥ <nax-line type="error" space="8"></nax-line>
+  [ 内缩 inset ] <view class="card"> ∥ <text class="card__text">列表项 A</text> ∥ <nax-line inset="16"></nax-line> ∥ <text class="card__text">列表项 B</text> ∥ <nax-line inset="16"></nax-line> ∥ </view>
+  [ 竖线 vertical ] <nax-line direction="vertical" length="24" space="12"></nax-line> ∥ <nax-line direction="vertical" length="24" space="12" type="primary" size="md"></nax-line> ∥ <nax-line direction="vertical" length="100%" space="12"></nax-line>
+  [ 自定义 color ] <nax-line color="#8a2be2" size="md" space="8"></nax-line> ∥ <nax-line color="#8a2be2" dashed size="md" space="8"></nax-line>
+##### loading (8 组)
+  [ 基础 ] <nax-loading></nax-loading>
+  [ 带文案 ] <nax-loading text="加载中"></nax-loading>
+  [ 纵向 vertical ] <nax-loading vertical text="请稍候"></nax-loading>
+  [ 尺寸 size ] <nax-loading size="sm" text="sm"></nax-loading> ∥ <nax-loading size="md" text="md"></nax-loading> ∥ <nax-loading size="lg" text="lg"></nax-loading>
+  [ 图标 icon ] <nax-loading icon="loading" text="loading"></nax-loading> ∥ <nax-loading icon="loader" text="loader"></nax-loading> ∥ <nax-loading icon="loader-4" text="loader-4"></nax-loading>
+  [ 类型 type ] <nax-loading type="default" text="默认"></nax-loading> ∥ <nax-loading type="primary" text="主色"></nax-loading> ∥ <nax-loading type="info" text="信息"></nax-loading> ∥ <nax-loading type="warning" text="警告"></nax-loading> ∥ <nax-loading type="error" text="错误"></nax-loading>
+  [ 区块占位 ] <nax-loading v-if="blockLoading" vertical text="内容加载中" type="primary"></nax-loading> ∥ <view v-else> ∥ <text class="body-text">数据已就绪</text> ∥ </view> ∥ <nax-button type="primary" size="sm" label="模拟加载 1.5s" @click="simulate"></nax-button>
+  [ show 控制 ] <nax-loading :show="toggled" text="可开关"></nax-loading> ∥ <nax-button size="sm" :label="toggled ? '隐藏' : '显示'" @click="toggleShow"></nax-button>
+##### nav-bar (6 组)
+  [ 默认 default ] <nax-nav-bar ∥ title="默认标题" ∥ :fixed="false" ∥ :safe-area-inset-top="false" ∥ :auto-back="false" ∥ @back="onBack" ∥ ></nax-nav-bar>
+  [ 主色 primary ] <nax-nav-bar ∥ type="primary" ∥ title="主色导航" ∥ :fixed="false" ∥ :safe-area-inset-top="false" ∥ :auto-back="false" ∥ @back="onBack" ∥ ></nax-nav-bar>
+  [ 返回文案 + 无图标 ] <nax-nav-bar ∥ title="设置" ∥ back-text="关闭" ∥ back-icon="" ∥ :fixed="false" ∥ :safe-area-inset-top="false" ∥ :auto-back="false" ∥ @back="onBack"
+  [ 左对齐标题 + 无返回 ] <nax-nav-bar ∥ title="首页风格" ∥ title-align="left" ∥ :show-back="false" ∥ :fixed="false" ∥ :safe-area-inset-top="false" ∥ > ∥ <template #right>
+  [ 自定义中间（插槽） ] <nax-nav-bar ∥ :fixed="false" ∥ :safe-area-inset-top="false" ∥ :auto-back="false" ∥ @back="onBack" ∥ > ∥ <view class="mid-tabs"> ∥ <text class="mid-tabs__item mid-tabs__item--on">关注</text>
+  [ 沉浸 immersive（预览） ] <nax-nav-bar ∥ title="沉浸标题" ∥ type="primary" ∥ immersive ∥ :fixed="false" ∥ :safe-area-inset-top="false" ∥ :auto-back="false" ∥ @back="onBack"
+##### notice-bar (7 组)
+  [ 水平衔接（默认） ] <nax-notice-bar :list="list" @click="onClick"></nax-notice-bar>
+  [ 水平步进 scroll=step ] <nax-notice-bar ∥ scroll="step" ∥ :list="list" ∥ :duration="2500" ∥ @click="onClick" ∥ @end="onEnd" ∥ ></nax-notice-bar>
+  [ 垂直滚动 mode=vertical ] <nax-notice-bar ∥ mode="vertical" ∥ type="info" ∥ :list="list" ∥ :duration="2000" ∥ @click="onClick" ∥ ></nax-notice-bar>
+  [ 类型 type ] <nax-notice-bar type="primary" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar type="info" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar type="success" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar type="warning" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar type="error" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar type="none" :list="shortList"></nax-notice-bar>
+  [ 图标 / 更多 / 关闭 ] <nax-notice-bar :show-icon="false" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar icon="star" type="primary" :list="shortList"></nax-notice-bar> ∥ <nax-notice-bar ∥ show-more ∥ type="info" ∥ :list="shortList" ∥ @get-more="onGetMore" ∥ ></nax-notice-bar>
+  [ 暂停 / 播放 ] <nax-notice-bar :list="list" :paused="paused" :speed="40"></nax-notice-bar> ∥ <nax-button size="sm" label="暂停" @click="paused = true"></nax-button> ∥ <nax-button size="sm" type="primary" label="播放" @click="paused = false"></nax-button>
+  [ 兼容 is-circular=false ] <nax-notice-bar ∥ :is-circular="false" ∥ type="success" ∥ :list="list" ∥ :duration="2200" ∥ ></nax-notice-bar>
+##### number-box (10 组)
+  [ 基础用法 ] <nax-number-box v-model="basic" @change="onBasicChange"></nax-number-box>
+  [ 尺寸 size ] <nax-number-box v-model="sizeSm" size="sm"></nax-number-box> ∥ <nax-number-box v-model="sizeMd" size="md"></nax-number-box> ∥ <nax-number-box v-model="sizeLg" size="lg"></nax-number-box>
+  [ 范围 min / max / step ] <nax-number-box v-model="rangeVal" :min="1" :max="10" :step="1" @overlimit="onOverlimit"></nax-number-box> ∥ <nax-number-box v-model="stepVal" :min="0" :max="5" :step="0.5"></nax-number-box>
+  [ 仅整数 integer ] <nax-number-box v-model="intVal" integer :min="0" :max="99"></nax-number-box>
+  [ 禁用 ] <nax-number-box v-model="disabledAll" disabled></nax-number-box> ∥ <nax-number-box v-model="disabledInputVal" disabled-input></nax-number-box> ∥ <nax-number-box v-model="disableBtnVal" disable-plus disable-minus></nax-number-box>
+  [ 长按 longPress ] <nax-number-box v-model="longPressOn" :long-press="true"></nax-number-box> ∥ <nax-number-box v-model="longPressOff" :long-press="false"></nax-number-box>
+  [ 异步变更 asyncChange ] <nax-number-box v-model="asyncVal" async-change @change="onAsyncChange"></nax-number-box>
+  [ 自定义颜色 / 宽度 ] <nax-number-box v-model="colorVal" bg-color="#e8f5ee" color="#18a058" :button-size="36" :input-width="56"></nax-number-box>
+  [ 自定义插槽 ] <nax-number-box v-model="slotVal"> ∥ <template #minus> ∥ <text class="slot-text">减</text> ∥ </template> ∥ <template #plus> ∥ <text class="slot-text">加</text> ∥ </template> ∥ </nax-number-box>
+  [ 事件 ] <nax-number-box ∥ v-model="eventVal" ∥ :min="0" ∥ :max="20" ∥ @change="onEventChange" ∥ @focus="onEventFocus" ∥ @blur="onEventBlur" ∥ @plus="onEventPlus"
+##### progress (9 组)
+  [ 基础线形 ] <nax-progress :percent="30"></nax-progress> ∥ <nax-progress :percent="60"></nax-progress> ∥ <nax-progress :percent="100"></nax-progress>
+  [ 动态 percent ] <nax-progress :percent="dynamicPercent" type="primary"></nax-progress> ∥ <nax-button size="sm" label="-10" @click="dec"></nax-button> ∥ <nax-button size="sm" type="primary" label="+10" @click="inc"></nax-button> ∥ <nax-button size="sm" variant="secondary" label="随机" @click="rand"></nax-button> ∥ <nax-progress shape="circle" :percent="dynamicPercent" type="info" :width="112" :stroke-width="8"></nax-progress>
+  [ 类型 type ] <nax-progress type="primary" :percent="70"></nax-progress> ∥ <nax-progress type="info" :percent="70"></nax-progress> ∥ <nax-progress type="success" :percent="70"></nax-progress> ∥ <nax-progress type="warning" :percent="70"></nax-progress> ∥ <nax-progress type="error" :percent="70"></nax-progress>
+  [ 尺寸 size ] <nax-progress size="sm" :percent="50"></nax-progress> ∥ <nax-progress size="md" :percent="50"></nax-progress> ∥ <nax-progress size="lg" :percent="50"></nax-progress>
+  [ 条内文案 textInside ] <nax-progress :percent="55" text-inside></nax-progress> ∥ <nax-progress :percent="88" text-inside type="success"></nax-progress>
+  [ 隐藏文案 / 自定义 pivotText ] <nax-progress :percent="40" :show-info="false"></nax-progress> ∥ <nax-progress :percent="40" pivot-text="上传中"></nax-progress>
+  [ status 覆盖色 ] <nax-progress :percent="100" status="success"></nax-progress> ∥ <nax-progress :percent="60" status="warning"></nax-progress> ∥ <nax-progress :percent="30" status="error"></nax-progress>
+  [ 圆形 shape=circle（含类型） ] <nax-progress shape="circle" :percent="25" size="sm"></nax-progress> ∥ <nax-progress shape="circle" :percent="60"></nax-progress> ∥ <nax-progress shape="circle" :percent="100" type="success" size="lg"></nax-progress> ∥ <nax-progress shape="circle" type="primary" :percent="70" size="sm"></nax-progress> ∥ <nax-progress shape="circle" type="info" :percent="70" size="sm"></nax-progress> ∥ <nax-progress shape="circle" type="warning" :percent="70" size="sm"></nax-progress> ∥ <nax-progress shape="circle" type="error" :percent="70" size="sm"></nax-progress>
+  [ 插槽 useSlot ] <nax-progress :percent="50" use-slot> ∥ <text class="slot-text">一半啦</text> ∥ </nax-progress> ∥ <nax-progress shape="circle" :percent="75" use-slot size="md"> ∥ <text class="slot-text">3/4</text> ∥ </nax-progress>
+##### radio (9 组)
+  [ 单独使用 ] <nax-radio v-model="alone" label="默认选项" @change="onAloneChange"></nax-radio>
+  [ 基础组 ] <nax-radio-group v-model="basic" @change="onGroupChange"> ∥ <nax-radio name="apple" label="苹果"></nax-radio> ∥ <nax-radio name="banana" label="香蕉"></nax-radio> ∥ <nax-radio name="orange" label="橙子"></nax-radio> ∥ </nax-radio-group>
+  [ 形状 shape ] <nax-radio-group v-model="shapeCircle" shape="circle"> ∥ <nax-radio name="c1" label="圆形（默认）"></nax-radio> ∥ <nax-radio name="c2" label="另一项"></nax-radio> ∥ </nax-radio-group> ∥ <nax-radio-group v-model="shapeSquare" shape="square"> ∥ <nax-radio name="s1" label="方形"></nax-radio> ∥ <nax-radio name="s2" label="另一项"></nax-radio> ∥ </nax-radio-group>
+  [ 尺寸 size ] <nax-radio-group v-model="sizeSm" size="sm"> ∥ <nax-radio name="s" label="sm"></nax-radio> ∥ </nax-radio-group> ∥ <nax-radio-group v-model="sizeMd" size="md"> ∥ <nax-radio name="m" label="md"></nax-radio> ∥ </nax-radio-group> ∥ <nax-radio-group v-model="sizeLg" size="lg"> ∥ <nax-radio name="l" label="lg"></nax-radio>
+  [ 禁用 disabled ] <nax-radio-group v-model="disabledVals"> ∥ <nax-radio name="on" label="可选"></nax-radio> ∥ <nax-radio name="off" label="禁用项" disabled></nax-radio> ∥ </nax-radio-group> ∥ <nax-radio-group v-model="disabledGroup" disabled> ∥ <nax-radio name="g1" label="整组禁用"></nax-radio> ∥ <nax-radio name="g2" label="不可点"></nax-radio> ∥ </nax-radio-group>
+  [ 文案不可点 labelDisabled ] <nax-radio-group v-model="labelLock" label-disabled> ∥ <nax-radio name="x" label="只能点左侧圆框"></nax-radio> ∥ <nax-radio name="y" label="点文字无效"></nax-radio> ∥ </nax-radio-group>
+  [ 纵向排列 wrap ] <nax-radio-group v-model="wrapVal" wrap> ∥ <nax-radio name="1" label="选项一"></nax-radio> ∥ <nax-radio name="2" label="选项二"></nax-radio> ∥ <nax-radio name="3" label="选项三"></nax-radio> ∥ </nax-radio-group>
+  [ 自定义颜色 activeColor ] <nax-radio-group v-model="colorVal" active-color="#2080f0"> ∥ <nax-radio name="c1" label="信息色"></nax-radio> ∥ <nax-radio name="c2" label="另一项"></nax-radio> ∥ </nax-radio-group>
+  [ 横向均分 width ] <nax-radio-group v-model="widthVal" width="50%"> ∥ <nax-radio name="w1" label="左侧 50%"></nax-radio> ∥ <nax-radio name="w2" label="右侧 50%"></nax-radio> ∥ <nax-radio name="w3" label="再一行左"></nax-radio> ∥ <nax-radio name="w4" label="再一行右"></nax-radio> ∥ </nax-radio-group>
+##### rate (9 组)
+  [ 基础用法 ] <nax-rate v-model="basic" @change="onBasicChange"></nax-rate>
+  [ 尺寸 size ] <nax-rate v-model="sizeSm" size="sm"></nax-rate> ∥ <nax-rate v-model="sizeMd" size="md"></nax-rate> ∥ <nax-rate v-model="sizeLg" size="lg"></nax-rate> ∥ <nax-rate v-model="sizePx" size="32"></nax-rate>
+  [ 星星数量 count ] <nax-rate v-model="countVal" :count="8"></nax-rate>
+  [ 自定义颜色 / 间距 ] <nax-rate v-model="colorVal" active-color="#d03050" inactive-color="#f0f0f3" :gutter="12"></nax-rate> ∥ <nax-rate v-model="infoVal" active-color="#2080f0" inactive-color="#d6e4ff"></nax-rate>
+  [ 最少可选 minCount ] <nax-rate v-model="minVal" :min-count="2"></nax-rate>
+  [ 半星 allowHalf ] <nax-rate v-model="halfVal" allow-half></nax-rate>
+  [ 禁用 / 只读 ] <nax-rate v-model="disabledVal" disabled></nax-rate> ∥ <nax-rate v-model="readonlyVal" readonly></nax-rate> ∥ <nax-rate v-model="halfReadonly" allow-half readonly></nax-rate>
+  [ 禁用滑动 touchable=false ] <nax-rate v-model="noTouchVal" :touchable="false"></nax-rate>
+  [ 自定义图标 ] <nax-rate v-model="heartVal" active-icon="heart" inactive-icon="heart" active-color="#d03050"></nax-rate>
+##### search (10 组)
+  [ 基础 ] <nax-search ∥ v-model="basic" ∥ @search="onSearch" ∥ @custom="onCustom" ∥ @change="onChange" ∥ ></nax-search>
+  [ 形状 shape ] <nax-search v-model="shapeRound" shape="round" placeholder="round 胶囊"></nax-search> ∥ <nax-search v-model="shapeSquare" shape="square" placeholder="square 方角"></nax-search>
+  [ 尺寸 size ] <nax-search v-model="sizeSm" size="sm" placeholder="sm"></nax-search> ∥ <nax-search v-model="sizeMd" size="md" placeholder="md"></nax-search> ∥ <nax-search v-model="sizeLg" size="lg" placeholder="lg"></nax-search>
+  [ 无右侧按钮 ] <nax-search v-model="noAction" :show-action="false" placeholder="show-action=false"></nax-search>
+  [ animation（聚焦才显示操作） ] <nax-search ∥ v-model="anim" ∥ animation ∥ action-text="取消" ∥ placeholder="聚焦后出现取消" ∥ @custom="onCustom" ∥ ></nax-search>
+  [ label + 边框色 ] <nax-search ∥ v-model="withLabel" ∥ label="地址" ∥ border-color="#18a058" ∥ placeholder="请输入地址" ∥ ></nax-search>
+  [ 对齐 input-align ] <nax-search v-model="alignCenter" input-align="center" :show-action="false" placeholder="居中"></nax-search> ∥ <nax-search v-model="alignRight" input-align="right" :show-action="false" placeholder="右对齐"></nax-search>
+  [ 自定义背景 / 图标色 ] <nax-search ∥ v-model="customBg" ∥ background="#e8f5ee" ∥ search-icon-color="#18a058" ∥ action-color="#18a058" ∥ placeholder="浅绿背景" ∥ ></nax-search>
+  [ 禁用（点击跳转场景） ] <nax-search ∥ v-model="disabledVal" ∥ disabled ∥ placeholder="点击整条触发 click" ∥ @click="onDisabledClick" ∥ ></nax-search>
+  [ 清除 clearable ] <nax-search ∥ v-model="clearable" ∥ :show-action="false" ∥ @clear="onClear" ∥ ></nax-search>
+##### skeleton (9 组)
+  [ 基础（标题 + 段落） ] <nax-skeleton></nax-skeleton>
+  [ 头像 + 标题 + 段落 ] <nax-skeleton avatar :rows="2"></nax-skeleton>
+  [ 方形头像 avatar-shape ] <nax-skeleton avatar avatar-shape="square" avatar-size="40" :rows="2"></nax-skeleton>
+  [ 自定义行宽 rows-width ] <nax-skeleton :rows="3" rows-width="100%,88%,52%" title-width="50%"></nax-skeleton>
+  [ 列表重复 count ] <nax-skeleton avatar :rows="2" :count="3" gap="20"></nax-skeleton>
+  [ 关闭动画 animate=false ] <nax-skeleton :animate="false" avatar :rows="2"></nax-skeleton>
+  [ 仅段落（无标题） ] <nax-skeleton :title="false" :rows="4" rows-width="100%,100%,90%,40%"></nax-skeleton>
+  [ loading 切换真实内容 ] <nax-skeleton :loading="demoLoading" avatar :rows="2"> ∥ <view class="real__row"> ∥ <view class="real__avatar"></view> ∥ <view class="real__body"> ∥ <text class="real__title">张三 · 前端工程师</text> ∥ <text class="real__desc">骨架结束后展示真实列表项内容。</text> ∥ </view> ∥ </view>
+  [ 自定义骨架 #skeleton ] <nax-skeleton :loading="cardLoading"> ∥ <template #skeleton> ∥ <view class="card-sk"> ∥ <view class="card-sk__cover nax-sk-bone"></view> ∥ <view class="card-sk__line nax-sk-bone"></view> ∥ <view class="card-sk__line nax-sk-bone card-sk__line--short"></view> ∥ </view> ∥ </template>
+##### slider (10 组)
+  [ 基础用法 ] <nax-slider v-model="basic" @change="onBasicChange"></nax-slider>
+  [ 尺寸 size ] <nax-slider v-model="sizeSm" size="sm"></nax-slider> ∥ <nax-slider v-model="sizeMd" size="md"></nax-slider> ∥ <nax-slider v-model="sizeLg" size="lg"></nax-slider>
+  [ 范围 min / max ] <nax-slider v-model="rangeVal" :min="30" :max="80" show-edge-value></nax-slider>
+  [ 步长 step ] <nax-slider v-model="stepVal" :step="10"></nax-slider>
+  [ 小数步长 ] <nax-slider v-model="stepFloat" :step="0.1" :start="0" :end="1"></nax-slider>
+  [ 自定义颜色 ] <nax-slider ∥ v-model="colorVal" ∥ active-color="#2080f0" ∥ inactive-color="#d6e4ff" ∥ block-color="#ffffff" ∥ ></nax-slider>
+  [ 显示起止值 showEdgeValue ] <nax-slider ∥ v-model="edgeVal" ∥ :start="0" ∥ :end="100" ∥ show-edge-value ∥ edge-value-position="bottom" ∥ ></nax-slider>
+  [ 自定义滑块 useSlot ] <nax-slider v-model="slotVal" use-slot :block-width="28"> ∥ <view class="custom-thumb"> ∥ <text class="custom-thumb__text">{{ slotVal }}</text> ∥ </view> ∥ </nax-slider>
+  [ 禁用 disabled ] <nax-slider v-model="disabledVal" disabled></nax-slider>
+  [ 事件 start / moving / end ] <nax-slider ∥ v-model="eventVal" ∥ @start="onStart" ∥ @moving="onMoving" ∥ @end="onEnd" ∥ @change="onEventChange" ∥ ></nax-slider>
+##### space (7 组)
+  [ 基础横向 ] <nax-space size="md"> ∥ <nax-space-item> ∥ <nax-button type="primary" size="sm" label="主要"></nax-button> ∥ </nax-space-item> ∥ <nax-space-item> ∥ <nax-button size="sm" label="默认"></nax-button> ∥ </nax-space-item> ∥ <nax-space-item>
+  [ 间距 size ] <nax-space size="xs"> ∥ <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="C"></nax-tag></nax-space-item> ∥ </nax-space> ∥ <nax-space size="sm"> ∥ <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+  [ 纵向 vertical ] <nax-space direction="vertical" size="sm"> ∥ <nax-space-item> ∥ <nax-button size="sm" label="第一行"></nax-button> ∥ </nax-space-item> ∥ <nax-space-item> ∥ <nax-button size="sm" type="primary" label="第二行"></nax-button> ∥ </nax-space-item> ∥ <nax-space-item>
+  [ 换行 wrap ] <nax-space size="sm" wrap> ∥ <nax-space-item><nax-tag type="primary" label="标签1"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag type="info" label="标签2"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag type="success" label="标签3"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag type="warning" label="标签4"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag type="error" label="标签5"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="标签6"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="标签7"></nax-tag></nax-space-item>
+  [ 对齐 align ] <nax-space align="start" size="md"> ∥ <nax-space-item><view class="box box--sm"></view></nax-space-item> ∥ <nax-space-item><view class="box box--lg"></view></nax-space-item> ∥ <nax-space-item><view class="box box--md"></view></nax-space-item> ∥ </nax-space> ∥ <nax-space align="center" size="md"> ∥ <nax-space-item><view class="box box--sm"></view></nax-space-item> ∥ <nax-space-item><view class="box box--lg"></view></nax-space-item>
+  [ 主轴 justify ] <nax-space justify="between" size="0" fill> ∥ <nax-space-item><nax-tag label="左"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="中"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="右"></nax-tag></nax-space-item> ∥ </nax-space> ∥ <nax-space justify="center" size="sm" fill> ∥ <nax-space-item><nax-tag label="A"></nax-tag></nax-space-item> ∥ <nax-space-item><nax-tag label="B"></nax-tag></nax-space-item>
+  [ fill 纵向撑满 ] <nax-space direction="vertical" size="sm" fill> ∥ <nax-space-item> ∥ <nax-button block type="primary" label="通栏按钮 A"></nax-button> ∥ </nax-space-item> ∥ <nax-space-item> ∥ <nax-button block label="通栏按钮 B"></nax-button> ∥ </nax-space-item> ∥ </nax-space>
+##### steps (8 组)
+  [ 基础（list + current） ] <nax-steps :list="basicList" :current="basicCurrent"></nax-steps> ∥ <nax-button size="sm" label="上一步" :disabled="basicCurrent <= 0" @click="prevBasic"></nax-button> ∥ <nax-button size="sm" type="primary" label="下一步" :disabled="basicCurrent >= basicList.length - 1" @click="nextBasic"></nax-button>
+  [ 点状 mode=dot ] <nax-steps :list="basicList" :current="1" mode="dot"></nax-steps>
+  [ 语义色 type ] <nax-steps :list="typeList" :current="2" type="info"></nax-steps> ∥ <nax-steps :list="typeList" :current="2" type="warning"></nax-steps> ∥ <nax-steps :list="typeList" :current="2" type="error"></nax-steps>
+  [ 尺寸 size ] <nax-steps :list="sizeList" :current="1" size="sm"></nax-steps> ∥ <nax-steps :list="sizeList" :current="1" size="md"></nax-steps> ∥ <nax-steps :list="sizeList" :current="1" size="lg"></nax-steps>
+  [ 纵向 + 描述 ] <nax-steps :list="verticalList" :current="verticalCurrent" direction="vertical"></nax-steps> ∥ <nax-button size="sm" type="primary" label="推进进度" @click="nextVertical"></nax-button>
+  [ 单步 status（含失败） ] <nax-steps :list="statusList" :current="1"></nax-steps>
+  [ 组合式 nax-step ] <nax-steps :current="1" direction="vertical" type="success"> ∥ <nax-step title="提交资料" desc="已完成"></nax-step> ∥ <nax-step title="人工审核" desc="进行中"></nax-step> ∥ <nax-step title="开通成功" desc="等待中"></nax-step> ∥ </nax-steps>
+  [ 可点击 clickable ] <nax-steps ∥ :list="clickList" ∥ :current="clickCurrent" ∥ clickable ∥ @click="onStepClick" ∥ ></nax-steps>
+##### swiper (4 组)
+  [ 基础（点指示器） ] <nax-swiper ∥ :list="slides" ∥ height="160" ∥ @change="onChange" ∥ @click="onClickItem" ∥ ></nax-swiper>
+  [ 自动播放 + 循环 ] <nax-swiper ∥ :list="slides" ∥ height="160" ∥ autoplay ∥ :interval="2500" ∥ circular ∥ ></nax-swiper>
+  [ 数字指示器 ] <nax-swiper ∥ :list="slides" ∥ height="160" ∥ indicator ∥ indicator-type="number" ∥ indicator-position="bottom-right" ∥ ></nax-swiper>
+  [ 受控 current ] <nax-swiper ∥ :list="slides" ∥ height="160" ∥ v-model:current="current" ∥ :indicator="true" ∥ ></nax-swiper> ∥ <nax-button size="sm" label="上一页" @click="prev"></nax-button> ∥ <nax-button size="sm" type="primary" label="下一页" @click="next"></nax-button>
+##### switch (5 组)
+  [ 尺寸 size ] <nax-switch v-model="sizeSm" size="sm"></nax-switch> ∥ <nax-switch v-model="sizeMd" size="md"></nax-switch> ∥ <nax-switch v-model="sizeLg" size="lg"></nax-switch>
+  [ 禁用 disabled ] <nax-switch v-model="disabledOff" disabled></nax-switch> ∥ <nax-switch v-model="disabledOn" disabled></nax-switch>
+  [ 加载 loading ] <nax-switch v-model="loadingOff" loading></nax-switch> ∥ <nax-switch v-model="loadingOn" loading></nax-switch> ∥ <nax-switch v-model="asyncVal" :loading="asyncBusy" @change="onAsyncChange"></nax-switch>
+  [ 自定义颜色 ] <nax-switch v-model="colorA" active-color="#2080f0"></nax-switch> ∥ <nax-switch v-model="colorB" active-color="#d03050" inactive-color="#f3f3f5"></nax-switch>
+  [ 切换震动 vibrateShort ] <nax-switch v-model="vibrateVal" vibrate-short></nax-switch>
+##### tag (10 组)
+  [ 基础 ] <nax-tag label="标签"></nax-tag> ∥ <nax-tag type="info" label="标签文案"></nax-tag> ∥ <nax-tag icon="star" label="图标"></nax-tag> ∥ <nax-tag strong label="加粗"></nax-tag>
+  [ 类型 type ] <nax-tag type="default" label="default"></nax-tag> ∥ <nax-tag type="primary" label="primary"></nax-tag> ∥ <nax-tag type="info" label="info"></nax-tag> ∥ <nax-tag type="success" label="success"></nax-tag> ∥ <nax-tag type="warning" label="warning"></nax-tag> ∥ <nax-tag type="error" label="error"></nax-tag>
+  [ 层级 variant ] <nax-tag type="primary" variant="light" label="light"></nax-tag> ∥ <nax-tag type="primary" variant="solid" label="solid"></nax-tag> ∥ <nax-tag type="primary" variant="outline" label="outline"></nax-tag> ∥ <nax-tag type="primary" variant="text" label="text"></nax-tag>
+  [ 尺寸 size ] <nax-tag size="sm" type="info" label="sm"></nax-tag> ∥ <nax-tag size="md" type="info" label="md"></nax-tag> ∥ <nax-tag size="lg" type="info" label="lg"></nax-tag> ∥ <nax-tag size="tiny" type="info" label="tiny"></nax-tag> ∥ <nax-tag size="large" type="info" label="large"></nax-tag>
+  [ 圆角 / 无边框 ] <nax-tag round type="success" label="round"></nax-tag> ∥ <nax-tag :bordered="false" type="success" label="no border"></nax-tag> ∥ <nax-tag round :bordered="false" type="warning" label="round+无边"></nax-tag>
+  [ 可关闭 closable ] <nax-tag v-if="showCloseA" closable type="error" label="关闭我" @close="onCloseA" @click="onTagClick('A')"></nax-tag> ∥ <nax-tag v-if="showCloseB" closable :trigger-click-on-close="false" type="warning" label="关不触发 click" @close="onCloseB" @click="onTagClick('B')"></nax-tag>
+  [ 可选中 checkable ] <nax-tag checkable type="primary" label="可选 primary" :checked="checkedPrimary" @update:checked="onCheckedPrimary"></nax-tag> ∥ <nax-tag checkable type="info" label="可选 info" :checked="checkedInfo" @update:checked="onCheckedInfo"></nax-tag> ∥ <nax-tag checkable type="success" variant="outline" label="outline 可选" :checked="checkedOutline" @update:checked="onCheckedOutline"></nax-tag>
+  [ 禁用 disabled ] <nax-tag disabled label="禁用"></nax-tag> ∥ <nax-tag disabled type="primary" label="禁用 primary"></nax-tag> ∥ <nax-tag disabled closable type="error" label="禁用关闭"></nax-tag>
+  [ 自定义 color ] <nax-tag color="#8a2be2" label="紫 light"></nax-tag> ∥ <nax-tag color="#8a2be2" variant="solid" label="紫 solid"></nax-tag> ∥ <nax-tag color="#8a2be2" variant="outline" label="紫 outline"></nax-tag> ∥ <nax-tag color="#ff6b00" text-color="#ff6b00" :bordered="false" label="橙字"></nax-tag>
+  [ solid × type ] <nax-tag variant="solid" label="default"></nax-tag> ∥ <nax-tag type="primary" variant="solid" label="primary"></nax-tag> ∥ <nax-tag type="info" variant="solid" label="info"></nax-tag> ∥ <nax-tag type="success" variant="solid" label="success"></nax-tag> ∥ <nax-tag type="warning" variant="solid" label="warning"></nax-tag> ∥ <nax-tag type="error" variant="solid" label="error"></nax-tag>
+##### text (10 组)
+  [ 基础用法 ] <nax-text text="我用十年青春,赴你最后之约"></nax-text> ∥ <nax-text text="带图标的文本" prefix-icon="star" type="primary"></nax-text> ∥ <nax-text text="后缀图标" suffix-icon="arrow-right" type="secondary"></nax-text>
+  [ 主题色 ] <nax-text type="default" text="default 主文案"></nax-text> ∥ <nax-text type="primary" text="primary 主题"></nax-text> ∥ <nax-text type="info" text="info 信息"></nax-text> ∥ <nax-text type="success" text="success 成功"></nax-text> ∥ <nax-text type="warning" text="warning 警告"></nax-text> ∥ <nax-text type="error" text="error 错误"></nax-text> ∥ <nax-text type="secondary" text="secondary 次文案"></nax-text> ∥ <nax-text type="placeholder" text="placeholder 占位"></nax-text>
+  [ 文字尺寸 ] <nax-text size="sm" text="sm 14px"></nax-text> ∥ <nax-text size="md" text="md 16px（默认）"></nax-text> ∥ <nax-text size="lg" text="lg 18px"></nax-text> ∥ <nax-text size="xl" text="xl 20px"></nax-text> ∥ <nax-text size="20" text="数字 20px"></nax-text>
+  [ 字重与装饰 ] <nax-text bold text="加粗 bold"></nax-text> ∥ <nax-text decoration="underline" text="下划线 underline" type="info"></nax-text> ∥ <nax-text decoration="line-through" text="删除线 line-through" type="secondary"></nax-text>
+  [ 文本省略 ] <nax-text ∥ :lines="1" ∥ block ∥ text="单行省略：这是一段很长很长的文本内容，超出一行后会显示省略号，方便列表场景使用。" ∥ ></nax-text> ∥ <nax-text ∥ :lines="2" ∥ block
+  [ 内容格式化 ] <nax-text mode="price" text="128.5" type="error" bold></nax-text> ∥ <nax-text mode="phone" text="13800138000" type="info"></nax-text> ∥ <nax-text mode="phone" format="encrypt" text="13800138000"></nax-text> ∥ <nax-text mode="name" format="encrypt" text="张三丰"></nax-text> ∥ <nax-text mode="date" text="1710000000"></nax-text> ∥ <nax-text mode="date" format="yyyy-mm-dd HH:MM" text="1710000000000" type="secondary"></nax-text> ∥ <nax-text mode="link" text="nax-ui文档" href="https://gitee.com/liusixsix/nax-ui" @click="onLinkClick"></nax-text>
+  [ 拨号操作 ] <nax-text ∥ mode="phone" ∥ call ∥ type="primary" ∥ text="10086" ∥ prefix-icon="share" ∥ @click="onCallClick" ∥ ></nax-text>
+  [ 块级对齐 ] <nax-text block align="left" text="左对齐 left"></nax-text> ∥ <nax-text block align="center" text="居中 center" type="primary"></nax-text> ∥ <nax-text block align="right" text="右对齐 right" type="secondary"></nax-text>
+  [ 文本选择 ] <nax-text selectable text="长按可选中复制这段文字" type="info"></nax-text>
+  [ 自定义颜色 ] <nax-text color="#8a2be2" text="自定义紫色 #8a2be2"></nax-text>
+##### textarea (8 组)
+  [ 基础用法 ] <nax-textarea ∥ v-model="basic" ∥ placeholder="请输入内容" ∥ @change="onChange('basic')" ∥ @focus="onFieldFocus('sec-basic')" ∥ @blur="onFieldBlur" ∥ @keyboardheightchange="onTaKeyboard" ∥ ></nax-textarea>
+  [ 字数统计 count ] <nax-textarea v-model="withCount" count :maxlength="100" placeholder="最多 100 字"></nax-textarea>
+  [ 自动增高 auto-height ] <nax-textarea v-model="autoH" auto-height height="70" placeholder="输入时自动增高"></nax-textarea>
+  [ 无边框 / 背景色 ] <nax-textarea v-model="plain" :border="false" placeholder="无边框"></nax-textarea> ∥ <nax-textarea v-model="plainBg" :border="false" background="#f3f3f5" placeholder="无边框 + 背景色"></nax-textarea>
+  [ 仅下边框 border-type=bottom ] <nax-textarea v-model="bottomBorder" border border-type="bottom" placeholder="下划线风格"></nax-textarea>
+  [ 尺寸 size ] <nax-textarea v-model="sizeSm" size="sm" height="56" placeholder="sm"></nax-textarea> ∥ <nax-textarea v-model="sizeMd" size="md" height="70" placeholder="md"></nax-textarea> ∥ <nax-textarea v-model="sizeLg" size="lg" height="88" placeholder="lg"></nax-textarea>
+  [ 禁用 / 只读 ] <nax-textarea v-model="disabledVal" disabled count></nax-textarea> ∥ <nax-textarea v-model="readonlyVal" readonly></nax-textarea>
+  [ 自定义边框色 + 高度 ] <nax-textarea ∥ v-model="colorBorder" ∥ border ∥ border-color="#18a058" ∥ height="100" ∥ placeholder="height=100，边框 primary" ∥ @confirm="onConfirm" ∥ ></nax-textarea>

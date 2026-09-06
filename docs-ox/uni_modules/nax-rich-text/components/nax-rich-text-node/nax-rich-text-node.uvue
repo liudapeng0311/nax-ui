@@ -1,0 +1,947 @@
+<template>
+	<!-- 文本叶子 -->
+	<text v-if="isText" :style="styleText">{{ textContent }}</text>
+
+	<!-- 换行（嵌套 text 继承父级样式） -->
+	<text v-else-if="isBr">{{ newlineText }}</text>
+
+	<!-- 图片：宽度自适应，点击预览 -->
+	<image
+		v-else-if="isImg"
+		class="nax-rich-text-node__img"
+		:src="imgSrc"
+		mode="widthFix"
+		:style="styleText"
+		@click="onImgTap"
+	></image>
+
+	<!-- 视频：原生 video 常驻挂载（uni-app x 同层级渲染可被覆盖），封面卡片叠于其上；
+	     点击在用户手势内 play()，规避 iOS 动态挂载 + 非手势播放被拒的问题；App 端视频预先缓冲，点击通常即点即播 -->
+	<view v-else-if="isVideo" class="nax-rich-text-node__video-wrap">
+		<video
+			:id="videoId"
+			class="nax-rich-text-node__video"
+			:src="videoSrc"
+			:poster="videoPoster"
+			:controls="true"
+			:autoplay="false"
+			:show-center-play-btn="true"
+			:show-loading="true"
+			:style="styleText"
+			@play="onVideoPlaying"
+			@pause="onVideoPaused"
+			@error="onVideoError"
+		></video>
+		<!-- 封面卡片：未播放时盖在视频上方，点击开始播放；加载中显示旋转 loading -->
+		<view
+			v-if="!videoPlaying"
+			class="nax-rich-text-node__video-card"
+			:style="styleText"
+			@click="onVideoPlay"
+		>
+			<image
+				v-if="videoPosterShow"
+				class="nax-rich-text-node__video-cover"
+				:src="videoPoster"
+				mode="aspectFill"
+				@error="onVideoPosterError"
+			></image>
+			<!-- 无封面 / 封面加载失败：浅主题色兜底 -->
+			<view v-else class="nax-rich-text-node__video-cover-fallback"></view>
+			<view v-if="videoLoading" class="nax-rich-text-node__video-loading">
+				<nax-loading size="lg" color="#ffffff"></nax-loading>
+			</view>
+			<view v-else class="nax-rich-text-node__video-btn">
+				<nax-icon name="player-play-filled" size="20" color="#ffffff"></nax-icon>
+			</view>
+		</view>
+	</view>
+
+	<!-- 音频播放器（createInnerAudioContext 实现，无内建 audio 组件） -->
+	<view v-else-if="isAudio" class="nax-rich-text-node__audio">
+		<view class="nax-rich-text-node__audio-cover">
+			<image
+				v-if="audioCoverShow"
+				class="nax-rich-text-node__audio-cover-img"
+				:src="audioCover"
+				mode="aspectFill"
+				@error="onAudioCoverError"
+			></image>
+			<!-- 无封面或封面加载失败：主题色块兜底 -->
+			<view v-else class="nax-rich-text-node__audio-cover-fallback"></view>
+			<view
+				class="nax-rich-text-node__audio-btn"
+				:class="audioPlaying ? '' : 'nax-rich-text-node__audio-btn--play'"
+				@click="onAudioToggle"
+			>
+				<nax-icon
+					:name="audioPlaying ? 'player-pause-filled' : 'player-play-filled'"
+					size="14"
+					color="#ffffff"
+				></nax-icon>
+			</view>
+		</view>
+		<view class="nax-rich-text-node__audio-main">
+			<text class="nax-rich-text-node__audio-title" :max-lines="1">{{ audioTitleText }}</text>
+			<view class="nax-rich-text-node__audio-control">
+				<!-- 颜色/尺寸属性供非蒸汽端；鸿蒙蒸汽端忽略这些属性，走 track/thumb class -->
+				<slider
+					class="nax-rich-text-node__audio-slider"
+					:min="0"
+					:max="audioMax"
+					:step="1"
+					:value="audioSliderValue"
+					activeColor="#18a058"
+					backgroundColor="#e2e4ea"
+					:blockSize="12"
+					track-class="nax-rich-text-node__audio-slider-track"
+					track-active-class="nax-rich-text-node__audio-slider-track-active"
+					thumb-class="nax-rich-text-node__audio-slider-thumb"
+					@change="onAudioSeek"
+					@changing="onAudioChanging"
+				></slider>
+				<text class="nax-rich-text-node__audio-time">{{ audioTimeText }}</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 内嵌内容占位（iframe 等编辑器嵌入） -->
+	<view v-else-if="isEmbed" class="nax-rich-text-node__media-card" @click="onEmbedTap">
+		<text class="nax-rich-text-node__media-icon">▶</text>
+		<text class="nax-rich-text-node__media-text">外部内容：{{ embedDomain }}</text>
+	</view>
+
+	<!-- 分隔线 -->
+	<view v-else-if="isHr" :style="styleText"></view>
+
+	<!-- 行内文本串：一个 run 一个 text，内部嵌套行内元素 -->
+	<text v-else-if="isRun" :style="styleText">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</text>
+
+	<!-- 行内元素（span / strong / a 等） -->
+	<text v-else-if="isInline" :style="styleText" @click="onInlineTap">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</text>
+
+	<!-- 列表：标记 + 内容两列 -->
+	<view v-else-if="isList" :style="styleText">
+		<view v-for="(item, index) in children" :key="index" class="nax-rich-text-node__li">
+			<text class="nax-rich-text-node__marker">{{ markerFor(item, index) }}</text>
+			<view class="nax-rich-text-node__li-body">
+				<nax-rich-text-node
+					v-for="(child, j) in item.children"
+					:key="j"
+					:node="child"
+					@action="forwardAction"
+				></nax-rich-text-node>
+			</view>
+		</view>
+	</view>
+
+	<!-- 表格：行扁平化渲染，列宽已在渲染前处理阶段按各列内容最大值对齐 -->
+	<view v-else-if="isTable" :style="styleText">
+		<nax-rich-text-node
+			v-for="(other, oi) in tableOthers"
+			:key="'o' + oi"
+			:node="other"
+			@action="forwardAction"
+		></nax-rich-text-node>
+		<view v-for="(row, ri) in tableRows" :key="'r' + ri" class="nax-rich-text-node__tr">
+			<view
+				v-for="(cell, ci) in row.children"
+				:key="ci"
+				class="nax-rich-text-node__cell"
+				:style="cell.styleText"
+			>
+				<nax-rich-text-node
+					v-for="(c, i) in cell.children"
+					:key="i"
+					:node="c"
+					@action="forwardAction"
+				></nax-rich-text-node>
+			</view>
+		</view>
+	</view>
+
+	<!-- 表格行组 thead / tbody / tfoot -->
+	<view v-else-if="isSection" :style="styleText">
+		<nax-rich-text-node
+			v-for="(row, index) in children"
+			:key="index"
+			:node="row"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</view>
+
+	<!-- 表格行（游离行的兜底路径） -->
+	<view v-else-if="isRow" class="nax-rich-text-node__tr">
+		<view v-for="(cell, index) in children" :key="index" class="nax-rich-text-node__cell">
+			<nax-rich-text-node :node="cell" @action="forwardAction"></nax-rich-text-node>
+		</view>
+	</view>
+
+	<!-- 单元格 -->
+	<view v-else-if="isCell" :style="styleText">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</view>
+
+	<!-- 块容器（p / 标题 / 引用 / div / 被提升的行内结构等） -->
+	<view v-else-if="isBlock" :style="styleText" @click="onBlockTap">
+		<nax-rich-text-node
+			v-for="(child, index) in children"
+			:key="index"
+			:node="child"
+			@action="forwardAction"
+		></nax-rich-text-node>
+	</view>
+
+	<!-- 无渲染节点（source / track / col 等） -->
+	<view v-else class="nax-rich-text-node__skip"></view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-rich-text-node
+	 * nax-rich-text 内部递归渲染节点，解析器 + 渲染前处理产出 RichNode 树后由本组件消费。
+	 * 节点样式已在渲染前处理阶段合并为 styleText，本组件只做结构与事件映射。
+	 */
+	import {
+		RichNode,
+		NODE_TYPE_TEXT,
+		NODE_KIND_BR,
+		NODE_KIND_RUN,
+		NODE_KIND_INLINE,
+		NODE_KIND_MEDIA,
+		NODE_KIND_EMBED,
+		NODE_KIND_HR,
+		NODE_KIND_LIST,
+		NODE_KIND_TABLE,
+		NODE_KIND_TABLE_SECTION,
+		NODE_KIND_TABLE_ROW,
+		NODE_KIND_TABLE_CELL,
+		NODE_KIND_BLOCK
+	} from '../nax-rich-text/parser.uts'
+	import { RichNodeAction, extractDomain } from '../nax-rich-text/resolve.uts'
+	import { pauseCurrentAudio, setCurrentAudio, clearCurrentAudio } from '../nax-rich-text/audio-manager.uts'
+
+	const props = defineProps({
+		node: {
+			type: Object,
+			default: null
+		}
+	})
+	const emit = defineEmits(['action'])
+
+	const richNode = computed((): RichNode | null => {
+		const n = props.node
+		if (n == null) {
+			return null
+		}
+		return n as RichNode
+	})
+
+	const nodeName = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.name : ''
+	})
+
+	const nodeKind = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.kind : ''
+	})
+
+	const styleText = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.styleText : ''
+	})
+
+	const children = computed((): RichNode[] => {
+		const n = richNode.value
+		return n != null ? n.children : [] as RichNode[]
+	})
+
+	const isText = computed((): boolean => {
+		const n = richNode.value
+		return n != null && n.type == NODE_TYPE_TEXT
+	})
+
+	const textContent = computed((): string => {
+		const n = richNode.value
+		return n != null ? n.text : ''
+	})
+
+	const isBr = computed((): boolean => nodeKind.value == NODE_KIND_BR)
+	const isRun = computed((): boolean => nodeKind.value == NODE_KIND_RUN)
+	const isInline = computed((): boolean => nodeKind.value == NODE_KIND_INLINE)
+	const isEmbed = computed((): boolean => nodeKind.value == NODE_KIND_EMBED)
+	const isHr = computed((): boolean => nodeKind.value == NODE_KIND_HR)
+	const isList = computed((): boolean => nodeKind.value == NODE_KIND_LIST)
+	const isTable = computed((): boolean => nodeKind.value == NODE_KIND_TABLE)
+	const isSection = computed((): boolean => nodeKind.value == NODE_KIND_TABLE_SECTION)
+	const isRow = computed((): boolean => nodeKind.value == NODE_KIND_TABLE_ROW)
+	const isCell = computed((): boolean => nodeKind.value == NODE_KIND_TABLE_CELL)
+	const isBlock = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_BLOCK
+			|| (nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'picture')
+	})
+
+	const isImg = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'img'
+	})
+	const isVideo = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'video'
+	})
+	const isAudio = computed((): boolean => {
+		return nodeKind.value == NODE_KIND_MEDIA && nodeName.value == 'audio'
+	})
+
+	const newlineText = '\n'
+
+	function attrValue(key : string) : string {
+		const n = richNode.value
+		if (n == null) {
+			return ''
+		}
+		const v = n.attrs.get(key)
+		return v != null ? v : ''
+	}
+
+	const imgSrc = computed((): string => {
+		let src = attrValue('src')
+		if (src.length == 0) {
+			src = attrValue('data-src')
+		}
+		return src
+	})
+
+	const videoSrc = computed((): string => attrValue('src'))
+	const videoPoster = computed((): string => attrValue('poster'))
+
+	// —— 视频播放：原生 video 常驻挂载，封面卡片覆盖其上；点击在用户手势内 play()，规避 iOS 非手势播放被拒 ——
+	// 播放超时未开始则退回可重试的播放按钮；App 端 video 预先缓冲，点击后通常即点即播
+	const instance = getCurrentInstance()
+	const VIDEO_PLAY_TIMEOUT = 4000
+	const videoStarted = ref(false)
+	const videoPosterFailed = ref(false)
+	const videoPlaying = ref(false)
+	const videoId = 'nax-rich-text-video-' + Math.floor(Math.random() * 10000000).toString()
+	let videoFailTimer : number | null = null
+	let videoRetryExhausted = false
+
+	const videoPosterShow = computed((): boolean => {
+		return videoPosterFailed.value == false && videoPoster.value.length > 0
+	})
+
+	// 点击后未开始播放且未超时失败：封面显示 loading
+	const videoLoading = computed((): boolean => {
+		return videoStarted.value && !videoPlaying.value && !videoRetryExhausted
+	})
+
+	function onVideoPosterError() {
+		videoPosterFailed.value = true
+	}
+
+	function onVideoPlay() {
+		// 视频已常驻挂载，直接在用户手势内 play()（iOS 对非手势播放会拒绝）
+		videoStarted.value = true
+		videoRetryExhausted = false
+		const ctx = ensureVideoContext()
+		if (ctx != null) {
+			ctx.play()
+		}
+		startVideoFailTimer()
+	}
+
+	function ensureVideoContext() : VideoContext | null {
+		const proxy = instance?.proxy
+		if (proxy != null) {
+			return uni.createVideoContext(videoId, proxy)
+		}
+		return uni.createVideoContext(videoId)
+	}
+
+	function startVideoFailTimer() : void {
+		stopVideoFailTimer()
+		videoFailTimer = setTimeout(() => {
+			videoFailTimer = null
+			if (!videoPlaying.value) {
+				// 超时未开始播放：退回可重试的播放按钮
+				videoRetryExhausted = true
+			}
+		}, VIDEO_PLAY_TIMEOUT)
+	}
+
+	function stopVideoFailTimer() : void {
+		if (videoFailTimer != null) {
+			clearTimeout(videoFailTimer)
+			videoFailTimer = null
+		}
+	}
+
+	function onVideoPlaying() {
+		videoPlaying.value = true
+		stopVideoFailTimer()
+	}
+
+	function onVideoPaused() {
+		// 尚未播放过即暂停：视为本次播放失败，退回可重试按钮
+		if (!videoPlaying.value) {
+			videoRetryExhausted = true
+			stopVideoFailTimer()
+		}
+	}
+
+	function onVideoError() {
+		// 播放出错退回封面态，避免残留黑屏原生控件
+		videoStarted.value = false
+		videoPlaying.value = false
+		videoRetryExhausted = false
+		stopVideoFailTimer()
+	}
+
+	onUnmounted(() => {
+		// 节点销毁时清理播放超时定时器
+		stopVideoFailTimer()
+	})
+	const embedDomain = computed((): string => {
+		let src = attrValue('src')
+		if (src.length == 0) {
+			return '外部内容'
+		}
+		const domain = extractDomain(src)
+		return domain.length > 0 ? domain : src
+	})
+
+	// —— 音频播放（uni-app x 无 audio 组件，基于 createInnerAudioContext）——
+	const audioPlaying = ref(false)
+	const audioCurrent = ref(0)
+	const audioDuration = ref(0)
+	const audioError = ref(false)
+	const audioDragging = ref(false)
+	const audioDragValue = ref(0)
+	let audioPlayer : InnerAudioContext | null = null
+
+	function ensureAudioPlayer() : InnerAudioContext | null {
+		if (audioPlayer != null) {
+			return audioPlayer
+		}
+		let src = attrValue('src')
+		if (src.length == 0) {
+			src = attrValue('data-src')
+		}
+		if (src.length == 0) {
+			return null
+		}
+		const ctx = uni.createInnerAudioContext()
+		ctx.src = src
+		ctx.onError((err) => {
+			audioError.value = true
+			audioPlaying.value = false
+		})
+		ctx.onPlay(() => {
+			audioPlaying.value = true
+		})
+		ctx.onPause(() => {
+			audioPlaying.value = false
+		})
+		ctx.onStop(() => {
+			audioPlaying.value = false
+		})
+		ctx.onEnded(() => {
+			audioPlaying.value = false
+			// 播放完成把进度钉到结尾，避免部分端最后一次 timeupdate 停在半路
+			audioCurrent.value = audioDuration.value
+		})
+		ctx.onCanplay(() => {
+			// 部分端元数据就绪后才上报总时长，先取一次让总时长尽早显示
+			const p = audioPlayer
+			if (p == null) {
+				return
+			}
+			const d = p.duration
+			if (d > 0 && d == d) {
+				audioDuration.value = d
+			}
+		})
+		ctx.onTimeUpdate(() => {
+			const p = audioPlayer
+			if (p == null) {
+				return
+			}
+			audioCurrent.value = p.currentTime
+			const d = p.duration
+			if (d > 0 && d == d) {
+				audioDuration.value = d
+			}
+		})
+		audioPlayer = ctx
+		return ctx
+	}
+
+	function onAudioToggle() {
+		if (audioError.value) {
+			return
+		}
+		const ctx = ensureAudioPlayer()
+		if (ctx == null) {
+			return
+		}
+		if (audioPlaying.value) {
+			ctx.pause()
+			return
+		}
+		pauseCurrentAudio()
+		setCurrentAudio(ctx)
+		ctx.play()
+	}
+
+	function onAudioSeek(e : UniSliderChangeEvent) {
+		const ctx = ensureAudioPlayer()
+		if (ctx == null) {
+			return
+		}
+		audioDragging.value = false
+		const value = e.detail.value
+		ctx.seek(value)
+		audioCurrent.value = value
+	}
+
+	function onAudioChanging(e : UniSliderChangeEvent) {
+		audioDragging.value = true
+		audioDragValue.value = e.detail.value
+	}
+
+	const audioMax = computed((): number => {
+		const d = audioDuration.value
+		// 步进 1 秒：max 用 round 保证进度能走满（ceil 会让小数秒音频播完仍差一格）
+		return d > 0 ? Math.max(1, Math.round(d)) : 1
+	})
+
+	const audioSliderValue = computed((): number => {
+		const v = audioDragging.value ? audioDragValue.value : audioCurrent.value
+		const max = audioMax.value
+		if (v >= max) {
+			return max
+		}
+		return Math.round(v)
+	})
+
+	function formatAudioTime(sec : number) : string {
+		if (sec <= 0 || sec != sec) {
+			return '00:00'
+		}
+		const total = Math.floor(sec)
+		const m = Math.floor(total / 60)
+		const s = total % 60
+		const mStr = m < 10 ? '0' + m.toString() : m.toString()
+		const sStr = s < 10 ? '0' + s.toString() : s.toString()
+		return mStr + ':' + sStr
+	}
+
+	// —— 音频封面 / 标题（来自 audio 标签属性，缺省时主题色块 + 文件名兜底）——
+	const audioCoverFailed = ref(false)
+
+	const audioCover = computed((): string => {
+		let cover = attrValue('poster')
+		if (cover.length == 0) {
+			cover = attrValue('cover')
+		}
+		if (cover.length == 0) {
+			cover = attrValue('data-poster')
+		}
+		if (cover.length == 0) {
+			cover = attrValue('data-cover')
+		}
+		return cover
+	})
+
+	const audioCoverShow = computed((): boolean => {
+		return audioCoverFailed.value == false && audioCover.value.length > 0
+	})
+
+	function onAudioCoverError() {
+		audioCoverFailed.value = true
+	}
+
+	/** 从音频地址提取文件名：去参数与锚点，URI 解码失败时保留原值 */
+	function extractFileName(src : string) : string {
+		if (src.length == 0) {
+			return '音频'
+		}
+		let path = src
+		const queryIndex = path.indexOf('?')
+		if (queryIndex >= 0) {
+			path = path.substring(0, queryIndex)
+		}
+		const hashIndex = path.indexOf('#')
+		if (hashIndex >= 0) {
+			path = path.substring(0, hashIndex)
+		}
+		const slashIndex = path.lastIndexOf('/')
+		const backslashIndex = path.lastIndexOf('\\')
+		const nameIndex = slashIndex > backslashIndex ? slashIndex : backslashIndex
+		let name = nameIndex >= 0 ? path.substring(nameIndex + 1) : path
+		if (name.length == 0) {
+			return '音频'
+		}
+		try {
+			const decoded = decodeURIComponent(name)
+			if (decoded != null && decoded.length > 0) {
+				name = decoded
+			}
+		} catch (e) {
+			// 保留未解码的文件名
+		}
+		return name
+	}
+
+	const audioTitleText = computed((): string => {
+		if (audioError.value) {
+			return '音频加载失败'
+		}
+		let title = attrValue('title')
+		if (title.length == 0) {
+			title = attrValue('data-title')
+		}
+		if (title.length > 0) {
+			return title
+		}
+		let src = attrValue('src')
+		if (src.length == 0) {
+			src = attrValue('data-src')
+		}
+		return extractFileName(src)
+	})
+
+	const audioTimeText = computed((): string => {
+		// 拖拽中实时显示拖拽位置对应的时间
+		const v = audioDragging.value ? audioDragValue.value : audioCurrent.value
+		return formatAudioTime(v) + ' / ' + formatAudioTime(audioDuration.value)
+	})
+
+	onUnmounted(() => {
+		const p = audioPlayer
+		if (p != null) {
+			clearCurrentAudio(p)
+			// destroy 不支持微信小程序
+			// #ifndef MP-WEIXIN
+			p.destroy()
+			// #endif
+			audioPlayer = null
+		}
+	})
+
+	/** 列表标记：ol 序号 / ul 圆点 */
+	function markerFor(item : any, index : number) : string {
+		const li = item as RichNode
+		if (li.name == 'ol') {
+			return (index + 1).toString() + '.'
+		}
+		return '•'
+	}
+
+	/** 表格下全部行（穿透 thead / tbody / tfoot），行内仅保留单元格 */
+	const tableRows = computed((): RichNode[] => {
+		const rows : RichNode[] = []
+		const n = richNode.value
+		if (n == null) {
+			return rows
+		}
+		// 队列迭代收集（uts 闭包不可自引用递归）
+		const pending : RichNode[] = []
+		for (let i = 0; i < n.children.length; i++) {
+			pending.push(n.children[i])
+		}
+		while (pending.length > 0) {
+			const child = pending.shift()
+			if (child == null) {
+				continue
+			}
+			if (child.kind == NODE_KIND_TABLE_SECTION) {
+				for (let i = 0; i < child.children.length; i++) {
+					pending.push(child.children[i])
+				}
+			} else if (child.kind == NODE_KIND_TABLE_ROW) {
+				const rowNode = new RichNode()
+				rowNode.name = '__tr'
+				rowNode.kind = NODE_KIND_TABLE_ROW
+				rowNode.children = child.children.filter((c : RichNode): boolean => c.kind == NODE_KIND_TABLE_CELL)
+				rows.push(rowNode)
+			}
+		}
+		return rows
+	})
+
+	/** 表格下非行结构子级（caption 等） */
+	const tableOthers = computed((): RichNode[] => {
+		const out : RichNode[] = []
+		const n = richNode.value
+		if (n == null) {
+			return out
+		}
+		for (let i = 0; i < n.children.length; i++) {
+			const child = n.children[i]
+			if (child.kind == NODE_KIND_TABLE_SECTION || child.kind == NODE_KIND_TABLE_ROW) {
+				continue
+			}
+			if (child.name == 'col' || child.name == 'colgroup') {
+				continue
+			}
+			out.push(child)
+		}
+		return out
+	})
+
+	function newAction(type : string, src : string, href : string) : RichNodeAction {
+		const action = new RichNodeAction()
+		action.type = type
+		action.src = src
+		action.href = href
+		return action
+	}
+
+	function onImgTap() {
+		emit('action', newAction('img', imgSrc.value, ''))
+	}
+
+	function onEmbedTap() {
+		emit('action', newAction('embed', attrValue('src'), ''))
+	}
+
+	function onInlineTap() {
+		if (nodeName.value == 'a') {
+			emit('action', newAction('a', '', attrValue('href')))
+		}
+	}
+
+	function onBlockTap() {
+		// 被提升为块的行内结构（如链接包图片）
+		if (nodeName.value == 'a') {
+			emit('action', newAction('a', '', attrValue('href')))
+		}
+	}
+
+	function forwardAction(action : any) {
+		emit('action', action as RichNodeAction)
+	}
+</script>
+
+<style>
+	.nax-rich-text-node__skip {
+		width: 0;
+		height: 0;
+	}
+
+	.nax-rich-text-node__li {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+
+	.nax-rich-text-node__marker {
+		color: #6b7076;
+		margin-right: 4px;
+	}
+
+	.nax-rich-text-node__li-body {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.nax-rich-text-node__tr {
+		flex-direction: row;
+		align-items: stretch;
+	}
+
+	.nax-rich-text-node__cell {
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+
+	/* 视频封面卡片：绝对定位盖在常驻 video 之上，宽高圆角由 styleText 提供，封面铺满，点击整卡开始播放 */
+	.nax-rich-text-node__video-card {
+		position: absolute;
+		left: 0;
+		top: 0;
+		z-index: 1;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
+
+	.nax-rich-text-node__video-cover {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	/* 无封面 / 封面加载失败时的占位：比主题色浅一档 */
+	.nax-rich-text-node__video-cover-fallback {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+	}
+
+	/* 播放三角形视觉重心偏左，右移 1px 修正观感 */
+	.nax-rich-text-node__video-btn {
+		width: 48px;
+		height: 48px;
+		border-radius: 24px;
+		background-color: rgba(0, 0, 0, 0.3);
+		align-items: center;
+		justify-content: center;
+		padding-left: 2px;
+	}
+
+	.nax-rich-text-node__video-wrap {
+		position: relative;
+		margin-bottom: 12px;
+	}
+
+	/* 加载圆钮：与播放按钮同尺寸同风格，内容为旋转 loading（nax-loading 内部处理各端旋转） */
+	.nax-rich-text-node__video-loading {
+		width: 48px;
+		height: 48px;
+		border-radius: 24px;
+		background-color: rgba(0, 0, 0, 0.3);
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-rich-text-node__media-card {
+		flex-direction: row;
+		align-items: center;
+		padding: 10px 12px;
+		margin-bottom: 12px;
+		background-color: #f7f8fa;
+		border-radius: 4px;
+	}
+
+	.nax-rich-text-node__media-icon {
+		color: #18a058;
+		font-size: 15px;
+		margin-right: 8px;
+	}
+
+	.nax-rich-text-node__media-text {
+		color: #6b7076;
+		font-size: 13px;
+	}
+
+	.nax-rich-text-node__audio {
+		flex-direction: row;
+		align-items: center;
+		padding: 10px 12px;
+		margin-bottom: 12px;
+		background-color: #f7f8fa;
+		border-radius: 8px;
+	}
+
+	.nax-rich-text-node__audio-cover {
+		position: relative;
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		margin-right: 10px;
+	}
+
+	.nax-rich-text-node__audio-cover-img {
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+	}
+
+	/* 无封面 / 封面加载失败时的占位：比主题色浅一档 */
+	.nax-rich-text-node__audio-cover-fallback {
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+	}
+
+	.nax-rich-text-node__audio-btn {
+		position: absolute;
+		left: 8px;
+		top: 8px;
+		width: 32px;
+		height: 32px;
+		border-radius: 16px;
+		background-color: rgba(0, 0, 0, 0.3);
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* 播放态：三角形视觉重心偏左，右移 1px 修正观感（暂停态双竖条对称，不偏移） */
+	.nax-rich-text-node__audio-btn--play {
+		padding-left: 2px;
+	}
+
+	.nax-rich-text-node__audio-main {
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.nax-rich-text-node__audio-title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		margin-bottom: 6px;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙端兜底：flex 子项定宽裁剪保证单行省略（同 nax-text 先例）；行数由 :max-lines 属性承担 */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-rich-text-node__audio-control {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-rich-text-node__audio-slider {
+		flex: 1;
+	}
+
+	/* 蒸汽（vapor）模式下 slider 的颜色/尺寸属性被忽略，以下三个 class 仅鸿蒙 Vapor 端生效 */
+	.nax-rich-text-node__audio-slider-track {
+		background-color: #e2e4ea;
+	}
+
+	.nax-rich-text-node__audio-slider-track-active {
+		background-color: #18a058;
+	}
+
+	.nax-rich-text-node__audio-slider-thumb {
+		width: 12px;
+		height: 12px;
+		border-radius: 6px;
+		background-color: #ffffff;
+	}
+
+	.nax-rich-text-node__audio-time {
+		font-size: 11px;
+		color: #6b7076;
+		margin-left: 8px;
+	}
+</style>

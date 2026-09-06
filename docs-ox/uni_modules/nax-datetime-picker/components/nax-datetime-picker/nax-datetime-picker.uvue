@@ -1,0 +1,2192 @@
+<template>
+	<view class="nax-datetime-picker" :class="rootClass">
+		<!-- #ifdef MP-WEIXIN -->
+		<!-- 微信小程序可映射模式（date/year/year-month/time 无秒）：系统弹层 picker，贴合微信原生 UI -->
+		<picker
+			v-if="mpShowSystemPicker"
+			:mode="mpPickerMode"
+			:fields="mpPickerFields"
+			:value="mpPickerValue"
+			:start="mpStartValue"
+			:end="mpEndValue"
+			:disabled="disabled"
+			:header-text="title"
+			@change="onMpChange"
+			@cancel="onMpCancel"
+		>
+			<view class="nax-datetime-picker__trigger" :class="triggerClass" :hover-class="triggerHoverClass" :hover-start-time="20" :hover-stay-time="70">
+				<slot name="trigger">
+					<text class="nax-datetime-picker__trigger-text" :max-lines="1" :class="triggerTextClass">{{ triggerDisplayText }}</text>
+					<view
+						v-if="showMpClear"
+						class="nax-datetime-picker__trigger-clear"
+						@touchstart.stop.prevent="onMpClear"
+						@click.stop.prevent="onMpClear"
+					>
+						<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+					</view>
+					<view v-else class="nax-datetime-picker__trigger-arrow">
+						<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+					</view>
+				</slot>
+			</view>
+		</picker>
+		<!-- #endif -->
+
+		<!-- 自建弹层分支：非微信端全部；微信端仅 datetime / month-day / time+秒 等不可映射模式 -->
+		<view v-if="!mpShowSystemPicker" class="nax-datetime-picker__legacy">
+		<view
+			v-if="showTrigger"
+			class="nax-datetime-picker__trigger"
+			:class="triggerClass"
+			:hover-class="triggerHoverClass"
+			:hover-start-time="20"
+			:hover-stay-time="70"
+			@click="onTriggerClick"
+		>
+				<slot name="trigger">
+					<text class="nax-datetime-picker__trigger-text" :max-lines="1" :class="triggerTextClass" @click="onTriggerClick">{{ triggerDisplayText }}</text>
+					<view
+						v-if="showClear"
+						class="nax-datetime-picker__trigger-clear"
+						@touchstart.stop.prevent="onClear"
+						@click.stop.prevent="onClear"
+					>
+						<nax-icon name="close" :size="actionIconSizePx" :color="actionIconColor"></nax-icon>
+					</view>
+					<view v-if="!showClear" class="nax-datetime-picker__trigger-arrow">
+						<nax-icon name="chevron-down" :size="actionIconSizePx" :color="arrowColor"></nax-icon>
+					</view>
+				</slot>
+		</view>
+
+		<view v-if="rootMounted" class="nax-datetime-picker__root" :style="rootOverlayStyle">
+			<view
+				class="nax-datetime-picker__mask"
+				:class="maskClass"
+				:style="maskStyle"
+				@click="onMaskClick"
+			></view>
+			<view class="nax-datetime-picker__panel-layer">
+				<nax-transition
+					:show="panelShow"
+					name="slide-up"
+					:duration="ANIM_DURATION"
+					@after-leave="onOverlayLeave"
+				>
+					<view class="nax-datetime-picker__panel" :class="panelClass" :style="panelStyle">
+						<view class="nax-datetime-picker__header">
+							<view
+								class="nax-datetime-picker__btn nax-datetime-picker__btn--cancel"
+								:hover-class="btnHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click.stop="onCancel"
+							>
+								<text class="nax-datetime-picker__btn-text" :style="cancelTextStyle" @click.stop="onCancel">{{ cancelTextValue }}</text>
+							</view>
+							<view class="nax-datetime-picker__title-wrap">
+								<text v-if="title.length > 0" class="nax-datetime-picker__title" :max-lines="1">{{ title }}</text>
+							</view>
+							<view
+								class="nax-datetime-picker__btn nax-datetime-picker__btn--confirm"
+								:hover-class="btnHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click.stop="onConfirm"
+							>
+								<text class="nax-datetime-picker__btn-text nax-datetime-picker__btn-text--confirm" :style="confirmTextStyle" @click.stop="onConfirm">{{ confirmTextValue }}</text>
+							</view>
+						</view>
+
+						<!-- #ifdef APP-IOS || APP-ANDROID -->
+						<!-- iOS/Android 上 border-color 不生效（退化黑色），标题分割线用 inline 背景色线 -->
+						<view class="nax-datetime-picker__header-line" :style="headerLineStyle"></view>
+						<!-- #endif -->
+
+						<view class="nax-datetime-picker__body">
+							<!-- #ifdef APP-IOS -->
+							<!-- iOS 自研滚轮：原生 picker-view 列 CSS 不生效（初始值错位/文字不居中）且挂载定位动画卡顿，改用框架渲染滚轮 -->
+							<view v-if="readyToRender" class="nax-datetime-picker__wheel">
+								<view
+									v-for="idx in wheelCols"
+									:key="'wc-' + idx.toString()"
+									class="nax-datetime-picker__wheel-col-wrap"
+								>
+									<view class="nax-datetime-picker__wheel-indicator">
+										<view class="nax-datetime-picker__wheel-indicator-line" :style="wheelIndicatorLineStyle"></view>
+										<view class="nax-datetime-picker__wheel-indicator-line" :style="wheelIndicatorLineStyle"></view>
+									</view>
+									<scroll-view
+										:id="wheelColId(idx)"
+										class="nax-datetime-picker__wheel-col"
+										direction="vertical"
+										:bounces="false"
+										:show-scrollbar="false"
+										@scrollend="onWheelEnd(idx)"
+									>
+										<view class="nax-datetime-picker__wheel-track">
+											<view
+												v-for="(label, i) in wheelItems(idx)"
+												:key="'wi-' + idx.toString() + '-' + i.toString()"
+												class="nax-datetime-picker__wheel-item"
+												:class="wheelItemClassAt(idx, i)"
+												@click="onWheelTap(idx, i)"
+											>
+												<text class="nax-datetime-picker__wheel-text" :max-lines="1" :class="wheelTextClassAt(idx, i)">{{ label }}</text>
+											</view>
+										</view>
+									</scroll-view>
+								</view>
+							</view>
+							<!-- #endif -->
+							<!-- #ifndef APP-IOS -->
+							<!-- #ifdef APP-ANDROID || APP-HARMONY -->
+							<picker-view
+								v-if="readyToRender"
+								:key="pickerRenderKey"
+								class="nax-datetime-picker__picker"
+								:class="pickerClass"
+								:style="pickerWheelStyle"
+								:value="pickerValue"
+								:indicator-style="indicatorStyle"
+								:mask-style="pickerMaskStyle"
+								:mask-top-style="pickerMaskTopStyle"
+								:mask-bottom-style="pickerMaskBottomStyle"
+								@change="onColumnChange"
+								@pickstart="onPickStart"
+								@pickend="onPickEnd"
+							>
+							<!-- #endif -->
+							<!-- #ifndef APP-ANDROID || APP-HARMONY -->
+							<picker-view
+								v-if="readyToRender"
+								:key="pickerRenderKey"
+								class="nax-datetime-picker__picker"
+								:class="pickerClass"
+								:style="pickerWheelStyle"
+								:value="pickerValue"
+								:indicator-style="indicatorStyle"
+								:mask-style="pickerMaskStyle"
+								@change="onColumnChange"
+								@pickstart="onPickStart"
+								@pickend="onPickEnd"
+							>
+							<!-- #endif -->
+								<!-- #ifdef APP-HARMONY -->
+								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column0"
+										:key="'h0-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(0, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column1"
+										:key="'h1-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(1, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column2"
+										:key="'h2-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(2, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column3"
+										:key="'h3-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(3, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column4"
+										:key="'h4-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(4, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(4, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
+									<view
+										v-for="(item, index) in column5"
+										:key="'h5-' + index.toString() + '-' + item.toString()"
+										class="nax-datetime-picker__item nax-datetime-picker__item--no-tap"
+										hover-class="none"
+										@click.stop.prevent="onWheelItemClickBlock"
+									>
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(5, index)" @click.stop.prevent="onWheelItemClickBlock">{{ formatColLabel(5, item) }}</text>
+									</view>
+								</picker-view-column>
+								<!-- #endif -->
+
+								<!-- #ifndef APP-HARMONY -->
+								<picker-view-column v-if="columnNum > 0" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column0" :key="'c0-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(0, index)">{{ formatColLabel(0, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 1" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column1" :key="'c1-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(1, index)">{{ formatColLabel(1, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 2" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column2" :key="'c2-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(2, index)">{{ formatColLabel(2, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 3" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column3" :key="'c3-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(3, index)">{{ formatColLabel(3, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 4" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column4" :key="'c4-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(4, index)">{{ formatColLabel(4, item) }}</text>
+									</view>
+								</picker-view-column>
+								<picker-view-column v-if="columnNum > 5" class="nax-datetime-picker__column">
+									<view v-for="(item, index) in column5" :key="'c5-' + index.toString() + '-' + item.toString()" class="nax-datetime-picker__item">
+										<text class="nax-datetime-picker__item-text" :max-lines="1" :class="pickerItemTextClass(5, index)">{{ formatColLabel(5, item) }}</text>
+									</view>
+								</picker-view-column>
+								<!-- #endif -->
+							</picker-view>
+							<!-- #endif -->
+						</view>
+					</view>
+				</nax-transition>
+			</view>
+		</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-datetime-picker
+	 * @description 时间选择器（底部弹层 + picker-view）。对齐  DatetimePicker 主能力。
+	 * @property {boolean} show v-model:show 弹层显隐；微信小程序端系统弹层模式不生效（点触发条弹出，自动回写 false）
+	 * @property {number|string} modelValue v-model 选中值（时间戳 ms，或日期时间字符串）
+	 * @property {string} mode datetime | date | time | year-month | year | month-day；微信小程序端 datetime / month-day / time + show-second 无法映射系统弹层，保持自建弹层
+	 * @property {number|string} minDate / maxDate 可选范围（时间戳或 YYYY-MM-DD[ HH:mm:ss]）；微信小程序端系统弹层模式映射为 start / end
+	 * @property {number} minHour maxHour minMinute maxMinute minSecond maxSecond 时分秒范围；微信小程序端系统弹层 time 模式映射为 start / end
+	 * @property {boolean} showSecond 是否显示秒列（datetime / time）；微信小程序端 time + show-second 退回自建弹层
+	 * @property {boolean} showUnit 列文案是否带单位（年/月/日…）；微信小程序端系统弹层模式不生效（列由微信渲染）
+	 * @property {string} format 触发条/回传 formatted 自定义格式；空则按 mode 默认
+		 * @property {boolean} showTrigger 内置触发条；微信小程序端系统弹层模式始终渲染触发条作为弹层触发区域
+		 * @property {boolean} clearable 触发条有选中值时显示清除按钮，默认 true
+			 * @event update:show / update:modelValue / confirm / cancel / change / open / close
+			 * @event clear 点击触发条清除按钮
+		 * @slot trigger 自定义触发区（需 showTrigger）
+	 */
+	// parts 引擎（解析/换算/clamp/范围/格式化）抽至 datetime-parts.uts，与 nax-ui 的 useDatetimeParts 共用
+	import {
+		pad2,
+		clamp,
+		daysInMonth,
+		makeRange,
+		copyParts,
+		nowParts,
+		partsFromDate,
+		parseAnyToParts,
+		defaultMinParts,
+		defaultMaxParts,
+		partsToTimestamp,
+		compareParts,
+		formatParts,
+		buildFieldList,
+		clampPartsFor,
+		monthRangeFor,
+		dayRangeFor,
+		defaultFormatFor
+	} from './datetime-parts.uts'
+
+	const props = defineProps({
+		show: { type: Boolean, default: false },
+		modelValue: { type: [Number, String], default: 0 as any },
+		mode: { type: String, default: 'datetime' },
+		minDate: { type: [Number, String], default: '' as any },
+		maxDate: { type: [Number, String], default: '' as any },
+		minHour: { type: Number, default: 0 },
+		maxHour: { type: Number, default: 23 },
+		minMinute: { type: Number, default: 0 },
+		maxMinute: { type: Number, default: 59 },
+		minSecond: { type: Number, default: 0 },
+		maxSecond: { type: Number, default: 59 },
+		showSecond: { type: Boolean, default: false },
+		showUnit: { type: Boolean, default: true },
+		title: { type: String, default: '' },
+		confirmText: { type: String, default: '确认' },
+		cancelText: { type: String, default: '取消' },
+		confirmColor: { type: String, default: '' },
+		cancelColor: { type: String, default: '' },
+		maskClosable: { type: Boolean, default: true },
+		maskCloseAble: { type: Boolean, default: true },
+		safeAreaInsetBottom: { type: Boolean, default: true },
+		zIndex: { type: Number, default: 10076 },
+		preserveSelection: { type: Boolean, default: true },
+			showTrigger: { type: Boolean, default: false },
+			clearable: { type: Boolean, default: true },
+			placeholder: { type: String, default: '请选择' },
+		disabled: { type: Boolean, default: false },
+		border: { type: Boolean, default: true },
+		size: { type: String, default: 'md' },
+		format: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'update:modelValue',
+		'confirm',
+		'cancel',
+		'change',
+			'open',
+			'close',
+			'clear'
+		])
+
+	// #ifdef MP-WEIXIN
+	// ===== 微信小程序：系统弹层 picker 实现（date / year / year-month / time 无秒）=====
+	/** 系统 picker 的 mode */
+	const mpPickerMode = computed((): string => {
+		return modeName.value == 'time' ? 'time' : 'date'
+	})
+
+	/** date 模式的粒度 */
+	const mpPickerFields = computed((): string => {
+		const m = modeName.value
+		if (m == 'year') {
+			return 'year'
+		}
+		if (m == 'year-month') {
+			return 'month'
+		}
+		return 'day'
+	})
+
+	/** 系统 picker 当前值（字符串：YYYY-MM-DD / YYYY / YYYY-MM / HH:mm） */
+	const mpPickerValue = ref('')
+
+	/** 触发条清除按钮（微信端始终渲染触发条作为 picker 触发区域） */
+	const showMpClear = computed((): boolean => {
+		if (!props.clearable) {
+			return false
+		}
+		if (props.disabled) {
+			return false
+		}
+		return hasConfirmed.value && confirmedFormatted.value.length > 0
+	})
+
+	/** 范围下限：date 系取 minDate，time 取 minHour:minMinute */
+	const mpStartValue = computed((): string => {
+		if (modeName.value == 'time') {
+			return pad2(props.minHour) + ':' + pad2(props.minMinute)
+		}
+		return mpRangeDate(props.minDate)
+	})
+
+	/** 范围上限：date 系取 maxDate，time 取 maxHour:maxMinute */
+	const mpEndValue = computed((): string => {
+		if (modeName.value == 'time') {
+			return pad2(props.maxHour) + ':' + pad2(props.maxMinute)
+		}
+		return mpRangeDate(props.maxDate)
+	})
+
+	/** minDate / maxDate → 微信 date 模式字符串（按粒度截取） */
+	function mpRangeDate(raw: any): string {
+		if (raw == null || raw == '') {
+			return ''
+		}
+		const parts = clampParts(parseAnyToParts(raw, nowParts()))
+		const m = modeName.value
+		if (m == 'year') {
+			return parts[0].toString()
+		}
+		if (m == 'year-month') {
+			return parts[0].toString() + '-' + pad2(parts[1])
+		}
+		return parts[0].toString() + '-' + pad2(parts[1]) + '-' + pad2(parts[2])
+	}
+
+	/** 按已确认值 / v-model 同步系统 picker 的字符串值 */
+	function mpSyncValue() {
+		let ts = 0
+		if (hasConfirmed.value && confirmedTimestamp.value > 0) {
+			ts = confirmedTimestamp.value
+		} else {
+			const raw = props.modelValue
+			if (raw != null && raw != '' && raw != 0) {
+				const parts = clampParts(parseAnyToParts(raw, nowParts()))
+				ts = partsToTimestamp(parts)
+			}
+		}
+		if (ts <= 0) {
+			ts = Date.now()
+		}
+		const parts = partsFromDate(new Date(ts))
+		const m = modeName.value
+		if (m == 'year') {
+			mpPickerValue.value = parts[0].toString()
+		} else if (m == 'year-month') {
+			mpPickerValue.value = parts[0].toString() + '-' + pad2(parts[1])
+		} else if (m == 'time') {
+			mpPickerValue.value = pad2(parts[3]) + ':' + pad2(parts[4])
+		} else {
+			mpPickerValue.value = parts[0].toString() + '-' + pad2(parts[1]) + '-' + pad2(parts[2])
+		}
+	}
+
+	/** 微信端确认：系统弹层点「确定」后回调，值即最终值 */
+	function onMpChange(e: UniPickerChangeEvent) {
+		const val = e.detail.value
+		if (typeof val != 'string') {
+			return
+		}
+		const s = val as string
+		let parts: number[]
+		const m = modeName.value
+		if (m == 'time') {
+			const hm = s.split(':')
+			const baseTs = confirmedTimestamp.value > 0 ? confirmedTimestamp.value : Date.now()
+			const bp = partsFromDate(new Date(baseTs))
+			parts = [bp[0], bp[1], bp[2], parseInt(hm[0]), parseInt(hm[1]), 0]
+		} else {
+			const ymd = s.split('-')
+			if (m == 'year') {
+				parts = [parseInt(ymd[0]), 1, 1, 0, 0, 0]
+			} else if (m == 'year-month') {
+				parts = [parseInt(ymd[0]), parseInt(ymd[1]), 1, 0, 0, 0]
+			} else {
+				parts = [parseInt(ymd[0]), parseInt(ymd[1]), parseInt(ymd[2]), 0, 0, 0]
+			}
+		}
+		const clamped = clampParts(parts)
+		const ts = partsToTimestamp(clamped)
+		const formatted = formatCurrent(clamped)
+		hasConfirmed.value = true
+		confirmedTimestamp.value = ts
+		confirmedFormatted.value = formatted
+		modelBound.value = true
+		emit('update:modelValue', ts)
+		emit('confirm', buildResult(clamped))
+		emit('change', buildResult(clamped))
+		mpPickerValue.value = s
+	}
+
+	/** 微信端取消 */
+	function onMpCancel() {
+		let parts: number[] = nowParts()
+		if (hasConfirmed.value && confirmedTimestamp.value > 0) {
+			parts = partsFromDate(new Date(confirmedTimestamp.value))
+		}
+		emit('cancel', buildResult(clampParts(parts)))
+	}
+
+	/** 微信端清除 */
+	function onMpClear() {
+		if (props.disabled) {
+			return
+		}
+		if (!hasConfirmed.value) {
+			return
+		}
+		hasConfirmed.value = false
+		confirmedTimestamp.value = 0
+		confirmedFormatted.value = ''
+		modelBound.value = false
+		emit('update:modelValue', 0)
+		emit('clear')
+		mpSyncValue()
+	}
+	// #endif
+
+	const rootMounted = ref(false)
+	const panelShow = ref(false)
+	const readyToRender = ref(false)
+	const pickerRenderKey = ref(0)
+	const moving = ref(false)
+	const columnNum = ref(0)
+	const pickerValue = ref([] as number[])
+	const lastSelectIndex = ref([] as number[])
+		const hasConfirmed = ref(false)
+		const confirmedTimestamp = ref(0)
+		const confirmedFormatted = ref('')
+		/** 外部 v-model 曾经有过非空值；用于区分「未绑定 / 默认 0」与「绑定后清空」 */
+		const modelBound = ref(false)
+	const currentParts = ref([0, 0, 0, 0, 0, 0] as number[])
+	const safeBottomPx = ref(0)
+	const ANIM_DURATION = 280
+	let openDelayTimer: number = -1
+	/** 程序化改列/下标时忽略 change，避免鸿蒙 remount 死循环 */
+	let suppressPickerEvent: boolean = false
+	let suppressTimer: number = -1
+	const clearSuppress = ref(false)
+	let clearButtonSuppressTimer: number = -1
+
+	const column0 = ref([] as number[])
+	const column1 = ref([] as number[])
+	const column2 = ref([] as number[])
+	const column3 = ref([] as number[])
+	const column4 = ref([] as number[])
+	const column5 = ref([] as number[])
+	const fieldTypes = ref([] as string[])
+
+	// #ifdef APP-IOS
+	// iOS 自研滚轮：原生 picker-view 列 CSS 不生效且挂载定位动画卡顿，改用框架渲染滚轮（scrollTo 直接定位）
+	const WHEEL_ITEM_H = 40
+	const WHEEL_PAD_ITEMS = 3
+	const wheelBaseId = 'nax-dtp-w-' + Math.floor(Math.random() * 10000000).toString()
+	const wheelIndexes = ref([] as number[])
+	/** 挂载/定位期间忽略 scrollend，防止初始位置反推污染选中值 */
+	let wheelLocked: boolean = false
+	let wheelLocateTimer: number = -1
+	let wheelUnlockTimer: number = -1
+	// #endif
+
+	// #ifdef APP-IOS || APP-ANDROID
+	// App 端自定义 CSS 变量不可靠（var 声明失效：iOS 弹窗背景透明、Android 原生 picker 文字退系统默认色，
+	// 深色模式下白字白底不可见），用官方主题 API 驱动字面量颜色
+	const darkTheme = ref(false)
+	let themeChangeId: number = -1
+
+	function refreshTheme() {
+		try {
+			const info = uni.getAppBaseInfo()
+			const t = info.appTheme
+			if (t == 'dark' || t == 'light') {
+				darkTheme.value = t == 'dark'
+				return
+			}
+		} catch (e) {
+		}
+		try {
+			const dev = uni.getDeviceInfo()
+			if (dev.osTheme == 'dark') {
+				darkTheme.value = true
+			}
+		} catch (e) {
+		}
+	}
+
+	const themeClass = computed((): string => {
+		let cls = ''
+		// #ifdef APP-IOS
+		cls += darkTheme.value ? ' nax-datetime-picker--ios-dark' : ' nax-datetime-picker--ios-light'
+		// #endif
+		// #ifdef APP-ANDROID
+		cls += darkTheme.value ? ' nax-datetime-picker--android-dark' : ' nax-datetime-picker--android-light'
+		// #endif
+		return cls
+	})
+	// #endif
+
+	function normalizeMode(value: string): string {
+		if (value == 'date') return 'date'
+		if (value == 'time') return 'time'
+		if (value == 'year-month' || value == 'yearmonth') return 'year-month'
+		if (value == 'year') return 'year'
+		if (value == 'month-day' || value == 'monthday') return 'month-day'
+		return 'datetime'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') return 'sm'
+		if (value == 'lg' || value == 'large') return 'lg'
+		return 'md'
+	}
+
+	const modeName = computed((): string => normalizeMode(props.mode))
+	const sizeName = computed((): string => normalizeSize(props.size))
+
+	/** 微信端是否启用系统 picker（非微信端恒 false） */
+	const mpShowSystemPicker = computed((): boolean => {
+		// #ifdef MP-WEIXIN
+		const m = modeName.value
+		if (m == 'datetime') {
+			return false
+		}
+		if (m == 'month-day') {
+			return false
+		}
+		if (m == 'time' && props.showSecond) {
+			return false
+		}
+		return true
+		// #endif
+		// #ifndef MP-WEIXIN
+		return false
+		// #endif
+	})
+
+	const cancelTextValue = computed((): string => {
+		if (props.cancelText.length > 0) return props.cancelText
+		return '取消'
+	})
+
+	const confirmTextValue = computed((): string => {
+		if (props.confirmText.length > 0) return props.confirmText
+		return '确认'
+	})
+
+	const canCloseByMask = computed((): boolean => props.maskClosable && props.maskCloseAble)
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		// #ifdef APP-IOS || APP-ANDROID
+		// App 端主题 class：样式块内按字面量覆盖弹窗内颜色（不依赖 CSS 变量）
+		cls += themeClass.value
+		// #endif
+		if (props.customClass.length > 0) cls += ' ' + props.customClass
+		return cls.trim()
+	})
+
+	const triggerClass = computed((): string => {
+		let cls = 'nax-datetime-picker__trigger--' + sizeName.value
+		if (props.border) cls += ' nax-datetime-picker__trigger--border'
+		if (props.disabled) cls += ' nax-datetime-picker__trigger--disabled'
+		return cls
+	})
+
+	const triggerHoverClass = computed((): string => {
+		if (props.disabled) return ''
+		return 'nax-datetime-picker__trigger--hover'
+	})
+
+	const btnHoverClass = computed((): string => 'nax-datetime-picker__btn--hover')
+
+	const triggerTextClass = computed((): string => {
+		if (!hasConfirmed.value || confirmedFormatted.value.length == 0) {
+			return 'nax-datetime-picker__trigger-text--placeholder'
+		}
+		if (props.disabled) return 'nax-datetime-picker__trigger-text--disabled'
+		return ''
+	})
+
+		const triggerDisplayText = computed((): string => {
+			if (!hasConfirmed.value || confirmedFormatted.value.length == 0) return props.placeholder
+			return confirmedFormatted.value
+		})
+	
+		const showClear = computed((): boolean => {
+			if (!props.clearable) return false
+			if (!props.showTrigger) return false
+			if (props.disabled) return false
+			return hasConfirmed.value && confirmedFormatted.value.length > 0
+		})
+
+		/** 触发条操作图标（清除/箭头）对齐 nax-input：随 size 缩放，保证切换时位置重合 */
+		const actionIconSizePx = computed((): string => {
+			if (sizeName.value == 'sm') return '14'
+			if (sizeName.value == 'lg') return '18'
+			return '16'
+		})
+
+		const actionIconColor = computed((): string => {
+			// App（含蒸汽）：与 nax-input 一致，主题状态由 custom-class 传递，字面量色驱动
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			if (props.customClass.indexOf('nax-theme-dark') >= 0) {
+				return props.disabled ? '#ffffff4d' : '#ffffffa6'
+			}
+			// #endif
+			return props.disabled ? '#e5e5ea' : '#767c82'
+		})
+
+	const arrowColor = computed((): string => {
+		if (props.disabled) return 'var(--nax-color-text-disabled, #e5e5ea)'
+		return 'var(--nax-color-text-secondary, #767c82)'
+	})
+
+	const cancelTextStyle = computed((): string => {
+		if (props.cancelColor.length > 0) return 'color:' + props.cancelColor + ';'
+		return ''
+	})
+
+	const confirmTextStyle = computed((): string => {
+		if (moving.value) {
+			if (props.cancelColor.length > 0) return 'color:' + props.cancelColor + ';'
+			return 'color:var(--nax-color-text-disabled, #e5e5ea);'
+		}
+		if (props.confirmColor.length > 0) return 'color:' + props.confirmColor + ';'
+		return 'color:var(--nax-color-primary, #18a058);'
+	})
+
+	const rootOverlayStyle = computed((): string => 'z-index:' + props.zIndex.toString() + ';')
+
+	const maskClass = computed((): string => {
+		if (panelShow.value) return 'nax-datetime-picker__mask--show'
+		return ''
+	})
+
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (panelShow.value) return 'background-color:rgba(0,0,0,0.45);opacity:1;'
+		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
+		// #endif
+		// #ifdef APP-IOS
+		if (panelShow.value) return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
+		return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
+		// #endif
+		// #ifdef APP-ANDROID
+		if (panelShow.value) return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:1;'
+		return 'background-color:' + (darkTheme.value ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)') + ';opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY || APP-IOS || APP-ANDROID
+		return ''
+		// #endif
+	})
+
+	const panelClass = computed((): string => {
+		if (props.safeAreaInsetBottom) return 'nax-datetime-picker__panel--safe'
+		return ''
+	})
+
+	const panelStyle = computed((): string => {
+		let style = ''
+		// #ifdef APP-IOS
+		// iOS 不支持自定义 CSS 变量（var 声明整体失效→背景透明），用官方主题 API 驱动的字面量兜底
+		style += 'background-color:' + (darkTheme.value ? '#101014' : '#ffffff') + ';'
+		// #endif
+		// #ifdef APP-ANDROID
+		// Android 同样不支持自定义 CSS 变量，面板底色用字面量兜底
+		style += 'background-color:' + (darkTheme.value ? '#101014' : '#ffffff') + ';'
+		// #endif
+		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+			style += 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+		}
+		return style
+	})
+
+	const indicatorStyle = computed((): string => {
+		// #ifdef APP-ANDROID
+		// Android 原生 picker-view 不会为已设置宽度的边框补默认 solid 样式；var 在 Android 失效，用字面量颜色按主题兜底
+		const dividerColor = darkTheme.value ? '#ffffff1a' : '#f5f5f7'
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-top-style:solid;border-top-color:' + dividerColor + ';border-bottom-width:1px;border-bottom-style:solid;border-bottom-color:' + dividerColor + ';'
+		// #endif
+		// #ifndef APP-ANDROID
+		return 'height:40px;background-color:transparent;border-top-width:1px;border-bottom-width:1px;border-color:var(--nax-color-divider,#f5f5f7);'
+		// #endif
+	})
+
+	const pickerMaskStyle = computed((): string => {
+		// #ifdef APP-ANDROID || APP-HARMONY
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID || APP-HARMONY
+		return 'background:none;'
+		// #endif
+	})
+
+	const pickerMaskTopStyle = computed((): string => {
+		// Android / 鸿蒙需分别覆盖原生上下遮罩，避免白色渐变覆盖暗色面板。
+		return 'background-image:linear-gradient(to bottom,transparent,transparent);'
+	})
+
+	const pickerMaskBottomStyle = computed((): string => {
+		return 'background-image:linear-gradient(to top,transparent,transparent);'
+	})
+
+	const pickerWheelStyle = computed((): string => {
+		// 原生 picker-view 高度需内联显式指定（App 蒸汽/VDOM 下 CSS height 均不可靠，曾出现只显示一条选项高度）
+		return 'flex:1;height:240px;'
+	})
+
+	function isPickerItemSelected(columnIndex: number, itemIndex: number): boolean {
+		if (columnIndex < 0 || columnIndex >= pickerValue.value.length) {
+			return false
+		}
+		return pickerValue.value[columnIndex] == itemIndex
+	}
+
+	function pickerItemTextClass(columnIndex: number, itemIndex: number): string {
+		if (isPickerItemSelected(columnIndex, itemIndex)) {
+			return 'nax-datetime-picker__item-text--selected'
+		}
+		return ''
+	}
+
+	const pickerClass = computed((): string => {
+		// #ifdef APP-HARMONY
+		return 'nax-datetime-picker__picker--harmony'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	// pad2/clamp/daysInMonth/makeRange/copyParts/nowParts/partsFromDate/parseAnyToParts/
+	// defaultMinParts/defaultMaxParts 已抽至 datetime-parts.uts
+
+	function minBoundParts(): number[] {
+		if (props.minDate == null || props.minDate == '' || props.minDate == 0) {
+			const base = defaultMinParts()
+			if (modeName.value == 'time') {
+				base[3] = clamp(props.minHour, 0, 23)
+				base[4] = clamp(props.minMinute, 0, 59)
+				base[5] = clamp(props.minSecond, 0, 59)
+			}
+			return base
+		}
+		const p = parseAnyToParts(props.minDate, defaultMinParts())
+		if (modeName.value == 'time') {
+			p[3] = clamp(props.minHour, 0, 23)
+			p[4] = clamp(props.minMinute, 0, 59)
+			p[5] = clamp(props.minSecond, 0, 59)
+		}
+		return p
+	}
+
+	function maxBoundParts(): number[] {
+		if (props.maxDate == null || props.maxDate == '' || props.maxDate == 0) {
+			const base = defaultMaxParts()
+			if (modeName.value == 'time') {
+				base[3] = clamp(props.maxHour, 0, 23)
+				base[4] = clamp(props.maxMinute, 0, 59)
+				base[5] = clamp(props.maxSecond, 0, 59)
+			}
+			return base
+		}
+		const p = parseAnyToParts(props.maxDate, defaultMaxParts())
+		if (modeName.value == 'time') {
+			p[3] = clamp(props.maxHour, 0, 23)
+			p[4] = clamp(props.maxMinute, 0, 59)
+			p[5] = clamp(props.maxSecond, 0, 59)
+		}
+		return p
+	}
+
+	function getFieldList(mode: string): string[] {
+		return buildFieldList(mode, props.showSecond)
+	}
+
+	function partsToTimestamp(parts: number[]): number {
+		const y = parts[0]
+		const m = parts[1]
+		const d = parts[2]
+		const h = parts[3]
+		const mi = parts[4]
+		const s = parts[5]
+		const date = new Date(y, m - 1, d, h, mi, s)
+		const t = date.getTime()
+		if (t != t) return 0
+		return t
+	}
+
+	function compareParts(a: number[], b: number[]): number {
+		let i = 0
+		while (i < 6) {
+			if (a[i] < b[i]) return -1
+			if (a[i] > b[i]) return 1
+			i++
+		}
+		return 0
+	}
+
+	function clampParts(parts: number[]): number[] {
+		return clampPartsFor(parts, minBoundParts(), maxBoundParts())
+	}
+
+	function yearRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		return makeRange(minP[0], maxP[0])
+	}
+
+	function monthRange(parts: number[]): number[] {
+		return monthRangeFor(parts, minBoundParts(), maxBoundParts())
+	}
+
+	function dayRange(parts: number[]): number[] {
+		return dayRangeFor(parts, minBoundParts(), maxBoundParts())
+	}
+
+	function hourRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = clamp(props.minHour, 0, 23)
+		let end = clamp(props.maxHour, 0, 23)
+		if (modeName.value != 'time') {
+			start = 0
+			end = 23
+			const sameMinDay = parts[0] == minP[0] && parts[1] == minP[1] && parts[2] == minP[2]
+			const sameMaxDay = parts[0] == maxP[0] && parts[1] == maxP[1] && parts[2] == maxP[2]
+			if (sameMinDay) start = minP[3]
+			if (sameMaxDay) end = maxP[3]
+		}
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function minuteRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = clamp(props.minMinute, 0, 59)
+		let end = clamp(props.maxMinute, 0, 59)
+		if (modeName.value != 'time') {
+			start = 0
+			end = 59
+			const sameMinHour = parts[0] == minP[0] && parts[1] == minP[1] && parts[2] == minP[2] && parts[3] == minP[3]
+			const sameMaxHour = parts[0] == maxP[0] && parts[1] == maxP[1] && parts[2] == maxP[2] && parts[3] == maxP[3]
+			if (sameMinHour) start = minP[4]
+			if (sameMaxHour) end = maxP[4]
+		}
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function secondRange(parts: number[]): number[] {
+		const minP = minBoundParts()
+		const maxP = maxBoundParts()
+		let start = clamp(props.minSecond, 0, 59)
+		let end = clamp(props.maxSecond, 0, 59)
+		if (modeName.value != 'time') {
+			start = 0
+			end = 59
+			const sameMinMin = parts[0] == minP[0] && parts[1] == minP[1] && parts[2] == minP[2] && parts[3] == minP[3] && parts[4] == minP[4]
+			const sameMaxMin = parts[0] == maxP[0] && parts[1] == maxP[1] && parts[2] == maxP[2] && parts[3] == maxP[3] && parts[4] == maxP[4]
+			if (sameMinMin) start = minP[5]
+			if (sameMaxMin) end = maxP[5]
+		}
+		if (start > end) start = end
+		return makeRange(start, end)
+	}
+
+	function setColumnList(colIndex: number, list: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < list.length) {
+			next.push(list[i])
+			i++
+		}
+		if (colIndex == 0) column0.value = next
+		else if (colIndex == 1) column1.value = next
+		else if (colIndex == 2) column2.value = next
+		else if (colIndex == 3) column3.value = next
+		else if (colIndex == 4) column4.value = next
+		else if (colIndex == 5) column5.value = next
+	}
+
+	function getColumnList(colIndex: number): number[] {
+		if (colIndex == 0) return column0.value
+		if (colIndex == 1) return column1.value
+		if (colIndex == 2) return column2.value
+		if (colIndex == 3) return column3.value
+		if (colIndex == 4) return column4.value
+		if (colIndex == 5) return column5.value
+		return [] as number[]
+	}
+
+	function clearExtraColumns(from: number) {
+		let i = from
+		while (i < 6) {
+			setColumnList(i, [] as number[])
+			i++
+		}
+	}
+
+	function rangeForField(field: string, parts: number[]): number[] {
+		if (field == 'year') return yearRange(parts)
+		if (field == 'month') return monthRange(parts)
+		if (field == 'day') return dayRange(parts)
+		if (field == 'hour') return hourRange(parts)
+		if (field == 'minute') return minuteRange(parts)
+		if (field == 'second') return secondRange(parts)
+		return [] as number[]
+	}
+
+	function fieldIndex(field: string): number {
+		if (field == 'year') return 0
+		if (field == 'month') return 1
+		if (field == 'day') return 2
+		if (field == 'hour') return 3
+		if (field == 'minute') return 4
+		if (field == 'second') return 5
+		return 0
+	}
+
+	function indexOfValue(list: number[], value: number): number {
+		let i = 0
+		while (i < list.length) {
+			if (list[i] == value) return i
+			i++
+		}
+		if (list.length == 0) return 0
+		return 0
+	}
+
+	function unitOf(field: string): string {
+		if (!props.showUnit) return ''
+		if (field == 'year') return '年'
+		if (field == 'month') return '月'
+		if (field == 'day') return '日'
+		if (field == 'hour') return '时'
+		if (field == 'minute') return '分'
+		if (field == 'second') return '秒'
+		return ''
+	}
+
+	function formatColLabel(colIndex: number, value: number): string {
+		if (colIndex < 0 || colIndex >= fieldTypes.value.length) return value.toString()
+		const field = fieldTypes.value[colIndex]
+		const unit = unitOf(field)
+		if (field == 'year') return value.toString() + unit
+		if (field == 'month' || field == 'day') return value.toString() + unit
+		return pad2(value) + unit
+	}
+
+	function defaultFormatByMode(mode: string): string {
+		return defaultFormatFor(mode, props.showSecond)
+	}
+
+	function formatParts(parts: number[], pattern: string): string {
+		let out = pattern
+		out = out.replace('YYYY', parts[0].toString())
+		out = out.replace('MM', pad2(parts[1]))
+		out = out.replace('DD', pad2(parts[2]))
+		out = out.replace('HH', pad2(parts[3]))
+		out = out.replace('mm', pad2(parts[4]))
+		out = out.replace('ss', pad2(parts[5]))
+		// single tokens without pad for rare cases
+		out = out.replace('M', parts[1].toString())
+		out = out.replace('D', parts[2].toString())
+		return out
+	}
+
+	function formatCurrent(parts: number[]): string {
+		const pattern = props.format.length > 0 ? props.format : defaultFormatByMode(modeName.value)
+		return formatParts(parts, pattern)
+	}
+
+	function clearSuppressTimer() {
+		if (suppressTimer >= 0) {
+			clearTimeout(suppressTimer)
+			suppressTimer = -1
+		}
+	}
+
+	function armSuppressPickerEvent() {
+		suppressPickerEvent = true
+		clearSuppressTimer()
+		// #ifdef APP-HARMONY
+		// 鸿蒙：原生 picker 异步回抛 change，抑制窗口略长
+		const delay = 80
+		// #endif
+		// #ifndef APP-HARMONY
+		const delay = 32
+		// #endif
+		suppressTimer = setTimeout(() => {
+			suppressTimer = -1
+			suppressPickerEvent = false
+		}, delay)
+	}
+
+	function clearClearSuppressTimer() {
+		if (clearButtonSuppressTimer >= 0) {
+			clearTimeout(clearButtonSuppressTimer)
+			clearButtonSuppressTimer = -1
+		}
+	}
+
+	function armClearSuppress() {
+		clearSuppress.value = true
+		clearClearSuppressTimer()
+		// 鸿蒙原生 picker 异步回抛事件，清空后的触发条点击需保留短暂抑制窗口。
+		// #ifdef APP-HARMONY
+		const delay = 100
+		// #endif
+		// #ifndef APP-HARMONY
+		const delay = 32
+		// #endif
+		clearButtonSuppressTimer = setTimeout(() => {
+			clearButtonSuppressTimer = -1
+			clearSuppress.value = false
+		}, delay)
+	}
+
+	/**
+	 * 重建列数据（不改 picker key）。
+	 * 滚动 change 中禁止 remount：与 nax-select 一致，避免鸿蒙闪 0 再跳目标 / 死循环。
+	 */
+/** 对齐 nax-select.syncPickerValue：只在列数据就绪后写一次下标 */
+	function syncPickerValue(selector: number[]) {
+		const next = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			let idx = i < selector.length ? selector[i] : 0
+			if (idx < 0) {
+				idx = 0
+			}
+			if (col.length > 0 && idx >= col.length) {
+				idx = col.length - 1
+			}
+			next.push(idx)
+			i++
+		}
+		armSuppressPickerEvent()
+		pickerValue.value = next
+		lastSelectIndex.value = next.slice()
+	}
+
+	function rebuildColumns(partsIn: number[], remount: boolean) {
+		const mode = modeName.value
+		const fields = getFieldList(mode)
+		fieldTypes.value = fields
+		columnNum.value = fields.length
+		let parts = clampParts(partsIn)
+
+		let c = 0
+		while (c < fields.length) {
+			const field = fields[c]
+			const range = rangeForField(field, parts)
+			const fi = fieldIndex(field)
+			if (range.length > 0) {
+				const idx = indexOfValue(range, parts[fi])
+				const picked = range[idx]
+				parts[fi] = picked
+			}
+			setColumnList(c, range)
+			c++
+		}
+		clearExtraColumns(fields.length)
+
+		const selector = [] as number[]
+		c = 0
+		while (c < fields.length) {
+			const field = fields[c]
+			const range = getColumnList(c)
+			const fi = fieldIndex(field)
+			selector.push(indexOfValue(range, parts[fi]))
+			c++
+		}
+
+		currentParts.value = parts
+		// 对齐 nax-select：若 remount，先换 key，再写入 value，避免挂载后二次改 value 触发滚动画
+		if (remount) {
+			pickerRenderKey.value = pickerRenderKey.value + 1
+		}
+		syncPickerValue(selector)
+	}
+
+	// #ifdef APP-IOS || APP-ANDROID
+	/** iOS/Android：分割线用官方主题 API 驱动的字面量 inline 背景色（App 端 var 声明失效） */
+	const headerLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (darkTheme.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+	// #endif
+
+	// #ifdef APP-IOS
+	// ===== iOS 自研滚轮逻辑（框架渲染，CSS 完全可控）=====
+
+	const wheelIndicatorLineStyle = computed((): string => {
+		return 'height:1px;background-color:' + (darkTheme.value ? '#ffffff1a' : '#f5f5f7') + ';'
+	})
+
+	function wheelColId(colIndex: number): string {
+		return wheelBaseId + '-' + colIndex.toString()
+	}
+
+	const wheelCols = computed((): number[] => {
+		const out = [] as number[]
+		var i = 0
+		while (i < columnNum.value) {
+			out.push(i)
+			i++
+		}
+		return out
+	})
+
+	function wheelItems(colIndex: number): string[] {
+		const col = getColumnList(colIndex)
+		const total = col.length + WHEEL_PAD_ITEMS * 2
+		const items = [] as string[]
+		var i = 0
+		while (i < total) {
+			const real = i - WHEEL_PAD_ITEMS
+			if (real >= 0 && real < col.length) {
+				items.push(formatColLabel(colIndex, col[real]))
+			} else {
+				items.push('')
+			}
+			i++
+		}
+		return items
+	}
+
+	function wheelRealIndex(colIndex: number, itemIndex: number): number {
+		return itemIndex - WHEEL_PAD_ITEMS
+	}
+
+	function wheelItemClassAt(colIndex: number, itemIndex: number): string {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		if (real >= 0 && real == wheelIndexes.value[colIndex]) {
+			return 'nax-datetime-picker__wheel-item--selected'
+		}
+		return ''
+	}
+
+	function wheelTextClassAt(colIndex: number, itemIndex: number): string {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		if (real >= 0 && real == wheelIndexes.value[colIndex]) {
+			return 'nax-datetime-picker__wheel-text--selected'
+		}
+		return ''
+	}
+
+	/** 定位列到指定下标（无动画直接跳转，避免原生长距离滚动卡顿） */
+	function locateWheelCol(colIndex: number, index: number) {
+		const el = uni.getElementById(wheelColId(colIndex))
+		if (el == null) {
+			return
+		}
+		const sv = el as UniScrollViewElement
+		// 选中项（content index = WHEEL_PAD_ITEMS + index）对准可视区第 4 行，上方 3 行留白与下方对称
+		const top = index * WHEEL_ITEM_H
+		sv.scrollTo(0, top)
+	}
+
+	/** 按当前选中值定位全部列 */
+	function locateAllWheels() {
+		const fields = fieldTypes.value
+		const next = [] as number[]
+		var c = 0
+		while (c < fields.length) {
+			const col = getColumnList(c)
+			const fi = fieldIndex(fields[c])
+			const idx = indexOfValue(col, currentParts.value[fi])
+			next.push(idx)
+			locateWheelCol(c, idx)
+			c++
+		}
+		wheelIndexes.value = next
+	}
+
+	/** 等所有滚轮列挂载就绪后定位；未就绪则重试（最多 6 次） */
+	function locateWheelsWhenReady(attempt: number) {
+		const fields = fieldTypes.value
+		var c = 0
+		while (c < fields.length) {
+			if (uni.getElementById(wheelColId(c)) == null) {
+				if (attempt < 6) {
+					wheelLocateTimer = setTimeout(() => {
+						wheelLocateTimer = -1
+						locateWheelsWhenReady(attempt + 1)
+					}, 40)
+				}
+				return
+			}
+			c++
+		}
+		wheelLocked = true
+		locateAllWheels()
+		if (wheelUnlockTimer >= 0) {
+			clearTimeout(wheelUnlockTimer)
+		}
+		// scrollTo 触发的 scrollend 为异步派发，等其落地后再解锁
+		wheelUnlockTimer = setTimeout(() => {
+			wheelUnlockTimer = -1
+			wheelLocked = false
+		}, 80)
+	}
+
+	/** 上级列变化后：重建的后续列重新定位 */
+	function relocateFollowingWheels(fromCol: number) {
+		const fields = fieldTypes.value
+		var c = fromCol + 1
+		while (c < fields.length) {
+			const col = getColumnList(c)
+			const fi = fieldIndex(fields[c])
+			const idx = indexOfValue(col, currentParts.value[fi])
+			if (idx != wheelIndexes.value[c]) {
+				const next = wheelIndexes.value.slice()
+				next[c] = idx
+				wheelIndexes.value = next
+			}
+			locateWheelCol(c, idx)
+			c++
+		}
+	}
+
+	/** 列停止后正式生效：联动上级列或更新选中值 */
+	function applyWheelSelection(colIndex: number) {
+		const fields = fieldTypes.value
+		if (colIndex >= fields.length) {
+			return
+		}
+		const parts = copyParts(currentParts.value)
+		const col = getColumnList(colIndex)
+		const idx = wheelIndexes.value[colIndex]
+		if (col.length > 0) {
+			parts[fieldIndex(fields[colIndex])] = col[idx]
+		}
+		if (colIndex < fields.length - 1) {
+			rebuildColumns(parts, false)
+			// 列数据重建会重渲染当前列内容，重新吸附当前位置，防止 iOS 内容重建后 scrollTop 重置
+			locateWheelCol(colIndex, idx)
+			relocateFollowingWheels(colIndex)
+		} else {
+			const clamped = clampParts(parts)
+			currentParts.value = clamped
+		}
+		emit('change', buildResult(currentParts.value))
+	}
+
+	function onWheelEnd(colIndex: number) {
+		// #ifdef APP-IOS
+		// 挂载/程序化定位期间忽略 scrollend，避免初始位置反推污染选中值
+		if (wheelLocked) {
+			return
+		}
+		// #endif
+		const el = uni.getElementById(wheelColId(colIndex))
+		if (el == null) {
+			return
+		}
+		const top = el.scrollTop
+		// 与 locateWheelCol 对齐：选中项居中于可视区第 4 行，反推 idx = scrollTop / 行高
+		var idx = Math.round(top / WHEEL_ITEM_H)
+		const col = getColumnList(colIndex)
+		if (idx < 0) {
+			idx = 0
+		}
+		if (col.length > 0 && idx >= col.length) {
+			idx = col.length - 1
+		}
+		const aligned = Math.abs(top - idx * WHEEL_ITEM_H) <= 1
+		if (!aligned) {
+			// 未对齐：先吸附，吸附后 scrollend 再次进入正式生效分支
+			locateWheelCol(colIndex, idx)
+			return
+		}
+		if (idx != wheelIndexes.value[colIndex]) {
+			const next = wheelIndexes.value.slice()
+			next[colIndex] = idx
+			wheelIndexes.value = next
+			applyWheelSelection(colIndex)
+		}
+	}
+
+	function onWheelTap(colIndex: number, itemIndex: number) {
+		const real = wheelRealIndex(colIndex, itemIndex)
+		const col = getColumnList(colIndex)
+		if (real < 0 || real >= col.length) {
+			return
+		}
+		locateWheelCol(colIndex, real)
+		// 跳转后 scrollend 触发正式生效
+	}
+	// #endif
+
+		function buildResult(parts: number[]): UTSJSONObject {
+		const ts = partsToTimestamp(parts)
+		const formatted = formatCurrent(parts)
+		const row = {
+			value: ts,
+			timestamp: ts,
+			formatted: formatted,
+			year: parts[0],
+			month: parts[1],
+			day: parts[2],
+			hour: parts[3],
+			minute: parts[4],
+			second: parts[5],
+			mode: modeName.value
+		} as UTSJSONObject
+		return row
+	}
+
+	function resolveOpenParts(): number[] {
+		if (props.preserveSelection && hasConfirmed.value && confirmedTimestamp.value > 0) {
+			return clampParts(parseAnyToParts(confirmedTimestamp.value, nowParts()))
+		}
+		const fromModel = parseAnyToParts(props.modelValue, nowParts())
+		return clampParts(fromModel)
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function initPicker() {
+		const parts = resolveOpenParts()
+		// open 时 remount，与 nax-select.initPicker 一致
+		rebuildColumns(parts, true)
+	}
+
+	function openPicker() {
+		// #ifdef MP-WEIXIN
+		// 微信端系统 picker 模式：点击触发条弹出，无自建弹层；v-model:show 拉回 false
+		if (mpShowSystemPicker.value) {
+			emit('update:show', false)
+			return
+		}
+		// #endif
+		if (props.disabled) {
+			return
+		}
+		// 已完全展开：只同步 v-model
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		// 已在进场排队：勿二次 open
+		if (openDelayTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
+		refreshSafeArea()
+		rootMounted.value = true
+		// 先卸再挂：首帧即带正确 value，对齐 nax-select（避免挂载后改 value 的滚动动画）
+		readyToRender.value = false
+		initPicker()
+		// 等列数据与 value 就绪再挂载选择器
+		readyToRender.value = true
+		// 始终先 false 再 true：保证 nax-transition 进场
+		panelShow.value = false
+		// #ifdef APP-IOS
+		// iOS 自研滚轮：挂载后无动画直接定位到选中值，再显示面板（原生 picker 定位动画卡顿且会暴露初始列值）
+		const openDelay = 50
+		// #endif
+		// #ifdef APP-HARMONY
+		const openDelay = 50
+		// #endif
+		// #ifndef APP-HARMONY || APP-IOS
+		const openDelay = 30
+		// #endif
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			// 先挂载面板：nax-transition 为 v-if 渲染，panelShow 之前 scroll-view 不在 DOM，定位会全部落空
+			panelShow.value = true
+			// #ifdef APP-IOS
+			// 挂载完成后再定位滚轮；定位期间锁定 scrollend，避免挂载初始位置被当成选中值
+			if (wheelLocateTimer >= 0) {
+				clearTimeout(wheelLocateTimer)
+			}
+			wheelLocateTimer = setTimeout(() => {
+				wheelLocateTimer = -1
+				locateWheelsWhenReady(0)
+			}, 30)
+			// #endif
+		}, openDelay)
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function closePicker(emitUpdate: boolean) {
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) emit('update:show', false)
+			return
+		}
+		if (!panelShow.value) {
+			if (emitUpdate) emit('update:show', false)
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) emit('update:show', false)
+	}
+
+	function onOverlayLeave() {
+		if (panelShow.value) return
+		clearSuppressTimer()
+		suppressPickerEvent = false
+		clearClearSuppressTimer()
+		clearSuppress.value = false
+		// #ifdef APP-IOS
+		if (wheelLocateTimer >= 0) {
+			clearTimeout(wheelLocateTimer)
+			wheelLocateTimer = -1
+		}
+		if (wheelUnlockTimer >= 0) {
+			clearTimeout(wheelUnlockTimer)
+			wheelUnlockTimer = -1
+		}
+		wheelLocked = false
+		// #endif
+		rootMounted.value = false
+		readyToRender.value = false
+		moving.value = false
+		emit('close')
+	}
+
+		function onTriggerClick() {
+			if (props.disabled) return
+			// 鸿蒙上清空按钮的点击仍可能冒泡到触发条，不能因此重新打开弹层。
+			// #ifdef APP-HARMONY
+			if (clearSuppress.value) {
+				clearSuppress.value = false
+				clearClearSuppressTimer()
+				return
+			}
+			// #endif
+			if (rootMounted.value && panelShow.value) return
+			openPicker()
+		}
+	
+	function onClear() {
+		if (props.disabled) return
+		if (!hasConfirmed.value) return
+		armClearSuppress()
+		hasConfirmed.value = false
+		confirmedTimestamp.value = 0
+		confirmedFormatted.value = ''
+		modelBound.value = false
+		emit('update:modelValue', 0)
+		emit('clear')
+	}
+
+	function onMaskClick() {
+		if (!canCloseByMask.value) return
+		emit('cancel', buildResult(currentParts.value))
+		closePicker(true)
+	}
+
+	function onCancel() {
+		emit('cancel', buildResult(currentParts.value))
+		closePicker(true)
+	}
+
+	function onConfirm() {
+		// #ifdef MP-WEIXIN
+		if (moving.value) return
+		// #endif
+		const parts = clampParts(currentParts.value)
+		const result = buildResult(parts)
+		const ts = partsToTimestamp(parts)
+		const formatted = formatCurrent(parts)
+			hasConfirmed.value = true
+			confirmedTimestamp.value = ts
+			confirmedFormatted.value = formatted
+			modelBound.value = true
+			emit('update:modelValue', ts)
+		emit('confirm', result)
+		closePicker(true)
+	}
+
+	function onWheelItemClickBlock() {
+		// 鸿蒙：吞掉滚轮选项点击
+	}
+
+	function onPickStart() {
+		// #ifdef MP-WEIXIN
+		moving.value = true
+		// #endif
+	}
+
+	function onPickEnd() {
+		// #ifdef MP-WEIXIN
+		moving.value = false
+		// #endif
+	}
+
+	function findChangedColumn(prev: number[], next: number[]): number {
+		const len = prev.length < next.length ? prev.length : next.length
+		let i = 0
+		while (i < len) {
+			if (prev[i] != next[i]) return i
+			i++
+		}
+		if (prev.length != next.length) return 0
+		return -1
+	}
+
+	function onColumnChange(e: UniPickerViewChangeEvent) {
+		if (clearSuppress.value) {
+			clearSuppress.value = false
+			clearClearSuppressTimer()
+			return
+		}
+		if (suppressPickerEvent) {
+			return
+		}
+		const detail = e.detail
+		const columnIndex = detail.value
+		const next = [] as number[]
+		let n = 0
+		// 兼容鸿蒙 value 项可能为 string
+		while (n < columnIndex.length) {
+			const raw = columnIndex[n]
+			if (typeof raw == 'number') {
+				next.push(raw as number)
+			} else if (typeof raw == 'string') {
+				const parsed = parseInt(raw as string)
+				next.push(parsed >= 0 ? parsed : 0)
+			} else {
+				next.push(0)
+			}
+			n++
+		}
+		if (next.length == 0) {
+			return
+		}
+
+		// 夹紧到当前列长度
+		const fixed = [] as number[]
+		let i = 0
+		while (i < columnNum.value) {
+			const col = getColumnList(i)
+			let idx = i < next.length ? next[i] : 0
+			if (idx < 0) {
+				idx = 0
+			}
+			if (col.length > 0 && idx >= col.length) {
+				idx = col.length - 1
+			}
+			fixed.push(idx)
+			i++
+		}
+
+		const fields = fieldTypes.value
+		const parts = copyParts(currentParts.value)
+		i = 0
+		while (i < fields.length) {
+			const field = fields[i]
+			const col = getColumnList(i)
+			const idx = fixed[i]
+			if (col.length > 0) {
+				parts[fieldIndex(field)] = col[idx]
+			}
+			i++
+		}
+
+		const changed = findChangedColumn(lastSelectIndex.value, fixed)
+		// 上级变化：只刷新列数据，禁止 remount（鸿蒙滚动中 remount 会卡死/崩溃）
+		if (changed >= 0 && changed < fields.length - 1) {
+			rebuildColumns(parts, false)
+		} else {
+			const clamped = clampParts(parts)
+			armSuppressPickerEvent()
+			currentParts.value = clamped
+			pickerValue.value = fixed.slice()
+			lastSelectIndex.value = fixed.slice()
+		}
+		emit('change', buildResult(currentParts.value))
+	}
+
+				function syncConfirmedFromModel() {
+				const raw = props.modelValue
+				if (raw == null || raw == '' || raw == 0) {
+					if (modelBound.value) {
+						hasConfirmed.value = false
+						confirmedTimestamp.value = 0
+						confirmedFormatted.value = ''
+						modelBound.value = false
+					}
+					return
+				}
+				const parts = clampParts(parseAnyToParts(raw, nowParts()))
+				const ts = partsToTimestamp(parts)
+				if (ts <= 0) {
+					if (modelBound.value) {
+						hasConfirmed.value = false
+						confirmedTimestamp.value = 0
+						confirmedFormatted.value = ''
+						modelBound.value = false
+					}
+					return
+				}
+				hasConfirmed.value = true
+				confirmedTimestamp.value = ts
+				confirmedFormatted.value = formatCurrent(parts)
+				modelBound.value = true
+			}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		// #ifdef MP-WEIXIN
+		// 微信端系统 picker 模式：无自建弹层，v-model:show 不生效
+		if (mpShowSystemPicker.value) {
+			emit('update:show', false)
+			return
+		}
+		// #endif
+		if (val) {
+			// 已完全展开：忽略，避免 v-model 回写二次 open
+			if (rootMounted.value && panelShow.value) {
+				return
+			}
+			openPicker()
+		} else {
+			closePicker(false)
+		}
+	})
+
+	watch((): any => {
+		return props.modelValue
+	}, (_: any) => {
+		syncConfirmedFromModel()
+		// #ifdef MP-WEIXIN
+		mpSyncValue()
+		// #endif
+	})
+
+	watch((): string => {
+		return modeName.value
+	}, (_: string) => {
+		// #ifdef MP-WEIXIN
+		mpSyncValue()
+		// #endif
+		if (rootMounted.value && panelShow.value) {
+			// 展示中切 mode：刷新列数据，不 remount
+			rebuildColumns(currentParts.value, false)
+			// #ifdef APP-IOS
+			locateAllWheels()
+			// #endif
+		}
+	})
+
+	// 初始化触发条文案
+	syncConfirmedFromModel()
+	// #ifdef MP-WEIXIN
+	mpSyncValue()
+	// #endif
+	if (props.show) {
+		openPicker()
+	}
+
+	// #ifdef APP-IOS || APP-ANDROID
+	// 官方主题 API：App 端 4.18+ 支持；监听 appTheme 变化驱动弹窗字面量颜色
+	refreshTheme()
+	try {
+		themeChangeId = uni.onAppThemeChange((res: AppThemeChangeResult) => {
+			darkTheme.value = res.appTheme == 'dark'
+		})
+	} catch (e) {
+		themeChangeId = -1
+	}
+	onUnmounted(() => {
+		if (themeChangeId >= 0) {
+			try {
+				uni.offAppThemeChange(themeChangeId)
+			} catch (e) {
+			}
+			themeChangeId = -1
+		}
+	})
+	// #endif
+</script>
+
+<style>
+	.nax-datetime-picker {
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__trigger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+	}
+
+	.nax-datetime-picker__trigger--sm { height: 32px; }
+	.nax-datetime-picker__trigger--md { height: 40px; }
+	.nax-datetime-picker__trigger--lg { height: 48px; }
+
+	.nax-datetime-picker__trigger--border {
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-datetime-picker__trigger--disabled { opacity: 0.5; }
+	.nax-datetime-picker__trigger--hover { background-color: var(--nax-color-bg-hover, #f3f3f5); }
+
+	.nax-datetime-picker__trigger-text {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		/* #endif */
+	}
+
+	/* #ifndef VUE3-VAPOR */
+	.nax-datetime-picker__trigger--sm .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-sm, 14px); }
+	.nax-datetime-picker__trigger--lg .nax-datetime-picker__trigger-text { font-size: var(--nax-font-size-lg, 18px); }
+	/* #endif */
+	.nax-datetime-picker__trigger-text--placeholder { color: var(--nax-color-text-placeholder, #e5e5ea); }
+	.nax-datetime-picker__trigger-text--disabled { color: var(--nax-color-text-disabled, #e5e5ea); }
+
+	.nax-datetime-picker__trigger-clear {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: var(--nax-space-2, 8px);
+		/* 扩大点击热区，对齐 nax-input 清除按钮 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		position: relative;
+		z-index: 2;
+		cursor: pointer;
+		/* #endif */
+	}
+	
+	.nax-datetime-picker__trigger-arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: var(--nax-space-2, 8px);
+		flex-shrink: 0;
+		/* 热区内边距与清除按钮一致：清除/箭头切换时图标位置不跳动 */
+		padding-top: 6px;
+		padding-bottom: 6px;
+		padding-left: 6px;
+		padding-right: 6px;
+	}
+
+	.nax-datetime-picker__root {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	.nax-datetime-picker__panel-layer {
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		background-color: rgba(0, 0, 0, 0.45);
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-datetime-picker__mask {
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+	/* #endif */
+
+	.nax-datetime-picker__mask--show { opacity: 1; }
+
+	.nax-datetime-picker__panel {
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-datetime-picker__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-datetime-picker__header {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 48px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-datetime-picker__btn {
+		min-width: 72px;
+		height: 48px;
+		padding-left: var(--nax-space-4, 16px);
+		padding-right: var(--nax-space-4, 16px);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-datetime-picker__btn--hover { opacity: 0.7; }
+
+	.nax-datetime-picker__btn-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-datetime-picker__btn-text--confirm {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 500;
+	}
+
+	.nax-datetime-picker__title-wrap {
+		flex: 1;
+		min-width: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-datetime-picker__title {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		text-align: center;
+	}
+
+	.nax-datetime-picker__body {
+		height: 240px;
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__picker {
+		flex: 1;
+		height: 240px;
+	}
+
+	.nax-datetime-picker__column { flex: 1; }
+
+	/* #ifdef APP-IOS */
+	/* iOS 自研滚轮样式（框架渲染，可正常控制文字居中） */
+	.nax-datetime-picker__wheel {
+		flex: 1;
+		height: 240px;
+		flex-direction: row;
+	}
+
+	/* iOS 主题 class：按暗黑/浅色用字面量覆盖弹窗内颜色（不依赖 CSS 变量） */
+	/* #ifndef VUE3-VAPOR */
+	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel {
+		background-color: #ffffff;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel {
+		background-color: #101014;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__title {
+		color: #333639;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__title {
+		color: #ffffffd1;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__btn-text {
+		color: #767c82;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__btn-text {
+		color: #ffffffa6;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__btn-text--confirm {
+		color: #18a058;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__btn-text--confirm {
+		color: #63e2b7;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel-text {
+		color: #767c82;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel-text {
+		color: #ffffffa6;
+	}
+
+	.nax-datetime-picker--ios-light .nax-datetime-picker__wheel-text--selected {
+		color: #000000;
+	}
+
+	.nax-datetime-picker--ios-dark .nax-datetime-picker__wheel-text--selected {
+		color: #ffffff;
+	}
+	/* #endif */
+
+	/* iOS 上 border-color 不生效（退化黑色），标题分割线改用普通流布局的背景色线（inline 兜底） */
+	.nax-datetime-picker__header {
+		border-bottom-width: 0;
+		border-bottom-color: transparent;
+	}
+
+	.nax-datetime-picker__header-line {
+		background-color: #f5f5f7;
+	}
+
+	.nax-datetime-picker__wheel-col-wrap {
+		flex: 1;
+		flex-direction: column;
+		height: 240px;
+		position: relative;
+	}
+
+	/* 固定选中行指示器（上下边框）：独立于滚动内容，滑动/点击时始终停在可视区中间，不随 item 移动 */
+	/* iOS 上 border-color 与 1px 高度均不可靠：容器 absolute 定位，两条线 flex 流布局 + inline 背景色 2px */
+	.nax-datetime-picker__wheel-indicator {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 120px;
+		height: 40px;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+
+	.nax-datetime-picker__wheel-indicator-line {
+		background-color: #f5f5f7;
+	}
+
+	.nax-datetime-picker__wheel-col {
+		flex: 1;
+		height: 240px;
+	}
+
+	.nax-datetime-picker__wheel-track {
+		flex-direction: column;
+	}
+
+	.nax-datetime-picker__wheel-item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.nax-datetime-picker__wheel-item--selected {}
+
+	.nax-datetime-picker__wheel-text {
+		font-size: 16px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		/* iOS 单行 text 基线不随父级居中，显式对齐行高 */
+		height: 40px;
+		line-height: 40px;
+	}
+
+	.nax-datetime-picker__wheel-text--selected {
+		color: var(--nax-color-text-black, #000000);
+	}
+	/* #endif */
+
+	.nax-datetime-picker__item {
+		height: 40px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-left: var(--nax-space-2, 8px);
+		padding-right: var(--nax-space-2, 8px);
+	}
+
+	.nax-datetime-picker__item-text {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-datetime-picker__item-text--selected {
+		color: var(--nax-color-text-black, #000000);
+	}
+
+	/* #ifdef APP-ANDROID */
+	/* Android 不支持自定义 CSS 变量（var 声明失效：文字颜色退系统默认，深色系统下白字白底不可见），
+	   用官方主题 API 驱动的字面量颜色覆盖弹窗内文字与面板 */
+	/* #ifndef VUE3-VAPOR */
+	.nax-datetime-picker--android-light .nax-datetime-picker__panel { background-color: #ffffff; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__panel { background-color: #101014; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__title { color: #333639; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__title { color: #ffffffd1; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__btn-text { color: #767c82; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__btn-text { color: #ffffffa6; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__btn-text--confirm { color: #18a058; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__btn-text--confirm { color: #63e2b7; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__item-text { color: #767c82; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__item-text { color: #ffffffa6; }
+
+	.nax-datetime-picker--android-light .nax-datetime-picker__item-text--selected { color: #000000; }
+	.nax-datetime-picker--android-dark .nax-datetime-picker__item-text--selected { color: #ffffff; }
+	/* #endif */
+
+	/* Android 上 border-color 不生效（退化黑色），标题分割线改用背景色线（inline 兜底） */
+	.nax-datetime-picker__header {
+		border-bottom-width: 0;
+		border-bottom-color: transparent;
+	}
+	/* #endif */
+
+	/* #ifdef APP-HARMONY */
+	.nax-datetime-picker__item--no-tap {}
+	.nax-datetime-picker__picker--harmony {}
+	/* #endif */
+</style>

@@ -1,0 +1,137 @@
+<template>
+  <view class="ox-demo-swatch">
+    <view v-for="(sw, i) in swatches" :key="i" class="ox-swatch-item" :style="itemStyle()" hover-class="ox-press" @click="copySwatch(sw)">
+      <view class="ox-swatch-color" :style="swatchStyle(sw.color)" />
+      <view class="ox-swatch-texts">
+        <text class="ox-swatch-name" :style="nameStyle()">{{ sw.name }}</text>
+        <text class="ox-swatch-value" :style="valueStyle()">{{ sw.color }}</text>
+      </view>
+    </view>
+    <text class="ox-swatch-hint" :style="hintStyle()">点击色块复制色值</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import { theme } from '../../utils/theme.uts'
+
+class Swatch {
+  name: string = ''
+  color: string = ''
+
+  constructor(name: string, color: string) {
+    this.name = name
+    this.color = color
+  }
+}
+
+const swatches = computed((): Swatch[] => {
+  const c = theme.state.colors
+  return [
+    new Swatch('brand', c.brand),
+    new Swatch('text1', c.text1),
+    new Swatch('text2', c.text2),
+    new Swatch('text3', c.text3),
+    new Swatch('border', c.border),
+    new Swatch('surface', c.surface),
+    new Swatch('codeBlockBg', c.codeBlockBg),
+    new Swatch('danger', c.danger),
+    new Swatch('success', c.success),
+  ]
+})
+
+function copySwatch(sw: Swatch): void {
+  uni.setClipboardData({
+    data: sw.color,
+    showToast: false,
+    success: () => {
+      uni.showToast({ title: `已复制 ${sw.color}`, icon: 'none' } as ShowToastOptions)
+    },
+  } as SetClipboardDataOptions)
+}
+
+function itemStyle(): UTSJSONObject {
+  return {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: '8px',
+    paddingTop: '7px',
+    paddingBottom: '7px',
+    paddingLeft: '6px',
+    paddingRight: '6px',
+  } as UTSJSONObject
+}
+
+function swatchStyle(color: string): UTSJSONObject {
+  return {
+    width: '22px',
+    height: '22px',
+    borderRadius: '6px',
+    borderWidth: '1px',
+    borderColor: theme.state.colors.border,
+    borderStyle: 'solid',
+    backgroundColor: color,
+  } as UTSJSONObject
+}
+
+function nameStyle(): UTSJSONObject {
+  return { fontSize: '13px', color: theme.state.colors.text1 } as UTSJSONObject
+}
+
+function valueStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text3, marginLeft: '8px' } as UTSJSONObject
+}
+
+function hintStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text3, marginTop: '8px' } as UTSJSONObject
+}
+</script>
+
+<style>
+.ox-demo-swatch {
+  flex-direction: column;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.ox-swatch-item {
+  flex-direction: row;
+}
+
+.ox-swatch-color {
+  flex-direction: row;
+  margin-right: 10px;
+}
+
+.ox-swatch-texts {
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+}
+
+.ox-swatch-name {
+  flex-direction: column;
+}
+
+.ox-swatch-value {
+  flex-direction: column;
+}
+
+.ox-swatch-hint {
+  flex-direction: column;
+}
+
+/* 按压反馈仅触屏端生效 */
+/* #ifndef WEB */
+.ox-press {
+  opacity: 0.6;
+}
+/* #endif */
+
+/* #ifdef WEB */
+.ox-swatch-item {
+  cursor: pointer;
+  user-select: none;
+}
+/* #endif */
+</style>

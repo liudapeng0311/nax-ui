@@ -1,0 +1,62 @@
+<template>
+  <view class="demo-divider">
+    <text class="dsec">基础</text>
+    <nax-divider></nax-divider>
+
+    <text class="dsec">带文字</text>
+    <nax-divider text="或者" space="8"></nax-divider>
+    <nax-divider text="更多内容" space="8"></nax-divider>
+
+    <text class="dsec">位置 content-position</text>
+    <nax-divider text="居中" content-position="center" space="8"></nax-divider>
+    <nax-divider text="左侧" content-position="left" space="8"></nax-divider>
+    <nax-divider text="右侧" content-position="right" space="8"></nax-divider>
+
+    <text class="dsec">虚线 / 类型</text>
+    <nax-divider dashed text="虚线" space="8"></nax-divider>
+    <nax-divider text="主色" type="primary" space="8"></nax-divider>
+    <nax-divider text="警告" type="warning" space="8"></nax-divider>
+    <nax-divider text="错误" type="error" space="8"></nax-divider>
+
+    <text class="dsec">粗细 size</text>
+    <nax-divider text="hairline" size="hairline" space="8"></nax-divider>
+    <nax-divider text="sm" size="sm" space="8"></nax-divider>
+    <nax-divider text="md" size="md" space="8"></nax-divider>
+
+    <text class="dsec">竖线 vertical</text>
+    <view class="vrow">
+      <text class="vtxt">左</text>
+      <nax-divider direction="vertical" space="12"></nax-divider>
+      <text class="vtxt">中</text>
+      <nax-divider direction="vertical" space="12" type="primary" size="sm"></nax-divider>
+      <text class="vtxt">右</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-divider {
+  flex-direction: column;
+}
+
+.vrow {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.vtxt {
+  font-size: 13px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

@@ -1,0 +1,235 @@
+/**
+ * nax-toast 命令式 API
+ * 业务：import { naxToast, hideNaxToast } from '@/uni_modules/nax-toast/index.uts'
+ * 宿主：全局挂一次 <nax-toast />，组件内 bind/unbind
+ */
+
+type NaxToastShowHandler = (title: string, type: string, icon: string, duration: number, position: string, overlay: boolean, showIcon: boolean, bg: string, color: string) => void
+type NaxToastHideHandler = () => void
+
+var showHandler: NaxToastShowHandler | null = null
+var hideHandler: NaxToastHideHandler | null = null
+var hostBound: boolean = false
+var hostSeq: number = 0
+var activeHostId: number = 0
+
+/**
+ * 宿主挂载时绑定；返回 hostId，卸载时原样传回 unbind
+ */
+export function bindNaxToastHost(show: NaxToastShowHandler, hide: NaxToastHideHandler): number {
+	hostSeq = hostSeq + 1
+	const id = hostSeq
+	activeHostId = id
+	showHandler = show
+	hideHandler = hide
+	hostBound = true
+	return id
+}
+
+/**
+ * 仅当仍是当前宿主时解绑，避免多实例互相踩
+ */
+export function unbindNaxToastHost(hostId: number = 0) {
+	if (hostId > 0 && hostId != activeHostId) {
+		return
+	}
+	showHandler = null
+	hideHandler = null
+	hostBound = false
+	activeHostId = 0
+}
+
+export function isNaxToastHostBound(): boolean {
+	return hostBound
+}
+
+function normalizeType(raw: string): string {
+	if (raw == 'success' || raw == 'error' || raw == 'warning' || raw == 'info' || raw == 'loading' || raw == 'text') {
+		return raw
+	}
+	if (raw == 'danger' || raw == 'fail' || raw == 'failed') {
+		return 'error'
+	}
+	if (raw == 'warn') {
+		return 'warning'
+	}
+	if (raw == 'default' || raw == 'none' || raw == 'message') {
+		return 'text'
+	}
+	return 'text'
+}
+
+function normalizePosition(raw: string): string {
+	if (raw == 'top' || raw == 'bottom' || raw == 'center') {
+		return raw
+	}
+	return 'center'
+}
+
+function fallbackUniToast(title: string, type: string, duration: number) {
+	// icon 必须用字面量：Web 端 Icon 联合类型不接受 string 变量
+	let d = duration
+	if (d <= 0) {
+		if (type == 'loading') {
+			d = 60000
+		} else {
+			d = 2000
+		}
+	}
+	if (type == 'success') {
+		uni.showToast({
+			title: title,
+			icon: 'success',
+			duration: d,
+			mask: false
+		})
+		return
+	}
+	if (type == 'error') {
+		uni.showToast({
+			title: title,
+			icon: 'error',
+			duration: d,
+			mask: false
+		})
+		return
+	}
+	if (type == 'loading') {
+		uni.showToast({
+			title: title,
+			icon: 'loading',
+			duration: d,
+			mask: true
+		})
+		return
+	}
+	uni.showToast({
+		title: title,
+		icon: 'none',
+		duration: d,
+		mask: false
+	})
+}
+
+function showCore(title: string, type: string, icon: string, duration: number, position: string, overlay: boolean, showIcon: boolean, bg: string, color: string) {
+	const t = normalizeType(type)
+	const p = normalizePosition(position)
+	if (hostBound && showHandler != null) {
+		showHandler!(title, t, icon, duration, p, overlay, showIcon, bg, color)
+		return
+	}
+	fallbackUniToast(title, t, duration)
+}
+
+/**
+ * 展示轻提示。
+ * - string / number：纯文案
+ * - UTSJSONObject：title/message/type/icon/duration/position/overlay/showIcon/bg/background
+ */
+export function naxToast(input: any | null = null) {
+	if (input == null) {
+		return
+	}
+
+	if (typeof input == 'string') {
+		showCore(input as string, 'text', '', 2000, 'center', false, false, '', '')
+		return
+	}
+	if (typeof input == 'number') {
+		showCore('' + (input as number), 'text', '', 2000, 'center', false, false, '', '')
+		return
+	}
+
+	const obj = input as UTSJSONObject
+	var title = ''
+	const t1 = obj.getString('title')
+	const t2 = obj.getString('message')
+	if (t1 != null && (t1 as string).length > 0) {
+		title = t1 as string
+	} else if (t2 != null && (t2 as string).length > 0) {
+		title = t2 as string
+	}
+
+	var type = 'text'
+	const ty = obj.getString('type')
+	if (ty != null && (ty as string).length > 0) {
+		type = normalizeType(ty as string)
+	}
+
+	var icon = ''
+	const ic = obj.getString('icon')
+	if (ic != null) {
+		icon = ic as string
+	}
+
+	var duration = 2000
+	const dur = obj.getNumber('duration')
+	if (dur != null) {
+		duration = dur as number
+	} else if (type == 'loading') {
+		duration = 0
+	}
+
+	var position = 'center'
+	const pos = obj.getString('position')
+	if (pos != null && (pos as string).length > 0) {
+		position = normalizePosition(pos as string)
+	}
+
+	var overlay = false
+	const ov = obj.getBoolean('overlay')
+	if (ov != null) {
+		overlay = ov as boolean
+	}
+
+	var showIcon = type != 'text'
+	const si = obj.getBoolean('showIcon')
+	if (si != null) {
+		showIcon = si as boolean
+	}
+
+	var bg = ''
+	const bg1 = obj.getString('bg')
+	const bg2 = obj.getString('background')
+	if (bg1 != null && (bg1 as string).length > 0) {
+		bg = bg1 as string
+	} else if (bg2 != null && (bg2 as string).length > 0) {
+		bg = bg2 as string
+	}
+
+	var color = ''
+	const c1 = obj.getString('color')
+	if (c1 != null && (c1 as string).length > 0) {
+		color = c1 as string
+	}
+
+	showCore(title, type, icon, duration, position, overlay, showIcon, bg, color)
+}
+
+export function hideNaxToast() {
+	if (hostBound && hideHandler != null) {
+		hideHandler!()
+		return
+	}
+	uni.hideToast()
+}
+
+export function naxToastSuccess(title: string) {
+	showCore(title, 'success', '', 2000, 'center', false, true, '', '')
+}
+
+export function naxToastError(title: string) {
+	showCore(title, 'error', '', 2000, 'center', false, true, '', '')
+}
+
+export function naxToastWarning(title: string) {
+	showCore(title, 'warning', '', 2000, 'center', false, true, '', '')
+}
+
+export function naxToastInfo(title: string) {
+	showCore(title, 'info', '', 2000, 'center', false, true, '', '')
+}
+
+export function naxToastLoading(title: string = '加载中', overlay: boolean = true) {
+	showCore(title, 'loading', '', 0, 'center', overlay, true, '', '')
+}

@@ -1,0 +1,132 @@
+<template>
+  <view class="pager" :style="pagerStyle()">
+    <view
+      v-if="prev != null"
+      class="pager-card"
+      :style="cardStyle()"
+      hover-class="press"
+      @click="go(prev!)"
+    >
+      <text class="dir" :style="dirStyle()">上一篇</text>
+      <text class="title" :style="titleStyle()">{{ prev!.title }}</text>
+    </view>
+    <view v-else class="pager-empty" />
+
+    <view
+      v-if="next != null"
+      class="pager-card next"
+      :style="cardStyle()"
+      hover-class="press"
+      @click="go(next!)"
+    >
+      <text class="dir right" :style="dirStyle()">下一篇</text>
+      <text class="title" :style="titleStyle()">{{ next!.title }}</text>
+    </view>
+    <view v-else class="pager-empty" />
+  </view>
+</template>
+
+<script setup lang="uts">
+import { PageMeta } from '../../types/content.uts'
+import { theme } from '../../utils/theme.uts'
+
+// 可空 prop 用可选（?）声明：类型式 `| null` 会被 Web 端 SFC 编译成
+// { type: [Object, null] }，触发 Vue props 的 TS2769 类型错误
+const props = defineProps<{
+  prev?: PageMeta
+  next?: PageMeta
+}>()
+
+const emit = defineEmits(['navigate'])
+
+function pagerStyle(): UTSJSONObject {
+  const style = {
+    borderTopWidth: '1px',
+    borderTopColor: theme.state.colors.border,
+    borderTopStyle: 'solid',
+  } as UTSJSONObject
+  // #ifdef WEB
+  // 鼠标悬停背景色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-bg'] = theme.state.colors.surfaceHover
+  // #endif
+  return style
+}
+
+function cardStyle(): UTSJSONObject {
+  return {
+    backgroundColor: theme.state.colors.surface,
+    borderWidth: '1px',
+    borderColor: theme.state.colors.border,
+    borderStyle: 'solid',
+    borderRadius: '12px',
+  } as UTSJSONObject
+}
+
+function dirStyle(): UTSJSONObject {
+  return { fontSize: '11px', color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+function titleStyle(): UTSJSONObject {
+  return { fontSize: '14px', fontWeight: '600', color: theme.state.colors.brand } as UTSJSONObject
+}
+
+function go(meta: PageMeta): void {
+  emit('navigate', meta.path)
+}
+</script>
+
+<style>
+.pager {
+  flex-direction: row;
+  margin-top: 28px;
+  padding-top: 20px;
+}
+
+.pager-card {
+  flex: 1;
+  flex-direction: column;
+  padding: 12px 14px;
+}
+
+/* #ifdef WEB */
+.pager-card {
+  cursor: pointer;
+  transition-property: background-color;
+  transition-duration: 120ms;
+}
+
+.pager-card:hover {
+  /* 卡片底色由 :style 内联下发，内联样式优先级高于样式表，悬停色需 !important 覆盖 */
+  background-color: var(--up-hover-bg, rgba(20, 24, 40, 0.05)) !important;
+}
+/* #endif */
+
+.next {
+  align-items: flex-end;
+  margin-left: 12px;
+}
+
+/* 按压反馈仅触屏端生效：Web 端已有悬停底色，按压变透明会在点击时产生文字"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.press {
+  opacity: 0.7;
+}
+/* #endif */
+
+.dir {
+  margin-bottom: 2px;
+}
+
+.right {
+  text-align: right;
+}
+
+.title {
+  lines: 1;
+  text-overflow: ellipsis;
+}
+
+.pager-empty {
+  flex: 1;
+}
+</style>

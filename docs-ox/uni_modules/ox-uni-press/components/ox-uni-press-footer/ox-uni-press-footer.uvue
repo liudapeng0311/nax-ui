@@ -1,0 +1,155 @@
+<template>
+  <view class="footer" :style="footerStyle()">
+    <view v-if="links.length > 0" class="links">
+      <text
+        v-for="(item, index) in links"
+        :key="index"
+        class="link"
+        :style="linkStyle()"
+        hover-class="press"
+        @click="onLink(item.link)"
+      >{{ item.text }}</text>
+    </view>
+    <view v-if="copyright !== '' || beian !== ''" class="meta-row">
+      <text v-if="copyright !== ''" class="meta" :style="metaStyle()">{{ copyright }}</text>
+      <text v-if="beian !== ''" class="meta up-clickable" :style="metaStyle()" hover-class="press" @click="onBeian">{{ beian }}</text>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { computed } from 'vue'
+import { SiteFooter, SiteFooterLink } from '../../types/content.uts'
+import { theme } from '../../utils/theme.uts'
+
+const props = defineProps<{
+  /** 站点页脚数据（manifest.site.footer），字段均可缺省 */
+  footer: SiteFooter
+}>()
+
+const emit = defineEmits(['navigate'])
+
+const links = computed((): SiteFooterLink[] => {
+  const raw = props.footer.links
+  const out: SiteFooterLink[] = []
+  if (raw != null) {
+    for (let i = 0; i < raw.length; i++) {
+      const item = raw[i]
+      if (item != null) out.push(item)
+    }
+  }
+  return out
+})
+
+const copyright = computed((): string => props.footer.copyright ?? '')
+const beian = computed((): string => props.footer.beian ?? '')
+
+function footerStyle(): UTSJSONObject {
+  const style = {
+    backgroundColor: theme.state.colors.bg,
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: theme.state.colors.border,
+  } as UTSJSONObject
+  // #ifdef WEB
+  // 链接悬停色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-color'] = theme.state.colors.text1
+  // #endif
+  return style
+}
+
+function linkStyle(): UTSJSONObject {
+  return { color: theme.state.colors.text2 } as UTSJSONObject
+}
+
+function metaStyle(): UTSJSONObject {
+  return { color: theme.state.colors.text3 } as UTSJSONObject
+}
+
+/** 页脚链接：内链走路由（交给宿主页面导航），外链 Web 新窗口 / App 复制链接 */
+function onLink(link: string): void {
+  if (link.startsWith('/')) {
+    emit('navigate', link)
+    return
+  }
+  openExternal(link)
+}
+
+/** 备案号指向工信部备案网站（外链） */
+function onBeian(): void {
+  openExternal('https://beian.miit.gov.cn/')
+}
+
+function openExternal(link: string): void {
+  // #ifdef WEB
+  window.open(link, '_blank')
+  // #endif
+  // #ifndef WEB
+  uni.setClipboardData({
+    data: link,
+    success: () => {
+      uni.showToast({ title: '链接已复制', icon: 'none' } as ShowToastOptions)
+    },
+  })
+  // #endif
+}
+</script>
+
+<style>
+.footer {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.links {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.link {
+  font-size: 13px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.meta-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.meta {
+  font-size: 12px;
+  margin-left: 8px;
+  margin-right: 8px;
+  text-align: center;
+}
+
+/* 按压反馈仅触屏端生效：Web 端已有悬停变色，按压变透明会让文字产生"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.press {
+  opacity: 0.6;
+}
+/* #endif */
+
+/* #ifdef WEB */
+.link,
+.up-clickable {
+  cursor: pointer;
+  transition-property: color;
+  transition-duration: 120ms;
+}
+
+.link:hover,
+.up-clickable:hover {
+  /* 链接颜色由 :style 内联下发，内联样式优先级高于样式表，悬停色需 !important 覆盖 */
+  color: var(--up-hover-color, #191c24) !important;
+}
+/* #endif */
+</style>

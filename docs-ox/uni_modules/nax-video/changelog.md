@@ -1,0 +1,16 @@
+## 0.1.2（2026-08-14）
+- 精简 readme：移除内部开发向内容（设计说明 / 实现细节 / 平台差异实现等），只保留安装、用法、API、主题等用户文档
+
+## 0.1.1（2026-08-10）
+
+- 修复 Android 编译失败：插槽传递带默认参数（`direction: number | null = null`）的函数引用报 "Function invocation expected"；`requestFullscreen` 改为必选参数，组件内部调用处已显式传参，行为不变
+
+## 0.1.0（2026-08-06）
+
+- 初版 `nax-video` 无头视频播放器（uvue）
+- 原生 `<video>` + `uni.createVideoContext`：play / pause / toggle / stop / seek / seekBy / 倍速 / 静音 / 全屏
+- 默认 `controls=false`；作用域插槽暴露状态与控制方法；`controls=true` 可降级原生控制条
+- 状态以原生事件为真相来源；多实例独立 id / context
+- 平台：Web / Android / HarmonyOS / 微信小程序；iOS 标记为未验证（`-`）
+- 能力下限按 uni-app x 4.61（含 HarmonyOS video / createVideoContext）
+- 首版不实现列表 recycle/reuse、弹幕、画中画、播放列表

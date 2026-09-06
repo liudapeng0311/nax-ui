@@ -1,0 +1,391 @@
+﻿<template>
+	<!-- 页面级弹层：薄封装 nax-picker；也可作小程序降级宿主 -->
+	<nax-picker
+		:show="visible"
+		:position="panelPosition"
+		:round="roundEnabled"
+		:mask="maskEnabled"
+		:mask-closable="effectiveMaskClosable"
+		:close-on-mask="effectiveMaskClosable"
+		:close-on-click-overlay="effectiveMaskClosable"
+		:z-index="zIndexValue"
+		:duration="durationValue"
+		:width="widthValue"
+		:height="heightValue"
+		:custom-class="pickerRootClass"
+		@update:show="onPickerUpdateShow"
+		@open="onOpen"
+		@opened="onOpened"
+		@close="onClose"
+		@click-mask="onClickMask"
+	>
+		<view class="nax-popup" :class="rootClass">
+			<slot>
+				<view v-if="hasDefaultBody" class="nax-popup__body">
+				<text v-if="titleText.length > 0" class="nax-popup__title" :max-lines="2">{{ titleText }}</text>
+				<text v-if="contentText.length > 0" class="nax-popup__content" :max-lines="16">{{ contentText }}</text>
+					<view class="nax-popup__actions">
+						<view
+							class="nax-popup__btn"
+							hover-class="nax-popup__btn--hover"
+							:hover-start-time="20"
+							:hover-stay-time="70"
+							@click="onCloseClick"
+						>
+							<text class="nax-popup__btn-text" :max-lines="1">关闭</text>
+						</view>
+					</view>
+				</view>
+			</slot>
+		</view>
+	</nax-picker>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-popup
+	 * @description 压窗屏 / 页面级弹层。
+	 * - 声明式：v-model:show + 默认插槽（页面级，不盖原生导航栏/tabBar）
+	 * - 命令式：openNaxPopup()；App/Web 走 dialogPage 真压窗，小程序降级到本宿主
+	 * @property {boolean} show v-model:show 声明式显隐
+	 * @property {string} title 简易标题（无插槽时）
+	 * @property {string} content 简易内容
+	 * @property {string} position center/bottom/left/right
+	 * @property {boolean} mask 遮罩
+	 * @property {boolean} maskClosable 点遮罩关闭
+	 * @property {boolean} round 圆角
+	 * @property {string} width 宽度
+	 * @property {string} height 高度
+	 * @property {number} zIndex 层级
+	 * @property {number} duration 动画 ms
+	 * @property {string} customClass 根 class
+	 * @event update:show
+	 * @event open / opened / close / click-mask
+	 * @slot default 自定义面板
+	 */
+	import {
+		bindNaxPopupHost,
+		unbindNaxPopupHost,
+		notifyNaxPopupAction
+	} from '../../index.uts'
+
+	const props = defineProps({
+		show: {
+			type: Boolean,
+			default: false
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		content: {
+			type: String,
+			default: ''
+		},
+		position: {
+			type: String,
+			default: 'center'
+		},
+		mask: {
+			type: Boolean,
+			default: true
+		},
+		maskClosable: {
+			type: Boolean,
+			default: true
+		},
+		closeOnMask: {
+			type: Boolean,
+			default: true
+		},
+		closeOnClickOverlay: {
+			type: Boolean,
+			default: true
+		},
+		round: {
+			type: Boolean,
+			default: true
+		},
+		width: {
+			type: String,
+			default: ''
+		},
+		height: {
+			type: String,
+			default: ''
+		},
+		zIndex: {
+			type: Number,
+			default: 10090
+		},
+		duration: {
+			type: Number,
+			default: 280
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:show',
+		'open',
+		'opened',
+		'close',
+		'click-mask'
+	])
+
+	const hostOpen = ref(false)
+	const hostTitle = ref('')
+	const hostContent = ref('')
+	const hostPosition = ref('center')
+	const hostMask = ref(true)
+	const hostMaskClosable = ref(true)
+	const hostRound = ref(true)
+	const hostWidth = ref('')
+	const hostHeight = ref('')
+	const hostZIndex = ref(10090)
+	const hostDuration = ref(280)
+
+	const visible = computed((): boolean => {
+		if (hostOpen.value) {
+			return true
+		}
+		return props.show
+	})
+
+	const titleText = computed((): string => {
+		if (hostOpen.value) {
+			return hostTitle.value
+		}
+		return props.title
+	})
+
+	const contentText = computed((): string => {
+		if (hostOpen.value) {
+			return hostContent.value
+		}
+		return props.content
+	})
+
+	const hasDefaultBody = computed((): boolean => {
+		return titleText.value.length > 0 || contentText.value.length > 0
+	})
+
+	const panelPosition = computed((): string => {
+		if (hostOpen.value) {
+			return hostPosition.value
+		}
+		const p = props.position
+		if (p == 'bottom' || p == 'left' || p == 'right' || p == 'center') {
+			return p
+		}
+		return 'center'
+	})
+
+	const maskEnabled = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostMask.value
+		}
+		return props.mask
+	})
+
+	const effectiveMaskClosable = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostMaskClosable.value
+		}
+		return props.maskClosable && props.closeOnMask && props.closeOnClickOverlay
+	})
+
+	const roundEnabled = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostRound.value
+		}
+		return props.round
+	})
+
+	const widthValue = computed((): string => {
+		if (hostOpen.value) {
+			return hostWidth.value
+		}
+		return props.width
+	})
+
+	const heightValue = computed((): string => {
+		if (hostOpen.value) {
+			return hostHeight.value
+		}
+		return props.height
+	})
+
+	const zIndexValue = computed((): number => {
+		if (hostOpen.value) {
+			return hostZIndex.value
+		}
+		return props.zIndex
+	})
+
+	const durationValue = computed((): number => {
+		if (hostOpen.value) {
+			return hostDuration.value
+		}
+		return props.duration
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-popup--' + panelPosition.value
+		if (props.customClass.length > 0 && !hostOpen.value) {
+			cls = cls + ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const pickerRootClass = computed((): string => {
+		return 'nax-popup-picker'
+	})
+
+	function hostShow(
+		title: string,
+		content: string,
+		position: string,
+		mask: boolean,
+		maskClosable: boolean,
+		round: boolean,
+		width: string,
+		height: string,
+		zIndex: number,
+		duration: number
+	) {
+		hostTitle.value = title
+		hostContent.value = content
+		hostPosition.value = position
+		hostMask.value = mask
+		hostMaskClosable.value = maskClosable
+		hostRound.value = round
+		hostWidth.value = width
+		hostHeight.value = height
+		hostZIndex.value = zIndex
+		hostDuration.value = duration
+		hostOpen.value = true
+	}
+
+	function hostHide() {
+		hostOpen.value = false
+	}
+
+	function onCloseClick() {
+		if (hostOpen.value) {
+			hostOpen.value = false
+			notifyNaxPopupAction('close')
+			return
+		}
+		emit('update:show', false)
+	}
+
+	function onPickerUpdateShow(v: boolean) {
+		if (v) {
+			return
+		}
+		if (hostOpen.value) {
+			hostOpen.value = false
+			notifyNaxPopupAction('mask')
+			return
+		}
+		if (props.show) {
+			emit('update:show', false)
+		}
+	}
+
+	function onOpen() {
+		emit('open')
+	}
+
+	function onOpened() {
+		emit('opened')
+	}
+
+	function onClose() {
+		emit('close')
+	}
+
+	function onClickMask() {
+		emit('click-mask')
+	}
+
+	let boundHostId: number = 0
+
+	onMounted(() => {
+		boundHostId = bindNaxPopupHost(hostShow, hostHide)
+	})
+
+	onUnmounted(() => {
+		if (hostOpen.value) {
+			hostOpen.value = false
+			notifyNaxPopupAction('dismiss')
+		}
+		unbindNaxPopupHost(boundHostId)
+		boundHostId = 0
+	})
+</script>
+
+<style>
+	.nax-popup {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: hidden;
+	}
+
+	.nax-popup__body {
+		flex-direction: column;
+		padding-top: 20px;
+		padding-bottom: 16px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.nax-popup__title {
+		font-size: 17px;
+		font-weight: 600;
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+		margin-bottom: 10px;
+	}
+
+	.nax-popup__content {
+		font-size: 14px;
+		line-height: 21px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+		margin-bottom: 16px;
+	}
+
+	.nax-popup__actions {
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.nax-popup__btn {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 40px;
+		padding-left: 20px;
+		padding-right: 20px;
+		border-radius: var(--nax-radius-md, 3px);
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-popup__btn--hover {
+		opacity: 0.88;
+	}
+
+	.nax-popup__btn-text {
+		font-size: 15px;
+		font-weight: 500;
+		color: var(--nax-color-text-inverse, #ffffff);
+		text-align: center;
+	}
+</style>

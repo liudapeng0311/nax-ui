@@ -1,0 +1,125 @@
+<template>
+  <view class="outline" :style="outlineStyle()">
+    <text class="outline-title" :style="titleStyle()">本页目录</text>
+    <scroll-view class="scroll" :scroll-y="true" :show-scrollbar="false">
+      <view
+        v-for="(h, i) in headings"
+        :key="i"
+        class="outline-item"
+        :style="itemStyle(h.level, isActive(h))"
+        hover-class="press"
+        @click="onTap(h)"
+      >
+        <text :style="textStyle(isActive(h))">{{ h.text }}</text>
+      </view>
+      <view class="tail-space" />
+    </scroll-view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { HeadingMeta } from '../../types/content.uts'
+import { theme } from '../../utils/theme.uts'
+
+const props = defineProps<{
+  headings: HeadingMeta[]
+  activeId: string
+}>()
+
+const emit = defineEmits(['jump'])
+
+function outlineStyle(): UTSJSONObject {
+  const style = {
+    borderLeftWidth: '1px',
+    borderLeftColor: theme.state.colors.border,
+    borderLeftStyle: 'solid',
+  } as UTSJSONObject
+  // #ifdef WEB
+  // 鼠标悬停背景色通过 CSS 变量下发，:hover 规则随之适配深浅色（App 端无鼠标且不支持伪类）
+  style['--up-hover-bg'] = theme.state.colors.surfaceHover
+  // #endif
+  return style
+}
+
+function titleStyle(): UTSJSONObject {
+  return {
+    fontSize: '11px',
+    fontWeight: '600',
+    letterSpacing: '0.5px',
+    color: theme.state.colors.text3,
+  } as UTSJSONObject
+}
+
+function isActive(h: HeadingMeta): boolean {
+  return h.id === props.activeId
+}
+
+function itemStyle(level: number, active: boolean): UTSJSONObject {
+  return {
+    borderLeftWidth: '2px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: active ? theme.state.colors.brand : 'transparent',
+    paddingLeft: level >= 3 ? '24px' : '12px',
+  } as UTSJSONObject
+}
+
+function textStyle(active: boolean): UTSJSONObject {
+  return {
+    fontSize: '12.5px',
+    lineHeight: '20px',
+    fontWeight: active ? '600' : '400',
+    color: active ? theme.state.colors.brand : theme.state.colors.text3,
+  } as UTSJSONObject
+}
+
+function onTap(h: HeadingMeta): void {
+  emit('jump', h.id)
+}
+</script>
+
+<style>
+.outline {
+  flex-direction: column;
+  /* 填满父容器（outline-rail），否则左边框线与内部滚动区高度塌成内容高度 */
+  flex: 1;
+}
+
+.scroll {
+  flex: 1;
+  flex-direction: column;
+}
+
+.outline-title {
+  margin-bottom: 12px;
+}
+
+.outline-item {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-bottom: 1px;
+  border-radius: 6px;
+}
+
+/* #ifdef WEB */
+.outline-item {
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 120ms;
+}
+
+.outline-item:hover {
+  background-color: var(--up-hover-bg, rgba(20, 24, 40, 0.05));
+}
+/* #endif */
+
+/* 按压反馈仅触屏端生效：Web 端已有悬停底色，按压变透明会在点击时产生文字"先浅后深"的闪烁 */
+/* #ifndef WEB */
+.press {
+  opacity: 0.7;
+}
+/* #endif */
+
+.tail-space {
+  height: 40px;
+}
+</style>

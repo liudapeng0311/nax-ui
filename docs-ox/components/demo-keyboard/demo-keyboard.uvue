@@ -1,0 +1,23 @@
+<template>
+  <view class="demo-keyboard">
+    <nax-button label="打开数字键盘" @click="show = true"></nax-button>
+    <nax-keyboard v-model:show="show" mode="number" @confirm="onConfirm"></nax-keyboard>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+
+function onConfirm(_payload: UTSJSONObject) {
+  show.value = false
+  uni.showToast({ title: '已确认输入', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-keyboard {
+  flex-direction: column;
+}
+</style>

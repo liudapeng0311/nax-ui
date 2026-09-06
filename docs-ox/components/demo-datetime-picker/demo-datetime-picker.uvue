@@ -1,0 +1,28 @@
+<template>
+  <view class="demo-datetime-picker">
+    <nax-button label="选择日期时间" @click="show = true"></nax-button>
+    <nax-datetime-picker
+      v-model:show="show"
+      mode="datetime"
+      title="选择时间"
+      @confirm="onConfirm"
+    ></nax-datetime-picker>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+
+function onConfirm(_payload: UTSJSONObject) {
+  show.value = false
+  uni.showToast({ title: '已确认时间', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-datetime-picker {
+  flex-direction: column;
+}
+</style>

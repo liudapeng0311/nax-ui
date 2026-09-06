@@ -1,0 +1,427 @@
+<template>
+	<view class="nax-steps" :class="rootClass">
+		<template v-if="hasList">
+			<nax-step
+				v-for="(item, index) in stepItems"
+				:key="index"
+				:index="index"
+				:total="stepItems.length"
+				:title="resolveTitle(item)"
+				:desc="resolveDesc(item)"
+				:status="resolveItemStatus(item)"
+				:icon="resolveItemIcon(item)"
+				:disabled="resolveItemDisabled(item)"
+			></nax-step>
+		</template>
+		<slot v-else></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-steps
+	 * @description 步骤条容器。list 数据驱动或配合 nax-step 组合使用。
+	 * @property {Array} list 步骤列表（name/title、desc/description、status、icon、disabled；支持字符串）
+	 * @property {number} current 当前步下标（从 0 起），无显式 status 时推导
+	 * @property {string} direction horizontal | vertical（兼容 row | column）
+	 * @property {string} mode number | dot
+	 * @property {string} type primary | info | success | warning | error
+	 * @property {string} size sm | md | lg
+	 * @property {string} icon 完成态默认图标，默认 check
+	 * @property {string} errorIcon 失败态默认图标，默认 close
+	 * @property {boolean} clickable 是否可点击，默认 false
+	 * @property {string} customClass 根扩展 class
+	 * @event click 点击步骤（index）
+	 * @slot default 放置 nax-step（list 为空时）
+	 */
+	const props = defineProps({
+		list: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		current: {
+			type: Number,
+			default: 0
+		},
+		direction: {
+			type: String,
+			default: 'horizontal'
+		},
+		mode: {
+			type: String,
+			default: 'number'
+		},
+		type: {
+			type: String,
+			default: 'primary'
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		icon: {
+			type: String,
+			default: 'check'
+		},
+		errorIcon: {
+			type: String,
+			default: 'close'
+		},
+		clickable: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click'])
+
+	const registeredIds = ref([] as string[])
+
+	function normalizeDirection(value : string) : string {
+		if (value == 'vertical' || value == 'column' || value == 'col') {
+			return 'vertical'
+		}
+		return 'horizontal'
+	}
+
+	function normalizeMode(value : string) : string {
+		if (value == 'dot' || value == 'dots') {
+			return 'dot'
+		}
+		return 'number'
+	}
+
+	function normalizeSize(value : string) : string {
+		if (value == 'sm' || value == 'small' || value == 'tiny') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	function normalizeType(value : string) : string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'primary'
+	}
+
+	function asAnyArray(val : any | null) : any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function asObject(item : any | null) : UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function readString(obj : UTSJSONObject, key : string) : string {
+		const anyVal = obj[key]
+		if (anyVal == null) {
+			return ''
+		}
+		if (typeof anyVal == 'string') {
+			return anyVal as string
+		}
+		if (typeof anyVal == 'number' || typeof anyVal == 'boolean') {
+			return '' + anyVal
+		}
+		return ''
+	}
+
+	function readBoolean(obj : UTSJSONObject, key : string) : boolean {
+		const anyVal = obj[key]
+		if (anyVal == null) {
+			return false
+		}
+		if (typeof anyVal == 'boolean') {
+			return anyVal as boolean
+		}
+		if (typeof anyVal == 'string') {
+			const s = (anyVal as string).toLowerCase()
+			return s == 'true' || s == '1'
+		}
+		if (typeof anyVal == 'number') {
+			return (anyVal as number) != 0
+		}
+		return false
+	}
+
+	const stepItems = computed((): any[] => {
+		return asAnyArray(props.list as any)
+	})
+
+	const hasList = computed((): boolean => {
+		return stepItems.value.length > 0
+	})
+
+	const directionName = computed((): string => {
+		return normalizeDirection(props.direction)
+	})
+
+	const modeName = computed((): string => {
+		return normalizeMode(props.mode)
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const currentIndex = computed((): number => {
+		const n = Math.floor(props.current as number)
+		if (n < 0) {
+			return 0
+		}
+		return n
+	})
+
+	const finishIconName = computed((): string => {
+		if (props.icon.length > 0) {
+			return props.icon
+		}
+		return 'check'
+	})
+
+	const errorIconName = computed((): string => {
+		if (props.errorIcon.length > 0) {
+			return props.errorIcon
+		}
+		return 'close'
+	})
+
+	const clickableValue = computed((): boolean => {
+		return props.clickable
+	})
+
+	const listTotal = computed((): number => {
+		if (hasList.value) {
+			return stepItems.value.length
+		}
+		return registeredIds.value.length
+	})
+
+	function resolveTitle(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item as string
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const name = readString(obj, 'name')
+		if (name.length > 0) {
+			return name
+		}
+		const title = readString(obj, 'title')
+		if (title.length > 0) {
+			return title
+		}
+		const label = readString(obj, 'label')
+		if (label.length > 0) {
+			return label
+		}
+		const text = readString(obj, 'text')
+		if (text.length > 0) {
+			return text
+		}
+		return ''
+	}
+
+	function resolveDesc(item : any | null) : string {
+		if (item == null || typeof item == 'string') {
+			return ''
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const desc = readString(obj, 'desc')
+		if (desc.length > 0) {
+			return desc
+		}
+		return readString(obj, 'description')
+	}
+
+	function resolveItemStatus(item : any | null) : string {
+		if (item == null || typeof item == 'string') {
+			return ''
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		return readString(obj, 'status')
+	}
+
+	function resolveItemIcon(item : any | null) : string {
+		if (item == null || typeof item == 'string') {
+			return ''
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		return readString(obj, 'icon')
+	}
+
+	function resolveItemDisabled(item : any | null) : boolean {
+		if (item == null || typeof item == 'string') {
+			return false
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return false
+		}
+		return readBoolean(obj, 'disabled')
+	}
+
+	function findRegisteredIndex(id : string) : number {
+		const arr = registeredIds.value
+		for (var i = 0; i < arr.length; i++) {
+			if (arr[i] == id) {
+				return i
+			}
+		}
+		return -1
+	}
+
+	function registerStep(id : string) : number {
+		const exist = findRegisteredIndex(id)
+		if (exist >= 0) {
+			return exist
+		}
+		const next = registeredIds.value.slice()
+		next.push(id)
+		registeredIds.value = next
+		return next.length - 1
+	}
+
+	function unregisterStep(id : string) {
+		const idx = findRegisteredIndex(id)
+		if (idx < 0) {
+			return
+		}
+		const next = [] as string[]
+		const arr = registeredIds.value
+		for (var i = 0; i < arr.length; i++) {
+			if (i != idx) {
+				next.push(arr[i])
+			}
+		}
+		registeredIds.value = next
+	}
+
+	function onStepClick(index : number) {
+		if (!props.clickable) {
+			return
+		}
+		emit('click', index)
+	}
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-steps--' + directionName.value
+		cls += ' nax-steps--' + sizeName.value
+		cls += ' nax-steps--' + typeName.value
+		cls += ' nax-steps--mode-' + modeName.value
+		if (props.clickable) {
+			cls += ' nax-steps--clickable'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	// 安卓 UTS：provide 用 Ref，避免 ComputedRef
+	const currentState = ref(0)
+	const directionState = ref('horizontal')
+	const modeState = ref('number')
+	const typeState = ref('primary')
+	const sizeState = ref('md')
+	const iconState = ref('check')
+	const errorIconState = ref('close')
+	const clickableState = ref(false)
+	const totalState = ref(0)
+
+	function syncProvideStates() {
+		currentState.value = currentIndex.value
+		directionState.value = directionName.value
+		modeState.value = modeName.value
+		typeState.value = typeName.value
+		sizeState.value = sizeName.value
+		iconState.value = finishIconName.value
+		errorIconState.value = errorIconName.value
+		clickableState.value = clickableValue.value
+		totalState.value = listTotal.value
+	}
+	syncProvideStates()
+	watch((): number => currentIndex.value, (_v : number) => { syncProvideStates() })
+	watch((): string => directionName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => modeName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => typeName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => sizeName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => finishIconName.value, (_v : string) => { syncProvideStates() })
+	watch((): string => errorIconName.value, (_v : string) => { syncProvideStates() })
+	watch((): boolean => clickableValue.value, (_v : boolean) => { syncProvideStates() })
+	watch((): number => listTotal.value, (_v : number) => { syncProvideStates() })
+
+	provide('naxStepsInGroup', true)
+	provide('naxStepsCurrent', currentState)
+	provide('naxStepsDirection', directionState)
+	provide('naxStepsMode', modeState)
+	provide('naxStepsType', typeState)
+	provide('naxStepsSize', sizeState)
+	provide('naxStepsIcon', iconState)
+	provide('naxStepsErrorIcon', errorIconState)
+	provide('naxStepsClickable', clickableState)
+	provide('naxStepsTotal', totalState)
+	provide('naxStepsRegister', registerStep)
+	provide('naxStepsUnregister', unregisterStep)
+	provide('naxStepsOnClick', onStepClick)
+</script>
+
+<style>
+	.nax-steps {
+		width: 100%;
+		flex-direction: row;
+		align-items: flex-start;
+	}
+
+	.nax-steps--vertical {
+		flex-direction: column;
+	}
+
+	.nax-steps--horizontal {
+		flex-direction: row;
+	}
+</style>

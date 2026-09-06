@@ -1,0 +1,137 @@
+<template>
+  <view class="demo-grid">
+    <text class="dsec">基础 · 3 列 + 边框</text>
+    <nax-grid :col="3">
+      <nax-grid-item index="0">
+        <nax-icon name="home" size="22"></nax-icon>
+        <text class="gtxt">首页</text>
+      </nax-grid-item>
+      <nax-grid-item index="1">
+        <nax-icon name="search" size="22"></nax-icon>
+        <text class="gtxt">发现</text>
+      </nax-grid-item>
+      <nax-grid-item index="2">
+        <nax-icon name="user" size="22"></nax-icon>
+        <text class="gtxt">我的</text>
+      </nax-grid-item>
+      <nax-grid-item index="3">
+        <nax-icon name="star" size="22"></nax-icon>
+        <text class="gtxt">收藏</text>
+      </nax-grid-item>
+      <nax-grid-item index="4">
+        <nax-icon name="settings" size="22"></nax-icon>
+        <text class="gtxt">设置</text>
+      </nax-grid-item>
+      <nax-grid-item index="5">
+        <nax-icon name="share" size="22"></nax-icon>
+        <text class="gtxt">分享</text>
+      </nax-grid-item>
+    </nax-grid>
+
+    <text class="dsec">4 列 · 无边框</text>
+    <nax-grid :col="4" :border="false">
+      <nax-grid-item index="0">
+        <nax-icon name="home" size="20"></nax-icon>
+        <text class="gtxt">首页</text>
+      </nax-grid-item>
+      <nax-grid-item index="1">
+        <nax-icon name="search" size="20"></nax-icon>
+        <text class="gtxt">发现</text>
+      </nax-grid-item>
+      <nax-grid-item index="2">
+        <nax-icon name="user" size="20"></nax-icon>
+        <text class="gtxt">我的</text>
+      </nax-grid-item>
+      <nax-grid-item index="3">
+        <nax-icon name="settings" size="20"></nax-icon>
+        <text class="gtxt">设置</text>
+      </nax-grid-item>
+    </nax-grid>
+
+    <text class="dsec">间距 gap</text>
+    <nax-grid :col="3" gap="8">
+      <nax-grid-item index="0">
+        <nax-icon name="image" size="22"></nax-icon>
+        <text class="gtxt">图片</text>
+      </nax-grid-item>
+      <nax-grid-item index="1">
+        <nax-icon name="copy" size="22"></nax-icon>
+        <text class="gtxt">复制</text>
+      </nax-grid-item>
+      <nax-grid-item index="2">
+        <nax-icon name="delete" size="22"></nax-icon>
+        <text class="gtxt">删除</text>
+      </nax-grid-item>
+    </nax-grid>
+
+    <text class="dsec">对齐 align（仅 2 项）</text>
+    <nax-grid :col="3" align="left" :border="false" gap="8">
+      <nax-grid-item index="a1">
+        <nax-icon name="home" size="22"></nax-icon>
+        <text class="gtxt">首页</text>
+      </nax-grid-item>
+      <nax-grid-item index="a2">
+        <nax-icon name="user" size="22"></nax-icon>
+        <text class="gtxt">我的</text>
+      </nax-grid-item>
+    </nax-grid>
+
+    <text class="dsec">徽标组合</text>
+    <nax-grid :col="3">
+      <nax-grid-item index="msg">
+        <nax-badge value="9">
+          <nax-icon name="share" size="22"></nax-icon>
+        </nax-badge>
+        <text class="gtxt">消息</text>
+      </nax-grid-item>
+      <nax-grid-item index="dot">
+        <nax-badge dot>
+          <nax-icon name="user" size="22"></nax-icon>
+        </nax-badge>
+        <text class="gtxt">我的</text>
+      </nax-grid-item>
+      <nax-grid-item index="norm">
+        <nax-icon name="settings" size="22"></nax-icon>
+        <text class="gtxt">设置</text>
+      </nax-grid-item>
+    </nax-grid>
+
+    <text class="dsec">禁用 · 关闭 hover</text>
+    <nax-grid :col="3" :hover="false">
+      <nax-grid-item index="ok">
+        <nax-icon name="check" size="22"></nax-icon>
+        <text class="gtxt">可用</text>
+      </nax-grid-item>
+      <nax-grid-item index="off" disabled>
+        <nax-icon name="close" size="22"></nax-icon>
+        <text class="gtxt">禁用</text>
+      </nax-grid-item>
+      <nax-grid-item index="auto">
+        <nax-icon name="edit" size="22"></nax-icon>
+        <text class="gtxt">编辑</text>
+      </nax-grid-item>
+    </nax-grid>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-grid {
+  flex-direction: column;
+}
+
+.gtxt {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 6px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

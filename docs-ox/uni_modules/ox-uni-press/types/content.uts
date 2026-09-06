@@ -1,0 +1,172 @@
+// OxUniPress 内容数据契约（UTS 版）
+// 与 packages/contracts/src/index.ts 保持同步（schemaVersion 1）。
+// 差异说明：UTS 不支持联合类型数组，BlockNode/InlineNode 统一为 AstNode；
+// attrs 使用 UTSJSONObject 承载动态键值。
+
+export const CONTENT_SCHEMA_VERSION: number = 1
+
+export interface SourcePosition {
+  start: Position
+  end: Position
+}
+
+export interface Position {
+  line: number
+  column: number
+}
+
+export interface HeadingMeta {
+  id: string
+  text: string
+  level: number
+}
+
+export interface PageMeta {
+  id: string
+  path: string
+  source: string
+  title: string
+  description?: string
+  headings: HeadingMeta[]
+  order?: number
+  lang?: string
+  draft?: boolean
+  lastUpdated?: string
+  /** doc 为普通文档页，home 为站点首页 */
+  layout?: string
+  custom?: UTSJSONObject | null
+}
+
+/** 首页 hero 区按钮：brand 实底主按钮，alt 描边次按钮 */
+export interface HomeHeroAction {
+  text: string
+  link: string
+  theme?: string
+}
+
+/** 首页 hero 区 */
+export interface HomeHero {
+  name?: string
+  text?: string
+  tagline?: string
+  actions?: HomeHeroAction[] | null
+}
+
+/** 首页特性卡片 */
+export interface HomeFeature {
+  icon?: string
+  title?: string
+  details?: string
+  link?: string
+}
+
+/** layout: home 页面的结构化数据，由构建端从 frontmatter 的 hero/features 字段生成 */
+export interface HomeLayoutData {
+  hero?: HomeHero | null
+  features?: HomeFeature[] | null
+}
+
+/** 代码高亮 token：构建端切词，c 为语义类别（kw/str/com/num/fn/type），缺省为普通文本 */
+export interface CodeToken {
+  t: string
+  c?: string
+}
+
+/** 通用 AST 节点：块级与行内共用同一结构 */
+export interface AstNode {
+  type: string
+  value?: string | null
+  children?: AstNode[] | null
+  attrs?: UTSJSONObject | null
+  /** 仅 code-block：构建端预切词的高亮 token */
+  tokens?: CodeToken[] | null
+  /** 仅 demo：组件引用 props，只允许标量（字符串/数字/布尔） */
+  props?: UTSJSONObject | null
+  source?: SourcePosition | null
+}
+
+export interface Document {
+  meta: PageMeta
+  root: AstNode
+  /** layout: home 时的首页结构化数据；普通文档页不存在该字段 */
+  home?: HomeLayoutData | null
+}
+
+export interface NavigationNode {
+  text: string
+  link?: string
+  items?: NavigationNode[]
+}
+
+export interface SidebarGroup {
+  text?: string
+  items: NavigationNode[]
+}
+
+export interface SearchDocument {
+  id: string
+  path: string
+  title: string
+  headings: string[]
+  text: string
+}
+
+export interface SiteFooterLink {
+  text: string
+  link: string
+}
+
+/** 站点页脚：版权、备案号与自定义链接 */
+export interface SiteFooter {
+  copyright?: string
+  /** ICP 备案号，渲染时自动附加工信部备案网站链接 */
+  beian?: string
+  links?: SiteFooterLink[]
+}
+
+export interface SiteInfo {
+  title: string
+  description?: string
+  base?: string
+  lang?: string
+  footer?: SiteFooter
+  /** 头部品牌图路径（如 "/static/ox_logo.png"），原样交给 image 组件；为空时 header 只渲染文字品牌 */
+  logo?: string
+  /** 站点图标路径（如 "/static/favicon.png"）；浏览器标签栏图标由宿主工程 index.html 引用 */
+  favicon?: string
+}
+
+/**
+ * 站点清单（UTS 形态）。
+ * 与 TS 契约的差异：pages 由 Record 改为数组，由运行时按 path 线性查找，
+ * 规避 UTS 对象字面量作为 Map 的限制；生成端已同步输出数组形态。
+ */
+export interface SiteManifestData {
+  site: SiteInfo
+  pages: PageMeta[]
+  navigation: NavigationNode[]
+  sidebar: SidebarGroup[]
+  search: SearchDocument[]
+}
+
+/** 远程内容发布包（uniCloud 模式） */
+export interface ContentRelease {
+  releaseId: string
+  schemaVersion: number
+  siteId: string
+  version: string
+  createdAt: string
+  checksum: string
+  signature?: string
+  minClientVersion?: string
+  manifest: SiteManifestData
+}
+
+/** 远程页面信封：按 path 单独下载 */
+export interface RemotePageEnvelope {
+  releaseId: string
+  path: string
+  schemaVersion: number
+  checksum: string
+  document: Document
+}

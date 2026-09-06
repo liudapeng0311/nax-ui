@@ -1,0 +1,1141 @@
+/**
+ * nax-rich-text 渲染前处理
+ *
+ * 输入 parser.uts 产出的归一化节点树，原地补全渲染所需信息后返回：
+ * - 默认排版常量（标题字号、段距、引用、列表、表格等）与全局 props（BaseStyle）合并
+ * - 可继承样式（字号 / 颜色 / 字重 / 行高 / 对齐等）沿树向下合并，逐节点产出最终 styleText
+ * - 块容器内行内内容分组为 run 节点：原生 flex 无行内混排能力，行内图片等结构会拆分为独立块
+ * - 空白折叠与块首尾修剪（对齐 HTML 空白语义；pre 内保留）
+ * - text-indent 用全角空格模拟（原生 text 组件不支持该属性，中文新闻首行缩进必需）
+ *
+ * 纯字符串 / Map 处理，零平台 API 依赖，全端可用，可在 Node 中直接验证。
+ */
+import {
+	RichNode,
+	NODE_TYPE_ELEMENT,
+	NODE_TYPE_TEXT,
+	NODE_KIND_ROOT,
+	NODE_KIND_BLOCK,
+	NODE_KIND_INLINE,
+	NODE_KIND_MEDIA,
+	NODE_KIND_EMBED,
+	NODE_KIND_HR,
+	NODE_KIND_BR,
+	NODE_KIND_RUN,
+	NODE_KIND_TABLE_SECTION,
+	NODE_KIND_TABLE_ROW,
+	NODE_KIND_TABLE_CELL,
+	isVoidTag
+} from './parser.uts'
+
+/** 全局基础样式（来自组件 props） */
+export class BaseStyle {
+	fontSize : number = 16
+	color : string = '#333639'
+	lineHeight : string = '1.6'
+	fontFamily : string = ''
+	linkColor : string = '#18a058'
+
+	constructor() {}
+}
+
+/** 渲染器交互动作（图片 / 链接 / 视频 / 嵌入内容点击） */
+export class RichNodeAction {
+	type : string = ''
+	src : string = ''
+	href : string = ''
+
+	constructor() {}
+}
+
+/** 可继承样式键 */
+const INHERIT_KEYS : string[] = [
+	'color', 'font-family', 'font-weight', 'font-style',
+	'line-height', 'letter-spacing', 'text-align'
+]
+
+/** 文本节点 / run 的最终样式输出顺序 */
+const TEXT_KEYS : string[] = [
+	'font-size', 'font-family', 'font-weight', 'font-style',
+	'color', 'background-color', 'text-decoration', 'letter-spacing',
+	'line-height', 'text-align'
+]
+
+/** 块容器的最终样式输出顺序 */
+const BLOCK_KEYS : string[] = [
+	'width', 'height', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+	'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+	'background-color', 'border', 'border-left', 'border-top', 'border-right', 'border-bottom',
+	'border-radius', 'align-self', 'text-align'
+]
+
+/** 块节点允许从内容内联样式透传的键 */
+const BLOCK_PASS_KEYS : string[] = [
+	'background-color', 'border', 'border-left', 'border-top', 'border-right', 'border-bottom',
+	'border-radius', 'text-align', 'width', 'height'
+]
+
+const MONO_FONT : string = 'Menlo,Consolas,monospace'
+
+function inList(list : string[], key : string) : boolean {
+	for (let i = 0; i < list.length; i++) {
+		if (list[i] == key) {
+			return true
+		}
+	}
+	return false
+}
+
+function copyMap(source : Map<string, string>) : Map<string, string> {
+	const out : Map<string, string> = new Map()
+	source.forEach((value : string, key : string) => {
+		out.set(key, value)
+	})
+	return out
+}
+
+function px(n : number) : string {
+	return Math.round(n).toString() + 'px'
+}
+
+/** 解析样式值开头数字（不使用正则），非法返回 NaN */
+function parseLeadingNumber(s : string) : number {
+	let num = ''
+	for (let i = 0; i < s.length; i++) {
+		const c = s.charAt(i)
+		const isDigit = c.charCodeAt(0) >= 48 && c.charCodeAt(0) <= 57
+		if (isDigit || c == '.' || (i == 0 && (c == '-' || c == '+'))) {
+			num += c
+		} else {
+			break
+		}
+	}
+	if (num.length == 0) {
+		return NaN
+	}
+	const v = parseFloat(num)
+	if (v != v) {
+		return NaN
+	}
+	return v
+}
+
+/**
+ * 长度值 → px 数值：支持 px / pt / em / rem / % 与无单位数字；
+ * 无法解析返回 -1。em 相对 currentPx，rem 相对 basePx。
+ */
+function parseLengthPx(value : string, currentPx : number, basePx : number) : number {
+	const v = value.trim().toLowerCase()
+	if (v.length == 0) {
+		return -1
+	}
+	if (v == '0') {
+		return 0
+	}
+	if (v == 'auto') {
+		return 0
+	}
+	let numStr = v
+	let unit = 'px'
+	if (v.length > 2) {
+		const tail = v.substring(v.length - 2)
+		if (tail == 'px' || tail == 'pt' || tail == 'em' || tail == 'rem') {
+			numStr = v.substring(0, v.length - 2)
+			unit = tail
+		} else if (v.charAt(v.length - 1) == '%') {
+			numStr = v.substring(0, v.length - 1)
+			unit = '%'
+		}
+	}
+	const n = parseLeadingNumber(numStr)
+	if (n != n || n < 0) {
+		return -1
+	}
+	if (unit == 'pt') {
+		return n * 4 / 3
+	}
+	if (unit == 'em') {
+		return n * currentPx
+	}
+	if (unit == 'rem') {
+		return n * basePx
+	}
+	if (unit == '%') {
+		return currentPx * n / 100
+	}
+	return n
+}
+
+function currentFontSizePx(inherited : Map<string, string>) : number {
+	const fs = inherited.get('font-size')
+	if (fs == null) {
+		return 16
+	}
+	const n = parseLeadingNumber(fs)
+	if (n != n) {
+		return 16
+	}
+	return n
+}
+
+/** 按固定键序输出样式串 */
+function buildStyleText(style : Map<string, string>, keys : string[]) : string {
+	let out = ''
+	for (let i = 0; i < keys.length; i++) {
+		const v = style.get(keys[i])
+		if (v != null && v.length > 0) {
+			if (out.length > 0) {
+				out += ';'
+			}
+			out += keys[i] + ':' + v
+		}
+	}
+	return out
+}
+
+/**
+ * 空白折叠：内部连续空白 → 单空格；首尾空白折叠为单个空格保留。
+ * 块边界的修剪由 normalizeSeq 依据跨界空格状态处理。
+ */
+export function collapseWhitespace(s : string) : string {
+	let out = ''
+	let pendingSpace = false
+	let sawWs = false
+	for (let i = 0; i < s.length; i++) {
+		const code = s.charCodeAt(i)
+		const isWs = code == 32 || code == 9 || code == 10 || code == 13 || code == 12
+		if (isWs) {
+			sawWs = true
+			pendingSpace = true
+			continue
+		}
+		if (pendingSpace) {
+			out += ' '
+			pendingSpace = false
+		}
+		out += s.charAt(i)
+	}
+	if (out.length == 0) {
+		return sawWs ? ' ' : ''
+	}
+	if (pendingSpace) {
+		out += ' '
+	}
+	return out
+}
+
+function trimStartSpace(s : string) : string {
+	let i = 0
+	while (i < s.length && s.charAt(i) == ' ') {
+		i++
+	}
+	return s.substring(i)
+}
+
+function trimEndSpace(s : string) : string {
+	let end = s.length
+	while (end > 0 && s.charAt(end - 1) == ' ') {
+		end--
+	}
+	return s.substring(0, end)
+}
+
+function repeatChar(c : string, count : number) : string {
+	let out = ''
+	for (let i = 0; i < count; i++) {
+		out += c
+	}
+	return out
+}
+
+/** 从 16px 基准换算当前全局字号下的间距 */
+function spacing(basePx : number, v : number) : string {
+	return px(v * basePx / 16)
+}
+
+/**
+ * 由自身样式 + 父级继承链推导子级继承链。
+ * font-size 做 em / rem / % / pt 归一化为 px，其余可继承键直接覆盖。
+ */
+function deriveInherited(own : Map<string, string>, inherited : Map<string, string>, basePx : number) : Map<string, string> {
+	const out = copyMap(inherited)
+	const cur = currentFontSizePx(inherited)
+	const fs = own.get('font-size')
+	if (fs != null) {
+		const n = parseLengthPx(fs, cur, basePx)
+		if (n > 0) {
+			out.set('font-size', px(n))
+		}
+	}
+	for (let i = 0; i < INHERIT_KEYS.length; i++) {
+		const key = INHERIT_KEYS[i]
+		const v = own.get(key)
+		if (v != null && v.length > 0) {
+			out.set(key, v)
+		}
+	}
+	return out
+}
+
+/** 行内元素的语义默认样式（内容内联样式优先，只补缺省项） */
+function inlineSemantic(node : RichNode, inherited : Map<string, string>, base : BaseStyle) : Map<string, string> {
+	const add : Map<string, string> = new Map()
+	const name = node.name
+	const fill = (key : string, value : string) => {
+		if (inherited.get(key) == null) {
+			add.set(key, value)
+		}
+	}
+	const cur = currentFontSizePx(inherited)
+	if (name == 'strong' || name == 'b') {
+		fill('font-weight', 'bold')
+	} else if (name == 'em' || name == 'i' || name == 'cite' || name == 'var' || name == 'dfn') {
+		fill('font-style', 'italic')
+	} else if (name == 'u' || name == 'ins') {
+		fill('text-decoration', 'underline')
+	} else if (name == 's' || name == 'del' || name == 'strike') {
+		fill('text-decoration', 'line-through')
+	} else if (name == 'mark') {
+		fill('background-color', '#fdf6b2')
+	} else if (name == 'small') {
+		add.set('font-size', px(cur * 0.85))
+	} else if (name == 'big') {
+		add.set('font-size', px(cur * 1.2))
+	} else if (name == 'sub' || name == 'sup') {
+		add.set('font-size', px(cur * 0.75))
+	} else if (name == 'code' || name == 'kbd' || name == 'samp' || name == 'tt') {
+		fill('font-family', MONO_FONT)
+	} else if (name == 'a') {
+		// 未被内容显式指定颜色时使用链接色
+		if (inherited.get('color') == base.color) {
+			add.set('color', base.linkColor)
+		}
+	} else if (name == 'font') {
+		const color = node.attrs.get('color')
+		if (color != null && color.length > 0) {
+			fill('color', color)
+		}
+		const face = node.attrs.get('face')
+		if (face != null && face.length > 0) {
+			fill('font-family', face)
+		}
+		const sizeAttr = node.attrs.get('size')
+		if (sizeAttr != null) {
+			// 旧式 font size 1-7
+			const legacy : number[] = [10, 13, 16, 18, 20, 24, 32]
+			const idx = parseInt(sizeAttr)
+			if (idx >= 1 && idx <= 7) {
+				add.set('font-size', px(legacy[idx - 1]))
+			}
+		}
+	}
+	return add
+}
+
+/**
+ * 行内序列空白规整（含行内元素内部递归）：
+ * prevSpace 跨节点传递，保证「a <b> b</b> c」只保留单个分词空格；
+ * atEdgeStart / atEdgeEnd 时剥掉序列首尾空格。
+ * 返回序列渲染后是否以空格结尾。
+ */
+function normalizeSeq(children : RichNode[], atEdgeStart : boolean, atEdgeEnd : boolean) : boolean {
+	const kept : RichNode[] = []
+	let prevSpace = atEdgeStart
+	for (let i = 0; i < children.length; i++) {
+		const child = children[i]
+		if (child.type == NODE_TYPE_TEXT) {
+			if (child.preserveWs) {
+				// pre 内容不做空格处理
+				kept.push(child)
+				continue
+			}
+			let t = collapseWhitespace(child.text)
+			if (t.length > 0 && t.charAt(0) == ' ' && prevSpace) {
+				t = trimStartSpace(t)
+			}
+			if (t.length > 0) {
+				child.text = t
+				kept.push(child)
+				prevSpace = t.charAt(t.length - 1) == ' '
+			}
+			continue
+		}
+		if (child.kind == NODE_KIND_INLINE) {
+			prevSpace = normalizeSeq(child.children, prevSpace, false)
+			kept.push(child)
+			continue
+		}
+		// br 等不改变空格状态
+		kept.push(child)
+	}
+	if (atEdgeEnd) {
+		trimEndSeq(kept)
+	}
+	// 原地写回（uts 的 Array 长度只读，不能用 length = 0 清空）
+	while (children.length > 0) {
+		children.pop()
+	}
+	for (let i = 0; i < kept.length; i++) {
+		children.push(kept[i])
+	}
+	const last = kept.length > 0 ? kept[kept.length - 1] : null
+	if (last == null) {
+		return atEdgeStart
+	}
+	if (last.type == NODE_TYPE_TEXT) {
+		return last.text.charAt(last.text.length - 1) == ' '
+	}
+	return prevSpace
+}
+
+/** 从序列尾部剥空格（深入行内元素），空节点剔除 */
+function trimEndSeq(children : RichNode[]) {
+	while (children.length > 0) {
+		const last = children[children.length - 1]
+		if (last.type == NODE_TYPE_TEXT) {
+			if (last.preserveWs) {
+				return
+			}
+			last.text = trimEndSpace(last.text)
+			if (last.text.length > 0) {
+				return
+			}
+			children.pop()
+			continue
+		}
+		if (last.kind == NODE_KIND_INLINE) {
+			trimEndSeq(last.children)
+			if (last.children.length > 0) {
+				return
+			}
+			children.pop()
+			continue
+		}
+		return
+	}
+}
+
+/**
+ * 解析行内序列（run 或行内元素子级）：空白规整 + 样式产出 + 递归。
+ * normalizeSeq 原地修改 children 并返回末尾空格状态，这里直接消费原数组。
+ */
+function resolveInlineSeq(children : RichNode[], inherited : Map<string, string>, base : BaseStyle, atEdgeStart : boolean, atEdgeEnd : boolean) : RichNode[] {
+	normalizeSeq(children, atEdgeStart, atEdgeEnd)
+	const kept = children
+	for (let i = 0; i < kept.length; i++) {
+		const child = kept[i]
+		if (child.type == NODE_TYPE_TEXT) {
+			child.styleText = buildStyleText(inherited, TEXT_KEYS)
+			continue
+		}
+		if (child.kind == NODE_KIND_INLINE) {
+			resolveNode(child, inherited, base, false, false)
+		}
+	}
+	return kept
+}
+
+/** 是否含块级 / 结构化后代（媒体、表格、列表等，行内无法承载） */
+function hasStructuredDescendant(node : RichNode) : boolean {
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.type == NODE_TYPE_TEXT) {
+			continue
+		}
+		if (child.kind == NODE_KIND_INLINE) {
+			if (hasStructuredDescendant(child)) {
+				return true
+			}
+			continue
+		}
+		return true
+	}
+	return false
+}
+
+/**
+ * 块容器行内内容分组：连续行内 / 文本归入 run；
+ * 含结构子节点的行内元素（如包着图片的 a）提升为块容器。
+ */
+function groupChildren(node : RichNode) {
+	const rebuilt : RichNode[] = []
+	let runBuf : RichNode[] = []
+	const flush = () => {
+		if (runBuf.length == 0) {
+			return
+		}
+		const run = new RichNode()
+		run.name = '__run'
+		run.kind = NODE_KIND_RUN
+		run.children = runBuf
+		rebuilt.push(run)
+		runBuf = []
+	}
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.type == NODE_TYPE_TEXT || child.kind == NODE_KIND_INLINE) {
+			if (child.type == NODE_TYPE_ELEMENT && hasStructuredDescendant(child)) {
+				flush()
+				child.kind = NODE_KIND_BLOCK
+				rebuilt.push(child)
+			} else {
+				runBuf.push(child)
+			}
+			continue
+		}
+		flush()
+		rebuilt.push(child)
+	}
+	flush()
+	node.children = rebuilt
+}
+
+/**
+ * margin / padding 简写展开为四边（em 等 → px）。
+ * 左右同时为 auto 映射为 align-self:center（flex 居中，图片常见 margin:0 auto）。
+ */
+function expandBoxKey(out : Map<string, string>, own : Map<string, string>, key : string, prefix : string, currentPx : number) {
+	const suffixes : string[] = ['top', 'right', 'bottom', 'left']
+	const raw = own.get(key)
+	if (raw != null && raw.length > 0) {
+		const parts = raw.split(' ')
+		const vals : string[] = []
+		for (let i = 0; i < parts.length; i++) {
+			const p = parts[i].trim()
+			if (p.length > 0) {
+				vals.push(p)
+			}
+		}
+		if (vals.length == 0) {
+			return
+		}
+		let t = vals[0]
+		let r = vals.length > 1 ? vals[1] : t
+		let b = vals.length > 2 ? vals[2] : t
+		let l = vals.length > 3 ? vals[3] : r
+		if ((l == 'auto' && r == 'auto') || (t == 'auto' && b == 'auto')) {
+			out.set('align-self', 'center')
+			if (t == 'auto') { t = '0' }
+			if (b == 'auto') { b = '0' }
+			if (l == 'auto') { l = '0' }
+			if (r == 'auto') { r = '0' }
+		}
+		const sides : string[] = [t, r, b, l]
+		for (let i = 0; i < 4; i++) {
+			const n = parseLengthPx(sides[i], currentPx, currentPx)
+			if (n > 0) {
+				out.set(prefix + '-' + suffixes[i], px(n))
+			}
+		}
+		return
+	}
+	// 已是单边写法
+	for (let i = 0; i < 4; i++) {
+		const v = own.get(prefix + '-' + suffixes[i])
+		if (v != null && v.length > 0) {
+			const n = parseLengthPx(v, currentPx, currentPx)
+			if (n > 0) {
+				out.set(prefix + '-' + suffixes[i], px(n))
+			}
+		}
+	}
+}
+
+/** 递归标记表格下所有单元格（border 属性存在时启用单元格边框） */
+function markCellsBordered(node : RichNode) {
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.type == NODE_TYPE_ELEMENT) {
+			if (child.name == 'td' || child.name == 'th') {
+				child.attrs.set('__cell-border', '1')
+			}
+			markCellsBordered(child)
+		}
+	}
+}
+
+/** 收集表格下全部行（穿透 thead / tbody / tfoot） */
+function collectTableRows(node : RichNode, rows : RichNode[]) {
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.type != NODE_TYPE_ELEMENT) {
+			continue
+		}
+		if (child.kind == NODE_KIND_TABLE_SECTION) {
+			collectTableRows(child, rows)
+		} else if (child.kind == NODE_KIND_TABLE_ROW) {
+			rows.push(child)
+		}
+	}
+}
+
+function cellsOfRow(row : RichNode) : RichNode[] {
+	return row.children.filter((c : RichNode) : boolean => c.kind == NODE_KIND_TABLE_CELL)
+}
+
+/** 估算单元格内容宽度（CJK 记 1 字宽，ASCII 记 0.6） */
+function textUnits(node : RichNode) : number {
+	let units = 0
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.type == NODE_TYPE_TEXT) {
+			for (let j = 0; j < child.text.length; j++) {
+				units += child.text.charCodeAt(j) > 255 ? 1 : 0.6
+			}
+		} else {
+			units += textUnits(child)
+		}
+	}
+	return units
+}
+
+/**
+ * 列宽取各列内容最大值（含内边距），写入单元格 attrs 供其 resolve 时应用；
+ * 同时把各列宽之和写入表格 attrs（__table-width），避免表格撑满容器后
+ * 上 / 左边框超出单元格区域悬空。原生 flex 无表格布局，逐行独立排布会导致列不对齐。
+ */
+function applyTableColumnWidths(table : RichNode, basePx : number, bordered : boolean) {
+	const rows : RichNode[] = []
+	collectTableRows(table, rows)
+	if (rows.length == 0) {
+		return
+	}
+	let colCount = 0
+	for (let i = 0; i < rows.length; i++) {
+		const count = cellsOfRow(rows[i]).length
+		if (count > colCount) {
+			colCount = count
+		}
+	}
+	if (colCount == 0) {
+		return
+	}
+	const maxs : number[] = []
+	for (let i = 0; i < colCount; i++) {
+		maxs.push(0)
+	}
+	for (let i = 0; i < rows.length; i++) {
+		const cells = cellsOfRow(rows[i])
+		for (let j = 0; j < cells.length && j < colCount; j++) {
+			const w = textUnits(cells[j]) * basePx
+			if (w > maxs[j]) {
+				maxs[j] = w
+			}
+		}
+	}
+	// 单列上限约 18 字宽，超宽内容由文字换行兜底
+	const cap = 18 * basePx
+	const padH = 16 * basePx / 16
+	let total = bordered ? 1 : 0
+	for (let j = 0; j < colCount; j++) {
+		let w = maxs[j]
+		if (w > cap) {
+			w = cap
+		}
+		const cellW = Math.round(w + padH + 1)
+		total += cellW
+		for (let i = 0; i < rows.length; i++) {
+			const cells = cellsOfRow(rows[i])
+			if (j < cells.length) {
+				cells[j].attrs.set('__col-width', px(cellW))
+			}
+		}
+	}
+	table.attrs.set('__table-width', px(total))
+}
+
+/**
+ * 块级默认排版：盒模型写入 box，需向下传递的文字属性写入 inheritedAdd。
+ * 对齐新闻阅读场景：标题加粗分级、段落间距、引用左线灰底、表格细边框。
+ * 内容自带样式优先：盒默认只补缺省项；文字默认仅当继承链未被内容自定义（与父级一致）时应用。
+ */
+function applyBlockDefaults(
+	node : RichNode,
+	box : Map<string, string>,
+	inheritedAdd : Map<string, string>,
+	parentInherited : Map<string, string>,
+	base : BaseStyle,
+	isFirst : boolean,
+	isLast : boolean
+) {
+	const name = node.name
+	const bpx = base.fontSize
+	const fillBox = (key : string, value : string) => {
+		if (box.get(key) == null) {
+			box.set(key, value)
+		}
+	}
+	const fillInherit = (key : string, value : string) => {
+		const curVal = inheritedAdd.get(key)
+		const parentVal = parentInherited.get(key)
+		if (curVal == null || curVal == parentVal) {
+			inheritedAdd.set(key, value)
+		}
+	}
+	if (name == 'p') {
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 12))
+		}
+	} else if (name == 'h1' || name == 'h2' || name == 'h3' || name == 'h4' || name == 'h5' || name == 'h6') {
+		const ratios : number[] = [1.75, 1.375, 1.125, 1.0, 0.875, 0.8125]
+		let level = 1
+		if (name == 'h2') { level = 2 } else if (name == 'h3') { level = 3 } else if (name == 'h4') { level = 4 } else if (name == 'h5') { level = 5 } else if (name == 'h6') { level = 6 }
+		fillInherit('font-size', px(bpx * ratios[level - 1]))
+		fillInherit('font-weight', 'bold')
+		if (!isFirst) {
+			fillBox('margin-top', spacing(bpx, level <= 3 ? 18 : 12))
+		}
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 10))
+		}
+	} else if (name == 'blockquote') {
+		fillBox('margin-bottom', spacing(bpx, 12))
+		fillBox('padding-top', spacing(bpx, 8))
+		fillBox('padding-bottom', spacing(bpx, 8))
+		fillBox('padding-left', spacing(bpx, 12))
+		fillBox('padding-right', spacing(bpx, 12))
+		fillBox('border-left', '3px solid #dcdee3')
+		fillBox('background-color', '#f7f8fa')
+	} else if (name == 'pre') {
+		fillBox('margin-bottom', spacing(bpx, 12))
+		fillBox('padding-top', spacing(bpx, 10))
+		fillBox('padding-bottom', spacing(bpx, 10))
+		fillBox('padding-left', spacing(bpx, 12))
+		fillBox('padding-right', spacing(bpx, 12))
+		fillBox('background-color', '#f6f8fa')
+		fillBox('border-radius', '4px')
+		fillInherit('font-family', MONO_FONT)
+	} else if (name == 'figure') {
+		if (!isFirst) {
+			fillBox('margin-top', spacing(bpx, 12))
+		}
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 12))
+		}
+	} else if (name == 'figcaption') {
+		fillInherit('font-size', px(bpx * 0.8125))
+		fillInherit('color', '#8a919f')
+		fillInherit('text-align', 'center')
+		fillBox('margin-top', spacing(bpx, 6))
+	} else if (name == 'center') {
+		fillInherit('text-align', 'center')
+	} else if (name == 'hr') {
+		fillBox('height', '1px')
+		fillBox('background-color', '#e5e6eb')
+		if (!isFirst) {
+			fillBox('margin-top', spacing(bpx, 16))
+		}
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 16))
+		}
+	} else if (name == 'ul' || name == 'ol' || name == 'dl') {
+		fillBox('padding-left', spacing(bpx, 4))
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 12))
+		}
+	} else if (name == 'li') {
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 4))
+		}
+	} else if (name == 'dt') {
+		fillInherit('font-weight', 'bold')
+		if (!isFirst) {
+			fillBox('margin-top', spacing(bpx, 8))
+		}
+	} else if (name == 'dd') {
+		fillBox('padding-left', spacing(bpx, 20))
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 6))
+		}
+	} else if (name == 'table') {
+		const width = node.attrs.get('width')
+		const hasOwnWidth = (width != null && width.length > 0) || (node.style.get('width') != null)
+		const border = node.attrs.get('border')
+		const bordered = border != null && border != '0' && border.length > 0
+		if (bordered) {
+			// 边框收敛模拟：表格管上左，单元格管下右
+			fillBox('border-top', '1px solid #e5e6eb')
+			fillBox('border-left', '1px solid #e5e6eb')
+			markCellsBordered(node)
+		}
+		applyTableColumnWidths(node, bpx, bordered)
+		if (!hasOwnWidth) {
+			// 表格收缩到单元格总宽，边框线正好包住内容
+			const tableWidth = node.attrs.get('__table-width')
+			if (tableWidth != null) {
+				fillBox('width', tableWidth)
+			}
+		} else if (width != null && width.length > 0) {
+			const n = parseLengthPx(width, 0, 0)
+			fillBox('width', n > 0 ? px(n) : width)
+		}
+		if (!isLast) {
+			fillBox('margin-bottom', spacing(bpx, 12))
+		}
+	} else if (name == 'caption') {
+		fillInherit('font-size', px(bpx * 0.8125))
+		fillInherit('color', '#8a919f')
+		fillInherit('text-align', 'center')
+		fillBox('margin-bottom', spacing(bpx, 6))
+	} else if (name == 'td' || name == 'th') {
+		const colWidth = node.attrs.get('__col-width')
+		if (colWidth != null) {
+			fillBox('width', colWidth)
+		}
+		fillBox('padding-top', spacing(bpx, 6))
+		fillBox('padding-bottom', spacing(bpx, 6))
+		fillBox('padding-left', spacing(bpx, 8))
+		fillBox('padding-right', spacing(bpx, 8))
+		if (node.attrs.get('__cell-border') != null) {
+			fillBox('border-right', '1px solid #e5e6eb')
+			fillBox('border-bottom', '1px solid #e5e6eb')
+		}
+		if (name == 'th') {
+			fillInherit('font-weight', 'bold')
+			fillInherit('text-align', 'center')
+			fillBox('background-color', '#f7f8fa')
+		}
+	}
+}
+
+/** 内容自带盒样式覆盖默认排版 */
+function mergeOwnBox(box : Map<string, string>, own : Map<string, string>, currentPx : number) {
+	expandBoxKey(box, own, 'margin', 'margin', currentPx)
+	expandBoxKey(box, own, 'padding', 'padding', currentPx)
+	for (let i = 0; i < BLOCK_PASS_KEYS.length; i++) {
+		const key = BLOCK_PASS_KEYS[i]
+		const v = own.get(key)
+		if (v != null && v.length > 0 && box.get(key) == null) {
+			box.set(key, v)
+		}
+	}
+}
+
+/** text-indent 全角空格模拟：定位块内首个文本节点加前缀 */
+function applyIndentEmulation(node : RichNode, own : Map<string, string>, currentPx : number) {
+	const raw = own.get('text-indent')
+	if (raw == null || raw.length == 0) {
+		return
+	}
+	let emCount = -1
+	if (raw.length > 2 && raw.substring(raw.length - 2) == 'em') {
+		const n = parseLeadingNumber(raw)
+		if (n == n && n > 0) {
+			emCount = n
+		}
+	} else {
+		const n = parseLengthPx(raw, currentPx, currentPx)
+		if (n > 0 && currentPx > 0) {
+			emCount = n / currentPx
+		}
+	}
+	if (emCount <= 0) {
+		return
+	}
+	const prefix = repeatChar('　', Math.round(emCount))
+	// 找第一个 run 或行内元素，深入其首个文本节点
+	let target : RichNode | null = null
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i]
+		if (child.kind == NODE_KIND_RUN || child.kind == NODE_KIND_INLINE) {
+			target = child
+			break
+		}
+	}
+	while (target != null && target.type == NODE_TYPE_ELEMENT && target.children.length > 0) {
+		target = target.children[0]
+	}
+	if (target != null && target.type == NODE_TYPE_TEXT) {
+		target.text = prefix + target.text
+	}
+}
+
+/** 图片样式：默认撑满宽度（widthFix 模式），attr width → px；margin auto → 居中 */
+function imgStyle(node : RichNode) : string {
+	const box : Map<string, string> = new Map()
+	const own = node.style
+	const ownWidth = own.get('width')
+	const attrWidth = node.attrs.get('width')
+	if (ownWidth != null && ownWidth.length > 0) {
+		box.set('width', ownWidth)
+	} else if (attrWidth != null && attrWidth.length > 0) {
+		const n = parseLengthPx(attrWidth, 0, 0)
+		box.set('width', n > 0 ? px(n) : attrWidth)
+	} else {
+		box.set('width', '100%')
+	}
+	const radius = own.get('border-radius')
+	if (radius != null && radius.length > 0) {
+		box.set('border-radius', radius)
+	}
+	expandBoxKey(box, own, 'margin', 'margin', 16)
+	return buildStyleText(box, BLOCK_KEYS)
+}
+
+/** video 样式：默认宽度撑满 + 兜底高度 */
+function videoStyle(node : RichNode) : string {
+	const box : Map<string, string> = new Map()
+	const own = node.style
+	const ownWidth = own.get('width')
+	if (ownWidth != null && ownWidth.length > 0) {
+		box.set('width', ownWidth)
+	} else {
+		box.set('width', '100%')
+	}
+	const ownHeight = own.get('height')
+	const attrHeight = node.attrs.get('height')
+	if (ownHeight != null && ownHeight.length > 0) {
+		box.set('height', ownHeight)
+	} else if (attrHeight != null && attrHeight.length > 0) {
+		const n = parseLengthPx(attrHeight, 0, 0)
+		box.set('height', n > 0 ? px(n) : attrHeight)
+	} else {
+		box.set('height', '200px')
+	}
+	const radius = own.get('border-radius')
+	if (radius != null && radius.length > 0) {
+		box.set('border-radius', radius)
+	}
+	return buildStyleText(box, BLOCK_KEYS)
+}
+
+/**
+ * 递归解析：为节点产出 styleText，块容器完成 run 分组后向下处理。
+ * isFirst / isLast 用于首尾外边距裁剪。
+ */
+function resolveNode(node : RichNode, inherited : Map<string, string>, base : BaseStyle, isFirst : boolean, isLast : boolean) {
+	if (node.type == NODE_TYPE_TEXT) {
+		node.styleText = buildStyleText(inherited, TEXT_KEYS)
+		return
+	}
+
+	const own = node.style
+	const kind = node.kind
+
+	// 行内元素：语义默认 + 继承合并，继续行内上下文
+	if (kind == NODE_KIND_INLINE) {
+		const semantic = inlineSemantic(node, inherited, base)
+		const childInherited = deriveInherited(own, inherited, base.fontSize)
+		semantic.forEach((value : string, key : string) => {
+			if (childInherited.get(key) == null) {
+				childInherited.set(key, value)
+			}
+		})
+		node.styleText = buildStyleText(childInherited, TEXT_KEYS)
+		node.children = resolveInlineSeq(node.children, childInherited, base, isFirst, isLast)
+		return
+	}
+
+	if (kind == NODE_KIND_MEDIA) {
+		const name = node.name
+		if (name == 'img') {
+			node.styleText = imgStyle(node)
+			return
+		}
+		if (name == 'video') {
+			node.styleText = videoStyle(node)
+			return
+		}
+		if (name == 'picture') {
+			// 透明容器：继续处理其子 img
+			const childInherited = deriveInherited(own, inherited, base.fontSize)
+			for (let i = 0; i < node.children.length; i++) {
+				resolveNode(node.children[i], childInherited, base, i == 0, i == node.children.length - 1)
+			}
+		}
+		// audio 由渲染器接 createInnerAudioContext 播放；source / track 跳过
+		return
+	}
+
+	if (kind == NODE_KIND_EMBED) {
+		return
+	}
+
+	// 表格列定义不参与渲染
+	if (node.name == 'colgroup' || node.name == 'col') {
+		return
+	}
+
+	// 块容器（block / list / list-item / table 系 / hr / br 兜底）
+	groupChildren(node)
+	const childInherited = deriveInherited(own, inherited, base.fontSize)
+	const box : Map<string, string> = new Map()
+	applyBlockDefaults(node, box, childInherited, inherited, base, isFirst, isLast)
+	const cur = currentFontSizePx(childInherited)
+	mergeOwnBox(box, own, cur)
+	node.styleText = buildStyleText(box, BLOCK_KEYS)
+	applyIndentEmulation(node, own, cur)
+
+	const count = node.children.length
+	for (let i = 0; i < count; i++) {
+		const child = node.children[i]
+		if (child.kind == NODE_KIND_RUN) {
+			child.styleText = buildStyleText(childInherited, TEXT_KEYS)
+			child.children = resolveInlineSeq(child.children, childInherited, base, i == 0 && isFirst, i == count - 1 && isLast)
+			continue
+		}
+		resolveNode(child, childInherited, base, i == 0, i == count - 1)
+	}
+}
+
+/**
+ * 解析入口：归一化树 → 可渲染树（原地补全）。
+ * 返回虚拟根节点，渲染器遍历 children。
+ */
+export function resolveTree(root : RichNode, base : BaseStyle) : RichNode {
+	const inherited : Map<string, string> = new Map()
+	inherited.set('color', base.color)
+	inherited.set('font-size', px(base.fontSize))
+	if (base.fontFamily.length > 0) {
+		inherited.set('font-family', base.fontFamily)
+	}
+	inherited.set('line-height', base.lineHeight)
+	const count = root.children.length
+	for (let i = 0; i < count; i++) {
+		resolveNode(root.children[i], inherited, base, i == 0, i == count - 1)
+	}
+	return root
+}
+
+/** 收集全文图片地址（预览用），src 缺失时回退 data-src 懒加载属性 */
+function collectImgWalk(node : RichNode, out : string[]) {
+	if (node.type != NODE_TYPE_ELEMENT) {
+		return
+	}
+	if (node.name == 'img') {
+		let src = node.attrs.get('src')
+		if (src == null || src.length == 0) {
+			src = node.attrs.get('data-src')
+		}
+		if (src != null && src.length > 0 && !inList(out, src)) {
+			out.push(src)
+		}
+	}
+	for (let i = 0; i < node.children.length; i++) {
+		collectImgWalk(node.children[i], out)
+	}
+}
+
+export function collectImageSrcs(root : RichNode) : string[] {
+	const out : string[] = []
+	for (let i = 0; i < root.children.length; i++) {
+		collectImgWalk(root.children[i], out)
+	}
+	return out
+}
+
+/** 提取链接 / 嵌入内容的域名展示文本 */
+export function extractDomain(url : string) : string {
+	let rest = url
+	const scheme = rest.indexOf('://')
+	if (scheme >= 0) {
+		rest = rest.substring(scheme + 3)
+	}
+	const slash = rest.indexOf('/')
+	if (slash >= 0) {
+		rest = rest.substring(0, slash)
+	}
+	return rest
+}
+
+/**
+ * 组件 nodes 属性（内置节点列表格式）→ RichNode 树。
+ * 兼容 { name, attrs, children, text } 结构，attrs 为对象字面量。
+ */
+export function nodeListToRich(list : any[]) : RichNode {
+	const root = new RichNode()
+	root.kind = NODE_KIND_ROOT
+	const convert = (input : any, parent : RichNode) => {
+		if (input == null) {
+			return
+		}
+		const o = input as UTSJSONObject
+		const text = o['text']
+		if (text != null) {
+			const t = new RichNode()
+			t.type = NODE_TYPE_TEXT
+			t.text = text.toString()
+			parent.children.push(t)
+			return
+		}
+		const nameVal = o['name']
+		if (nameVal == null) {
+			return
+		}
+		const el = new RichNode()
+		el.name = nameVal.toString().toLowerCase()
+		if (el.name == 'br') {
+			el.kind = NODE_KIND_BR
+		} else if (el.name == 'hr') {
+			el.kind = NODE_KIND_HR
+		} else if (el.name == 'embed') {
+			el.kind = NODE_KIND_EMBED
+		} else if (isVoidTag(el.name)) {
+			el.kind = NODE_KIND_MEDIA
+		}
+		const attrsVal = o['attrs']
+		if (attrsVal != null) {
+			const attrsObj = attrsVal as UTSJSONObject
+			const styleRaw = attrsObj['style']
+			const href = attrsObj['href']
+			const src = attrsObj['src']
+			const width = attrsObj['width']
+			const height = attrsObj['height']
+			const dataSrc = attrsObj['data-src']
+			if (styleRaw != null) {
+				el.attrs.set('style', styleRaw.toString())
+				el.style = parseStyleAttrCompat(styleRaw.toString())
+			}
+			if (href != null) {
+				el.attrs.set('href', href.toString())
+			}
+			if (src != null) {
+				el.attrs.set('src', src.toString())
+			}
+			if (width != null) {
+				el.attrs.set('width', width.toString())
+			}
+			if (height != null) {
+				el.attrs.set('height', height.toString())
+			}
+			if (dataSrc != null) {
+				el.attrs.set('data-src', dataSrc.toString())
+			}
+		}
+		const childrenVal = o['children']
+		if (childrenVal != null) {
+			const arr = childrenVal as Array<any>
+			for (let i = 0; i < arr.length; i++) {
+				convert(arr[i], el)
+			}
+		}
+		parent.children.push(el)
+	}
+	for (let i = 0; i < list.length; i++) {
+		convert(list[i], root)
+	}
+	return root
+}
+
+/** style 属性解析（与 parser.uts 同款规则，独立实现避免模块循环依赖） */
+function parseStyleAttrCompat(raw : string) : Map<string, string> {
+	const map : Map<string, string> = new Map()
+	const parts = raw.split(';')
+	for (let i = 0; i < parts.length; i++) {
+		const part = parts[i].trim()
+		if (part.length == 0) {
+			continue
+		}
+		const colon = part.indexOf(':')
+		if (colon <= 0) {
+			continue
+		}
+		const key = part.substring(0, colon).trim().toLowerCase()
+		const value = part.substring(colon + 1).trim()
+		if (key.length == 0 || value.length == 0) {
+			continue
+		}
+		map.set(key, value)
+	}
+	return map
+}

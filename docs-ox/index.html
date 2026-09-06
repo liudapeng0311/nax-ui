@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <!--本文件为编译到web专用文件-->
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      var coverSupport = 'CSS' in window && typeof CSS.supports === 'function' && (CSS.supports('top: env(a)') ||
+        CSS.supports('top: constant(a)'))
+      document.write(
+        '<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0' +
+        (coverSupport ? ', viewport-fit=cover' : '') + '" />')
+    </script>
+    <title>nax-ui Docs</title>
+    <link rel="icon" type="image/png" href="/static/logo.png" />
+    <script>
+      // 深链托管：uni-app 路由只认 pages.json 注册的页面路径，整页刷新时若地址是
+      // #/components/xxx 形态会白屏。这里把文档路径暂存到 sessionStorage（由 doc.uvue
+      // 启动后取回并还原地址栏），地址仅临时回到 #/ 保证路由正常启动，地址栏不出现内部页面路径
+      (function () {
+        var h = location.hash
+        if (!h || h === '#' || h.indexOf('#/') !== 0) return
+        var p = h.substring(1)
+        // 旧形态（#/uni_modules/...?path=xxx，历史书签）：路由本可识别，交给 doc.uvue 还原地址
+        if (p.indexOf('/uni_modules/ox-uni-press/pages/doc/doc') === 0) return
+        try {
+          sessionStorage.setItem('ox-doc-deeplink', p)
+        } catch (e) {
+          return
+        }
+        history.replaceState(null, '', '#/')
+      })()
+    </script>
+    <!--preload-links-->
+    <!--app-context-->
+  </head>
+  <body>
+    <div id="app"><!--app-html--></div>
+    <script type="module" src="/main"></script>
+  </body>
+</html>

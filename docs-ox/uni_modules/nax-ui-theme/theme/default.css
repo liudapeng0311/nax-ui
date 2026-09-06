@@ -1,0 +1,117 @@
+﻿/**
+ * nax-ui-theme / default
+ * 默认浅色语义 token。
+ * primary/success #18a058 · info #2080f0 · warning #f0a020 · error #d03050
+ * soft fill 为色值 0.16/0.10 叠白实色近似（兼容蒸汽模式不支持 rgba 背景）。
+ * uvue 仅支持 class 选择器，故挂在 .nax-theme 上（勿使用 page / tag 选择器）。
+ */
+.nax-theme {
+	/* ===== Color: brand & status ( common/light) ===== */
+	/* primary: default #18a058 · hover #36ad6a · pressed #0c7a43 */
+	--nax-color-primary: #18a058;
+	--nax-color-primary-deep: #0c7a43;
+	--nax-color-primary-hover: #36ad6a;
+	--nax-color-primary-disabled: #18a058;
+	/* success 与 primary 同色阶 */
+	--nax-color-success: #18a058;
+	--nax-color-success-deep: #0c7a43;
+	--nax-color-success-hover: #36ad6a;
+	--nax-color-success-disabled: #18a058;
+	/* warning: #f0a020 · hover #fcb040 · pressed #c97c10 */
+	--nax-color-warning: #f0a020;
+	--nax-color-warning-deep: #c97c10;
+	--nax-color-warning-hover: #fcb040;
+	--nax-color-warning-disabled: #f0a020;
+	/* error: #d03050 · hover #de576d · pressed #ab1f3f */
+	--nax-color-danger: #d03050;
+	--nax-color-error: #d03050;
+	--nax-color-error-deep: #ab1f3f;
+	--nax-color-error-hover: #de576d;
+	--nax-color-error-disabled: #d03050;
+	/* info: #2080f0 · hover #4098fc · pressed #1060c9 */
+	--nax-color-info: #2080f0;
+	--nax-color-info-deep: #1060c9;
+	--nax-color-info-hover: #4098fc;
+	--nax-color-info-disabled: #2080f0;
+
+	/* soft fills：typed secondary ≈ 色×0.16 叠白；tertiary 更淡；default 用 buttonColor2 实色近似 */
+	--nax-color-button-secondary: #ececed;
+	--nax-color-button-tertiary: #f2f3f3;
+	--nax-color-primary-secondary: #daefe4;
+	--nax-color-primary-tertiary: #e3f3eb;
+	--nax-color-info-secondary: #dbeafc;
+	--nax-color-info-tertiary: #e4effd;
+	--nax-color-success-secondary: #daefe4;
+	--nax-color-success-tertiary: #e3f3eb;
+	--nax-color-warning-secondary: #fcefda;
+	--nax-color-warning-tertiary: #fdf3e4;
+	--nax-color-error-secondary: #f7dde3;
+	--nax-color-error-tertiary: #f9e6ea;
+
+	/* ===== Color: text ( textColor1/2/3) ===== */
+	--nax-color-text: #333639;
+	--nax-color-text-secondary: #767c82;
+	--nax-color-text-placeholder: #e5e5ea;
+	--nax-color-text-disabled: #e5e5ea;
+	--nax-color-text-inverse: #ffffff;
+	--nax-color-text-black: #000000;
+
+	/* ===== Color: surface / border / mask ===== */
+	--nax-color-bg: #ffffff;
+	--nax-color-bg-secondary: #fafafc;
+	--nax-color-bg-hover: #f3f3f5;
+	--nax-color-skeleton: #f2f3f5;
+	--nax-skeleton-radius: 3px;
+	--nax-color-bg-dark: #001428;
+	--nax-color-bg-black: #000000;
+	/* border #f0f0f3 · divider #f5f5f7 */
+	--nax-color-border: #f0f0f3;
+	--nax-color-border-strong: #e5e5ea;
+	--nax-color-divider: #f5f5f7;
+	--nax-color-mask: rgba(0, 0, 0, 0.4);
+	--nax-color-shadow: rgba(0, 0, 0, 0.08);
+
+	/* ===== Typography ===== */
+	--nax-font-size-xs: 12px;
+	--nax-font-size-sm: 14px;
+	--nax-font-size-md: 16px;
+	--nax-font-size-lg: 18px;
+	--nax-font-size-xl: 20px;
+	--nax-font-size-xxl: 22px;
+	--nax-font-weight-regular: 400;
+	--nax-font-weight-medium: 500;
+	--nax-font-weight-semibold: 600;
+
+	/* ===== Spacing (4px base) ===== */
+	--nax-space-0: 0px;
+	--nax-space-1: 4px;
+	--nax-space-2: 8px;
+	--nax-space-3: 12px;
+	--nax-space-4: 16px;
+	--nax-space-5: 20px;
+	--nax-space-6: 24px;
+	--nax-space-8: 32px;
+	--nax-space-10: 40px;
+
+	/* ===== Radius / border / shadow（默认 3px，对齐 nax-button） ===== */
+	--nax-radius-sm: 3px; /* 与 button 默认圆角一致 */
+	--nax-radius-md: 3px;
+	--nax-radius-lg: 3px;
+	--nax-radius-xl: 3px;
+	--nax-radius-full: 999px;
+	--nax-border-width: 1px;
+	--nax-shadow-sm: 0 1px 2px -2px rgba(0, 0, 0, 0.08), 0 3px 6px 0 rgba(0, 0, 0, 0.06);
+	--nax-shadow-md: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08);
+
+	/* ===== Motion / state ===== */
+	--nax-duration-fast: 150ms;
+	--nax-duration-normal: 250ms;
+	--nax-duration-slow: 350ms;
+	--nax-ease-out: ease-out;
+	--nax-opacity-disabled: 0.5;
+
+	/* ===== Component tokens: button ===== */
+	--nax-button-height: 34px;
+	--nax-button-padding-x: 14px;
+	--nax-button-radius: 3px;
+}

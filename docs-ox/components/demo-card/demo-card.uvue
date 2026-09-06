@@ -1,0 +1,87 @@
+<template>
+  <view class="demo-card">
+    <text class="dsec">基础</text>
+    <nax-card title="基础卡片" extra="更多">
+      <text class="ctxt">用卡片承载一段说明、列表摘要或操作入口。</text>
+    </nax-card>
+
+    <text class="dsec">仅正文</text>
+    <nax-card>
+      <text class="ctxt">没有标题时，正文自动吃掉上下内边距，适合纯内容块。</text>
+    </nax-card>
+
+    <text class="dsec">尺寸 size</text>
+    <nax-card size="sm" title="小号 sm" extra="sm">
+      <text class="ctxt">更紧凑的内边距</text>
+    </nax-card>
+    <nax-card size="md" title="中号 md" extra="md">
+      <text class="ctxt">默认档</text>
+    </nax-card>
+    <nax-card size="lg" title="大号 lg" extra="lg">
+      <text class="ctxt">更宽松</text>
+    </nax-card>
+
+    <text class="dsec">分割线 segmented + 页脚</text>
+    <nax-card title="订单摘要" extra="详情" segmented :show-footer="true">
+      <text class="ctxt">商品合计 ¥128.00</text>
+      <text class="ctxt">含运费 ¥8.00</text>
+      <template #footer>
+        <nax-button type="primary" size="sm" label="去支付"></nax-button>
+      </template>
+    </nax-card>
+
+    <text class="dsec">封面 cover</text>
+    <nax-card title="风景推荐" extra="2.3k" :show-cover="true" :show-footer="true" segmented>
+      <template #cover>
+        <view class="cover"><text class="cover-t">Cover</text></view>
+      </template>
+      <text class="ctxt">周末短途：湖边步道与日落观景点。</text>
+      <template #footer>
+        <nax-button size="sm" label="查看"></nax-button>
+      </template>
+    </nax-card>
+
+    <text class="dsec">可点击 hoverable</text>
+    <nax-card title="设置项入口" hoverable>
+      <text class="ctxt">开启 hoverable 后有按压反馈</text>
+    </nax-card>
+
+    <text class="dsec">无边框</text>
+    <nax-card title="无边框" :bordered="false">
+      <text class="ctxt">bordered=false，适合嵌在已有面板里</text>
+    </nax-card>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-card {
+  flex-direction: column;
+}
+
+.ctxt {
+  font-size: 13px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.cover {
+  height: 90px;
+  background-color: var(--nax-color-bg-secondary, #f2f3f5);
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-t {
+  font-size: 13px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

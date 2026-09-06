@@ -1,0 +1,187 @@
+﻿<template>
+	<view class="nax-grid" :class="rootClass" :style="rootStyle">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-grid
+	 * @description 宫格容器。配合 nax-grid-item 使用。
+	 * @property {number} col 列数（默认 3，最小 1）
+	 * @property {boolean} border 是否显示边框（默认 true）
+	 * @property {string} align left | center | right（默认 left）
+	 * @property {string} gap 子项间距；纯数字按 px（默认 0）
+	 * @property {boolean} hover 是否启用按压反馈（默认 true）
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击子项；参数为 index（string）
+	 * @slot default 放置 nax-grid-item
+	 */
+	const props = defineProps({
+		col: {
+			type: Number,
+			default: 3
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		align: {
+			type: String,
+			default: 'left'
+		},
+		gap: {
+			type: String,
+			default: '0'
+		},
+		hover: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click'])
+
+	function normalizeCol(value : number) : number {
+		const n = Math.floor(value)
+		if (n < 1) {
+			return 1
+		}
+		return n
+	}
+
+	function parseGapPx(value : string) : number {
+		if (value.length == 0) {
+			return 0
+		}
+		const n = parseFloat(value)
+		if (isNaN(n) || n < 0) {
+			return 0
+		}
+		return n
+	}
+
+	function normalizeAlign(value : string) : string {
+		if (value == 'center' || value == 'right') {
+			return value
+		}
+		return 'left'
+	}
+
+	// #ifdef APP-ANDROID
+	// Android provide Ref，避免子项注入 ComputedRef 时发生运行时类型转换。
+	const colRef = ref(normalizeCol(props.col))
+	const borderRef = ref(props.border)
+	const gapPxRef = ref(parseGapPx(props.gap))
+	const hoverRef = ref(props.hover)
+	watch((): number => props.col, (value : number) => {
+		colRef.value = normalizeCol(value)
+	})
+	watch((): boolean => props.border, (value : boolean) => {
+		borderRef.value = value
+	})
+	watch((): string => props.gap, (value : string) => {
+		gapPxRef.value = parseGapPx(value)
+	})
+	watch((): boolean => props.hover, (value : boolean) => {
+		hoverRef.value = value
+	})
+	// #endif
+	// #ifndef APP-ANDROID
+	const colRef = computed((): number => {
+		return normalizeCol(props.col)
+	})
+
+	const borderRef = computed((): boolean => {
+		return props.border
+	})
+
+	const gapPxRef = computed((): number => {
+		return parseGapPx(props.gap)
+	})
+
+	const hoverRef = computed((): boolean => {
+		return props.hover
+	})
+	// #endif
+
+	const nextSeq = ref(0)
+
+	function claimIndex() : number {
+		const i = nextSeq.value
+		nextSeq.value = i + 1
+		return i
+	}
+
+	function onItemClick(index : string) {
+		emit('click', index)
+	}
+
+	provide('naxGridInGroup', true)
+	provide('naxGridCol', colRef)
+	provide('naxGridBorder', borderRef)
+	provide('naxGridGapPx', gapPxRef)
+	provide('naxGridHover', hoverRef)
+	provide('naxGridClaimIndex', claimIndex)
+	provide('naxGridOnClick', onItemClick)
+
+	const alignValue = computed((): string => {
+		return normalizeAlign(props.align)
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		const gap = gapPxRef.value
+		if (props.border && gap <= 0) {
+			cls += ' nax-grid--mesh'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		const align = alignValue.value
+		if (align == 'center') {
+			style += 'justify-content:center;'
+		} else if (align == 'right') {
+			style += 'justify-content:flex-end;'
+		} else {
+			style += 'justify-content:flex-start;'
+		}
+		const gap = gapPxRef.value
+		if (gap > 0) {
+			const half = gap / 2
+			style += 'margin-left:-' + half + 'px;'
+			style += 'margin-right:-' + half + 'px;'
+			style += 'margin-top:-' + half + 'px;'
+			style += 'margin-bottom:-' + half + 'px;'
+		}
+		return style
+	})
+</script>
+
+<style>
+	.nax-grid {
+		width: 100%;
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: stretch;
+	}
+
+	.nax-grid--mesh {
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-divider, #f5f5f7);
+		border-left-width: 1px;
+		border-left-style: solid;
+		border-left-color: var(--nax-color-divider, #f5f5f7);
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+</style>

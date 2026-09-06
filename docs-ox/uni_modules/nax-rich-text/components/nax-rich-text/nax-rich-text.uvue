@@ -1,0 +1,440 @@
+<template>
+	<view
+		v-if="show"
+		class="nax-rich-text"
+		:class="rootClass"
+		@click="onClick"
+	>
+		<!-- 自研解析渲染器引擎：全端一致，支持视频 / 表格 / 缩进 / 小程序端内容点击 -->
+		<view v-if="useParserEngine" class="nax-rich-text__parser">
+			<nax-rich-text-node
+				v-for="(node, index) in richNodes"
+				:key="index"
+				:node="node"
+				@action="onNodeAction"
+			></nax-rich-text-node>
+		</view>
+
+		<!-- 内置 rich-text 引擎（engine="builtin" 兜底） -->
+		<rich-text
+			v-else
+			class="nax-rich-text__content"
+			:style="contentStyle"
+			:nodes="effectiveNodes"
+			:mode="renderMode"
+			:space="spaceName"
+			:user-select="userSelect"
+			@itemclick="onBuiltinItemClick"
+		></rich-text>
+
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-rich-text
+	 * @description 富文本。自研解析渲染器引擎（默认，全端一致）与内置 rich-text 引擎双通道：HTML 字符串 / 节点列表双入口，全局字号/颜色/行高/字体，图片预览，内容点击事件。
+	 * @property {string} content HTML 字符串（nodes 为空时生效）
+	 * @property {any[]} nodes 节点列表（非空时优先于 content）
+	 * @property {string} engine 渲染引擎 parser（默认，自研解析渲染器，全端一致）| builtin（内置 rich-text 兜底）
+	 * @property {string} mode 仅 builtin 引擎生效：App 渲染模式 web | native
+	 * @property {boolean} userSelect 仅 builtin 引擎生效：文本是否可选中复制
+	 * @property {string} space 仅 builtin 引擎生效：连续空格显示 ensp | emsp | nbsp
+	 * @property {string} size 全局字号 sm(14) | md(16 默认) | lg(18) | xl(20) | xxl(22) | 数字字符串（px）
+	 * @property {string} color 全局文字色（内容内联样式优先于全局样式）
+	 * @property {string} lineHeight 全局行高，如 1.5 或 22px
+	 * @property {string} fontFamily 全局字体
+	 * @property {string} linkColor 链接颜色（parser 引擎生效，默认主题绿 #18a058）
+	 * @property {boolean} show 是否显示
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击根节点
+	 * @event itemclick 内容点击：detail.src / detail.href，type 标记来源 img | a | audio | embed（builtin 引擎小程序端不触发）
+	 * @slot default 预留扩展内容
+	 */
+	import {
+		RichNode,
+		parseRichHtml
+	} from './parser.uts'
+	import {
+		BaseStyle,
+		RichNodeAction,
+		resolveTree,
+		collectImageSrcs,
+		nodeListToRich
+	} from './resolve.uts'
+
+	const props = defineProps({
+		content: {
+			type: String,
+			default: ''
+		},
+		nodes: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		engine: {
+			type: String,
+			default: 'parser'
+		},
+		mode: {
+			type: String,
+			default: 'web'
+		},
+		userSelect: {
+			type: Boolean,
+			default: false
+		},
+		space: {
+			type: String,
+			default: ''
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		color: {
+			type: String,
+			default: ''
+		},
+		lineHeight: {
+			type: String,
+			default: ''
+		},
+		fontFamily: {
+			type: String,
+			default: ''
+		},
+		linkColor: {
+			type: String,
+			default: '#18a058'
+		},
+		show: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['click', 'itemclick'])
+
+	function normalizeMode(value : string) : string {
+		if (value == 'web') {
+			return 'web'
+		}
+		return 'native'
+	}
+
+	function normalizeSpace(value : string) : string {
+		if (value == 'ensp' || value == 'emsp' || value == 'nbsp') {
+			return value
+		}
+		return ''
+	}
+
+	/**
+	 * App builtin 引擎 native 模式（C 自绘）对 HTML 结构标签解析不稳：
+	 * 含 h1-h6 / ul / li 等标签时整块内容可能渲染空白，命中即回退 web 渲染。
+	 */
+	const nativeSafeTags : string[] = ['br', 'p', 'span', 'strong', 'i', 'big', 'small', 'a', 'u', 'del', 'img']
+
+	function isNativeSafeTag(name : string) : boolean {
+		const lower = name.toLowerCase()
+		for (let i = 0; i < nativeSafeTags.length; i++) {
+			if (nativeSafeTags[i] == lower) {
+				return true
+			}
+		}
+		return false
+	}
+
+	function htmlHasUnsafeTag(html : string) : boolean {
+		let i = 0
+		while (i < html.length) {
+			const lt = html.indexOf('<', i)
+			if (lt < 0 || lt >= html.length - 1) {
+				return false
+			}
+			const next = html.charAt(lt + 1)
+			if (next == '!' || next == '?') {
+				// 注释 / 声明：跳过到 '>'
+				const gt = html.indexOf('>', lt + 1)
+				if (gt < 0) {
+					return false
+				}
+				i = gt + 1
+				continue
+			}
+			let j = lt + 1
+			if (html.charAt(j) == '/') {
+				j++
+			}
+			let name = ''
+			while (j < html.length) {
+				const c = html.charAt(j)
+				const code = c.charCodeAt(0)
+				const isNameChar = (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)
+				if (!isNameChar) {
+					break
+				}
+				name += c
+				j++
+			}
+			if (name.length > 0 && !isNativeSafeTag(name)) {
+				return true
+			}
+			i = j > lt + 1 ? j : lt + 1
+		}
+		return false
+	}
+
+	/** 节点列表经 JSON 序列化后按 "name":"xxx" 扫描，避免跨端 UTSJSONObject 实例差异 */
+	function nodesHaveUnsafeTag(list : any[]) : boolean {
+		const json = JSON.stringify(list)
+		const key = '"name":"'
+		let from = 0
+		while (from < json.length) {
+			const at = json.indexOf(key, from)
+			if (at < 0) {
+				return false
+			}
+			const start = at + key.length
+			const end = json.indexOf('"', start)
+			if (end < 0) {
+				return false
+			}
+			const name = json.substring(start, end)
+			if (name.length > 0 && !isNativeSafeTag(name)) {
+				return true
+			}
+			from = end + 1
+		}
+		return false
+	}
+
+	function resolveFontSizePx(value : string) : number {
+		// 字号阶梯与 nax-text 对齐
+		if (value == 'xs') {
+			return 12
+		}
+		if (value == 'sm') {
+			return 14
+		}
+		if (value == 'lg') {
+			return 18
+		}
+		if (value == 'xl') {
+			return 20
+		}
+		if (value == 'xxl') {
+			return 22
+		}
+		if (value == 'md' || value == 'medium' || value.length == 0) {
+			return 16
+		}
+		let raw = value
+		if (raw.length > 2) {
+			const tail = raw.substring(raw.length - 2)
+			if (tail == 'px') {
+				raw = raw.substring(0, raw.length - 2)
+			}
+		}
+		const n = parseInt(raw)
+		if (n > 0) {
+			return n
+		}
+		return 16
+	}
+
+	const modeName = computed((): string => {
+		return normalizeMode(props.mode)
+	})
+
+	const spaceName = computed((): string => {
+		return normalizeSpace(props.space)
+	})
+
+	const fontSizePx = computed((): number => {
+		return resolveFontSizePx(props.size)
+	})
+
+	const hasNodeList = computed((): boolean => {
+		return props.nodes != null && (props.nodes as any[]).length > 0
+	})
+
+	/** 全局基础样式：parser 引擎的排版基准 */
+	const baseStyle = computed((): BaseStyle => {
+		const base = new BaseStyle()
+		base.fontSize = fontSizePx.value
+		if (props.color.length > 0) {
+			base.color = props.color
+		}
+		if (props.lineHeight.length > 0) {
+			base.lineHeight = props.lineHeight
+		}
+		if (props.fontFamily.length > 0) {
+			base.fontFamily = props.fontFamily
+		}
+		if (props.linkColor.length > 0) {
+			base.linkColor = props.linkColor
+		}
+		return base
+	})
+
+	/** parser 引擎：解析 + 渲染前处理，产出可渲染节点树 */
+	const resolvedRoot = computed((): RichNode | null => {
+		if (props.engine != 'parser') {
+			return null
+		}
+		let root : RichNode | null = null
+		if (hasNodeList.value) {
+			root = nodeListToRich(props.nodes as any[])
+		} else if (props.content.length > 0) {
+			root = parseRichHtml(props.content)
+		}
+		if (root == null) {
+			return null
+		}
+		resolveTree(root, baseStyle.value)
+		return root
+	})
+
+	const richNodes = computed((): RichNode[] => {
+		const root = resolvedRoot.value
+		return root != null ? root.children : [] as RichNode[]
+	})
+
+	const useParserEngine = computed((): boolean => {
+		return resolvedRoot.value != null
+	})
+
+	/** 全文图片列表：点击预览使用 */
+	const imageList = computed((): string[] => {
+		const root = resolvedRoot.value
+		if (root == null) {
+			return [] as string[]
+		}
+		return collectImageSrcs(root)
+	})
+
+	/**
+	 * builtin 引擎实际渲染模式：期望 native，内容含 native 不可靠的结构标签时自动回退 web；
+	 * iOS / 鸿蒙开启 user-select 时 native 不支持，同样回退 web。
+	 */
+	const renderMode = computed((): string => {
+		// #ifdef APP-IOS || APP-HARMONY
+		if (props.userSelect) {
+			return 'web'
+		}
+		// #endif
+		if (modeName.value == 'web') {
+			return 'web'
+		}
+		if (hasNodeList.value) {
+			return nodesHaveUnsafeTag(props.nodes as any[]) ? 'web' : 'native'
+		}
+		if (htmlHasUnsafeTag(props.content)) {
+			return 'web'
+		}
+		return 'native'
+	})
+
+	/** 节点列表优先；否则回退 HTML 字符串（rich-text nodes 属性两种类型都接受） */
+	const effectiveNodes = computed((): any => {
+		if (hasNodeList.value) {
+			return props.nodes
+		}
+		return props.content
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	/**
+	 * builtin 引擎全局样式必须写在 rich-text 元素自身（官方约定支持 font-size / font-family / line-height / color）；
+	 * uni-app x 文本样式不继承，写在包裹 view 上不生效。
+	 */
+	const contentStyle = computed((): string => {
+		let style = ''
+		style += 'font-size:' + fontSizePx.value.toString() + 'px'
+		if (props.color.length > 0) {
+			style += ';color:' + props.color
+		}
+		if (props.lineHeight.length > 0) {
+			style += ';line-height:' + props.lineHeight
+		}
+		if (props.fontFamily.length > 0) {
+			style += ';font-family:' + props.fontFamily
+		}
+		return style
+	})
+
+	/** 统一对外派发内容点击：detail 形状与内置 rich-text 事件保持兼容 */
+	function emitItemclick(type : string, src : string, href : string) {
+		emit('itemclick', {
+			type: type,
+			src: src,
+			href: href,
+			detail: {
+				src: src,
+				href: href
+			}
+		})
+	}
+
+	/** parser 引擎节点动作：图片默认预览，其余交由业务层 */
+	function onNodeAction(action : any) {
+		const item = action as RichNodeAction
+		if (item.type == 'img' && item.src.length > 0 && imageList.value.length > 0) {
+			uni.previewImage({
+				urls: imageList.value,
+				current: item.src
+			})
+		}
+		emitItemclick(item.type, item.src, item.href)
+	}
+
+	/** builtin 引擎原生 itemclick 事件 → 统一形状 */
+	function onBuiltinItemClick(e : UniRichTextItemClickEvent) {
+		const detail = e.detail
+		let src = ''
+		let href = ''
+		if (detail.src != null) {
+			src = detail.src
+		}
+		if (detail.href != null) {
+			href = detail.href
+		}
+		emitItemclick('rich-text', src, href)
+	}
+
+	function onClick() {
+		emit('click')
+	}
+</script>
+
+<style>
+	.nax-rich-text {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.nax-rich-text__parser {
+		flex-direction: column;
+		align-items: stretch;
+		width: 100%;
+	}
+
+	.nax-rich-text__content {
+		width: 100%;
+		color: var(--nax-color-text, #333639);
+	}
+</style>

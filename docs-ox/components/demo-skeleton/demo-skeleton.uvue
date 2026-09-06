@@ -1,0 +1,89 @@
+<template>
+  <view class="demo-skeleton">
+    <text class="dsec">基础（标题 + 段落）</text>
+    <nax-skeleton></nax-skeleton>
+
+    <text class="dsec">头像 + 标题 + 段落</text>
+    <nax-skeleton avatar :rows="2"></nax-skeleton>
+
+    <text class="dsec">方形头像 avatar-shape</text>
+    <nax-skeleton avatar avatar-shape="square" avatar-size="40" :rows="2"></nax-skeleton>
+
+    <text class="dsec">自定义行宽 rows-width</text>
+    <nax-skeleton :rows="3" rows-width="100%,88%,52%" title-width="50%"></nax-skeleton>
+
+    <text class="dsec">列表重复 count</text>
+    <nax-skeleton avatar :rows="2" :count="3" gap="20"></nax-skeleton>
+
+    <text class="dsec">关闭动画 animate=false</text>
+    <nax-skeleton :animate="false" avatar :rows="2"></nax-skeleton>
+
+    <text class="dsec">仅段落（无标题）</text>
+    <nax-skeleton :title="false" :rows="4" rows-width="100%,100%,90%,40%"></nax-skeleton>
+
+    <text class="dsec">loading 切换真实内容</text>
+    <view class="block">
+      <nax-skeleton v-if="demoLoading" :loading="true" avatar :rows="2"></nax-skeleton>
+      <view v-else class="real">
+        <nax-avatar src="/static/logo.png" size="40"></nax-avatar>
+        <view class="real-body">
+          <text class="real-title">张三 · 前端工程师</text>
+          <text class="real-desc">骨架结束后展示真实列表项内容。</text>
+        </view>
+      </view>
+    </view>
+    <nax-button size="sm" type="primary" :label="demoLoading ? '显示真实内容' : '重新加载'" @click="toggle"></nax-button>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const demoLoading = ref(true)
+
+function toggle() {
+  demoLoading.value = !demoLoading.value
+}
+</script>
+
+<style>
+.demo-skeleton {
+  flex-direction: column;
+}
+
+.block {
+  background-color: var(--nax-color-surface, #ffffff);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.real {
+  flex-direction: row;
+  align-items: center;
+}
+
+.real-body {
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.real-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nax-color-text, #333333);
+}
+
+.real-desc {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 4px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

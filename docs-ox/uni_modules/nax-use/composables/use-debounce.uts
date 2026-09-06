@@ -1,0 +1,91 @@
+/**
+ * useDebounce — 防抖组合式函数：窗口内的多次调用只执行最后一次。
+ *
+ * 用法（必须在 setup 内同步调用以获得自动清理）：
+ * ```
+ * import { useDebounce } from '@/uni_modules/nax-use/composables/use-debounce.uts'
+ *
+ * const onSearch = useDebounce((kw : any | null) => {
+ *   // kw 为最后一次调用的载荷
+ * }, 400)
+ * onSearch.call('a')     // 400ms 内的后续 call 会重置计时，只有最后一次生效
+ * onSearch.cancel()      // 取消未执行任务
+ * onSearch.flush()       // 立即执行未触发任务（如失焦时提交）
+ * ```
+ *
+ * 说明：
+ * - 单载荷设计（uts 无可靠的剩余参数展开），多参数请包对象传入
+ * - 组件内使用时卸载自动 cancel；页面级使用请自行调 cancel
+ */
+
+import { onUnmounted, getCurrentInstance } from 'vue'
+
+export class NaxDebounceHandle {
+	private _fn : (payload : any | null) => void
+	private _wait : number
+	private _timerId : number
+	private _pending : any | null
+	private _hasPending : boolean
+
+	constructor(fn : (payload : any | null) => void, wait : number) {
+		this._fn = fn
+		this._wait = wait
+		this._timerId = -1
+		this._pending = null
+		this._hasPending = false
+	}
+
+	/** 触发一次；窗口内的后续 call 只保留最后一次 */
+	call(payload : any | null) : void {
+		this._pending = payload
+		this._hasPending = true
+		if (this._timerId != -1) {
+			clearTimeout(this._timerId)
+		}
+		this._timerId = setTimeout(() => {
+			this._run()
+		}, this._wait)
+	}
+
+	/** 取消未执行的任务 */
+	cancel() : void {
+		if (this._timerId != -1) {
+			clearTimeout(this._timerId)
+			this._timerId = -1
+		}
+		this._pending = null
+		this._hasPending = false
+	}
+
+	/** 立即执行未触发的任务；无待执行则忽略 */
+	flush() : void {
+		if (!this._hasPending || this._timerId == -1) {
+			return
+		}
+		clearTimeout(this._timerId)
+		this._timerId = -1
+		this._run()
+	}
+
+	private _run() : void {
+		this._timerId = -1
+		this._hasPending = false
+		const p = this._pending
+		this._pending = null
+		this._fn(p)
+	}
+}
+
+/**
+ * 创建防抖句柄。必须在 setup 内同步调用（内部依赖组件实例注册卸载清理）。
+ */
+export function useDebounce(fn : (payload : any | null) => void, wait? : number) : NaxDebounceHandle {
+	const resolvedWait = wait != null && wait > 0 ? wait : 300
+	const handle = new NaxDebounceHandle(fn, resolvedWait)
+	if (getCurrentInstance() != null) {
+		onUnmounted(() => {
+			handle.cancel()
+		})
+	}
+	return handle
+}

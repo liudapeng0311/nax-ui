@@ -1,0 +1,22 @@
+<template>
+  <view class="demo-calendar">
+    <nax-button label="打开日历" @click="show = true"></nax-button>
+    <nax-calendar v-model:show="show" @change="onChange"></nax-calendar>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+
+function onChange(_item: UTSJSONObject) {
+  uni.showToast({ title: '已选择日期', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-calendar {
+  flex-direction: column;
+}
+</style>

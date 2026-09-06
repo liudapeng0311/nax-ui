@@ -1,0 +1,33 @@
+<template>
+  <view class="demo-action-sheet">
+    <nax-button label="打开操作菜单" @click="show = true"></nax-button>
+    <nax-action-sheet
+      v-model:show="show"
+      title="请选择操作"
+      :actions="actions"
+      @select="onSelect"
+    ></nax-action-sheet>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+const actions = [
+  { name: '分享' },
+  { name: '收藏' },
+  { name: '删除', type: 'error' }
+]
+
+function onSelect(_item: UTSJSONObject) {
+  show.value = false
+  uni.showToast({ title: '已选择操作', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-action-sheet {
+  flex-direction: column;
+}
+</style>

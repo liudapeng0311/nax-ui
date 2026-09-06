@@ -1,0 +1,20 @@
+<template>
+  <view class="demo-upload">
+    <nax-upload v-model:file-list="fileList" :max-count="6"></nax-upload>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const fileList = ref([
+  { url: '/static/logo.png', name: 'logo.png', type: 'image', size: 20480 } as UTSJSONObject,
+  { url: '/static/logo.png', name: 'logo-2.png', type: 'image', size: 20480 } as UTSJSONObject
+] as any[])
+</script>
+
+<style>
+.demo-upload {
+  flex-direction: column;
+}
+</style>

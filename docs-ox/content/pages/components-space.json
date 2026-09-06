@@ -1,0 +1,5591 @@
+{
+  "meta": {
+    "id": "components-space",
+    "path": "/components/space",
+    "source": "components/space.md",
+    "title": "nax-space / nax-space-item",
+    "headings": [
+      {
+        "id": "nax-space-nax-space-item",
+        "text": "nax-space / nax-space-item",
+        "level": 1
+      },
+      {
+        "id": "安装",
+        "text": "安装",
+        "level": 2
+      },
+      {
+        "id": "代码示例",
+        "text": "代码示例",
+        "level": 2
+      },
+      {
+        "id": "用法",
+        "text": "用法",
+        "level": 3
+      },
+      {
+        "id": "nax-space-item",
+        "text": "nax-space-item",
+        "level": 3
+      },
+      {
+        "id": "基础横向",
+        "text": "基础横向",
+        "level": 3
+      },
+      {
+        "id": "间距-size",
+        "text": "间距 size",
+        "level": 3
+      },
+      {
+        "id": "纵向-vertical",
+        "text": "纵向 vertical",
+        "level": 3
+      },
+      {
+        "id": "换行-wrap",
+        "text": "换行 wrap",
+        "level": 3
+      },
+      {
+        "id": "对齐-align",
+        "text": "对齐 align",
+        "level": 3
+      },
+      {
+        "id": "主轴-justify",
+        "text": "主轴 justify",
+        "level": 3
+      },
+      {
+        "id": "fill-纵向撑满",
+        "text": "fill 纵向撑满",
+        "level": 3
+      },
+      {
+        "id": "props",
+        "text": "Props",
+        "level": 2
+      },
+      {
+        "id": "slots",
+        "text": "Slots",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T08:31:21.598Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "nax-space-nax-space-item"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "nax-space / nax-space-item",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "当前版本：0.1.3",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "间距容器：横向 / 纵向排列子项，并统一间距。",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 4,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "因 uni-app x ",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "样式隔离 2.0",
+                    "source": {
+                      "start": {
+                        "line": 6,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 15
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "，父组件无法给任意子节点加 margin。请用 ",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 25
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 25
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "nax-space-item",
+                    "source": {
+                      "start": {
+                        "line": 6,
+                        "column": 51
+                      },
+                      "end": {
+                        "line": 6,
+                        "column": 51
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": " 包裹每个子项（与 ",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 69
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 69
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "nax-grid",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 79
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 79
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " / ",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 89
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 89
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "nax-grid-item",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 92
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 92
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 同模式）。",
+                "source": {
+                  "start": {
+                    "line": 6,
+                    "column": 107
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 107
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 6,
+            "column": 1
+          },
+          "end": {
+            "line": 6,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "安装",
+            "source": {
+              "start": {
+                "line": 8,
+                "column": 1
+              },
+              "end": {
+                "line": 8,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 8,
+            "column": 1
+          },
+          "end": {
+            "line": 8,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "插件市场：",
+                    "source": {
+                      "start": {
+                        "line": 10,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "link",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "nax-space",
+                        "source": {
+                          "start": {
+                            "line": 10,
+                            "column": 1
+                          },
+                          "end": {
+                            "line": 10,
+                            "column": 1
+                          }
+                        }
+                      }
+                    ],
+                    "attrs": {
+                      "href": "https://ext.dcloud.net.cn/plugin?id=29063"
+                    },
+                    "source": {
+                      "start": {
+                        "line": 10,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 6
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 10,
+                "column": 1
+              },
+              "end": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 10,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "easycom 自动生效，页面直接使用 ",
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 1
+              },
+              "end": {
+                "line": 12,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "<nax-space />",
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 21
+              },
+              "end": {
+                "line": 12,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 即可。",
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 36
+              },
+              "end": {
+                "line": 12,
+                "column": 36
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 12,
+            "column": 1
+          },
+          "end": {
+            "line": 11,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "建议同时安装主题包 ",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni_modules/nax-ui-theme",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 11
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 11
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 并在 ",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 37
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 37
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "App.uvue",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 41
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 41
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引入主题变量，详见 ",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 51
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 51
+                  }
+                }
+              },
+              {
+                "type": "link",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "主题接入",
+                    "source": {
+                      "start": {
+                        "line": 14,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 14,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "attrs": {
+                  "href": "/guide/theme"
+                },
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 62
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 62
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 82
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 82
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 14,
+            "column": 1
+          },
+          "end": {
+            "line": 14,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "代码示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "代码示例",
+            "source": {
+              "start": {
+                "line": 16,
+                "column": 1
+              },
+              "end": {
+                "line": 16,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 16,
+            "column": 1
+          },
+          "end": {
+            "line": 16,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "用法"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "用法",
+            "source": {
+              "start": {
+                "line": 18,
+                "column": 1
+              },
+              "end": {
+                "line": 18,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 18,
+            "column": 1
+          },
+          "end": {
+            "line": 18,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "demo",
+        "value": "<nax-space size=\"md\">\n  <nax-space-item>\n    <nax-button type=\"primary\" label=\"主要\"></nax-button>\n  </nax-space-item>\n  <nax-space-item>\n    <nax-button label=\"默认\"></nax-button>\n  </nax-space-item>\n  <nax-space-item>\n    <nax-button variant=\"tertiary\" label=\"次要\"></nax-button>\n  </nax-space-item>\n</nax-space>\n\n<!-- 纵向 -->\n<nax-space direction=\"vertical\" size=\"sm\" fill>\n  <nax-space-item>\n    <nax-button block label=\"按钮 A\"></nax-button>\n  </nax-space-item>\n  <nax-space-item>\n    <nax-button block label=\"按钮 B\"></nax-button>\n  </nax-space-item>\n</nax-space>",
+        "attrs": {
+          "name": "demo-space"
+        },
+        "source": {
+          "start": {
+            "line": 19,
+            "column": 1
+          },
+          "end": {
+            "line": 40,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "nax-space-item"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "nax-space-item",
+            "source": {
+              "start": {
+                "line": 43,
+                "column": 1
+              },
+              "end": {
+                "line": 43,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 43,
+            "column": 1
+          },
+          "end": {
+            "line": 43,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 44,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 44,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 44,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 44,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 44,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 44,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认",
+                    "source": {
+                      "start": {
+                        "line": 44,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 44,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 44,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 44,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 44,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 44,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 44,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 44,
+                "column": 1
+              },
+              "end": {
+                "line": 44,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "custom-class",
+                    "source": {
+                      "start": {
+                        "line": 46,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 46,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 46,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 46,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 46,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 46,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 46,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 46,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 46,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 46,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 46,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 46,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 46,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 46,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 46,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 46,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 46,
+                "column": 1
+              },
+              "end": {
+                "line": 46,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 44,
+            "column": 1
+          },
+          "end": {
+            "line": 45,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "插槽 ",
+            "source": {
+              "start": {
+                "line": 48,
+                "column": 1
+              },
+              "end": {
+                "line": 48,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "default",
+            "source": {
+              "start": {
+                "line": 48,
+                "column": 4
+              },
+              "end": {
+                "line": 48,
+                "column": 4
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "：实际内容。",
+            "source": {
+              "start": {
+                "line": 48,
+                "column": 13
+              },
+              "end": {
+                "line": 48,
+                "column": 13
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 48,
+            "column": 1
+          },
+          "end": {
+            "line": 47,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "基础横向"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "基础横向",
+            "source": {
+              "start": {
+                "line": 50,
+                "column": 1
+              },
+              "end": {
+                "line": 50,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 50,
+            "column": 1
+          },
+          "end": {
+            "line": 50,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-space size=\"md\">\n    <nax-space-item>\n        <nax-button type=\"primary\" size=\"sm\" label=\"主要\"></nax-button>\n    </nax-space-item>\n    <nax-space-item>\n        <nax-button size=\"sm\" label=\"默认\"></nax-button>\n    </nax-space-item>\n    <nax-space-item>\n        <nax-button variant=\"tertiary\" size=\"sm\" label=\"次要\"></nax-button>\n    </nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 51,
+            "column": 1
+          },
+          "end": {
+            "line": 62,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"md\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"primary\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"主要\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"默认\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "variant",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"tertiary\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"次要\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "间距-size"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "间距 size",
+            "source": {
+              "start": {
+                "line": 65,
+                "column": 1
+              },
+              "end": {
+                "line": 65,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 65,
+            "column": 1
+          },
+          "end": {
+            "line": 65,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<!-- xs (4) -->\n<nax-space size=\"xs\">\n    <nax-space-item><nax-tag label=\"A\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"B\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"C\"></nax-tag></nax-space-item>\n</nax-space>\n\n<!-- sm (8) -->\n<nax-space size=\"sm\">\n    <nax-space-item><nax-tag label=\"A\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"B\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"C\"></nax-tag></nax-space-item>\n</nax-space>\n\n<!-- md (12) -->\n<nax-space size=\"md\">\n    <nax-space-item><nax-tag label=\"A\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"B\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"C\"></nax-tag></nax-space-item>\n</nax-space>\n\n<!-- lg (16) -->\n<nax-space size=\"lg\">\n    <nax-space-item><nax-tag label=\"A\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"B\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"C\"></nax-tag></nax-space-item>\n</nax-space>\n\n<!-- 自定义 24 -->\n<nax-space size=\"24\">\n    <nax-space-item><nax-tag label=\"A\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"B\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"C\"></nax-tag></nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 66,
+            "column": 1
+          },
+          "end": {
+            "line": 100,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<!-- xs (4) -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"xs\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"C\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- sm (8) -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"C\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- md (12) -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"md\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"C\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- lg (16) -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"lg\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"C\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- 自定义 24 -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"24\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"C\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "纵向-vertical"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "纵向 vertical",
+            "source": {
+              "start": {
+                "line": 103,
+                "column": 1
+              },
+              "end": {
+                "line": 103,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 103,
+            "column": 1
+          },
+          "end": {
+            "line": 103,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-space direction=\"vertical\" size=\"sm\">\n    <nax-space-item>\n        <nax-button size=\"sm\" label=\"第一行\"></nax-button>\n    </nax-space-item>\n    <nax-space-item>\n        <nax-button size=\"sm\" type=\"primary\" label=\"第二行\"></nax-button>\n    </nax-space-item>\n    <nax-space-item>\n        <nax-button size=\"sm\" type=\"success\" label=\"第三行\"></nax-button>\n    </nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 104,
+            "column": 1
+          },
+          "end": {
+            "line": 115,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "direction",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"vertical\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"第一行\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"primary\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"第二行\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"success\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"第三行\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "换行-wrap"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "换行 wrap",
+            "source": {
+              "start": {
+                "line": 118,
+                "column": 1
+              },
+              "end": {
+                "line": 118,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 118,
+            "column": 1
+          },
+          "end": {
+            "line": 118,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-space size=\"sm\" wrap>\n    <nax-space-item><nax-tag type=\"primary\" label=\"标签1\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag type=\"info\" label=\"标签2\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag type=\"success\" label=\"标签3\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag type=\"warning\" label=\"标签4\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag type=\"error\" label=\"标签5\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"标签6\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"标签7\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"标签8\"></nax-tag></nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 119,
+            "column": 1
+          },
+          "end": {
+            "line": 129,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "wrap",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"primary\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签1\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"info\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签2\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"success\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签3\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"warning\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签4\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"error\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签5\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签6\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签7\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"标签8\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "对齐-align"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "对齐 align",
+            "source": {
+              "start": {
+                "line": 132,
+                "column": 1
+              },
+              "end": {
+                "line": 132,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 132,
+            "column": 1
+          },
+          "end": {
+            "line": 132,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<!-- start -->\n<nax-space align=\"start\" size=\"md\">\n    <nax-space-item><view class=\"box box--sm\"></view></nax-space-item>\n    <nax-space-item><view class=\"box box--lg\"></view></nax-space-item>\n    <nax-space-item><view class=\"box box--md\"></view></nax-space-item>\n</nax-space>\n\n<!-- center（默认） -->\n<nax-space align=\"center\" size=\"md\">\n    <nax-space-item><view class=\"box box--sm\"></view></nax-space-item>\n    <nax-space-item><view class=\"box box--lg\"></view></nax-space-item>\n    <nax-space-item><view class=\"box box--md\"></view></nax-space-item>\n</nax-space>\n\n<!-- end -->\n<nax-space align=\"end\" size=\"md\">\n    <nax-space-item><view class=\"box box--sm\"></view></nax-space-item>\n    <nax-space-item><view class=\"box box--lg\"></view></nax-space-item>\n    <nax-space-item><view class=\"box box--md\"></view></nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 133,
+            "column": 1
+          },
+          "end": {
+            "line": 153,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<!-- start -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "align",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"start\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"md\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--sm\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--lg\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--md\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- center（默认） -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "align",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"center\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"md\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--sm\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--lg\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--md\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- end -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "align",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"end\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"md\"",
+            "c": "str"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--sm\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--lg\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><view",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "class",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"box box--md\"",
+            "c": "str"
+          },
+          {
+            "t": "></view></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "box--sm / box--md / box--lg 为三种不同尺寸的方块，样式由页面定义。",
+            "source": {
+              "start": {
+                "line": 156,
+                "column": 1
+              },
+              "end": {
+                "line": 156,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 156,
+            "column": 1
+          },
+          "end": {
+            "line": 155,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "主轴-justify"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "主轴 justify",
+            "source": {
+              "start": {
+                "line": 158,
+                "column": 1
+              },
+              "end": {
+                "line": 158,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 158,
+            "column": 1
+          },
+          "end": {
+            "line": 158,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<!-- between -->\n<nax-space justify=\"between\" size=\"0\" fill>\n    <nax-space-item><nax-tag label=\"左\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"中\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"右\"></nax-tag></nax-space-item>\n</nax-space>\n\n<!-- center -->\n<nax-space justify=\"center\" size=\"sm\" fill>\n    <nax-space-item><nax-tag label=\"A\"></nax-tag></nax-space-item>\n    <nax-space-item><nax-tag label=\"B\"></nax-tag></nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 159,
+            "column": 1
+          },
+          "end": {
+            "line": 171,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<!-- between -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "justify",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"between\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"0\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "fill",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"左\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"中\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"右\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "<!-- center -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "justify",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"center\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "fill",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item><nax-tag",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-tag></nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "fill-纵向撑满"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "fill 纵向撑满",
+            "source": {
+              "start": {
+                "line": 174,
+                "column": 1
+              },
+              "end": {
+                "line": 174,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 174,
+            "column": 1
+          },
+          "end": {
+            "line": 174,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-space direction=\"vertical\" size=\"sm\" fill>\n    <nax-space-item>\n        <nax-button block type=\"primary\" label=\"通栏按钮 A\"></nax-button>\n    </nax-space-item>\n    <nax-space-item>\n        <nax-button block label=\"通栏按钮 B\"></nax-button>\n    </nax-space-item>\n</nax-space>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 175,
+            "column": 1
+          },
+          "end": {
+            "line": 183,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-space",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "direction",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"vertical\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "fill",
+            "c": "fn"
+          },
+          {
+            "t": ">",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "block",
+            "c": "fn"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"primary\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"通栏按钮 A\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "<nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n        "
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "block",
+            "c": "fn"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"通栏按钮 B\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "</nax-space-item>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "</nax-space>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "props"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Props",
+            "source": {
+              "start": {
+                "line": 186,
+                "column": 1
+              },
+              "end": {
+                "line": 186,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 186,
+            "column": 1
+          },
+          "end": {
+            "line": 186,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 188,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 188,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 188,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 188,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 188,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 188,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 188,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 188,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认值",
+                    "source": {
+                      "start": {
+                        "line": 188,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 188,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 188,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 188,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 188,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 188,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 188,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 188,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 188,
+                "column": 1
+              },
+              "end": {
+                "line": 188,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "direction",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 190,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 190,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 190,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 190,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'horizontal'",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 190,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 190,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "horizontal",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 横向 | ",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 13
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 13
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "vertical",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 19
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 19
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 纵向（兼容 ",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 29
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 29
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "row",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 36
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 36
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 41
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 41
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "column",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 44
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 44
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）",
+                    "source": {
+                      "start": {
+                        "line": 190,
+                        "column": 52
+                      },
+                      "end": {
+                        "line": 190,
+                        "column": 52
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 190,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 190,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 190,
+                "column": 1
+              },
+              "end": {
+                "line": 190,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "size",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 191,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 191,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 191,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 191,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'md'",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 191,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 191,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "xs",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 特小 | ",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 5
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 5
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "sm",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 11
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 11
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 小 | ",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 15
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "md",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 20
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 20
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 中 | ",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 24
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 24
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "lg",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 29
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 29
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 大 | ",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 33
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 33
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "xl",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 38
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 38
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 特大（token 档）或 1~10（token 档）或数字（px）/ 带单位",
+                    "source": {
+                      "start": {
+                        "line": 191,
+                        "column": 42
+                      },
+                      "end": {
+                        "line": 191,
+                        "column": 42
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 191,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 191,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 191,
+                "column": 1
+              },
+              "end": {
+                "line": 191,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "wrap",
+                    "source": {
+                      "start": {
+                        "line": 192,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 192,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 192,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 192,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 192,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 192,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 192,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 192,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 192,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 192,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 192,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 192,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否换行（横向有效）",
+                    "source": {
+                      "start": {
+                        "line": 192,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 192,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 192,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 192,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 192,
+                "column": 1
+              },
+              "end": {
+                "line": 192,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "align",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 193,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 193,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 193,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 193,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'center'",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 193,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 193,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "start",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 起点 | ",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 8
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 8
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "center",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 14
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 居中 | ",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 22
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 22
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "end",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 28
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 终点 | ",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 33
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 33
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "baseline",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 39
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 39
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 基线 | ",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 49
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 49
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "stretch",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 55
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 55
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 拉伸（兼容 flex 原语）",
+                    "source": {
+                      "start": {
+                        "line": 193,
+                        "column": 64
+                      },
+                      "end": {
+                        "line": 193,
+                        "column": 64
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 193,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 193,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 193,
+                "column": 1
+              },
+              "end": {
+                "line": 193,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "justify",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 194,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 194,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 194,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 194,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'start'",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 194,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 194,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "start",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 起点 | ",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 8
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 8
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "center",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 14
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 居中 | ",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 22
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 22
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "end",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 28
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 终点 | ",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 33
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 33
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "between",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 39
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 39
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 两端对齐 | ",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 48
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 48
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "around",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 56
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 56
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 环绕 | ",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 64
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 64
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "evenly",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 70
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 70
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 均匀分布",
+                    "source": {
+                      "start": {
+                        "line": 194,
+                        "column": 78
+                      },
+                      "end": {
+                        "line": 194,
+                        "column": 78
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 194,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 194,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 194,
+                "column": 1
+              },
+              "end": {
+                "line": 194,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "fill",
+                    "source": {
+                      "start": {
+                        "line": 195,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 195,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 195,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 195,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 195,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 195,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 195,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 195,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 195,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 195,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 195,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 195,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "子项在主轴方向拉伸占满（vertical 时 item 宽 100%）",
+                    "source": {
+                      "start": {
+                        "line": 195,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 195,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 195,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 195,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 195,
+                "column": 1
+              },
+              "end": {
+                "line": 195,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "customClass",
+                    "source": {
+                      "start": {
+                        "line": 196,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 196,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 196,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 196,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 196,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 196,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 196,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 196,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 196,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 196,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 196,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 196,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 196,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 196,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 196,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 196,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 196,
+                "column": 1
+              },
+              "end": {
+                "line": 196,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 188,
+            "column": 1
+          },
+          "end": {
+            "line": 195,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "slots"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Slots",
+            "source": {
+              "start": {
+                "line": 198,
+                "column": 1
+              },
+              "end": {
+                "line": 198,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 198,
+            "column": 1
+          },
+          "end": {
+            "line": 198,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "插槽",
+                    "source": {
+                      "start": {
+                        "line": 200,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 200,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 200,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 200,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 200,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 200,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 200,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 200,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 200,
+                "column": 1
+              },
+              "end": {
+                "line": 200,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "default",
+                    "source": {
+                      "start": {
+                        "line": 202,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 202,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 202,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 202,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "放置 nax-space-item（或任意子节点；无 item 时仅布局不保证间距）",
+                    "source": {
+                      "start": {
+                        "line": 202,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 202,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 202,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 202,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 202,
+                "column": 1
+              },
+              "end": {
+                "line": 202,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 200,
+            "column": 1
+          },
+          "end": {
+            "line": 201,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 203,
+        "column": 1
+      }
+    }
+  }
+}

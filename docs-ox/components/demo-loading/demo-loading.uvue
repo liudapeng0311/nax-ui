@@ -1,0 +1,94 @@
+<template>
+  <view class="demo-loading">
+    <text class="dsec">基础</text>
+    <nax-loading></nax-loading>
+
+    <text class="dsec">带文案</text>
+    <nax-loading text="加载中"></nax-loading>
+
+    <text class="dsec">纵向 vertical</text>
+    <nax-loading vertical text="请稍候"></nax-loading>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="row">
+      <nax-loading size="sm" text="sm"></nax-loading>
+      <nax-loading size="md" text="md"></nax-loading>
+      <nax-loading size="lg" text="lg"></nax-loading>
+    </view>
+
+    <text class="dsec">图标 icon</text>
+    <view class="row">
+      <nax-loading icon="loading" text="loading"></nax-loading>
+      <nax-loading icon="loader" text="loader"></nax-loading>
+      <nax-loading icon="loader-4" text="loader-4"></nax-loading>
+    </view>
+
+    <text class="dsec">类型 type</text>
+    <view class="row">
+      <nax-loading type="primary" text="主色"></nax-loading>
+      <nax-loading type="info" text="信息"></nax-loading>
+      <nax-loading type="warning" text="警告"></nax-loading>
+      <nax-loading type="error" text="错误"></nax-loading>
+    </view>
+
+    <text class="dsec">区块占位</text>
+    <view class="block">
+      <nax-loading v-if="blockLoading" vertical text="内容加载中" type="primary"></nax-loading>
+      <text v-else class="btxt">数据已就绪</text>
+    </view>
+    <nax-button type="primary" size="sm" label="模拟加载 1.5s" @click="simulate"></nax-button>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const blockLoading = ref(false)
+
+let timerId = -1
+
+function simulate() {
+  blockLoading.value = true
+  if (timerId !== -1) {
+    clearTimeout(timerId)
+  }
+  timerId = setTimeout(() => {
+    blockLoading.value = false
+    timerId = -1
+  }, 1500)
+}
+</script>
+
+<style>
+.demo-loading {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.block {
+  height: 90px;
+  background-color: var(--nax-color-bg-secondary, #f2f3f5);
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.btxt {
+  font-size: 13px;
+  color: var(--nax-color-text-secondary, #666666);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

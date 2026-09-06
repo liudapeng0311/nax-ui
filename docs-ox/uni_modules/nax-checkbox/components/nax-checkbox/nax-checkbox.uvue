@@ -1,0 +1,521 @@
+<template>
+	<view class="nax-checkbox" :class="rootClass" :style="rootStyle">
+		<view
+			class="nax-checkbox__box"
+			:class="boxClass"
+			:style="boxStyle"
+			@click.stop="onBoxClick"
+		>
+			<nax-icon
+				v-if="checked"
+				name="check"
+				:size="iconSizePx"
+				:color="checkIconColor"
+			></nax-icon>
+		</view>
+
+		<text
+			v-if="hasLabel"
+			class="nax-checkbox__label"
+			:max-lines="1"
+			:class="labelClass"
+			:style="labelStyle"
+			@click.stop="onLabelClick"
+		>{{ labelText }}</text>
+
+		<view class="nax-checkbox__slot" @click.stop="onLabelClick">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-checkbox
+	 * @description 复选框。可单独使用（v-model 布尔）或置于 nax-checkbox-group 内。
+	 * @property {boolean} modelValue 单独使用时的选中态（v-model）
+	 * @property {string} name 选项标识（组内）；value 优先
+	 * @property {string} value 选项标识，优先级高于 name
+	 * @property {string} label 右侧文案
+	 * @property {string} shape square | circle
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} labelDisabled 为 true 时点击文案不切换
+	 * @property {string} activeColor 选中色
+	 * @property {string} iconSize 勾选图标字号（数字字符串 px）
+	 * @property {string} labelSize 文案字号（数字字符串 px）
+	 * @property {string} size sm | md | lg
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue 单独使用时的 v-model
+	 * @event change 选中态变化（boolean）
+	 * @slot default 自定义标签内容
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: Boolean,
+			default: false
+		},
+		name: {
+			type: String,
+			default: ''
+		},
+		value: {
+			type: String,
+			default: ''
+		},
+		label: {
+			type: String,
+			default: ''
+		},
+		shape: {
+			type: String,
+			default: 'square'
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		labelDisabled: {
+			type: Boolean,
+			default: false
+		},
+		activeColor: {
+			type: String,
+			default: ''
+		},
+		iconSize: {
+			type: String,
+			default: ''
+		},
+		labelSize: {
+			type: String,
+			default: ''
+		},
+		size: {
+			type: String,
+			default: 'md'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	// Android inject 不能用 null 作为 Ref/函数默认值，否则 UTS 会推断为 Void。
+	// #ifdef APP-ANDROID
+	function fallbackToggle(_name : string) : number {
+		return -1
+	}
+	// #endif
+
+	const inGroup = inject('naxCbInGroup', false) as boolean
+	// #ifdef APP-ANDROID
+	const selectedRef = inject('naxCbSelected', ref([] as string[])) as Ref<string[]>
+	const toggleRaw = inject('naxCbToggle', fallbackToggle) as (name : string) => number
+	const groupDisabledRef = inject('naxCbDisabled', ref(false)) as Ref<boolean>
+	const groupShapeRef = inject('naxCbShape', ref('square')) as Ref<string>
+	const groupSizeRef = inject('naxCbSize', ref('md')) as Ref<string>
+	const groupActiveColorRef = inject('naxCbActiveColor', ref('')) as Ref<string>
+	const groupIconSizeRef = inject('naxCbIconSize', ref('')) as Ref<string>
+	const groupLabelSizeRef = inject('naxCbLabelSize', ref('')) as Ref<string>
+	const groupLabelDisabledRef = inject('naxCbLabelDisabled', ref(false)) as Ref<boolean>
+	const groupMaxRef = inject('naxCbMax', ref(0)) as Ref<number>
+	const groupWidthRef = inject('naxCbWidth', ref('')) as Ref<string>
+	const groupWrapRef = inject('naxCbWrap', ref(false)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
+	const selectedRef = inject('naxCbSelected', null)
+	const toggleRaw = inject('naxCbToggle', null)
+	const groupDisabledRef = inject('naxCbDisabled', null)
+	const groupShapeRef = inject('naxCbShape', null)
+	const groupSizeRef = inject('naxCbSize', null)
+	const groupActiveColorRef = inject('naxCbActiveColor', null)
+	const groupIconSizeRef = inject('naxCbIconSize', null)
+	const groupLabelSizeRef = inject('naxCbLabelSize', null)
+	const groupLabelDisabledRef = inject('naxCbLabelDisabled', null)
+	const groupMaxRef = inject('naxCbMax', null)
+	const groupWidthRef = inject('naxCbWidth', null)
+	const groupWrapRef = inject('naxCbWrap', null)
+	// #endif
+
+	function readRefBool(r : any | null, fallback : boolean) : boolean {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<boolean>).value
+	}
+
+	function readRefString(r : any | null, fallback : string) : string {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<string>).value
+	}
+
+	function readRefNumber(r : any | null, fallback : number) : number {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<number>).value
+	}
+
+	function readSelected() : string[] {
+		if (selectedRef == null) {
+			return [] as string[]
+		}
+		return (selectedRef as Ref<string[]>).value
+	}
+
+	function callToggle(name : string) : number {
+		if (toggleRaw == null) {
+			return -1
+		}
+		const fn = toggleRaw as (n : string) => number
+		return fn(name)
+	}
+
+	const itemName = computed((): string => {
+		if (props.value.length > 0) {
+			return props.value
+		}
+		return props.name
+	})
+
+	function listHas(list : string[], name : string) : boolean {
+		var i = 0
+		while (i < list.length) {
+			if (list[i] == name) {
+				return true
+			}
+			i++
+		}
+		return false
+	}
+
+	const checked = computed((): boolean => {
+		if (inGroup && selectedRef != null) {
+			return listHas(readSelected(), itemName.value)
+		}
+		return props.modelValue
+	})
+
+	const isDisabled = computed((): boolean => {
+		if (props.disabled) {
+			return true
+		}
+		if (inGroup && readRefBool(groupDisabledRef, false)) {
+			return true
+		}
+		if (inGroup && selectedRef != null) {
+			const max = readRefNumber(groupMaxRef, 0)
+			if (max > 0 && !checked.value && readSelected().length >= max) {
+				return true
+			}
+		}
+		return false
+	})
+
+	const mergedShape = computed((): string => {
+		if (inGroup) {
+			const g = readRefString(groupShapeRef, '')
+			if (g == 'circle' || g == 'square') {
+				return g
+			}
+		}
+		if (props.shape == 'circle') {
+			return 'circle'
+		}
+		return 'square'
+	})
+
+	const mergedSize = computed((): string => {
+		if (inGroup) {
+			const g = readRefString(groupSizeRef, '')
+			if (g == 'sm' || g == 'md' || g == 'lg') {
+				return g
+			}
+		}
+		if (props.size == 'sm' || props.size == 'lg') {
+			return props.size
+		}
+		return 'md'
+	})
+
+	const mergedActiveColor = computed((): string => {
+		if (props.activeColor.length > 0) {
+			return props.activeColor
+		}
+		if (inGroup) {
+			return readRefString(groupActiveColorRef, '')
+		}
+		return ''
+	})
+
+	const mergedIconSize = computed((): string => {
+		if (props.iconSize.length > 0) {
+			return props.iconSize
+		}
+		if (inGroup) {
+			return readRefString(groupIconSizeRef, '')
+		}
+		return ''
+	})
+
+	const mergedLabelSize = computed((): string => {
+		if (props.labelSize.length > 0) {
+			return props.labelSize
+		}
+		if (inGroup) {
+			return readRefString(groupLabelSizeRef, '')
+		}
+		return ''
+	})
+
+	const mergedLabelDisabled = computed((): boolean => {
+		if (props.labelDisabled) {
+			return true
+		}
+		if (inGroup) {
+			return readRefBool(groupLabelDisabledRef, false)
+		}
+		return false
+	})
+
+	const itemWidth = computed((): string => {
+		if (inGroup) {
+			return readRefString(groupWidthRef, '')
+		}
+		return ''
+	})
+
+	const groupWrap = computed((): boolean => {
+		if (inGroup) {
+			return readRefBool(groupWrapRef, false)
+		}
+		return false
+	})
+
+	function sizeBoxPx() : number {
+		const s = mergedSize.value
+		if (s == 'sm') {
+			return 16
+		}
+		if (s == 'lg') {
+			return 22
+		}
+		return 18
+	}
+
+	function sizeLabelPx() : number {
+		const s = mergedSize.value
+		if (s == 'sm') {
+			return 14
+		}
+		if (s == 'lg') {
+			return 18
+		}
+		return 16
+	}
+
+	function sizeIconDefaultPx() : number {
+		const s = mergedSize.value
+		if (s == 'sm') {
+			return 12
+		}
+		if (s == 'lg') {
+			return 16
+		}
+		return 14
+	}
+
+	function parsePx(value : string, fallback : number) : number {
+		if (value.length == 0) {
+			return fallback
+		}
+		const n = parseFloat(value)
+		if (isNaN(n) || n <= 0) {
+			return fallback
+		}
+		return n
+	}
+
+	const iconSizePx = computed((): string => {
+		const px = parsePx(mergedIconSize.value, sizeIconDefaultPx())
+		return '' + Math.floor(px)
+	})
+
+	const labelFontPx = computed((): number => {
+		return parsePx(mergedLabelSize.value, sizeLabelPx())
+	})
+
+	const activeColorValue = computed((): string => {
+		if (mergedActiveColor.value.length > 0) {
+			return mergedActiveColor.value
+		}
+		return 'var(--nax-color-primary, #18a058)'
+	})
+
+	const checkIconColor = computed((): string => {
+		return 'var(--nax-color-text-inverse, #ffffff)'
+	})
+
+	const hasLabel = computed((): boolean => {
+		return props.label.length > 0
+	})
+
+	const labelText = computed((): string => {
+		return props.label
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-checkbox--' + mergedSize.value
+		if (checked.value) {
+			cls += ' nax-checkbox--checked'
+		}
+		if (isDisabled.value) {
+			cls += ' nax-checkbox--disabled'
+		}
+		if (mergedShape.value == 'circle') {
+			cls += ' nax-checkbox--circle'
+		} else {
+			cls += ' nax-checkbox--square'
+		}
+		if (groupWrap.value) {
+			cls += ' nax-checkbox--block'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		const w = itemWidth.value
+		if (w.length > 0) {
+			style += 'width:' + w + ';'
+			// 指定宽度时去掉右外边距，避免 50% + margin 换行错位
+			style += 'margin-right:0;'
+			style += 'padding-right:8px;'
+		}
+		return style
+	})
+
+	const boxClass = computed((): string => {
+		var cls = ''
+		if (checked.value) {
+			cls += ' nax-checkbox__box--checked'
+		}
+		if (mergedShape.value == 'circle') {
+			cls += ' nax-checkbox__box--circle'
+		}
+		return cls.trim()
+	})
+
+	const boxStyle = computed((): string => {
+		const box = sizeBoxPx()
+		var style = ''
+		style += 'width:' + box + 'px;'
+		style += 'height:' + box + 'px;'
+		if (checked.value) {
+			style += 'background-color:' + activeColorValue.value + ';'
+			style += 'border-color:' + activeColorValue.value + ';'
+		}
+		return style
+	})
+
+	const labelClass = computed((): string => {
+		var cls = ''
+		if (isDisabled.value) {
+			cls += ' nax-checkbox__label--disabled'
+		}
+		return cls.trim()
+	})
+
+	const labelStyle = computed((): string => {
+		return 'font-size:' + labelFontPx.value + 'px;'
+	})
+
+	function toggle() {
+		if (isDisabled.value) {
+			return
+		}
+		if (inGroup) {
+			const name = itemName.value
+			if (name.length == 0) {
+				return
+			}
+			const code = callToggle(name)
+			if (code < 0) {
+				return
+			}
+			emit('change', code == 1)
+			return
+		}
+		const next = !props.modelValue
+		emit('update:modelValue', next)
+		emit('change', next)
+	}
+
+	function onBoxClick() {
+		toggle()
+	}
+
+	function onLabelClick() {
+		if (mergedLabelDisabled.value) {
+			return
+		}
+		toggle()
+	}
+</script>
+
+<style>
+	.nax-checkbox {
+		flex-direction: row;
+		align-items: center;
+		margin-right: 16px;
+		/* 行内不留底边距，避免 form-item 内相对标签偏高/不居中 */
+		margin-bottom: 0;
+	}
+
+	.nax-checkbox--block {
+		margin-right: 0;
+		margin-bottom: 8px;
+		width: 100%;
+	}
+
+	.nax-checkbox__box {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border-strong, #e5e5ea);
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-sm, 3px);
+		flex-shrink: 0;
+	}
+
+	.nax-checkbox__box--circle {
+		border-radius: var(--nax-radius-full, 999px);
+	}
+
+	.nax-checkbox--disabled {
+		opacity: var(--nax-opacity-disabled, 0.45);
+	}
+
+	.nax-checkbox__label {
+		margin-left: 8px;
+		color: var(--nax-color-text, #333639);
+	}
+
+	.nax-checkbox__label--disabled {
+		color: var(--nax-color-text-disabled, #e5e5ea);
+	}
+
+	.nax-checkbox__slot {
+		flex-direction: row;
+		align-items: center;
+	}
+</style>

@@ -1,0 +1,1526 @@
+<template>
+	<view class="nax-calendar" :class="rootClass">
+		<!-- 页面内联模式 -->
+		<view v-if="isPageMode" class="nax-calendar__inner nax-calendar__inner--page">
+			<view class="nax-calendar__action">
+				<view
+					v-if="changeYear"
+					class="nax-calendar__action-btn"
+					:hover-class="navHoverClass"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onChangeYear(-1)"
+				>
+					<nax-icon name="chevron-left" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+					<nax-icon name="chevron-left" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+				</view>
+				<view
+					v-if="changeMonth"
+					class="nax-calendar__action-btn"
+					:hover-class="navHoverClass"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onChangeMonth(-1)"
+				>
+					<nax-icon name="chevron-left" size="18" color="var(--nax-color-text, #333639)"></nax-icon>
+				</view>
+				<text class="nax-calendar__action-title">{{ titleText }}</text>
+				<view
+					v-if="changeMonth"
+					class="nax-calendar__action-btn"
+					:hover-class="navHoverClass"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onChangeMonth(1)"
+				>
+					<nax-icon name="chevron-right" size="18" color="var(--nax-color-text, #333639)"></nax-icon>
+				</view>
+				<view
+					v-if="changeYear"
+					class="nax-calendar__action-btn"
+					:hover-class="navHoverClass"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onChangeYear(1)"
+				>
+					<nax-icon name="chevron-right" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+					<nax-icon name="chevron-right" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+				</view>
+			</view>
+
+			<view class="nax-calendar__week">
+				<view v-for="(w, wi) in weekLabels" :key="wi" class="nax-calendar__week-item">
+					<text class="nax-calendar__week-text">{{ w }}</text>
+				</view>
+			</view>
+
+			<view class="nax-calendar__grid">
+				<view v-for="(row, ri) in weekRows" :key="'pr' + ri.toString()" class="nax-calendar__row">
+					<view
+						v-for="(cell, ci) in row"
+						:key="'pc' + ri.toString() + '-' + ci.toString()"
+						class="nax-calendar__cell"
+						:class="gridCellClass(cell)"
+						:hover-class="gridCellHoverClass(cell)"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onGridCellClick(cell)"
+					>
+						<view v-if="cell > 0" class="nax-calendar__day" :class="dayBoxClass(cell)">
+							<text v-if="showCheckMark(cell)" class="nax-calendar__day-text" :class="dayTextClass(cell)">✓</text>
+							<text v-else class="nax-calendar__day-text" :class="dayTextClass(cell)">{{ cell }}</text>
+							<text v-if="hasMark(cell)" class="nax-calendar__mark" :class="markClass(cell)">{{ markText(cell) }}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 底部弹层模式 -->
+		<view v-if="!isPageMode && rootMounted" class="nax-calendar__root" :style="rootOverlayStyle">
+			<view
+				class="nax-calendar__mask"
+				:class="maskClass"
+				:style="maskStyle"
+				@click="onMaskClick"
+			></view>
+			<view class="nax-calendar__panel-layer">
+				<nax-transition
+					:show="panelShow"
+					name="slide-up"
+					:duration="ANIM_DURATION"
+					@after-leave="onOverlayLeave"
+				>
+					<view class="nax-calendar__panel" :class="panelClass" :style="panelStyle">
+						<view class="nax-calendar__header">
+							<text class="nax-calendar__header-title">{{ toolTipText }}</text>
+							<view
+								v-if="closeable"
+								class="nax-calendar__close"
+								:hover-class="navHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click.stop="onCloseClick"
+							>
+								<nax-icon name="close" size="18" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+							</view>
+						</view>
+
+						<view class="nax-calendar__action">
+							<view
+								v-if="changeYear"
+								class="nax-calendar__action-btn"
+								:hover-class="navHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onChangeYear(-1)"
+							>
+								<nax-icon name="chevron-left" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+								<nax-icon name="chevron-left" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+							</view>
+							<view
+								v-if="changeMonth"
+								class="nax-calendar__action-btn"
+								:hover-class="navHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onChangeMonth(-1)"
+							>
+								<nax-icon name="chevron-left" size="18" color="var(--nax-color-text, #333639)"></nax-icon>
+							</view>
+							<text class="nax-calendar__action-title">{{ titleText }}</text>
+							<view
+								v-if="changeMonth"
+								class="nax-calendar__action-btn"
+								:hover-class="navHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onChangeMonth(1)"
+							>
+								<nax-icon name="chevron-right" size="18" color="var(--nax-color-text, #333639)"></nax-icon>
+							</view>
+							<view
+								v-if="changeYear"
+								class="nax-calendar__action-btn"
+								:hover-class="navHoverClass"
+								:hover-start-time="20"
+								:hover-stay-time="70"
+								@click="onChangeYear(1)"
+							>
+								<nax-icon name="chevron-right" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+								<nax-icon name="chevron-right" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+							</view>
+						</view>
+
+						<view class="nax-calendar__week">
+							<view v-for="(w, wi) in weekLabels" :key="wi" class="nax-calendar__week-item">
+								<text class="nax-calendar__week-text">{{ w }}</text>
+							</view>
+						</view>
+
+						<view class="nax-calendar__grid">
+							<view v-for="(row, ri) in weekRows" :key="'r' + ri.toString()" class="nax-calendar__row">
+								<view
+									v-for="(cell, ci) in row"
+									:key="'c' + ri.toString() + '-' + ci.toString()"
+									class="nax-calendar__cell"
+									:class="gridCellClass(cell)"
+									:hover-class="gridCellHoverClass(cell)"
+									:hover-start-time="20"
+									:hover-stay-time="70"
+									@click="onGridCellClick(cell)"
+								>
+									<view v-if="cell > 0" class="nax-calendar__day" :class="dayBoxClass(cell)">
+										<text v-if="showCheckMark(cell)" class="nax-calendar__day-text" :class="dayTextClass(cell)">✓</text>
+										<text v-else class="nax-calendar__day-text" :class="dayTextClass(cell)">{{ cell }}</text>
+										<text v-if="hasMark(cell)" class="nax-calendar__mark" :class="markClass(cell)">{{ markText(cell) }}</text>
+									</view>
+								</view>
+							</view>
+						</view>
+
+						<view class="nax-calendar__bottom">
+							<view class="nax-calendar__choose">
+								<text class="nax-calendar__choose-text">{{ chooseText }}</text>
+							</view>
+							<view class="nax-calendar__confirm-wrap">
+								<nax-button
+									type="primary"
+									shape="round"
+									block
+									:disabled="confirmDisabled"
+									:label="confirmTextValue"
+									@click="onConfirm"
+								></nax-button>
+							</view>
+						</view>
+					</view>
+				</nax-transition>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-calendar
+	 * @description 日历选择器。功能主要对齐  Calendar：单选 / 范围、弹层 / 页面内联、节假日与打卡标记。
+	 * @property {boolean} show v-model:show 控制弹层显隐（isPage 时无效）
+	 * @property {string} mode date | range
+	 * @property {boolean} isPage 页面内联展示，不走底部弹层
+	 * @property {string} toolTip 弹层顶部标题，默认「选择日期」
+	 * @property {boolean} changeYear 是否可切换年
+	 * @property {boolean} changeMonth 是否可切换月
+	 * @property {number|string} minYear / maxYear 可切换年份范围
+	 * @property {string} minDate / maxDate 可选日期范围，YYYY-MM-DD；maxDate 空则为今天
+	 * @property {string} defaultDate 单选默认日期
+	 * @property {string} startDate / endDate 范围默认起止
+	 * @property {boolean} defaultSelectToday 无默认值时是否选中今天
+	 * @property {boolean} readonly 只读
+	 * @property {boolean} closeable 弹层右上角关闭
+	 * @property {boolean} maskClosable / maskCloseAble 点遮罩关闭
+	 * @property {boolean} safeAreaInsetBottom 底部安全区
+	 * @property {number} zIndex 弹层层级
+	 * @property {string} confirmText 确认文案
+	 * @property {string} startText / endText 范围起止标记文案
+	 * @property {boolean} isActiveCurrent 当前选中日是否高亮
+	 * @property {boolean} isChange 切换年月时是否触发 change（仅 date）
+	 * @property {Array} holidays / workdays 节假日、加班日 YYYY-MM-DD 列表
+	 * @property {Object} festivals 节日映射 { 'YYYY-MM-DD': '清明节' }
+	 * @property {boolean} showFestival 是否显示内置公历节日
+	 * @property {Array} checkedDates 已打卡日期
+	 * @property {boolean} todayChecked 今日已打卡
+	 * @property {boolean} checkinMode 打卡签到模式
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:show 弹层显隐
+	 * @event change 确认或页面模式选完；单选/范围结构不同
+	 * @event open / close 打开 / 关闭
+	 */
+	const props = defineProps({
+		show: { type: Boolean, default: false },
+		mode: { type: String, default: 'date' },
+		isPage: { type: Boolean, default: false },
+		toolTip: { type: String, default: '' },
+		changeYear: { type: Boolean, default: true },
+		changeMonth: { type: Boolean, default: true },
+		maxYear: { type: [Number, String], default: 2050 },
+		minYear: { type: [Number, String], default: 1950 },
+		minDate: { type: [Number, String], default: '1950-01-01' },
+		maxDate: { type: [Number, String], default: '' },
+		defaultDate: { type: String, default: '' },
+		startDate: { type: String, default: '' },
+		endDate: { type: String, default: '' },
+		defaultSelectToday: { type: Boolean, default: true },
+		readonly: { type: Boolean, default: false },
+		closeable: { type: Boolean, default: true },
+		maskClosable: { type: Boolean, default: true },
+		maskCloseAble: { type: Boolean, default: true },
+		safeAreaInsetBottom: { type: Boolean, default: true },
+		zIndex: { type: Number, default: 10075 },
+		confirmText: { type: String, default: '确定' },
+		startText: { type: String, default: '开始' },
+		endText: { type: String, default: '结束' },
+		isActiveCurrent: { type: Boolean, default: true },
+		isChange: { type: Boolean, default: false },
+		holidays: { type: Array, default: () => [] as string[] },
+		workdays: { type: Array, default: () => [] as string[] },
+		festivals: { type: Object, default: () => ({} as UTSJSONObject) },
+		showFestival: { type: Boolean, default: false },
+		checkedDates: { type: Array, default: () => [] as string[] },
+		todayChecked: { type: Boolean, default: false },
+		checkinMode: { type: Boolean, default: false },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['update:show', 'change', 'open', 'close'])
+
+	const ANIM_DURATION = 280
+	const weekLabels = ['日', '一', '二', '三', '四', '五', '六'] as string[]
+
+	const rootMounted = ref(false)
+	const panelShow = ref(false)
+	const safeBottomPx = ref(0)
+	let openDelayTimer: number = -1
+
+	const year = ref(2020)
+	const month = ref(1)
+	const day = ref(1)
+	const daysArr = ref([] as number[])
+	const weekdayPads = ref([] as number[])
+	/** 按周分行：每行 7 个，0 表示空白占位 */
+	const weekRows = ref([] as number[][])
+
+	const today = ref('')
+	const activeDate = ref('')
+	const rangeStart = ref('')
+	const rangeEnd = ref('')
+	const isStart = ref(true)
+
+	const minY = ref(1950)
+	const minM = ref(1)
+	const minD = ref(1)
+	const maxY = ref(2050)
+	const maxM = ref(12)
+	const maxD = ref(31)
+
+	const isPageMode = computed((): boolean => {
+		return props.isPage
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (isPageMode.value) {
+			cls += ' nax-calendar--page'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const navHoverClass = computed((): string => {
+		return 'nax-calendar__action-btn--hover'
+	})
+
+	const titleText = computed((): string => {
+		return year.value.toString() + '年' + month.value.toString() + '月'
+	})
+
+	const toolTipText = computed((): string => {
+		if (props.toolTip.length > 0) {
+			return props.toolTip
+		}
+		return '选择日期'
+	})
+
+	const confirmTextValue = computed((): string => {
+		if (props.confirmText.length > 0) {
+			return props.confirmText
+		}
+		return '确定'
+	})
+
+	const confirmDisabled = computed((): boolean => {
+		if (props.mode == 'range') {
+			return rangeStart.value.length == 0 || rangeEnd.value.length == 0
+		}
+		return activeDate.value.length == 0
+	})
+
+	const chooseText = computed((): string => {
+		if (props.mode == 'range') {
+			if (rangeStart.value.length == 0) {
+				return '请选择开始日期'
+			}
+			if (rangeEnd.value.length == 0) {
+				return rangeStart.value + ' 至 ...'
+			}
+			return rangeStart.value + ' 至 ' + rangeEnd.value
+		}
+		if (activeDate.value.length == 0) {
+			return '请选择日期'
+		}
+		return activeDate.value
+	})
+
+	const rootOverlayStyle = computed((): string => {
+		return 'z-index:' + props.zIndex.toString() + ';'
+	})
+
+	const maskClass = computed((): string => {
+		if (panelShow.value) {
+			return 'nax-calendar__mask--show'
+		}
+		return ''
+	})
+
+	const maskStyle = computed((): string => {
+		// #ifdef APP-HARMONY
+		if (panelShow.value) {
+			return 'background-color:rgba(0,0,0,0.45);opacity:1;'
+		}
+		return 'background-color:rgba(0,0,0,0.45);opacity:0;'
+		// #endif
+		// #ifndef APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	const panelClass = computed((): string => {
+		if (props.safeAreaInsetBottom) {
+			return 'nax-calendar__panel--safe'
+		}
+		return ''
+	})
+
+	const panelStyle = computed((): string => {
+		if (props.safeAreaInsetBottom && safeBottomPx.value > 0) {
+			return 'padding-bottom:' + safeBottomPx.value.toString() + 'px;'
+		}
+		return ''
+	})
+
+	function toInt(value: any, fallback: number): number {
+		if (typeof value == 'number') {
+			return value as number
+		}
+		if (typeof value == 'string') {
+			const n = parseInt(value as string)
+			if (n.toString() != 'NaN' && n == n) {
+				return n
+			}
+		}
+		return fallback
+	}
+
+	function pad2(n: number): string {
+		if (n < 10) {
+			return '0' + n.toString()
+		}
+		return n.toString()
+	}
+
+	function formatDate(y: number, m: number, d: number): string {
+		return y.toString() + '-' + pad2(m) + '-' + pad2(d)
+	}
+
+	function parseDateParts(value: string): number[] {
+		const empty = [] as number[]
+		if (value.length == 0) {
+			return empty
+		}
+		const normalized = value.replace(/-/g, '/')
+		const d = new Date(normalized)
+		const t = d.getTime()
+		if (t != t) {
+			return empty
+		}
+		const parts = [] as number[]
+		parts.push(d.getFullYear())
+		parts.push(d.getMonth() + 1)
+		parts.push(d.getDate())
+		return parts
+	}
+
+	function dateToTime(value: string): number {
+		if (value.length == 0) {
+			return 0
+		}
+		const d = new Date(value.replace(/-/g, '/'))
+		const t = d.getTime()
+		if (t != t) {
+			return 0
+		}
+		return t
+	}
+
+	function getMonthDays(y: number, m: number): number {
+		return new Date(y, m, 0).getDate()
+	}
+
+	/** 当月 1 号星期（0=日） */
+	function getWeekday(y: number, m: number): number {
+		const d = new Date(y.toString() + '/' + m.toString() + '/1 00:00:00')
+		return d.getDay()
+	}
+
+	function makeRange(from: number, to: number): number[] {
+		const arr = [] as number[]
+		let i = from
+		while (i <= to) {
+			arr.push(i)
+			i++
+		}
+		return arr
+	}
+
+	function listHas(list: any[], value: string): boolean {
+		let i = 0
+		while (i < list.length) {
+			const item = list[i]
+			if (typeof item == 'string' && (item as string) == value) {
+				return true
+			}
+			i++
+		}
+		return false
+	}
+
+	function buildDate(y: number, m: number, d: number): string {
+		return formatDate(y, m, d)
+	}
+
+	function getWeekText(date: string): string {
+		const d = new Date(date.replace(/-/g, '/') + ' 00:00:00')
+		const week = d.getDay()
+		const names = ['日', '一', '二', '三', '四', '五', '六'] as string[]
+		return '星期' + names[week]
+	}
+
+	function todayString(): string {
+		const now = new Date()
+		return formatDate(now.getFullYear(), now.getMonth() + 1, now.getDate())
+	}
+
+	function clampToRange(y: number, m: number, d: number): number[] {
+		let cy = y
+		let cm = m
+		let cd = d
+		const minT = dateToTime(formatDate(minY.value, minM.value, minD.value))
+		const maxT = dateToTime(formatDate(maxY.value, maxM.value, maxD.value))
+		const t = dateToTime(formatDate(cy, cm, cd))
+		if (t < minT) {
+			cy = minY.value
+			cm = minM.value
+			cd = minD.value
+		} else if (t > maxT) {
+			cy = maxY.value
+			cm = maxM.value
+			cd = maxD.value
+		}
+		const out = [] as number[]
+		out.push(cy)
+		out.push(cm)
+		out.push(cd)
+		return out
+	}
+
+	function isDisabledDay(d: number): boolean {
+		const date = buildDate(year.value, month.value, d)
+		const t = dateToTime(date)
+		const minT = dateToTime(formatDate(minY.value, minM.value, minD.value))
+		const maxT = dateToTime(formatDate(maxY.value, maxM.value, maxD.value))
+		if (t < minT || t > maxT) {
+			return true
+		}
+		return false
+	}
+
+	function isSelectedDay(d: number): boolean {
+		const date = buildDate(year.value, month.value, d)
+		if (props.mode == 'range') {
+			return rangeStart.value == date || rangeEnd.value == date
+		}
+		if (!props.isActiveCurrent) {
+			return false
+		}
+		return activeDate.value == date
+	}
+
+	function isInRangeDay(d: number): boolean {
+		if (props.mode != 'range') {
+			return false
+		}
+		if (rangeStart.value.length == 0 || rangeEnd.value.length == 0) {
+			return false
+		}
+		const date = buildDate(year.value, month.value, d)
+		const t = dateToTime(date)
+		const st = dateToTime(rangeStart.value)
+		const et = dateToTime(rangeEnd.value)
+		return t > st && t < et
+	}
+
+	function isStartDay(d: number): boolean {
+		if (props.mode != 'range') {
+			return false
+		}
+		return rangeStart.value == buildDate(year.value, month.value, d)
+	}
+
+	function isEndDay(d: number): boolean {
+		if (props.mode != 'range') {
+			return false
+		}
+		return rangeEnd.value == buildDate(year.value, month.value, d)
+	}
+
+	function isTodayDay(d: number): boolean {
+		return buildDate(year.value, month.value, d) == today.value
+	}
+
+	function isHolidayDay(d: number): boolean {
+		return listHas(props.holidays as any[], buildDate(year.value, month.value, d))
+	}
+
+	function isWorkdayDay(d: number): boolean {
+		return listHas(props.workdays as any[], buildDate(year.value, month.value, d))
+	}
+
+	function isCheckedDay(d: number): boolean {
+		return listHas(props.checkedDates as any[], buildDate(year.value, month.value, d))
+	}
+
+	function isTodayCheckedDay(d: number): boolean {
+		const date = buildDate(year.value, month.value, d)
+		if (date != today.value) {
+			return false
+		}
+		if (props.todayChecked) {
+			return true
+		}
+		return listHas(props.checkedDates as any[], date)
+	}
+
+	/** 已打卡日期显示对号：今天走 todayChecked/列表，其它日期走 checkedDates */
+	function showCheckMark(d: number): boolean {
+		if (isTodayCheckedDay(d)) {
+			return true
+		}
+		return isCheckedDay(d)
+	}
+
+	function builtInFestival(date: string): string {
+		const parts = parseDateParts(date)
+		if (parts.length < 3) {
+			return ''
+		}
+		const key = pad2(parts[1]) + '-' + pad2(parts[2])
+		if (key == '01-01') return '元旦'
+		if (key == '02-14') return '情人节'
+		if (key == '03-08') return '妇女节'
+		if (key == '03-12') return '植树节'
+		if (key == '04-01') return '愚人节'
+		if (key == '05-01') return '劳动节'
+		if (key == '05-04') return '青年节'
+		if (key == '06-01') return '儿童节'
+		if (key == '07-01') return '建党节'
+		if (key == '08-01') return '建军节'
+		if (key == '09-10') return '教师节'
+		if (key == '10-01') return '国庆节'
+		if (key == '11-11') return '光棍节'
+		if (key == '12-25') return '圣诞节'
+		return ''
+	}
+
+	function festivalName(d: number): string {
+		const date = buildDate(year.value, month.value, d)
+		const map = props.festivals as UTSJSONObject
+		const custom = map.getString(date)
+		if (custom != null && custom.length > 0) {
+			return custom
+		}
+		if (props.showFestival) {
+			return builtInFestival(date)
+		}
+		return ''
+	}
+
+	function markText(d: number): string {
+		if (isStartDay(d)) {
+			return props.startText.length > 0 ? props.startText : '开始'
+		}
+		if (isEndDay(d)) {
+			return props.endText.length > 0 ? props.endText : '结束'
+		}
+		if (isHolidayDay(d)) {
+			return '休'
+		}
+		if (isWorkdayDay(d)) {
+			return '班'
+		}
+		const fest = festivalName(d)
+		if (fest.length > 0) {
+			return fest
+		}
+		return ''
+	}
+
+	function hasMark(d: number): boolean {
+		return markText(d).length > 0
+	}
+
+	function cellClass(d: number): string {
+		let cls = ''
+		if (isDisabledDay(d)) {
+			cls += ' nax-calendar__cell--disabled'
+		}
+		if (isInRangeDay(d)) {
+			cls += ' nax-calendar__cell--in-range'
+		}
+		if (isStartDay(d)) {
+			cls += ' nax-calendar__cell--start'
+		}
+		if (isEndDay(d)) {
+			cls += ' nax-calendar__cell--end'
+		}
+		if (isSelectedDay(d) && props.mode == 'date') {
+			cls += ' nax-calendar__cell--selected'
+		}
+		if (isCheckedDay(d) && !isTodayCheckedDay(d)) {
+			cls += ' nax-calendar__cell--checked'
+		}
+		if (isTodayCheckedDay(d)) {
+			cls += ' nax-calendar__cell--today-checked'
+		}
+		if (props.checkinMode) {
+			cls += ' nax-calendar__cell--checkin'
+		}
+		return cls.trim()
+	}
+
+	function dayBoxClass(d: number): string {
+		let cls = ''
+		if (isSelectedDay(d)) {
+			cls += ' nax-calendar__day--active'
+		}
+		if (isInRangeDay(d)) {
+			cls += ' nax-calendar__day--range'
+		}
+		if (isTodayCheckedDay(d)) {
+			cls += ' nax-calendar__day--today-checked'
+		} else if (isCheckedDay(d)) {
+			cls += ' nax-calendar__day--checked'
+		} else if (props.checkinMode && !isDisabledDay(d) && !isSelectedDay(d)) {
+			cls += ' nax-calendar__day--unchecked'
+		}
+		if (isTodayDay(d) && !isSelectedDay(d) && !isCheckedDay(d) && !isTodayCheckedDay(d)) {
+			cls += ' nax-calendar__day--today'
+		}
+		return cls.trim()
+	}
+
+	function dayTextClass(d: number): string {
+		let cls = ''
+		if (isDisabledDay(d)) {
+			cls += ' nax-calendar__day-text--disabled'
+		}
+		if (isSelectedDay(d) || isTodayCheckedDay(d) || isCheckedDay(d)) {
+			cls += ' nax-calendar__day-text--active'
+		} else if (isInRangeDay(d)) {
+			cls += ' nax-calendar__day-text--range'
+		} else if (isHolidayDay(d)) {
+			cls += ' nax-calendar__day-text--holiday'
+		} else if (isWorkdayDay(d)) {
+			cls += ' nax-calendar__day-text--workday'
+		} else if (isTodayDay(d)) {
+			cls += ' nax-calendar__day-text--today'
+		}
+		return cls.trim()
+	}
+
+	function markClass(d: number): string {
+		let cls = ''
+		if (isSelectedDay(d) || isStartDay(d) || isEndDay(d)) {
+			cls += ' nax-calendar__mark--active'
+		} else if (isHolidayDay(d)) {
+			cls += ' nax-calendar__mark--holiday'
+		} else if (isWorkdayDay(d)) {
+			cls += ' nax-calendar__mark--workday'
+		} else {
+			cls += ' nax-calendar__mark--festival'
+		}
+		return cls.trim()
+	}
+
+	function cellHoverClass(d: number): string {
+		if (props.readonly || isDisabledDay(d)) {
+			return ''
+		}
+		return 'nax-calendar__cell--hover'
+	}
+
+	function rebuildMonth() {
+		const days = getMonthDays(year.value, month.value)
+		daysArr.value = makeRange(1, days)
+		const week = getWeekday(year.value, month.value)
+		if (week > 0) {
+			weekdayPads.value = makeRange(1, week)
+		} else {
+			weekdayPads.value = [] as number[]
+		}
+		const flat = [] as number[]
+		let p0 = 0
+		while (p0 < week) {
+			flat.push(0)
+			p0++
+		}
+		let d0 = 1
+		while (d0 <= days) {
+			flat.push(d0)
+			d0++
+		}
+		while (flat.length % 7 != 0) {
+			flat.push(0)
+		}
+		const rows = [] as number[][]
+		let i0 = 0
+		while (i0 < flat.length) {
+			const row = [] as number[]
+			let j0 = 0
+			while (j0 < 7) {
+				row.push(flat[i0 + j0])
+				j0++
+			}
+			rows.push(row)
+			i0 += 7
+		}
+		weekRows.value = rows
+	}
+
+	function gridCellClass(cell: number): string {
+		if (cell <= 0) {
+			return 'nax-calendar__cell--empty'
+		}
+		return cellClass(cell)
+	}
+
+	function gridCellHoverClass(cell: number): string {
+		if (cell <= 0) {
+			return ''
+		}
+		return cellHoverClass(cell)
+	}
+
+	function emitChange(_fromSwitch: boolean) {
+		if (props.mode == 'date') {
+			if (activeDate.value.length == 0) {
+				return
+			}
+			const parts = parseDateParts(activeDate.value)
+			if (parts.length < 3) {
+				return
+			}
+			const y = parts[0]
+			const m = parts[1]
+			const d = parts[2]
+			const days = getMonthDays(y, m)
+			const result = formatDate(y, m, d)
+			const payload = {
+				year: y,
+				month: m,
+				day: d,
+				days: days,
+				result: result,
+				week: getWeekText(result),
+				isToday: result == today.value
+			} as UTSJSONObject
+			emit('change', payload)
+			return
+		}
+		if (rangeStart.value.length == 0 || rangeEnd.value.length == 0) {
+			return
+		}
+		const sp = parseDateParts(rangeStart.value)
+		const ep = parseDateParts(rangeEnd.value)
+		if (sp.length < 3 || ep.length < 3) {
+			return
+		}
+		const payload = {
+			startYear: sp[0],
+			startMonth: sp[1],
+			startDay: sp[2],
+			startDate: rangeStart.value,
+			startWeek: getWeekText(rangeStart.value),
+			endYear: ep[0],
+			endMonth: ep[1],
+			endDay: ep[2],
+			endDate: rangeEnd.value,
+			endWeek: getWeekText(rangeEnd.value)
+		} as UTSJSONObject
+		emit('change', payload)
+	}
+
+	function onDayClick(d: number) {
+		if (props.readonly) {
+			return
+		}
+		if (isDisabledDay(d)) {
+			return
+		}
+		day.value = d
+		const date = buildDate(year.value, month.value, d)
+		if (props.mode == 'date') {
+			activeDate.value = date
+			if (isPageMode.value || props.checkinMode) {
+				emitChange(true)
+			}
+			return
+		}
+		const compareEarlier = rangeStart.value.length > 0 && dateToTime(date) < dateToTime(rangeStart.value)
+		if (isStart.value || compareEarlier || rangeStart.value.length == 0) {
+			rangeStart.value = date
+			rangeEnd.value = ''
+			isStart.value = false
+		} else {
+			rangeEnd.value = date
+			isStart.value = true
+			if (isPageMode.value) {
+				emitChange(true)
+			}
+		}
+	}
+
+	function onGridCellClick(cell: number) {
+		if (cell <= 0) {
+			return
+		}
+		onDayClick(cell)
+	}
+
+	function initBounds() {
+		today.value = todayString()
+		const minParts = parseDateParts(props.minDate.toString())
+		if (minParts.length >= 3) {
+			minY.value = minParts[0]
+			minM.value = minParts[1]
+			minD.value = minParts[2]
+		} else {
+			minY.value = 1950
+			minM.value = 1
+			minD.value = 1
+		}
+
+		let maxRaw = props.maxDate.toString()
+		if (maxRaw.length == 0) {
+			maxRaw = today.value
+		}
+		const maxParts = parseDateParts(maxRaw)
+		if (maxParts.length >= 3) {
+			maxY.value = maxParts[0]
+			maxM.value = maxParts[1]
+			maxD.value = maxParts[2]
+		} else {
+			const p = parseDateParts(today.value)
+			maxY.value = p[0]
+			maxM.value = p[1]
+			maxD.value = p[2]
+		}
+	}
+
+	function initSelection() {
+		activeDate.value = ''
+		rangeStart.value = ''
+		rangeEnd.value = ''
+		isStart.value = true
+
+		if (props.mode == 'range') {
+			if (props.startDate.length > 0) {
+				const sp = parseDateParts(props.startDate)
+				if (sp.length >= 3) {
+					const clamped = clampToRange(sp[0], sp[1], sp[2])
+					rangeStart.value = formatDate(clamped[0], clamped[1], clamped[2])
+					year.value = clamped[0]
+					month.value = clamped[1]
+					day.value = clamped[2]
+				}
+			}
+			if (props.endDate.length > 0) {
+				const ep = parseDateParts(props.endDate)
+				if (ep.length >= 3) {
+					const clamped = clampToRange(ep[0], ep[1], ep[2])
+					rangeEnd.value = formatDate(clamped[0], clamped[1], clamped[2])
+					if (rangeStart.value.length == 0) {
+						year.value = clamped[0]
+						month.value = clamped[1]
+						day.value = clamped[2]
+					}
+					isStart.value = true
+				}
+			}
+			if (rangeStart.value.length == 0) {
+				const p = parseDateParts(today.value)
+				const clamped = clampToRange(p[0], p[1], p[2])
+				year.value = clamped[0]
+				month.value = clamped[1]
+				day.value = clamped[2]
+			}
+			return
+		}
+
+		if (props.defaultDate.length > 0) {
+			const p = parseDateParts(props.defaultDate)
+			if (p.length >= 3) {
+				const clamped = clampToRange(p[0], p[1], p[2])
+				year.value = clamped[0]
+				month.value = clamped[1]
+				day.value = clamped[2]
+				activeDate.value = formatDate(clamped[0], clamped[1], clamped[2])
+				return
+			}
+		}
+		const tp = parseDateParts(today.value)
+		const clamped = clampToRange(tp[0], tp[1], tp[2])
+		year.value = clamped[0]
+		month.value = clamped[1]
+		day.value = clamped[2]
+		if (props.defaultSelectToday) {
+			activeDate.value = formatDate(clamped[0], clamped[1], clamped[2])
+		}
+	}
+
+	function init() {
+		initBounds()
+		initSelection()
+		rebuildMonth()
+	}
+
+	function outOfMonthRangeToast() {
+		uni.showToast({
+			title: '日期超出范围',
+			icon: 'none'
+		})
+	}
+
+	function canSwitchTo(y: number, m: number): boolean {
+		const minYearLimit = toInt(props.minYear, 1950)
+		const maxYearLimit = toInt(props.maxYear, 2050)
+		if (y < minYearLimit || y > maxYearLimit) {
+			return false
+		}
+		if (y < minY.value || (y == minY.value && m < minM.value)) {
+			return false
+		}
+		if (y > maxY.value || (y == maxY.value && m > maxM.value)) {
+			return false
+		}
+		return true
+	}
+
+	function onChangeMonth(dir: number) {
+		let y = year.value
+		let m = month.value + dir
+		if (m < 1) {
+			y = y - 1
+			m = 12
+		} else if (m > 12) {
+			y = y + 1
+			m = 1
+		}
+		if (!canSwitchTo(y, m)) {
+			outOfMonthRangeToast()
+			return
+		}
+		year.value = y
+		month.value = m
+		rebuildMonth()
+		if (props.isChange && props.mode == 'date' && activeDate.value.length > 0) {
+			emitChange(true)
+		}
+	}
+
+	function onChangeYear(dir: number) {
+		const y = year.value + dir
+		let m = month.value
+		if (!canSwitchTo(y, m)) {
+			if (dir < 0) {
+				m = 12
+			} else {
+				m = 1
+			}
+			if (!canSwitchTo(y, m)) {
+				outOfMonthRangeToast()
+				return
+			}
+		}
+		year.value = y
+		month.value = m
+		rebuildMonth()
+		if (props.isChange && props.mode == 'date' && activeDate.value.length > 0) {
+			emitChange(true)
+		}
+	}
+
+	function clearOpenDelayTimer() {
+		if (openDelayTimer >= 0) {
+			clearTimeout(openDelayTimer)
+			openDelayTimer = -1
+		}
+	}
+
+	function closePicker(emitUpdate: boolean) {
+		if (isPageMode.value) {
+			return
+		}
+		if (!rootMounted.value) {
+			panelShow.value = false
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		if (!panelShow.value) {
+			if (emitUpdate) {
+				emit('update:show', false)
+			}
+			return
+		}
+		clearOpenDelayTimer()
+		panelShow.value = false
+		if (emitUpdate) {
+			emit('update:show', false)
+		}
+		emit('close')
+	}
+
+	function onConfirm() {
+		if (confirmDisabled.value) {
+			return
+		}
+		// 打卡模式：点日期时已触发 change，确定只关闭，避免重复回调
+		if (!props.checkinMode) {
+			emitChange(false)
+		}
+		closePicker(true)
+	}
+
+	function canCloseByMask(): boolean {
+		return props.maskClosable && props.maskCloseAble
+	}
+
+	function onMaskClick() {
+		if (!canCloseByMask()) {
+			return
+		}
+		closePicker(true)
+	}
+
+	function onCloseClick() {
+		closePicker(true)
+	}
+
+	function refreshSafeArea() {
+		if (!props.safeAreaInsetBottom) {
+			safeBottomPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		const insets = info.safeAreaInsets
+		if (insets != null) {
+			safeBottomPx.value = insets.bottom
+		} else {
+			safeBottomPx.value = 0
+		}
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		safeBottomPx.value = 0
+		// #endif
+	}
+
+	function openPicker() {
+		if (isPageMode.value) {
+			return
+		}
+		if (rootMounted.value && panelShow.value) {
+			emit('update:show', true)
+			return
+		}
+		if (openDelayTimer >= 0) {
+			emit('update:show', true)
+			return
+		}
+		refreshSafeArea()
+		init()
+		rootMounted.value = true
+		panelShow.value = false
+		// #ifdef APP-HARMONY
+		const openDelay = 50
+		// #endif
+		// #ifndef APP-HARMONY
+		const openDelay = 30
+		// #endif
+		openDelayTimer = setTimeout(() => {
+			openDelayTimer = -1
+			panelShow.value = true
+		}, openDelay)
+		emit('update:show', true)
+		emit('open')
+	}
+
+	function onOverlayLeave() {
+		if (panelShow.value) {
+			return
+		}
+		rootMounted.value = false
+	}
+
+	watch((): boolean => {
+		return props.show
+	}, (val: boolean) => {
+		if (isPageMode.value) {
+			return
+		}
+		if (val) {
+			openPicker()
+		} else {
+			closePicker(false)
+		}
+	})
+
+	watch((): string => {
+		return props.mode + '|' + props.minDate.toString() + '|' + props.maxDate.toString() + '|' + props.defaultDate + '|' + props.startDate + '|' + props.endDate + '|' + props.defaultSelectToday.toString()
+	}, (_v: string) => {
+		init()
+	})
+
+	onMounted(() => {
+		init()
+		if (!isPageMode.value && props.show) {
+			openPicker()
+		}
+	})
+</script>
+
+<style>
+	.nax-calendar {
+		flex-direction: column;
+	}
+
+	.nax-calendar--page {
+		flex-direction: column;
+	}
+
+	.nax-calendar__inner {
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-calendar__inner--page {
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.nax-calendar__root {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	.nax-calendar__panel-layer {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+	}
+
+	.nax-calendar__mask {
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1;
+		background-color: rgba(0, 0, 0, 0.45);
+		opacity: 0;
+		transition-property: opacity;
+		transition-duration: 280ms;
+		transition-timing-function: ease-out;
+	}
+
+	/* #ifndef APP-HARMONY */
+	.nax-calendar__mask {
+		background-color: var(--nax-color-mask, rgba(0, 0, 0, 0.4));
+	}
+	/* #endif */
+
+	.nax-calendar__mask--show {
+		opacity: 1;
+	}
+
+	.nax-calendar__panel {
+		position: relative;
+		z-index: 2;
+		flex-direction: column;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-top-left-radius: var(--nax-radius-xl, 12px);
+		border-top-right-radius: var(--nax-radius-xl, 12px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-calendar__panel--safe {
+		padding-bottom: constant(safe-area-inset-bottom);
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+	/* #endif */
+
+	.nax-calendar__header {
+		position: relative;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 48px;
+		padding-left: 16px;
+		padding-right: 16px;
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-calendar__header-title {
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		text-align: center;
+	}
+
+	.nax-calendar__close {
+		position: absolute;
+		right: 12px;
+		top: 12px;
+		width: 28px;
+		height: 28px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		border-radius: 14px;
+	}
+
+	.nax-calendar__action {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding-top: 12px;
+		padding-bottom: 8px;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.nax-calendar__action-btn {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 32px;
+		border-radius: 6px;
+	}
+
+	.nax-calendar__action-btn--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-calendar__action-title {
+		min-width: 120px;
+		margin-left: 8px;
+		margin-right: 8px;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 600;
+		text-align: center;
+	}
+
+	.nax-calendar__week {
+		flex-direction: row;
+		align-items: center;
+		padding-left: 8px;
+		padding-right: 8px;
+		padding-bottom: 4px;
+	}
+
+	.nax-calendar__week-item {
+		flex: 1;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 32px;
+	}
+
+	.nax-calendar__week-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-calendar__grid {
+		flex-direction: column;
+		padding-left: 8px;
+		padding-right: 8px;
+		padding-bottom: 8px;
+	}
+
+	.nax-calendar__row {
+		flex-direction: row;
+		align-items: stretch;
+	}
+
+	.nax-calendar__cell {
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding-top: 4px;
+		padding-bottom: 4px;
+		min-height: 48px;
+	}
+
+	.nax-calendar__cell--empty {
+		min-height: 48px;
+	}
+
+	.nax-calendar__cell--hover {
+		opacity: 0.85;
+	}
+
+	.nax-calendar__cell--disabled {
+		opacity: 0.35;
+	}
+
+	.nax-calendar__cell--in-range {
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+	}
+
+	.nax-calendar__day {
+		width: 40px;
+		min-height: 40px;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		border-radius: 20px;
+		padding-top: 2px;
+		padding-bottom: 2px;
+	}
+
+	.nax-calendar__day--active {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-calendar__day--range {
+		background-color: transparent;
+	}
+
+	.nax-calendar__day--today {
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-calendar__day--checked {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-calendar__day--today-checked {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-calendar__day--unchecked {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-calendar__day-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+	}
+
+	.nax-calendar__day-text--disabled {
+		color: var(--nax-color-text-disabled, #e5e5ea);
+	}
+
+	.nax-calendar__day-text--active {
+		color: var(--nax-color-text-inverse, #ffffff);
+		font-weight: 600;
+	}
+
+	.nax-calendar__day-text--range {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-calendar__day-text--today {
+		color: var(--nax-color-primary, #18a058);
+		font-weight: 600;
+	}
+
+	.nax-calendar__day-text--holiday {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-calendar__day-text--workday {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-calendar__mark {
+		margin-top: 1px;
+		font-size: 10px;
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-calendar__mark--active {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	.nax-calendar__mark--holiday {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-calendar__mark--workday {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-calendar__mark--festival {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-calendar__bottom {
+		flex-direction: column;
+		padding-left: 16px;
+		padding-right: 16px;
+		padding-top: 8px;
+		padding-bottom: 12px;
+		border-top-width: 1px;
+		border-top-style: solid;
+		border-top-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-calendar__choose {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 10px;
+	}
+
+	.nax-calendar__choose-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: center;
+	}
+
+	.nax-calendar__confirm-wrap {
+		flex-direction: column;
+	}
+</style>

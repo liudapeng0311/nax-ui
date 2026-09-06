@@ -1,0 +1,36 @@
+<template>
+  <view class="demo-virtual-list">
+    <nax-virtual-list height="300px" :list="rows" :item-height="52" :buffer="8" key-field="id">
+      <template #default="{ item, index }">
+        <nax-cell :title="rowTitle(item)" :value="'' + (index + 1)"></nax-cell>
+      </template>
+    </nax-virtual-list>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const rows = ref([] as UTSJSONObject[])
+
+var i = 0
+while (i < 100) {
+  rows.value.push({ id: i, title: '第 ' + (i + 1) + ' 行数据' } as UTSJSONObject)
+  i++
+}
+
+function rowTitle(item: any | null): string {
+  if (item == null) {
+    return ''
+  }
+  const obj = item as UTSJSONObject
+  const t = obj['title']
+  return typeof t === 'string' ? t : ''
+}
+</script>
+
+<style>
+.demo-virtual-list {
+  flex-direction: column;
+}
+</style>

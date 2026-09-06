@@ -1,0 +1,71 @@
+// 持久缓存封装：基于 uni storage（App/Web/小程序通用）。
+// 全部操作失败降级为"无缓存"，不阻塞内容渲染；写入失败仅告警。
+
+export const CACHE_MANIFEST_KEY = 'up.release.manifest'
+
+export function pageCacheKey(releaseId: string, path: string): string {
+  return `up.page.${releaseId}.${path}`
+}
+
+export function cacheGetJson(key: string): UTSJSONObject | null {
+  try {
+    const v = uni.getStorageSync(key)
+    if (v == null) return null
+    if (v instanceof UTSJSONObject) return v
+    if (typeof v === 'string') {
+      if (v === '') return null
+      return JSON.parse<UTSJSONObject>(v)
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+export function cacheSetJson(key: string, value: UTSJSONObject): void {
+  try {
+    uni.setStorageSync(key, value)
+  } catch {
+    console.warn('[ox-uni-press] 缓存写入失败：' + key)
+  }
+}
+
+export function cacheRemove(key: string): void {
+  try {
+    uni.removeStorageSync(key)
+  } catch {
+    // 忽略
+  }
+}
+
+/** 清理除 keepReleaseId 之外的全部页面缓存（发布切换后的缓存失效） */
+export function cachePurgePages(keepReleaseId: string): void {
+  try {
+    const info = uni.getStorageInfoSync()
+    const keys = info.keys
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]!
+      if (!key.startsWith('up.page.')) continue
+      if (keepReleaseId !== '' && key.startsWith(`up.page.${keepReleaseId}.`)) continue
+      cacheRemove(key)
+    }
+  } catch {
+    // 存储信息不可用时跳过清理，缓存仍可被 checksum 校验兜底
+  }
+}
+
+/** 清理全部 OxUniPress 缓存（宿主调试/登出场景使用） */
+export function clearOxUniPressCache(): void {
+  try {
+    const info = uni.getStorageInfoSync()
+    const keys = info.keys
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]!
+      if (key === CACHE_MANIFEST_KEY || key.startsWith('up.page.')) {
+        cacheRemove(key)
+      }
+    }
+  } catch {
+    // 忽略
+  }
+}

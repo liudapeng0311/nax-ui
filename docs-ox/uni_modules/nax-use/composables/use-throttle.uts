@@ -1,0 +1,107 @@
+/**
+ * useThrottle — 节流组合式函数：窗口起点立即执行（leading），窗口内的调用合并为窗口结束时补一次（trailing）。
+ *
+ * 用法（必须在 setup 内同步调用以获得自动清理）：
+ * ```
+ * import { useThrottle } from '@/uni_modules/nax-use/composables/use-throttle.uts'
+ *
+ * const onScroll = useThrottle((payload : any | null) => {
+ *   // 窗口起点立即执行一次 + 窗口结束补最后一次
+ * }, 500)
+ * onScroll.call(null)
+ * onScroll.cancel()   // 取消待补的 trailing 任务
+ * onScroll.flush()    // 立即执行待补任务
+ * ```
+ *
+ * 说明：
+ * - 单载荷设计（uts 无可靠的剩余参数展开），多参数请包对象传入
+ * - 组件内使用时卸载自动 cancel；页面级使用请自行调 cancel
+ */
+
+import { onUnmounted, getCurrentInstance } from 'vue'
+
+export class NaxThrottleHandle {
+	private _fn : (payload : any | null) => void
+	private _wait : number
+	private _lastExec : number
+	private _timerId : number
+	private _pending : any | null
+	private _hasPending : boolean
+
+	constructor(fn : (payload : any | null) => void, wait : number) {
+		this._fn = fn
+		this._wait = wait
+		this._lastExec = -1
+		this._timerId = -1
+		this._pending = null
+		this._hasPending = false
+	}
+
+	/** 触发一次；窗口外立即执行，窗口内记录待补 */
+	call(payload : any | null) : void {
+		const now = Date.now()
+		if (this._lastExec < 0 || now - this._lastExec >= this._wait) {
+			// 窗口外：立即执行
+			if (this._timerId != -1) {
+				clearTimeout(this._timerId)
+				this._timerId = -1
+			}
+			this._pending = null
+			this._hasPending = false
+			this._lastExec = now
+			this._fn(payload)
+			return
+		}
+		// 窗口内：记录载荷，窗口结束时补一次
+		this._pending = payload
+		this._hasPending = true
+		if (this._timerId == -1) {
+			this._timerId = setTimeout(() => {
+				this._runTrailing()
+			}, this._wait - (now - this._lastExec))
+		}
+	}
+
+	/** 取消待补的 trailing 任务（不影响已执行部分） */
+	cancel() : void {
+		if (this._timerId != -1) {
+			clearTimeout(this._timerId)
+			this._timerId = -1
+		}
+		this._pending = null
+		this._hasPending = false
+	}
+
+	/** 立即执行待补任务；无待补则忽略 */
+	flush() : void {
+		if (!this._hasPending || this._timerId == -1) {
+			return
+		}
+		clearTimeout(this._timerId)
+		this._timerId = -1
+		this._runTrailing()
+	}
+
+	private _runTrailing() : void {
+		this._timerId = -1
+		const p = this._pending
+		this._pending = null
+		this._hasPending = false
+		this._lastExec = Date.now()
+		this._fn(p)
+	}
+}
+
+/**
+ * 创建节流句柄。必须在 setup 内同步调用（内部依赖组件实例注册卸载清理）。
+ */
+export function useThrottle(fn : (payload : any | null) => void, wait? : number) : NaxThrottleHandle {
+	const resolvedWait = wait != null && wait > 0 ? wait : 300
+	const handle = new NaxThrottleHandle(fn, resolvedWait)
+	if (getCurrentInstance() != null) {
+		onUnmounted(() => {
+			handle.cancel()
+		})
+	}
+	return handle
+}

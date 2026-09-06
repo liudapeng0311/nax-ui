@@ -1,0 +1,416 @@
+<template>
+	<view
+		v-if="visible"
+		class="nax-alert"
+		:class="rootClass"
+		@click="onClick"
+	>
+		<!-- 左侧图标 -->
+		<view v-if="showIcon" class="nax-alert__icon">
+			<slot name="icon">
+				<nax-icon :name="resolvedIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
+			</slot>
+		</view>
+
+		<!-- 中间内容 -->
+		<view class="nax-alert__body" :class="bodyClass">
+			<slot name="title">
+				<text
+					v-if="hasTitle"
+					class="nax-alert__title"
+					:class="titleClass"
+					:max-lines="3"
+				>{{ title }}</text>
+			</slot>
+			<slot>
+				<text
+					v-if="hasDescription"
+					class="nax-alert__desc"
+					:class="descClass"
+					:max-lines="10"
+				>{{ description }}</text>
+			</slot>
+		</view>
+
+		<!-- 关闭 -->
+		<view
+			v-if="closable"
+			class="nax-alert__close"
+			@click.stop="onClose"
+		>
+			<nax-icon name="close" :size="closeSizePx" :color="closeIconColor"></nax-icon>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-alert
+	 * @description 警告提示条（页面内常驻）。能力对齐  AlertTips：类型 / 标题 / 描述 / 图标 / 可关闭 / light|solid。
+	 * @property {string} type primary | info | success | warning | error（兼容 danger）；默认 warning
+	 * @property {string} variant light | solid；兼容 effect(light/dark)；默认 light
+	 * @property {string} effect 兼容 ：light / dark（等价 solid）
+	 * @property {string} title 标题
+	 * @property {string} description 描述；也可用默认插槽
+	 * @property {boolean} closable 是否可关闭
+	 * @property {boolean} showIcon 是否显示左侧图标，默认 true
+	 * @property {string} icon 自定义 nax-icon 名；空则按 type 映射
+	 * @property {boolean} center 内容是否水平居中
+	 * @property {boolean} show 是否显示；配合 update:show
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击主体
+	 * @event close 关闭
+	 * @event update:show 显示状态变化
+	 * @slot default 自定义描述内容
+	 * @slot title 自定义标题
+	 * @slot icon 自定义左侧图标
+	 */
+	const props = defineProps({
+		type: { type: String, default: 'warning' },
+		variant: { type: String, default: 'light' },
+		effect: { type: String, default: '' },
+		title: { type: String, default: '' },
+		description: { type: String, default: '' },
+		closable: { type: Boolean, default: false },
+		showIcon: { type: Boolean, default: true },
+		icon: { type: String, default: '' },
+		center: { type: Boolean, default: false },
+		show: { type: Boolean, default: true },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['click', 'close', 'update:show'])
+
+	const closed = ref(false)
+
+	function normalizeType(value : string) : string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		if (value == 'default') {
+			return 'info'
+		}
+		return 'warning'
+	}
+
+	function normalizeVariant(variant : string, effect : string) : string {
+		if (effect == 'dark' || effect == 'solid') {
+			return 'solid'
+		}
+		if (effect == 'light') {
+			return 'light'
+		}
+		if (variant == 'solid' || variant == 'dark') {
+			return 'solid'
+		}
+		return 'light'
+	}
+
+	function typeMainColor(name : string) : string {
+		if (name == 'primary' || name == 'success') {
+			return '#18a058'
+		}
+		if (name == 'info') {
+			return '#2080f0'
+		}
+		if (name == 'warning') {
+			return '#f0a020'
+		}
+		if (name == 'error') {
+			return '#d03050'
+		}
+		return '#2080f0'
+	}
+
+	function typeDefaultIcon(name : string) : string {
+		if (name == 'success') {
+			return 'success'
+		}
+		if (name == 'warning') {
+			return 'warning'
+		}
+		if (name == 'error') {
+			return 'error'
+		}
+		return 'info'
+	}
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const variantName = computed((): string => {
+		return normalizeVariant(props.variant, props.effect)
+	})
+
+	const tone = computed((): string => {
+		return typeName.value + '-' + variantName.value
+	})
+
+	const hasTitle = computed((): boolean => {
+		return props.title.length > 0
+	})
+
+	const hasDescription = computed((): boolean => {
+		return props.description.length > 0
+	})
+
+	const resolvedIcon = computed((): string => {
+		if (props.icon.length > 0) {
+			return props.icon
+		}
+		return typeDefaultIcon(typeName.value)
+	})
+
+	const iconSizePx = computed((): string => {
+		return '18'
+	})
+
+	const closeSizePx = computed((): string => {
+		return '16'
+	})
+
+	const isSolid = computed((): boolean => {
+		return variantName.value == 'solid'
+	})
+
+	const iconColor = computed((): string => {
+		if (isSolid.value) {
+			return 'var(--nax-color-text-inverse, #ffffff)'
+		}
+		return typeMainColor(typeName.value)
+	})
+
+	const closeIconColor = computed((): string => {
+		if (isSolid.value) {
+			return 'var(--nax-color-text-inverse, #ffffff)'
+		}
+		return typeMainColor(typeName.value)
+	})
+
+	const visible = computed((): boolean => {
+		return props.show && !closed.value
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-alert--' + tone.value
+		if (props.center) {
+			cls += ' nax-alert--center'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const bodyClass = computed((): string => {
+		if (props.center) {
+			return 'nax-alert__body--center'
+		}
+		return ''
+	})
+
+	const titleClass = computed((): string => {
+		return 'nax-alert__title--' + tone.value
+	})
+
+	const descClass = computed((): string => {
+		return 'nax-alert__desc--' + tone.value
+	})
+
+	watch((): boolean => {
+		return props.show
+	}, (v : boolean) => {
+		if (v) {
+			closed.value = false
+		}
+	})
+
+	function onClick() {
+		if (!props.show || closed.value) {
+			return
+		}
+		emit('click')
+	}
+
+	function onClose() {
+		if (!props.show || closed.value) {
+			return
+		}
+		closed.value = true
+		emit('update:show', false)
+		emit('close')
+	}
+</script>
+
+<style>
+	.nax-alert {
+		flex-direction: row;
+		align-items: flex-start;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 12px;
+		padding-right: 12px;
+		border-radius: var(--nax-radius-md, 6px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: transparent;
+	}
+
+	.nax-alert--center {
+		align-items: center;
+	}
+
+	/* ========== type + variant 背景/边框 ========== */
+	.nax-alert--primary-light {
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-alert--primary-solid {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-alert--info-light {
+		background-color: var(--nax-color-info-secondary, #dbeafc);
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-alert--info-solid {
+		background-color: var(--nax-color-info, #2080f0);
+		border-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-alert--success-light {
+		background-color: var(--nax-color-success-secondary, #daefe4);
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-alert--success-solid {
+		background-color: var(--nax-color-success, #18a058);
+		border-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-alert--warning-light {
+		background-color: var(--nax-color-warning-secondary, #fcefda);
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-alert--warning-solid {
+		background-color: var(--nax-color-warning, #f0a020);
+		border-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-alert--error-light {
+		background-color: var(--nax-color-error-secondary, #f7dde3);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-alert--error-solid {
+		background-color: var(--nax-color-error, #d03050);
+		border-color: var(--nax-color-error, #d03050);
+	}
+
+	/* ========== icon ========== */
+	.nax-alert__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 8px;
+		margin-top: 1px;
+	}
+
+	/* ========== body ========== */
+	.nax-alert__body {
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.nax-alert__body--center {
+		align-items: center;
+	}
+
+	.nax-alert__title {
+		font-size: var(--nax-font-size-md, 16px);
+		font-weight: var(--nax-font-weight-semibold, 600);
+		text-overflow: ellipsis;
+	}
+
+	.nax-alert__desc {
+		font-size: var(--nax-font-size-sm, 14px);
+		font-weight: var(--nax-font-weight-regular, 400);
+		margin-top: 4px;
+		text-overflow: ellipsis;
+	}
+
+	/* light：标题用类型色，描述用次级文字色 */
+	.nax-alert__title--primary-light {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-alert__title--info-light {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-alert__title--success-light {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-alert__title--warning-light {
+		color: var(--nax-color-warning-deep, #c97c10);
+	}
+
+	.nax-alert__title--error-light {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-alert__desc--primary-light,
+	.nax-alert__desc--info-light,
+	.nax-alert__desc--success-light,
+	.nax-alert__desc--warning-light,
+	.nax-alert__desc--error-light {
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	/* solid：标题/描述反白 */
+	.nax-alert__title--primary-solid,
+	.nax-alert__title--info-solid,
+	.nax-alert__title--success-solid,
+	.nax-alert__title--warning-solid,
+	.nax-alert__title--error-solid {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	.nax-alert__desc--primary-solid,
+	.nax-alert__desc--info-solid,
+	.nax-alert__desc--success-solid,
+	.nax-alert__desc--warning-solid,
+	.nax-alert__desc--error-solid {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	/* ========== close ========== */
+	.nax-alert__close {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: 8px;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+</style>

@@ -1,0 +1,127 @@
+<template>
+  <view class="ox-demo-counter">
+    <text v-if="title !== ''" class="ox-counter-title" :style="titleStyle()">{{ title }}</text>
+    <view class="ox-counter-row">
+      <view class="ox-counter-btn" :style="btnStyle()" hover-class="ox-press" @click="dec">
+        <text class="ox-counter-btn-text" :style="btnTextStyle()">−</text>
+      </view>
+      <text class="ox-counter-value" :style="valueStyle()">{{ count }}</text>
+      <view class="ox-counter-btn" :style="btnStyle()" hover-class="ox-press" @click="inc">
+        <text class="ox-counter-btn-text" :style="btnTextStyle()">+</text>
+      </view>
+    </view>
+    <text class="ox-counter-step" :style="stepStyle()">步长 {{ step }}，当前值 {{ count }}</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { theme } from '../../utils/theme.uts'
+
+const props = defineProps<{
+  /** 初始值 */
+  start?: number
+  /** 步长 */
+  step?: number
+  /** 标题文案 */
+  title?: string
+}>()
+
+const count = ref(props.start ?? 0)
+
+function inc(): void {
+  count.value += props.step ?? 1
+}
+
+function dec(): void {
+  count.value -= props.step ?? 1
+}
+
+function titleStyle(): UTSJSONObject {
+  return {
+    fontSize: '13px',
+    fontWeight: '600',
+    color: theme.state.colors.text1,
+    marginBottom: '10px',
+  } as UTSJSONObject
+}
+
+function btnStyle(): UTSJSONObject {
+  return {
+    width: '34px',
+    height: '34px',
+    borderRadius: '17px',
+    borderWidth: '1px',
+    borderColor: theme.state.colors.borderStrong,
+    borderStyle: 'solid',
+    justifyContent: 'center',
+    alignItems: 'center',
+  } as UTSJSONObject
+}
+
+function btnTextStyle(): UTSJSONObject {
+  return { fontSize: '18px', color: theme.state.colors.text2 } as UTSJSONObject
+}
+
+function valueStyle(): UTSJSONObject {
+  return {
+    fontSize: '22px',
+    fontWeight: '700',
+    color: theme.state.colors.brand,
+    marginLeft: '18px',
+    marginRight: '18px',
+  } as UTSJSONObject
+}
+
+function stepStyle(): UTSJSONObject {
+  return { fontSize: '12px', color: theme.state.colors.text3, marginTop: '8px' } as UTSJSONObject
+}
+</script>
+
+<style>
+.ox-demo-counter {
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.ox-counter-title {
+  flex-direction: column;
+}
+
+.ox-counter-row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.ox-counter-btn {
+  flex-direction: row;
+}
+
+.ox-counter-btn-text {
+  flex-direction: column;
+}
+
+.ox-counter-value {
+  flex-direction: column;
+}
+
+.ox-counter-step {
+  flex-direction: column;
+}
+
+/* 按压反馈仅触屏端生效 */
+/* #ifndef WEB */
+.ox-press {
+  opacity: 0.6;
+}
+/* #endif */
+
+/* #ifdef WEB */
+.ox-counter-btn {
+  cursor: pointer;
+  user-select: none;
+}
+/* #endif */
+</style>

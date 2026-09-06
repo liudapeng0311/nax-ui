@@ -1,0 +1,4025 @@
+{
+  "meta": {
+    "id": "components-switch",
+    "path": "/components/switch",
+    "source": "components/switch.md",
+    "title": "nax-switch",
+    "headings": [
+      {
+        "id": "nax-switch",
+        "text": "nax-switch",
+        "level": 1
+      },
+      {
+        "id": "安装",
+        "text": "安装",
+        "level": 2
+      },
+      {
+        "id": "代码示例",
+        "text": "代码示例",
+        "level": 2
+      },
+      {
+        "id": "基础用法",
+        "text": "基础用法",
+        "level": 3
+      },
+      {
+        "id": "尺寸-size",
+        "text": "尺寸 size",
+        "level": 3
+      },
+      {
+        "id": "禁用-disabled",
+        "text": "禁用 disabled",
+        "level": 3
+      },
+      {
+        "id": "加载-loading",
+        "text": "加载 loading",
+        "level": 3
+      },
+      {
+        "id": "自定义颜色",
+        "text": "自定义颜色",
+        "level": 3
+      },
+      {
+        "id": "切换震动-vibrateshort",
+        "text": "切换震动 vibrateShort",
+        "level": 3
+      },
+      {
+        "id": "主题",
+        "text": "主题",
+        "level": 2
+      },
+      {
+        "id": "props",
+        "text": "Props",
+        "level": 2
+      },
+      {
+        "id": "events",
+        "text": "Events",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T08:31:21.687Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "nax-switch"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "nax-switch",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "当前版本：0.1.5",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "uni-app x 开关，功能覆盖常用场景。",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 4,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "安装",
+            "source": {
+              "start": {
+                "line": 7,
+                "column": 1
+              },
+              "end": {
+                "line": 7,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 7,
+            "column": 1
+          },
+          "end": {
+            "line": 7,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "插件市场：",
+                    "source": {
+                      "start": {
+                        "line": 9,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 9,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "link",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "nax-switch",
+                        "source": {
+                          "start": {
+                            "line": 9,
+                            "column": 1
+                          },
+                          "end": {
+                            "line": 9,
+                            "column": 1
+                          }
+                        }
+                      }
+                    ],
+                    "attrs": {
+                      "href": "https://ext.dcloud.net.cn/plugin?id=29067"
+                    },
+                    "source": {
+                      "start": {
+                        "line": 9,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 9,
+                        "column": 6
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 9,
+                "column": 1
+              },
+              "end": {
+                "line": 9,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 9,
+            "column": 1
+          },
+          "end": {
+            "line": 9,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "easycom 自动生效，页面直接使用 ",
+            "source": {
+              "start": {
+                "line": 11,
+                "column": 1
+              },
+              "end": {
+                "line": 11,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "<nax-switch />",
+            "source": {
+              "start": {
+                "line": 11,
+                "column": 21
+              },
+              "end": {
+                "line": 11,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 即可。",
+            "source": {
+              "start": {
+                "line": 11,
+                "column": 37
+              },
+              "end": {
+                "line": 11,
+                "column": 37
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 11,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "建议同时安装主题包 ",
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni_modules/nax-ui-theme",
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 11
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 11
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 并在 ",
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 37
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 37
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "App.uvue",
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 41
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 41
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引入主题变量，详见 ",
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 51
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 51
+                  }
+                }
+              },
+              {
+                "type": "link",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "主题接入",
+                    "source": {
+                      "start": {
+                        "line": 13,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 13,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "attrs": {
+                  "href": "/guide/theme"
+                },
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 62
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 62
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。",
+                "source": {
+                  "start": {
+                    "line": 13,
+                    "column": 82
+                  },
+                  "end": {
+                    "line": 13,
+                    "column": 82
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 13,
+            "column": 1
+          },
+          "end": {
+            "line": 13,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "代码示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "代码示例",
+            "source": {
+              "start": {
+                "line": 15,
+                "column": 1
+              },
+              "end": {
+                "line": 15,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 15,
+            "column": 1
+          },
+          "end": {
+            "line": 15,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "基础用法"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "基础用法",
+            "source": {
+              "start": {
+                "line": 17,
+                "column": 1
+              },
+              "end": {
+                "line": 17,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 17,
+            "column": 1
+          },
+          "end": {
+            "line": 17,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "demo",
+        "value": "<nax-switch v-model=\"checked\" @change=\"onChange\"></nax-switch>",
+        "attrs": {
+          "name": "demo-switch"
+        },
+        "source": {
+          "start": {
+            "line": 18,
+            "column": 1
+          },
+          "end": {
+            "line": 19,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "尺寸-size"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "尺寸 size",
+            "source": {
+              "start": {
+                "line": 22,
+                "column": 1
+              },
+              "end": {
+                "line": 22,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 22,
+            "column": 1
+          },
+          "end": {
+            "line": 22,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-switch v-model=\"sizeSm\" size=\"sm\"></nax-switch>\n<nax-switch v-model=\"sizeMd\" size=\"md\"></nax-switch>\n<nax-switch v-model=\"sizeLg\" size=\"lg\"></nax-switch>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 23,
+            "column": 1
+          },
+          "end": {
+            "line": 26,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sizeSm\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sm\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sizeMd\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"md\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"sizeLg\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "size",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"lg\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const sizeSm = ref(true)\nconst sizeMd = ref(true)\nconst sizeLg = ref(true)",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 29,
+            "column": 1
+          },
+          "end": {
+            "line": 32,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " sizeSm = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " sizeMd = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " sizeLg = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "禁用-disabled"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "禁用 disabled",
+            "source": {
+              "start": {
+                "line": 35,
+                "column": 1
+              },
+              "end": {
+                "line": 35,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 35,
+            "column": 1
+          },
+          "end": {
+            "line": 35,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-switch v-model=\"disabledOff\" disabled></nax-switch>\n<nax-switch v-model=\"disabledOn\" disabled></nax-switch>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 36,
+            "column": 1
+          },
+          "end": {
+            "line": 38,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"disabledOff\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "disabled",
+            "c": "fn"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"disabledOn\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "disabled",
+            "c": "fn"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const disabledOff = ref(false)\nconst disabledOn = ref(true)",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 41,
+            "column": 1
+          },
+          "end": {
+            "line": 43,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " disabledOff = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " disabledOn = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "加载-loading"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "加载 loading",
+            "source": {
+              "start": {
+                "line": 46,
+                "column": 1
+              },
+              "end": {
+                "line": 46,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 46,
+            "column": 1
+          },
+          "end": {
+            "line": 46,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-switch v-model=\"loadingOff\" loading></nax-switch>\n<nax-switch v-model=\"loadingOn\" loading></nax-switch>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 47,
+            "column": 1
+          },
+          "end": {
+            "line": 49,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"loadingOff\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "loading",
+            "c": "fn"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"loadingOn\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "loading",
+            "c": "fn"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const loadingOff = ref(false)\nconst loadingOn = ref(true)",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 52,
+            "column": 1
+          },
+          "end": {
+            "line": 54,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " loadingOff = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " loadingOn = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "模拟异步提交：switch 先切换到目标值，这里立刻回滚并进入 loading，成功后再写入。",
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 1
+              },
+              "end": {
+                "line": 57,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 57,
+            "column": 1
+          },
+          "end": {
+            "line": 56,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-switch v-model=\"asyncVal\" :loading=\"asyncBusy\" @change=\"onAsyncChange\"></nax-switch>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 59,
+            "column": 1
+          },
+          "end": {
+            "line": 60,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"asyncVal\"",
+            "c": "str"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "loading",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"asyncBusy\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "change",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onAsyncChange\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const asyncVal = ref(false)\nconst asyncBusy = ref(false)\n\nfunction onAsyncChange(v : boolean) {\n    if (asyncBusy.value) {\n        return\n    }\n    const target = v\n    // 回滚到切换前，进入 loading\n    asyncVal.value = !target\n    asyncBusy.value = true\n    setTimeout(() => {\n        asyncVal.value = target\n        asyncBusy.value = false\n    }, 1200)\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 63,
+            "column": 1
+          },
+          "end": {
+            "line": 79,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " asyncVal = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " asyncBusy = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onAsyncChange",
+            "c": "fn"
+          },
+          {
+            "t": "(v : "
+          },
+          {
+            "t": "boolean",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    "
+          },
+          {
+            "t": "if",
+            "c": "kw"
+          },
+          {
+            "t": " (asyncBusy.value) {\n        "
+          },
+          {
+            "t": "return",
+            "c": "kw"
+          },
+          {
+            "t": "\n    }\n    "
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " target = v\n    "
+          },
+          {
+            "t": "// 回滚到切换前，进入 loading",
+            "c": "com"
+          },
+          {
+            "t": "\n    asyncVal.value = !target\n    asyncBusy.value = "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "setTimeout",
+            "c": "fn"
+          },
+          {
+            "t": "(() => {\n        asyncVal.value = target\n        asyncBusy.value = "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n    }, "
+          },
+          {
+            "t": "1200",
+            "c": "num"
+          },
+          {
+            "t": ")\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "自定义颜色"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "自定义颜色",
+            "source": {
+              "start": {
+                "line": 82,
+                "column": 1
+              },
+              "end": {
+                "line": 82,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 82,
+            "column": 1
+          },
+          "end": {
+            "line": 82,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-switch v-model=\"colorA\" active-color=\"#2080f0\"></nax-switch>\n<nax-switch v-model=\"colorB\" active-color=\"#d03050\" inactive-color=\"#f3f3f5\"></nax-switch>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 83,
+            "column": 1
+          },
+          "end": {
+            "line": 85,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"colorA\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "active-color",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"#2080f0\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"colorB\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "active-color",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"#d03050\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "inactive-color",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"#f3f3f5\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const colorA = ref(true)\nconst colorB = ref(false)",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 88,
+            "column": 1
+          },
+          "end": {
+            "line": 90,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " colorA = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " colorB = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "切换震动-vibrateshort"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "切换震动 vibrateShort",
+            "source": {
+              "start": {
+                "line": 93,
+                "column": 1
+              },
+              "end": {
+                "line": 93,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 93,
+            "column": 1
+          },
+          "end": {
+            "line": 93,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-switch v-model=\"vibrateVal\" vibrate-short></nax-switch>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 94,
+            "column": 1
+          },
+          "end": {
+            "line": 95,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-switch",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "v-model",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"vibrateVal\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "vibrate-short",
+            "c": "fn"
+          },
+          {
+            "t": "></nax-switch>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const vibrateVal = ref(false)",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 98,
+            "column": 1
+          },
+          "end": {
+            "line": 99,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " vibrateVal = "
+          },
+          {
+            "t": "ref",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": ")"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "主题"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "主题",
+            "source": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 102,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 102,
+            "column": 1
+          },
+          "end": {
+            "line": 102,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "通过 CSS 变量覆盖：",
+            "source": {
+              "start": {
+                "line": 104,
+                "column": 1
+              },
+              "end": {
+                "line": 104,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 104,
+            "column": 1
+          },
+          "end": {
+            "line": 103,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Token",
+                    "source": {
+                      "start": {
+                        "line": 106,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 106,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 106,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 106,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "用途",
+                    "source": {
+                      "start": {
+                        "line": 106,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 106,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 106,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 106,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 106,
+                "column": 1
+              },
+              "end": {
+                "line": 106,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-bg",
+                    "source": {
+                      "start": {
+                        "line": 108,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 108,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 108,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 108,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "背景色",
+                    "source": {
+                      "start": {
+                        "line": 108,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 108,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 108,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 108,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 108,
+                "column": 1
+              },
+              "end": {
+                "line": 108,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-border",
+                    "source": {
+                      "start": {
+                        "line": 109,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 109,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 109,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 109,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "边框色",
+                    "source": {
+                      "start": {
+                        "line": 109,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 109,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 109,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 109,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 109,
+                "column": 1
+              },
+              "end": {
+                "line": 109,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-primary",
+                    "source": {
+                      "start": {
+                        "line": 110,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 110,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 110,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 110,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "主题主色",
+                    "source": {
+                      "start": {
+                        "line": 110,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 110,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 110,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 110,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 110,
+                "column": 1
+              },
+              "end": {
+                "line": 110,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-text-secondary",
+                    "source": {
+                      "start": {
+                        "line": 111,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 111,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 111,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 111,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "次要文字色",
+                    "source": {
+                      "start": {
+                        "line": 111,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 111,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 111,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 111,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 111,
+                "column": 1
+              },
+              "end": {
+                "line": 111,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-opacity-disabled",
+                    "source": {
+                      "start": {
+                        "line": 112,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 112,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 112,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 112,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "禁用透明度",
+                    "source": {
+                      "start": {
+                        "line": 112,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 112,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 112,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 112,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 112,
+                "column": 1
+              },
+              "end": {
+                "line": 112,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 106,
+            "column": 1
+          },
+          "end": {
+            "line": 111,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "props"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Props",
+            "source": {
+              "start": {
+                "line": 114,
+                "column": 1
+              },
+              "end": {
+                "line": 114,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 114,
+            "column": 1
+          },
+          "end": {
+            "line": 114,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 116,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 116,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 116,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 116,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 116,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 116,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 116,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 116,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认值",
+                    "source": {
+                      "start": {
+                        "line": 116,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 116,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 116,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 116,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 116,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 116,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 116,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 116,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 116,
+                "column": 1
+              },
+              "end": {
+                "line": 116,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "modelValue",
+                    "source": {
+                      "start": {
+                        "line": 118,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 118,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 118,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 118,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 118,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 118,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 118,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 118,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 118,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 118,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 118,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 118,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "开关状态（v-model）",
+                    "source": {
+                      "start": {
+                        "line": 118,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 118,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 118,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 118,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 118,
+                "column": 1
+              },
+              "end": {
+                "line": 118,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "disabled",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "禁用",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 119,
+                "column": 1
+              },
+              "end": {
+                "line": 119,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "loading",
+                    "source": {
+                      "start": {
+                        "line": 120,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 120,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 120,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 120,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 120,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 120,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 120,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 120,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 120,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 120,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 120,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 120,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "加载中（阻止切换）",
+                    "source": {
+                      "start": {
+                        "line": 120,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 120,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 120,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 120,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 120,
+                "column": 1
+              },
+              "end": {
+                "line": 120,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "size",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'md'",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "sm",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 小 | ",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 5
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 5
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "md",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 中 | ",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 14
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "lg",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 19
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 19
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 大",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 23
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 23
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 121,
+                "column": 1
+              },
+              "end": {
+                "line": 121,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "activeColor",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "打开时轨道色；空则主题 primary",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 122,
+                "column": 1
+              },
+              "end": {
+                "line": 122,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "inactiveColor",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "关闭时轨道色；空则边框灰",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 123,
+                "column": 1
+              },
+              "end": {
+                "line": 123,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "vibrateShort",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "切换时短震动（支持端生效）",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 124,
+                "column": 1
+              },
+              "end": {
+                "line": 124,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "customClass",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 125,
+                "column": 1
+              },
+              "end": {
+                "line": 125,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 116,
+            "column": 1
+          },
+          "end": {
+            "line": 124,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "events"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Events",
+            "source": {
+              "start": {
+                "line": 127,
+                "column": 1
+              },
+              "end": {
+                "line": 127,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 127,
+            "column": 1
+          },
+          "end": {
+            "line": 127,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "事件",
+                    "source": {
+                      "start": {
+                        "line": 129,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 129,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 129,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 129,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 129,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 129,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 129,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 129,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 129,
+                "column": 1
+              },
+              "end": {
+                "line": 129,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "update:modelValue",
+                    "source": {
+                      "start": {
+                        "line": 131,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 131,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 131,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 131,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "v-model",
+                    "source": {
+                      "start": {
+                        "line": 131,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 131,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 131,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 131,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 131,
+                "column": 1
+              },
+              "end": {
+                "line": 131,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "change",
+                    "source": {
+                      "start": {
+                        "line": 132,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 132,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 132,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 132,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "状态变化（boolean）",
+                    "source": {
+                      "start": {
+                        "line": 132,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 132,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 132,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 132,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 132,
+                "column": 1
+              },
+              "end": {
+                "line": 132,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 129,
+            "column": 1
+          },
+          "end": {
+            "line": 131,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 134,
+        "column": 1
+      }
+    }
+  }
+}

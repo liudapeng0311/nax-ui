@@ -1,0 +1,66 @@
+<template>
+  <view class="demo-switch">
+    <text class="dsec">尺寸 size</text>
+    <view class="row">
+      <nax-switch v-model="sizeSm" size="sm"></nax-switch>
+      <nax-switch v-model="sizeMd" size="md"></nax-switch>
+      <nax-switch v-model="sizeLg" size="lg"></nax-switch>
+    </view>
+
+    <text class="dsec">禁用 disabled</text>
+    <view class="row">
+      <nax-switch v-model="disabledOff" disabled></nax-switch>
+      <nax-switch v-model="disabledOn" disabled></nax-switch>
+    </view>
+
+    <text class="dsec">加载 loading</text>
+    <view class="row">
+      <nax-switch v-model="loadingOff" loading></nax-switch>
+      <nax-switch v-model="loadingOn" loading></nax-switch>
+    </view>
+
+    <text class="dsec">自定义颜色</text>
+    <view class="row">
+      <nax-switch v-model="colorA" active-color="#2080f0"></nax-switch>
+      <nax-switch v-model="colorB" active-color="#d03050" inactive-color="#f3f3f5"></nax-switch>
+    </view>
+
+    <text class="dsec">切换震动 vibrateShort</text>
+    <nax-switch v-model="vibrateVal" vibrate-short></nax-switch>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const sizeSm = ref(true)
+const sizeMd = ref(true)
+const sizeLg = ref(false)
+const disabledOff = ref(false)
+const disabledOn = ref(true)
+const loadingOff = ref(false)
+const loadingOn = ref(true)
+const colorA = ref(true)
+const colorB = ref(false)
+const vibrateVal = ref(true)
+</script>
+
+<style>
+.demo-switch {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

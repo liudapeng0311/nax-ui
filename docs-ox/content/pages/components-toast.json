@@ -1,0 +1,6879 @@
+{
+  "meta": {
+    "id": "components-toast",
+    "path": "/components/toast",
+    "source": "components/toast.md",
+    "title": "nax-toast",
+    "headings": [
+      {
+        "id": "nax-toast",
+        "text": "nax-toast",
+        "level": 1
+      },
+      {
+        "id": "安装",
+        "text": "安装",
+        "level": 2
+      },
+      {
+        "id": "代码示例",
+        "text": "代码示例",
+        "level": 2
+      },
+      {
+        "id": "接入",
+        "text": "接入",
+        "level": 3
+      },
+      {
+        "id": "1.-全局挂载一次宿主",
+        "text": "1. 全局挂载一次宿主",
+        "level": 3
+      },
+      {
+        "id": "2.-业务页只调方法",
+        "text": "2. 业务页只调方法",
+        "level": 3
+      },
+      {
+        "id": "api",
+        "text": "API",
+        "level": 3
+      },
+      {
+        "id": "naxtoastinput",
+        "text": "naxToast(input)",
+        "level": 3
+      },
+      {
+        "id": "hidenaxtoast",
+        "text": "hideNaxToast()",
+        "level": 3
+      },
+      {
+        "id": "快捷方法",
+        "text": "快捷方法",
+        "level": 3
+      },
+      {
+        "id": "基础纯文案",
+        "text": "基础（纯文案）",
+        "level": 3
+      },
+      {
+        "id": "类型-type",
+        "text": "类型 type",
+        "level": 3
+      },
+      {
+        "id": "位置-position",
+        "text": "位置 position",
+        "level": 3
+      },
+      {
+        "id": "loading-手动关闭",
+        "text": "Loading + 手动关闭",
+        "level": 3
+      },
+      {
+        "id": "自定义图标-时长",
+        "text": "自定义图标 / 时长",
+        "level": 3
+      },
+      {
+        "id": "自定义背景-bg请用-hex",
+        "text": "自定义背景 bg（请用 hex）",
+        "level": 3
+      },
+      {
+        "id": "快捷方法-1",
+        "text": "快捷方法",
+        "level": 3
+      },
+      {
+        "id": "主题",
+        "text": "主题",
+        "level": 2
+      },
+      {
+        "id": "props",
+        "text": "Props",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T03:16:02.210Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "nax-toast"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "nax-toast",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "当前版本：0.1.11",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "inline-code",
+            "value": "nax-ui",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 轻提示（uni-app x / uvue）。 ",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 9
+              },
+              "end": {
+                "line": 5,
+                "column": 9
+              }
+            }
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "推荐用法：函数式调用",
+                "source": {
+                  "start": {
+                    "line": 5,
+                    "column": 35
+                  },
+                  "end": {
+                    "line": 5,
+                    "column": 35
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "，业务页面不写 Toast DOM。",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 47
+              },
+              "end": {
+                "line": 5,
+                "column": 47
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 5,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "安装",
+            "source": {
+              "start": {
+                "line": 8,
+                "column": 1
+              },
+              "end": {
+                "line": 8,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 8,
+            "column": 1
+          },
+          "end": {
+            "line": 8,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "插件市场：",
+                    "source": {
+                      "start": {
+                        "line": 10,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "link",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "nax-toast",
+                        "source": {
+                          "start": {
+                            "line": 10,
+                            "column": 1
+                          },
+                          "end": {
+                            "line": 10,
+                            "column": 1
+                          }
+                        }
+                      }
+                    ],
+                    "attrs": {
+                      "href": "https://ext.dcloud.net.cn/plugin?id=29074"
+                    },
+                    "source": {
+                      "start": {
+                        "line": 10,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 10,
+                        "column": 6
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 10,
+                "column": 1
+              },
+              "end": {
+                "line": 10,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 10,
+            "column": 1
+          },
+          "end": {
+            "line": 10,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "easycom 自动生效，页面直接使用 ",
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 1
+              },
+              "end": {
+                "line": 12,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "<nax-toast />",
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 21
+              },
+              "end": {
+                "line": 12,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 即可。",
+            "source": {
+              "start": {
+                "line": 12,
+                "column": 36
+              },
+              "end": {
+                "line": 12,
+                "column": 36
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 12,
+            "column": 1
+          },
+          "end": {
+            "line": 11,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "建议同时安装主题包 ",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni_modules/nax-ui-theme",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 11
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 11
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 并在 ",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 37
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 37
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "App.uvue",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 41
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 41
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引入主题变量，详见 ",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 51
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 51
+                  }
+                }
+              },
+              {
+                "type": "link",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "主题接入",
+                    "source": {
+                      "start": {
+                        "line": 14,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 14,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "attrs": {
+                  "href": "/guide/theme"
+                },
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 62
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 62
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。",
+                "source": {
+                  "start": {
+                    "line": 14,
+                    "column": 82
+                  },
+                  "end": {
+                    "line": 14,
+                    "column": 82
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 14,
+            "column": 1
+          },
+          "end": {
+            "line": 14,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "代码示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "代码示例",
+            "source": {
+              "start": {
+                "line": 16,
+                "column": 1
+              },
+              "end": {
+                "line": 16,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 16,
+            "column": 1
+          },
+          "end": {
+            "line": 16,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "接入"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "接入",
+            "source": {
+              "start": {
+                "line": 18,
+                "column": 1
+              },
+              "end": {
+                "line": 18,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 18,
+            "column": 1
+          },
+          "end": {
+            "line": 18,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "1.-全局挂载一次宿主"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "1. 全局挂载一次宿主",
+            "source": {
+              "start": {
+                "line": 19,
+                "column": 1
+              },
+              "end": {
+                "line": 19,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 19,
+            "column": 1
+          },
+          "end": {
+            "line": 19,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "在根布局或长期存活的页面挂一次（整个 App 只需一处）：",
+            "source": {
+              "start": {
+                "line": 21,
+                "column": 1
+              },
+              "end": {
+                "line": 21,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 21,
+            "column": 1
+          },
+          "end": {
+            "line": 20,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "demo",
+        "value": "<nax-toast />",
+        "attrs": {
+          "name": "demo-toast"
+        },
+        "source": {
+          "start": {
+            "line": 23,
+            "column": 1
+          },
+          "end": {
+            "line": 24,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "uni-app x 的 ",
+                "source": {
+                  "start": {
+                    "line": 27,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "App.uvue",
+                "source": {
+                  "start": {
+                    "line": 27,
+                    "column": 13
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 13
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 通常不渲染 template。请挂在自定义根布局、Tab 根页，或业务页面栈中会存活的壳页面。 注意：上一页的宿主一般不会盖到当前页上，所以「全局一次」应挂在真正常驻的根布局，而不是指望页面栈底层页。",
+                "source": {
+                  "start": {
+                    "line": 27,
+                    "column": 23
+                  },
+                  "end": {
+                    "line": 27,
+                    "column": 23
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 27,
+            "column": 1
+          },
+          "end": {
+            "line": 28,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "2.-业务页只调方法"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "2. 业务页只调方法",
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 1
+              },
+              "end": {
+                "line": 30,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 30,
+            "column": 1
+          },
+          "end": {
+            "line": 30,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "import {\n  naxToast as showNaxToast,\n  hideNaxToast,\n  naxToastSuccess,\n  naxToastError,\n  naxToastLoading\n} from '@/uni_modules/nax-toast/index.uts'\n\nshowNaxToast('操作成功')\nshowNaxToast({ title: '保存成功', type: 'success' })\nnaxToastSuccess('已提交')\nnaxToastError('网络异常')\nnaxToastLoading('提交中…')\n// 手动关闭（loading 常用）\nhideNaxToast()",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 32,
+            "column": 1
+          },
+          "end": {
+            "line": 47,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "import",
+            "c": "kw"
+          },
+          {
+            "t": " {\n  naxToast "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " showNaxToast,\n  hideNaxToast,\n  naxToastSuccess,\n  naxToastError,\n  naxToastLoading\n} "
+          },
+          {
+            "t": "from",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'@/uni_modules/nax-toast/index.uts'",
+            "c": "str"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "showNaxToast",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'操作成功'",
+            "c": "str"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "showNaxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({ title: "
+          },
+          {
+            "t": "'保存成功'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'success'",
+            "c": "str"
+          },
+          {
+            "t": " })\n"
+          },
+          {
+            "t": "naxToastSuccess",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'已提交'",
+            "c": "str"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "naxToastError",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'网络异常'",
+            "c": "str"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "naxToastLoading",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'提交中…'",
+            "c": "str"
+          },
+          {
+            "t": ")\n"
+          },
+          {
+            "t": "// 手动关闭（loading 常用）",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "hideNaxToast",
+            "c": "fn"
+          },
+          {
+            "t": "()"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "未挂载宿主时，会回退到 ",
+            "source": {
+              "start": {
+                "line": 50,
+                "column": 1
+              },
+              "end": {
+                "line": 50,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "uni.showToast",
+            "source": {
+              "start": {
+                "line": 50,
+                "column": 13
+              },
+              "end": {
+                "line": 50,
+                "column": 13
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "，保证基础可用。",
+            "source": {
+              "start": {
+                "line": 50,
+                "column": 28
+              },
+              "end": {
+                "line": 50,
+                "column": 28
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 50,
+            "column": 1
+          },
+          "end": {
+            "line": 49,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "微信小程序端：若当前 SFC 同时挂载 ",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "<nax-toast />",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 21
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 21
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 并导入 ",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 36
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 36
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "naxToast",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 41
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 41
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "，请像上例一样给函数设置本地别名。",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 51
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 51
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "naxToast",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 68
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 68
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 会与组件标签映射到同一个驼峰名，导致 ",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 78
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 78
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "MP-WEIXIN",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 98
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 98
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 未注册宿主组件并回退到不支持 ",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 109
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 109
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "position",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 125
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 125
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 的 ",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 135
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 135
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni.showToast",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 138
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 138
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。仅调用函数、不挂载宿主的业务页可继续直接导入 ",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 153
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 153
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "naxToast",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 177
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 177
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。",
+                "source": {
+                  "start": {
+                    "line": 52,
+                    "column": 187
+                  },
+                  "end": {
+                    "line": 52,
+                    "column": 187
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 52,
+            "column": 1
+          },
+          "end": {
+            "line": 52,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "api"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "API",
+            "source": {
+              "start": {
+                "line": 54,
+                "column": 1
+              },
+              "end": {
+                "line": 54,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 54,
+            "column": 1
+          },
+          "end": {
+            "line": 54,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "naxtoastinput"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "naxToast(input)",
+            "source": {
+              "start": {
+                "line": 55,
+                "column": 1
+              },
+              "end": {
+                "line": 55,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 55,
+            "column": 1
+          },
+          "end": {
+            "line": 55,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "入参",
+                    "source": {
+                      "start": {
+                        "line": 57,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 57,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 57,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 57,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 57,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 57,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 1
+              },
+              "end": {
+                "line": 57,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 59,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 59,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 59,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 59,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "等价 ",
+                    "source": {
+                      "start": {
+                        "line": 59,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 59,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "{ title: string, type: 'text' }",
+                    "source": {
+                      "start": {
+                        "line": 59,
+                        "column": 4
+                      },
+                      "end": {
+                        "line": 59,
+                        "column": 4
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 59,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 59,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 1
+              },
+              "end": {
+                "line": 59,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "object",
+                    "source": {
+                      "start": {
+                        "line": 60,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 60,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 60,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 60,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "见下表",
+                    "source": {
+                      "start": {
+                        "line": 60,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 60,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 60,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 60,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 60,
+                "column": 1
+              },
+              "end": {
+                "line": 60,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 57,
+            "column": 1
+          },
+          "end": {
+            "line": 59,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "字段",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 62,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 62,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 62,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 62,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 62,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 62,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 62,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 62,
+                "column": 1
+              },
+              "end": {
+                "line": 62,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "title / message",
+                    "source": {
+                      "start": {
+                        "line": 64,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 64,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 64,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 64,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 64,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 64,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 64,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 64,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 64,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 64,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 64,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 64,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "文案（message 为别名）",
+                    "source": {
+                      "start": {
+                        "line": 64,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 64,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 64,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 64,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 64,
+                "column": 1
+              },
+              "end": {
+                "line": 64,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "type",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 65,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 65,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 65,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 65,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "text",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 65,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 65,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "text",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 7
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "success",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 19
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 19
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "error",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 22
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 22
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 29
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 29
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "warning",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 32
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 32
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 41
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 41
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "info",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 44
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 44
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 50
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 50
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "loading",
+                    "source": {
+                      "start": {
+                        "line": 65,
+                        "column": 53
+                      },
+                      "end": {
+                        "line": 65,
+                        "column": 53
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 65,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 65,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 65,
+                "column": 1
+              },
+              "end": {
+                "line": 65,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "icon",
+                    "source": {
+                      "start": {
+                        "line": 66,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 66,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 66,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 66,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 66,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 66,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "自定义 ",
+                    "source": {
+                      "start": {
+                        "line": 66,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "nax-icon",
+                    "source": {
+                      "start": {
+                        "line": 66,
+                        "column": 5
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 5
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 名；空则按 type 映射",
+                    "source": {
+                      "start": {
+                        "line": 66,
+                        "column": 15
+                      },
+                      "end": {
+                        "line": 66,
+                        "column": 15
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 66,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 66,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 66,
+                "column": 1
+              },
+              "end": {
+                "line": 66,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "duration",
+                    "source": {
+                      "start": {
+                        "line": 67,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 67,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 67,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 67,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "number",
+                    "source": {
+                      "start": {
+                        "line": 67,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 67,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 67,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 67,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "2000",
+                    "source": {
+                      "start": {
+                        "line": 67,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 67,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 67,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 67,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "毫秒；",
+                    "source": {
+                      "start": {
+                        "line": 67,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 67,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "0",
+                    "source": {
+                      "start": {
+                        "line": 67,
+                        "column": 4
+                      },
+                      "end": {
+                        "line": 67,
+                        "column": 4
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 不自动关闭（loading 默认 0）",
+                    "source": {
+                      "start": {
+                        "line": 67,
+                        "column": 7
+                      },
+                      "end": {
+                        "line": 67,
+                        "column": 7
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 67,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 67,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 67,
+                "column": 1
+              },
+              "end": {
+                "line": 67,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "position",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 68,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 68,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 68,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 68,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "center",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 68,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 68,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "top",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 6
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "center",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 9
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 9
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 17
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "bottom",
+                    "source": {
+                      "start": {
+                        "line": 68,
+                        "column": 20
+                      },
+                      "end": {
+                        "line": 68,
+                        "column": 20
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 68,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 68,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 68,
+                "column": 1
+              },
+              "end": {
+                "line": 68,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "overlay",
+                    "source": {
+                      "start": {
+                        "line": 69,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 69,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 69,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 69,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 69,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 69,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 69,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 69,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 69,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 69,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 69,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 69,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否显示遮罩（loading 可设 true 防误触）",
+                    "source": {
+                      "start": {
+                        "line": 69,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 69,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 69,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 69,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 69,
+                "column": 1
+              },
+              "end": {
+                "line": 69,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "showIcon",
+                    "source": {
+                      "start": {
+                        "line": 70,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 70,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 70,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 70,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 70,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 70,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 70,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 70,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "true",
+                    "source": {
+                      "start": {
+                        "line": 70,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 70,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 70,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 70,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否显示图标；",
+                    "source": {
+                      "start": {
+                        "line": 70,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 70,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "text",
+                    "source": {
+                      "start": {
+                        "line": 70,
+                        "column": 8
+                      },
+                      "end": {
+                        "line": 70,
+                        "column": 8
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 类型默认无图标",
+                    "source": {
+                      "start": {
+                        "line": 70,
+                        "column": 14
+                      },
+                      "end": {
+                        "line": 70,
+                        "column": 14
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 70,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 70,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 70,
+                "column": 1
+              },
+              "end": {
+                "line": 70,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "bg / background",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 71,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 71,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 71,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 71,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 71,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 71,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "单次背景色（如 ",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "#18a058",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 9
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 9
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 18
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 18
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "rgba(0,0,0,0.85)",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 21
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 21
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）；空则走主题/type",
+                    "source": {
+                      "start": {
+                        "line": 71,
+                        "column": 39
+                      },
+                      "end": {
+                        "line": 71,
+                        "column": 39
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 71,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 71,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 71,
+                "column": 1
+              },
+              "end": {
+                "line": 71,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 62,
+            "column": 1
+          },
+          "end": {
+            "line": 70,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "strong",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "微信小程序",
+                        "source": {
+                          "start": {
+                            "line": 73,
+                            "column": 3
+                          },
+                          "end": {
+                            "line": 73,
+                            "column": 3
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "value": "：",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "position: 'top'",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 11
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 11
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 会依据状态栏与胶囊位置计算导航栏底部，并额外下移 ",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 28
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 28
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "16px",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 54
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 54
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "，避免覆盖自定义导航栏（",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 60
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 60
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "MP-WEIXIN",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 72
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 72
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）。",
+                    "source": {
+                      "start": {
+                        "line": 73,
+                        "column": 83
+                      },
+                      "end": {
+                        "line": 73,
+                        "column": 83
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 73,
+                "column": 1
+              },
+              "end": {
+                "line": 73,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 73,
+            "column": 1
+          },
+          "end": {
+            "line": 73,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "hidenaxtoast"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "hideNaxToast()",
+            "source": {
+              "start": {
+                "line": 75,
+                "column": 1
+              },
+              "end": {
+                "line": 75,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 75,
+            "column": 1
+          },
+          "end": {
+            "line": 75,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "立即关闭当前提示。",
+            "source": {
+              "start": {
+                "line": 77,
+                "column": 1
+              },
+              "end": {
+                "line": 77,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 77,
+            "column": 1
+          },
+          "end": {
+            "line": 76,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "快捷方法"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "快捷方法",
+            "source": {
+              "start": {
+                "line": 79,
+                "column": 1
+              },
+              "end": {
+                "line": 79,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 79,
+            "column": 1
+          },
+          "end": {
+            "line": 79,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "naxToastSuccess(title)",
+                    "source": {
+                      "start": {
+                        "line": 81,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 81,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 81,
+                "column": 1
+              },
+              "end": {
+                "line": 81,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "naxToastError(title)",
+                    "source": {
+                      "start": {
+                        "line": 82,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 82,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 82,
+                "column": 1
+              },
+              "end": {
+                "line": 82,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "naxToastWarning(title)",
+                    "source": {
+                      "start": {
+                        "line": 83,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 83,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 83,
+                "column": 1
+              },
+              "end": {
+                "line": 83,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "naxToastInfo(title)",
+                    "source": {
+                      "start": {
+                        "line": 84,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 84,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 84,
+                "column": 1
+              },
+              "end": {
+                "line": 84,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "naxToastLoading(title?, overlay?)",
+                    "source": {
+                      "start": {
+                        "line": 85,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 85,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 85,
+                "column": 1
+              },
+              "end": {
+                "line": 85,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 81,
+            "column": 1
+          },
+          "end": {
+            "line": 85,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "基础纯文案"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "基础（纯文案）",
+            "source": {
+              "start": {
+                "line": 87,
+                "column": 1
+              },
+              "end": {
+                "line": 87,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 87,
+            "column": 1
+          },
+          "end": {
+            "line": 87,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<!-- 宿主挂载：生产建议根布局挂一次；演示页本地挂载保证可展示 -->\n<nax-toast></nax-toast>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 88,
+            "column": 1
+          },
+          "end": {
+            "line": 90,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<!-- 宿主挂载：生产建议根布局挂一次；演示页本地挂载保证可展示 -->",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-toast></nax-toast>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "import {\n    naxToast,\n    hideNaxToast,\n    naxToastSuccess,\n    naxToastError,\n    naxToastWarning,\n    naxToastInfo,\n    naxToastLoading\n} from '@/uni_modules/nax-toast/index.uts'\n\nnaxToast('你好，这是一条轻提示')",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 93,
+            "column": 1
+          },
+          "end": {
+            "line": 104,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "import",
+            "c": "kw"
+          },
+          {
+            "t": " {\n    naxToast,\n    hideNaxToast,\n    naxToastSuccess,\n    naxToastError,\n    naxToastWarning,\n    naxToastInfo,\n    naxToastLoading\n} "
+          },
+          {
+            "t": "from",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "'@/uni_modules/nax-toast/index.uts'",
+            "c": "str"
+          },
+          {
+            "t": "\n\n"
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'你好，这是一条轻提示'",
+            "c": "str"
+          },
+          {
+            "t": ")"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "类型-type"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "类型 type",
+            "source": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 107,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 107,
+            "column": 1
+          },
+          "end": {
+            "line": 107,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-button type=\"success\" label=\"success\" @click=\"onSuccess\"></nax-button>\n<nax-button type=\"error\" label=\"error\" @click=\"onError\"></nax-button>\n<nax-button type=\"warning\" label=\"warning\" @click=\"onWarning\"></nax-button>\n<nax-button type=\"info\" label=\"info\" @click=\"onInfo\"></nax-button>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 108,
+            "column": 1
+          },
+          "end": {
+            "line": 112,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"success\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"success\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onSuccess\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"error\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"error\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onError\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"warning\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"warning\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onWarning\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"info\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"info\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onInfo\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "function onSuccess() {\n    naxToast({\n        title: '保存成功',\n        type: 'success'\n    } as UTSJSONObject)\n}\n\nfunction onError() {\n    naxToast({\n        title: '提交失败',\n        type: 'error'\n    } as UTSJSONObject)\n}\n\nfunction onWarning() {\n    naxToast({\n        title: '请注意风险',\n        type: 'warning'\n    } as UTSJSONObject)\n}\n\nfunction onInfo() {\n    naxToast({\n        title: '已为你更新内容',\n        type: 'info'\n    } as UTSJSONObject)\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 115,
+            "column": 1
+          },
+          "end": {
+            "line": 142,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onSuccess",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'保存成功'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'success'",
+            "c": "str"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onError",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'提交失败'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'error'",
+            "c": "str"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onWarning",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'请注意风险'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'warning'",
+            "c": "str"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onInfo",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'已为你更新内容'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'info'",
+            "c": "str"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "位置-position"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "位置 position",
+            "source": {
+              "start": {
+                "line": 145,
+                "column": 1
+              },
+              "end": {
+                "line": 145,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 145,
+            "column": 1
+          },
+          "end": {
+            "line": 145,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-button label=\"top\" @click=\"onPos('top')\"></nax-button>\n<nax-button label=\"center\" @click=\"onPos('center')\"></nax-button>\n<nax-button label=\"bottom\" @click=\"onPos('bottom')\"></nax-button>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 146,
+            "column": 1
+          },
+          "end": {
+            "line": 149,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"top\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onPos('top')\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"center\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onPos('center')\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"bottom\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onPos('bottom')\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "function onPos(pos : string) {\n    naxToast({\n        title: '位置：' + pos,\n        type: 'text',\n        position: pos\n    } as UTSJSONObject)\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 152,
+            "column": 1
+          },
+          "end": {
+            "line": 159,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onPos",
+            "c": "fn"
+          },
+          {
+            "t": "(pos : "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'位置：'",
+            "c": "str"
+          },
+          {
+            "t": " + pos,\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'text'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        position: pos\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "loading-手动关闭"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Loading + 手动关闭",
+            "source": {
+              "start": {
+                "line": 162,
+                "column": 1
+              },
+              "end": {
+                "line": 162,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 162,
+            "column": 1
+          },
+          "end": {
+            "line": 162,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-button type=\"primary\" label=\"显示 loading\" @click=\"onLoading\"></nax-button>\n<nax-button label=\"hideNaxToast()\" @click=\"onHide\"></nax-button>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 163,
+            "column": 1
+          },
+          "end": {
+            "line": 165,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"primary\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"显示 loading\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onLoading\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"hideNaxToast()\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onHide\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "function onLoading() {\n    naxToastLoading('提交中…', true)\n    // loading 默认 duration=0 且带遮罩，需手动关闭或稍后再调 hide\n    setTimeout(() => {\n        hideNaxToast()\n        naxToastSuccess('提交完成')\n    }, 2500)\n}\n\nfunction onHide() {\n    hideNaxToast()\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 168,
+            "column": 1
+          },
+          "end": {
+            "line": 180,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onLoading",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToastLoading",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'提交中…'",
+            "c": "str"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": ")\n    "
+          },
+          {
+            "t": "// loading 默认 duration=0 且带遮罩，需手动关闭或稍后再调 hide",
+            "c": "com"
+          },
+          {
+            "t": "\n    "
+          },
+          {
+            "t": "setTimeout",
+            "c": "fn"
+          },
+          {
+            "t": "(() => {\n        "
+          },
+          {
+            "t": "hideNaxToast",
+            "c": "fn"
+          },
+          {
+            "t": "()\n        "
+          },
+          {
+            "t": "naxToastSuccess",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'提交完成'",
+            "c": "str"
+          },
+          {
+            "t": ")\n    }, "
+          },
+          {
+            "t": "2500",
+            "c": "num"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onHide",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "hideNaxToast",
+            "c": "fn"
+          },
+          {
+            "t": "()\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "自定义图标-时长"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "自定义图标 / 时长",
+            "source": {
+              "start": {
+                "line": 183,
+                "column": 1
+              },
+              "end": {
+                "line": 183,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 183,
+            "column": 1
+          },
+          "end": {
+            "line": 183,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-button label=\"自定义 icon\" @click=\"onCustomIcon\"></nax-button>\n<nax-button label=\"4 秒后关闭\" @click=\"onLong\"></nax-button>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 184,
+            "column": 1
+          },
+          "end": {
+            "line": 186,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"自定义 icon\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onCustomIcon\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"4 秒后关闭\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onLong\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "function onCustomIcon() {\n    naxToast({\n        title: '收藏成功',\n        type: 'text',\n        icon: 'star',\n        showIcon: true\n    } as UTSJSONObject)\n}\n\nfunction onLong() {\n    naxToast({\n        title: '这条会停留 4 秒',\n        type: 'info',\n        duration: 4000\n    } as UTSJSONObject)\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 189,
+            "column": 1
+          },
+          "end": {
+            "line": 205,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onCustomIcon",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'收藏成功'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'text'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        icon: "
+          },
+          {
+            "t": "'star'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        showIcon: "
+          },
+          {
+            "t": "true",
+            "c": "kw"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onLong",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'这条会停留 4 秒'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'info'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        duration: "
+          },
+          {
+            "t": "4000",
+            "c": "num"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "自定义背景-bg请用-hex"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "自定义背景 bg（请用 hex）",
+            "source": {
+              "start": {
+                "line": 208,
+                "column": 1
+              },
+              "end": {
+                "line": 208,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 208,
+            "column": 1
+          },
+          "end": {
+            "line": 208,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-button label=\"品牌绿\" @click=\"onCustomBg('#18a058')\"></nax-button>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 209,
+            "column": 1
+          },
+          "end": {
+            "line": 210,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"品牌绿\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onCustomBg('#18a058')\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "// 鸿蒙/App 请优先 hex（如 #18a058）；rgba 在端上可能失效\nfunction onCustomBg(color : string) {\n    naxToast({\n        title: '自定义背景色',\n        type: 'text',\n        bg: color,\n        color: '#ffffff',\n        showIcon: false\n    } as UTSJSONObject)\n}",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 213,
+            "column": 1
+          },
+          "end": {
+            "line": 223,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "// 鸿蒙/App 请优先 hex（如 #18a058）；rgba 在端上可能失效",
+            "c": "com"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onCustomBg",
+            "c": "fn"
+          },
+          {
+            "t": "(color : "
+          },
+          {
+            "t": "string",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n    "
+          },
+          {
+            "t": "naxToast",
+            "c": "fn"
+          },
+          {
+            "t": "({\n        title: "
+          },
+          {
+            "t": "'自定义背景色'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        "
+          },
+          {
+            "t": "type",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "'text'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        bg: color,\n        color: "
+          },
+          {
+            "t": "'#ffffff'",
+            "c": "str"
+          },
+          {
+            "t": ",\n        showIcon: "
+          },
+          {
+            "t": "false",
+            "c": "kw"
+          },
+          {
+            "t": "\n    } "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "UTSJSONObject",
+            "c": "type"
+          },
+          {
+            "t": ")\n}"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "快捷方法-1"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "快捷方法",
+            "source": {
+              "start": {
+                "line": 226,
+                "column": 1
+              },
+              "end": {
+                "line": 226,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 226,
+            "column": 1
+          },
+          "end": {
+            "line": 226,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-button type=\"success\" label=\"naxToastSuccess\" @click=\"onQuickSuccess\"></nax-button>\n<nax-button type=\"error\" label=\"naxToastError\" @click=\"onQuickError\"></nax-button>",
+        "attrs": {
+          "lang": "uvue"
+        },
+        "source": {
+          "start": {
+            "line": 227,
+            "column": 1
+          },
+          "end": {
+            "line": 229,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"success\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"naxToastSuccess\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onQuickSuccess\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "<nax-button",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "type",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"error\"",
+            "c": "str"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "label",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"naxToastError\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "click",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onQuickError\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-button>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "function onQuickSuccess() {\n    naxToastSuccess('快捷成功')\n}\n\nfunction onQuickError() {\n    naxToastError('快捷错误')\n}\n\n// 同系列：naxToastWarning('注意') / naxToastInfo('提示') / naxToastLoading('加载中', true)",
+        "attrs": {
+          "lang": "uts"
+        },
+        "source": {
+          "start": {
+            "line": 232,
+            "column": 1
+          },
+          "end": {
+            "line": 241,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onQuickSuccess",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToastSuccess",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'快捷成功'",
+            "c": "str"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onQuickError",
+            "c": "fn"
+          },
+          {
+            "t": "() {\n    "
+          },
+          {
+            "t": "naxToastError",
+            "c": "fn"
+          },
+          {
+            "t": "("
+          },
+          {
+            "t": "'快捷错误'",
+            "c": "str"
+          },
+          {
+            "t": ")\n}\n\n"
+          },
+          {
+            "t": "// 同系列：naxToastWarning('注意') / naxToastInfo('提示') / naxToastLoading('加载中', true)",
+            "c": "com"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "主题"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "主题",
+            "source": {
+              "start": {
+                "line": 244,
+                "column": 1
+              },
+              "end": {
+                "line": 244,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 244,
+            "column": 1
+          },
+          "end": {
+            "line": 244,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "通过 CSS 变量覆盖：",
+            "source": {
+              "start": {
+                "line": 246,
+                "column": 1
+              },
+              "end": {
+                "line": 246,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 246,
+            "column": 1
+          },
+          "end": {
+            "line": 245,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Token",
+                    "source": {
+                      "start": {
+                        "line": 248,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 248,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 248,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 248,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "用途",
+                    "source": {
+                      "start": {
+                        "line": 248,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 248,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 248,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 248,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 248,
+                "column": 1
+              },
+              "end": {
+                "line": 248,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-mask",
+                    "source": {
+                      "start": {
+                        "line": 250,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 250,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 250,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 250,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "遮罩色",
+                    "source": {
+                      "start": {
+                        "line": 250,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 250,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 250,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 250,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 250,
+                "column": 1
+              },
+              "end": {
+                "line": 250,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 248,
+            "column": 1
+          },
+          "end": {
+            "line": 249,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "在 ",
+            "source": {
+              "start": {
+                "line": 252,
+                "column": 1
+              },
+              "end": {
+                "line": 252,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "nax-theme",
+            "source": {
+              "start": {
+                "line": 252,
+                "column": 3
+              },
+              "end": {
+                "line": 252,
+                "column": 3
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 节点或全局 CSS 覆盖：",
+            "source": {
+              "start": {
+                "line": 252,
+                "column": 14
+              },
+              "end": {
+                "line": 252,
+                "column": 14
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 252,
+            "column": 1
+          },
+          "end": {
+            "line": 251,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": ".nax-theme {\n  --nax-toast-bg: rgba(0, 0, 0, 0.85);\n  --nax-toast-color: #ffffff;\n  --nax-toast-bg-success: #18a058;\n  --nax-toast-bg-error: #d03050;\n  --nax-toast-bg-warning: #f0a020;\n  --nax-toast-bg-info: #2080f0;\n}",
+        "attrs": {
+          "lang": "css"
+        },
+        "source": {
+          "start": {
+            "line": 254,
+            "column": 1
+          },
+          "end": {
+            "line": 262,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": ".nax-theme {"
+          },
+          {
+            "t": "\n  --nax-toast-bg",
+            "c": "kw"
+          },
+          {
+            "t": ": rgba("
+          },
+          {
+            "t": "0",
+            "c": "num"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "0",
+            "c": "num"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "0",
+            "c": "num"
+          },
+          {
+            "t": ", "
+          },
+          {
+            "t": "0.85",
+            "c": "num"
+          },
+          {
+            "t": ");"
+          },
+          {
+            "t": "\n  --nax-toast-color",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "#ffffff",
+            "c": "num"
+          },
+          {
+            "t": ";"
+          },
+          {
+            "t": "\n  --nax-toast-bg-success",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "#18a058",
+            "c": "num"
+          },
+          {
+            "t": ";"
+          },
+          {
+            "t": "\n  --nax-toast-bg-error",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "#d03050",
+            "c": "num"
+          },
+          {
+            "t": ";"
+          },
+          {
+            "t": "\n  --nax-toast-bg-warning",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "#f0a020",
+            "c": "num"
+          },
+          {
+            "t": ";"
+          },
+          {
+            "t": "\n  --nax-toast-bg-info",
+            "c": "kw"
+          },
+          {
+            "t": ": "
+          },
+          {
+            "t": "#2080f0",
+            "c": "num"
+          },
+          {
+            "t": ";"
+          },
+          {
+            "t": "\n",
+            "c": "kw"
+          },
+          {
+            "t": "}"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认文案 / loading：半透明黑（",
+                    "source": {
+                      "start": {
+                        "line": 265,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 265,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-toast-bg",
+                    "source": {
+                      "start": {
+                        "line": 265,
+                        "column": 21
+                      },
+                      "end": {
+                        "line": 265,
+                        "column": 21
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）",
+                    "source": {
+                      "start": {
+                        "line": 265,
+                        "column": 37
+                      },
+                      "end": {
+                        "line": 265,
+                        "column": 37
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 265,
+                "column": 1
+              },
+              "end": {
+                "line": 265,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "success / error / warning / info：使用对应语义色底",
+                    "source": {
+                      "start": {
+                        "line": 266,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 266,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 266,
+                "column": 1
+              },
+              "end": {
+                "line": 266,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "单次调用优先 ",
+                    "source": {
+                      "start": {
+                        "line": 267,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 267,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "bg",
+                    "source": {
+                      "start": {
+                        "line": 267,
+                        "column": 8
+                      },
+                      "end": {
+                        "line": 267,
+                        "column": 8
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "，覆盖主题与 type 底色",
+                    "source": {
+                      "start": {
+                        "line": 267,
+                        "column": 12
+                      },
+                      "end": {
+                        "line": 267,
+                        "column": 12
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 267,
+                "column": 1
+              },
+              "end": {
+                "line": 267,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "strong",
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "鸿蒙 / App",
+                        "source": {
+                          "start": {
+                            "line": 268,
+                            "column": 3
+                          },
+                          "end": {
+                            "line": 268,
+                            "column": 3
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "value": "：背景请用实色 hex（如 ",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 13
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 13
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "#18a058",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 27
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 27
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "）。",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 36
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 36
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "rgba(...)",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 38
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 38
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "、嵌套 ",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 49
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 49
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "var()",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 53
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 53
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 在 ucss 下可能失效",
+                    "source": {
+                      "start": {
+                        "line": 268,
+                        "column": 60
+                      },
+                      "end": {
+                        "line": 268,
+                        "column": 60
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 268,
+                "column": 1
+              },
+              "end": {
+                "line": 268,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 265,
+            "column": 1
+          },
+          "end": {
+            "line": 268,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "props"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Props",
+            "source": {
+              "start": {
+                "line": 270,
+                "column": 1
+              },
+              "end": {
+                "line": 270,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 270,
+            "column": 1
+          },
+          "end": {
+            "line": 270,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 272,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 272,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 272,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 272,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 272,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 272,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 272,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 272,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认值",
+                    "source": {
+                      "start": {
+                        "line": 272,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 272,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 272,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 272,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 272,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 272,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 272,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 272,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 272,
+                "column": 1
+              },
+              "end": {
+                "line": 272,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "zIndex",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "number",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "10090",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "层级，默认 10090",
+                    "source": {
+                      "start": {
+                        "line": 274,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 274,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 274,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 274,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 274,
+                "column": 1
+              },
+              "end": {
+                "line": 274,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "customClass",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 275,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 275,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 275,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 275,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 275,
+                "column": 1
+              },
+              "end": {
+                "line": 275,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 272,
+            "column": 1
+          },
+          "end": {
+            "line": 274,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 277,
+        "column": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+<template>
+  <view class="demo-avatar">
+    <text class="dsec">基础图片</text>
+    <view class="row">
+      <nax-avatar src="/static/logo.png"></nax-avatar>
+      <nax-avatar src="/static/logo.png" bordered></nax-avatar>
+    </view>
+
+    <text class="dsec">描边色 border-color</text>
+    <view class="row">
+      <nax-avatar src="/static/logo.png" border-color="#18a058"></nax-avatar>
+      <nax-avatar src="/static/logo.png" border-color="#2080f0" size="48"></nax-avatar>
+      <nax-avatar text="NA" color="#18a058" border-color="#0c7a43" size="48"></nax-avatar>
+    </view>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="row">
+      <nax-avatar src="/static/logo.png" size="sm"></nax-avatar>
+      <nax-avatar src="/static/logo.png" size="md"></nax-avatar>
+      <nax-avatar src="/static/logo.png" size="lg"></nax-avatar>
+      <nax-avatar src="/static/logo.png" size="56"></nax-avatar>
+    </view>
+
+    <text class="dsec">形状 shape</text>
+    <view class="row">
+      <nax-avatar src="/static/logo.png" shape="circle" size="48"></nax-avatar>
+      <nax-avatar src="/static/logo.png" shape="round" size="48"></nax-avatar>
+      <nax-avatar src="/static/logo.png" shape="square" size="48"></nax-avatar>
+    </view>
+
+    <text class="dsec">文字头像 text + color</text>
+    <view class="row">
+      <nax-avatar text="A"></nax-avatar>
+      <nax-avatar text="NA" color="#18a058"></nax-avatar>
+      <nax-avatar text="UI" color="#2080f0"></nax-avatar>
+      <nax-avatar text="!" color="#d03050" size="lg"></nax-avatar>
+      <nax-avatar text="文" color="#f0a020" text-color="#333639"></nax-avatar>
+    </view>
+
+    <text class="dsec">失败回退 fallback</text>
+    <view class="row">
+      <nax-avatar src="https://invalid.invalid/a.png" fallback-src="/static/logo.png" size="48"></nax-avatar>
+      <nax-avatar src="https://invalid.invalid/a.png" text="回退" size="48"></nax-avatar>
+    </view>
+
+    <text class="dsec">与 nax-badge 组合</text>
+    <view class="row">
+      <nax-badge value="8" offset-x="3" offset-y="-3">
+        <nax-avatar src="/static/logo.png" size="48"></nax-avatar>
+      </nax-badge>
+      <nax-badge dot type="success" offset-x="3" offset-y="-3">
+        <nax-avatar text="在" color="#2080f0" size="48"></nax-avatar>
+      </nax-badge>
+      <nax-badge value="99+" type="error" offset-x="3" offset-y="-3">
+        <nax-avatar src="/static/logo.png" size="48" shape="round"></nax-avatar>
+      </nax-badge>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-avatar {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

@@ -1,0 +1,199 @@
+<template>
+	<view class="nax-cell-group" :class="rootClass">
+		<!-- 分组标题 -->
+		<view v-if="hasTitle" class="nax-cell-group__header">
+			<text class="nax-cell-group__title">{{ title }}</text>
+		</view>
+		<slot name="title"></slot>
+
+		<!-- 列表容器 -->
+		<view class="nax-cell-group__body" :class="bodyClass">
+			<slot></slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-cell-group
+	 * @description 单元格分组容器。包裹 nax-cell，统一边框/圆角/内嵌样式。对齐  CellGroup。
+	 * @property {string} title 分组标题
+	 * @property {boolean} inset 圆角卡片内嵌（左右留白）
+	 * @property {string} insetBorder inset 卡片外框：all | none | horizontal | vertical，默认 all
+	 * @property {boolean} border 是否显示子 cell 底部分割线，默认 true
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 放置 nax-cell
+	 * @slot title 自定义分组标题区域
+	 */
+	const props = defineProps({
+		title: {
+			type: String,
+			default: ''
+		},
+		inset: {
+			type: Boolean,
+			default: false
+		},
+		/**
+		 * inset 时卡片外框边框
+		 * all 四边 | none 无 | horizontal 仅上下 | vertical 仅左右
+		 */
+		insetBorder: {
+			type: String,
+			default: 'all'
+		},
+		border: {
+			type: Boolean,
+			default: true
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const hasTitle = computed((): boolean => {
+		return props.title.length > 0
+	})
+
+	function normalizeInsetBorder(value : string) : string {
+		if (value == 'none' || value == 'false' || value == '0') {
+			return 'none'
+		}
+		if (value == 'horizontal' || value == 'x' || value == 'top-bottom') {
+			return 'horizontal'
+		}
+		if (value == 'vertical' || value == 'y' || value == 'left-right') {
+			return 'vertical'
+		}
+		return 'all'
+	}
+
+	const insetBorderName = computed((): string => {
+		return normalizeInsetBorder(props.insetBorder)
+	})
+
+	const rootClass = computed((): string => {
+		let cls = ''
+		if (props.inset) {
+			cls += ' nax-cell-group--inset'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const bodyClass = computed((): string => {
+		let cls = ''
+		if (props.inset) {
+			cls += ' nax-cell-group__body--inset'
+			cls += ' nax-cell-group__body--inset-border-' + insetBorderName.value
+		}
+		// border 控制子 cell 分割线；非 inset 时保留 body 顶/底清零约定
+		if (props.border) {
+			cls += ' nax-cell-group__body--border'
+		}
+		return cls.trim()
+	})
+
+	// 向子 cell 注入上下文（字符串 key，避免跨端符号问题）
+	// 安卓 UTS：provide 用 Ref，避免 ComputedRef；inject 端勿用 null 默认（会收成 Void 导致 ClassCastException）
+	const groupBorderState = ref(props.border)
+	const groupInsetState = ref(props.inset)
+	watch((): boolean => props.border, (v : boolean) => {
+		groupBorderState.value = v
+	})
+	watch((): boolean => props.inset, (v : boolean) => {
+		groupInsetState.value = v
+	})
+	provide('naxCellInGroup', true)
+	provide('naxCellBorder', groupBorderState)
+	provide('naxCellInset', groupInsetState)
+</script>
+
+<style>
+	.nax-cell-group {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-cell-group--inset {
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-cell-group__header {
+		flex-direction: row;
+		align-items: center;
+		padding-top: 12px;
+		padding-bottom: 8px;
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	/* #ifndef VUE3-VAPOR */
+	.nax-cell-group--inset .nax-cell-group__header {
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+	/* #endif */
+
+	.nax-cell-group__title {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 20px;
+	}
+
+	.nax-cell-group__body {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		overflow: hidden;
+	}
+
+	.nax-cell-group__body--inset {
+		border-radius: var(--nax-radius-md, 8px);
+	}
+
+	/* border：非 inset 外层顶/底不画线，分隔交给子 cell */
+	.nax-cell-group__body--border {
+		border-top-width: 0;
+		border-bottom-width: 0;
+	}
+
+	/* inset 外框：写在 --border 之后，显式四边宽度避免被清零 */
+	.nax-cell-group__body--inset-border-all {
+		border-top-width: 1px;
+		border-right-width: 1px;
+		border-bottom-width: 1px;
+		border-left-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-cell-group__body--inset-border-none {
+		border-top-width: 0;
+		border-right-width: 0;
+		border-bottom-width: 0;
+		border-left-width: 0;
+	}
+
+	.nax-cell-group__body--inset-border-horizontal {
+		border-top-width: 1px;
+		border-right-width: 0;
+		border-bottom-width: 1px;
+		border-left-width: 0;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-cell-group__body--inset-border-vertical {
+		border-top-width: 0;
+		border-right-width: 1px;
+		border-bottom-width: 0;
+		border-left-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+</style>

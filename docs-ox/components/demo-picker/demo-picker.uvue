@@ -1,0 +1,33 @@
+<template>
+  <view class="demo-picker">
+    <nax-button label="打开自定义面板" @click="show = true"></nax-button>
+    <nax-picker v-model:show="show" position="bottom">
+      <view class="demo-picker__panel">
+        <text class="demo-picker__text">自定义内容</text>
+      </view>
+    </nax-picker>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+</script>
+
+<style>
+.demo-picker {
+  flex-direction: column;
+}
+
+.demo-picker__panel {
+  padding: 40px 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-picker__text {
+  font-size: 14px;
+  color: var(--nax-color-text, #333333);
+}
+</style>

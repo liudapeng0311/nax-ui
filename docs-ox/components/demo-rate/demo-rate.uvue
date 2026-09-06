@@ -1,0 +1,79 @@
+<template>
+  <view class="demo-rate">
+    <text class="dsec">基础用法</text>
+    <nax-rate v-model="basic"></nax-rate>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="col">
+      <nax-rate v-model="sizeSm" size="sm"></nax-rate>
+      <nax-rate v-model="sizeMd" size="md"></nax-rate>
+      <nax-rate v-model="sizeLg" size="lg"></nax-rate>
+      <nax-rate v-model="sizePx" size="32"></nax-rate>
+    </view>
+
+    <text class="dsec">星星数量 count</text>
+    <nax-rate v-model="countVal" :count="8"></nax-rate>
+
+    <text class="dsec">自定义颜色 / 间距</text>
+    <nax-rate v-model="colorVal" active-color="#d03050" inactive-color="#f0f0f3" :gutter="12" class="mb"></nax-rate>
+    <nax-rate v-model="infoVal" active-color="#2080f0" inactive-color="#d6e4ff"></nax-rate>
+
+    <text class="dsec">最少可选 minCount</text>
+    <nax-rate v-model="minVal" :min-count="2"></nax-rate>
+
+    <text class="dsec">半星 allowHalf</text>
+    <nax-rate v-model="halfVal" allow-half></nax-rate>
+
+    <text class="dsec">禁用 / 只读</text>
+    <nax-rate v-model="disabledVal" disabled class="mb"></nax-rate>
+    <nax-rate v-model="readonlyVal" readonly class="mb"></nax-rate>
+    <nax-rate v-model="halfReadonly" allow-half readonly></nax-rate>
+
+    <text class="dsec">禁用滑动 touchable=false</text>
+    <nax-rate v-model="noTouchVal" :touchable="false"></nax-rate>
+
+    <text class="dsec">自定义图标</text>
+    <nax-rate v-model="heartVal" active-icon="heart" inactive-icon="heart" active-color="#d03050"></nax-rate>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const basic = ref(3)
+const sizeSm = ref(3)
+const sizeMd = ref(3)
+const sizeLg = ref(3)
+const sizePx = ref(3)
+const countVal = ref(4)
+const colorVal = ref(3)
+const infoVal = ref(2)
+const minVal = ref(2)
+const halfVal = ref(3)
+const disabledVal = ref(3)
+const readonlyVal = ref(4)
+const halfReadonly = ref(3)
+const noTouchVal = ref(2)
+const heartVal = ref(4)
+</script>
+
+<style>
+.demo-rate {
+  flex-direction: column;
+}
+
+.col {
+  flex-direction: column;
+}
+
+.mb {
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

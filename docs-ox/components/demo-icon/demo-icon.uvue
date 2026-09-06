@@ -1,0 +1,99 @@
+<template>
+  <view class="demo-icon">
+    <text class="dsec">全部图标（{{ allIcons.length }} 个）</text>
+    <view class="icon-grid">
+      <view v-for="(n, i) in allIcons" :key="i" class="icon-cell">
+        <nax-icon :name="n" size="22"></nax-icon>
+        <text class="icon-name">{{ n }}</text>
+      </view>
+    </view>
+
+    <text class="dsec">尺寸 size</text>
+    <view class="row">
+      <nax-icon name="search" size="sm"></nax-icon>
+      <nax-icon name="search" size="md"></nax-icon>
+      <nax-icon name="search" size="lg"></nax-icon>
+      <nax-icon name="search" size="28"></nax-icon>
+    </view>
+
+    <text class="dsec">颜色 color</text>
+    <view class="row">
+      <nax-icon name="heart" color="#d03050"></nax-icon>
+      <nax-icon name="star" color="#f0a020"></nax-icon>
+      <nax-icon name="success" color="#18a058"></nax-icon>
+      <nax-icon name="info" color="#2080f0"></nax-icon>
+      <nax-icon name="warning" color="#8a2be2"></nax-icon>
+    </view>
+
+    <text class="dsec">状态</text>
+    <view class="row">
+      <nax-icon name="settings"></nax-icon>
+      <nax-icon name="settings" disabled></nax-icon>
+    </view>
+
+    <text class="dsec">配合 nax-button</text>
+    <view class="row">
+      <nax-button type="primary" label="搜索">
+        <template #icon>
+          <nax-icon name="search" size="sm" color="#ffffff"></nax-icon>
+        </template>
+      </nax-button>
+      <nax-button type="error" variant="outline" label="删除">
+        <template #icon>
+          <nax-icon name="delete" size="sm" color="#d03050"></nax-icon>
+        </template>
+      </nax-button>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+const allIcons = [
+  'close', 'check', 'plus', 'minus', 'arrow-left', 'arrow-right', 'arrow-up', 'arrow-down',
+  'chevron-left', 'chevron-right', 'chevron-up', 'chevron-down', 'search', 'loading', 'info',
+  'warning', 'success', 'error', 'user', 'home', 'more', 'edit', 'delete', 'star', 'heart',
+  'settings', 'eye', 'eye-off', 'copy', 'share', 'image', 'image-off', 'loader', 'loader-4',
+  'square', 'circle', 'square-check', 'file-off', 'notes-off', 'database-off', 'message-off',
+  'category', 'category-filled', 'map-pin', 'map-pin-filled', 'player-play', 'player-pause',
+  'player-play-filled', 'player-pause-filled', 'arrows-maximize', 'arrows-minimize'
+]
+</script>
+
+<style>
+.demo-icon {
+  flex-direction: column;
+}
+
+.icon-grid {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.icon-cell {
+  width: 25%;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.icon-name {
+  font-size: 10px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 6px;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

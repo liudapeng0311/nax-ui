@@ -1,0 +1,427 @@
+<template>
+	<view
+		class="nax-cell"
+		:class="rootClass"
+		:hover-class="hoverClassName"
+		hover-stay-time="70"
+		@click="onClick"
+	>
+		<view class="nax-cell__main" :class="mainClass">
+			<!-- 左侧图标 -->
+			<view v-if="hasIcon" class="nax-cell__icon">
+				<nax-icon :name="icon" :size="iconSizePx" :color="iconColor"></nax-icon>
+			</view>
+			<slot name="icon"></slot>
+
+			<!-- 标题区 -->
+			<view class="nax-cell__content">
+				<view class="nax-cell__title-row">
+					<text v-if="required" class="nax-cell__required">*</text>
+					<text v-if="hasTitle" class="nax-cell__title" :max-lines="2" :class="titleClass" :style="titleStyle">{{ title }}</text>
+					<slot name="title"></slot>
+				</view>
+				<text v-if="hasLabel" class="nax-cell__label" :max-lines="3" :class="labelClass" :style="labelStyle">{{ label }}</text>
+				<slot name="label"></slot>
+				<slot></slot>
+			</view>
+
+			<!-- 右侧值 + 箭头 -->
+			<view class="nax-cell__right">
+				<text v-if="hasValue" class="nax-cell__value" :max-lines="2" :class="valueClass" :style="valueStyle">{{ value }}</text>
+				<slot name="value"></slot>
+				<slot name="right"></slot>
+				<view v-if="showArrow" class="nax-cell__arrow">
+					<nax-icon name="chevron-right" :size="arrowSizePx" color="#e5e5ea"></nax-icon>
+				</view>
+				<slot name="right-icon"></slot>
+			</view>
+		</view>
+
+		<!-- 底部分割线 -->
+		<view v-if="showBorder" class="nax-cell__divider nax-cell__divider--full"></view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-cell
+	 * @description 单元格。设置项 / 列表行基础。对齐  CellItem + 清单 API。
+	 * @property {string} title 左侧标题
+	 * @property {string} label 标题下方说明
+	 * @property {string|number} value 右侧内容
+	 * @property {string} icon 左侧 nax-icon 名
+	 * @property {boolean} isLink 展示右侧箭头（兼容 arrow）
+	 * @property {boolean} arrow 同 isLink（ 兼容）
+	 * @property {boolean} border 底部分割线，默认 true；组内受 cell-group.border 控制
+	 * @property {boolean} disabled 禁用
+	 * @property {boolean} required 标题旁必填星号
+	 * @property {boolean} center 垂直居中（多行时）
+	 * @property {boolean} clickable 强制按压态（无箭头时也可点）
+	 * @property {string} size sm | md | lg
+	 * @property {string} iconColor 左侧图标色
+	 * @property {string} titleColor 标题色
+	 * @property {string} valueColor 右侧值颜色
+	 * @property {string} customClass 根节点扩展 class
+	 * @event click 点击（disabled 不触发）
+	 * @slot icon 自定义左侧图标
+	 * @slot title 自定义标题
+	 * @slot label 自定义说明
+	 * @slot value 自定义右侧值
+	 * @slot right 右侧扩展（开关等）
+	 * @slot right-icon 右侧图标区（在箭头后）
+	 * @slot default 标题区额外内容
+	 */
+	const props = defineProps({
+		title: { type: String, default: '' },
+		label: { type: String, default: '' },
+		value: { type: [String, Number], default: '' as any },
+		icon: { type: String, default: '' },
+		isLink: { type: Boolean, default: false },
+		arrow: { type: Boolean, default: false },
+		border: { type: Boolean, default: true },
+		disabled: { type: Boolean, default: false },
+		required: { type: Boolean, default: false },
+		center: { type: Boolean, default: false },
+		clickable: { type: Boolean, default: false },
+		size: { type: String, default: 'md' },
+		iconColor: { type: String, default: '' },
+		titleColor: { type: String, default: '' },
+		valueColor: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['click'])
+
+	const inGroup = inject('naxCellInGroup', false) as boolean
+	// 默认值必须是同类型 Ref，不能用 null（安卓会收成 Void，再注入 ComputedRef/Ref 即 ClassCastException）
+	const groupBorderRef = inject('naxCellBorder', ref(true)) as Ref<boolean>
+	const groupInsetRef = inject('naxCellInset', ref(false)) as Ref<boolean>
+
+	function readRefBool(r : Ref<boolean>, fallback : boolean) : boolean {
+		if (r == null) {
+			return fallback
+		}
+		return r.value
+	}
+
+	function normalizeSize(value : string) : string {
+		if (value == 'sm' || value == 'small' || value == 'mini') {
+			return 'sm'
+		}
+		if (value == 'lg' || value == 'large') {
+			return 'lg'
+		}
+		return 'md'
+	}
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const hasTitle = computed((): boolean => {
+		return props.title.length > 0
+	})
+
+	const hasLabel = computed((): boolean => {
+		return props.label.length > 0
+	})
+
+	const hasValue = computed((): boolean => {
+		// number 类型直接视为有值（含 0）
+		if (typeof props.value == 'number') {
+			return true
+		}
+		return (props.value as string).length > 0
+	})
+
+	const hasIcon = computed((): boolean => {
+		return props.icon.length > 0
+	})
+
+	const showArrow = computed((): boolean => {
+		return props.isLink || props.arrow
+	})
+
+	const isInteractive = computed((): boolean => {
+		if (props.disabled) {
+			return false
+		}
+		return props.isLink || props.arrow || props.clickable
+	})
+
+	const showBorder = computed((): boolean => {
+		if (!props.border) {
+			return false
+		}
+		if (inGroup) {
+			return readRefBool(groupBorderRef, true)
+		}
+		return true
+	})
+
+	const groupInset = computed((): boolean => {
+		if (!inGroup) {
+			return false
+		}
+		return readRefBool(groupInsetRef, false)
+	})
+
+	const iconSizePx = computed((): string => {
+		if (sizeName.value == 'sm') {
+			return '18'
+		}
+		if (sizeName.value == 'lg') {
+			return '22'
+		}
+		return '20'
+	})
+
+	const arrowSizePx = computed((): string => {
+		if (sizeName.value == 'sm') {
+			return '16'
+		}
+		if (sizeName.value == 'lg') {
+			return '20'
+		}
+		return '18'
+	})
+
+	const rootClass = computed((): string => {
+		let cls = 'nax-cell--' + sizeName.value
+		if (props.disabled) {
+			cls += ' nax-cell--disabled'
+		}
+		if (isInteractive.value) {
+			cls += ' nax-cell--clickable'
+		}
+		if (groupInset.value) {
+			cls += ' nax-cell--inset'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const mainClass = computed((): string => {
+		let cls = 'nax-cell__main--' + sizeName.value
+		if (props.center) {
+			cls += ' nax-cell__main--center'
+		}
+		return cls
+	})
+
+	const titleClass = computed((): string => {
+		return 'nax-cell__title--' + sizeName.value
+	})
+
+	const labelClass = computed((): string => {
+		return 'nax-cell__label--' + sizeName.value
+	})
+
+	const valueClass = computed((): string => {
+		return 'nax-cell__value--' + sizeName.value
+	})
+
+	const hoverClassName = computed((): string => {
+		if (!isInteractive.value) {
+			return 'none'
+		}
+		return 'nax-cell--hover'
+	})
+
+	const titleStyle = computed((): string => {
+		if (props.titleColor.length > 0) {
+			return 'color:' + props.titleColor + ';'
+		}
+		return ''
+	})
+
+	const labelStyle = computed((): string => {
+		return ''
+	})
+
+	const valueStyle = computed((): string => {
+		if (props.valueColor.length > 0) {
+			return 'color:' + props.valueColor + ';'
+		}
+		return ''
+	})
+
+	function onClick() {
+		if (props.disabled) {
+			return
+		}
+		emit('click')
+	}
+</script>
+
+<style>
+	.nax-cell {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-cell--disabled {
+		opacity: 0.5;
+	}
+
+	.nax-cell--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-cell__main {
+		flex-direction: row;
+		align-items: flex-start;
+		width: 100%;
+		padding-left: 16px;
+		padding-right: 16px;
+		/* box 模型：主内容区 */
+	}
+
+	.nax-cell__main--center {
+		align-items: center;
+	}
+
+	.nax-cell__main--sm {
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+
+	.nax-cell__main--md {
+		padding-top: 14px;
+		padding-bottom: 14px;
+	}
+
+	.nax-cell__main--lg {
+		padding-top: 16px;
+		padding-bottom: 16px;
+	}
+
+	.nax-cell__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 10px;
+		/* 与单行标题视觉对齐 */
+		margin-top: 1px;
+	}
+
+	.nax-cell__content {
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+		justify-content: center;
+	}
+
+	.nax-cell__title-row {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.nax-cell__title {
+		color: var(--nax-color-text, #333639);
+		font-weight: 400;
+	}
+
+	.nax-cell__title--sm {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-cell__title--md {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+
+	.nax-cell__title--lg {
+		font-size: var(--nax-font-size-lg, 18px);
+		line-height: 24px;
+	}
+
+	.nax-cell__required {
+		color: var(--nax-color-error, #d03050);
+		font-size: var(--nax-font-size-md, 16px);
+		margin-right: 2px;
+		line-height: 22px;
+	}
+
+	.nax-cell__label {
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-top: 4px;
+	}
+
+	.nax-cell__label--sm {
+		font-size: var(--nax-font-size-xs, 12px);
+		line-height: 16px;
+	}
+
+	.nax-cell__label--md {
+		font-size: var(--nax-font-size-xs, 12px);
+		line-height: 17px;
+	}
+
+	.nax-cell__label--lg {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-cell__right {
+		flex-direction: row;
+		align-items: center;
+		flex-shrink: 0;
+		margin-left: 12px;
+		/* App ucss: max-width 仅支持 number|pixel，不支持 % */
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		max-width: 200px;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		max-width: 55%;
+		/* #endif */
+	}
+
+	.nax-cell__value {
+		color: var(--nax-color-text-secondary, #767c82);
+		text-align: right;
+		/* 尽量占满右侧可用宽度再交给箭头 */
+		flex-shrink: 1;
+	}
+
+	.nax-cell__value--sm {
+		font-size: var(--nax-font-size-sm, 14px);
+		line-height: 20px;
+	}
+
+	.nax-cell__value--md {
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+	}
+
+	.nax-cell__value--lg {
+		font-size: var(--nax-font-size-lg, 18px);
+		line-height: 24px;
+	}
+
+	.nax-cell__arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: 4px;
+	}
+
+	.nax-cell__divider {
+		height: 1px;
+		background-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	/* 通栏分割线：有图标时也从左侧边缘画过，不在图标下留白 */
+	.nax-cell__divider--full {
+		margin-left: 0;
+		width: 100%;
+	}
+
+</style>

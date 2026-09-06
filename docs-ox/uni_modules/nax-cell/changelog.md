@@ -1,0 +1,20 @@
+## 0.2.0（2026-09-04）
+- `value` prop 支持 number 类型（`[String, Number]`）：数字值直接渲染（含 `0`）；`hasValue` 数字直接视为有值（仅空串为无值）
+## 0.1.5（2026-08-18）
+- 蒸汽模式（`VUE3-VAPOR`）兼容修复：`nax-cell-group` inset 模式组头内缩的 1 条下级选择器规则用 CSS 条件编译隔离，消除 "Invalid selector" 警告；VDOM/Web/小程序行为不变
+- 蒸汽模式兼容：`lines` CSS 声明改回 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
+## 0.1.4（2026-08-18）
+- 蒸汽模式兼容：移除 `<text>` 上不支持的 `lines` 属性，改为 CSS `lines` 声明（各文本 class 补齐 `lines: N;`），消除 App 蒸汽模式 warning
+## 0.1.3（2026-08-14）
+- readme 统一主题小节：通过 CSS 变量覆盖表格（button 风格），补充组件可覆盖的主题 Token
+## 0.1.2（2026-08-07）
+- 兼容性声明：补充 iOS（`APP-IOS`）端支持，package.json 平台标记同步为 `√`
+## 0.1.1（2026-07-31）
+- 移除第三方组件库参考表述，完善独立组件文档。
+## 0.1.0（2026-07-21）
+
+- 初版 `nax-cell` / `nax-cell-group`
+- 支持 CellItem + CellGroup 主能力
+- `title` / `label` / `value` / `icon` / `is-link` / `border` / `disabled` / `required` / `size`
+- 分组：`title` / `inset` / `border`（provide/inject）
+- 插槽：`icon` / `title` / `label` / `value` / `right` / `right-icon`

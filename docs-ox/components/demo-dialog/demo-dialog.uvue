@@ -1,0 +1,32 @@
+<template>
+  <view class="demo-dialog">
+    <nax-button label="打开对话框" @click="show = true"></nax-button>
+    <nax-dialog
+      v-model:show="show"
+      title="提示"
+      content="确定执行该操作吗？"
+      @confirm="onConfirm"
+      @cancel="onCancel"
+    ></nax-dialog>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const show = ref(false)
+
+function onConfirm() {
+  uni.showToast({ title: '已确认', icon: 'none' })
+}
+
+function onCancel() {
+  uni.showToast({ title: '已取消', icon: 'none' })
+}
+</script>
+
+<style>
+.demo-dialog {
+  flex-direction: column;
+}
+</style>

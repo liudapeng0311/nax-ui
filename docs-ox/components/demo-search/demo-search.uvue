@@ -1,0 +1,69 @@
+<template>
+  <view class="demo-search">
+    <text class="dsec">基础</text>
+    <nax-search v-model="basic"></nax-search>
+
+    <text class="dsec">形状 shape</text>
+    <nax-search v-model="shapeRound" shape="round" placeholder="round 胶囊" class="mb"></nax-search>
+    <nax-search v-model="shapeSquare" shape="square" placeholder="square 方角" class="mb"></nax-search>
+
+    <text class="dsec">尺寸 size</text>
+    <nax-search v-model="sizeSm" size="sm" placeholder="sm" class="mb"></nax-search>
+    <nax-search v-model="sizeMd" size="md" placeholder="md" class="mb"></nax-search>
+    <nax-search v-model="sizeLg" size="lg" placeholder="lg" class="mb"></nax-search>
+
+    <text class="dsec">无右侧按钮</text>
+    <nax-search v-model="noAction" :show-action="false" placeholder="show-action=false" class="mb"></nax-search>
+
+    <text class="dsec">animation（聚焦才显示操作）</text>
+    <nax-search v-model="anim" animation action-text="取消" placeholder="聚焦后出现取消" class="mb"></nax-search>
+
+    <text class="dsec">label + 边框色</text>
+    <nax-search v-model="withLabel" label="地址" border-color="#18a058" placeholder="请输入地址" class="mb"></nax-search>
+
+    <text class="dsec">自定义背景 / 图标色</text>
+    <nax-search v-model="customBg" background="#e8f5ee" search-icon-color="#18a058" action-color="#18a058" placeholder="浅绿背景" class="mb"></nax-search>
+
+    <text class="dsec">禁用（点击跳转场景）</text>
+    <nax-search v-model="disabledVal" disabled placeholder="点击整条触发 click" class="mb"></nax-search>
+
+    <text class="dsec">清除 clearable</text>
+    <nax-search v-model="clearable" :show-action="false"></nax-search>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const basic = ref('')
+const shapeRound = ref('')
+const shapeSquare = ref('')
+const sizeSm = ref('')
+const sizeMd = ref('')
+const sizeLg = ref('')
+const noAction = ref('')
+const anim = ref('')
+const withLabel = ref('')
+const alignCenter = ref('')
+const alignRight = ref('')
+const customBg = ref('')
+const disabledVal = ref('')
+const clearable = ref('')
+</script>
+
+<style>
+.demo-search {
+  flex-direction: column;
+}
+
+.mb {
+  margin-bottom: 12px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

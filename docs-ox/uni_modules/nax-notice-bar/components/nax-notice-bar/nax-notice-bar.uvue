@@ -1,0 +1,911 @@
+<template>
+	<view
+		v-if="visible"
+		class="nax-notice-bar"
+		:class="rootClass"
+	>
+		<!-- 图标区域 -->
+		<view v-if="showIcon" class="nax-notice-bar__icon">
+			<slot name="icon">
+				<nax-icon :name="resolvedIcon" :size="iconSizePx" :color="iconColor"></nax-icon>
+			</slot>
+		</view>
+
+		<!-- 水平无缝滚动区域 -->
+		<view v-if="useSeamless" class="nax-notice-bar__body">
+			<view class="nax-notice-bar__viewport">
+				<!-- 离屏测量文本宽度，供无缝滚动计算使用。 -->
+				<view class="nax-notice-bar__measure">
+					<text :id="measureId" class="nax-notice-bar__measure-text">{{ seamlessText }}</text>
+				</view>
+
+				<!-- #ifdef APP-ANDROID || APP-IOS || APP-HARMONY -->
+				<!-- App: dual segs; UniElement.animate + rAF fallback -->
+				<view :id="trackId" class="nax-notice-bar__track" :style="appTrackStyle">
+					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
+						<text :id="segMeasureId" class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
+					</view>
+					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
+					</view>
+				</view>
+				<!-- #endif -->
+
+				<!-- #ifndef APP-ANDROID || APP-IOS || APP-HARMONY -->
+				<!-- Web 与小程序端使用 CSS 动画向左移动 50%。 -->
+				<view
+					class="nax-notice-bar__track nax-notice-bar__track--css"
+					:style="cssTrackStyle"
+				>
+					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
+					</view>
+					<view class="nax-notice-bar__seg" :style="segStyle" @click="onClickSeamless">
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ seamlessText }}</text>
+					</view>
+				</view>
+				<!-- #endif -->
+			</view>
+		</view>
+
+		<!-- 步进滚动区域 -->
+		<view v-else class="nax-notice-bar__body">
+			<swiper
+				class="nax-notice-bar__swiper"
+				:vertical="isVertical"
+				:autoplay="swiperAutoplay"
+				:interval="durationMs"
+				:circular="true"
+				:disable-touch="disableTouch"
+				:duration="400"
+				@change="onSwiperChange"
+			>
+				<swiper-item
+					v-for="(item, index) in textList"
+					:key="index"
+					class="nax-notice-bar__swiper-item"
+				>
+					<view class="nax-notice-bar__step" @click="onClickItem(index)">
+						<text class="nax-notice-bar__text" :max-lines="1" :class="textClass">{{ item }}</text>
+					</view>
+				</swiper-item>
+			</swiper>
+		</view>
+
+		<!-- 更多操作 -->
+		<view
+			v-if="showMore"
+			class="nax-notice-bar__action"
+			@click.stop="onGetMore"
+		>
+			<nax-icon name="arrow-right" :size="actionSizePx" :color="iconColor"></nax-icon>
+		</view>
+
+		<!-- 关闭按钮 -->
+		<view
+			v-if="closable"
+			class="nax-notice-bar__action"
+			@click.stop="onClose"
+		>
+			<nax-icon name="close" :size="actionSizePx" :color="iconColor"></nax-icon>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-notice-bar
+	 * @description 滚动通告栏，支持 NoticeBar 的水平衔接、水平步进、垂直步进、主题、图标和关闭操作。
+	 */
+	const props = defineProps({
+		list: {
+			type: Array,
+			default: () => [] as string[]
+		},
+		type: { type: String, default: 'warning' },
+		mode: { type: String, default: 'horizontal' },
+		scroll: { type: String, default: '' },
+		isCircular: { type: Boolean, default: true },
+		showIcon: { type: Boolean, default: true },
+		icon: { type: String, default: '' },
+		showMore: { type: Boolean, default: false },
+		closable: { type: Boolean, default: false },
+		autoplay: { type: Boolean, default: true },
+		paused: { type: Boolean, default: false },
+		playState: { type: String, default: 'play' },
+		duration: { type: Number, default: 2000 },
+		speed: { type: Number, default: 50 },
+		separator: { type: String, default: '    ' },
+		disableTouch: { type: Boolean, default: true },
+		show: { type: Boolean, default: true },
+		noListHidden: { type: Boolean, default: true },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['click', 'close', 'getMore', 'end', 'update:show'])
+
+	const closed = ref(false)
+	const instance = getCurrentInstance()
+	const measureId = 'nax-notice-m-' + Math.floor(Math.random() * 10000000).toString()
+	const segMeasureId = 'nax-notice-s-' + Math.floor(Math.random() * 10000000).toString()
+	const trackId = 'nax-notice-t-' + Math.floor(Math.random() * 10000000).toString()
+	const measuredLoopWidth = ref(0)
+
+	function normalizeType(value : string) : string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (value == 'none') {
+			return 'none'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		if (value == 'default') {
+			return 'info'
+		}
+		return 'warning'
+	}
+
+	function typeMainColor(name : string) : string {
+		if (name == 'primary' || name == 'success') {
+			return '#18a058'
+		}
+		if (name == 'info') {
+			return '#2080f0'
+		}
+		if (name == 'warning') {
+			return '#f0a020'
+		}
+		if (name == 'error') {
+			return '#d03050'
+		}
+		return '#767c82'
+	}
+
+	function typeDefaultIcon(name : string) : string {
+		if (name == 'success') {
+			return 'success'
+		}
+		if (name == 'warning') {
+			return 'warning'
+		}
+		if (name == 'error') {
+			return 'error'
+		}
+		return 'info'
+	}
+
+	function isArrayValue(val : any | null) : boolean {
+		if (val == null) {
+			return false
+		}
+		if (typeof val == 'string' || typeof val == 'number' || typeof val == 'boolean') {
+			return false
+		}
+		const maybe = val as any[]
+		const len = maybe.length
+		if (typeof len != 'number') {
+			return false
+		}
+		return true
+	}
+
+	function asAnyArray(val : any | null) : any[] {
+		if (val == null) {
+			return [] as any[]
+		}
+		if (!isArrayValue(val)) {
+			return [] as any[]
+		}
+		return val as any[]
+	}
+
+	function itemToText(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		const t = typeof item
+		if (t == 'string') {
+			return item as string
+		}
+		if (t == 'number' || t == 'boolean') {
+			return '' + item
+		}
+		try {
+			const obj = item as UTSJSONObject
+			const text = obj['text']
+			if (text != null && ('' + text).length > 0) {
+				return '' + text
+			}
+			const title = obj['title']
+			if (title != null && ('' + title).length > 0) {
+				return '' + title
+			}
+			const label = obj['label']
+			if (label != null && ('' + label).length > 0) {
+				return '' + label
+			}
+		} catch (e) {
+			// ignore
+		}
+		return '' + item
+	}
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const textList = computed((): string[] => {
+		const raw = asAnyArray(props.list as any)
+		const out = [] as string[]
+		for (let i = 0; i < raw.length; i++) {
+			const line = itemToText(raw[i])
+			if (line.length > 0) {
+				out.push(line)
+			}
+		}
+		return out
+	})
+
+	const listCount = computed((): number => {
+		return textList.value.length
+	})
+
+	const visible = computed((): boolean => {
+		if (!props.show || closed.value) {
+			return false
+		}
+		if (props.noListHidden && listCount.value == 0) {
+			return false
+		}
+		return true
+	})
+
+	const isVertical = computed((): boolean => {
+		return props.mode == 'vertical'
+	})
+
+	const useSeamless = computed((): boolean => {
+		if (isVertical.value) {
+			return false
+		}
+		if (props.scroll == 'step') {
+			return false
+		}
+		if (props.scroll == 'seamless') {
+			return true
+		}
+		return props.isCircular
+	})
+
+	const isPlaying = computed((): boolean => {
+		if (!props.autoplay) {
+			return false
+		}
+		if (props.paused) {
+			return false
+		}
+		if (props.playState == 'paused') {
+			return false
+		}
+		return true
+	})
+
+	const durationMs = computed((): number => {
+		const d = props.duration
+		if (d <= 0) {
+			return 2000
+		}
+		return d
+	})
+
+	const speedPx = computed((): number => {
+		const s = props.speed
+		if (s <= 0) {
+			return 50
+		}
+		return s
+	})
+
+	const seamlessText = computed((): string => {
+		const list = textList.value
+		if (list.length == 0) {
+			return ''
+		}
+		return list.join(props.separator) + props.separator
+	})
+
+	function estimateLoopWidth(text : string) : number {
+		// sm 字号约 14px；略放大避免鸿蒙测宽偏短裁切
+		const w = text.length * 16
+		if (w < 80) {
+			return 80
+		}
+		return w
+	}
+
+	const loopWidth = computed((): number => {
+		if (measuredLoopWidth.value > 0) {
+			return measuredLoopWidth.value
+		}
+		return estimateLoopWidth(seamlessText.value)
+	})
+
+	const animDurationSec = computed((): number => {
+		const sec = loopWidth.value / speedPx.value
+		if (sec < 2) {
+			return 2
+		}
+		return Math.round(sec * 10) / 10
+	})
+
+	const segStyle = computed((): string => {
+		// 仅在测宽成功后固定分段宽度，避免估算宽度截断公告内容。
+		if (measuredLoopWidth.value > 0) {
+			return 'width:' + measuredLoopWidth.value.toString() + 'px;'
+		}
+		return ''
+	})
+
+	const cssTrackStyle = computed((): string => {
+		if (measuredLoopWidth.value <= 0 || !isPlaying.value) {
+			return 'animation-play-state:paused;animation-duration:' + animDurationSec.value.toString() + 's;'
+		}
+		let s = 'animation-duration:' + animDurationSec.value.toString() + 's;'
+		s += 'animation-play-state:running;'
+		return s
+	})
+
+	const swiperAutoplay = computed((): boolean => {
+		return isPlaying.value && listCount.value > 0
+	})
+
+	const resolvedIcon = computed((): string => {
+		if (props.icon.length > 0) {
+			return props.icon
+		}
+		return typeDefaultIcon(typeName.value)
+	})
+
+	const iconSizePx = computed((): string => {
+		return '16'
+	})
+
+	const actionSizePx = computed((): string => {
+		return '14'
+	})
+
+	const iconColor = computed((): string => {
+		return typeMainColor(typeName.value)
+	})
+
+	const rootClass = computed((): string => {
+		const list = [] as string[]
+		list.push('nax-notice-bar--' + typeName.value)
+		if (isVertical.value) {
+			list.push('nax-notice-bar--vertical')
+		} else {
+			list.push('nax-notice-bar--horizontal')
+		}
+		if (useSeamless.value) {
+			list.push('nax-notice-bar--seamless')
+		} else {
+			list.push('nax-notice-bar--step')
+		}
+		if (props.customClass.length > 0) {
+			list.push(props.customClass)
+		}
+		return list.join(' ')
+	})
+
+	const textClass = computed((): string => {
+		return 'nax-notice-bar__text--' + typeName.value
+	})
+
+	function applyMeasuredWidth(w : number) {
+		if (w <= 1) {
+			return
+		}
+		// 鸿蒙等端：混排英文缺字时 offsetWidth 可能只量到前半段，固定 width + overflow 会裁掉后文
+		const measured = Math.round(w)
+		const estimated = estimateLoopWidth(seamlessText.value)
+		let ww = measured
+		if (estimated > ww) {
+			ww = estimated
+		}
+		if (ww <= 1) {
+			return
+		}
+		const prev = measuredLoopWidth.value
+		if (prev <= 0 || Math.abs(prev - ww) > 2) {
+			measuredLoopWidth.value = ww
+		}
+	}
+
+	function measureLoopWidth() {
+		if (!useSeamless.value || listCount.value == 0 || !visible.value) {
+			return
+		}
+		setTimeout(() => {
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			// App 端优先直接读取元素宽度，避免查询延迟影响 translateX 动画。
+			const segEl = uni.getElementById(segMeasureId)
+			if (segEl != null && segEl.offsetWidth > 1) {
+				applyMeasuredWidth(segEl.offsetWidth)
+				return
+			}
+			// #endif
+
+			const proxy = instance?.proxy
+			const query = uni.createSelectorQuery()
+			if (proxy != null) {
+				query.in(proxy)
+			}
+			// 其他端通过选择器查询测量离屏文本宽度。
+			query
+				.select('#' + measureId)
+				.boundingClientRect((rect : any | null) => {
+					if (rect != null) {
+						const info = rect as NodeInfo
+						if (info.width != null) {
+							const w = info.width as number
+							if (w > 1) {
+								applyMeasuredWidth(w)
+								return
+							}
+						}
+					}
+				})
+			// #ifdef APP-HARMONY
+			// 鸿蒙端额外测量可见分段，作为离屏测量的回退。
+			query
+				.select('#' + segMeasureId)
+				.boundingClientRect((rect2 : any | null) => {
+					if (rect2 != null) {
+						const info2 = rect2 as NodeInfo
+						if (info2.width != null) {
+							const w2 = info2.width as number
+							if (w2 > 1) {
+								applyMeasuredWidth(w2)
+							}
+						}
+					}
+				})
+			// #endif
+			query.exec()
+		}, 50)
+	}
+
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	// App 端通过 rAF + setProperty 驱动无缝滚动。
+	// - DOM 直写跳过 Vue diff，16ms/帧不掉帧（官方推荐的高性能手动动画方式）。
+	// - 暂停/恢复通过 cancelAnimationFrame / requestAnimationFrame 控制，全端语义一致；
+	//   不依赖 UniElement.animate 的无限循环（iOS 上无法可靠停止，暂停会失效）。
+	let marqueeToken = 0
+	let marqueeRafId = 0
+	let marqueeLastTs = 0
+	let marqueeOffsetPx = 0.0
+	let cachedTrackEl : UniElement | null = null
+	let hostAlive = true
+
+	const appTrackStyle = computed((): string => {
+		// transform 由 setProperty 直接更新。
+		return ''
+	})
+
+	function getTrackElement() : UniElement | null {
+		if (!hostAlive) {
+			return null
+		}
+		if (cachedTrackEl != null) {
+			return cachedTrackEl
+		}
+		const el = uni.getElementById(trackId)
+		if (el != null) {
+			cachedTrackEl = el
+		}
+		return el
+	}
+
+	function applyTrackTransform(offset : number) : boolean {
+		if (!hostAlive) {
+			return false
+		}
+		const el = getTrackElement()
+		if (el == null) {
+			cachedTrackEl = null
+			return false
+		}
+		el.style.setProperty('transform', 'translateX(' + offset.toString() + 'px)')
+		return true
+	}
+
+	function clearMarqueeRaf() {
+		if (marqueeRafId > 0) {
+			cancelAnimationFrame(marqueeRafId)
+			marqueeRafId = 0
+		}
+	}
+
+	function stopMarquee() {
+		marqueeToken = marqueeToken + 1
+		clearMarqueeRaf()
+		marqueeLastTs = 0
+		marqueeOffsetPx = 0
+		applyTrackTransform(0)
+		cachedTrackEl = null
+	}
+
+	function marqueeFrame(timestamp : number, token : number) {
+		if (!hostAlive) {
+			return
+		}
+		if (token != marqueeToken) {
+			return
+		}
+		if (!useSeamless.value || !isPlaying.value || !visible.value) {
+			stopMarquee()
+			return
+		}
+
+		const half = measuredLoopWidth.value
+		if (half <= 1) {
+			// 未测得宽度时保持起点展示，并继续发起测量。
+			marqueeOffsetPx = 0
+			applyTrackTransform(0)
+			measureLoopWidth()
+			marqueeLastTs = 0
+			marqueeRafId = requestAnimationFrame((ts : number) => {
+				marqueeFrame(ts, token)
+			})
+			return
+		}
+
+		if (marqueeLastTs <= 0) {
+			marqueeLastTs = timestamp
+		}
+		let dt = timestamp - marqueeLastTs
+		marqueeLastTs = timestamp
+		if (dt > 48) {
+			dt = 48
+		}
+		if (dt < 0) {
+			dt = 0
+		}
+		let next = marqueeOffsetPx - speedPx.value * dt / 1000.0
+		while (next <= (0 - half)) {
+			next = next + half
+		}
+		if (next > -0.5 && next < 0.5) {
+			next = 0
+		}
+		marqueeOffsetPx = next
+		if (!applyTrackTransform(next)) {
+			marqueeLastTs = 0
+		}
+
+		marqueeRafId = requestAnimationFrame((ts : number) => {
+			marqueeFrame(ts, token)
+		})
+	}
+
+	function startMarquee() {
+		stopMarquee()
+		if (!useSeamless.value || !isPlaying.value || listCount.value == 0 || !visible.value) {
+			return
+		}
+		if (measuredLoopWidth.value <= 1) {
+			measureLoopWidth()
+		}
+		const token = marqueeToken
+		// 先从起点显示，避免首次渲染出现空白。
+		applyTrackTransform(0)
+		marqueeRafId = requestAnimationFrame((ts : number) => {
+			marqueeFrame(ts, token)
+		})
+	}
+
+	function syncMarquee() {
+		if (useSeamless.value && isPlaying.value && visible.value) {
+			startMarquee()
+		} else {
+			stopMarquee()
+		}
+	}
+
+	watch((): boolean => {
+		return useSeamless.value && isPlaying.value && visible.value
+	}, (_v : boolean) => {
+		syncMarquee()
+	}, { immediate: true })
+
+	watch((): string => {
+		return seamlessText.value
+	}, (_t : string) => {
+		measuredLoopWidth.value = 0
+		measureLoopWidth()
+		syncMarquee()
+	})
+
+	watch((): number => {
+		return speedPx.value
+	}, (_s : number) => {
+		syncMarquee()
+	})
+
+	watch((): number => {
+		return measuredLoopWidth.value
+	}, (w : number) => {
+		if (w <= 1) {
+			return
+		}
+		if (!useSeamless.value || !isPlaying.value || !visible.value) {
+			return
+		}
+		startMarquee()
+	})
+
+	onUnmounted(() => {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		hostAlive = false
+		// #endif
+		stopMarquee()
+	})
+	// #endif
+
+	watch((): boolean => {
+		return props.show
+	}, (v : boolean) => {
+		if (v) {
+			closed.value = false
+		}
+	})
+
+	watch((): boolean => {
+		return useSeamless.value && visible.value && listCount.value > 0
+	}, (on : boolean) => {
+		if (on) {
+			measureLoopWidth()
+		} else {
+			measuredLoopWidth.value = 0
+		}
+	}, { immediate: true })
+
+	function onClickSeamless() {
+		if (!visible.value) {
+			return
+		}
+		emit('click', -1)
+	}
+
+	function onClickItem(index : number) {
+		if (!visible.value) {
+			return
+		}
+		emit('click', index)
+	}
+
+	function onGetMore() {
+		if (!visible.value) {
+			return
+		}
+		emit('getMore')
+	}
+
+	function onClose() {
+		if (!visible.value) {
+			return
+		}
+		closed.value = true
+		emit('update:show', false)
+		emit('close')
+	}
+
+	function onSwiperChange(e : UniSwiperChangeEvent) {
+		const detail = e.detail
+		const current = detail.current
+		const last = listCount.value - 1
+		if (last >= 0 && current == last) {
+			emit('end')
+		}
+	}
+</script>
+
+<style>
+	.nax-notice-bar {
+		flex-direction: row;
+		align-items: center;
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 12px;
+		padding-right: 12px;
+		border-radius: var(--nax-radius-md, 6px);
+		overflow: hidden;
+	}
+
+	.nax-notice-bar--primary {
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+	}
+
+	.nax-notice-bar--info {
+		background-color: var(--nax-color-info-secondary, #dbeafc);
+	}
+
+	.nax-notice-bar--success {
+		background-color: var(--nax-color-success-secondary, #daefe4);
+	}
+
+	.nax-notice-bar--warning {
+		background-color: var(--nax-color-warning-secondary, #fcefda);
+	}
+
+	.nax-notice-bar--error {
+		background-color: var(--nax-color-error-secondary, #f7dde3);
+	}
+
+	.nax-notice-bar--none {
+		background-color: transparent;
+	}
+
+	.nax-notice-bar__icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 8px;
+	}
+
+	.nax-notice-bar__action {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: 8px;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		padding-left: 2px;
+		padding-right: 2px;
+	}
+
+	.nax-notice-bar__body {
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.nax-notice-bar__viewport {
+		flex-direction: row;
+		align-items: center;
+		overflow: hidden;
+		width: 100%;
+		height: 22px;
+		position: relative;
+	}
+
+	.nax-notice-bar__measure {
+		position: absolute;
+		/* 离屏测量节点从左上角定位，避免位置影响宽度计算。 */
+		left: 0;
+		top: 0;
+		flex-direction: row;
+		opacity: 0;
+		pointer-events: none;
+		z-index: -1;
+	}
+
+	.nax-notice-bar__measure-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		font-weight: var(--nax-font-weight-regular, 400);
+		flex-shrink: 0;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：显式系统字体；图标字体若声明 Latin codepage 会抢占 ASCII 导致英文空白 */
+		font-family: HarmonyOS Sans;
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS */
+		font-family: sans-serif;
+		/* #endif */
+	}
+
+	.nax-notice-bar__track {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: nowrap;
+		flex-shrink: 0;
+		height: 22px;
+	}
+
+	.nax-notice-bar__seg {
+		flex-direction: row;
+		align-items: center;
+		flex-shrink: 0;
+		height: 22px;
+		/* #ifndef APP-HARMONY */
+		overflow: hidden;
+		/* #endif */
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：避免 width 测短时 overflow 裁掉后半段（含中英文混排） */
+		overflow: visible;
+		/* #endif */
+	}
+
+	/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-notice-bar__track--css {
+		animation-name: nax-notice-marquee;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes nax-notice-marquee {
+		0% {
+			transform: translateX(0);
+		}
+		100% {
+			transform: translateX(-50%);
+		}
+	}
+	/* #endif */
+
+	.nax-notice-bar__text {
+		font-size: var(--nax-font-size-sm, 14px);
+		font-weight: var(--nax-font-weight-regular, 400);
+		flex-shrink: 0;
+		height: 22px;
+		line-height: 22px;
+		/* #ifdef APP-HARMONY */
+		/* 鸿蒙：显式系统字体；图标字体若声明 Latin codepage 会抢占 ASCII 导致英文空白 */
+		font-family: HarmonyOS Sans;
+		/* #endif */
+		/* #ifdef APP-ANDROID || APP-IOS */
+		font-family: sans-serif;
+		/* #endif */
+	}
+
+	.nax-notice-bar__text--primary {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-notice-bar__text--info {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-notice-bar__text--success {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-notice-bar__text--warning {
+		color: var(--nax-color-warning-deep, #c97c10);
+	}
+
+	.nax-notice-bar__text--error {
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-notice-bar__text--none {
+		color: var(--nax-color-text, #333639);
+	}
+
+	.nax-notice-bar__swiper {
+		width: 100%;
+		height: 22px;
+	}
+
+	.nax-notice-bar__swiper-item {
+		height: 22px;
+	}
+
+	.nax-notice-bar__step {
+		flex-direction: row;
+		align-items: center;
+		height: 22px;
+		overflow: hidden;
+	}
+</style>
+

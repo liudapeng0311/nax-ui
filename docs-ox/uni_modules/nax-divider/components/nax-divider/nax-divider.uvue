@@ -1,0 +1,544 @@
+<template>
+	<view class="nax-divider" :class="rootClass" :style="rootStyle">
+		<template v-if="isHorizontal">
+			<view
+				v-if="showStartLine"
+				class="nax-divider__line nax-divider__line--h"
+				:class="lineClass"
+				:style="lineColorStyle"
+			></view>
+			<view v-if="hasContent" class="nax-divider__content nax-divider__content--h">
+				<slot>
+					<text v-if="hasText" class="nax-divider__text" :class="textClass" :style="textColorStyle">{{ text }}</text>
+				</slot>
+			</view>
+			<view
+				v-if="showEndLine"
+				class="nax-divider__line nax-divider__line--h"
+				:class="lineClass"
+				:style="lineColorStyle"
+			></view>
+		</template>
+		<!-- 竖向带文案：上下线段 + 中间内容 -->
+		<template v-else-if="hasContent">
+			<view
+				v-if="showStartLine"
+				class="nax-divider__line nax-divider__line--v"
+				:class="lineClass"
+				:style="lineColorStyle"
+			></view>
+			<view class="nax-divider__content nax-divider__content--v">
+				<slot>
+					<text v-if="hasText" class="nax-divider__text" :class="textClass" :style="textColorStyle">{{ text }}</text>
+				</slot>
+			</view>
+			<view
+				v-if="showEndLine"
+				class="nax-divider__line nax-divider__line--v"
+				:class="lineClass"
+				:style="lineColorStyle"
+			></view>
+		</template>
+		<!-- 纯竖线：根节点自身即线条（对齐 nax-line，避免子节点 height:0 塌缩） -->
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-divider
+	 * @description 内容分割线（可带文字）。与 nax-line 分工：line 只画纯线，本组件负责「文案分隔」。
+	 * @property {string} direction horizontal | vertical；兼容 row / column
+	 * @property {string} text 中间文案；也可用默认插槽
+	 * @property {string} contentPosition left | center | right（横线）；兼容 start/end
+	 * @property {boolean} dashed 虚线
+	 * @property {string} size hairline | sm | md；线粗细，默认 hairline
+	 * @property {string} type default | primary | info | success | warning | error（兼容 danger）
+	 * @property {string} color 自定义线色（覆盖 type）
+	 * @property {string} textColor 自定义文案色
+	 * @property {string} space 外边距：横=上下，竖=左右
+	 * @property {string} length 竖向高度（纯竖线默认 100%；与文字并排建议传如 16）
+	 * @property {string} customClass 根节点扩展 class
+	 * @slot default 自定义中间内容
+	 */
+	const props = defineProps({
+		direction: { type: String, default: 'horizontal' },
+		text: { type: String, default: '' },
+		contentPosition: { type: String, default: 'center' },
+		dashed: { type: Boolean, default: false },
+		size: { type: String, default: 'hairline' },
+		type: { type: String, default: 'default' },
+		color: { type: String, default: '' },
+		textColor: { type: String, default: '' },
+		space: { type: String, default: '' },
+		length: { type: String, default: '' },
+		customClass: { type: String, default: '' }
+	})
+
+	function normalizeDirection(value: string): string {
+		if (value == 'vertical' || value == 'column') {
+			return 'vertical'
+		}
+		return 'horizontal'
+	}
+
+	function normalizeSize(value: string): string {
+		if (value == 'sm' || value == 'small' || value == '1') {
+			return 'sm'
+		}
+		if (value == 'md' || value == 'medium' || value == '2' || value == 'lg' || value == 'large') {
+			return 'md'
+		}
+		return 'hairline'
+	}
+
+	function normalizeType(value: string): string {
+		if (value == 'danger') {
+			return 'error'
+		}
+		if (
+			value == 'primary' ||
+			value == 'info' ||
+			value == 'success' ||
+			value == 'warning' ||
+			value == 'error'
+		) {
+			return value
+		}
+		return 'default'
+	}
+
+	function normalizePosition(value: string): string {
+		if (value == 'left' || value == 'start') {
+			return 'left'
+		}
+		if (value == 'right' || value == 'end') {
+			return 'right'
+		}
+		return 'center'
+	}
+
+	function formatCssSize(value: string): string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return ''
+		}
+		if (
+			trimmed.indexOf('%') >= 0 ||
+			trimmed.indexOf('px') >= 0 ||
+			trimmed.indexOf('rpx') >= 0 ||
+			trimmed.indexOf('em') >= 0 ||
+			trimmed.indexOf('rem') >= 0
+		) {
+			return trimmed
+		}
+		if (isNaN(parseFloat(trimmed))) {
+			return trimmed
+		}
+		return trimmed + 'px'
+	}
+
+	const isHorizontal = computed((): boolean => {
+		return normalizeDirection(props.direction) == 'horizontal'
+	})
+
+	const sizeName = computed((): string => {
+		return normalizeSize(props.size)
+	})
+
+	const typeName = computed((): string => {
+		return normalizeType(props.type)
+	})
+
+	const positionName = computed((): string => {
+		return normalizePosition(props.contentPosition)
+	})
+
+	const hasText = computed((): boolean => {
+		return props.text.trim().length > 0
+	})
+
+	// 中间区以 text 为准；自定义内容可用默认插槽覆盖 text 展示（需同时传 text 触发中间区，或用空格占位）
+	const hasContent = computed((): boolean => {
+		return hasText.value
+	})
+
+	const showStartLine = computed((): boolean => {
+		if (!hasContent.value) {
+			return true
+		}
+		return positionName.value != 'left'
+	})
+
+	const showEndLine = computed((): boolean => {
+		if (!hasContent.value) {
+			return true
+		}
+		return positionName.value != 'right'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-divider--' + (isHorizontal.value ? 'horizontal' : 'vertical')
+		cls += ' nax-divider--size-' + sizeName.value
+		cls += ' nax-divider--' + typeName.value
+		if (props.dashed) {
+			cls += ' nax-divider--dashed'
+		} else {
+			cls += ' nax-divider--solid'
+		}
+		if (hasContent.value) {
+			cls += ' nax-divider--with-content'
+			cls += ' nax-divider--pos-' + positionName.value
+		} else {
+			cls += ' nax-divider--plain'
+			// 纯竖线：固定高度与文字居中；百分比/默认 100% 则 stretch 拉满父高
+			if (!isHorizontal.value) {
+				const rawLen = props.length.trim()
+				if (rawLen.length > 0 && rawLen.indexOf('%') < 0) {
+					cls += ' nax-divider--v-center'
+				} else {
+					cls += ' nax-divider--v-stretch'
+				}
+			}
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls
+	})
+
+	const rootStyle = computed((): string => {
+		var style = ''
+		const space = formatCssSize(props.space)
+		if (space.length > 0) {
+			if (isHorizontal.value) {
+				style += 'margin-top:' + space + ';margin-bottom:' + space + ';'
+			} else {
+				style += 'margin-left:' + space + ';margin-right:' + space + ';'
+			}
+		}
+
+		// 纯竖线：高度默认 100%（父级需有明确高度），可用 length 覆盖
+		if (!isHorizontal.value && !hasContent.value) {
+			const rawLen = props.length.trim().length > 0 ? props.length : '100%'
+			const len = formatCssSize(rawLen)
+			if (len.length > 0) {
+				style += 'height:' + len + ';'
+			}
+		} else if (!isHorizontal.value && props.length.trim().length > 0) {
+			// 竖向带文案时也可指定总高
+			const len = formatCssSize(props.length)
+			if (len.length > 0) {
+				style += 'height:' + len + ';'
+			}
+		}
+
+		// 自定义色：纯竖线画在根节点上
+		if (!isHorizontal.value && !hasContent.value && props.color.length > 0) {
+			if (props.dashed) {
+				style += 'border-left-color:' + props.color + ';'
+			} else {
+				style += 'background-color:' + props.color + ';'
+			}
+		}
+		return style
+	})
+
+	const lineClass = computed((): string => {
+		var cls = 'nax-divider__line--size-' + sizeName.value
+		if (props.dashed) {
+			cls += ' nax-divider__line--dashed'
+		} else {
+			cls += ' nax-divider__line--solid'
+		}
+		cls += ' nax-divider__line--' + typeName.value
+		return cls
+	})
+
+	const textClass = computed((): string => {
+		return 'nax-divider__text--' + typeName.value
+	})
+
+	const lineColorStyle = computed((): string => {
+		if (props.color.length == 0) {
+			return ''
+		}
+		if (props.dashed) {
+			if (isHorizontal.value) {
+				return 'border-top-color:' + props.color + ';'
+			}
+			return 'border-left-color:' + props.color + ';'
+		}
+		return 'background-color:' + props.color + ';'
+	})
+
+	const textColorStyle = computed((): string => {
+		if (props.textColor.length > 0) {
+			return 'color:' + props.textColor + ';'
+		}
+		if (props.color.length > 0) {
+			return 'color:' + props.color + ';'
+		}
+		return ''
+	})
+</script>
+
+<style>
+	.nax-divider {
+		flex-shrink: 0;
+		box-sizing: border-box;
+		align-items: center;
+	}
+
+	.nax-divider--horizontal {
+		flex-direction: row;
+		width: 100%;
+	}
+
+	/* 竖向带文案：column + stretch */
+	.nax-divider--vertical.nax-divider--with-content {
+		flex-direction: column;
+		align-self: stretch;
+		align-items: center;
+		justify-content: center;
+		min-height: 14px;
+	}
+
+	/* 纯竖线：根节点即线条 */
+	.nax-divider--vertical.nax-divider--plain {
+		flex-direction: column;
+	}
+
+	/* 固定 length（如 16）与文字垂直居中 */
+	.nax-divider--vertical.nax-divider--plain.nax-divider--v-center {
+		align-self: center;
+	}
+
+	/* length 为 % 或默认 100%：拉满父级交叉轴 */
+	.nax-divider--vertical.nax-divider--plain.nax-divider--v-stretch {
+		align-self: stretch;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--solid.nax-divider--size-hairline {
+		width: 1px;
+		transform: scaleX(0.5);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--solid.nax-divider--size-sm {
+		width: 1px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--solid.nax-divider--size-md {
+		width: 2px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed {
+		width: 0;
+		background-color: transparent;
+		border-left-style: dashed;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed.nax-divider--size-hairline,
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed.nax-divider--size-sm {
+		border-left-width: 1px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--dashed.nax-divider--size-md {
+		border-left-width: 2px;
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--default.nax-divider--solid {
+		background-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--primary.nax-divider--solid {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--info.nax-divider--solid {
+		background-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--success.nax-divider--solid {
+		background-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--warning.nax-divider--solid {
+		background-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--error.nax-divider--solid {
+		background-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--default.nax-divider--dashed {
+		border-left-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--primary.nax-divider--dashed {
+		border-left-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--info.nax-divider--dashed {
+		border-left-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--success.nax-divider--dashed {
+		border-left-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--warning.nax-divider--dashed {
+		border-left-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-divider--vertical.nax-divider--plain.nax-divider--error.nax-divider--dashed {
+		border-left-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-divider__line {
+		flex-shrink: 0;
+		box-sizing: border-box;
+	}
+
+	.nax-divider__line--h {
+		flex-grow: 1;
+		flex-shrink: 1;
+		width: 0;
+		min-width: 12px;
+	}
+
+	/* 竖向带文案时上下线段均分剩余高度 */
+	.nax-divider__line--v {
+		flex-grow: 1;
+		flex-shrink: 1;
+		flex-basis: 0;
+		min-height: 8px;
+		align-self: center;
+	}
+
+	.nax-divider__line--h.nax-divider__line--solid.nax-divider__line--size-hairline {
+		height: 1px;
+		transform: scaleY(0.5);
+	}
+
+	.nax-divider__line--h.nax-divider__line--solid.nax-divider__line--size-sm {
+		height: 1px;
+	}
+
+	.nax-divider__line--h.nax-divider__line--solid.nax-divider__line--size-md {
+		height: 2px;
+	}
+
+	.nax-divider__line--v.nax-divider__line--solid.nax-divider__line--size-hairline {
+		width: 1px;
+		transform: scaleX(0.5);
+	}
+
+	.nax-divider__line--v.nax-divider__line--solid.nax-divider__line--size-sm {
+		width: 1px;
+	}
+
+	.nax-divider__line--v.nax-divider__line--solid.nax-divider__line--size-md {
+		width: 2px;
+	}
+
+	.nax-divider__line--h.nax-divider__line--dashed {
+		height: 0;
+		border-top-style: dashed;
+		border-top-width: 1px;
+		background-color: transparent;
+	}
+
+	.nax-divider__line--h.nax-divider__line--dashed.nax-divider__line--size-md {
+		border-top-width: 2px;
+	}
+
+	.nax-divider__line--v.nax-divider__line--dashed {
+		width: 0;
+		border-left-style: dashed;
+		border-left-width: 1px;
+		background-color: transparent;
+	}
+
+	.nax-divider__line--v.nax-divider__line--dashed.nax-divider__line--size-md {
+		border-left-width: 2px;
+	}
+
+	.nax-divider__line--default {
+		background-color: var(--nax-color-divider, #f5f5f7);
+		border-top-color: var(--nax-color-divider, #f5f5f7);
+		border-left-color: var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-divider__line--primary {
+		background-color: var(--nax-color-primary, #18a058);
+		border-top-color: var(--nax-color-primary, #18a058);
+		border-left-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-divider__line--info {
+		background-color: var(--nax-color-info, #2080f0);
+		border-top-color: var(--nax-color-info, #2080f0);
+		border-left-color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-divider__line--success {
+		background-color: var(--nax-color-success, #18a058);
+		border-top-color: var(--nax-color-success, #18a058);
+		border-left-color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-divider__line--warning {
+		background-color: var(--nax-color-warning, #f0a020);
+		border-top-color: var(--nax-color-warning, #f0a020);
+		border-left-color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-divider__line--error {
+		background-color: var(--nax-color-error, #d03050);
+		border-top-color: var(--nax-color-error, #d03050);
+		border-left-color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-divider__content {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.nax-divider__content--h {
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-divider__content--v {
+		padding-top: 8px;
+		padding-bottom: 8px;
+	}
+
+	.nax-divider__text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 20px;
+	}
+
+	.nax-divider__text--primary {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-divider__text--info {
+		color: var(--nax-color-info, #2080f0);
+	}
+
+	.nax-divider__text--success {
+		color: var(--nax-color-success, #18a058);
+	}
+
+	.nax-divider__text--warning {
+		color: var(--nax-color-warning, #f0a020);
+	}
+
+	.nax-divider__text--error {
+		color: var(--nax-color-error, #d03050);
+	}
+</style>

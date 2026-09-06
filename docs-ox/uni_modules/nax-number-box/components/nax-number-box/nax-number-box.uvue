@@ -1,0 +1,823 @@
+﻿<template>
+	<view class="nax-number-box" :class="rootClass" :style="rootStyle">
+		<!-- 减号 -->
+		<view
+			v-if="showMinus"
+			class="nax-number-box__btn nax-number-box__btn--minus"
+			:class="minusBtnClass"
+			:style="btnStyle"
+			@touchstart.stop="onMinusTouchStart"
+			@touchend.stop="onBtnTouchEnd"
+			@touchcancel.stop="onBtnTouchEnd"
+			@click.stop="onMinusClick"
+		>
+			<slot name="minus">
+				<nax-icon name="minus" :size="iconSizePx" :color="minusIconColor"></nax-icon>
+			</slot>
+		</view>
+
+		<!-- 输入 -->
+		<input
+			class="nax-number-box__input"
+			:class="inputClass"
+			:style="inputStyle"
+			:value="inputText"
+			:type="nativeInputType"
+			:disabled="isInputDisabled"
+			:cursor-spacing="cursorSpacing"
+			@input="onInput"
+			@focus="onFocus"
+			@blur="onBlur"
+		/>
+
+		<!-- 加号 -->
+		<view
+			v-if="showPlus"
+			class="nax-number-box__btn nax-number-box__btn--plus"
+			:class="plusBtnClass"
+			:style="btnStyle"
+			@touchstart.stop="onPlusTouchStart"
+			@touchend.stop="onBtnTouchEnd"
+			@touchcancel.stop="onBtnTouchEnd"
+			@click.stop="onPlusClick"
+		>
+			<slot name="plus">
+				<nax-icon name="plus" :size="iconSizePx" :color="plusIconColor"></nax-icon>
+			</slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-number-box
+	 * @description 步进器。用于数量加减
+	 * @property {number} modelValue 当前值（v-model）
+	 * @property {number} min 最小值
+	 * @property {number} max 最大值
+	 * @property {number} step 步长
+	 * @property {boolean} integer 是否仅允许整数
+	 * @property {boolean} disabled 整体禁用
+	 * @property {boolean} disabledInput 仅禁用中间输入
+	 * @property {boolean} disablePlus 禁用加号
+	 * @property {boolean} disableMinus 禁用减号
+	 * @property {boolean} asyncChange 异步变更：点击后不立刻改内部值，等外部 v-model 回写
+	 * @property {boolean} longPress 长按连续加减
+	 * @property {string} size sm | md | lg
+	 * @property {number} inputWidth 输入框宽度（px）；0 跟随 size
+	 * @property {number} buttonSize 按钮边长（px）；0 跟随 size
+	 * @property {boolean} showMinus 显示减号
+	 * @property {boolean} showPlus 显示加号
+	 * @property {string} bgColor 按钮/输入背景；空则主题次级背景
+	 * @property {string} color 文字/图标色；空则主题正文色
+	 * @property {number} cursorSpacing 键盘与光标间距
+	 * @property {string} customClass 根节点扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 值变化（number）
+	 * @event focus 输入框聚焦
+	 * @event blur 输入框失焦（number）
+	 * @event overlimit 触达边界（'minus' | 'plus'）
+	 * @event minus 点击减号
+	 * @event plus 点击加号
+	 * @slot minus 自定义减号
+	 * @slot plus 自定义加号
+	 */
+	const props = defineProps({
+		modelValue: { type: Number, default: 0 },
+		min: { type: Number, default: 0 },
+		max: { type: Number, default: 999999 },
+		step: { type: Number, default: 1 },
+		integer: { type: Boolean, default: false },
+		disabled: { type: Boolean, default: false },
+		disabledInput: { type: Boolean, default: false },
+		disablePlus: { type: Boolean, default: false },
+		disableMinus: { type: Boolean, default: false },
+		asyncChange: { type: Boolean, default: false },
+		longPress: { type: Boolean, default: true },
+		size: { type: String, default: 'md' },
+		inputWidth: { type: Number, default: 0 },
+		buttonSize: { type: Number, default: 0 },
+		showMinus: { type: Boolean, default: true },
+		showPlus: { type: Boolean, default: true },
+		bgColor: { type: String, default: '' },
+		color: { type: String, default: '' },
+		cursorSpacing: { type: Number, default: 100 },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits([
+		'update:modelValue',
+		'change',
+		'focus',
+		'blur',
+		'overlimit',
+		'minus',
+		'plus'
+	])
+
+	const LONG_PRESS_DELAY = 400
+	const LONG_PRESS_INTERVAL = 120
+
+	const current = ref(0.0)
+	const inputText = ref('0')
+	const focused = ref(false)
+	const pressing = ref(false)
+	const longPressDir = ref('') // 'plus' | 'minus' | ''
+	// 最近一次 touch 处理时间，避免 touch + click 双触发
+	const lastTouchAt = ref(0)
+	// 长按定时器：-1 表示未启动（与 button/badge 一致用 let）
+	let longPressTimerId = -1
+	let longPressIntervalId = -1
+
+	const normalizedSize = computed((): string => {
+		if (props.size == 'sm' || props.size == 'lg') {
+			return props.size
+		}
+		return 'md'
+	})
+
+	function sizeBoxPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 28
+		}
+		if (s == 'lg') {
+			return 40
+		}
+		return 32
+	}
+
+	function sizeInputWidthPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 40
+		}
+		if (s == 'lg') {
+			return 56
+		}
+		return 48
+	}
+
+	function sizeFontPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 14
+		}
+		if (s == 'lg') {
+			return 18
+		}
+		return 16
+	}
+
+	function sizeIconPx() : number {
+		const s = normalizedSize.value
+		if (s == 'sm') {
+			return 14
+		}
+		if (s == 'lg') {
+			return 18
+		}
+		return 16
+	}
+
+	const boxSizePx = computed((): number => {
+		const n = props.buttonSize as number
+		if (n > 0) {
+			return n
+		}
+		return sizeBoxPx()
+	})
+
+	const inputWidthPx = computed((): number => {
+		const n = props.inputWidth as number
+		if (n > 0) {
+			return n
+		}
+		return sizeInputWidthPx()
+	})
+
+	const iconSizePx = computed((): string => {
+		return '' + sizeIconPx()
+	})
+
+	const bgColorValue = computed((): string => {
+		if ((props.bgColor as string).length > 0) {
+			return props.bgColor as string
+		}
+		return 'var(--nax-color-bg-secondary, #fafafc)'
+	})
+
+	const textColorValue = computed((): string => {
+		if ((props.color as string).length > 0) {
+			return props.color as string
+		}
+		return 'var(--nax-color-text, #333639)'
+	})
+
+	const isDisabled = computed((): boolean => {
+		return props.disabled
+	})
+
+	const isInputDisabled = computed((): boolean => {
+		return props.disabled || props.disabledInput
+	})
+
+	const rangeMin = computed((): number => {
+		return props.min as number
+	})
+
+	const rangeMax = computed((): number => {
+		return props.max as number
+	})
+
+	const isMinusDisabled = computed((): boolean => {
+		if (isDisabled.value || props.disableMinus) {
+			return true
+		}
+		return current.value <= rangeMin.value
+	})
+
+	const isPlusDisabled = computed((): boolean => {
+		if (isDisabled.value || props.disablePlus) {
+			return true
+		}
+		return current.value >= rangeMax.value
+	})
+
+	const nativeInputType = computed((): string => {
+		// integer：数字键盘；小数：digit（部分端支持小数点）
+		if (props.integer) {
+			return 'number'
+		}
+		return 'digit'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = 'nax-number-box--' + normalizedSize.value
+		if (isDisabled.value) {
+			cls += ' nax-number-box--disabled'
+		}
+		if (focused.value) {
+			cls += ' nax-number-box--focused'
+		}
+		if ((props.customClass as string).length > 0) {
+			cls += ' ' + (props.customClass as string)
+		}
+		return cls.trim()
+	})
+
+	const rootStyle = computed((): string => {
+		const h = boxSizePx.value
+		var style = ''
+		style += 'height:' + h.toString() + 'px;'
+		return style
+	})
+
+	const btnStyle = computed((): string => {
+		const n = boxSizePx.value
+		var style = ''
+		style += 'width:' + n.toString() + 'px;'
+		style += 'height:' + n.toString() + 'px;'
+		style += 'background-color:' + bgColorValue.value + ';'
+		return style
+	})
+
+	const inputStyle = computed((): string => {
+		const h = boxSizePx.value
+		const w = inputWidthPx.value
+		const fs = sizeFontPx()
+		var style = ''
+		style += 'width:' + w.toString() + 'px;'
+		style += 'height:' + h.toString() + 'px;'
+		style += 'line-height:' + h.toString() + 'px;'
+		style += 'font-size:' + fs.toString() + 'px;'
+		style += 'background-color:' + bgColorValue.value + ';'
+		style += 'color:' + textColorValue.value + ';'
+		return style
+	})
+
+	const minusBtnClass = computed((): string => {
+		var cls = ''
+		if (isMinusDisabled.value) {
+			cls += ' nax-number-box__btn--disabled'
+		}
+		if (pressing.value && longPressDir.value == 'minus') {
+			cls += ' nax-number-box__btn--active'
+		}
+		return cls.trim()
+	})
+
+	const plusBtnClass = computed((): string => {
+		var cls = ''
+		if (isPlusDisabled.value) {
+			cls += ' nax-number-box__btn--disabled'
+		}
+		if (pressing.value && longPressDir.value == 'plus') {
+			cls += ' nax-number-box__btn--active'
+		}
+		return cls.trim()
+	})
+
+	const inputClass = computed((): string => {
+		if (isInputDisabled.value) {
+			return 'nax-number-box__input--disabled'
+		}
+		return ''
+	})
+
+	const minusIconColor = computed((): string => {
+		if (isMinusDisabled.value) {
+			return 'var(--nax-color-text-disabled, #e5e5ea)'
+		}
+		return textColorValue.value
+	})
+
+	const plusIconColor = computed((): string => {
+		if (isPlusDisabled.value) {
+			return 'var(--nax-color-text-disabled, #e5e5ea)'
+		}
+		return textColorValue.value
+	})
+
+	function readNum(v : number) : number {
+		return v as number
+	}
+
+	function stepDecimals(step : number) : number {
+		if (props.integer) {
+			return 0
+		}
+		if (step <= 0) {
+			return 0
+		}
+		if (Math.abs(step - Math.round(step)) < 1e-10) {
+			return 0
+		}
+		var x = Math.abs(step)
+		var d = 0
+		while (d < 8) {
+			const nearest = Math.round(x)
+			if (Math.abs(x - nearest) < 1e-8) {
+				break
+			}
+			x = x * 10.0
+			d++
+		}
+		return d
+	}
+
+	function pow10(digits : number) : number {
+		var factor = 1.0
+		var i = 0
+		while (i < digits) {
+			factor = factor * 10.0
+			i++
+		}
+		return factor
+	}
+
+	function valuesEqual(a : number, b : number) : boolean {
+		return Math.abs(a - b) < 1e-9
+	}
+
+	function clamp(value : number) : number {
+		var minV = rangeMin.value
+		var maxV = rangeMax.value
+		if (minV > maxV) {
+			const t = minV
+			minV = maxV
+			maxV = t
+		}
+		var v = value
+		if (v < minV) {
+			v = minV
+		}
+		if (v > maxV) {
+			v = maxV
+		}
+		return v
+	}
+
+	/**
+	 * 按 step / integer 规范化；小数步长走整数网格，避免浮点误差。
+	 */
+	function formatValue(value : number) : number {
+		var clipped = clamp(value)
+		if (props.integer) {
+			clipped = Math.round(clipped)
+			return clamp(clipped as number)
+		}
+		const step = readNum(props.step as number)
+		if (step <= 0) {
+			return clipped
+		}
+		const digits = stepDecimals(step)
+		const factor = pow10(digits)
+		const minV = rangeMin.value
+		const maxV = rangeMax.value
+		const minInt = Math.round(minV * factor)
+		const stepInt = Math.round(step * factor)
+		if (stepInt <= 0) {
+			return clipped
+		}
+		const clippedInt = Math.round(clipped * factor)
+		const steps = Math.round((clippedInt - minInt) / stepInt)
+		var nextInt = minInt + steps * stepInt
+		const maxInt = Math.round(maxV * factor)
+		if (nextInt < minInt) {
+			nextInt = minInt
+		}
+		if (nextInt > maxInt) {
+			nextInt = maxInt
+		}
+		return nextInt / factor
+	}
+
+	function formatDisplay(v : number) : string {
+		if (props.integer) {
+			return '' + Math.round(v)
+		}
+		const step = readNum(props.step as number)
+		const digits = stepDecimals(step)
+		if (digits > 0) {
+			return v.toFixed(digits)
+		}
+		if (Math.abs(v - Math.round(v)) < 0.000001) {
+			return '' + Math.round(v)
+		}
+		return '' + v
+	}
+
+	function syncFromProp(v : number) {
+		const next = formatValue(v)
+		current.value = next
+		// 聚焦编辑中不打断输入展示
+		if (!focused.value) {
+			inputText.value = formatDisplay(next)
+		}
+	}
+
+	/**
+	 * @param nextRaw 目标值
+	 * @param fromButton 是否来自加减按钮（需强制同步输入框展示并结束聚焦态）
+	 */
+	function commitValue(nextRaw : number, fromButton : boolean) {
+		const next = formatValue(nextRaw)
+		const same = valuesEqual(next, current.value)
+
+		// 按钮操作：结束输入态，避免 Web 聚焦时只改 current 不改 input 展示
+		if (fromButton) {
+			focused.value = false
+		}
+
+		if (same) {
+			// 同值也刷新展示（按钮点击 / 越界回写）
+			if (fromButton || !focused.value) {
+				inputText.value = formatDisplay(current.value)
+			}
+			return
+		}
+
+		if (props.asyncChange && !fromButton) {
+			// 异步且非按钮：只通知外部（按钮异步见下方）
+			emit('update:modelValue', next)
+			emit('change', next)
+			return
+		}
+
+		if (props.asyncChange && fromButton) {
+			// 异步按钮：仍强制刷新展示为「将要变成」的值会误导；保持不改内部，只 emit
+			// 但若输入框处于聚焦脏状态，至少把展示拉回 current，避免「点了没反应」的错觉
+			inputText.value = formatDisplay(current.value)
+			emit('update:modelValue', next)
+			emit('change', next)
+			return
+		}
+
+		current.value = next
+		// 按钮或非聚焦：必须同步输入框；聚焦中的外部逻辑不走 commitValue
+		inputText.value = formatDisplay(next)
+		if (!valuesEqual(next, props.modelValue as number)) {
+			emit('update:modelValue', next)
+		}
+		emit('change', next)
+	}
+
+	function stepBy(dir : string) {
+		if (isDisabled.value) {
+			return
+		}
+		// 加减优先于输入态：先结束聚焦，防止展示不同步
+		focused.value = false
+		const step = readNum(props.step as number)
+		var delta = step
+		if (delta <= 0) {
+			delta = 1
+		}
+		if (dir == 'minus') {
+			if (props.disableMinus) {
+				return
+			}
+			if (current.value <= rangeMin.value) {
+				emit('overlimit', 'minus')
+				return
+			}
+			const next = current.value - delta
+			if (next < rangeMin.value && !valuesEqual(current.value, rangeMin.value)) {
+				// 允许一步落到 min
+				commitValue(rangeMin.value, true)
+				emit('minus')
+				return
+			}
+			if (next < rangeMin.value) {
+				emit('overlimit', 'minus')
+				return
+			}
+			commitValue(next, true)
+			emit('minus')
+			return
+		}
+
+		if (dir == 'plus') {
+			if (props.disablePlus) {
+				return
+			}
+			if (current.value >= rangeMax.value) {
+				emit('overlimit', 'plus')
+				return
+			}
+			const next = current.value + delta
+			if (next > rangeMax.value && !valuesEqual(current.value, rangeMax.value)) {
+				commitValue(rangeMax.value, true)
+				emit('plus')
+				return
+			}
+			if (next > rangeMax.value) {
+				emit('overlimit', 'plus')
+				return
+			}
+			commitValue(next, true)
+			emit('plus')
+		}
+	}
+
+	function clearLongPress() {
+		if (longPressTimerId >= 0) {
+			clearTimeout(longPressTimerId)
+			longPressTimerId = -1
+		}
+		if (longPressIntervalId >= 0) {
+			clearInterval(longPressIntervalId)
+			longPressIntervalId = -1
+		}
+		pressing.value = false
+		longPressDir.value = ''
+	}
+
+	function startLongPress(dir : string) {
+		clearLongPress()
+		if (!props.longPress || isDisabled.value) {
+			return
+		}
+		if (dir == 'minus' && isMinusDisabled.value) {
+			return
+		}
+		if (dir == 'plus' && isPlusDisabled.value) {
+			return
+		}
+		pressing.value = true
+		longPressDir.value = dir
+		longPressTimerId = setTimeout(() => {
+			stepBy(dir)
+			longPressIntervalId = setInterval(() => {
+				stepBy(dir)
+			}, LONG_PRESS_INTERVAL)
+		}, LONG_PRESS_DELAY)
+	}
+
+	function onMinusTouchStart() {
+		lastTouchAt.value = Date.now()
+		if (isDisabled.value || props.disableMinus) {
+			if (current.value <= rangeMin.value) {
+				emit('overlimit', 'minus')
+			}
+			return
+		}
+		// 先执行一次点击步进；长按再连续
+		stepBy('minus')
+		startLongPress('minus')
+	}
+
+	function onPlusTouchStart() {
+		lastTouchAt.value = Date.now()
+		if (isDisabled.value || props.disablePlus) {
+			if (current.value >= rangeMax.value) {
+				emit('overlimit', 'plus')
+			}
+			return
+		}
+		stepBy('plus')
+		startLongPress('plus')
+	}
+
+	function onBtnTouchEnd() {
+		lastTouchAt.value = Date.now()
+		clearLongPress()
+	}
+
+	function recentlyTouched() : boolean {
+		const now = Date.now()
+		return now - lastTouchAt.value < 350
+	}
+
+	function onMinusClick() {
+		// touch 路径已处理时跳过 click，避免双触发
+		if (recentlyTouched()) {
+			return
+		}
+		if (isDisabled.value) {
+			return
+		}
+		// 桌面 Web 无 touch：标记时间，供 blur 竞态判断
+		lastTouchAt.value = Date.now()
+		stepBy('minus')
+	}
+
+	function onPlusClick() {
+		if (recentlyTouched()) {
+			return
+		}
+		if (isDisabled.value) {
+			return
+		}
+		lastTouchAt.value = Date.now()
+		stepBy('plus')
+	}
+
+	function parseInputText(raw : string) : number {
+		var text = raw
+		if (text.length == 0 || text == '-' || text == '.' || text == '-.') {
+			return current.value
+		}
+		// 仅保留合法数字字符
+		var cleaned = ''
+		var hasDot = false
+		var i = 0
+		while (i < text.length) {
+			const ch = text.charAt(i)
+			if (ch >= '0' && ch <= '9') {
+				cleaned += ch
+			} else if (ch == '.' && !props.integer && !hasDot) {
+				cleaned += ch
+				hasDot = true
+			} else if (ch == '-' && cleaned.length == 0) {
+				cleaned += ch
+			}
+			i++
+		}
+		if (cleaned.length == 0 || cleaned == '-' || cleaned == '.' || cleaned == '-.') {
+			return current.value
+		}
+		const n = parseFloat(cleaned)
+		if (isNaN(n)) {
+			return current.value
+		}
+		return n
+	}
+
+	function onInput(e : UniInputEvent) {
+		const raw = e.detail.value
+		inputText.value = raw
+		// 空串 / 中间态（如 "1."）不写回，失焦再规范
+		if (raw.length == 0) {
+			return
+		}
+		const endsWithDot = raw.charAt(raw.length - 1) == '.'
+		if (raw == '-' || raw == '.' || raw == '-.' || endsWithDot) {
+			return
+		}
+		const n = parseInputText(raw)
+		// 输入过程只做范围夹取，不按 step 吸附（吸附放在 blur / 加减）
+		const next = clamp(n)
+		if (props.asyncChange) {
+			emit('update:modelValue', next)
+			emit('change', next)
+			return
+		}
+		current.value = next
+		if (!valuesEqual(next, props.modelValue as number)) {
+			emit('update:modelValue', next)
+		}
+		emit('change', next)
+	}
+
+	function onFocus() {
+		focused.value = true
+		emit('focus')
+	}
+
+	function onBlur() {
+		// 刚点加减时，以 current 为准，避免 blur 用旧输入盖回
+		if (recentlyTouched()) {
+			focused.value = false
+			inputText.value = formatDisplay(current.value)
+			emit('blur', current.value)
+			return
+		}
+		focused.value = false
+		const n = parseInputText(inputText.value)
+		// blur 强制落地（asyncChange 也回写展示与值，避免输入框脏值）
+		const next = formatValue(n)
+		current.value = next
+		inputText.value = formatDisplay(next)
+		if (!valuesEqual(next, props.modelValue as number)) {
+			emit('update:modelValue', next)
+		}
+		emit('change', next)
+		emit('blur', next)
+	}
+
+	watch((): number => {
+		return props.modelValue as number
+	}, (v : number) => {
+		if (focused.value) {
+			// 外部强制改值时，若未聚焦才同步；聚焦中仅在 async 回写后同步数值
+			if (props.asyncChange) {
+				current.value = formatValue(v)
+			}
+			return
+		}
+		if (!valuesEqual(v, current.value)) {
+			syncFromProp(v)
+		}
+	})
+
+	watch((): string => {
+		return (props.min as number).toString() + ',' + (props.max as number).toString() + ',' + (props.step as number).toString() + ',' + (props.integer ? '1' : '0')
+	}, (_ : string) => {
+		if (!focused.value) {
+			syncFromProp(current.value)
+		}
+	})
+
+	// 初始化
+	syncFromProp(props.modelValue as number)
+
+	onUnmounted(() => {
+		clearLongPress()
+	})
+</script>
+
+<style>
+	.nax-number-box {
+		flex-direction: row;
+		align-items: center;
+		/* 默认不撑满，随内容宽度 */
+		align-self: flex-start;
+	}
+
+	.nax-number-box--disabled {
+		opacity: var(--nax-opacity-disabled, 0.45);
+	}
+
+	.nax-number-box__btn {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.nax-number-box__btn--minus {
+		/* 与输入区间隔：用 margin 而非依赖 gap（App 更稳） */
+		margin-right: 2px;
+	}
+
+	.nax-number-box__btn--plus {
+		margin-left: 2px;
+	}
+
+	.nax-number-box__btn--active {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-number-box__btn--disabled {
+		/* 颜色已在 icon 上处理；保留 class 便于扩展 */
+	}
+
+	.nax-number-box__input {
+		text-align: center;
+		padding-left: 4px;
+		padding-right: 4px;
+		border-radius: var(--nax-radius-md, 3px);
+		/* 覆盖部分端 input 默认边框/外观 */
+		border-width: 0;
+		border-style: solid;
+		border-color: transparent;
+		/* 避免继承导致字号漂移 */
+		box-sizing: border-box;
+	}
+
+	.nax-number-box__input--disabled {
+		color: var(--nax-color-text-disabled, #e5e5ea);
+	}
+</style>

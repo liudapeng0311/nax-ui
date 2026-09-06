@@ -1,0 +1,5832 @@
+{
+  "meta": {
+    "id": "components-rich-text",
+    "path": "/components/rich-text",
+    "source": "components/rich-text.md",
+    "title": "nax-rich-text",
+    "headings": [
+      {
+        "id": "nax-rich-text",
+        "text": "nax-rich-text",
+        "level": 1
+      },
+      {
+        "id": "安装",
+        "text": "安装",
+        "level": 2
+      },
+      {
+        "id": "代码示例",
+        "text": "代码示例",
+        "level": 2
+      },
+      {
+        "id": "基础用法",
+        "text": "基础用法",
+        "level": 3
+      },
+      {
+        "id": "节点列表",
+        "text": "节点列表",
+        "level": 3
+      },
+      {
+        "id": "渲染引擎-engine",
+        "text": "渲染引擎 engine",
+        "level": 3
+      },
+      {
+        "id": "app-渲染模式-mode仅-builtin-引擎",
+        "text": "App 渲染模式 mode（仅 builtin 引擎）",
+        "level": 3
+      },
+      {
+        "id": "多媒体parser-引擎",
+        "text": "多媒体（parser 引擎）",
+        "level": 3
+      },
+      {
+        "id": "音频",
+        "text": "音频",
+        "level": 3
+      },
+      {
+        "id": "视频",
+        "text": "视频",
+        "level": 3
+      },
+      {
+        "id": "图片预览",
+        "text": "图片预览",
+        "level": 3
+      },
+      {
+        "id": "内容点击",
+        "text": "内容点击",
+        "level": 3
+      },
+      {
+        "id": "平台差异与已知限制",
+        "text": "平台差异与已知限制",
+        "level": 3
+      },
+      {
+        "id": "主题",
+        "text": "主题",
+        "level": 2
+      },
+      {
+        "id": "props",
+        "text": "Props",
+        "level": 2
+      },
+      {
+        "id": "events",
+        "text": "Events",
+        "level": 2
+      },
+      {
+        "id": "slots",
+        "text": "Slots",
+        "level": 2
+      }
+    ],
+    "lastUpdated": "2026-09-06T08:31:21.474Z"
+  },
+  "root": {
+    "type": "root",
+    "children": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1,
+          "id": "nax-rich-text"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "nax-rich-text",
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 1,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "当前版本：0.3.1",
+                "source": {
+                  "start": {
+                    "line": 3,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 3,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 3,
+            "column": 1
+          },
+          "end": {
+            "line": 3,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "inline-code",
+            "value": "nax-ui",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 1
+              },
+              "end": {
+                "line": 5,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 富文本组件（uni-app x / uvue）。 双引擎设计：",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 9
+              },
+              "end": {
+                "line": 5,
+                "column": 9
+              }
+            }
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "自研解析渲染器",
+                "source": {
+                  "start": {
+                    "line": 5,
+                    "column": 43
+                  },
+                  "end": {
+                    "line": 5,
+                    "column": 43
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "（默认 ",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 52
+              },
+              "end": {
+                "line": 5,
+                "column": 52
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "parser",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 56
+              },
+              "end": {
+                "line": 5,
+                "column": 56
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "，App / Web / 小程序渲染一致）与",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 64
+              },
+              "end": {
+                "line": 5,
+                "column": 64
+              }
+            }
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "内置 rich-text 兜底",
+                "source": {
+                  "start": {
+                    "line": 5,
+                    "column": 88
+                  },
+                  "end": {
+                    "line": 5,
+                    "column": 88
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "（",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 105
+              },
+              "end": {
+                "line": 5,
+                "column": 105
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "builtin",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 106
+              },
+              "end": {
+                "line": 5,
+                "column": 106
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "）。HTML 字符串 / 节点列表双入口，全局字号 / 颜色 / 行高 / 字体 / 链接色，以及",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 115
+              },
+              "end": {
+                "line": 5,
+                "column": 115
+              }
+            }
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "内容点击",
+                "source": {
+                  "start": {
+                    "line": 5,
+                    "column": 166
+                  },
+                  "end": {
+                    "line": 5,
+                    "column": 166
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "（图片 / 链接 / 音频卡）事件。",
+            "source": {
+              "start": {
+                "line": 5,
+                "column": 172
+              },
+              "end": {
+                "line": 5,
+                "column": 172
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 5,
+            "column": 1
+          },
+          "end": {
+            "line": 5,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "安装"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "安装",
+            "source": {
+              "start": {
+                "line": 8,
+                "column": 1
+              },
+              "end": {
+                "line": 8,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 8,
+            "column": 1
+          },
+          "end": {
+            "line": 8,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "uni_modules/nax-rich-text",
+        "attrs": {
+          "lang": "text"
+        },
+        "source": {
+          "start": {
+            "line": 10,
+            "column": 1
+          },
+          "end": {
+            "line": 11,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "uni_modules/nax-rich-text"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "easycom 自动生效，页面直接使用 ",
+            "source": {
+              "start": {
+                "line": 14,
+                "column": 1
+              },
+              "end": {
+                "line": 14,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "<nax-rich-text />",
+            "source": {
+              "start": {
+                "line": 14,
+                "column": 21
+              },
+              "end": {
+                "line": 14,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 即可。",
+            "source": {
+              "start": {
+                "line": 14,
+                "column": 40
+              },
+              "end": {
+                "line": 14,
+                "column": 40
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 14,
+            "column": 1
+          },
+          "end": {
+            "line": 13,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "建议同时安装主题包 ",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "uni_modules/nax-ui-theme",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 11
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 11
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 并在 ",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 37
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 37
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "App.uvue",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 41
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 41
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引入主题变量，详见 ",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 51
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 51
+                  }
+                }
+              },
+              {
+                "type": "link",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "主题接入",
+                    "source": {
+                      "start": {
+                        "line": 16,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 16,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "attrs": {
+                  "href": "/guide/theme"
+                },
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 62
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 62
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": "。",
+                "source": {
+                  "start": {
+                    "line": 16,
+                    "column": 82
+                  },
+                  "end": {
+                    "line": 16,
+                    "column": 82
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 16,
+            "column": 1
+          },
+          "end": {
+            "line": 16,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "代码示例"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "代码示例",
+            "source": {
+              "start": {
+                "line": 18,
+                "column": 1
+              },
+              "end": {
+                "line": 18,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 18,
+            "column": 1
+          },
+          "end": {
+            "line": 18,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "基础用法"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "基础用法",
+            "source": {
+              "start": {
+                "line": 20,
+                "column": 1
+              },
+              "end": {
+                "line": 20,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 20,
+            "column": 1
+          },
+          "end": {
+            "line": 20,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "demo",
+        "value": "<nax-rich-text\n  content=\"### nax-ui\n支持 加粗、斜体\"\n></nax-rich-text>",
+        "attrs": {
+          "name": "demo-rich-text"
+        },
+        "source": {
+          "start": {
+            "line": 21,
+            "column": 1
+          },
+          "end": {
+            "line": 25,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "默认走 ",
+            "source": {
+              "start": {
+                "line": 28,
+                "column": 1
+              },
+              "end": {
+                "line": 28,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "parser",
+            "source": {
+              "start": {
+                "line": 28,
+                "column": 5
+              },
+              "end": {
+                "line": 28,
+                "column": 5
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 引擎：标题 / 列表 / 表格列对齐 / 首行缩进等自带基础排版，全端渲染一致。",
+            "source": {
+              "start": {
+                "line": 28,
+                "column": 13
+              },
+              "end": {
+                "line": 28,
+                "column": 13
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 28,
+            "column": 1
+          },
+          "end": {
+            "line": 27,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "节点列表"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "节点列表",
+            "source": {
+              "start": {
+                "line": 30,
+                "column": 1
+              },
+              "end": {
+                "line": 30,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 30,
+            "column": 1
+          },
+          "end": {
+            "line": 30,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-rich-text :nodes=\"nodeList\"></nax-rich-text>",
+        "attrs": {
+          "lang": "html"
+        },
+        "source": {
+          "start": {
+            "line": 31,
+            "column": 1
+          },
+          "end": {
+            "line": 32,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-rich-text",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "nodes",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"nodeList\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-rich-text>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "const nodeList = [\n  {\n    name: 'p',\n    attrs: { style: 'color: #18a058;' },\n    children: [{ text: '节点列表渲染' }]\n  }\n] as any[]",
+        "attrs": {
+          "lang": "ts"
+        },
+        "source": {
+          "start": {
+            "line": 35,
+            "column": 1
+          },
+          "end": {
+            "line": 42,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "const",
+            "c": "kw"
+          },
+          {
+            "t": " nodeList = [\n  {\n    name: "
+          },
+          {
+            "t": "'p'",
+            "c": "str"
+          },
+          {
+            "t": ",\n    attrs: { style: "
+          },
+          {
+            "t": "'color: #18a058;'",
+            "c": "str"
+          },
+          {
+            "t": " },\n    children: [{ text: "
+          },
+          {
+            "t": "'节点列表渲染'",
+            "c": "str"
+          },
+          {
+            "t": " }]\n  }\n] "
+          },
+          {
+            "t": "as",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "any",
+            "c": "kw"
+          },
+          {
+            "t": "[]"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "inline-code",
+            "value": "nodes",
+            "source": {
+              "start": {
+                "line": 45,
+                "column": 1
+              },
+              "end": {
+                "line": 45,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 非空时优先于 ",
+            "source": {
+              "start": {
+                "line": 45,
+                "column": 8
+              },
+              "end": {
+                "line": 45,
+                "column": 8
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "content",
+            "source": {
+              "start": {
+                "line": 45,
+                "column": 16
+              },
+              "end": {
+                "line": 45,
+                "column": 16
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "。",
+            "source": {
+              "start": {
+                "line": 45,
+                "column": 25
+              },
+              "end": {
+                "line": 45,
+                "column": 25
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 45,
+            "column": 1
+          },
+          "end": {
+            "line": 44,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "渲染引擎-engine"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "渲染引擎 engine",
+            "source": {
+              "start": {
+                "line": 47,
+                "column": 1
+              },
+              "end": {
+                "line": 47,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 47,
+            "column": 1
+          },
+          "end": {
+            "line": 47,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "选项",
+                    "source": {
+                      "start": {
+                        "line": 48,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 48,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 48,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 48,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 48,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 48,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 48,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 48,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 48,
+                "column": 1
+              },
+              "end": {
+                "line": 48,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "parser",
+                    "source": {
+                      "start": {
+                        "line": 50,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 50,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "（默认）",
+                    "source": {
+                      "start": {
+                        "line": 50,
+                        "column": 9
+                      },
+                      "end": {
+                        "line": 50,
+                        "column": 9
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 50,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 50,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "自研解析渲染器：容错 HTML 解析 + 自绘节点树，App / Web / 小程序渲染一致；支持音频 / 视频播放卡、图片点击预览、表格对齐；小程序端也支持内容点击",
+                    "source": {
+                      "start": {
+                        "line": 50,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 50,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 50,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 50,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 50,
+                "column": 1
+              },
+              "end": {
+                "line": 50,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "builtin",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 51,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 51,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "内置 rich-text 兜底：App 渲染模式 ",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "web",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 26
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 26
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " / ",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 31
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 31
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "native",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 34
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 34
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "、",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 42
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 42
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "userSelect",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 43
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 43
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "、",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 55
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 55
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "space",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 56
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 56
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 仅此引擎生效",
+                    "source": {
+                      "start": {
+                        "line": 51,
+                        "column": 63
+                      },
+                      "end": {
+                        "line": 51,
+                        "column": 63
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 51,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 51,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 51,
+                "column": 1
+              },
+              "end": {
+                "line": 51,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 48,
+            "column": 1
+          },
+          "end": {
+            "line": 50,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "app-渲染模式-mode仅-builtin-引擎"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "App 渲染模式 mode（仅 builtin 引擎）",
+            "source": {
+              "start": {
+                "line": 53,
+                "column": 1
+              },
+              "end": {
+                "line": 53,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 53,
+            "column": 1
+          },
+          "end": {
+            "line": 53,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "选项",
+                    "source": {
+                      "start": {
+                        "line": 54,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 54,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 54,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 54,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 54,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 54,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 54,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 54,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 54,
+                "column": 1
+              },
+              "end": {
+                "line": 54,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "web",
+                    "source": {
+                      "start": {
+                        "line": 56,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 56,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "（默认）",
+                    "source": {
+                      "start": {
+                        "line": 56,
+                        "column": 6
+                      },
+                      "end": {
+                        "line": 56,
+                        "column": 6
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 56,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 56,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "webview 渲染；标签支持最广，渲染结果与 Web 端一致",
+                    "source": {
+                      "start": {
+                        "line": 56,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 56,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 56,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 56,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 56,
+                "column": 1
+              },
+              "end": {
+                "line": 56,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "native",
+                    "source": {
+                      "start": {
+                        "line": 57,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 57,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 57,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "蒸汽模式下 C 语言原生渲染：长文秒开、快滑不白屏不掉帧。适合纯文本长内容（段落 / 加粗 / 链接 / 图片）",
+                    "source": {
+                      "start": {
+                        "line": 57,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 57,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 57,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 57,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 57,
+                "column": 1
+              },
+              "end": {
+                "line": 57,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 54,
+            "column": 1
+          },
+          "end": {
+            "line": 56,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "自动回退",
+                "source": {
+                  "start": {
+                    "line": 59,
+                    "column": 3
+                  },
+                  "end": {
+                    "line": 59,
+                    "column": 3
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": "：传 ",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 9
+              },
+              "end": {
+                "line": 59,
+                "column": 9
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "mode=\"native\"",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 12
+              },
+              "end": {
+                "line": 59,
+                "column": 12
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 时，若内容含 h1-h6 / ul / li 等结构标签（native 解析不稳，会出现整块空白），或 iOS / 鸿蒙端开启 ",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 27
+              },
+              "end": {
+                "line": 59,
+                "column": 27
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "user-select",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 92
+              },
+              "end": {
+                "line": 59,
+                "column": 92
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "，组件自动改用 ",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 105
+              },
+              "end": {
+                "line": 59,
+                "column": 105
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "web",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 113
+              },
+              "end": {
+                "line": 59,
+                "column": 113
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 渲染，无需手动处理。",
+            "source": {
+              "start": {
+                "line": 59,
+                "column": 118
+              },
+              "end": {
+                "line": 59,
+                "column": 118
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 59,
+            "column": 1
+          },
+          "end": {
+            "line": 58,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Web / 小程序端忽略该属性（本身就是 webview 渲染）。",
+            "source": {
+              "start": {
+                "line": 61,
+                "column": 1
+              },
+              "end": {
+                "line": 61,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 61,
+            "column": 1
+          },
+          "end": {
+            "line": 60,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "多媒体parser-引擎"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "多媒体（parser 引擎）",
+            "source": {
+              "start": {
+                "line": 63,
+                "column": 1
+              },
+              "end": {
+                "line": 63,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 63,
+            "column": 1
+          },
+          "end": {
+            "line": 63,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "音频"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "音频",
+            "source": {
+              "start": {
+                "line": 64,
+                "column": 1
+              },
+              "end": {
+                "line": 64,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 64,
+            "column": 1
+          },
+          "end": {
+            "line": 64,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "`",
+            "source": {
+              "start": {
+                "line": 66,
+                "column": 1
+              },
+              "end": {
+                "line": 66,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": " 渲染为播放卡：封面（",
+            "source": {
+              "start": {
+                "line": 66,
+                "column": 2
+              },
+              "end": {
+                "line": 66,
+                "column": 2
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "poster",
+            "source": {
+              "start": {
+                "line": 66,
+                "column": 15
+              },
+              "end": {
+                "line": 66,
+                "column": 15
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": " 属性）+ 播放按钮叠放（播放态光学居中）、标题行（",
+            "source": {
+              "start": {
+                "line": 66,
+                "column": 21
+              },
+              "end": {
+                "line": 66,
+                "column": 21
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "title` 属性，缺省回退文件名）、当前 / 总时长、进度条拖拽实时跳转。",
+            "source": {
+              "start": {
+                "line": 66,
+                "column": 49
+              },
+              "end": {
+                "line": 66,
+                "column": 49
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 66,
+            "column": 1
+          },
+          "end": {
+            "line": 65,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-rich-text\n  content=\"\"\n></nax-rich-text>",
+        "attrs": {
+          "lang": "html"
+        },
+        "source": {
+          "start": {
+            "line": 68,
+            "column": 1
+          },
+          "end": {
+            "line": 71,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-rich-text",
+            "c": "kw"
+          },
+          {
+            "t": "\n  "
+          },
+          {
+            "t": "content",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"\"",
+            "c": "str"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "></nax-rich-text>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "视频"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "视频",
+            "source": {
+              "start": {
+                "line": 74,
+                "column": 1
+              },
+              "end": {
+                "line": 74,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 74,
+            "column": 1
+          },
+          "end": {
+            "line": 74,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "inline-code",
+            "value": "<video>",
+            "source": {
+              "start": {
+                "line": 76,
+                "column": 1
+              },
+              "end": {
+                "line": 76,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 渲染为封面卡片：封面图（",
+            "source": {
+              "start": {
+                "line": 76,
+                "column": 10
+              },
+              "end": {
+                "line": 76,
+                "column": 10
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "poster",
+            "source": {
+              "start": {
+                "line": 76,
+                "column": 23
+              },
+              "end": {
+                "line": 76,
+                "column": 23
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 属性）+ 播放按钮。原生 ",
+            "source": {
+              "start": {
+                "line": 76,
+                "column": 31
+              },
+              "end": {
+                "line": 76,
+                "column": 31
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "video",
+            "source": {
+              "start": {
+                "line": 76,
+                "column": 45
+              },
+              "end": {
+                "line": 76,
+                "column": 45
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 常驻挂载、封面卡覆盖其上（uni-app x 同层级渲染），点击后在手势内开始播放，App 端预先缓冲通常即点即播；点击后未开始播放期间圆钮显示加载动画，4 秒未开始自动退回播放按钮可重试；暂停后用原生控制条 / 中间播放键恢复。",
+            "source": {
+              "start": {
+                "line": 76,
+                "column": 52
+              },
+              "end": {
+                "line": 76,
+                "column": 52
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 76,
+            "column": 1
+          },
+          "end": {
+            "line": 75,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-rich-text\n  content=\"<video src='https://example.com/v.mp4' poster='https://example.com/cover.jpg' controls></video>\"\n></nax-rich-text>",
+        "attrs": {
+          "lang": "html"
+        },
+        "source": {
+          "start": {
+            "line": 78,
+            "column": 1
+          },
+          "end": {
+            "line": 81,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-rich-text",
+            "c": "kw"
+          },
+          {
+            "t": "\n  "
+          },
+          {
+            "t": "content",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"<video src='https://example.com/v.mp4' poster='https://example.com/cover.jpg' controls></video>\"",
+            "c": "str"
+          },
+          {
+            "t": "\n"
+          },
+          {
+            "t": "></nax-rich-text>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "图片预览"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "图片预览",
+            "source": {
+              "start": {
+                "line": 84,
+                "column": 1
+              },
+              "end": {
+                "line": 84,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 84,
+            "column": 1
+          },
+          "end": {
+            "line": 84,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "parser 引擎下点击内容图片自动调用 ",
+            "source": {
+              "start": {
+                "line": 85,
+                "column": 1
+              },
+              "end": {
+                "line": 85,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "inline-code",
+            "value": "uni.previewImage",
+            "source": {
+              "start": {
+                "line": 85,
+                "column": 22
+              },
+              "end": {
+                "line": 85,
+                "column": 22
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": " 全屏预览（同一段内容内的所有图片可左右切换）。",
+            "source": {
+              "start": {
+                "line": 85,
+                "column": 40
+              },
+              "end": {
+                "line": 85,
+                "column": 40
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 85,
+            "column": 1
+          },
+          "end": {
+            "line": 84,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "内容点击"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "内容点击",
+            "source": {
+              "start": {
+                "line": 87,
+                "column": 1
+              },
+              "end": {
+                "line": 87,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 87,
+            "column": 1
+          },
+          "end": {
+            "line": 87,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "code-block",
+        "value": "<nax-rich-text :content=\"html\" @itemclick=\"onItemClick\"></nax-rich-text>",
+        "attrs": {
+          "lang": "html"
+        },
+        "source": {
+          "start": {
+            "line": 88,
+            "column": 1
+          },
+          "end": {
+            "line": 89,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "<nax-rich-text",
+            "c": "kw"
+          },
+          {
+            "t": " :"
+          },
+          {
+            "t": "content",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"html\"",
+            "c": "str"
+          },
+          {
+            "t": " @"
+          },
+          {
+            "t": "itemclick",
+            "c": "fn"
+          },
+          {
+            "t": "="
+          },
+          {
+            "t": "\"onItemClick\"",
+            "c": "str"
+          },
+          {
+            "t": "></nax-rich-text>",
+            "c": "kw"
+          }
+        ]
+      },
+      {
+        "type": "code-block",
+        "value": "function onItemClick(e : any) {\n  // e.detail.type：img | a | audio | embed\n  // 点击图片 / 音频卡：e.detail.src；点击链接：e.detail.href\n}",
+        "attrs": {
+          "lang": "ts"
+        },
+        "source": {
+          "start": {
+            "line": 92,
+            "column": 1
+          },
+          "end": {
+            "line": 96,
+            "column": 1
+          }
+        },
+        "tokens": [
+          {
+            "t": "function",
+            "c": "kw"
+          },
+          {
+            "t": " "
+          },
+          {
+            "t": "onItemClick",
+            "c": "fn"
+          },
+          {
+            "t": "(e : "
+          },
+          {
+            "t": "any",
+            "c": "kw"
+          },
+          {
+            "t": ") {\n  "
+          },
+          {
+            "t": "// e.detail.type：img | a | audio | embed",
+            "c": "com"
+          },
+          {
+            "t": "\n  "
+          },
+          {
+            "t": "// 点击图片 / 音频卡：e.detail.src；点击链接：e.detail.href",
+            "c": "com"
+          },
+          {
+            "t": "\n}"
+          }
+        ]
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "inline-code",
+                "value": "builtin",
+                "source": {
+                  "start": {
+                    "line": 99,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 99,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引擎下小程序端 rich-text 不支持子内容点击，",
+                "source": {
+                  "start": {
+                    "line": 99,
+                    "column": 10
+                  },
+                  "end": {
+                    "line": 99,
+                    "column": 10
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "itemclick",
+                "source": {
+                  "start": {
+                    "line": 99,
+                    "column": 38
+                  },
+                  "end": {
+                    "line": 99,
+                    "column": 38
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 不会触发（官方限制）；",
+                "source": {
+                  "start": {
+                    "line": 99,
+                    "column": 49
+                  },
+                  "end": {
+                    "line": 99,
+                    "column": 49
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "parser",
+                "source": {
+                  "start": {
+                    "line": 99,
+                    "column": 61
+                  },
+                  "end": {
+                    "line": 99,
+                    "column": 61
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " 引擎无此限制。",
+                "source": {
+                  "start": {
+                    "line": 99,
+                    "column": 69
+                  },
+                  "end": {
+                    "line": 99,
+                    "column": 69
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 99,
+            "column": 1
+          },
+          "end": {
+            "line": 99,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 3,
+          "id": "平台差异与已知限制"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "平台差异与已知限制",
+            "source": {
+              "start": {
+                "line": 101,
+                "column": 1
+              },
+              "end": {
+                "line": 101,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 101,
+            "column": 1
+          },
+          "end": {
+            "line": 101,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "list",
+        "attrs": {},
+        "children": [
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "parser",
+                    "source": {
+                      "start": {
+                        "line": 102,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 102,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 为默认引擎：自绘节点树，App / Web / 小程序渲染一致；内置 rich-text 限制（如视频不支持）不适用于该引擎",
+                    "source": {
+                      "start": {
+                        "line": 102,
+                        "column": 9
+                      },
+                      "end": {
+                        "line": 102,
+                        "column": 9
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 102,
+                "column": 1
+              },
+              "end": {
+                "line": 102,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "builtin",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 引擎小程序端不支持 ",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "itemclick",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 21
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 21
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 子内容点击（官方限制）",
+                    "source": {
+                      "start": {
+                        "line": 103,
+                        "column": 32
+                      },
+                      "end": {
+                        "line": 103,
+                        "column": 32
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 103,
+                "column": 1
+              },
+              "end": {
+                "line": 103,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "builtin",
+                    "source": {
+                      "start": {
+                        "line": 104,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 104,
+                        "column": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 引擎 App 端 ",
+                    "source": {
+                      "start": {
+                        "line": 104,
+                        "column": 10
+                      },
+                      "end": {
+                        "line": 104,
+                        "column": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "inline-code",
+                    "value": "mode=native",
+                    "source": {
+                      "start": {
+                        "line": 104,
+                        "column": 20
+                      },
+                      "end": {
+                        "line": 104,
+                        "column": 20
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " 时内容含 h1-h6 / ul / li 等结构标签会自动回退 web 渲染（native 解析不稳）",
+                    "source": {
+                      "start": {
+                        "line": 104,
+                        "column": 33
+                      },
+                      "end": {
+                        "line": 104,
+                        "column": 33
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 104,
+                "column": 1
+              },
+              "end": {
+                "line": 104,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "list-item",
+            "children": [
+              {
+                "type": "list-item-text",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全局样式仅支持 font-size / font-family / line-height / color（写在 rich-text 元素上，优先级低于内容内样式）",
+                    "source": {
+                      "start": {
+                        "line": 105,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 105,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 0,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 105,
+                "column": 1
+              },
+              "end": {
+                "line": 105,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 102,
+            "column": 1
+          },
+          "end": {
+            "line": 105,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "主题"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "主题",
+            "source": {
+              "start": {
+                "line": 107,
+                "column": 1
+              },
+              "end": {
+                "line": 107,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 107,
+            "column": 1
+          },
+          "end": {
+            "line": 107,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "通过 CSS 变量覆盖：",
+            "source": {
+              "start": {
+                "line": 109,
+                "column": 1
+              },
+              "end": {
+                "line": 109,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 109,
+            "column": 1
+          },
+          "end": {
+            "line": 108,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "Token",
+                    "source": {
+                      "start": {
+                        "line": 111,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 111,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 111,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 111,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "用途",
+                    "source": {
+                      "start": {
+                        "line": 111,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 111,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 111,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 111,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 111,
+                "column": 1
+              },
+              "end": {
+                "line": 111,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "--nax-color-text",
+                    "source": {
+                      "start": {
+                        "line": 113,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 113,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 113,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 113,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认文字色（内容内未显式指定颜色时生效）",
+                    "source": {
+                      "start": {
+                        "line": 113,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 113,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 113,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 113,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 113,
+                "column": 1
+              },
+              "end": {
+                "line": 113,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 111,
+            "column": 1
+          },
+          "end": {
+            "line": 112,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "blockquote",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "富文本内容的颜色以",
+                "source": {
+                  "start": {
+                    "line": 115,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 115,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "内容内联样式",
+                    "source": {
+                      "start": {
+                        "line": 115,
+                        "column": 12
+                      },
+                      "end": {
+                        "line": 115,
+                        "column": 12
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "为最高优先级，其次为 ",
+                "source": {
+                  "start": {
+                    "line": 115,
+                    "column": 20
+                  },
+                  "end": {
+                    "line": 115,
+                    "column": 20
+                  }
+                }
+              },
+              {
+                "type": "inline-code",
+                "value": "color",
+                "source": {
+                  "start": {
+                    "line": 115,
+                    "column": 31
+                  },
+                  "end": {
+                    "line": 115,
+                    "column": 31
+                  }
+                }
+              },
+              {
+                "type": "text",
+                "value": " prop 全局色，最后回落到主题 token。",
+                "source": {
+                  "start": {
+                    "line": 115,
+                    "column": 38
+                  },
+                  "end": {
+                    "line": 115,
+                    "column": 38
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 1,
+                "column": 1
+              },
+              "end": {
+                "line": 0,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 115,
+            "column": 1
+          },
+          "end": {
+            "line": 115,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "props"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Props",
+            "source": {
+              "start": {
+                "line": 117,
+                "column": 1
+              },
+              "end": {
+                "line": 117,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 117,
+            "column": 1
+          },
+          "end": {
+            "line": 117,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left,left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "属性",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "类型",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "默认值",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 119,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 119,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 119,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 119,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 119,
+                "column": 1
+              },
+              "end": {
+                "line": 119,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "content",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "HTML 字符串（nodes 为空时生效）",
+                    "source": {
+                      "start": {
+                        "line": 121,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 121,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 121,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 121,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 121,
+                "column": 1
+              },
+              "end": {
+                "line": 121,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "nodes",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "array",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "() => [] as any[]",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "节点列表（非空时优先于 content）",
+                    "source": {
+                      "start": {
+                        "line": 122,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 122,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 122,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 122,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 122,
+                "column": 1
+              },
+              "end": {
+                "line": 122,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "engine",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'parser'",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "渲染引擎 parser（默认，自研解析渲染器，全端一致）| builtin（内置 rich-text 兜底）",
+                    "source": {
+                      "start": {
+                        "line": 123,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 123,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 123,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 123,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 123,
+                "column": 1
+              },
+              "end": {
+                "line": 123,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "mode",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'web'",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "仅 builtin 引擎生效：App 渲染模式 web | native",
+                    "source": {
+                      "start": {
+                        "line": 124,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 124,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 124,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 124,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 124,
+                "column": 1
+              },
+              "end": {
+                "line": 124,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "userSelect",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "false",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "仅 builtin 引擎生效：文本是否可选中复制",
+                    "source": {
+                      "start": {
+                        "line": 125,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 125,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 125,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 125,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 125,
+                "column": 1
+              },
+              "end": {
+                "line": 125,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "space",
+                    "source": {
+                      "start": {
+                        "line": 126,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 126,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 126,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 126,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 126,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 126,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 126,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 126,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 126,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 126,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 126,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 126,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "仅 builtin 引擎生效：连续空格显示 ensp | emsp | nbsp",
+                    "source": {
+                      "start": {
+                        "line": 126,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 126,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 126,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 126,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 126,
+                "column": 1
+              },
+              "end": {
+                "line": 126,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "size",
+                    "source": {
+                      "start": {
+                        "line": 127,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 127,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 127,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 127,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 127,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 127,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 127,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 127,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'md'",
+                    "source": {
+                      "start": {
+                        "line": 127,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 127,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 127,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 127,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全局字号 sm(14) | md(16 默认) | lg(18) | xl(20) | xxl(22) | 数字字符串（px）",
+                    "source": {
+                      "start": {
+                        "line": 127,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 127,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 127,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 127,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 127,
+                "column": 1
+              },
+              "end": {
+                "line": 127,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "color",
+                    "source": {
+                      "start": {
+                        "line": 128,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 128,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 128,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 128,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 128,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 128,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 128,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 128,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 128,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 128,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 128,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 128,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全局文字色（内容内联样式优先于全局样式）",
+                    "source": {
+                      "start": {
+                        "line": 128,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 128,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 128,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 128,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 128,
+                "column": 1
+              },
+              "end": {
+                "line": 128,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "lineHeight",
+                    "source": {
+                      "start": {
+                        "line": 129,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 129,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 129,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 129,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 129,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 129,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 129,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 129,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 129,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 129,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 129,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 129,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全局行高，如 1.5 或 22px",
+                    "source": {
+                      "start": {
+                        "line": 129,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 129,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 129,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 129,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 129,
+                "column": 1
+              },
+              "end": {
+                "line": 129,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "fontFamily",
+                    "source": {
+                      "start": {
+                        "line": 130,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 130,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 130,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 130,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 130,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 130,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 130,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 130,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 130,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 130,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 130,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 130,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "全局字体",
+                    "source": {
+                      "start": {
+                        "line": 130,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 130,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 130,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 130,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 130,
+                "column": 1
+              },
+              "end": {
+                "line": 130,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "linkColor",
+                    "source": {
+                      "start": {
+                        "line": 131,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 131,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 131,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 131,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 131,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 131,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 131,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 131,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "'#18a058'",
+                    "source": {
+                      "start": {
+                        "line": 131,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 131,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 131,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 131,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "链接颜色（parser 引擎生效，默认主题绿 #18a058）",
+                    "source": {
+                      "start": {
+                        "line": 131,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 131,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 131,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 131,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 131,
+                "column": 1
+              },
+              "end": {
+                "line": 131,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "show",
+                    "source": {
+                      "start": {
+                        "line": 132,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 132,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 132,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 132,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "boolean",
+                    "source": {
+                      "start": {
+                        "line": 132,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 132,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 132,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 132,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "true",
+                    "source": {
+                      "start": {
+                        "line": 132,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 132,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 132,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 132,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "是否显示",
+                    "source": {
+                      "start": {
+                        "line": 132,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 132,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 132,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 132,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 132,
+                "column": 1
+              },
+              "end": {
+                "line": 132,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "customClass",
+                    "source": {
+                      "start": {
+                        "line": 133,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 133,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 133,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 133,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "string",
+                    "source": {
+                      "start": {
+                        "line": 133,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 133,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 133,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 133,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "inline-code",
+                    "value": "''",
+                    "source": {
+                      "start": {
+                        "line": 133,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 133,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 133,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 133,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "根节点扩展 class",
+                    "source": {
+                      "start": {
+                        "line": 133,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 133,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 133,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 133,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 133,
+                "column": 1
+              },
+              "end": {
+                "line": 133,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 119,
+            "column": 1
+          },
+          "end": {
+            "line": 132,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "events"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Events",
+            "source": {
+              "start": {
+                "line": 135,
+                "column": 1
+              },
+              "end": {
+                "line": 135,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 135,
+            "column": 1
+          },
+          "end": {
+            "line": 135,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "事件",
+                    "source": {
+                      "start": {
+                        "line": 137,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 137,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 137,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 137,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 137,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 137,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 137,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 137,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 137,
+                "column": 1
+              },
+              "end": {
+                "line": 137,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "click",
+                    "source": {
+                      "start": {
+                        "line": 139,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 139,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 139,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 139,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "点击根节点",
+                    "source": {
+                      "start": {
+                        "line": 139,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 139,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 139,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 139,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 139,
+                "column": 1
+              },
+              "end": {
+                "line": 139,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "itemclick",
+                    "source": {
+                      "start": {
+                        "line": 140,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 140,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 140,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 140,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "内容点击：detail.src / detail.href，type 标记来源 img | a | audio | embed（builtin 引擎小程序端不触发）",
+                    "source": {
+                      "start": {
+                        "line": 140,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 140,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 140,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 140,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 140,
+                "column": 1
+              },
+              "end": {
+                "line": 140,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 137,
+            "column": 1
+          },
+          "end": {
+            "line": 139,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "id": "slots"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "Slots",
+            "source": {
+              "start": {
+                "line": 142,
+                "column": 1
+              },
+              "end": {
+                "line": 142,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 142,
+            "column": 1
+          },
+          "end": {
+            "line": 142,
+            "column": 1
+          }
+        }
+      },
+      {
+        "type": "table",
+        "attrs": {
+          "align": "left,left"
+        },
+        "children": [
+          {
+            "type": "table-row",
+            "attrs": {
+              "head": true
+            },
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "插槽",
+                    "source": {
+                      "start": {
+                        "line": 144,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 144,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 144,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 144,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "head": true,
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "说明",
+                    "source": {
+                      "start": {
+                        "line": 144,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 144,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 144,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 144,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 144,
+                "column": 1
+              },
+              "end": {
+                "line": 144,
+                "column": 1
+              }
+            }
+          },
+          {
+            "type": "table-row",
+            "children": [
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "default",
+                    "source": {
+                      "start": {
+                        "line": 146,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 146,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 146,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 146,
+                    "column": 1
+                  }
+                }
+              },
+              {
+                "type": "table-cell",
+                "attrs": {
+                  "align": "left"
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "预留扩展内容",
+                    "source": {
+                      "start": {
+                        "line": 146,
+                        "column": 1
+                      },
+                      "end": {
+                        "line": 146,
+                        "column": 1
+                      }
+                    }
+                  }
+                ],
+                "source": {
+                  "start": {
+                    "line": 146,
+                    "column": 1
+                  },
+                  "end": {
+                    "line": 146,
+                    "column": 1
+                  }
+                }
+              }
+            ],
+            "source": {
+              "start": {
+                "line": 146,
+                "column": 1
+              },
+              "end": {
+                "line": 146,
+                "column": 1
+              }
+            }
+          }
+        ],
+        "source": {
+          "start": {
+            "line": 144,
+            "column": 1
+          },
+          "end": {
+            "line": 145,
+            "column": 1
+          }
+        }
+      }
+    ],
+    "source": {
+      "start": {
+        "line": 1,
+        "column": 1
+      },
+      "end": {
+        "line": 147,
+        "column": 1
+      }
+    }
+  }
+}

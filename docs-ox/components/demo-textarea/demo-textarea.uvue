@@ -1,0 +1,65 @@
+<template>
+  <view class="demo-textarea">
+    <text class="dsec">基础用法</text>
+    <nax-textarea v-model="basic" placeholder="请输入内容" class="mb"></nax-textarea>
+
+    <text class="dsec">字数统计 count</text>
+    <nax-textarea v-model="withCount" count :maxlength="100" placeholder="最多 100 字" class="mb"></nax-textarea>
+
+    <text class="dsec">自动增高 auto-height</text>
+    <nax-textarea v-model="autoH" auto-height height="70" placeholder="输入时自动增高" class="mb"></nax-textarea>
+
+    <text class="dsec">无边框 / 背景色</text>
+    <nax-textarea v-model="plain" :border="false" placeholder="无边框" class="mb"></nax-textarea>
+    <nax-textarea v-model="plainBg" :border="false" background="#f3f3f5" placeholder="无边框 + 背景色" class="mb"></nax-textarea>
+
+    <text class="dsec">仅下边框 border-type=bottom</text>
+    <nax-textarea v-model="bottomBorder" border border-type="bottom" placeholder="下划线风格" class="mb"></nax-textarea>
+
+    <text class="dsec">尺寸 size</text>
+    <nax-textarea v-model="sizeSm" size="sm" height="56" placeholder="sm" class="mb"></nax-textarea>
+    <nax-textarea v-model="sizeMd" size="md" height="70" placeholder="md" class="mb"></nax-textarea>
+    <nax-textarea v-model="sizeLg" size="lg" height="88" placeholder="lg" class="mb"></nax-textarea>
+
+    <text class="dsec">禁用 / 只读</text>
+    <nax-textarea v-model="disabledVal" disabled count class="mb"></nax-textarea>
+    <nax-textarea v-model="readonlyVal" readonly class="mb"></nax-textarea>
+
+    <text class="dsec">自定义边框色 + 高度</text>
+    <nax-textarea v-model="colorBorder" border border-color="#18a058" height="100" placeholder="height=100，边框 primary"></nax-textarea>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const basic = ref('')
+const withCount = ref('')
+const autoH = ref('')
+const plain = ref('')
+const plainBg = ref('')
+const bottomBorder = ref('')
+const sizeSm = ref('')
+const sizeMd = ref('')
+const sizeLg = ref('')
+const disabledVal = ref('禁用状态内容')
+const readonlyVal = ref('只读状态内容')
+const colorBorder = ref('')
+</script>
+
+<style>
+.demo-textarea {
+  flex-direction: column;
+}
+
+.mb {
+  margin-bottom: 14px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

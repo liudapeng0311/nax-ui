@@ -1,0 +1,206 @@
+<template>
+	<view class="nax-form" :class="rootClass">
+		<slot></slot>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-form
+	 * @description 表单容器。管理 model / rules，提供校验与重置。功能主要对齐  Form。
+	 * @property {Object} model 表单数据对象（必填，配合 form-item prop）
+	 * @property {Object} rules 校验规则（字段 -> 规则数组）
+	 * @property {string} errorType 错误提示：message | toast | border-bottom | none
+	 * @property {boolean} borderBottom 是否显示表单项下边框，默认 true
+	 * @property {string} labelPosition left | top
+	 * @property {string|number} labelWidth 标签宽度（px），默认 80
+	 * @property {string} labelAlign left | center | right
+	 * @property {string|number} labelSize 标签字号（px），空串跟随组件默认 15
+	 * @property {string} customClass 根节点扩展 class
+	 * @method validate 校验全部字段，Promise<boolean>
+	 * @method validateField 校验指定字段
+	 * @method resetFields 重置为初始快照并清空错误
+	 * @method clearValidate 清空校验结果
+	 * @method setRules 手动设置规则（小程序函数规则场景）
+	 * @slot default 放置 nax-form-item
+	 */
+	import { createFormState, NaxFormStateOptions } from './form-state.uts'
+
+	const props = defineProps({
+		model: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		rules: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		errorType: {
+			type: String,
+			default: 'message'
+		},
+		borderBottom: {
+			type: Boolean,
+			default: true
+		},
+		labelPosition: {
+			type: String,
+			default: 'left'
+		},
+		labelWidth: {
+			type: [String, Number],
+			default: 80
+		},
+		labelAlign: {
+			type: String,
+			default: 'left'
+		},
+		labelSize: {
+			type: [String, Number],
+			default: ''
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['validate'])
+
+	// Android inject 会按默认值推断运行时类型，统一提供 Ref，避免 ComputedRef 类型强转。
+	const formErrorTypeState = ref(props.errorType)
+	const formBorderBottomState = ref(props.borderBottom)
+	const formLabelPositionState = ref(props.labelPosition)
+	const formLabelWidthState = ref('' + props.labelWidth)
+	const formLabelAlignState = ref(props.labelAlign)
+	const formLabelSizeState = ref('' + props.labelSize)
+
+	watch((): string => props.errorType, (value: string) => {
+		formErrorTypeState.value = value
+	})
+	watch((): boolean => props.borderBottom, (value: boolean) => {
+		formBorderBottomState.value = value
+	})
+	watch((): string => props.labelPosition, (value: string) => {
+		formLabelPositionState.value = value
+	})
+	watch((): any => props.labelWidth, (value: any) => {
+		formLabelWidthState.value = '' + value
+	})
+watch((): string => props.labelAlign, (value: string) => {
+	formLabelAlignState.value = value
+})
+watch((): any => props.labelSize, (value: any) => {
+	formLabelSizeState.value = '' + value
+})
+
+	// 校验编排（注册/错误/快照/validate 系列）抽至 form-state.uts，与 useValidate 组合式函数共用实现
+	const state = createFormState({
+		getModel: (): UTSJSONObject | null => {
+			return props.model as UTSJSONObject
+		},
+		getRules: (): UTSJSONObject | null => {
+			return props.rules as UTSJSONObject
+		}
+	} as NaxFormStateOptions)
+
+	watch((): any => {
+		return props.rules
+	}, (_: any) => {
+		state.setRules(props.rules as UTSJSONObject)
+	})
+
+	/**
+	 * 校验全部：先派发 validate 事件，失败按 errorType 弹 toast
+	 */
+	function validate(): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			const errors = state.validateField(null, '')
+			const ok = errors.length == 0
+			emit('validate', ok)
+			if (!ok) {
+				const et = props.errorType
+				if (et == 'toast' || et == 'message-toast') {
+					const first = errors[0]
+					const tip = first.getString('message')
+					uni.showToast({
+						title: tip != null ? tip : '校验失败',
+						icon: 'none'
+					})
+				}
+				reject(errors)
+				return
+			}
+			resolve(true)
+		})
+	}
+
+	function validateField(fieldProps: any | null = null, event: string = ''): UTSJSONObject[] {
+		return state.validateField(fieldProps, event)
+	}
+
+	function resetFields() {
+		state.resetFields()
+	}
+
+	function clearValidate(fieldProps: any | null = null) {
+		state.clearValidate(fieldProps)
+	}
+
+	function setRules(rules: UTSJSONObject) {
+		state.setRules(rules)
+	}
+
+	// —— provide 给 form-item ——
+	provide('naxFormInForm', true)
+	provide('naxFormErrorType', formErrorTypeState)
+	provide('naxFormBorderBottom', formBorderBottomState)
+	provide('naxFormLabelPosition', formLabelPositionState)
+	provide('naxFormLabelWidth', formLabelWidthState)
+	provide('naxFormLabelAlign', formLabelAlignState)
+	provide('naxFormLabelSize', formLabelSizeState)
+	provide('naxFormErrorVersion', state.errorVersion)
+	provide('naxFormGetError', (prop: string): string => {
+		return state.getError(prop)
+	})
+	provide('naxFormRegister', (prop: string) => {
+		state.register(prop)
+	})
+	provide('naxFormUnregister', (prop: string) => {
+		state.unregister(prop)
+	})
+	provide('naxFormSetItemRules', (prop: string, rules: any[]) => {
+		state.setItemRules(prop, rules)
+	})
+	provide('naxFormValidateField', (prop: string, event: string): string => {
+		return state.validateOne(prop, event)
+	})
+
+	defineExpose({
+		validate,
+		validateField,
+		resetFields,
+		clearValidate,
+		setRules
+	})
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+</script>
+
+<style>
+	.nax-form {
+		flex-direction: column;
+		align-items: stretch;
+		/* #ifdef APP-ANDROID */
+		align-self: stretch;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+</style>

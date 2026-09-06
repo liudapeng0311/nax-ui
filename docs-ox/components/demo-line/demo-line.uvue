@@ -1,0 +1,83 @@
+<template>
+  <view class="demo-line">
+    <text class="dsec">基础</text>
+    <nax-line></nax-line>
+
+    <text class="dsec">长度 length</text>
+    <nax-line length="100%" space="8"></nax-line>
+    <nax-line length="200" space="8"></nax-line>
+    <nax-line length="50%" space="8"></nax-line>
+
+    <text class="dsec">粗细 size</text>
+    <nax-line size="hairline"></nax-line>
+    <nax-line size="sm"></nax-line>
+    <nax-line size="md"></nax-line>
+    <nax-line size="lg"></nax-line>
+
+    <text class="dsec">虚线 dashed</text>
+    <nax-line dashed space="8"></nax-line>
+    <nax-line dashed size="md" type="primary" space="8"></nax-line>
+    <nax-line dashed size="lg" type="warning" space="8"></nax-line>
+
+    <text class="dsec">类型 type</text>
+    <nax-line type="primary" space="8"></nax-line>
+    <nax-line type="info" space="8"></nax-line>
+    <nax-line type="success" space="8"></nax-line>
+    <nax-line type="warning" space="8"></nax-line>
+    <nax-line type="error" space="8"></nax-line>
+
+    <text class="dsec">内缩 inset</text>
+    <view class="card">
+      <text class="ctxt">列表项 A</text>
+      <nax-line inset="16"></nax-line>
+      <text class="ctxt">列表项 B</text>
+      <nax-line inset="16"></nax-line>
+    </view>
+
+    <text class="dsec">竖线 vertical</text>
+    <view class="vrow">
+      <nax-line direction="vertical" length="24" space="12"></nax-line>
+      <nax-line direction="vertical" length="24" space="12" type="primary" size="md"></nax-line>
+    </view>
+
+    <text class="dsec">自定义 color</text>
+    <nax-line color="#8a2be2" size="md" space="8"></nax-line>
+    <nax-line color="#8a2be2" dashed size="md" space="8"></nax-line>
+  </view>
+</template>
+
+<script setup lang="uts">
+</script>
+
+<style>
+.demo-line {
+  flex-direction: column;
+}
+
+.card {
+  background-color: var(--nax-color-surface, #ffffff);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.ctxt {
+  font-size: 13px;
+  color: var(--nax-color-text, #333333);
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.vrow {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

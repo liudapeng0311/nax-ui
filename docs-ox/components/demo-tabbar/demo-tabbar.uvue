@@ -1,0 +1,23 @@
+<template>
+  <view class="demo-tabbar">
+    <nax-tabbar v-model="current" :list="tabs" :fixed="false" :safe-area-inset-bottom="false"></nax-tabbar>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const current = ref(0)
+const tabs = [
+  { text: '首页', icon: 'home' },
+  { text: '发现', icon: 'search' },
+  { text: '消息', icon: 'heart', dot: true },
+  { text: '我的', icon: 'user' }
+]
+</script>
+
+<style>
+.demo-tabbar {
+  flex-direction: column;
+}
+</style>

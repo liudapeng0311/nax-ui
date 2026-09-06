@@ -1,0 +1,74 @@
+<template>
+  <view class="demo-transition">
+    <text class="dsec">淡入淡出 fade</text>
+    <view class="row mb">
+      <nax-button size="sm" label="切换" @click="showFade = !showFade"></nax-button>
+    </view>
+    <nax-transition :show="showFade" name="fade">
+      <view class="panel"><text class="ptxt">fade 淡入淡出</text></view>
+    </nax-transition>
+
+    <text class="dsec">从下往上 slide-up</text>
+    <view class="row mb">
+      <nax-button size="sm" label="切换" @click="showUp = !showUp"></nax-button>
+    </view>
+    <nax-transition :show="showUp" name="slide-up">
+      <view class="panel"><text class="ptxt">slide-up 从下往上</text></view>
+    </nax-transition>
+
+    <text class="dsec">从上往下 slide-down</text>
+    <view class="row mb">
+      <nax-button size="sm" label="切换" @click="showDown = !showDown"></nax-button>
+    </view>
+    <nax-transition :show="showDown" name="slide-down">
+      <view class="panel"><text class="ptxt">slide-down 从上往下</text></view>
+    </nax-transition>
+
+    <text class="dsec">缩放 zoom</text>
+    <view class="row mb">
+      <nax-button size="sm" label="切换" @click="showZoom = !showZoom"></nax-button>
+    </view>
+    <nax-transition :show="showZoom" name="zoom">
+      <view class="panel"><text class="ptxt">zoom 缩放</text></view>
+    </nax-transition>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const showFade = ref(true)
+const showUp = ref(true)
+const showDown = ref(true)
+const showZoom = ref(true)
+</script>
+
+<style>
+.demo-transition {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.panel {
+  background-color: var(--nax-color-bg-secondary, #f2f3f5);
+  border-radius: 8px;
+  padding: 14px;
+  align-items: center;
+}
+
+.ptxt {
+  font-size: 13px;
+  color: var(--nax-color-text, #333333);
+}
+
+.dsec {
+  font-size: 12px;
+  color: var(--nax-color-text-secondary, #666666);
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+</style>

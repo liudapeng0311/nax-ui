@@ -1,0 +1,504 @@
+﻿<template>
+	<!-- 外层常驻以便注册；面板仅在展开时渲染 -->
+	<view class="nax-dropdown-item" :class="rootClass">
+		<view v-if="isOpen" class="nax-dropdown-item__panel">
+			<slot>
+				<!-- 默认单选列表 -->
+				<scroll-view
+					v-if="useScroll"
+					class="nax-dropdown-item__scroll"
+					:show-scrollbar="false"
+					:style="scrollStyle"
+				>
+					<view
+						v-for="(opt, index) in optionList"
+						:key="index"
+						class="nax-dropdown-item__option"
+						:class="optionClassAt(opt)"
+						@click="onOptionClick(opt)"
+					>
+						<text class="nax-dropdown-item__option-text" :max-lines="1" :class="optionTextClassAt(opt)">{{ resolveLabel(opt) }}</text>
+						<view v-if="isOptionSelected(opt)" class="nax-dropdown-item__check">
+							<nax-icon name="check" size="16" color="#18a058"></nax-icon>
+						</view>
+					</view>
+				</scroll-view>
+				<view v-else class="nax-dropdown-item__list">
+					<view
+						v-for="(opt, index) in optionList"
+						:key="index"
+						class="nax-dropdown-item__option"
+						:class="optionClassAt(opt)"
+						@click="onOptionClick(opt)"
+					>
+						<text class="nax-dropdown-item__option-text" :max-lines="1" :class="optionTextClassAt(opt)">{{ resolveLabel(opt) }}</text>
+						<view v-if="isOptionSelected(opt)" class="nax-dropdown-item__check">
+							<nax-icon name="check" size="16" color="#18a058"></nax-icon>
+						</view>
+					</view>
+				</view>
+			</slot>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-dropdown-item
+	 * @description 下拉菜单项。默认 options 单选；插槽可完全自定义面板。
+	 * @property {string} modelValue 当前选中值（v-model），与 options[].value 对应
+	 * @property {string} title 菜单标题
+	 * @property {Array} options 选项 { label, value } 或字符串
+	 * @property {boolean} disabled 禁用该菜单
+	 * @property {boolean} show 是否展示该菜单标题，默认 true
+	 * @property {string} height 默认列表高度（有值时 scroll-view），纯数字按 px
+	 * @property {boolean} highlighted 强制高亮标题；默认跟 modelValue 自动
+	 * @property {boolean} displaySelected 标题展示已选 label，默认 false
+	 * @property {string} labelName 选项文案字段，默认 label
+	 * @property {string} valueName 选项值字段，默认 value
+	 * @property {string} customClass 根扩展 class
+	 * @event update:modelValue v-model
+	 * @event change 选中值变化（string）
+	 * @slot default 自定义面板（覆盖默认列表）
+	 */
+	const props = defineProps({
+		modelValue: {
+			type: String,
+			default: ''
+		},
+		title: {
+			type: String,
+			default: ''
+		},
+		options: {
+			type: Array,
+			default: () => [] as any[]
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		show: {
+			type: Boolean,
+			default: true
+		},
+		height: {
+			type: String,
+			default: ''
+		},
+		highlighted: {
+			type: Boolean,
+			default: false
+		},
+		displaySelected: {
+			type: Boolean,
+			default: false
+		},
+		labelName: {
+			type: String,
+			default: 'label'
+		},
+		valueName: {
+			type: String,
+			default: 'value'
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits(['update:modelValue', 'change'])
+
+	const itemId = 'nax-dd-item-' + Math.floor(Math.random() * 10000000).toString()
+
+	const inGroup = inject('naxDdInGroup', false) as boolean
+	// Android UTS 会把 null 默认值推断为 Void，需使用同类型兜底值接收父级注入。
+	function fallbackRegister(_id : string, _title : string, _disabled : boolean, _visible : boolean, _highlighted : boolean) : number {
+		return -1
+	}
+	function fallbackUpdate(_id : string, _title : string, _disabled : boolean, _visible : boolean, _highlighted : boolean) {}
+	function fallbackUnregister(_id : string) {}
+	function fallbackClose() {}
+
+	// #ifdef APP-ANDROID
+	const activeIdRef = inject('naxDdActiveId', ref('')) as Ref<string>
+	const registerRaw = inject('naxDdRegister', fallbackRegister) as (a : string, b : string, c : boolean, d : boolean, e : boolean) => number
+	const updateRaw = inject('naxDdUpdate', fallbackUpdate) as (a : string, b : string, c : boolean, d : boolean, e : boolean) => void
+	const unregisterRaw = inject('naxDdUnregister', fallbackUnregister) as (a : string) => void
+	const closeRaw = inject('naxDdClose', fallbackClose) as () => void
+	const closeOnClickSelfRef = inject('naxDdCloseOnClickSelf', ref(true)) as Ref<boolean>
+	// #endif
+	// #ifndef APP-ANDROID
+	const activeIdRef = inject('naxDdActiveId', null)
+	const registerRaw = inject('naxDdRegister', null)
+	const updateRaw = inject('naxDdUpdate', null)
+	const unregisterRaw = inject('naxDdUnregister', null)
+	const closeRaw = inject('naxDdClose', null)
+	const closeOnClickSelfRef = inject('naxDdCloseOnClickSelf', null)
+	// #endif
+
+	function readRefString(r : any | null, fallback : string) : string {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<string>).value
+	}
+
+	function readRefBool(r : any | null, fallback : boolean) : boolean {
+		if (r == null) {
+			return fallback
+		}
+		return (r as Ref<boolean>).value
+	}
+
+	function callRegister(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) : number {
+		if (registerRaw == null) {
+			return -1
+		}
+		const fn = registerRaw as (a : string, b : string, c : boolean, d : boolean, e : boolean) => number
+		return fn(id, title, disabled, visible, highlighted)
+	}
+
+	function callUpdate(id : string, title : string, disabled : boolean, visible : boolean, highlighted : boolean) {
+		if (updateRaw == null) {
+			return
+		}
+		const fn = updateRaw as (a : string, b : string, c : boolean, d : boolean, e : boolean) => void
+		fn(id, title, disabled, visible, highlighted)
+	}
+
+	function callUnregister(id : string) {
+		if (unregisterRaw == null) {
+			return
+		}
+		const fn = unregisterRaw as (a : string) => void
+		fn(id)
+	}
+
+	function callClose() {
+		if (closeRaw == null) {
+			return
+		}
+		const fn = closeRaw as () => void
+		fn()
+	}
+
+	function asObject(item : any | null) : UTSJSONObject | null {
+		if (item == null) {
+			return null
+		}
+		if (typeof item == 'string' || typeof item == 'number' || typeof item == 'boolean') {
+			return null
+		}
+		return item as UTSJSONObject
+	}
+
+	function resolveLabel(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item
+		}
+		if (typeof item == 'number' || typeof item == 'boolean') {
+			return '' + item
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const key = props.labelName
+		const v = obj[key]
+		if (v != null) {
+			return '' + v
+		}
+		const label = obj['label']
+		if (label != null) {
+			return '' + label
+		}
+		const text = obj['text']
+		if (text != null) {
+			return '' + text
+		}
+		const name = obj['name']
+		if (name != null) {
+			return '' + name
+		}
+		return ''
+	}
+
+	function resolveValue(item : any | null) : string {
+		if (item == null) {
+			return ''
+		}
+		if (typeof item == 'string') {
+			return item
+		}
+		if (typeof item == 'number' || typeof item == 'boolean') {
+			return '' + item
+		}
+		const obj = asObject(item)
+		if (obj == null) {
+			return ''
+		}
+		const key = props.valueName
+		const v = obj[key]
+		if (v != null) {
+			return '' + v
+		}
+		const value = obj['value']
+		if (value != null) {
+			return '' + value
+		}
+		const id = obj['id']
+		if (id != null) {
+			return '' + id
+		}
+		return resolveLabel(item)
+	}
+
+	const optionList = computed((): any[] => {
+		const raw = props.options
+		if (raw == null) {
+			return [] as any[]
+		}
+		return raw as any[]
+	})
+
+	function findSelectedLabel() : string {
+		const cur = props.modelValue
+		if (cur.length == 0) {
+			return ''
+		}
+		const list = optionList.value
+		var i = 0
+		while (i < list.length) {
+			const opt = list[i]
+			if (resolveValue(opt) == cur) {
+				return resolveLabel(opt)
+			}
+			i++
+		}
+		return ''
+	}
+
+	function computeDisplayTitle() : string {
+		if (props.displaySelected) {
+			const selectedLabel = findSelectedLabel()
+			if (selectedLabel.length > 0) {
+				return selectedLabel
+			}
+		}
+		return props.title
+	}
+
+	function computeHighlighted() : boolean {
+		if (props.highlighted) {
+			return true
+		}
+		if (props.modelValue.length > 0) {
+			return true
+		}
+		return false
+	}
+
+	function syncToParent() {
+		if (!inGroup) {
+			return
+		}
+		callUpdate(itemId, computeDisplayTitle(), props.disabled, props.show, computeHighlighted())
+	}
+
+	function registerToParent() {
+		if (!inGroup) {
+			return
+		}
+		callRegister(itemId, computeDisplayTitle(), props.disabled, props.show, computeHighlighted())
+	}
+
+	const isOpen = computed((): boolean => {
+		if (!inGroup) {
+			return false
+		}
+		const active = readRefString(activeIdRef, '')
+		if (active.length == 0) {
+			return false
+		}
+		return active == itemId
+	})
+
+	function parseHeightPx() : number {
+		if (props.height.length == 0) {
+			return 0
+		}
+		var numPart = props.height
+		if (props.height.indexOf('px') >= 0) {
+			numPart = props.height.replace('px', '')
+		}
+		const n = parseFloat(numPart)
+		if (isNaN(n) || n < 0) {
+			return 0
+		}
+		return n
+	}
+
+	const useScroll = computed((): boolean => {
+		return parseHeightPx() > 0
+	})
+
+	const scrollStyle = computed((): string => {
+		const h = parseHeightPx()
+		if (h <= 0) {
+			return ''
+		}
+		return 'height:' + h.toString() + 'px;'
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (isOpen.value) {
+			cls += ' nax-dropdown-item--open'
+		}
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	function isOptionSelected(opt : any) : boolean {
+		return resolveValue(opt) == props.modelValue
+	}
+
+	function optionClassAt(opt : any) : string {
+		if (isOptionSelected(opt)) {
+			return 'nax-dropdown-item__option--active'
+		}
+		return ''
+	}
+
+	function optionTextClassAt(opt : any) : string {
+		if (isOptionSelected(opt)) {
+			return 'nax-dropdown-item__option-text--active'
+		}
+		return ''
+	}
+
+	function onOptionClick(opt : any) {
+		if (!isOpen.value) {
+			return
+		}
+		if (props.disabled) {
+			return
+		}
+		const value = resolveValue(opt)
+		if (value != props.modelValue) {
+			emit('update:modelValue', value)
+			emit('change', value)
+		}
+		const autoClose = readRefBool(closeOnClickSelfRef, true)
+		if (autoClose) {
+			callClose()
+		}
+	}
+
+	function close() {
+		callClose()
+	}
+
+	defineExpose({
+		close
+	})
+
+	watch((): string => props.modelValue, (_ : string) => {
+		syncToParent()
+	})
+	watch((): string => props.title, (_ : string) => {
+		syncToParent()
+	})
+	watch((): boolean => props.disabled, (_ : boolean) => {
+		syncToParent()
+	})
+	watch((): boolean => props.show, (_ : boolean) => {
+		syncToParent()
+	})
+	watch((): boolean => props.highlighted, (_ : boolean) => {
+		syncToParent()
+	})
+	watch((): boolean => props.displaySelected, (_ : boolean) => {
+		syncToParent()
+	})
+	watch((): any => props.options, (_ : any) => {
+		syncToParent()
+	})
+
+	onMounted(() => {
+		registerToParent()
+	})
+
+	onUnmounted(() => {
+		callUnregister(itemId)
+	})
+</script>
+
+<style>
+	.nax-dropdown-item {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-dropdown-item__panel {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+	}
+
+	.nax-dropdown-item__list {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-dropdown-item__scroll {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-dropdown-item__option {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding-left: 16px;
+		padding-right: 16px;
+		height: 48px;
+		border-bottom-width: 0.5px;
+		border-bottom-style: solid;
+		border-bottom-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-dropdown-item__option-text {
+		flex: 1;
+		font-size: var(--nax-font-size-md, 16px);
+		line-height: 22px;
+		color: var(--nax-color-text, #303133);
+		text-overflow: ellipsis;
+	}
+
+	/* #ifdef APP-HARMONY || APP-IOS */
+	.nax-dropdown-item__option-text {
+		/* iOS/鸿蒙单行 text 的基线不随父级 align-items 居中，显式对齐选项行高。 */
+		height: 48px;
+		line-height: 48px;
+	}
+	/* #endif */
+
+	.nax-dropdown-item__option-text--active {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-dropdown-item__check {
+		margin-left: 8px;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+</style>

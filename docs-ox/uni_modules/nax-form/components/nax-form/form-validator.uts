@@ -1,0 +1,476 @@
+/**
+ * nax-form 轻量校验（对齐  / async-validator 常用子集，适配 uts）
+ * 支持：required / type / min / max / len / pattern / whitespace / message / trigger
+ */
+function isEmptyValue(value: any | null): boolean {
+	if (value == null) {
+		return true
+	}
+	if (typeof value == 'string') {
+		return (value as string).length == 0
+	}
+	if (typeof value == 'number') {
+		// NaN
+		const n = value as number
+		return n != n
+	}
+	if (typeof value == 'boolean') {
+		return false
+	}
+	// 数组
+	const arr = value as any[]
+	if (arr != null && typeof arr.length == 'number') {
+		return arr.length == 0
+	}
+	return false
+}
+
+function valueLength(value: any | null): number {
+	if (value == null) {
+		return 0
+	}
+	if (typeof value == 'string') {
+		return (value as string).length
+	}
+	if (typeof value == 'number') {
+		return ('' + (value as number)).length
+	}
+	const arr = value as any[]
+	if (arr != null && typeof arr.length == 'number') {
+		return arr.length
+	}
+	return 0
+}
+
+function asNumber(value: any | null): number {
+	if (value == null) {
+		return NaN
+	}
+	if (typeof value == 'number') {
+		return value as number
+	}
+	if (typeof value == 'string') {
+		const s = value as string
+		if (s.length == 0) {
+			return NaN
+		}
+		return parseFloat(s)
+	}
+	return NaN
+}
+
+function isIntegerNum(n: number): boolean {
+	if (n != n) {
+		return false
+	}
+	return Math.floor(n) == n
+}
+
+function isEmail(s: string): boolean {
+	// 轻量邮箱校验
+	const re = new RegExp('^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')
+	return re.test(s)
+}
+
+function isUrl(s: string): boolean {
+	const re = new RegExp('^(https?:\\/\\/)?([\\w-]+\\.)+[\\w-]+(\\/[\\w-./?%&=]*)?$', 'i')
+	return re.test(s)
+}
+
+function ruleMessage(rule: UTSJSONObject, fallback: string): string {
+	const real = asRealJsonObject(rule)
+	if (real == null) {
+		return fallback
+	}
+	const msg = real.getString('message')
+	if (msg != null && msg.length > 0) {
+		return msg
+	}
+	return fallback
+}
+
+function matchType(value: any | null, typeName: string): boolean {
+	if (typeName == 'any' || typeName.length == 0) {
+		return true
+	}
+	if (typeName == 'string') {
+		return typeof value == 'string'
+	}
+	if (typeName == 'number') {
+		if (typeof value == 'number') {
+			const n = value as number
+			return n == n
+		}
+		if (typeof value == 'string') {
+			const n = parseFloat(value as string)
+			return n == n && (value as string).length > 0
+		}
+		return false
+	}
+	if (typeName == 'boolean') {
+		return typeof value == 'boolean'
+	}
+	if (typeName == 'integer') {
+		const n = asNumber(value)
+		return isIntegerNum(n)
+	}
+	if (typeName == 'float') {
+		const n = asNumber(value)
+		return n == n
+	}
+	if (typeName == 'array') {
+		const arr = value as any[]
+		return arr != null && typeof arr.length == 'number'
+	}
+	if (typeName == 'object') {
+		return value != null && typeof value == 'object'
+	}
+	if (typeName == 'accepted') {
+		if (typeof value == 'boolean') {
+			return value as boolean
+		}
+		if (typeof value == 'number') {
+			return (value as number) == 1
+		}
+		if (typeof value == 'string') {
+			const s = value as string
+			return s == 'true' || s == '1' || s == 'yes'
+		}
+		return false
+	}
+	if (typeName == 'email') {
+		if (typeof value != 'string') {
+			return false
+		}
+		return isEmail(value as string)
+	}
+	if (typeName == 'url') {
+		if (typeof value != 'string') {
+			return false
+		}
+		return isUrl(value as string)
+	}
+	if (typeName == 'date') {
+		if (typeof value == 'number') {
+			return true
+		}
+		if (typeof value == 'string') {
+			const t = Date.parse(value as string)
+			return t == t
+		}
+		return false
+	}
+	return true
+}
+
+/**
+ * 校验单条规则，失败返回 message，成功返回空串
+ */
+export function validateRuleItem(rule: UTSJSONObject, value: any | null): string {
+	const real = asRealJsonObject(rule)
+	if (real == null) {
+		return ''
+	}
+	const required = real.getBoolean('required') == true
+	const empty = isEmptyValue(value)
+
+	if (required && empty) {
+		return ruleMessage(real, '必填项不能为空')
+	}
+	// 非必填且空：跳过后续规则
+	if (empty) {
+		return ''
+	}
+
+	const whitespace = real.getBoolean('whitespace')
+	if (whitespace != false && typeof value == 'string') {
+		const s = value as string
+		if (s.trim().length == 0) {
+			// async-validator: whitespace true 时纯空格不通过（默认）
+			// 仅当显式 whitespace:false 时允许
+			if (whitespace == null || whitespace == true) {
+				// 与 required 组合时常见；无 required 时也拦截纯空格
+				if (required || whitespace == true) {
+					return ruleMessage(real, '不能为空白字符')
+				}
+			}
+		}
+	}
+
+	const typeName = real.getString('type')
+	if (typeName != null && typeName.length > 0) {
+		if (!matchType(value, typeName)) {
+			return ruleMessage(real, '类型不正确')
+		}
+	}
+
+	const pattern = real.getString('pattern')
+	if (pattern != null && pattern.length > 0) {
+		try {
+			const re = new RegExp(pattern)
+			const text = '' + value
+			if (!re.test(text)) {
+				return ruleMessage(real, '格式不正确')
+			}
+		} catch (e) {
+			// 非法正则：忽略该条 pattern
+		}
+	}
+
+	const minAny = real.getAny('min')
+	const maxAny = real.getAny('max')
+	const lenAny = real.getAny('len')
+
+	const typeForRange = typeName != null ? typeName : ''
+	const numericRange = typeForRange == 'number' || typeForRange == 'integer' || typeForRange == 'float' || typeof value == 'number'
+
+	if (lenAny != null) {
+		const len = asNumber(lenAny)
+		if (len == len && valueLength(value) != len) {
+			return ruleMessage(real, '长度必须为 ' + len.toString())
+		}
+	}
+	if (minAny != null) {
+		const min = asNumber(minAny)
+		if (min == min) {
+			if (numericRange) {
+				const n = asNumber(value)
+				if (!(n == n) || n < min) {
+					return ruleMessage(real, '不能小于 ' + min.toString())
+				}
+			} else if (valueLength(value) < min) {
+				return ruleMessage(real, '长度不能小于 ' + min.toString())
+			}
+		}
+	}
+	if (maxAny != null) {
+		const max = asNumber(maxAny)
+		if (max == max) {
+			if (numericRange) {
+				const n = asNumber(value)
+				if (!(n == n) || n > max) {
+					return ruleMessage(real, '不能大于 ' + max.toString())
+				}
+			} else if (valueLength(value) > max) {
+				return ruleMessage(real, '长度不能大于 ' + max.toString())
+			}
+		}
+	}
+
+	// enum: 数组包含
+	const enumList = real.getArray('enum')
+	if (enumList != null && enumList.length > 0) {
+		var hit = false
+		var i = 0
+		const text = '' + value
+		while (i < enumList.length) {
+			if ('' + enumList[i] == text) {
+				hit = true
+				break
+			}
+			i++
+		}
+		if (!hit) {
+			return ruleMessage(real, '不在可选范围内')
+		}
+	}
+
+	return ''
+}
+
+/**
+ * 规则 trigger 是否包含事件（event 为空表示全部执行）
+ */
+export function ruleMatchTrigger(rule: UTSJSONObject, event: string): boolean {
+	if (event.length == 0) {
+		return true
+	}
+	const real = asRealJsonObject(rule)
+	if (real == null) {
+		return true
+	}
+	const tAny = real.getAny('trigger')
+	if (tAny == null) {
+		// 未配置 trigger：全量校验时执行；字段事件时也执行（更宽松）
+		return true
+	}
+	if (typeof tAny == 'string') {
+		return (tAny as string) == event
+	}
+	const arr = tAny as any[]
+	if (arr != null && typeof arr.length == 'number') {
+		var i = 0
+		while (i < arr.length) {
+			if ('' + arr[i] == event) {
+				return true
+			}
+			i++
+		}
+		return false
+	}
+	return true
+}
+
+/**
+ * 对规则列表校验，返回首个错误文案
+ */
+export function validateRules(rules: any[], value: any | null, event: string): string {
+	var i = 0
+	while (i < rules.length) {
+		const raw = rules[i]
+		if (raw != null) {
+			const rule = raw as UTSJSONObject
+			if (ruleMatchTrigger(rule, event)) {
+				const msg = validateRuleItem(rule, value)
+				if (msg.length > 0) {
+					return msg
+				}
+			}
+		}
+		i++
+	}
+	return ''
+}
+
+/**
+ * 归一化为真实 UTSJSONObject。
+ * App 端对象 props（model / rules / 规则项）经渲染层桥接后会丢失 UTSJSONObject
+ * 方法（getAny/set 不可用），探测失败时用 JSON 往返转换还原；Web/小程序为真实实例，直接返回。
+ */
+function asRealJsonObject(obj: any | null): UTSJSONObject | null {
+	if (obj == null) {
+		return null
+	}
+	try {
+		const o = obj as UTSJSONObject
+		o.getAny('__nax_probe__')
+		return o
+	} catch (e) {
+		return JSON.parse(JSON.stringify(obj)) as UTSJSONObject
+	}
+}
+
+/**
+ * 从 model 读取字段（支持 a.b 一级路径）
+ */
+export function getModelValue(model: any | null, prop: string): any | null {
+	if (model == null || prop.length == 0) {
+		return null
+	}
+	const root = asRealJsonObject(model)
+	if (root == null) {
+		return null
+	}
+	if (prop.indexOf('.') < 0) {
+		return root.getAny(prop)
+	}
+	const parts = prop.split('.')
+	var cur: any | null = root
+	var i = 0
+	while (i < parts.length) {
+		if (cur == null) {
+			return null
+		}
+		const obj = asRealJsonObject(cur)
+		if (obj == null) {
+			return null
+		}
+		const key = parts[i]
+		if (i == parts.length - 1) {
+			return obj.getAny(key)
+		}
+		const next = obj.getAny(key)
+		cur = next
+		i++
+	}
+	return null
+}
+
+/**
+ * 写入 model 字段（扁平 key；含点时仅写最后一级已存在对象）
+ */
+export function setModelValue(model: any | null, prop: string, value: any | null) {
+	if (model == null || prop.length == 0) {
+		return
+	}
+	const rootSet = asRealJsonObject(model)
+	if (rootSet == null) {
+		return
+	}
+	if (prop.indexOf('.') < 0) {
+		rootSet.set(prop, value)
+		return
+	}
+	const parts2 = prop.split('.')
+	var cur2: any | null = rootSet
+	var j = 0
+	while (j < parts2.length - 1) {
+		if (cur2 == null) {
+			return
+		}
+		const obj2 = asRealJsonObject(cur2)
+		if (obj2 == null) {
+			return
+		}
+		const key2 = parts2[j]
+		const next2 = obj2.getAny(key2)
+		if (next2 == null) {
+			return
+		}
+		cur2 = next2
+		j++
+	}
+	if (cur2 != null) {
+		const real2 = asRealJsonObject(cur2)
+		if (real2 != null) {
+			real2.set(parts2[parts2.length - 1], value)
+		}
+	}
+}
+
+/**
+ * 浅克隆 model 快照（扁平字段）
+ */
+export function cloneModelSnapshot(model: UTSJSONObject | null, props: string[]): UTSJSONObject {
+	const out = {} as UTSJSONObject
+	if (model == null) {
+		return out
+	}
+	var i = 0
+	while (i < props.length) {
+		const p = props[i]
+		if (p.length > 0) {
+			out.set(p, getModelValue(model, p))
+		}
+		i++
+	}
+	// 同时拷贝 model 已有顶层 key 文本化不可行；至少保证已注册 prop
+	return out
+}
+
+/**
+ * rules[prop] 取规则数组
+ */
+export function rulesOfProp(rules: UTSJSONObject | null, prop: string): any[] {
+	const empty = [] as any[]
+	if (rules == null || prop.length == 0) {
+		return empty
+	}
+	const real = asRealJsonObject(rules)
+	if (real == null) {
+		return empty
+	}
+	// 优先 getArray，避免 any 上探测 .push（App 编译失败）
+	const list = real.getArray(prop)
+	if (list != null) {
+		return list as any[]
+	}
+	const raw = real.getAny(prop)
+	if (raw == null) {
+		return empty
+	}
+	// 单条对象规则
+	return [raw] as any[]
+}
+
+
