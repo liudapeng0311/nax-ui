@@ -115,6 +115,29 @@
 				></nax-search>
 				<text class="hint">最近事件：{{ lastEvent }}</text>
 			</view>
+
+			<view class="section">
+				<text class="section__title">右侧插槽 right（如相机入口）</text>
+				<view class="item">
+					<nax-search :custom-class="searchThemeClass" v-model="withRight" :show-action="false" placeholder="右侧图标可点击">
+						<template #right>
+							<view class="right-icon" @click.stop="onRightClick">
+								<nax-icon name="image" size="20" :color="rightIconColor"></nax-icon>
+							</view>
+						</template>
+					</nax-search>
+				</view>
+				<view class="item">
+					<nax-search :custom-class="searchThemeClass" v-model="withRightAction" placeholder="搜索按钮 + 图标共存">
+						<template #right>
+							<view class="right-icon" @click.stop="onRightClick">
+								<nax-icon name="image" size="20" :color="rightIconColor"></nax-icon>
+							</view>
+						</template>
+					</nax-search>
+				</view>
+				<text class="hint">最近事件：{{ lastEvent }}</text>
+			</view>
 		</view>
 	</scroll-view>
 	</view>
@@ -156,6 +179,13 @@
 		// #endif
 	})
 
+	const rightIconColor = computed((): string => {
+		if (darkMode.value) {
+			return '#ffffff99'
+		}
+		return '#909399'
+	})
+
 	onShow(() => {
 		darkMode.value = bindDemoThemePage()
 	})
@@ -174,6 +204,8 @@
 	const customBg = ref('')
 	const disabledVal = ref('')
 	const clearable = ref('可清除示例')
+	const withRight = ref('')
+	const withRightAction = ref('')
 	const lastEvent = ref('无')
 
 	function onSearch(val: string) {
@@ -190,6 +222,14 @@
 
 	function onClear() {
 		lastEvent.value = 'clear'
+	}
+
+	function onRightClick() {
+		lastEvent.value = 'right 插槽点击'
+		uni.showToast({
+			title: '右侧图标点击',
+			icon: 'none'
+		})
 	}
 
 	function onDisabledClick() {
@@ -246,6 +286,13 @@
 
 	.item {
 		margin-bottom: 10px;
+	}
+
+	.right-icon {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		padding: 2px;
 	}
 
 	.hint {

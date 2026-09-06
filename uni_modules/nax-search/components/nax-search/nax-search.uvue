@@ -59,6 +59,11 @@
 				<text class="nax-search__action-text" :style="actionTextStyle" :max-lines="1">{{ actionText }}</text>
 			</slot>
 		</view>
+
+		<!-- 最右侧自定义区（如相机/扫码入口），不受 showAction/animation 影响 -->
+		<view class="nax-search__right">
+			<slot name="right"></slot>
+		</view>
 	</view>
 </template>
 
@@ -103,6 +108,7 @@
 	 * @event clickIcon 点击搜索图标
 	 * @slot label 自定义左侧 label
 	 * @slot action 自定义右侧操作区
+	 * @slot right 最右侧自定义内容（如相机/扫码图标），点击事件在插槽内容上自行绑定
 	 */
 	const props = defineProps({
 		modelValue: {
@@ -783,5 +789,13 @@
 		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
 		white-space: nowrap;
 		/* #endif */
+	}
+
+	.nax-search__right {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-left: var(--nax-space-2, 8px);
 	}
 </style>
