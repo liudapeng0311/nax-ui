@@ -1,3 +1,5 @@
+## 0.3.0（2026-09-07）
+- 新增 `right` 插槽：搜索框最右侧自定义区（如相机/扫码入口），不受 `showAction` / `animation` 影响，可与搜索/清除按钮共存；插槽内点击事件由内容自行绑定
 ## 0.2.4（2026-09-01）
 - 修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`，同 nax-input 0.2.6 修复）：`useStorage` 置 null 删除 key 等场景下 v-model 传入 null，`innerValue` 在初始化与 `modelValue` watch 双入口统一规整为空串；外部置 null 显示为空串，其它行为不变
 ## 0.2.3（2026-08-19）

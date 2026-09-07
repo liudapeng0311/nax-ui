@@ -4,7 +4,7 @@ demo: date-strip
 
 # nax-date-strip
 
-> 当前版本：0.1.0
+> 当前版本：0.2.0
 
 `nax-ui` 日期横条（uni-app x / uvue）。以横向滚动条方式展示一段连续日期，支持单选、多选与范围选择。
 
@@ -132,6 +132,29 @@ const formatter = (day: any) => {
 
 :::
 
+::: details 自定义颜色（全端生效）
+
+选中（含起止）、今天文字与范围中间底色可用 props 直接指定，内联字面量渲染，不依赖 CSS 变量解析：
+
+```html
+<nax-date-strip
+  v-model="value"
+  selected-color="#f0a020"
+  today-color="#f0a020"
+  middle-color="#fcefda"
+></nax-date-strip>
+```
+
+| 属性 | 说明 | 默认 |
+|------|------|------|
+| selected-color | 选中 / 起止格子背景色 | 空（跟随主题） |
+| today-color | 「今天」文字色 | 空（跟随主题） |
+| middle-color | 范围中间格子背景色 | 空（跟随主题） |
+
+`formatter` 改写的 `day.style` 优先保留，颜色 props 追加覆盖段（后写优先级高）。
+
+:::
+
 ## 主题
 
 通过 CSS 变量覆盖：
@@ -180,6 +203,9 @@ const formatter = (day: any) => {
 | endDateText | string | `'结束'` | 结束日期文字，默认「结束」 |
 | sameDateText | string | `'开始/结束'` | 同一天文字，默认「开始/结束」 |
 | showLunar | boolean | `false` | 是否显示农历，默认 false |
+| selectedColor | string | `''` | 选中/起止格子背景色（内联字面量，全端生效） |
+| todayColor | string | `''` | 「今天」文字色（同上） |
+| middleColor | string | `''` | 范围中间格子背景色（同上） |
 | customClass | string | `''` | 根节点扩展 class |
 
 

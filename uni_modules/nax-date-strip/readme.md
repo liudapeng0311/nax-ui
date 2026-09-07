@@ -123,6 +123,9 @@ const formatter = (day: any) => {
 | startDateText / endDateText | 起止文字 | 开始 / 结束 |
 | sameDateText | 同一天文字 | 开始/结束 |
 | showLunar | 显示农历 | false |
+| selectedColor | 选中 / 起止格子背景色（内联，全端生效） | 空 |
+| todayColor | 「今天」文字色（同上） | 空 |
+| middleColor | 范围中间格子背景色（同上） | 空 |
 | customClass | 根节点扩展 class | '' |
 
 ## Events
@@ -131,6 +134,27 @@ const formatter = (day: any) => {
 |------|------|
 | update:modelValue | 选中变化（v-model） |
 | change | 选中变化（参数同 update:modelValue） |
+
+## 自定义颜色（全端生效）
+
+选中（含起止）、今天文字与范围中间底色可用 props 直接指定，内联字面量渲染，不依赖 CSS 变量解析：
+
+```html
+<nax-date-strip
+  v-model="value"
+  selected-color="#f0a020"
+  today-color="#f0a020"
+  middle-color="#fcefda"
+></nax-date-strip>
+```
+
+| 属性 | 说明 | 默认 |
+|------|------|------|
+| selected-color | 选中 / 起止格子背景色 | 空（跟随主题） |
+| today-color | 「今天」文字色 | 空（跟随主题） |
+| middle-color | 范围中间格子背景色 | 空（跟随主题） |
+
+`formatter` 改写的 `day.style` 优先保留，颜色 props 追加覆盖段（后写优先级高）。
 
 ## 主题定制
 

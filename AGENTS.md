@@ -321,6 +321,7 @@ const emit = defineEmits(['click'])
 - [ ] 无无关重构与无关文件打扰
 - [ ] **用户未明确要求发布线上时，未执行任何服务器部署 / 上传操作**（发布流程见 `docs/deploy-docs.md`）
 - [ ] **git 提交已同时推送到 Gitee（`origin`）与 GitHub（`github`）双远端**（见 10.1）
+- [ ] **`manifest.json` 本地配置未提交**（见 10.2）
 
 ---
 
@@ -349,6 +350,21 @@ git push github main
 2. **认证方式**：GitHub 用 Personal Access Token（`repo` 权限）或 Git Credential Manager 浏览器授权（代理环境下 device flow 可能无反应，优先 PAT）；token 由用户提供，**不得写入仓库文件或 git 配置**
 3. 推送失败需排查解决后补推成功，并向用户汇报两端 commit 状态
 4. 新增 remote 已配置；若 clone 新机器，执行 `git remote add github https://github.com/liudapeng0311/nax-ui.git`
+
+---
+
+## 10.2 manifest.json 本地配置约束
+
+**硬约束：`manifest.json` 的本地配置一律不提交（stage / commit），git 忽略或提交前 `git restore` 该文件。**
+
+原因：`manifest.json` 中的 `app-harmonyConfig.signingConfigs`（鸿蒙签名证书路径 `certpath` / `profile` / `storeFile` 与对应密码）随机器/账号不同而不同（如 `c:\Users\<用户名>\AppData\...`），且密码含敏感凭据；提交会造成仓库内配置漂移与凭据暴露。
+
+注意事项：
+
+1. 若 `git status` 出现 `manifest.json` 改动，先确认是否仅本地证书/密钥相关；是 → 不 stage 该文件；已 stage → `git restore --staged manifest.json` 后再提交
+2. 即使改动看似只是机器路径差异，也不提交；本地签名配置保持工作区自由变化
+3. 不将本机证书路径 / 密码写入任何提交到仓库的文件（含 AGENTS.md 之外的文档）
+4. 若仓库其他成员需要鸿蒙签名说明，走线下 / 私密渠道提供，不走 git
 
 ---
 

@@ -1,3 +1,6 @@
+## 0.3.3（2026-09-07）
+- 依赖组件更新：`nax-search`（0.2.4→0.3.0）新增 `right` 插槽（最右侧自定义区，如相机/扫码入口），不受 `showAction` / `animation` 影响
+- 依赖组件更新：`nax-date-strip`（0.1.0→0.2.0）新增 `selected-color` / `today-color` / `middle-color` 颜色 props（内联字面量，全端生效）+ App 暗黑主题 `nax-theme-dark` 修饰适配
 ## 0.3.2（2026-09-05）
 - 新增组件 `nax-date-strip`（0.1.0）并纳入套装依赖聚合：横向日期选择条，单选 / 多选 / 范围选择（`v-model` + `change`）、`min` / `max` 范围、`disabledDate` 禁用、`filter` 过滤、`maxDays` + `overMaxDays`、`formatter` 自定义、`value-format`、`show-lunar` 农历（聚合组件数 51 → 52）
 - 依赖组件更新：`nax-nav-bar`（0.1.6→0.2.0）新增 `centerClickable` 中间区域可点击（仅 Web/小程序需开启，App 端无 pointer-events 限制）；App 端 `type="primary"` 背景与反白文字改内联 CSS 变量兜底（组件隔离下变量失效修复）

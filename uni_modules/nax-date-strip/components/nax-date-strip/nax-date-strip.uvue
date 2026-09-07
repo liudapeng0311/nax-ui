@@ -16,14 +16,14 @@
 					:id="itemDomId(index)"
 					class="nax-date-strip__item"
 					:class="itemClass(day)"
-					:style="day.style"
+					:style="itemInlineStyle(day)"
 					:hover-class="itemHoverClass(day)"
 					:hover-start-time="20"
 					:hover-stay-time="70"
 					@click="onDayClick(day)"
 				>
 					<text class="nax-date-strip__week" :class="weekTextClass(day)">{{ topTextOf(day) }}</text>
-					<text class="nax-date-strip__day" :class="dayTextClass(day)" :style="day.style">{{ day.dayText }}</text>
+					<text class="nax-date-strip__day" :class="dayTextClass(day)" :style="dayTextInlineStyle(day)">{{ day.dayText }}</text>
 					<text v-if="hasInfoLine" class="nax-date-strip__info" :class="infoTextClass(day)">{{ infoTextOf(day) || '\u00A0' }}</text>
 				</view>
 			</view>
@@ -51,6 +51,9 @@
 	 * @property {string} sameDateText 同一天文字，默认「开始/结束」
 	 * @property {boolean} showLunar 是否显示农历，默认 false
 	 * @property {string} customClass 根节点扩展 class
+	 * @property {string} selectedColor 选中/起止格子背景色（内联字面量，全端生效）
+	 * @property {string} todayColor 「今天」文字色（同上）
+	 * @property {string} middleColor 范围中间格子背景色（同上）
 	 * @event update:modelValue 选中变化
 	 * @event change 选中变化（参数同 update:modelValue）
 	 */
@@ -70,6 +73,9 @@
 		endDateText: { type: String, default: '结束' },
 		sameDateText: { type: String, default: '开始/结束' },
 		showLunar: { type: Boolean, default: false },
+		selectedColor: { type: String, default: '' },
+		todayColor: { type: String, default: '' },
+		middleColor: { type: String, default: '' },
 		customClass: { type: String, default: '' }
 	})
 
@@ -132,6 +138,32 @@
 		}
 		return cls.trim()
 	})
+
+	/**
+	 * App 端（含蒸汽）不支持自定义 CSS 变量主题化（uni-app x 官方文档确认 Android/iOS 不解析
+	 * var(--nax-*) 声明，会整体失效），因此暗黑状态通过 custom-class 传入（约定含 `nax-theme-dark`，
+	 * 与 nax-search / nax-input / nax-upload 一致），组件据此为各节点追加字面量修饰 class：
+	 * 深色返回 `xxx--app-dark`，浅色返回空（沿用基础 var+fallback，与按钮/日历等组件一致）。
+	 * 修饰规则写在样式区末尾（#ifdef APP…）；非 App 端此函数恒返回空，不影响 Web/小程序。
+	 */
+	function appDark(): boolean {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		return props.customClass.indexOf('nax-theme-dark') >= 0
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return false
+		// #endif
+	}
+
+	function appClass(base: string): string {
+		// App 浅色沿用组件内置 var+fallback（与按钮/日历等基础组件一致）；仅深色需字面量覆盖
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (appDark()) {
+			return ' ' + base + '--app-dark'
+		}
+		// #endif
+		return ''
+	}
 
 	function pad2(n: number): string {
 		if (n < 10) {
@@ -574,12 +606,16 @@
 			cls += ' nax-date-strip__item--disabled'
 		} else if (day.type == 'start') {
 			cls += ' nax-date-strip__item--start'
+			cls += appClass('nax-date-strip__item--selected')
 		} else if (day.type == 'end') {
 			cls += ' nax-date-strip__item--end'
+			cls += appClass('nax-date-strip__item--selected')
 		} else if (day.type == 'middle') {
 			cls += ' nax-date-strip__item--middle'
+			cls += appClass('nax-date-strip__item--middle')
 		} else if (day.type == 'selected') {
 			cls += ' nax-date-strip__item--selected'
+			cls += appClass('nax-date-strip__item--selected')
 		}
 		if (day.className.length > 0) {
 			cls += ' ' + day.className
@@ -591,17 +627,48 @@
 		if (day.type == 'disabled') {
 			return ''
 		}
-		return 'nax-date-strip__item--hover'
+		return ('nax-date-strip__item--hover' + appClass('nax-date-strip__item--hover')).trim()
+	}
+
+	/**
+	 * formatter 的 day.style 保留，再叠加 color prop 驱动的覆盖段（后写优先级高）。
+	 * inline 字面量全端可靠（App 蒸汽模式亦可用），不依赖 CSS 变量解析。
+	 */
+	function itemInlineStyle(day: NaxDateStripDay): string {
+		let s = day.style
+		if (day.type == 'selected' || day.type == 'start' || day.type == 'end') {
+			if (props.selectedColor.length > 0) {
+				s += 'background-color:' + props.selectedColor + ';'
+			}
+		} else if (day.type == 'middle') {
+			if (props.middleColor.length > 0) {
+				s += 'background-color:' + props.middleColor + ';'
+			}
+		}
+		return s
+	}
+
+	function dayTextInlineStyle(day: NaxDateStripDay): string {
+		let s = day.style
+		if (day.type == 'today' && props.todayColor.length > 0) {
+			s += 'color:' + props.todayColor + ';'
+		}
+		return s
 	}
 
 	function dayTextClass(day: NaxDateStripDay): string {
 		let cls = ''
 		if (day.type == 'disabled') {
 			cls += ' nax-date-strip__day--disabled'
+			cls += appClass('nax-date-strip__day--disabled')
 		} else if (isHighlighted(day)) {
 			cls += ' nax-date-strip__day--active'
+			cls += appClass('nax-date-strip__day--active')
 		} else if (day.type == 'today') {
 			cls += ' nax-date-strip__day--today'
+			cls += appClass('nax-date-strip__day--today')
+		} else {
+			cls += appClass('nax-date-strip__day')
 		}
 		return cls.trim()
 	}
@@ -610,8 +677,12 @@
 		let cls = ''
 		if (day.type == 'disabled') {
 			cls += ' nax-date-strip__week--disabled'
+			cls += appClass('nax-date-strip__week--disabled')
 		} else if (isHighlighted(day)) {
 			cls += ' nax-date-strip__week--active'
+			cls += appClass('nax-date-strip__week--active')
+		} else {
+			cls += appClass('nax-date-strip__week')
 		}
 		return cls.trim()
 	}
@@ -620,8 +691,12 @@
 		let cls = ''
 		if (day.type == 'disabled') {
 			cls += ' nax-date-strip__info--disabled'
+			cls += appClass('nax-date-strip__info--disabled')
 		} else if (isHighlighted(day)) {
 			cls += ' nax-date-strip__info--active'
+			cls += appClass('nax-date-strip__info--active')
+		} else {
+			cls += appClass('nax-date-strip__info')
 		}
 		return cls.trim()
 	}
@@ -1245,4 +1320,48 @@
 	.nax-date-strip__info--disabled {
 		color: var(--nax-color-text-disabled, #e5e5ea);
 	}
+
+	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+	/* App 端（含蒸汽）不解析 var(--nax-*)（Android/iOS 官方确认），深色主题由 custom-class
+	 * 传 nax-theme-dark → script 追加 --app-dark 修饰（见 appClass），此处字面量覆盖：
+	 * 浅色沿用上方 var+fallback（与按钮/日历等基础组件一致）；深色必须可靠显式着色。
+	 * 修饰类直接挂在元素上（蒸汽模式不支持后代选择器）。
+	 */
+	.nax-date-strip__item--selected--app-dark {
+		background-color: #63e2b7;
+	}
+
+	.nax-date-strip__item--middle--app-dark {
+		background-color: #1f3d34;
+	}
+
+	.nax-date-strip__item--hover--app-dark {
+		background-color: #26272c;
+	}
+
+	.nax-date-strip__day--app-dark {
+		color: #ffffffd1;
+	}
+
+	.nax-date-strip__week--app-dark,
+	.nax-date-strip__info--app-dark {
+		color: #ffffffa6;
+	}
+
+	.nax-date-strip__day--active--app-dark,
+	.nax-date-strip__week--active--app-dark,
+	.nax-date-strip__info--active--app-dark {
+		color: #000000;
+	}
+
+	.nax-date-strip__day--today--app-dark {
+		color: #63e2b7;
+	}
+
+	.nax-date-strip__day--disabled--app-dark,
+	.nax-date-strip__week--disabled--app-dark,
+	.nax-date-strip__info--disabled--app-dark {
+		color: #ffffff52;
+	}
+	/* #endif */
 </style>

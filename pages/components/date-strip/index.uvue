@@ -10,7 +10,7 @@
 			<view class="nax-theme page" :class="themeExtraClass">
 				<view class="section">
 					<text class="section__title">基础用法（单选）</text>
-					<nax-date-strip v-model="singleValue" @change="onChange"></nax-date-strip>
+					<nax-date-strip :custom-class="stripThemeClass" v-model="singleValue" @change="onChange"></nax-date-strip>
 					<view class="row">
 						<nax-button size="sm" type="primary" label="设为今天" @click="setToday"></nax-button>
 						<nax-button size="sm" label="清空" @click="clearSingle"></nax-button>
@@ -20,25 +20,25 @@
 
 				<view class="section">
 					<text class="section__title">多选 multiple</text>
-					<nax-date-strip v-model="multipleValue" type="multiple"></nax-date-strip>
+					<nax-date-strip :custom-class="stripThemeClass" v-model="multipleValue" type="multiple"></nax-date-strip>
 					<text class="hint">当前值：{{ formatValues(multipleValue) }}</text>
 				</view>
 
 				<view class="section">
 					<text class="section__title">范围选择 range</text>
-					<nax-date-strip v-model="rangeValue" type="range"></nax-date-strip>
+					<nax-date-strip :custom-class="stripThemeClass" v-model="rangeValue" type="range"></nax-date-strip>
 					<text class="hint">当前值：{{ formatValues(rangeValue) }}</text>
 				</view>
 
 				<view class="section">
 					<text class="section__title">范围允许同一天</text>
-					<nax-date-strip v-model="sameDayValue" type="range" allow-same-day></nax-date-strip>
+					<nax-date-strip :custom-class="stripThemeClass" v-model="sameDayValue" type="range" allow-same-day></nax-date-strip>
 					<text class="hint">当前值：{{ formatValues(sameDayValue) }}（选中后点击同一天收尾）</text>
 				</view>
 
 				<view class="section">
 					<text class="section__title">自定义日期范围 min / max</text>
-					<nax-date-strip v-model="rangeValue2" :min="minDate" :max="maxDate"></nax-date-strip>
+					<nax-date-strip :custom-class="stripThemeClass" v-model="rangeValue2" :min="minDate" :max="maxDate"></nax-date-strip>
 					<text class="hint">可选范围：{{ ymd(minDate) }} 至 {{ ymd(maxDate) }}</text>
 					<text class="hint">当前值：{{ singleText2 }}</text>
 				</view>
@@ -47,6 +47,7 @@
 					<text class="section__title">最多选择天数</text>
 					<text class="hint">多选（最多 3 天）</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="maxMultiValue"
 						type="multiple"
 						:min="jan2024_1"
@@ -57,6 +58,7 @@
 					<text class="hint">当前值：{{ formatValues(maxMultiValue) }}</text>
 					<text class="hint">范围（最多 5 天）</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="maxRangeValue"
 						type="range"
 						:min="jan2024_1"
@@ -71,6 +73,7 @@
 					<text class="section__title">禁用日期 disabledDate</text>
 					<text class="hint">仅开放工作日</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="disabledValue"
 						:min="jan2024_1"
 						:max="jan2024_15"
@@ -83,6 +86,7 @@
 					<text class="section__title">过滤日期 filter</text>
 					<text class="hint">只展示工作日（格子不连续）</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="filterValue"
 						:min="jan2024_1"
 						:max="jan2024_15"
@@ -94,6 +98,7 @@
 				<view class="section">
 					<text class="section__title">格式化日期 formatter</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="formatterValue"
 						:min="jan2024_1"
 						:max="jan2024_15"
@@ -106,6 +111,7 @@
 				<view class="section">
 					<text class="section__title">展示农历 show-lunar</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="lunarValue"
 						:min="lunarMin"
 						:max="lunarMax"
@@ -117,6 +123,7 @@
 				<view class="section">
 					<text class="section__title">值格式化 value-format</text>
 					<nax-date-strip
+						:custom-class="stripThemeClass"
 						v-model="strValue"
 						:min="jan2024_1"
 						:max="jan2024_15"
@@ -126,11 +133,15 @@
 				</view>
 
 				<view class="section">
-					<text class="section__title">自定义样式（CSS 变量）</text>
+					<text class="section__title">自定义颜色（color prop，全端生效）</text>
 					<nax-date-strip
 						v-model="customValue"
-						style="--nax-date-strip-column-gap:0px;--nax-date-strip-item-border-radius:0px;--nax-date-strip-item-selected-bg:var(--nax-color-warning);--nax-date-strip-item-today-color:var(--nax-color-warning);--nax-date-strip-item-middle-bg:#fcefda;--nax-date-strip-item-week-order:3;background-color:var(--nax-color-bg, #ffffff);"
+						:custom-class="stripThemeClass"
+						selected-color="#f0a020"
+						today-color="#f0a020"
+						middle-color="#fcefda"
 					></nax-date-strip>
+					<text class="hint">选中/今天为 warning 橙。App 用字面量渲染，Web/小程序同效</text>
 					<text class="hint">当前值：{{ singleText7 }}</text>
 				</view>
 
@@ -164,6 +175,20 @@
 			return 'nax-theme-dark'
 		}
 		return ''
+	})
+
+	// App（含蒸汽）：组件隔离下主题状态需经 custom-class 传入（组件据此驱动字面量修饰），
+	// 与 nax-input / nax-search / nax-upload demo 一致
+	const stripThemeClass = computed((): string => {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (darkMode.value) {
+			return 'nax-theme nax-theme-dark'
+		}
+		return 'nax-theme'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return ''
+		// #endif
 	})
 
 	onShow(() => {

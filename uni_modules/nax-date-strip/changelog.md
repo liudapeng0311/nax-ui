@@ -1,3 +1,7 @@
+## 0.2.0（2026-09-07）
+- 新增 `selected-color` / `today-color` / `middle-color` 颜色 props：选中（含起止）/ 今天文字 / 范围中间底色，内联字面量渲染，全端生效（App 蒸汽模式不再依赖 CSS 变量解析）
+- App 暗黑主题适配：`custom-class` 含 `nax-theme-dark` 时按字面量修饰各节点（新增 `--app-dark` 修饰规则，覆盖背景/文字/禁用等），与 nax-search / nax-input / nax-upload 的暗色传递约定一致；Web / 小程序行为不变
+- formatter 的 `day.style` 保留，颜色 props 追加覆盖段（后写优先级高）
 ## 0.1.0（2026-09-05）
 - 初版 `nax-date-strip`
 - 横向日期选择条：单选 / 多选 / 范围选择（`v-model` + `change`）

@@ -15,7 +15,18 @@
 <nax-date-strip v-model="rangeValue" type="range"></nax-date-strip>
 ```
 
-## Props
+## Props — 格式化日期
+
+| 字段 | 说明 |
+|---|---|
+| `date` | `Date` 日期对象 |
+| `text` / `dayText` | 日期数字 |
+| `type` | `normal` / `today` / `disabled` / `selected` / `start` / `end` / `middle` |
+| `top` / `bottom` | 上下行文案 |
+| `style` / `className` | 自定义样式 / class |
+| `key` | `YYYY-MM-DD` |
+
+## Props — Props
 
 | 属性 | 说明 | 默认 |
 |---|---|---|
@@ -32,7 +43,18 @@
 | startDateText / endDateText | 起止文字 | 开始 / 结束 |
 | sameDateText | 同一天文字 | 开始/结束 |
 | showLunar | 显示农历 | false |
+| selectedColor | 选中 / 起止格子背景色（内联，全端生效） | 空 |
+| todayColor | 「今天」文字色（同上） | 空 |
+| middleColor | 范围中间格子背景色（同上） | 空 |
 | customClass | 根节点扩展 class | '' |
+
+## Props — 自定义颜色（全端生效）
+
+| 属性 | 说明 | 默认 |
+|---|---|---|
+| selected-color | 选中 / 起止格子背景色 | 空（跟随主题） |
+| today-color | 「今天」文字色 | 空（跟随主题） |
+| middle-color | 范围中间格子背景色 | 空（跟随主题） |
 
 ## Events
 
@@ -40,9 +62,3 @@
 |---|---|
 | update:modelValue | 选中变化（v-model） |
 | change | 选中变化（参数同 update:modelValue） |
-
-## 说明
-
-- `formatter` 回调接收 `CalendarDay` 对象，可改写 `top` / `bottom`（上下行文案）、`style`（内联样式字符串）、`className`；`CalendarDay` 含 `date`、`text` / `dayText`、`type`（`normal` / `today` / `disabled` / `selected` / `start` / `end` / `middle`）、`key`（YYYY-MM-DD）
-- 农历覆盖 1900 - 2100 年；默认展示以当前周为中心的 3 周
-- 蒸汽模式仅组合式 API；样式仅 class 选择器
