@@ -4,7 +4,7 @@ demo: date-strip
 
 # nax-date-strip
 
-> 当前版本：0.2.0
+> 当前版本：0.2.1
 
 `nax-ui` 日期横条（uni-app x / uvue）。以横向滚动条方式展示一段连续日期，支持单选、多选与范围选择。
 

@@ -1,3 +1,6 @@
+## 0.3.4（2026-09-08）
+- 依赖组件更新：`nax-popup`（0.2.5→0.3.0）新增头部区域与 `showHeader` / `showClose` prop（默认 `true`）：标题左对齐 + 右上角「✕」关闭，命令式 `openNaxPopup()` options 同步支持；`showClose=false` 时底部保留「关闭」按钮兜底；面板 `flex: 1` 支持定高面板内插槽滚动
+- 依赖组件更新：`nax-date-strip`（0.2.0→0.2.1）修复 Android 端按压反馈闪烁（hover 态改 `opacity`，不还原选中底色）
 ## 0.3.3（2026-09-07）
 - 依赖组件更新：`nax-search`（0.2.4→0.3.0）新增 `right` 插槽（最右侧自定义区，如相机/扫码入口），不受 `showAction` / `animation` 影响
 - 依赖组件更新：`nax-date-strip`（0.1.0→0.2.0）新增 `selected-color` / `today-color` / `middle-color` 颜色 props（内联字面量，全端生效）+ App 暗黑主题 `nax-theme-dark` 修饰适配

@@ -1218,7 +1218,9 @@
 	}
 
 	.nax-date-strip__item--hover {
-		background-color: var(--nax-color-bg-hover, #f3f3f5);
+		/* 按压反馈用 opacity：Android 端 hover-class 会把背景恢复成按压前的值，
+		 * 用 background-color 会导致按压中刚变成的选中底色被还原（绿底白字变透明底白字） */
+		opacity: 0.7;
 	}
 
 	.nax-date-strip__item--disabled {
@@ -1336,7 +1338,7 @@
 	}
 
 	.nax-date-strip__item--hover--app-dark {
-		background-color: #26272c;
+		opacity: 0.7;
 	}
 
 	.nax-date-strip__day--app-dark {

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<!-- 页面级弹层：薄封装 nax-picker；也可作小程序降级宿主 -->
 	<nax-picker
 		:show="visible"
@@ -20,11 +20,24 @@
 		@click-mask="onClickMask"
 	>
 		<view class="nax-popup" :class="rootClass">
+			<!-- 头部：标题 + 右上角关闭 -->
+			<view v-if="headerVisible" class="nax-popup__header">
+				<text v-if="titleText.length > 0" class="nax-popup__title" :max-lines="1">{{ titleText }}</text>
+				<view
+					v-if="showCloseVal"
+					class="nax-popup__close"
+					hover-class="nax-popup__close--hover"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onCloseClick"
+				>
+					<text class="nax-popup__close-icon" :max-lines="1">✕</text>
+				</view>
+			</view>
 			<slot>
 				<view v-if="hasDefaultBody" class="nax-popup__body">
-				<text v-if="titleText.length > 0" class="nax-popup__title" :max-lines="2">{{ titleText }}</text>
-				<text v-if="contentText.length > 0" class="nax-popup__content" :max-lines="16">{{ contentText }}</text>
-					<view class="nax-popup__actions">
+					<text v-if="contentText.length > 0" class="nax-popup__content" :max-lines="16">{{ contentText }}</text>
+					<view v-if="showFooterBtn" class="nax-popup__actions">
 						<view
 							class="nax-popup__btn"
 							hover-class="nax-popup__btn--hover"
@@ -48,8 +61,10 @@
 	 * - 声明式：v-model:show + 默认插槽（页面级，不盖原生导航栏/tabBar）
 	 * - 命令式：openNaxPopup()；App/Web 走 dialogPage 真压窗，小程序降级到本宿主
 	 * @property {boolean} show v-model:show 声明式显隐
-	 * @property {string} title 简易标题（无插槽时）
+	 * @property {string} title 简易标题（默认展示在头部区域）
 	 * @property {string} content 简易内容
+	 * @property {boolean} showHeader 是否显示头部区域，默认 true
+	 * @property {boolean} showClose 是否显示右上角关闭按钮，默认 true
 	 * @property {string} position center/bottom/left/right
 	 * @property {boolean} mask 遮罩
 	 * @property {boolean} maskClosable 点遮罩关闭
@@ -81,6 +96,14 @@
 		content: {
 			type: String,
 			default: ''
+		},
+		showHeader: {
+			type: Boolean,
+			default: true
+		},
+		showClose: {
+			type: Boolean,
+			default: true
 		},
 		position: {
 			type: String,
@@ -147,6 +170,8 @@
 	const hostHeight = ref('')
 	const hostZIndex = ref(10090)
 	const hostDuration = ref(280)
+	const hostShowHeader = ref(true)
+	const hostShowClose = ref(true)
 
 	const visible = computed((): boolean => {
 		if (hostOpen.value) {
@@ -170,7 +195,30 @@
 	})
 
 	const hasDefaultBody = computed((): boolean => {
-		return titleText.value.length > 0 || contentText.value.length > 0
+		return contentText.value.length > 0 || showFooterBtn.value
+	})
+
+	const showHeaderVal = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostShowHeader.value
+		}
+		return props.showHeader
+	})
+
+	const showCloseVal = computed((): boolean => {
+		if (hostOpen.value) {
+			return hostShowClose.value
+		}
+		return props.showClose
+	})
+
+	const headerVisible = computed((): boolean => {
+		return showHeaderVal.value && (titleText.value.length > 0 || showCloseVal.value)
+	})
+
+	/** 无右上角关闭按钮时，保留底部「关闭」按钮作为关闭渠道 */
+	const showFooterBtn = computed((): boolean => {
+		return !showCloseVal.value
 	})
 
 	const panelPosition = computed((): string => {
@@ -255,7 +303,9 @@
 		width: string,
 		height: string,
 		zIndex: number,
-		duration: number
+		duration: number,
+		showHeader: boolean,
+		showClose: boolean
 	) {
 		hostTitle.value = title
 		hostContent.value = content
@@ -267,6 +317,8 @@
 		hostHeight.value = height
 		hostZIndex.value = zIndex
 		hostDuration.value = duration
+		hostShowHeader.value = showHeader
+		hostShowClose.value = showClose
 		hostOpen.value = true
 	}
 
@@ -331,6 +383,8 @@
 
 <style>
 	.nax-popup {
+		/* 面板有确定高度（height prop / 左右抽屉）时撑满剩余，插槽内 flex:1 的滚动区才拿得到确定高度 */
+		flex: 1;
 		flex-direction: column;
 		width: 100%;
 		background-color: var(--nax-color-bg, #ffffff);
@@ -339,18 +393,48 @@
 
 	.nax-popup__body {
 		flex-direction: column;
-		padding-top: 20px;
+		padding-top: 14px;
 		padding-bottom: 16px;
 		padding-left: 20px;
 		padding-right: 20px;
 	}
 
+	.nax-popup__header {
+		flex-direction: row;
+		align-items: center;
+		/* 无 title 时 header 内只剩关闭按钮，需固定靠右 */
+		justify-content: flex-end;
+		height: 45px;
+		padding-left: 13px;
+		padding-right: 12px;
+	}
+
 	.nax-popup__title {
-		font-size: 17px;
+		flex: 1;
+		font-size: 16px;
 		font-weight: 600;
 		color: var(--nax-color-text, #333639);
+		text-align: left;
+	}
+
+	.nax-popup__close {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		margin-left: 8px;
+	}
+
+	.nax-popup__close--hover {
+		opacity: 0.6;
+	}
+
+	.nax-popup__close-icon {
+		font-size: 17px;
+		line-height: 22px;
+		color: var(--nax-color-text-secondary, #767c82);
 		text-align: center;
-		margin-bottom: 10px;
 	}
 
 	.nax-popup__content {

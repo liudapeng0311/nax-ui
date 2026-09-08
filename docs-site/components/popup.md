@@ -4,7 +4,7 @@ demo: popup
 
 # nax-popup
 
-> 当前版本：0.2.5
+> 当前版本：0.3.0
 
 压窗屏 / 页面级弹层。
 > **压窗屏**：遮罩与内容能盖住 `pages.json` 配置的**原生导航栏**和**底部 tabBar**。  
@@ -97,6 +97,8 @@ openNaxPopup({
 |------|------|------|------|
 | url | string | 内置 host | 自定义 dialog 页面路径 |
 | title / content | string | '' | 内置 host 文案 |
+| showHeader | boolean | true | 是否显示头部区域（含标题与右上角关闭按钮） |
+| showClose | boolean | true | 是否显示右上角关闭按钮；为 false 时底部保留「关闭」按钮兜底 |
 | position | string | center | center / bottom / left / right |
 | mode | string | auto | auto / window / page |
 | mask | boolean | true | 遮罩 |
@@ -303,8 +305,10 @@ function onCloseApi() {
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | show | boolean | `false` | v-model:show 声明式显隐 |
-| title | string | `''` | 简易标题（无插槽时） |
+| title | string | `''` | 简易标题（默认展示在头部区域） |
 | content | string | `''` | 简易内容 |
+| showHeader | boolean | `true` | 是否显示头部区域，默认 true |
+| showClose | boolean | `true` | 是否显示右上角关闭按钮，默认 true |
 | position | string | `'center'` | `center` 居中 \| `bottom` 底部 \| `left` 左侧 \| `right` 右侧 |
 | mask | boolean | `true` | 遮罩 |
 | maskClosable | boolean | `true` | 点遮罩关闭 |

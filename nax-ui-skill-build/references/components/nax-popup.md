@@ -29,6 +29,8 @@ if (naxPopupSupportsWindowCover()) {
 |---|---|---|---|
 | url | string | 内置 host | 自定义 dialog 页面路径 |
 | title / content | string | '' | 内置 host 文案 |
+| showHeader | boolean | true | 是否显示头部区域（含标题与右上角关闭按钮） |
+| showClose | boolean | true | 是否显示右上角关闭按钮；为 false 时底部保留「关闭」按钮兜底 |
 | position | string | center | center / bottom / left / right |
 | mode | string | auto | auto / window / page |
 | mask | boolean | true | 遮罩 |

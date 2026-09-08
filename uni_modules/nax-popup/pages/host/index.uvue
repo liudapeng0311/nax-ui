@@ -15,9 +15,22 @@
 			@click.stop="onPanelClick"
 		>
 			<view class="nax-popup-host__panel" :class="panelClass" :style="panelStyle">
-				<text v-if="titleText.length > 0" class="nax-popup-host__title" :max-lines="2">{{ titleText }}</text>
+				<!-- 头部：标题 + 右上角关闭 -->
+				<view v-if="headerVisible" class="nax-popup-host__header">
+					<text v-if="titleText.length > 0" class="nax-popup-host__title" :max-lines="1">{{ titleText }}</text>
+					<view
+						v-if="showCloseOn"
+						class="nax-popup-host__close"
+						hover-class="nax-popup-host__close--hover"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="onCloseClick"
+					>
+						<text class="nax-popup-host__close-icon" :max-lines="1">✕</text>
+					</view>
+				</view>
 				<text v-if="contentText.length > 0" class="nax-popup-host__content" :max-lines="20">{{ contentText }}</text>
-				<view class="nax-popup-host__actions">
+				<view v-if="showFooterBtn" class="nax-popup-host__actions">
 					<view
 						class="nax-popup-host__btn"
 						hover-class="nax-popup-host__btn--hover"
@@ -54,6 +67,8 @@
 	const heightText = ref('')
 	const animDuration = ref(280)
 	const themeClass = ref('')
+	const showHeaderOn = ref(true)
+	const showCloseOn = ref(true)
 	/** 面板是否处于结束态 */
 	const panelShow = ref(false)
 	/** 鸿蒙：遮罩是否点亮（opacity 0→0.4） */
@@ -185,6 +200,15 @@
 		return s
 	})
 
+	const headerVisible = computed((): boolean => {
+		return showHeaderOn.value && (titleText.value.length > 0 || showCloseOn.value)
+	})
+
+	/** 无右上角关闭按钮时，保留底部「关闭」按钮作为关闭渠道 */
+	const showFooterBtn = computed((): boolean => {
+		return !showCloseOn.value
+	})
+
 	function loadSession() {
 		const s = getNaxPopupSession()
 		const t = s.getString('title')
@@ -229,6 +253,14 @@
 		const tc = s.getString('themeClass')
 		if (tc != null) {
 			themeClass.value = tc as string
+		}
+		const sh = s.getBoolean('showHeader')
+		if (sh != null) {
+			showHeaderOn.value = sh as boolean
+		}
+		const sc = s.getBoolean('showClose')
+		if (sc != null) {
+			showCloseOn.value = sc as boolean
 		}
 	}
 
@@ -411,10 +443,10 @@
 	.nax-popup-host__panel {
 		flex-direction: column;
 		background-color: var(--nax-color-bg, #ffffff);
-		padding-top: 20px;
+		padding-top: 0px;
 		padding-bottom: 16px;
-		padding-left: 20px;
-		padding-right: 20px;
+		padding-left: 0px;
+		padding-right: 0px;
 		overflow: hidden;
 	}
 
@@ -458,12 +490,42 @@
 		border-bottom-left-radius: var(--nax-radius-xl, 12px);
 	}
 
+	.nax-popup-host__header {
+		flex-direction: row;
+		align-items: center;
+		/* 无 title 时 header 内只剩关闭按钮，需固定靠右 */
+		justify-content: flex-end;
+		height: 45px;
+		padding-left: 13px;
+		padding-right: 12px;
+	}
+
 	.nax-popup-host__title {
-		font-size: 17px;
+		flex: 1;
+		font-size: 16px;
 		font-weight: 600;
 		color: var(--nax-color-text, #333639);
+		text-align: left;
+	}
+
+	.nax-popup-host__close {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		margin-left: 8px;
+	}
+
+	.nax-popup-host__close--hover {
+		opacity: 0.6;
+	}
+
+	.nax-popup-host__close-icon {
+		font-size: 17px;
+		line-height: 22px;
+		color: var(--nax-color-text-secondary, #767c82);
 		text-align: center;
-		margin-bottom: 10px;
 	}
 
 	.nax-popup-host__content {
@@ -471,7 +533,10 @@
 		line-height: 21px;
 		color: var(--nax-color-text-secondary, #767c82);
 		text-align: center;
+		margin-top: 14px;
 		margin-bottom: 16px;
+		margin-left: 20px;
+		margin-right: 20px;
 	}
 
 	.nax-popup-host__actions {

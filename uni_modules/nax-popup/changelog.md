@@ -1,3 +1,9 @@
+## 0.3.0（2026-09-08）
+- 新增头部区域：标题（16px 加粗左对齐 + 单行省略）固定在 45px 高头部，右上角「✕」关闭按钮（17px 图标、26px 触区）
+- 新增 `showHeader` / `showClose` prop（默认 `true`）：`showHeader` 控制整体头部（含标题与关闭按钮）显示；`showClose` 控制右上角关闭
+- 命令式 `openNaxPopup()` options 同步支持 `showHeader` / `showClose`（内置 dialogPage host 与页面宿主均生效）
+- `showClose=false` 时右上角隐藏关闭按钮，底部保留「关闭」按钮作为兜底关闭渠道
+- 简易面板的 title 文案从正文区移入头部展示；面板加 `flex: 1` 支持定高面板内插槽 scroll-view 占满剩余空间滚动（演示页新增「面板内滚动」示例）
 ## 0.2.5（2026-08-18）
 - 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
 ## 0.2.4（2026-08-18）
