@@ -69,6 +69,8 @@
 	const themeClass = ref('')
 	const showHeaderOn = ref(true)
 	const showCloseOn = ref(true)
+	/** 左右抽屉顶部安全距离（px）：App 预留状态栏；微信小程序右侧抽屉预留到胶囊下方 */
+	const drawerSafeTopPx = ref(0)
 	/** 面板是否处于结束态 */
 	const panelShow = ref(false)
 	/** 鸿蒙：遮罩是否点亮（opacity 0→0.4） */
@@ -197,6 +199,10 @@
 		if (heightText.value.length > 0) {
 			s = s + 'height:' + heightText.value + ';'
 		}
+		// 左右抽屉顶部安全距离：App 预留状态栏；微信小程序右侧抽屉避开胶囊
+		if (drawerSafeTopPx.value > 0) {
+			s = s + 'padding-top:' + drawerSafeTopPx.value.toString() + 'px;'
+		}
 		return s
 	})
 
@@ -262,6 +268,45 @@
 		if (sc != null) {
 			showCloseOn.value = sc as boolean
 		}
+	}
+
+	/**
+	 * 左右抽屉顶部安全距离（仅左右抽屉生效）：
+	 * - App：预留状态栏高度（dialogPage 自绘内容会顶到状态栏）
+	 * - 微信小程序：右侧抽屉额外预留到胶囊下沿，避免内容与胶囊重叠
+	 */
+	function refreshDrawerSafeTop() {
+		const pos = position.value
+		if (pos != 'left' && pos != 'right') {
+			drawerSafeTopPx.value = 0
+			return
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const info = uni.getWindowInfo()
+		let top = 0
+		if (info.statusBarHeight != null) {
+			top = info.statusBarHeight as number
+		}
+		drawerSafeTopPx.value = top > 0 ? top : 0
+		// #endif
+		// #ifdef MP-WEIXIN
+		let topMp = 0
+		const win = uni.getWindowInfo()
+		if (win.statusBarHeight != null) {
+			topMp = win.statusBarHeight as number
+		}
+		// 胶囊在屏幕右上角，仅右抽屉需要避让
+		if (pos == 'right') {
+			const rect = uni.getMenuButtonBoundingClientRect()
+			if (rect != null && rect.bottom != null && (rect.bottom as number) > topMp) {
+				topMp = rect.bottom as number
+			}
+		}
+		drawerSafeTopPx.value = topMp > 0 ? topMp + 4 : 0
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		drawerSafeTopPx.value = 0
+		// #endif
 	}
 
 	function startOpenAnim() {
@@ -342,6 +387,7 @@
 
 	onLoad(() => {
 		loadSession()
+		refreshDrawerSafeTop()
 		startOpenAnim()
 	})
 

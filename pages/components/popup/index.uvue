@@ -19,13 +19,17 @@
 					<text class="section__title">压窗 · 内置 host（title/content）</text>
 					<view class="row">
 						<nax-button type="primary" label="居中压窗" @click="openWindowCenter"></nax-button>
+						<view class="gap"></view>
+						<nax-button type="primary" size="sm" label="左侧压窗" @click="openWindowLeft"></nax-button>
+						<view class="gap"></view>
+						<nax-button type="primary" size="sm" label="右侧压窗" @click="openWindowRight"></nax-button>
 					</view>
 					<view class="row row--gap">
 						<nax-button size="sm" label="底部" @click="openWindowBottom"></nax-button>
 						<view class="gap"></view>
 						<nax-button size="sm" label="mode=window" @click="openForceWindow"></nax-button>
 					</view>
-					<text class="hint">App/Web：应盖住本页导航栏。小程序：降级到页面宿主（本页底部已挂）。</text>
+					<text class="hint">App/Web：应盖住本页导航栏。左右抽屉默认 78% 宽、全屏高，可用 width 覆盖。小程序：降级到页面宿主（本页底部已挂）。</text>
 				</view>
 
 				<view class="section">
@@ -43,7 +47,12 @@
 						<view class="gap"></view>
 						<nax-button label="声明式插槽" @click="openDeclarative"></nax-button>
 					</view>
-					<text class="hint">与 nax-picker 相同层级：盖不住原生导航栏/tabBar。</text>
+					<view class="row row--gap">
+						<nax-button size="sm" label="声明式 · 左抽屉" @click="openDrawerLeft"></nax-button>
+						<view class="gap"></view>
+						<nax-button size="sm" label="声明式 · 右抽屉 60%" @click="openDrawerRight"></nax-button>
+					</view>
+					<text class="hint">与 nax-picker 相同层级：盖不住原生导航栏/tabBar。左右抽屉默认 78% 宽、全屏高；round 时圆角朝面板内侧。</text>
 				</view>
 
 				<view class="section">
@@ -131,6 +140,23 @@
 			:show-close="false"
 		></nax-popup>
 
+		<!-- 声明式左抽屉：默认 78% 宽、全屏高，标题头部 + ✕ -->
+		<nax-popup
+			v-model:show="drawerLeftShow"
+			position="left"
+			title="左侧抽屉"
+			content="position=left：从左侧滑出，默认 78% 宽、全屏高。"
+		></nax-popup>
+
+		<!-- 声明式右抽屉：width 覆盖默认尺寸 -->
+		<nax-popup
+			v-model:show="drawerRightShow"
+			position="right"
+			width="60%"
+			title="右侧抽屉 60%"
+			content="position=right + width=60%：自定义面板宽度，从右侧滑出。"
+		></nax-popup>
+
 		<!-- 命令式页面级 / 小程序降级宿主（可空） -->
 		<nax-popup />
 	</view>
@@ -161,6 +187,8 @@
 	const hdDefault = ref(false)
 	const hdNoClose = ref(false)
 	const hdNoHeader = ref(false)
+	const drawerLeftShow = ref(false)
+	const drawerRightShow = ref(false)
 
 	const themeExtraClass = computed((): string => {
 		if (darkMode.value) {
@@ -200,6 +228,27 @@
 		})
 	}
 
+	function openWindowLeft() {
+		openNaxPopup({
+			themeClass: themeExtraClass.value,
+			title: '左侧压窗抽屉',
+			content: 'position=left：App/Web 下遮罩盖住导航栏与 tabBar；默认 78% 宽、全屏高。',
+			position: 'left',
+			maskClosable: true
+		})
+	}
+
+	function openWindowRight() {
+		openNaxPopup({
+			themeClass: themeExtraClass.value,
+			title: '右侧压窗抽屉',
+			content: 'position=right：从右侧滑出，width 默认 78%，可用 width prop 覆盖。',
+			position: 'right',
+			width: '60%',
+			maskClosable: true
+		})
+	}
+
 	function openForceWindow() {
 		openNaxPopup({
 			themeClass: themeExtraClass.value,
@@ -228,6 +277,14 @@
 
 	function openDeclarative() {
 		declShow.value = true
+	}
+
+	function openDrawerLeft() {
+		drawerLeftShow.value = true
+	}
+
+	function openDrawerRight() {
+		drawerRightShow.value = true
 	}
 
 	function openScrollList() {

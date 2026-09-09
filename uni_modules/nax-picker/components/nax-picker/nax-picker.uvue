@@ -166,6 +166,8 @@
 	const hmMaskOn = ref(false)
 
 	const safeBottomPx = ref(0)
+	/** 左右抽屉顶部安全距离（px）：App 预留状态栏；微信小程序右侧抽屉预留到胶囊下方 */
+	const drawerSafeTopPx = ref(0)
 	const windowW = ref(0)
 	const windowH = ref(0)
 	const ANIM_DEFAULT = 280
@@ -358,6 +360,10 @@
 			style += 'height:' + sizeToCss(props.height, '') + ';'
 			style += 'top:0;bottom:auto;'
 		}
+		// 左右抽屉顶部安全距离：App 预留状态栏；微信小程序右侧抽屉避开胶囊
+		if (drawerSafeTopPx.value > 0) {
+			style += 'padding-top:' + drawerSafeTopPx.value.toString() + 'px;'
+		}
 		return style
 	})
 
@@ -436,6 +442,10 @@
 			if (props.height.length > 0) {
 				style += 'height:' + sizeToCss(props.height, '') + ';'
 			}
+			// 左右抽屉顶部安全距离：App 预留状态栏；微信小程序右侧抽屉避开胶囊
+			if (drawerSafeTopPx.value > 0) {
+				style += 'padding-top:' + drawerSafeTopPx.value.toString() + 'px;'
+			}
 		} else {
 			style += 'width:100%;'
 		}
@@ -483,19 +493,59 @@
 	function refreshSafeArea() {
 		if (positionName.value != 'bottom' || !props.safeAreaInsetBottom) {
 			safeBottomPx.value = 0
+		} else {
+			// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+			const info = uni.getWindowInfo()
+			const insets = info.safeAreaInsets
+			if (insets != null) {
+				safeBottomPx.value = insets.bottom
+			} else {
+				safeBottomPx.value = 0
+			}
+			// #endif
+			// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+			safeBottomPx.value = 0
+			// #endif
+		}
+		refreshDrawerSafeTop()
+	}
+
+	/**
+	 * 左右抽屉顶部安全距离（仅左右抽屉生效）：
+	 * - App：预留状态栏高度（navigationStyle:custom 下内容会顶到状态栏）
+	 * - 微信小程序：右侧抽屉额外预留到胶囊下沿，避免内容与胶囊重叠
+	 */
+	function refreshDrawerSafeTop() {
+		const pos = positionName.value
+		if (pos != 'left' && pos != 'right') {
+			drawerSafeTopPx.value = 0
 			return
 		}
 		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
 		const info = uni.getWindowInfo()
-		const insets = info.safeAreaInsets
-		if (insets != null) {
-			safeBottomPx.value = insets.bottom
-		} else {
-			safeBottomPx.value = 0
+		let top = 0
+		if (info.statusBarHeight != null) {
+			top = info.statusBarHeight as number
 		}
+		drawerSafeTopPx.value = top > 0 ? top : 0
 		// #endif
-		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
-		safeBottomPx.value = 0
+		// #ifdef MP-WEIXIN
+		let topMp = 0
+		const win = uni.getWindowInfo()
+		if (win.statusBarHeight != null) {
+			topMp = win.statusBarHeight as number
+		}
+		// 胶囊在屏幕右上角，仅右抽屉需要避让
+		if (pos == 'right') {
+			const rect = uni.getMenuButtonBoundingClientRect()
+			if (rect != null && rect.bottom != null && (rect.bottom as number) > topMp) {
+				topMp = rect.bottom as number
+			}
+		}
+		drawerSafeTopPx.value = topMp > 0 ? topMp + 4 : 0
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY || MP-WEIXIN
+		drawerSafeTopPx.value = 0
 		// #endif
 	}
 
