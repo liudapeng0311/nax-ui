@@ -1,0 +1,2067 @@
+<template>
+	<view class="nax-table" :class="rootClass">
+		<!-- 固定列覆盖层：fixed 列独立渲染，主区横滚时从其下方穿过 -->
+		<view v-if="fixedCols.length > 0" class="nax-table__fixed-layer">
+			<!-- 固定表头 -->
+			<view class="nax-table__header nax-table__header--fixed" :style="headerStyle">
+				<view
+					v-for="(col, colIndex) in fixedCols"
+					:key="'fh' + colIndex.toString()"
+					class="nax-table__th nax-table__th--fixed"
+					:style="fixedCellStyle(colIndex, fixedCols.length, true)"
+					@click="onThClick(col)"
+				>
+					<view class="nax-table__th-main" :style="thMainStyle(col)">
+						<view v-if="col.type == 'selection'" class="nax-checkbox" :class="headerBoxClass" @click.stop="onToggleAll">
+							<text v-if="headerBoxMark.length > 0" class="nax-checkbox__mark">{{ headerBoxMark }}</text>
+						</view>
+						<text v-else class="nax-table__th-text">{{ headerLabel(col, colIndex) }}</text>
+						<view v-if="isSortable(col)" class="nax-table__sort">
+							<text class="nax-table__sort-arrow" :class="sortAscClass(col)">↑</text>
+							<text class="nax-table__sort-arrow" :class="sortDescClass(col)">↓</text>
+						</view>
+					</view>
+				</view>
+			</view>
+			<!-- 固定表体：随主区纵向滚动同步 -->
+			<scroll-view class="nax-table__fixed-body" :scroll-y="true" :scroll-top="fixedScrollTop" :style="fixedBodyStyle">
+				<view v-if="bodyRows.length == 0 && emptyVisible">
+					<slot name="empty">
+						<nax-empty description="暂无数据" :show-image="false" icon="database-off" icon-size="36"></nax-empty>
+					</slot>
+				</view>
+				<view
+					v-for="(row, rowIndex) in bodyRows"
+					:key="'fr' + rowIndex.toString()"
+					class="nax-table__row"
+					:class="rowClass(rowIndex)"
+					:style="virtualRowStyle()"
+					@click="onRowClick(row, rowIndex)"
+				>
+					<view
+						v-for="(col, colIndex) in fixedCols"
+						:key="'fc' + colIndex.toString()"
+						class="nax-table__td"
+						:style="fixedCellStyle(colIndex, fixedCols.length, false)"
+					>
+						<view class="nax-table__td-main" :style="tdMainStyle(col)">
+							<view v-if="col.type == 'selection'" class="nax-checkbox" :class="[rowBoxClass(rowIndex), rowBoxDisabledClass(rowIndex)]" @click.stop="onToggleRow(rowIndex)">
+								<text v-if="rowBoxMark(rowIndex).length > 0" class="nax-checkbox__mark">{{ rowBoxMark(rowIndex) }}</text>
+							</view>
+							<text
+								v-if="col.type == 'text' && !isEditingCell(colIndex, rowIndex)"
+								class="nax-table__td-text"
+								:class="[tdTextClass(col), isEditableCol(col) ? 'nax-table__td-text--editable' : '']"
+								:style="tdTextStyle(col)"
+								:max-lines="col.lines"
+								@click.stop="onCellClick(col, colIndex, row, absIndex(rowIndex))"
+							>{{ formatCellText(row, col, rowIndex) }}</text>
+							<input
+								v-else-if="col.type == 'text'"
+								class="nax-table__td-input"
+								:class="tdInputClass(col)"
+								:value="editValue"
+								:focus="true"
+								:type="col.dataType == 'number' ? 'number' : 'text'"
+								@blur="onCellBlur(col, colIndex, row, absIndex(rowIndex))"
+								@confirm="onCellConfirm(col, colIndex, row, absIndex(rowIndex))"
+							/>
+						</view>
+					</view>
+				</view>
+			</scroll-view>
+			<!-- 固定合计行 -->
+			<view v-if="showSummary" class="nax-table__summary nax-table__summary--fixed">
+				<view
+					v-for="(col, colIndex) in fixedCols"
+					:key="'fs' + colIndex.toString()"
+					class="nax-table__td nax-table__td--summary"
+					:style="fixedCellStyle(colIndex, fixedCols.length, true)"
+				>
+					<view class="nax-table__td-main nax-table__td-main--summary">
+						<text class="nax-table__summary-text" :style="summaryTextStyle(colIndex)">{{ fixedSummaryText(colIndex) }}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 主表区 -->
+		<scroll-view class="nax-table__scroll-x" direction="horizontal" :scroll-x="true" :scroll-y="false" @scroll="onMainScrollX">
+			<view class="nax-table__inner" :style="innerStyle">
+				<!-- 分组表头行（无 fixed 列时才有意义；与 fixed 组合的场景列对齐以主区为准） -->
+				<view v-if="hasGroups && fixedCols.length == 0" class="nax-table__header nax-table__header--groups">
+					<view
+						v-for="(g, gi) in groups"
+						:key="groupKey(gi)"
+						class="nax-table__th nax-table__th--group"
+						:style="groupThStyle(g)"
+					>
+						<view class="nax-table__th-main" :style="groupMainStyle(g)">
+							<text class="nax-table__th-text">{{ g.title }}</text>
+						</view>
+					</view>
+				</view>
+				<!-- 表头（纵向滚动区外，天然固定） -->
+				<view class="nax-table__header" :class="headerRowClass" :style="headerStyle">
+					<view
+						v-for="(col, colIndex) in columns"
+						:key="headerKey(colIndex)"
+						class="nax-table__th"
+						:class="col.fixed ? 'nax-table__th--fixed-slot' : ''"
+						:style="thStyle(col)"
+						@click="onThClick(col)"
+					>
+						<view class="nax-table__th-main" :style="thMainStyle(col)">
+							<view v-if="col.type == 'selection'" class="nax-checkbox" :class="headerBoxClass" @click.stop="onToggleAll">
+								<text v-if="headerBoxMark.length > 0" class="nax-checkbox__mark">{{ headerBoxMark }}</text>
+							</view>
+							<text v-else class="nax-table__th-text" :class="thTextClass(col)" :style="thTextStyle(col)">{{ headerLabel(col, colIndex) }}</text>
+							<view v-if="isSortable(col)" class="nax-table__sort">
+								<text class="nax-table__sort-arrow" :class="sortAscClass(col)">↑</text>
+								<text class="nax-table__sort-arrow" :class="sortDescClass(col)">↓</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<!-- 表体 -->
+				<scroll-view
+					class="nax-table__scroll-y"
+					:scroll-y="true"
+					:style="bodyStyle"
+					@scroll="onBodyScrollY"
+					@scrolltolower="onScrollToLower"
+				>
+					<!-- 虚拟滚动：上 spacer -->
+					<view v-if="virtualEnabled && visStart > 0" :style="'width:100%;height:' + (visStart * virtualRowH()).toString() + 'px;'"></view>
+					<view v-if="bodyRows.length == 0 && emptyVisible">
+						<slot name="empty">
+							<nax-empty description="暂无数据" :show-image="false" icon="database-off" icon-size="36"></nax-empty>
+						</slot>
+					</view>
+					<template v-else>
+						<view
+							v-for="(row, rowIndex) in bodyRows"
+							:key="rowKey(row, rowIndex)"
+							class="nax-table__row"
+							:class="rowClass(rowIndex)"
+							:style="virtualRowStyle()"
+							@click="onRowClick(row, absIndex(rowIndex))"
+						>
+							<view
+								v-for="(col, colIndex) in columns"
+								:key="cellKey(colIndex)"
+								class="nax-table__td"
+								:class="col.fixed ? 'nax-table__td--fixed-slot' : ''"
+								:style="tdStyle(col)"
+							>
+								<view class="nax-table__td-main" :style="tdMainStyle(col)">
+									<view v-if="col.type == 'selection'" class="nax-checkbox" :class="[rowBoxClass(absIndex(rowIndex)), rowBoxDisabledClass(absIndex(rowIndex))]" @click.stop="onToggleRow(absIndex(rowIndex))">
+										<text v-if="rowBoxMark(absIndex(rowIndex)).length > 0" class="nax-checkbox__mark">{{ rowBoxMark(absIndex(rowIndex)) }}</text>
+									</view>
+									<view v-else-if="col.type == 'operation'" class="nax-table__ops">
+										<text
+											v-for="(op, opIndex) in col.renders"
+											:key="opKey(opIndex)"
+											class="nax-table__op"
+											:style="opStyle(op)"
+											@click.stop="onAction(op, row, absIndex(rowIndex))"
+										>{{ op.name }}</text>
+									</view>
+									<text
+										v-if="col.type == 'text' && !isEditingCell(colIndex, absIndex(rowIndex))"
+										class="nax-table__td-text"
+										:class="[tdTextClass(col), isEditableCol(col) ? 'nax-table__td-text--editable' : '']"
+										:style="tdTextStyle(col)"
+										:max-lines="col.lines"
+										@click.stop="onCellClick(col, colIndex, row, absIndex(rowIndex))"
+									>{{ formatCellText(row, col, absIndex(rowIndex)) }}</text>
+									<input
+										v-else-if="col.type == 'text'"
+										class="nax-table__td-input"
+										:class="tdInputClass(col)"
+										:value="editValue"
+										:focus="true"
+										:type="col.dataType == 'number' ? 'number' : 'text'"
+										@blur="onCellBlur(col, colIndex, row, absIndex(rowIndex))"
+										@confirm="onCellConfirm(col, colIndex, row, absIndex(rowIndex))"
+									/>
+								</view>
+							</view>
+						</view>
+					</template>
+					<!-- 虚拟滚动：下 spacer -->
+					<view v-if="virtualEnabled" :style="'width:100%;height:' + (visPadBottom * virtualRowH()).toString() + 'px;'"></view>
+					<!-- 上拉/点击加载更多 -->
+					<view v-if="showLoadMore && bodyRows.length > 0" class="nax-table__more" @click="onLoadMoreClick">
+						<text class="nax-table__more-text">{{ loadMoreText }}</text>
+					</view>
+				</scroll-view>
+				<!-- 合计行 -->
+				<view v-if="showSummary" class="nax-table__summary">
+					<view
+						v-for="(sc, sci) in summaryCells"
+						:key="summaryKey(sci)"
+						class="nax-table__td nax-table__td--summary"
+						:style="summaryCellStyle(sci)"
+					>
+						<view class="nax-table__td-main nax-table__td-main--summary">
+							<text class="nax-table__summary-text" :style="summaryTextStyle(sci)">{{ sc.text }}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+		<!-- 分页器 -->
+		<view v-if="showPaging" class="nax-table__pager">
+			<view class="nax-table__pager-btn" :class="pagerBtnDisabledClass('prev')" @click="onPagePrev">
+				<text class="nax-table__pager-btn-text" :class="pagerBtnTextDisabledClass('prev')">{{ paging.prevText }}</text>
+			</view>
+			<template v-for="(pi, piIndex) in pageItems">
+				<view
+					:key="pageKey(piIndex)"
+					v-if="pi > 0"
+					class="nax-table__pager-btn"
+					:class="pi == currentPage ? 'nax-table__pager-btn--active' : ''"
+					@click="onPageGo(pi)"
+				>
+					<text class="nax-table__pager-btn-text" :class="pi == currentPage ? 'nax-table__pager-btn-text--active' : ''">{{ pi.toString() }}</text>
+				</view>
+				<view :key="'e' + pageKey(piIndex)" v-else class="nax-table__pager-ellipsis">
+					<text class="nax-table__pager-ellipsis-text">…</text>
+				</view>
+			</template>
+			<view class="nax-table__pager-btn" :class="pagerBtnDisabledClass('next')" @click="onPageNext">
+				<text class="nax-table__pager-btn-text" :class="pagerBtnTextDisabledClass('next')">{{ paging.nextText }}</text>
+			</view>
+			<view v-if="paging.navNum" class="nax-table__pager-jump">
+				<input
+					class="nax-table__pager-input"
+					v-model="jumpNum"
+					type="number"
+					placeholder="页码"
+					@confirm="onJumpConfirm"
+				/>
+				<text class="nax-table__pager-jump-text">/ {{ pagesTotal.toString() }} 页</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-table
+	 * @description 数据表格。columns/data 驱动，支持斑马纹、边框、固定表头、横向滚动、排序、行数省略、空态、多选、合计行、分组表头、分页、加载更多、固定列、虚拟滚动。
+	 * @property {Array<any>} data 行数据数组
+	 * @property {NaxTableColumn[]} columns 列配置；type 可为 text/index/operation/selection
+	 * @property {boolean} stripe 斑马纹，默认 false
+	 * @property {boolean} border 单元格边框，默认 true
+	 * @property {boolean} highlight 点击行高亮，默认 false
+	 * @property {string} height 表体高度；纯数字按 px；不传则随内容（不纵向滚动）
+	 * @property {string} thH 表头行高；纯数字按 px，默认 40
+	 * @property {string} tdH 单元格最小行高；纯数字按 px，默认 40
+	 * @property {string} emptyString 全局空值占位文案，列配置优先
+	 * @property {boolean} empty 是否显示空态（data 为空时），默认 true
+	 * @property {boolean} showSummary 合计行开关，默认 false
+	 * @property {string} sumText 合计行首格文案，默认「合计」
+	 * @property {((columns: NaxTableColumn[], data: any[]) => NaxTableSummaryCell[]) | null} summaryMethod 自定义合计，colspan 跨列
+	 * @property {boolean} showPaging 分页器开关，默认 false
+	 * @property {string} pagingMode inner 组件内部分页（自动切片）/ outer 外部分页（只 emit page-change），默认 inner
+	 * @property {NaxTablePaging} paging 分页配置：current/pageSize/total/pageCount/navNum/prevText/nextText
+	 * @property {boolean} showLoadMore 加载更多开关；触底或点击底部触发 load-more，默认 false
+	 * @property {boolean} finished 加载完成（不再触发 load-more），默认 false
+	 * @property {boolean} virtual 虚拟滚动开关；需配合 height 与固定行高 rowH，默认 false
+	 * @property {string} rowH 虚拟滚动行高；纯数字按 px，默认 44
+	 * @property {string} customClass 根节点扩展 class
+	 * @event {Function} row-click 行点击；负载 (row, index)（index 为 data 绝对下标）
+	 * @event {Function} cell-click 单元格点击；负载 NaxTableCellPayload + row
+	 * @event {Function} cell-edit 可编辑单元格提交；负载 NaxTableCellEditPayload + row
+	 * @event {Function} row-blur 行焦点转移；点击/聚焦另一行或表体滚动离开时，对上一活跃行 emit
+	 * @event {Function} sort-change 排序变更；负载 NaxTableSortState
+	 * @event {Function} action 操作列按钮点击；负载 (NaxTableActionPayload, row)
+	 * @event {Function} selection-change 多选变化；负载选中行数组 any[]（按 data 绝对下标）
+	 * @event {Function} page-change 页码变化；负载 NaxTablePageState
+	 * @event {Function} load-more 触底/点击加载更多
+	 */
+	import { NaxTableColumn, NaxTableOperation, NaxTableSortState, NaxTableActionPayload, NaxTableCellPayload, NaxTableCellEditPayload, NaxTableSummaryCell, NaxTablePaging, NaxTablePageState } from './table-types.uts'
+
+	const props = defineProps({
+		data: { type: Array as PropType<any[]>, default: (): any[] => [] as any[] },
+		columns: { type: Array as PropType<NaxTableColumn[]>, default: (): NaxTableColumn[] => [] as NaxTableColumn[] },
+		stripe: { type: Boolean, default: false },
+		border: { type: Boolean, default: true },
+		highlight: { type: Boolean, default: false },
+		height: { type: String, default: '' },
+		thH: { type: String, default: '40' },
+		tdH: { type: String, default: '40' },
+		emptyString: { type: String, default: '' },
+		empty: { type: Boolean, default: true },
+		showSummary: { type: Boolean, default: false },
+		sumText: { type: String, default: '合计' },
+		summaryMethod: { type: Function as PropType<((columns: NaxTableColumn[], data: any[]) => NaxTableSummaryCell[]) | null>, default: null },
+		showPaging: { type: Boolean, default: false },
+		pagingMode: { type: String, default: 'inner' },
+		paging: { type: Object as PropType<NaxTablePaging>, default: (): NaxTablePaging => new NaxTablePaging() },
+		showLoadMore: { type: Boolean, default: false },
+		finished: { type: Boolean, default: false },
+		virtual: { type: Boolean, default: false },
+		rowH: { type: String, default: '44' },
+		customClass: { type: String, default: '' }
+	})
+
+	const emit = defineEmits(['row-click', 'cell-click', 'cell-edit', 'row-blur', 'sort-change', 'action', 'selection-change', 'page-change', 'load-more'])
+
+	/** 当前排序状态 */
+	const sortName = ref('')
+	const sortOrder = ref('')
+	/** 高亮行（data 绝对下标） */
+	const highlightIndex = ref(-1)
+	/** 多选：data 绝对下标集合 */
+	const selectedIndexes = ref([] as number[])
+	/** 当前页（从 1 开始） */
+	const currentPage = ref(1)
+	/** 跳页输入 */
+	const jumpNum = ref('')
+	/** 虚拟滚动窗口 */
+	const visStart = ref(0)
+	const visEnd = ref(20)
+	/** 固定列表体纵向同步值 */
+	const fixedScrollTop = ref(0)
+
+	// data 变化时重置多选、高亮与虚拟窗口
+	watch((): any[] => props.data, (_nv, _ov) => {
+		selectedIndexes.value = [] as number[]
+		highlightIndex.value = -1
+		visStart.value = 0
+		visEnd.value = 20
+		editingColIndex.value = -1
+		editingRowIndex.value = -1
+		editValue.value = ''
+		activeRowIndex.value = -1
+	})
+
+	const emptyVisible = computed((): boolean => {
+		return props.empty
+	})
+
+	const rootClass = computed((): string => {
+		var cls = ''
+		if (props.customClass.length > 0) {
+			cls += ' ' + props.customClass
+		}
+		return cls.trim()
+	})
+
+	const headerRowClass = computed((): string => {
+		return props.border ? '' : 'nax-table__header--no-border'
+	})
+
+	/** 列宽策略：指定 width 用之，否则 flex 均分 */
+	function isFlexCol(col : NaxTableColumn) : boolean {
+		return col.width.trim().length == 0
+	}
+
+	/** 均分列最小宽度（px）：保证内容总宽可超出容器触发横向滚动 */
+	function flexColMinWidth() : number {
+		return 100
+	}
+
+	function sizeToCss(value : string, fallback : number) : string {
+		const trimmed = value.trim()
+		if (trimmed.length == 0) {
+			return fallback.toString() + 'px'
+		}
+		if (trimmed.indexOf('px') >= 0 || trimmed.indexOf('rpx') >= 0 || trimmed.indexOf('%') >= 0) {
+			return trimmed
+		}
+		const n = parseFloat(trimmed)
+		if (isNaN(n) || n <= 0) {
+			return fallback.toString() + 'px'
+		}
+		return n.toString() + 'px'
+	}
+
+	const innerStyle = computed((): string => {
+		// 有固定列时主区左移量由 fixed-layer 宽度决定（用负 margin 让主区内容从覆盖层右侧起算）
+		var style = 'min-width:100%;flex-direction:column;flex-shrink:0;'
+		if (fixedWidthTotal.value > 0) {
+			style += 'padding-left:' + fixedWidthTotal.value.toString() + 'px;'
+		}
+		return style
+	})
+
+	const headerStyle = computed((): string => {
+		return 'height:' + sizeToCss(props.thH, 40) + ';'
+	})
+
+	const bodyStyle = computed((): string => {
+		if (props.height.trim().length == 0) {
+			return ''
+		}
+		return 'height:' + sizeToCss(props.height, 0) + ';'
+	})
+
+	const fixedBodyStyle = computed((): string => {
+		var style = ''
+		if (props.height.trim().length > 0) {
+			style += 'height:' + sizeToCss(props.height, 0) + ';'
+		}
+		return style
+	})
+
+	// ========== 固定列 ==========
+	const fixedCols = computed((): NaxTableColumn[] => {
+		const result : NaxTableColumn[] = []
+		for (var i = 0; i < props.columns.length; i++) {
+			if (props.columns[i].fixed) {
+				result.push(props.columns[i])
+			}
+		}
+		return result
+	})
+
+	/** 固定列总宽（决定覆盖层宽度与主区 padding-left） */
+	const fixedWidthTotal = computed((): number => {
+		var total = 0
+		for (var i = 0; i < fixedCols.value.length; i++) {
+			const w = fixedColWidth(fixedCols.value[i])
+			total += w
+		}
+		return total
+	})
+
+	/** 固定列有效宽度：未指定 width 按 100px 处理 */
+	function fixedColWidth(col : NaxTableColumn) : number {
+		const n = parseFloat(col.width.trim())
+		if (isNaN(n) || n <= 0) {
+			return flexColMinWidth()
+		}
+		return n
+	}
+
+	/** 固定列单元样式：固定宽 + 最后一列右侧阴影分界 */
+	function fixedCellStyle(indexInFixed : number, count : number, isHeader : boolean) : string {
+		const col = fixedCols.value[indexInFixed]
+		var style = 'width:' + fixedColWidth(col).toString() + 'px;flex-shrink:0;'
+		if (isHeader) {
+			style += 'height:100%;'
+		}
+		if (indexInFixed == count - 1) {
+			// 最后一列加右分界
+			style += 'border-right:1px solid var(--nax-color-border, #f0f0f3);'
+		}
+		return style
+	}
+
+	/** 固定列合计行文案：summaryCells 中对应区间的首格 */
+	function fixedSummaryText(indexInFixed : number) : string {
+		// 固定列与主列按下标一一对应（fixedCols 来自 columns 过滤）
+		var abs = -1
+		var seen = 0
+		for (var i = 0; i < props.columns.length; i++) {
+			if (props.columns[i].fixed) {
+				if (seen == indexInFixed) {
+					abs = i
+					break
+				}
+				seen++
+			}
+		}
+		if (abs < 0) {
+			return ''
+		}
+		// summaryCells 与 columns 一一对应（默认模式）；自定义模式按 colspan 推进
+		if (props.summaryMethod == null) {
+			if (abs < summaryCells.value.length) {
+				return summaryCells.value[abs].text
+			}
+			return ''
+		}
+		var pointer = 0
+		for (var j = 0; j < summaryCells.value.length; j++) {
+			const span = summaryCells.value[j].colspan
+			if (abs >= pointer && abs < pointer + span) {
+				return summaryCells.value[j].text
+			}
+			pointer += span
+		}
+		return ''
+	}
+
+	// ========== 主区横向滚动（fixed 列覆盖层透出效果） ==========
+	function onMainScrollX(e : UniScrollEvent) {
+		// 固定列固定在左侧不动，无需处理 scrollLeft；保留事件以备扩展
+	}
+
+	// ========== 虚拟滚动 ==========
+	const virtualEnabled = computed((): boolean => {
+		return props.virtual && props.height.trim().length > 0
+	})
+
+	function virtualRowH() : number {
+		const n = parseFloat(props.rowH.trim())
+		if (isNaN(n) || n <= 0) {
+			return 44
+		}
+		return n
+	}
+
+	const visPadBottom = computed((): number => {
+		const total = bodyRows.value.length
+		if (!virtualEnabled.value) {
+			return 0
+		}
+		var end = visEnd.value
+		if (end > total) {
+			end = total
+		}
+		const remain = total - end
+		return remain > 0 ? remain : 0
+	})
+
+	function onBodyScrollY(e : UniScrollEvent) {
+		// 固定列表体纵向同步（单向：主区 -> 固定层，无回环）
+		if (fixedCols.value.length > 0) {
+			fixedScrollTop.value = e.detail.scrollTop
+		}
+		if (!virtualEnabled.value) {
+			return
+		}
+		const rowH = virtualRowH()
+		const top = e.detail.scrollTop
+		var viewH = 0
+		const n = parseFloat(props.height.trim())
+		if (!isNaN(n) && n > 0) {
+			viewH = n
+		} else {
+			viewH = 400
+		}
+		const total = bodyRows.value.length
+		var start = Math.floor(top / rowH) - 5
+		var end = Math.ceil((top + viewH) / rowH) + 5
+		if (start < 0) {
+			start = 0
+		}
+		if (end > total) {
+			end = total
+		}
+		if (end < start) {
+			end = start
+		}
+		visStart.value = start
+		visEnd.value = end
+	}
+
+	/** 虚拟行高样式；行高固定由 rowH 承担 */
+	function virtualRowStyle() : string {
+		if (!virtualEnabled.value) {
+			return ''
+		}
+		return 'height:' + virtualRowH().toString() + 'px;'
+	}
+
+	/** 虚拟/分页裁剪下的 data 绝对下标 */
+	function absIndex(rowIndex : number) : number {
+		if (virtualEnabled.value) {
+			return visStart.value + rowIndex
+		}
+		if (props.showPaging && props.pagingMode == 'inner') {
+			const size = props.paging.pageSize
+			if (size > 0) {
+				return (currentPage.value - 1) * size + rowIndex
+			}
+		}
+		return rowIndex
+	}
+
+	// ========== 数据：排序 + 分页 + 虚拟窗口 ==========
+	/** 该列排序模式：'' 不可排序 / 'internal' 内部排序 / 'custom' 仅 emit */
+	function sortMode(col : NaxTableColumn) : string {
+		if (!col.sorter || col.type != 'text' || col.name.length == 0) {
+			return ''
+		}
+		// sorter 可为 true（内部排序）或 'custom'（业务自行排序）
+		if (typeof col.sorter == 'string' && (col.sorter as string) == 'custom') {
+			return 'custom'
+		}
+		return 'internal'
+	}
+
+	/** 当前生效的内部排序列（custom 模式列不参与内部排序） */
+	const activeSortName = computed((): string => {
+		if (sortName.value.length == 0) {
+			return ''
+		}
+		for (var i = 0; i < props.columns.length; i++) {
+			const c = props.columns[i]
+			if (c.name == sortName.value && sortMode(c) == 'internal') {
+				return sortName.value
+			}
+		}
+		return ''
+	})
+
+	/** 排序后的视图数据（不修改 props.data；数值列按数值、字符串列按码点比较，custom 列不排序） */
+	const viewData = computed((): any[] => {
+		const list = props.data
+		const name = activeSortName.value
+		if (name.length == 0) {
+			return list
+		}
+		const order = sortOrder.value
+		const sorted = list.slice()
+		sorted.sort((a : any, b : any): number => {
+			const av = a[name]
+			const bv = b[name]
+			const an = numValue(av)
+			const bn = numValue(bv)
+			var diff = 0
+			if (an != null && bn != null) {
+				// 两侧均可转数值：按数值比较
+				diff = an! - bn!
+			} else if (typeof av == 'string' && typeof bv == 'string') {
+				// 字符串列：逐码点比较，跨端安全（不依赖平台 ICU）
+				diff = strCompare(av as string, bv as string)
+			} else if (an != null && bn == null) {
+				diff = 1
+			} else if (an == null && bn != null) {
+				diff = -1
+			}
+			return order == 'desc' ? -diff : diff
+		})
+		return sorted
+	})
+
+	/** 字符串逐码点比较（uni-app x 各端无统一 localeCompare，用 charCodeAt 保证行为一致） */
+	function strCompare(s1 : string, s2 : string) : number {
+		const len1 = s1.length
+		const len2 = s2.length
+		const len = len1 < len2 ? len1 : len2
+		for (var i = 0; i < len; i++) {
+			const c1 = s1.charCodeAt(i)
+			const c2 = s2.charCodeAt(i)
+			if (c1 != c2) {
+				return c1 - c2
+			}
+		}
+		return len1 - len2
+	}
+
+	/** 当前渲染行（内部分页切片 + 虚拟窗口裁剪） */
+	const bodyRows = computed((): any[] => {
+		var list = viewData.value
+		if (props.showPaging && props.pagingMode == 'inner') {
+			const size = props.paging.pageSize
+			if (size > 0) {
+				const start = (currentPage.value - 1) * size
+				list = list.slice(start, start + size)
+			}
+		}
+		if (virtualEnabled.value) {
+			var end = visEnd.value
+			if (end > list.length) {
+				end = list.length
+			}
+			var start = visStart.value
+			if (start > end) {
+				start = end
+			}
+			return list.slice(start, end)
+		}
+		return list
+	})
+
+	function numValue(v : any) : number | null {
+		if (typeof v == 'number') {
+			return v as number
+		}
+		if (typeof v == 'string') {
+			const s = v as string
+			const n = parseFloat(s)
+			if (n == n) {
+				return n
+			}
+		}
+		return null
+	}
+
+	// ========== 行 / 单元格 ==========
+	function rowClass(rowIndex : number) : string {
+		var cls = 'nax-table__row--body'
+		if (props.stripe && (absIndex(rowIndex) % 2) == 1) {
+			cls += ' nax-table__row--stripe'
+		}
+		if (props.highlight && highlightIndex.value == absIndex(rowIndex)) {
+			cls += ' nax-table__row--highlight'
+		}
+		if (!props.border) {
+			cls += ' nax-table__row--no-border'
+		}
+		return cls
+	}
+
+	function rowKey(row : any, index : number) : string {
+		return 'r' + index.toString()
+	}
+
+	function cellKey(colIndex : number) : string {
+		return 'c' + colIndex.toString()
+	}
+
+	function opKey(opIndex : number) : string {
+		return 'o' + opIndex.toString()
+	}
+
+	function headerKey(colIndex : number) : string {
+		return 'h' + colIndex.toString()
+	}
+
+	function groupKey(index : number) : string {
+		return 'g' + index.toString()
+	}
+
+	function summaryKey(index : number) : string {
+		return 's' + index.toString()
+	}
+
+	function pageKey(index : number) : string {
+		return 'p' + index.toString()
+	}
+
+	/** 主区固定列槽位：透明让位（覆盖层在下层透出） */
+	function isFixedSlot(col : NaxTableColumn) : boolean {
+		return col.fixed
+	}
+
+	function thStyle(col : NaxTableColumn) : string {
+		var style = ''
+		if (isFlexCol(col)) {
+			// 均分列给最小宽度，避免内容压缩后总宽不超出容器、横向无内容可滚
+			style += 'flex:1;min-width:' + flexColMinWidth().toString() + 'px;'
+		} else {
+			style += 'width:' + sizeToCss(col.width, 80) + ';flex-shrink:0;'
+		}
+		if (col.fixed) {
+			style += 'visibility:hidden;'
+		}
+		return style
+	}
+
+	function thMainStyle(col : NaxTableColumn) : string {
+		var style = 'width:100%;'
+		if (col.type == 'index' || col.type == 'selection') {
+			style += 'padding-left:0;padding-right:0;'
+		}
+		return style
+	}
+
+	function thTextClass(col : NaxTableColumn) : string {
+		return ''
+	}
+
+	function thTextStyle(col : NaxTableColumn) : string {
+		// 表头对齐：headerAlign 优先，缺省跟随 align；text-align 由 text 承担
+		const align = col.headerAlign.trim().length > 0 ? col.headerAlign : col.align
+		const a = align.length > 0 ? align : 'left'
+		if (a == 'right') {
+			return 'text-align:right;'
+		}
+		if (a == 'center') {
+			return 'text-align:center;'
+		}
+		return ''
+	}
+
+	function headerLabel(col : NaxTableColumn, index : number) : string {
+		if (col.type == 'index') {
+			return col.label.length > 0 ? col.label : '#'
+		}
+		return col.label
+	}
+
+	function isSortable(col : NaxTableColumn) : boolean {
+		return sortMode(col).length > 0
+	}
+
+	function sortAscClass(col : NaxTableColumn) : string {
+		if (sortName.value == col.name && sortOrder.value == 'asc') {
+			return 'nax-table__sort-arrow--active'
+		}
+		return ''
+	}
+
+	function sortDescClass(col : NaxTableColumn) : string {
+		if (sortName.value == col.name && sortOrder.value == 'desc') {
+			return 'nax-table__sort-arrow--active'
+		}
+		return ''
+	}
+
+	function onThClick(col : NaxTableColumn) {
+		if (col.type == 'selection') {
+			onToggleAll()
+			return
+		}
+		if (!isSortable(col)) {
+			return
+		}
+		if (sortName.value == col.name) {
+			// 同列循环：无 -> asc -> desc -> 无
+			if (sortOrder.value == 'asc') {
+				sortOrder.value = 'desc'
+			} else if (sortOrder.value == 'desc') {
+				sortName.value = ''
+				sortOrder.value = ''
+			} else {
+				sortOrder.value = 'asc'
+			}
+		} else {
+			sortName.value = col.name
+			sortOrder.value = 'asc'
+		}
+		const state = new NaxTableSortState()
+		state.name = sortName.value
+		state.order = sortOrder.value
+		// custom 模式：组件不排序，业务收到事件后自行请求/整理数据
+		state.source = sortMode(col) == 'custom' ? 'custom' : 'internal'
+		emit('sort-change', state)
+	}
+
+	function tdStyle(col : NaxTableColumn) : string {
+		var style = ''
+		if (isFlexCol(col)) {
+			style += 'flex:1;min-width:' + flexColMinWidth().toString() + 'px;'
+		} else {
+			style += 'width:' + sizeToCss(col.width, 80) + ';flex-shrink:0;'
+		}
+		if (col.fixed) {
+			style += 'visibility:hidden;'
+		}
+		style += 'min-height:' + sizeToCss(props.tdH, 40) + ';'
+		return style
+	}
+
+	function tdMainStyle(col : NaxTableColumn) : string {
+		// 对齐统一由 <text> 的 text-align 承担（App 端 flex justify-content 对收缩子项不可靠）
+		var style = 'width:100%;'
+		if (col.type == 'index' || col.type == 'selection' || col.type == 'operation') {
+			style += 'padding-left:0;padding-right:0;'
+		}
+		return style
+	}
+
+	function tdTextClass(col : NaxTableColumn) : string {
+		if (col.lines > 1) {
+			return 'nax-table__td-text--lines-multi'
+		}
+		return 'nax-table__td-text--lines-1'
+	}
+
+	/** 编辑输入框附加 class（预留扩展位） */
+	function tdInputClass(col : NaxTableColumn) : string {
+		return ''
+	}
+
+	function tdTextStyle(col : NaxTableColumn) : string {
+		var style = ''
+		if (col.color.length > 0) {
+			style += 'color:' + col.color + ';'
+		}
+		// 对齐唯一路径：text 占满宽度后 text-align 生效
+		const a = col.align.length > 0 ? col.align : 'left'
+		if (a == 'right') {
+			style += 'text-align:right;'
+		} else if (a == 'center') {
+			style += 'text-align:center;'
+		}
+		return style
+	}
+
+	function cellText(row : any, col : NaxTableColumn, index : number) : string {
+		if (col.type == 'index') {
+			return (index + 1).toString()
+		}
+		if (col.formatter != null) {
+			const f = col.formatter!
+			return f(row, index)
+		}
+		const v = row[col.name]
+		if (v == null) {
+			if (col.emptyString.length > 0) {
+				return col.emptyString
+			}
+			if (props.emptyString.length > 0) {
+				return props.emptyString
+			}
+			return '--'
+		}
+		// filters 值 → 文案映射：命中映射展示文案，未命中回退原值
+		if (col.filters.size > 0) {
+			const mapped = col.filters.get(v.toString())
+			if (mapped != null) {
+				return mapped!
+			}
+		}
+		return v.toString()
+	}
+
+	// ========== dataType/format 声明式格式化 ==========
+
+	/** 全量替换（UTS 无 String.replaceAll 跨端保证，用 split/join） */
+	function replaceAll(s : string, from : string, to : string) : string {
+		if (from.length == 0) {
+			return s
+		}
+		return s.split(from).join(to)
+	}
+
+	/** 两位补齐 */
+	function pad2(n : number) : string {
+		return n < 10 ? '0' + n.toString() : n.toString()
+	}
+
+	/** 日期格式化：把 Date 各分量替换进模板（YYYY/MM/DD/HH/mm/ss） */
+	function formatDate(v : any, pattern : string) : string {
+		var d : Date | null = null
+		if (v instanceof Date) {
+			d = v as Date
+		} else if (typeof v == 'number') {
+			// 时间戳（ms）
+			d = new Date(v as number)
+		} else if (typeof v == 'string') {
+			const parsed = new Date(v as string)
+			if (!isNaN(parsed.getTime())) {
+				d = parsed
+			}
+		}
+		if (d == null || isNaN(d!.getTime())) {
+			return v != null ? v.toString() : ''
+		}
+		var out = pattern
+		out = replaceAll(out, 'YYYY', d!.getFullYear().toString())
+		out = replaceAll(out, 'MM', pad2(d!.getMonth() + 1))
+		out = replaceAll(out, 'DD', pad2(d!.getDate()))
+		out = replaceAll(out, 'HH', pad2(d!.getHours()))
+		out = replaceAll(out, 'mm', pad2(d!.getMinutes()))
+		out = replaceAll(out, 'ss', pad2(d!.getSeconds()))
+		return out
+	}
+
+	/** 数字格式化：'#' 整数位 + 固定小数位；模板含 ',' 千分位；含 '%' 输出百分比 */
+	function formatNumber(v : any, pattern : string) : string {
+		const n = numValue(v)
+		if (n == null) {
+			return v != null ? v.toString() : ''
+		}
+		var num = n!
+		// 百分比：值 ×100 后输出
+		const isPercent = pattern.indexOf('%') >= 0
+		if (isPercent) {
+			num = num * 100
+		}
+		// 小数位：取模板 '.' 后占位符位数
+		var decimals = 0
+		const dotPos = pattern.indexOf('.')
+		if (dotPos >= 0) {
+			var dCount = 0
+			for (var i = dotPos + 1; i < pattern.length; i++) {
+				const ch = pattern.charAt(i)
+				if (ch == '0' || ch == '#') {
+					dCount++
+				}
+			}
+			decimals = dCount
+		}
+		const factor = Math.pow(10, decimals)
+		const rounded = Math.round(Math.abs(num) * factor) / factor
+		var intPart = Math.floor(rounded).toString()
+		var fracPart = ''
+		if (decimals > 0) {
+			var fracNum = Math.round((rounded - Math.floor(rounded)) * factor).toString()
+			while (fracNum.length < decimals) {
+				fracNum = '0' + fracNum
+			}
+			// 保留模板要求的全部小数位（'0' 占位补零，'#' 占位同样固定输出，保证列内节奏一致）
+			fracPart = '.' + fracNum
+		}
+		// 千分位
+		if (pattern.indexOf(',') >= 0) {
+			var withSep = ''
+			var count = 0
+			for (var j = intPart.length - 1; j >= 0; j--) {
+				withSep = intPart.charAt(j) + withSep
+				count++
+				if (count % 3 == 0 && j > 0) {
+					withSep = ',' + withSep
+				}
+			}
+			intPart = withSep
+		}
+		const sign = num < 0 ? '-' : ''
+		return sign + intPart + fracPart + (isPercent ? '%' : '')
+	}
+
+	/** 列渲染文本：formatter > filters > dataType+format > 原值 */
+	function formatCellText(row : any, col : NaxTableColumn, index : number) : string {
+		const raw = cellText(row, col, index)
+		if (col.format.length == 0 || col.type != 'text') {
+			return raw
+		}
+		const v = row[col.name]
+		if (v == null) {
+			return raw
+		}
+		if (col.dataType == 'date') {
+			return formatDate(v, col.format)
+		}
+		if (col.dataType == 'number') {
+			return formatNumber(v, col.format)
+		}
+		return raw
+	}
+
+	function opStyle(op : NaxTableOperation) : string {
+		var color = ''
+		if (op.type == 'success') {
+			color = 'var(--nax-color-success, #18a058)'
+		} else if (op.type == 'warning') {
+			color = 'var(--nax-color-warning, #f0a020)'
+		} else if (op.type == 'error') {
+			color = 'var(--nax-color-error, #d03050)'
+		} else {
+			color = 'var(--nax-color-primary, #18a058)'
+		}
+		return 'color:' + color + ';'
+	}
+
+	function onAction(op : NaxTableOperation, row : any, index : number) {
+		// 操作按钮点击 stop 了行冒泡，高亮需在此同步
+		if (props.highlight) {
+			highlightIndex.value = index
+		}
+		const payload = new NaxTableActionPayload()
+		payload.name = op.name
+		payload.index = index
+		emit('action', payload, row)
+	}
+
+	/** 单元格点击：仅 text 列；index 为 data 绝对下标，value 为未经 filters/formatter 处理的原始值 */
+	function onCellClick(col : NaxTableColumn, colIndex : number, row : any, index : number) {
+		emitRowBlurIfNeeded(index)
+		// 单元格点击 stop 了行冒泡，高亮需在此同步（与 onRowClick 行为一致）
+		if (props.highlight) {
+			highlightIndex.value = index
+		}
+		// 可编辑列：点击进入输入态
+		if (isEditableCol(col)) {
+			startEdit(col, colIndex, index, row)
+			return
+		}
+		const payload = new NaxTableCellPayload()
+		payload.name = col.name
+		payload.colIndex = colIndex
+		payload.index = index
+		payload.value = row[col.name]
+		emit('cell-click', payload, row)
+	}
+
+	// ========== 可编辑单元格 ==========
+	/** 当前编辑单元格（data 绝对下标）；colIndex < 0 表示无编辑 */
+	const editingColIndex = ref(-1)
+	const editingRowIndex = ref(-1)
+	/** 编辑中的输入值 */
+	const editValue = ref('')
+
+	function isEditableCol(col : NaxTableColumn) : boolean {
+		return col.editable && col.type == 'text' && col.name.length > 0
+	}
+
+	function isEditingCell(colIndex : number, rowIndex : number) : boolean {
+		return editingColIndex.value == colIndex && editingRowIndex.value == rowIndex
+	}
+
+	function startEdit(col : NaxTableColumn, colIndex : number, index : number, row : any) {
+		const v = row[col.name]
+		editValue.value = v == null ? '' : v.toString()
+		editingColIndex.value = colIndex
+		editingRowIndex.value = index
+	}
+
+	/** 结束编辑并提交 cell-edit（仅值有变化时 emit） */
+	function commitEdit(col : NaxTableColumn, colIndex : number, row : any, index : number) {
+		if (!isEditingCell(colIndex, index)) {
+			return
+		}
+		const raw = editValue.value
+		var newVal : any = raw
+		if (col.dataType == 'number') {
+			const n = numValue(raw)
+			// 解析失败回退原值，避免脏数据进业务
+			newVal = n != null ? n! : row[col.name]
+		}
+		editingColIndex.value = -1
+		editingRowIndex.value = -1
+		editValue.value = ''
+		const oldVal = row[col.name]
+		const same = (oldVal == null && raw.length == 0) || (oldVal != null && oldVal.toString() == raw)
+		if (!same) {
+			const payload = new NaxTableCellEditPayload()
+			payload.name = col.name
+			payload.colIndex = colIndex
+			payload.index = index
+			payload.oldValue = oldVal
+			payload.value = newVal
+			emit('cell-edit', payload, row)
+		}
+	}
+
+	function onCellBlur(col : NaxTableColumn, colIndex : number, row : any, index : number) {
+		commitEdit(col, colIndex, row, index)
+	}
+
+	function onCellConfirm(col : NaxTableColumn, colIndex : number, row : any, index : number) {
+		commitEdit(col, colIndex, row, index)
+	}
+
+	// ========== 行焦点转移（row-blur） ==========
+	/** 上一活跃行（data 绝对下标） */
+	const activeRowIndex = ref(-1)
+
+	/** 点击新行时，对上一活跃行 emit row-blur（模拟焦点转移；App 端无 hover/焦点，以此近似） */
+	function emitRowBlurIfNeeded(newIndex : number) {
+		if (activeRowIndex.value >= 0 && activeRowIndex.value != newIndex) {
+			const list = viewData.value
+			if (activeRowIndex.value < list.length) {
+				emit('row-blur', list[activeRowIndex.value], activeRowIndex.value)
+			}
+		}
+		activeRowIndex.value = newIndex
+	}
+
+	function onRowClick(row : any, index : number) {
+		emitRowBlurIfNeeded(index)
+		highlightIndex.value = index
+		emit('row-click', row, index)
+	}
+
+	// ========== 多选（data 绝对下标） ==========
+	const hasSelection = computed((): boolean => {
+		for (var i = 0; i < props.columns.length; i++) {
+			if (props.columns[i].type == 'selection') {
+				return true
+			}
+		}
+		return false
+	})
+
+	function isSelected(index : number) : boolean {
+		return selectedIndexes.value.indexOf(index) >= 0
+	}
+
+	/** 该行是否可勾选（selectable 返回 false 表示禁用）；viewData 下标转绝对下标后判定 */
+	function isRowSelectable(absIdx : number) : boolean {
+		const col = selectionCol()
+		if (col == null || col.selectable == null) {
+			return true
+		}
+		const f = col.selectable!
+		const list = viewData.value
+		if (absIdx < 0 || absIdx >= list.length) {
+			return true
+		}
+		return f(list[absIdx], absIdx)
+	}
+
+	/** selection 列配置（最多取第一个） */
+	function selectionCol() : NaxTableColumn | null {
+		for (var i = 0; i < props.columns.length; i++) {
+			if (props.columns[i].type == 'selection') {
+				return props.columns[i]
+			}
+		}
+		return null
+	}
+
+	const isAllSelected = computed((): boolean => {
+		const total = bodyRows.value.length
+		if (total == 0) {
+			return false
+		}
+		for (var i = 0; i < total; i++) {
+			const ai = absIndex(i)
+			// 全部可勾选行均已选中才算全选（禁用行不参与判定）
+			if (isRowSelectable(ai) && !isSelected(ai)) {
+				return false
+			}
+		}
+		return true
+	})
+
+	const isSomeSelected = computed((): boolean => {
+		const total = bodyRows.value.length
+		var count = 0
+		var selectableCount = 0
+		for (var i = 0; i < total; i++) {
+			const ai = absIndex(i)
+			if (!isRowSelectable(ai)) {
+				continue
+			}
+			selectableCount++
+			if (isSelected(ai)) {
+				count++
+			}
+		}
+		return count > 0 && count < selectableCount
+	})
+
+	const headerBoxClass = computed((): string => {
+		if (isAllSelected.value) {
+			return 'nax-checkbox--on'
+		}
+		if (isSomeSelected.value) {
+			return 'nax-checkbox--some'
+		}
+		return ''
+	})
+
+	const headerBoxMark = computed((): string => {
+		if (isAllSelected.value) {
+			return '✓'
+		}
+		if (isSomeSelected.value) {
+			return '–'
+		}
+		return ''
+	})
+
+	function rowBoxClass(index : number) : string {
+		return isSelected(index) ? 'nax-checkbox--on' : ''
+	}
+
+	function rowBoxMark(index : number) : string {
+		return isSelected(index) ? '✓' : ''
+	}
+
+	/** 禁用行勾选框样式 */
+	function rowBoxDisabledClass(index : number) : string {
+		return isRowSelectable(index) ? '' : 'nax-checkbox--disabled'
+	}
+
+	function emitSelection() {
+		const rows : any[] = []
+		const list = viewData.value
+		for (var i = 0; i < selectedIndexes.value.length; i++) {
+			const idx = selectedIndexes.value[i]
+			if (idx >= 0 && idx < list.length) {
+				rows.push(list[idx])
+			}
+		}
+		emit('selection-change', rows)
+	}
+
+	function onToggleAll() {
+		if (!hasSelection.value) {
+			return
+		}
+		if (isAllSelected.value) {
+			// 取消当前渲染窗口内的选择
+			const remain = selectedIndexes.value.slice()
+			for (var i = 0; i < bodyRows.value.length; i++) {
+				const ai = absIndex(i)
+				const pos = remain.indexOf(ai)
+				if (pos >= 0) {
+					remain.splice(pos, 1)
+				}
+			}
+			selectedIndexes.value = remain
+		} else {
+			const all = selectedIndexes.value.slice()
+			for (var j = 0; j < bodyRows.value.length; j++) {
+				const ai2 = absIndex(j)
+				// 被 selectable 禁用的行不纳入全选
+				if (all.indexOf(ai2) < 0 && isRowSelectable(ai2)) {
+					all.push(ai2)
+				}
+			}
+			selectedIndexes.value = all
+		}
+		emitSelection()
+	}
+
+	function onToggleRow(index : number) {
+		// 被禁用的行不可勾选
+		if (!isRowSelectable(index)) {
+			return
+		}
+		const list = selectedIndexes.value.slice()
+		const pos = list.indexOf(index)
+		if (pos >= 0) {
+			list.splice(pos, 1)
+		} else {
+			list.push(index)
+		}
+		selectedIndexes.value = list
+		emitSelection()
+	}
+
+	// ========== 合计行 ==========
+	const summaryCells = computed((): NaxTableSummaryCell[] => {
+		if (props.summaryMethod != null) {
+			const f = props.summaryMethod!
+			return f(props.columns, props.data)
+		}
+		const cells : NaxTableSummaryCell[] = []
+		const cols = props.columns
+		var sumTextPlaced = false
+		for (var i = 0; i < cols.length; i++) {
+			const c = cols[i]
+			const cell = new NaxTableSummaryCell()
+			// sumText 放在第一个 text 列：selection/index 等窄列放不下会被挤压
+			if (!sumTextPlaced && c.type == 'text') {
+				cell.text = props.sumText
+				sumTextPlaced = true
+			} else if (c.type == 'text' && c.name.length > 0) {
+				var sum = 0.0
+				var allNum = props.data.length > 0
+				for (var r = 0; r < props.data.length; r++) {
+					const v = numValue(props.data[r][c.name])
+					if (v == null) {
+						allNum = false
+						break
+					}
+					sum += v!
+				}
+				if (allNum) {
+					sum = Math.round(sum * 100) / 100
+					cell.text = sum.toString()
+				}
+			}
+			cells.push(cell)
+		}
+		return cells
+	})
+
+	/** 合计单元格文本对齐（text-align 由 text 承担，与数据行同机制） */
+	function summaryTextStyle(index : number) : string {
+		const cell = summaryCells.value[index]
+		// cell 显式 align 优先（colspan 跨列时对应不到单一列，用 cell.align 控制）
+		var a = cell.align.trim()
+		if (a.length == 0) {
+			var pointer = 0
+			for (var i = 0; i < index; i++) {
+				pointer += summaryCells.value[i].colspan
+			}
+			if (pointer < props.columns.length) {
+				a = props.columns[pointer].align.length > 0 ? props.columns[pointer].align : 'left'
+			}
+		}
+		if (a == 'right') {
+			return 'text-align:right;'
+		}
+		if (a == 'center') {
+			return 'text-align:center;'
+		}
+		return ''
+	}
+
+	/** 合计单元格跨列样式 */
+	function summaryCellStyle(index : number) : string {
+		var pointer = 0
+		for (var i = 0; i < index; i++) {
+			pointer += summaryCells.value[i].colspan
+		}
+		const span = summaryCells.value[index].colspan
+		var style = spanStyle(pointer, span)
+		// 与数据行同源行高：inline min-height 优先级高于 CSS 固定值
+		style += 'min-height:' + sizeToCss(props.tdH, 40) + ';'
+		// 该区间包含 fixed 列时透明让位
+		for (var k = pointer; k < pointer + span && k < props.columns.length; k++) {
+			if (props.columns[k].fixed) {
+				style += 'visibility:hidden;'
+				break
+			}
+		}
+		return style
+	}
+
+	/** 跨列样式：固定宽求和 + flex 列计数 */
+	function spanStyle(start : number, count : number) : string {
+		var fixed = 0
+		var flexCount = 0
+		for (var k = 0; k < count; k++) {
+			const idx = start + k
+			if (idx >= props.columns.length) {
+				break
+			}
+			const c = props.columns[idx]
+			if (isFlexCol(c)) {
+				flexCount++
+			} else {
+				const n = parseFloat(c.width.trim())
+				fixed += isNaN(n) ? 80 : n
+			}
+		}
+		var style = ''
+		if (fixed > 0) {
+			style += 'width:' + fixed.toString() + 'px;'
+		}
+		if (flexCount > 0) {
+			style += 'flex:' + flexCount.toString() + ';min-width:' + (flexColMinWidth() * flexCount).toString() + 'px;'
+		}
+		if (style.length == 0) {
+			style = 'flex:1;'
+		}
+		return style
+	}
+
+	// ========== 分组表头 ==========
+	class NaxTableGroup {
+		title: string = ''
+		start: number = 0
+		end: number = 0
+	}
+
+	const hasGroups = computed((): boolean => {
+		return groups.value.length > 0
+	})
+
+	const groups = computed((): NaxTableGroup[] => {
+		const result : NaxTableGroup[] = []
+		const cols = props.columns
+		var i = 0
+		while (i < cols.length) {
+			const t = cols[i].groupTitle.trim()
+			if (t.length == 0) {
+				i++
+				continue
+			}
+			var j = i
+			while (j + 1 < cols.length && cols[j + 1].groupTitle.trim() == t) {
+				j++
+			}
+			const g = new NaxTableGroup()
+			g.title = t
+			g.start = i
+			g.end = j
+			result.push(g)
+			i = j + 1
+		}
+		return result
+	})
+
+	function groupThStyle(g : NaxTableGroup) : string {
+		return spanStyle(g.start, g.end - g.start + 1)
+	}
+
+	function groupMainStyle(g : NaxTableGroup) : string {
+		// 分组表头默认居中；跟随组内第一列 headerAlign
+		const first = props.columns[g.start]
+		const a = first.headerAlign.trim().length > 0 ? first.headerAlign : 'center'
+		if (a == 'left') {
+			return 'justify-content:flex-start;'
+		}
+		if (a == 'right') {
+			return 'justify-content:flex-end;'
+		}
+		return 'justify-content:center;'
+	}
+
+	// ========== 分页 ==========
+	const pagesTotal = computed((): number => {
+		var total = 0
+		if (props.pagingMode == 'inner') {
+			total = props.data.length
+		} else {
+			total = props.paging.total
+		}
+		const size = props.paging.pageSize
+		if (size <= 0) {
+			return 1
+		}
+		var p = Math.ceil(total * 1.0 / size)
+		if (p < 1) {
+			p = 1
+		}
+		return p
+	})
+
+	/** 页码序列：0 表示省略号 */
+	const pageItems = computed((): number[] => {
+		const total = pagesTotal.value
+		if (total <= 0) {
+			return [] as number[]
+		}
+		const maxBtn = props.paging.pageCount
+		if (maxBtn <= 0 || total <= maxBtn) {
+			const all : number[] = []
+			for (var i = 1; i <= total; i++) {
+				all.push(i)
+			}
+			return all
+		}
+		// 窗口算法：首尾恒显，当前页 ± 1
+		const win : number[] = [1]
+		var from = currentPage.value - 1
+		var to = currentPage.value + 1
+		if (from < 2) {
+			from = 2
+		}
+		if (to > total - 1) {
+			to = total - 1
+		}
+		if (from > to) {
+			if (currentPage.value <= 2) {
+				from = 2
+				to = maxBtn - 1 < total - 1 ? maxBtn - 1 : total - 1
+			} else {
+				to = total - 1
+				from = to - (maxBtn - 3)
+				if (from < 2) {
+					from = 2
+				}
+			}
+		}
+		if (from > 2) {
+			win.push(0)
+		}
+		for (var p = from; p <= to; p++) {
+			win.push(p)
+		}
+		if (to < total - 1) {
+			win.push(0)
+		}
+		win.push(total)
+		return win
+	})
+
+	function emitPageChange() {
+		const st = new NaxTablePageState()
+		st.current = currentPage.value
+		st.pageSize = props.paging.pageSize
+		st.pages = pagesTotal.value
+		emit('page-change', st)
+	}
+
+	function onPageGo(page : number) {
+		if (page < 1) {
+			page = 1
+		}
+		if (page > pagesTotal.value) {
+			page = pagesTotal.value
+		}
+		if (page == currentPage.value) {
+			return
+		}
+		currentPage.value = page
+		selectedIndexes.value = [] as number[]
+		visStart.value = 0
+		visEnd.value = 20
+		emitPageChange()
+	}
+
+	function onPagePrev() {
+		onPageGo(currentPage.value - 1)
+	}
+
+	function onPageNext() {
+		onPageGo(currentPage.value + 1)
+	}
+
+	function onJumpConfirm() {
+		const n = parseInt(jumpNum.value)
+		if (!isNaN(n) && n > 0) {
+			onPageGo(n)
+		}
+		jumpNum.value = ''
+	}
+
+	function pagerBtnDisabledClass(which : string) : string {
+		if (which == 'prev' && currentPage.value <= 1) {
+			return 'nax-table__pager-btn--disabled'
+		}
+		if (which == 'next' && currentPage.value >= pagesTotal.value) {
+			return 'nax-table__pager-btn--disabled'
+		}
+		return ''
+	}
+
+	function pagerBtnTextDisabledClass(which : string) : string {
+		if (which == 'prev' && currentPage.value <= 1) {
+			return 'nax-table__pager-btn-text--disabled'
+		}
+		if (which == 'next' && currentPage.value >= pagesTotal.value) {
+			return 'nax-table__pager-btn-text--disabled'
+		}
+		return ''
+	}
+
+	// ========== 加载更多 ==========
+	const loadMoreText = computed((): string => {
+		if (props.finished) {
+			return '没有更多了'
+		}
+		return '加载更多'
+	})
+
+	function onLoadMoreClick() {
+		if (props.finished) {
+			return
+		}
+		emit('load-more')
+	}
+
+	function onScrollToLower() {
+		if (!props.showLoadMore || props.finished) {
+			return
+		}
+		emit('load-more')
+	}
+
+	// ========== 实例方法（defineExpose，供父组件通过 ref 调用） ==========
+
+	/** 清除当前行高亮 */
+	function resetHighlight() {
+		highlightIndex.value = -1
+	}
+
+	/** 清空所有选中行 */
+	function clearSelection() {
+		selectedIndexes.value = [] as number[]
+		emitSelection()
+	}
+
+	/** 勾选/取消勾选指定行（data 绝对下标）；行被 selectable 禁用时忽略 */
+	function toggleRowSelection(index : number, selected ? : boolean) {
+		if (!hasSelection.value) {
+			return
+		}
+		if (!isRowSelectable(index)) {
+			return
+		}
+		const list = selectedIndexes.value.slice()
+		const pos = list.indexOf(index)
+		const willSelect = selected != null ? selected : pos < 0
+		if (willSelect && pos < 0) {
+			list.push(index)
+		} else if (!willSelect && pos >= 0) {
+			list.splice(pos, 1)
+		}
+		selectedIndexes.value = list
+		emitSelection()
+	}
+
+	/** 全选/取消全选当前渲染范围；全选时跳过被 selectable 禁用的行 */
+	function toggleAllSelection() {
+		if (!hasSelection.value) {
+			return
+		}
+		onToggleAll()
+	}
+
+	/** 排序状态复位（仅清内部状态，不改数据顺序） */
+	function clearSort() {
+		sortName.value = ''
+		sortOrder.value = ''
+	}
+
+	/** 回到第一页（inner/outer 分页模式通用） */
+	function resetPage() {
+		onPageGo(1)
+	}
+
+	defineExpose({
+		resetHighlight,
+		clearSelection,
+		toggleRowSelection,
+		toggleAllSelection,
+		clearSort,
+		resetPage
+	})
+</script>
+
+<style>
+	.nax-table {
+		flex-direction: column;
+		width: 100%;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		overflow: hidden;
+	}
+
+	.nax-table__scroll-x {
+		flex-direction: row;
+		width: 100%;
+	}
+
+	.nax-table__inner {
+		flex-direction: column;
+		min-width: 100%;
+		flex-shrink: 0;
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		align-self: flex-start;
+		/* #endif */
+	}
+
+	.nax-table__header {
+		flex-direction: row;
+		align-items: stretch;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-bottom: 1px solid var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-table__header--groups {
+		border-bottom-width: 0;
+	}
+
+	.nax-table__header--no-border {
+		border-bottom-width: 0;
+	}
+
+	.nax-table__th {
+		flex-direction: column;
+		justify-content: center;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-table__th--group {
+		border-bottom: 1px solid var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-table__th-main {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+	}
+
+	.nax-table__th-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		font-weight: 500;
+		width: 100%;
+	}
+
+	.nax-table__sort {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		margin-left: 4px;
+	}
+
+	.nax-table__sort-arrow {
+		font-size: 10px;
+		line-height: 11px;
+		color: var(--nax-color-text-placeholder, #e5e5ea);
+	}
+
+	.nax-table__sort-arrow--active {
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-table__scroll-y {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-table__row {
+		flex-direction: row;
+		align-items: stretch;
+	}
+
+	.nax-table__row--body {
+		border-bottom: 1px solid var(--nax-color-divider, #f5f5f7);
+	}
+
+	.nax-table__row--no-border {
+		border-bottom-width: 0;
+	}
+
+	.nax-table__row--stripe {
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.nax-table__row--highlight {
+		/* 选中行用主题色浅底，与斑马纹/白底明显区分 */
+		background-color: var(--nax-color-primary-secondary, #daefe4);
+	}
+
+	.nax-table__td {
+		flex-direction: column;
+		justify-content: center;
+		min-height: 40px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-table__td-main {
+		flex-direction: row;
+		align-items: center;
+		width: 100%;
+	}
+
+	.nax-table__td-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text, #333639);
+		line-height: 20px;
+		/* flex 子项默认不收缩宽度，text-align 需要文本节点本身占满可分配宽度 */
+		width: 100%;
+	}
+
+	/* 可编辑单元格（展示态）：底色与只读单元格区分 */
+	.nax-table__td-text--editable {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+		border-bottom: 1px dashed var(--nax-color-border-strong, #e5e5ea);
+		padding-left: 4px;
+		padding-right: 4px;
+	}
+
+	/* 单元格编辑输入框（编辑态） */
+	.nax-table__td-input {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text, #333639);
+		width: 100%;
+		height: 26px;
+		padding-left: 4px;
+		padding-right: 4px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border: 1px solid var(--nax-color-primary, #18a058);
+		border-radius: var(--nax-radius-sm, 3px);
+	}
+
+	/* Android / 鸿蒙 / iOS：overflow 兜底；行数由 :max-lines 属性承担 */
+	/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+	.nax-table__td-text--lines-1 {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.nax-table__td-text--lines-multi {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* #endif */
+
+	/* Web / 微信小程序：标准单行省略；多行依赖 :max-lines */
+	/* #ifdef WEB || MP-WEIXIN */
+	.nax-table__td-text--lines-1 {
+		display: block;
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.nax-table__td-text--lines-multi {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		word-break: break-all;
+	}
+	/* #endif */
+
+	.nax-table__ops {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-table__op {
+		font-size: var(--nax-font-size-sm, 14px);
+		margin-right: 12px;
+		padding: 2px 0;
+	}
+
+	/* 多选框（纯 view/text 自绘） */
+	.nax-checkbox {
+		width: 16px;
+		height: 16px;
+		border-radius: 3px;
+		border: 1px solid var(--nax-color-border-strong, #e5e5ea);
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.nax-checkbox--on {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-checkbox--some {
+		background-color: var(--nax-color-primary, #18a058);
+		border-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-checkbox--disabled {
+		opacity: 0.35;
+	}
+
+	.nax-checkbox__mark {
+		font-size: 11px;
+		line-height: 12px;
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	/* 合计行 */
+	.nax-table__summary {
+		flex-direction: row;
+		align-items: stretch;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-top: 1px solid var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-table__td--summary {
+		min-height: 40px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+	}
+
+	.nax-table__td-main--summary {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-table__summary-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		/* 与 td-text 同行高，保证文字块在 flex 垂直居中下节奏一致 */
+		line-height: 20px;
+		width: 100%;
+	}
+
+	/* 加载更多 */
+	.nax-table__more {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 40px;
+	}
+
+	.nax-table__more-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-primary, #18a058);
+	}
+
+	/* 固定列覆盖层 */
+	.nax-table__fixed-layer {
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		flex-direction: column;
+		z-index: 10;
+		background-color: var(--nax-color-bg, #ffffff);
+		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+		/* #endif */
+		/* #ifdef WEB || MP-WEIXIN */
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.06);
+		/* #endif */
+	}
+
+	.nax-table__header--fixed {
+		border-bottom: 1px solid var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-table__fixed-body {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.nax-table__summary--fixed {
+		border-top: 1px solid var(--nax-color-border, #f0f0f3);
+	}
+
+	/* 分页器 */
+	.nax-table__pager {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		flex-wrap: wrap;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.nax-table__pager-btn {
+		min-width: 30px;
+		height: 30px;
+		border-radius: var(--nax-radius-sm, 3px);
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: 4px;
+		margin-right: 4px;
+		/* flex-wrap 换行后靠上下 margin 拉开行间距（uvue 无 row-gap） */
+		margin-top: 6px;
+		margin-bottom: 6px;
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	.nax-table__pager-btn--active {
+		background-color: var(--nax-color-primary, #18a058);
+	}
+
+	.nax-table__pager-btn--disabled {
+		opacity: 0.4;
+	}
+
+	.nax-table__pager-btn-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text, #333639);
+	}
+
+	.nax-table__pager-btn-text--active {
+		color: var(--nax-color-text-inverse, #ffffff);
+	}
+
+	.nax-table__pager-btn-text--disabled {
+		color: var(--nax-color-text-disabled, #e5e5ea);
+	}
+
+	.nax-table__pager-ellipsis {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		margin-left: 2px;
+		margin-right: 2px;
+		margin-top: 6px;
+		margin-bottom: 6px;
+	}
+
+	.nax-table__pager-ellipsis-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-table__pager-jump {
+		flex-direction: row;
+		align-items: center;
+		margin-left: 12px;
+		margin-top: 6px;
+		margin-bottom: 6px;
+	}
+
+	.nax-table__pager-input {
+		width: 56px;
+		height: 30px;
+		border: 1px solid var(--nax-color-border-strong, #e5e5ea);
+		border-radius: var(--nax-radius-sm, 3px);
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text, #333639);
+		text-align: center;
+		padding: 0;
+	}
+
+	.nax-table__pager-jump-text {
+		font-size: var(--nax-font-size-sm, 14px);
+		color: var(--nax-color-text-secondary, #767c82);
+		margin-left: 6px;
+	}
+</style>

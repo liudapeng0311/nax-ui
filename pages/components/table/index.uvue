@@ -1,0 +1,739 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="nax-table"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">基础</text>
+				<view class="block">
+					<nax-table :data="baseData" :columns="baseCols" @row-click="onBaseRow"></nax-table>
+				</view>
+				<text class="hint">默认 border + 表头灰底；点击行弹 toast</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">斑马纹 + 选中行高亮</text>
+				<view class="block">
+					<nax-table :data="baseData" :columns="baseCols" :stripe="true" :highlight="true"></nax-table>
+				</view>
+				<text class="hint">stripe 斑马纹；点击任意行后该行以主题色浅底高亮（与斑马纹/普通行明显区分），可配合 ref 调 resetHighlight() 清除</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">排序</text>
+				<view class="block">
+					<nax-table :data="sortData" :columns="sortCols" @sort-change="onSortChange"></nax-table>
+				</view>
+				<text class="hint">点击表头循环 无 → asc → desc；组件内部排序，同时 emit sort-change</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">字符串排序 + custom 排序</text>
+				<view class="block">
+					<nax-table :data="sortStrData" :columns="sortStrCols" @sort-change="onCustomSortChange"></nax-table>
+				</view>
+				<text class="hint">城市列字符串按码点排序；等级列 sorter='custom' 组件不排序、仅 emit，由业务处理</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">filters 值映射</text>
+				<view class="block">
+					<nax-table :data="filterData" :columns="filterCols"></nax-table>
+				</view>
+				<text class="hint">sex 列 0/1 映射为 男/女 展示，未命中映射回退原值</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">单元格点击（cell-click）</text>
+				<view class="block">
+					<nax-table :data="baseData" :columns="baseCols" @cell-click="onCellClick"></nax-table>
+				</view>
+				<text class="hint">点击单元格弹 toast，负载含列名、行下标与原始值；行点击仍触发 row-click</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">固定高度滚动 + 序号列 + 操作列</text>
+				<view class="block">
+					<nax-table
+						:data="bigData"
+						:columns="bigCols"
+						height="260px"
+						:stripe="true"
+						@action="onAction"
+					></nax-table>
+				</view>
+				<text class="hint">height=260 表体独立滚动、表头固定；操作列 emit action</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">横向滚动（列宽固定）</text>
+				<view class="block">
+					<nax-table :data="wideData" :columns="wideCols"></nax-table>
+				</view>
+				<text class="hint">各列指定 width，总宽超出容器时横向滑动</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">多行省略 + 空值占位 + formatter</text>
+				<view class="block">
+					<nax-table :data="formatData" :columns="formatCols" :empty-string="'--'"></nax-table>
+				</view>
+				<text class="hint">lines=2 超出省略；空值显示 emptyString；score 列 formatter 加分</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">空状态</text>
+				<view class="block">
+					<nax-table :data="[]" :columns="baseCols"></nax-table>
+				</view>
+				<text class="hint">data 为空时内置 nax-empty；也可用 #empty 槽自定义</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">多选 + 合计行（含禁用行）</text>
+				<view class="block">
+					<nax-table
+						ref="selTableRef"
+						:data="selData"
+						:columns="selCols"
+						:stripe="true"
+						:show-summary="true"
+						sum-text="合计"
+						@selection-change="onSelectionChange"
+					></nax-table>
+				</view>
+				<view class="btn-row">
+					<nax-button size="sm" @click="onClearSelection">清空选择</nax-button>
+					<nax-button size="sm" type="tertiary" @click="onSelectFirst">选第一行</nax-button>
+				</view>
+				<text class="hint">selection 列全选/半选；「王五」行 selectable=false 禁用，不可勾选且不参与全选</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">实例方法（ref）</text>
+				<view class="block">
+					<nax-table
+						ref="methodTableRef"
+						:data="pageData"
+						:columns="pageCols"
+						height="200px"
+						:highlight="true"
+						:show-paging="true"
+						:paging="methodPageConf"
+					></nax-table>
+				</view>
+				<view class="btn-row">
+					<nax-button size="sm" @click="onClearHighlight">清除高亮</nax-button>
+					<nax-button size="sm" type="tertiary" @click="onResetPage">回第一页</nax-button>
+					<nax-button size="sm" type="tertiary" @click="onClearSort">清空排序</nax-button>
+				</view>
+				<text class="hint">点击行高亮后可 resetHighlight 清除；resetPage / clearSort / clearSelection / toggleRowSelection 均为实例方法</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">自定义合计（summary-method + colspan）</text>
+				<view class="block">
+					<nax-table :data="selData" :columns="selCols" :show-summary="true" :summary-method="mySummary"></nax-table>
+				</view>
+				<text class="hint">首格跨 2 列显示「共 N 人」，平均分单独一列</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">分组表头</text>
+				<view class="block">
+					<nax-table :data="groupData" :columns="groupCols"></nax-table>
+				</view>
+				<text class="hint">相邻列 groupTitle 相同自动合并为一组；无分组的列不占分组行</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">组件内部分页（inner）</text>
+				<view class="block">
+					<nax-table
+						:data="pageData"
+						:columns="pageCols"
+						height="300px"
+						:show-paging="true"
+						:paging="pageConf"
+						@page-change="onPageChange"
+					></nax-table>
+				</view>
+				<text class="hint">pagingMode=inner：组件自动按 pageSize 切片，data 全量传入</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">加载更多（load-more）</text>
+				<view class="block">
+					<nax-table
+						:data="moreData"
+						:columns="pageCols"
+						height="240px"
+						:show-load-more="true"
+						:finished="moreFinished"
+						@load-more="onLoadMore"
+					></nax-table>
+				</view>
+				<text class="hint">触底或点击「加载更多」触发；finished 后显示「没有更多了」</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">固定列（fixed）</text>
+				<view class="block">
+					<nax-table
+						:data="fixedData"
+						:columns="fixedCols"
+						height="240px"
+						:stripe="true"
+						:show-summary="true"
+					></nax-table>
+				</view>
+				<text class="hint">姓名列固定在左侧，横向滑动时其余列从其下方穿过；序号列为主区普通列</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">虚拟滚动（virtual + 固定行高）</text>
+				<view class="block">
+					<nax-table
+						:data="virtualData"
+						:columns="virtualCols"
+						height="300px"
+						:virtual="true"
+						row-h="44"
+						:stripe="true"
+					></nax-table>
+				</view>
+				<text class="hint">1000 行数据窗口裁剪，仅渲染可见区 ± 5 行；行高固定 44px</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">虚拟滚动 + 多选（跨窗口选择）</text>
+				<view class="block">
+					<nax-table
+						:data="virtualData"
+						:columns="virtualSelCols"
+						height="300px"
+						:virtual="true"
+						row-h="44"
+						@selection-change="onVirtualSelChange"
+					></nax-table>
+				</view>
+				<text class="hint">选择按 data 绝对下标维护，滚动换窗后已选状态保持</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">字段类型与格式化（dataType + format）</text>
+				<view class="block">
+					<nax-table :data="typedData" :columns="typedCols"></nax-table>
+				</view>
+				<text class="hint">date 列按 YYYY-MM-DD 格式化；number 列千分位 + 2 位小数；weight 列百分比格式</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">可编辑单元格（editable + cell-edit）</text>
+				<view class="block">
+					<nax-table :data="editData" :columns="editCols" @cell-edit="onCellEdit"></nax-table>
+				</view>
+				<text class="hint">姓名/城市列可编辑（底色区分），点击进入输入态，失焦或确认提交；年龄列只读</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">行焦点转移（row-blur）</text>
+				<view class="block">
+					<nax-table
+						ref="blurTableRef"
+						:data="baseData"
+						:columns="baseCols"
+						:highlight="true"
+						@row-click="onBlurRowClick"
+						@row-blur="onRowBlur"
+					></nax-table>
+				</view>
+				<text class="hint">点击另一行时，对上一活跃行触发 row-blur（焦点转移）；再点击可观察 toast</text>
+			</view>
+
+		</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { NaxTableColumn, NaxTableOperation, NaxTableSortState, NaxTableActionPayload, NaxTableCellPayload, NaxTableCellEditPayload, NaxTableSummaryCell, NaxTablePaging, NaxTablePageState } from '@/uni_modules/nax-table/components/nax-table/table-types.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	// 基础
+	const baseCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'city', label: '城市' }),
+		new NaxTableColumn({ name: 'age', label: '年龄', width: '70', align: 'center' })
+	]
+	const baseData = [
+		{ name: '张三', city: '杭州', age: 24 },
+		{ name: '李四', city: '上海', age: 31 },
+		{ name: '王五', city: '深圳', age: 28 }
+	]
+
+	function onBaseRow(row : any, index : number) {
+		uni.showToast({ title: '点击第 ' + (index + 1).toString() + ' 行', icon: 'none' })
+	}
+
+	// 排序
+	const sortCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'score', label: '分数', sorter: true, align: 'center' })
+	]
+	const sortData = [
+		{ name: '张三', score: 88 },
+		{ name: '李四', score: 95 },
+		{ name: '王五', score: 72 },
+		{ name: '赵六', score: 83 }
+	]
+
+	function onSortChange(state : NaxTableSortState) {
+		uni.showToast({ title: 'sort: ' + state.name + ' ' + state.order, icon: 'none' })
+	}
+
+	// 字符串排序 + custom 排序
+	const sortStrCols = [
+		new NaxTableColumn({ name: 'city', label: '城市', sorter: true, width: '100' }),
+		new NaxTableColumn({ name: 'level', label: '等级', sorter: 'custom', width: '80', align: 'center', filters: new Map<string, string>([['1', '青铜'], ['2', '黄金'], ['3', '王者']]) }),
+		new NaxTableColumn({ name: 'score', label: '分数', sorter: true, align: 'center', width: '80' })
+	]
+	const sortStrData = [
+		{ city: '深圳', level: 3, score: 72 },
+		{ city: '杭州', level: 1, score: 95 },
+		{ city: '北京', level: 2, score: 88 },
+		{ city: '上海', level: 2, score: 83 }
+	]
+
+	function onCustomSortChange(state : NaxTableSortState) {
+		if (state.source == 'custom') {
+			uni.showToast({ title: 'custom 排序，业务自行处理: ' + state.order, icon: 'none' })
+		}
+	}
+
+	// filters 值映射
+	const filterCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'sex', label: '性别', width: '70', align: 'center', filters: new Map<string, string>([['0', '男'], ['1', '女']]) }),
+		new NaxTableColumn({ name: 'status', label: '状态', width: '90', align: 'center', filters: new Map<string, string>([['online', '在线'], ['offline', '离线']]) })
+	]
+	const filterData = [
+		{ name: '张三', sex: 0, status: 'online' },
+		{ name: '李四', sex: 1, status: 'offline' },
+		{ name: '王五', sex: 2, status: 'unknown' }
+	]
+
+	// 单元格点击
+	function onCellClick(payload : NaxTableCellPayload, row : any) {
+		uni.showToast({ title: 'cell: ' + payload.name + ' = ' + payload.value + '（第 ' + (payload.index + 1).toString() + ' 行）', icon: 'none' })
+	}
+
+	// 固定高度 + 序号 + 操作
+	const bigCols = [
+		new NaxTableColumn({ type: 'index', width: '50', align: 'center' }),
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '80' }),
+		new NaxTableColumn({ name: 'city', label: '城市' }),
+		new NaxTableColumn({ name: 'age', label: '年龄', width: '60', align: 'center' }),
+		new NaxTableColumn({
+			type: 'operation',
+			label: '操作',
+			width: '110',
+			renders: [
+				new NaxTableOperation({ name: '编辑', type: 'primary' }),
+				new NaxTableOperation({ name: '删除', type: 'error' })
+			]
+		})
+	]
+	const bigData = ref([] as any[])
+	var bigSeq = 0
+	for (var i = 0; i < 30; i++) {
+		bigSeq++
+		const cityIdx = i % 3
+		var city = '杭州'
+		if (cityIdx == 1) {
+			city = '上海'
+		} else if (cityIdx == 2) {
+			city = '北京'
+		}
+		bigData.value.push({
+			name: '成员 ' + bigSeq.toString(),
+			city: city,
+			age: 20 + (i % 15)
+		})
+	}
+
+	function onAction(payload : NaxTableActionPayload, row : any) {
+		uni.showToast({ title: payload.name + '：' + payload.index.toString(), icon: 'none' })
+	}
+
+	// 横向滚动
+	const wideCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'phone', label: '手机号', width: '130' }),
+		new NaxTableColumn({ name: 'email', label: '邮箱', width: '200' }),
+		new NaxTableColumn({ name: 'address', label: '地址', width: '240' })
+	]
+	const wideData = [
+		{ name: '张三', phone: '13800000000', email: 'zhangsan@example.com', address: '浙江省杭州市西湖区某街道 88 号' }
+	]
+
+	// 省略/占位/formatter
+	const formatCols = [
+		new NaxTableColumn({ name: 'title', label: '标题', lines: 2 }),
+		new NaxTableColumn({ name: 'score', label: '得分', width: '70', align: 'center', formatter: (row : any, index : number): string => {
+			const v = row['score']
+			if (v == null) {
+				return '-'
+			}
+			const n = v as number
+			return (n + 10).toString() + ' 分'
+		} }),
+		new NaxTableColumn({ name: 'remark', label: '备注', width: '80', emptyString: '无备注' })
+	]
+	const formatData = [
+		{ title: '这是一条很长很长的标题，会在第二行末尾出现省略号，用于验证 lines=2 的多行省略效果', score: 90, remark: '' },
+		{ title: '短标题', remark: '正常' }
+	]
+
+	// 多选 + 合计（含禁用行）
+	const selCols = [
+		new NaxTableColumn({ type: 'selection', width: '44' }),
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'city', label: '城市' }),
+		new NaxTableColumn({ name: 'score', label: '分数', width: '80', align: 'center' })
+	]
+	const selData = [
+		{ name: '张三', city: '杭州', score: 88 },
+		{ name: '李四', city: '上海', score: 95 },
+		{ name: '王五', city: '深圳', score: 72 },
+		{ name: '赵六', city: '广州', score: 83 }
+	]
+
+	// App UTS：组件 ref 不能按 any 调方法，需声明 expose 类型（form/video demo 同款模式）
+	type NaxTableExpose = {
+		resetHighlight : () => void
+		clearSelection : () => void
+		toggleRowSelection : (index : number, selected ? : boolean) => void
+		toggleAllSelection : () => void
+		clearSort : () => void
+		resetPage : () => void
+	}
+	const selTableRef = ref(null as NaxTableExpose | null)
+	const methodTableRef = ref(null as NaxTableExpose | null)
+
+	function onSelectionChange(rows : any[]) {
+		uni.showToast({ title: '已选 ' + rows.length.toString() + ' 行', icon: 'none' })
+	}
+
+	function onClearSelection() {
+		const t = selTableRef.value
+		if (t != null) {
+			t.clearSelection()
+		}
+	}
+
+	function onSelectFirst() {
+		const t = selTableRef.value
+		if (t != null) {
+			t.toggleRowSelection(0)
+		}
+	}
+
+	function mySummary(columns : NaxTableColumn[], data : any[]) : NaxTableSummaryCell[] {
+		const cells : NaxTableSummaryCell[] = []
+		const first = new NaxTableSummaryCell()
+		first.text = '共 ' + data.length.toString() + ' 人'
+		// 跨「复选框 + 姓名 + 城市」3 列，让平均分落到分数列下方
+		first.colspan = 3
+		cells.push(first)
+		const avg = new NaxTableSummaryCell()
+		avg.text = '平均 ' + avgScore(data)
+		// 显式右对齐：与分数列数值对齐
+		avg.align = 'right'
+		cells.push(avg)
+		return cells
+	}
+
+	function avgScore(data : any[]) : string {
+		if (data.length == 0) {
+			return '0'
+		}
+		var sum = 0.0
+		for (var i = 0; i < data.length; i++) {
+			sum += data[i]['score'] as number
+		}
+		return (Math.round(sum * 100.0 / data.length * 100) / 100).toString()
+	}
+
+	// 分组表头
+	const groupCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'chinese', label: '语文', groupTitle: '成绩', align: 'center' }),
+		new NaxTableColumn({ name: 'math', label: '数学', groupTitle: '成绩', align: 'center' }),
+		new NaxTableColumn({ name: 'english', label: '英语', groupTitle: '成绩', align: 'center' }),
+		new NaxTableColumn({ name: 'city', label: '城市', groupTitle: '信息' }),
+		new NaxTableColumn({ name: 'phone', label: '电话', groupTitle: '信息', width: '120' })
+	]
+	const groupData = [
+		{ name: '张三', chinese: 90, math: 85, english: 92, city: '杭州', phone: '13800000001' },
+		{ name: '李四', chinese: 78, math: 94, english: 88, city: '上海', phone: '13800000002' }
+	]
+
+	// 分页
+	const pageCols = [
+		new NaxTableColumn({ type: 'index', width: '50', align: 'center' }),
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'city', label: '城市' }),
+		new NaxTableColumn({ name: 'score', label: '分数', width: '70', align: 'center' })
+	]
+	const pageData = ref([] as any[])
+	var pageSeq = 0
+	for (var i2 = 0; i2 < 57; i2++) {
+		pageSeq++
+		const cityIdx2 = i2 % 3
+		var city2 = '杭州'
+		if (cityIdx2 == 1) {
+			city2 = '上海'
+		} else if (cityIdx2 == 2) {
+			city2 = '北京'
+		}
+		pageData.value.push({
+			name: '成员 ' + pageSeq.toString(),
+			city: city2,
+			score: 60 + (i2 % 40)
+		})
+	}
+	const pageConf = new NaxTablePaging({ current: 1, pageSize: 10, pageCount: 5, navNum: true })
+
+	// 实例方法 demo（复用 pageData）
+	const methodPageConf = new NaxTablePaging({ current: 1, pageSize: 8, pageCount: 5 })
+
+	function onClearHighlight() {
+		const t = methodTableRef.value
+		if (t != null) {
+			t.resetHighlight()
+			uni.showToast({ title: '已清除行高亮', icon: 'none' })
+		}
+	}
+
+	function onResetPage() {
+		const t = methodTableRef.value
+		if (t != null) {
+			t.resetPage()
+		}
+	}
+
+	function onClearSort() {
+		const t = methodTableRef.value
+		if (t != null) {
+			t.clearSort()
+		}
+	}
+
+	function onPageChange(st : NaxTablePageState) {
+		uni.showToast({ title: '第 ' + st.current.toString() + ' / ' + st.pages.toString() + ' 页', icon: 'none' })
+	}
+
+	// 加载更多
+	const moreData = ref([] as any[])
+	const moreFinished = ref(false)
+	var moreSeq = 0
+
+	function appendMore() {
+		for (var i = 0; i < 15; i++) {
+			moreSeq++
+			moreData.value.push({
+				name: '追加 ' + moreSeq.toString(),
+				city: '城市 ' + (moreSeq % 4).toString(),
+				score: 60 + (moreSeq % 40)
+			})
+		}
+		if (moreSeq >= 60) {
+			moreFinished.value = true
+		}
+	}
+	appendMore()
+
+	function onLoadMore() {
+		// 实际场景在此请求接口；demo 直接追加
+		appendMore()
+	}
+
+	// 固定列
+	const fixedCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90', fixed: true }),
+		new NaxTableColumn({ type: 'index', width: '50', align: 'center' }),
+		new NaxTableColumn({ name: 'city', label: '城市', width: '110' }),
+		new NaxTableColumn({ name: 'phone', label: '电话', width: '130' }),
+		new NaxTableColumn({ name: 'email', label: '邮箱', width: '190' }),
+		new NaxTableColumn({ name: 'score', label: '分数', width: '80', align: 'center' }),
+		new NaxTableColumn({ name: 'remark', label: '备注', width: '160' })
+	]
+	const fixedData = ref([] as any[])
+	var fixedSeq = 0
+	for (var i3 = 0; i3 < 25; i3++) {
+		fixedSeq++
+		fixedData.value.push({
+			name: '成员 ' + fixedSeq.toString(),
+			city: '城市 ' + (i3 % 3).toString(),
+			phone: '1380000' + (10000 + i3).toString(),
+			email: 'user' + fixedSeq.toString() + '@example.com',
+			score: 60 + (i3 % 40),
+			remark: '备注内容 ' + fixedSeq.toString()
+		})
+	}
+
+	// 虚拟滚动
+	const virtualCols = [
+		new NaxTableColumn({ type: 'index', width: '60', align: 'center' }),
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '110' }),
+		new NaxTableColumn({ name: 'city', label: '城市', width: '110' }),
+		new NaxTableColumn({ name: 'score', label: '分数', width: '80', align: 'center' })
+	]
+	const virtualSelCols = [
+		new NaxTableColumn({ type: 'selection', width: '44' }),
+		new NaxTableColumn({ type: 'index', width: '60', align: 'center' }),
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '110' }),
+		new NaxTableColumn({ name: 'score', label: '分数', width: '80', align: 'center' })
+	]
+	const virtualData = ref([] as any[])
+	var virtualSeq = 0
+	for (var i4 = 0; i4 < 1000; i4++) {
+		virtualSeq++
+		virtualData.value.push({
+			name: '虚拟成员 ' + virtualSeq.toString(),
+			city: '城市 ' + (i4 % 5).toString(),
+			score: 50 + (i4 % 50)
+		})
+	}
+
+	function onVirtualSelChange(rows : any[]) {
+		uni.showToast({ title: '已选 ' + rows.length.toString() + ' 行', icon: 'none' })
+	}
+
+	// 字段类型与格式化
+	const typedCols = [
+		new NaxTableColumn({ name: 'date', label: '日期', width: '110', dataType: 'date', format: 'YYYY-MM-DD' }),
+		new NaxTableColumn({ name: 'amount', label: '金额', width: '110', align: 'center', dataType: 'number', format: '#,###.00' }),
+		new NaxTableColumn({ name: 'weight', label: '占比', width: '90', align: 'center', dataType: 'number', format: '0.0%' })
+	]
+	const typedData = [
+		{ date: '2026-09-01', amount: 1234567.891, weight: 0.456 },
+		{ date: '2026-09-15', amount: 98765.4, weight: 0.083 },
+		{ date: '2026-10-08', amount: 120, weight: 1 }
+	]
+
+	// 可编辑单元格
+	const editCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名（可编辑）', width: '130', editable: true }),
+		new NaxTableColumn({ name: 'city', label: '城市（可编辑）', editable: true }),
+		new NaxTableColumn({ name: 'age', label: '年龄（只读）', width: '110', align: 'center' })
+	]
+	const editData = ref([] as any[])
+	editData.value.push({ name: '张三', city: '杭州', age: 24 })
+	editData.value.push({ name: '李四', city: '上海', age: 31 })
+	editData.value.push({ name: '王五', city: '深圳', age: 28 })
+
+	function onCellEdit(payload : NaxTableCellEditPayload, row : any) {
+		// 组件不直接改 props.data，由业务接收 cell-edit 后更新自己的数据源
+		row[payload.name] = payload.value
+		uni.showToast({
+			title: payload.name + ': ' + (payload.oldValue != null ? payload.oldValue.toString() : '') + ' → ' + payload.value.toString(),
+			icon: 'none'
+		})
+	}
+
+	// 行焦点转移
+	const blurTableRef = ref(null as NaxTableExpose | null)
+
+	function onBlurRowClick(row : any, index : number) {
+		// row-blur 由组件在切换活跃行时自动触发，这里仅提示点击
+	}
+
+	function onRowBlur(row : any, index : number) {
+		uni.showToast({ title: '焦点离开第 ' + (index + 1).toString() + ' 行', icon: 'none' })
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg, #ffffff);
+		flex-direction: column;
+	}
+
+	.section {
+		margin-bottom: 20px;
+		flex-direction: column;
+	}
+
+	.section__title {
+		font-size: 14px;
+		color: var(--nax-color-text, #333639);
+		font-weight: 500;
+		margin-bottom: 10px;
+	}
+
+	.block {
+		flex-direction: column;
+		padding: 12px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+		border-radius: var(--nax-radius-md, 3px);
+	}
+
+	.hint {
+		margin-top: 8px;
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.btn-row {
+		flex-direction: row;
+		align-items: center;
+		margin-top: 10px;
+	}
+</style>

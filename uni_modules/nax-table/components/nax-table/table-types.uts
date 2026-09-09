@@ -1,0 +1,173 @@
+/**
+ * nax-table 列配置类型
+ * 数据驱动表格：columns 描述列，data 提供行数据
+ */
+
+export type TableColumnType = 'text' | 'index' | 'operation' | 'selection'
+
+export type TableCellDataType = 'date' | 'number' | 'string'
+
+export class NaxTableColumn {
+	/** 字段名，对应行数据 key；index/operation/selection 列可留空 */
+	name: string = ''
+	/** 表头文案 */
+	label: string = ''
+	/** 列类型：text 普通文本（默认）/ index 序号 / operation 操作列 / selection 多选列 */
+	type: TableColumnType = 'text'
+	/** 列宽，纯数字按 px；不传自适应均分 */
+	width: string = ''
+	/** 单元格最大行数 1-5，超出省略；默认 1 */
+	lines: number = 1
+	/** 单元格文字对齐：left / center / right */
+	align: string = ''
+	/** 表头文字对齐，缺省跟随 align */
+	headerAlign: string = ''
+	/** 单元格内容为空/undefined 时展示的占位文案 */
+	emptyString: string = ''
+	/** 单元格文字颜色（16 进制），空则走 token */
+	color: string = ''
+	/** 值 → 文案映射渲染（如 {'0':'男','1':'女'}）；设置后单元格优先按映射展示 */
+	filters: Map<string, string> = new Map()
+	/** 字段类型：date 日期 / number 数字 / string 字符串（默认）；影响 format 解析与可编辑输入 */
+	dataType: TableCellDataType = 'string'
+	/**
+	 * 展示格式：
+	 * date 列 → 日期模板，YYYY/MM/DD/HH/mm/ss 占位替换（如 'YYYY-MM-DD'）
+	 * number 列 → '#' 整数位占位 + 固定小数位（如 '#,###.00' 千分位 2 位小数、'0.0%' 百分比）
+	 * string 列 → 不生效
+	 */
+	format: string = ''
+	/** 单元格是否可编辑：点击进入输入态，失焦/确认提交 cell-edit；只读列保持展示态 */
+	editable: boolean = false
+	/** 该列是否可排序：true 内部排序 / 'custom' 组件不排序、仅 emit sort-change 由业务处理 */
+	sorter: boolean | string = false
+	/** 分组表头：一级分组名；相邻同名列自动合并为一组，空串不参与分组 */
+	groupTitle: string = ''
+	/** 是否固定在左侧；固定列需显式指定 width（缺省按 100px 处理） */
+	fixed: boolean = false
+	/** 自定义渲染函数；返回值作为单元格文本 */
+	formatter: ((row: any, index: number) => string) | null = null
+	/** 该行是否可勾选（仅 selection 列生效）；返回 false 时勾选框置灰且不可勾选 */
+	selectable: ((row: any, index: number) => boolean) | null = null
+	/** operation 列按钮配置 */
+	renders: NaxTableOperation[] = []
+
+	constructor(init? : Partial<NaxTableColumn>) {
+		if (init != null) {
+			Object.assign(this, init)
+		}
+	}
+}
+
+/** operation 列按钮 */
+export class NaxTableOperation {
+	/** 按钮文案 */
+	name: string = ''
+	/** 按钮语义：primary / success / warning / error；决定文字颜色 */
+	type: string = 'primary'
+
+	constructor(init? : Partial<NaxTableOperation>) {
+		if (init != null) {
+			Object.assign(this, init)
+		}
+	}
+}
+
+/** action 事件负载（operation 列按钮点击） */
+export class NaxTableActionPayload {
+	/** 按钮文案，即操作标识 */
+	name: string = ''
+	/** 行下标 */
+	index: number = 0
+}
+
+/** cell-click 事件负载 */
+export class NaxTableCellPayload {
+	/** 字段名（index/selection 等无字段列场景） */
+	name: string = ''
+	/** 列下标 */
+	colIndex: number = 0
+	/** 行下标（data 绝对下标） */
+	index: number = 0
+	/** 单元格原始值（未经 filters/formatter 处理） */
+	value: any = null
+}
+
+/** cell-edit 事件负载（可编辑单元格提交） */
+export class NaxTableCellEditPayload {
+	/** 字段名 */
+	name: string = ''
+	/** 列下标 */
+	colIndex: number = 0
+	/** 行下标（data 绝对下标） */
+	index: number = 0
+	/** 提交前的原始值 */
+	oldValue: any = null
+	/** 提交后的新值（number 列已转为数值，解析失败回退原值） */
+	value: any = null
+}
+
+/** 排序变更事件负载 */
+export class NaxTableSortState {
+	/** 排序字段 */
+	name: string = ''
+	/** asc / desc（再次点击同列则切换；'' 为未排序） */
+	order: string = ''
+	/** 排序来源：'internal' 组件内部排序 / 'custom' sorter='custom' 时业务自行处理 */
+	source: string = 'internal'
+}
+
+/** 合计行单元格（summary-method 返回值） */
+export class NaxTableSummaryCell {
+	/** 展示文案；数值列合计默认为求和结果 */
+	text: string = ''
+	/** 单元格跨列数，默认 1 */
+	colspan: number = 1
+	/** 本格文本对齐：left / center / right；缺省跟随对应列的 align */
+	align: string = ''
+
+	constructor(init? : Partial<NaxTableSummaryCell>) {
+		if (init != null) {
+			Object.assign(this, init)
+		}
+	}
+}
+
+/** 分页器配置 */
+export class NaxTablePaging {
+	/** 当前页（从 1 开始），受控值随 page-change 同步 */
+	current: number = 1
+	/** 每页条数 */
+	pageSize: number = 10
+	/** 总条数；组件内部分页模式（pagingMode=inner）下自动取 data.length */
+	total: number = 0
+	/** 页码按钮数量（含省略），建议奇数，默认 5 */
+	pageCount: number = 5
+	/** 是否显示页码输入跳页 */
+	navNum: boolean = false
+	/** 上一页/下一页文案 */
+	prevText: string = '上一页'
+	nextText: string = '下一页'
+
+	constructor(init? : Partial<NaxTablePaging>) {
+		if (init != null) {
+			Object.assign(this, init)
+		}
+	}
+}
+
+/** page-change 事件负载 */
+export class NaxTablePageState {
+	/** 当前页（从 1 开始） */
+	current: number = 1
+	/** 每页条数 */
+	pageSize: number = 10
+	/** 总页数 */
+	pages: number = 1
+
+	constructor(init? : Partial<NaxTablePageState>) {
+		if (init != null) {
+			Object.assign(this, init)
+		}
+	}
+}
