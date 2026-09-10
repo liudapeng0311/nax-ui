@@ -5,6 +5,8 @@
 		:style="rootStyle"
 		@click="onRootClick"
 		@touchstart="onRootTouchStart"
+		@touchmove="onRootTouchMove"
+		@touchcancel="onRootTouchCancel"
 	>
 		<textarea
 			class="nax-textarea__field"
@@ -215,6 +217,11 @@
 	const isFocused = ref(false)
 	// 聚焦时的内容基准，用于失焦时判断是否触发 change
 	let changeBaseValue: string = ''
+	// 触摸预亮聚焦样式的临时标记：touchstart 点亮、focus 事件确认转正；
+	// 长按滚动 / 手势被滚动容器接管时撤回，避免未聚焦输入框样式残留（对齐 nax-input）
+	let touchPrelit = false
+	let touchPrelitX = 0
+	let touchPrelitY = 0
 
 	watch((): string => {
 		return props.modelValue
@@ -453,6 +460,8 @@
 
 	function onFocus(e: UniTextareaFocusEvent) {
 		isFocused.value = true
+		// 真实聚焦到达，触摸预亮转正，后续滚动不再撤回（对齐 nax-input）
+		touchPrelit = false
 		const val = e.detail.value
 		// 记录聚焦时内容，作为 change（失焦对比）的基准
 		changeBaseValue = val
@@ -490,20 +499,52 @@
 		emit('click')
 	}
 
-	function onRootTouchStart() {
-		if (props.disabled) {
+	function onRootTouchStart(e: UniTouchEvent) {
+		if (props.disabled || props.readonly) {
 			return
 		}
-		// App 端 @focus 回调随键盘动画延迟，触摸瞬间提前点亮聚焦样式（对齐 nax-input）
-		isFocused.value = true
+		// App 端 @focus 回调随键盘动画延迟，触摸瞬间提前点亮聚焦样式（对齐 nax-input）；
+		// 仅在未点亮时预亮并做标记，已被 focus 确认的样式不归本次触摸管
+		if (!isFocused.value) {
+			touchPrelit = true
+			isFocused.value = true
+			if (e.touches.length > 0) {
+				touchPrelitX = e.touches[0].clientX
+				touchPrelitY = e.touches[0].clientY
+			}
+		}
+	}
+
+	function onRootTouchMove(e: UniTouchEvent) {
+		// 长按滚动页面：只撤回本次触摸预亮的样式；真实聚焦已被 focus 确认的不受影响
+		if (!touchPrelit || e.touches.length == 0) {
+			return
+		}
+		const dx = e.touches[0].clientX - touchPrelitX
+		const dy = e.touches[0].clientY - touchPrelitY
+		// 位移超阈值视为滚动/滑动手势，输入框不会聚焦，撤回预亮样式
+		if (dx * dx + dy * dy > 36) {
+			touchPrelit = false
+			isFocused.value = false
+		}
+	}
+
+	function onRootTouchCancel() {
+		// 仅复位预亮标记，不撤回样式：部分端（如鸿蒙）点击输入框也可能派发
+		// touchcancel，而其 focus 事件可能缺失，撤回后样式无法恢复；
+		// 滚动撤回已由 onRootTouchMove 的位移阈值覆盖
+		touchPrelit = false
 	}
 
 	function onFieldClick() {
 		if (props.disabled) {
 			return
 		}
-		// 鸿蒙等端 focus 事件可能缺失，点击时补聚焦态（同 nax-input）
-		isFocused.value = true
+		// readonly 原生 textarea 不可聚焦，不点亮聚焦样式（否则无 focus 事件会残留）
+		if (!props.readonly) {
+			// 鸿蒙等端 focus 事件可能缺失，点击时补聚焦态（同 nax-input）
+			isFocused.value = true
+		}
 		emit('click')
 	}
 </script>

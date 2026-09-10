@@ -32,12 +32,17 @@
 					<text class="hint">App/Web：应盖住本页导航栏。左右抽屉默认 78% 宽、全屏高，可用 width 覆盖。小程序：降级到页面宿主（本页底部已挂）。</text>
 				</view>
 
-				<view class="section">
+				<view class="section" v-if="supportsWindowCover">
 					<text class="section__title">压窗 · 自定义 dialog 页</text>
 					<view class="row">
 						<nax-button type="info" label="打开 demo-dialog 页" @click="openCustomDialog"></nax-button>
 					</view>
-					<text class="hint">复杂 UI 推荐自建透明页 + openNaxPopup({ url })；animationType 建议 none，进退场动画写在 dialog 页内（本 demo 已示例）。</text>
+					<text class="hint">复杂 UI 推荐自建透明页 + openNaxPopup({ url })；animationType 建议 none，进退场动画写在 dialog 页内（本 demo 已示例）。App/Web：dialogPage 压窗；小程序端不支持 dialogPage，url 模式不可用。</text>
+				</view>
+
+				<view class="section" v-if="!supportsWindowCover">
+					<text class="section__title">压窗 · 自定义 dialog 页（当前端不支持）</text>
+					<text class="hint">微信小程序无 dialogPage 能力：url 模式（自定义 dialog 页）不可用，且不提供降级（页面宿主承载不了完整页面，降级只会得到空白面板）。如需类似效果，请用 nax-picker 声明式插槽或普通页面跳转自行实现。App/Web 端可查看此演示。</text>
 				</view>
 
 				<view class="section">
@@ -204,6 +209,11 @@
 		return '不支持 dialogPage：已降级页面级弹层，无法盖住原生导航栏/tabBar'
 	})
 
+	/** 是否支持 dialogPage 压窗：控制「自定义 dialog 页」演示的展示/隐藏 */
+	const supportsWindowCover = computed((): boolean => {
+		return naxPopupSupportsWindowCover()
+	})
+
 	onShow(() => {
 		darkMode.value = bindDemoThemePage()
 	})
@@ -260,6 +270,14 @@
 	}
 
 	function openCustomDialog() {
+		if (!supportsWindowCover.value) {
+			// 当前以 nax-toast 全局挂载演示兜底；无宿主时自动回退 uni.showToast
+			uni.showToast({
+				title: '当前端不支持 dialogPage，url 模式不可用',
+				icon: 'none'
+			})
+			return
+		}
 		openNaxPopup({
 			url: '/pages/components/popup/demo-dialog',
 			animationType: 'none'

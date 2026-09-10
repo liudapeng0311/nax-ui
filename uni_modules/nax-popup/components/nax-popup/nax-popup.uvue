@@ -163,6 +163,9 @@
 	const hostTitle = ref('')
 	const hostContent = ref('')
 	const hostPosition = ref('center')
+	/** host 关闭退场期间保持最后位置，避免 position 提前翻转导致 picker 抽屉分支切换、根层无法卸载 */
+	const hostClosing = ref(false)
+	const lastHostPosition = ref('')
 	const hostMask = ref(true)
 	const hostMaskClosable = ref(true)
 	const hostRound = ref(true)
@@ -222,8 +225,8 @@
 	})
 
 	const panelPosition = computed((): string => {
-		if (hostOpen.value) {
-			return hostPosition.value
+		if (hostOpen.value || hostClosing.value) {
+			return lastHostPosition.value.length > 0 ? lastHostPosition.value : hostPosition.value
 		}
 		const p = props.position
 		if (p == 'bottom' || p == 'left' || p == 'right' || p == 'center') {
@@ -310,6 +313,8 @@
 		hostTitle.value = title
 		hostContent.value = content
 		hostPosition.value = position
+		lastHostPosition.value = position
+		hostClosing.value = false
 		hostMask.value = mask
 		hostMaskClosable.value = maskClosable
 		hostRound.value = round
@@ -323,15 +328,23 @@
 	}
 
 	function hostHide() {
+		// closeNaxPopup() 入口：同样需在退场期间冻结位置，避免 picker 抽屉分支切换导致根层残留
+		closeHostSession('close')
+	}
+
+	/** 宿主关闭：退场期间冻结最后位置，picker 完全卸载（close）后再恢复 props 位置 */
+	function closeHostSession(action: string) {
+		hostClosing.value = true
 		hostOpen.value = false
+		notifyNaxPopupAction(action)
 	}
 
 	function onCloseClick() {
 		if (hostOpen.value) {
-			hostOpen.value = false
-			notifyNaxPopupAction('close')
+			closeHostSession('close')
 			return
 		}
+		// 声明式：✕ 与遮罩同语义，经 emit 同步父层 v-model 后由 picker 收尾卸载
 		emit('update:show', false)
 	}
 
@@ -340,8 +353,7 @@
 			return
 		}
 		if (hostOpen.value) {
-			hostOpen.value = false
-			notifyNaxPopupAction('mask')
+			closeHostSession('mask')
 			return
 		}
 		if (props.show) {
@@ -358,6 +370,10 @@
 	}
 
 	function onClose() {
+		// picker 根层已卸载，恢复 props 位置；host 关闭动画期间无 picker 实例时由 onUnmounted 兜底
+		if (hostClosing.value) {
+			hostClosing.value = false
+		}
 		emit('close')
 	}
 
@@ -372,8 +388,9 @@
 	})
 
 	onUnmounted(() => {
-		if (hostOpen.value) {
+		if (hostOpen.value || hostClosing.value) {
 			hostOpen.value = false
+			hostClosing.value = false
 			notifyNaxPopupAction('dismiss')
 		}
 		unbindNaxPopupHost(boundHostId)

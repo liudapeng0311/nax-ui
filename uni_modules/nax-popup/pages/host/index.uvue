@@ -271,9 +271,52 @@
 	}
 
 	/**
+	 * 微信小程序：按 width 文本折算抽屉面板宽度（px），用于判断是否横向覆盖胶囊区域。
+	 * 空值按默认 78% 屏宽；纯数字按 px；纯数字百分比按屏宽折算；其它/无法解析返回 -1（按覆盖处理）
+	 */
+	function drawerWidthPxForCapsule(widthStr: string, windowW: number): number {
+		if (windowW <= 0) {
+			return -1
+		}
+		if (widthStr.length == 0) {
+			return Math.floor(windowW * 0.78)
+		}
+		var i = 0
+		var digits = true
+		while (i < widthStr.length) {
+			const c = widthStr.charAt(i)
+			if (c < '0' || c > '9') {
+				digits = false
+				break
+			}
+			i++
+		}
+		if (digits) {
+			return parseFloat(widthStr)
+		}
+		if (widthStr.indexOf('%') >= 0) {
+			const numStr = widthStr.substring(0, widthStr.indexOf('%'))
+			var numDigits = numStr.length > 0
+			var j = 0
+			while (j < numStr.length) {
+				const c2 = numStr.charAt(j)
+				if (c2 < '0' || c2 > '9') {
+					numDigits = false
+					break
+				}
+				j++
+			}
+			if (numDigits) {
+				return Math.floor(windowW * (parseFloat(numStr) / 100.0))
+			}
+		}
+		return -1
+	}
+
+	/**
 	 * 左右抽屉顶部安全距离（仅左右抽屉生效）：
 	 * - App：预留状态栏高度（dialogPage 自绘内容会顶到状态栏）
-	 * - 微信小程序：右侧抽屉额外预留到胶囊下沿，避免内容与胶囊重叠
+	 * - 微信小程序：面板横向覆盖胶囊区域时，预留到胶囊下沿，避免内容与胶囊重叠
 	 */
 	function refreshDrawerSafeTop() {
 		const pos = position.value
@@ -295,8 +338,18 @@
 		if (win.statusBarHeight != null) {
 			topMp = win.statusBarHeight as number
 		}
-		// 胶囊在屏幕右上角，仅右抽屉需要避让
-		if (pos == 'right') {
+		const screenW = win.windowWidth > 0 ? win.windowWidth : 0
+		// 胶囊固定在屏幕右上角：按面板横向范围判断是否与胶囊区域重叠
+		// （左抽屉默认 78% 宽已轻微覆盖胶囊，width=100% 完全覆盖；右抽屉则始终覆盖）
+		const wPx = drawerWidthPxForCapsule(widthText.value, screenW)
+		var capsuleCovered = true
+		if (wPx >= 0 && screenW > 0) {
+			const panelRight = pos == 'left' ? wPx : screenW
+			const rect0 = uni.getMenuButtonBoundingClientRect()
+			const capsuleLeft = rect0 != null && rect0.left != null ? rect0.left as number : 0
+			capsuleCovered = panelRight > capsuleLeft
+		}
+		if (capsuleCovered) {
 			const rect = uni.getMenuButtonBoundingClientRect()
 			if (rect != null && rect.bottom != null && (rect.bottom as number) > topMp) {
 				topMp = rect.bottom as number

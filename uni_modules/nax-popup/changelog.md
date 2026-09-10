@@ -1,3 +1,7 @@
+## 0.3.1（2026-09-10）
+- 修复 host 关闭退场期间位置残留：`closeNaxPopup()` / 关闭按钮 / 遮罩关闭统一走 `closeHostSession`，退场期间冻结最后面板位置（`hostClosing` + `lastHostPosition`），picker 完全卸载后再恢复 props 位置，避免 position 提前翻转导致 picker 抽屉分支切换、根层无法卸载；`onUnmounted` 兜底覆盖退场期间无 picker 实例的场景
+- 小程序降级保护：`openNaxPopup()` 传入自定义 url 时，不支持 dialogPage 的端不再静默降级打开空白面板，改为 console.warn 提示并直接返回，建议业务改用 nax-picker 声明式插槽或普通页面跳转
+- 微信小程序左右抽屉顶部安全距离判定修正：胶囊避让不再只看 `position == 'right'`，改为按面板实际横向范围（width 空值按默认 78% 屏宽、纯数字按 px、百分比按屏宽折算）判断是否覆盖胶囊区域——左抽屉宽度过半、右抽屉覆盖时均预留到胶囊下沿
 ## 0.3.0（2026-09-08）
 - 新增头部区域：标题（16px 加粗左对齐 + 单行省略）固定在 45px 高头部，右上角「✕」关闭按钮（17px 图标、26px 触区）
 - 新增 `showHeader` / `showClose` prop（默认 `true`）：`showHeader` 控制整体头部（含标题与关闭按钮）显示；`showClose` 控制右上角关闭

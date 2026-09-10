@@ -510,6 +510,12 @@ export function openNaxPopup(input: any | null = null) {
 
 	// 3) 不支持压窗：降级
 	warnMpNoWindowCover()
+	// 自定义 url 页无法降级：页面宿主仅支持简易 title/content，承载不了完整页面，
+	// 静默降级会得到空白面板；这里 warn 后不打开任何弹层，业务应自行改用其它方案
+	if (hasCustomUrl) {
+		console.warn('[nax-popup] 当前端不支持 dialogPage，自定义 url 页面无法打开；建议用 nax-picker 声明式插槽或普通页面跳转替代')
+		return
+	}
 	if (openPageHost(opts)) {
 		return
 	}

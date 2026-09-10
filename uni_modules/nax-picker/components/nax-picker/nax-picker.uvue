@@ -223,6 +223,30 @@
 		return value
 	}
 
+	/**
+	 * 微信小程序：按 width prop 折算抽屉面板宽度（px），用于判断是否横向覆盖胶囊区域。
+	 * 空值按默认 78% 屏宽；纯数字按 px；纯数字百分比按屏宽折算；其它/无法解析返回 -1（按覆盖处理）
+	 */
+	function drawerWidthPxForCapsule(widthStr: string, windowW: number): number {
+		if (windowW <= 0) {
+			return -1
+		}
+		if (widthStr.length == 0) {
+			return Math.floor(windowW * 0.78)
+		}
+		if (isDigits(widthStr)) {
+			return parseFloat(widthStr)
+		}
+		if (widthStr.indexOf('%') >= 0) {
+			const numStr = widthStr.substring(0, widthStr.indexOf('%'))
+			if (numStr.length > 0 && isDigits(numStr)) {
+				return Math.floor(windowW * (parseFloat(numStr) / 100.0))
+			}
+			return -1
+		}
+		return -1
+	}
+
 	function refreshWindowSize() {
 		const info = uni.getWindowInfo()
 		let w = info.windowWidth
@@ -535,8 +559,20 @@
 		if (win.statusBarHeight != null) {
 			topMp = win.statusBarHeight as number
 		}
-		// 胶囊在屏幕右上角，仅右抽屉需要避让
-		if (pos == 'right') {
+		const screenW = win.windowWidth > 0 ? win.windowWidth : windowW.value
+		// 胶囊固定在屏幕右上角：按面板横向范围判断是否与胶囊区域重叠
+		// （左抽屉默认 78% 宽已轻微覆盖胶囊，width=100% 完全覆盖；右抽屉则始终覆盖）
+		const wPx = drawerWidthPxForCapsule(props.width, screenW)
+		var capsuleCovered = true
+		if (wPx >= 0 && screenW > 0) {
+			// 面板右缘位置：左抽屉右缘 = wPx；右抽屉右缘 = 屏宽
+			const panelRight = pos == 'left' ? wPx : screenW
+			// 面板右缘未进入胶囊左缘之前，不与胶囊重叠
+			const rect0 = uni.getMenuButtonBoundingClientRect()
+			const capsuleLeft = rect0 != null && rect0.left != null ? rect0.left as number : 0
+			capsuleCovered = panelRight > capsuleLeft
+		}
+		if (capsuleCovered) {
 			const rect = uni.getMenuButtonBoundingClientRect()
 			if (rect != null && rect.bottom != null && (rect.bottom as number) > topMp) {
 				topMp = rect.bottom as number
@@ -669,6 +705,15 @@
 			hmMaskOn.value = false
 			hmAnimReady.value = false
 			rootMounted.value = false
+			// #endif
+			// #ifndef APP-HARMONY
+			// 抽屉退场由 leaveTimer 收尾卸载；若定时器已丢失（收起流程被打断/重复触发），
+			// 全屏根层会残留并挡住页面点击，这里兜底立即卸载（正常退场中 leaveTimer 在跑，会跳过）
+			if (isDrawer.value && leaveTimer < 0) {
+				clearOpenDelayTimer()
+				rootMounted.value = false
+				emit('close')
+			}
 			// #endif
 			if (emitUpdate) {
 				emit('update:show', false)

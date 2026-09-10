@@ -1,3 +1,7 @@
+## 0.2.6（2026-09-10）
+- 修复长按滚动页面时聚焦样式残留：根节点触摸预亮对齐 nax-input 机制——`touchstart` 仅未聚焦时预亮并记录起点，`focus` 事件确认转正；新增 `touchmove` 位移超阈值（约 6px）判定为滚动/滑动手势撤回预亮样式，`touchcancel` 仅复位标记不撤样式（部分端点击也会派发且 focus 可能缺失）
+- `readonly` 不再点亮聚焦样式（原生 textarea 不可聚焦，点亮后无 focus 事件会残留），对齐 nax-input
+- 各端行为一致（无条件编译差异）：点击聚焦正常点亮，长按滚动样式撤回，真实聚焦后滚动不受影响
 ## 0.2.5（2026-09-01）
 - 修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`，同 nax-input 0.2.6 修复）：`useStorage` 置 null 删除 key 等场景下 v-model 传入 null，`innerValue` 在初始化与 `modelValue` watch 双入口统一规整为空串；外部置 null 显示为空串，其它行为不变
 ## 0.2.4（2026-08-27）
