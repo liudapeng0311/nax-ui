@@ -13,7 +13,7 @@
 				>
 					<view class="nax-table__th-main" :style="thMainStyle(col)">
 						<view v-if="col.type == 'selection'" class="nax-checkbox" :class="headerBoxClass" @click.stop="onToggleAll">
-							<text v-if="headerBoxMark.length > 0" class="nax-checkbox__mark">{{ headerBoxMark }}</text>
+							<nax-icon v-if="headerBoxIcon.length > 0" :name="headerBoxIcon" size="12" color="var(--nax-color-text-inverse, #ffffff)"></nax-icon>
 						</view>
 						<text v-else class="nax-table__th-text">{{ headerLabel(col, colIndex) }}</text>
 						<view v-if="isSortable(col)" class="nax-table__sort">
@@ -24,7 +24,7 @@
 				</view>
 			</view>
 			<!-- 固定表体：随主区纵向滚动同步 -->
-			<scroll-view class="nax-table__fixed-body" :scroll-y="true" :scroll-top="fixedScrollTop" :style="fixedBodyStyle">
+			<scroll-view class="nax-table__fixed-body" direction="vertical" :scroll-top="fixedScrollTop" :style="fixedBodyStyle">
 				<view v-if="bodyRows.length == 0 && emptyVisible">
 					<slot name="empty">
 						<nax-empty description="暂无数据" :show-image="false" icon="database-off" icon-size="36"></nax-empty>
@@ -46,7 +46,7 @@
 					>
 						<view class="nax-table__td-main" :style="tdMainStyle(col)">
 							<view v-if="col.type == 'selection'" class="nax-checkbox" :class="[rowBoxClass(rowIndex), rowBoxDisabledClass(rowIndex)]" @click.stop="onToggleRow(rowIndex)">
-								<text v-if="rowBoxMark(rowIndex).length > 0" class="nax-checkbox__mark">{{ rowBoxMark(rowIndex) }}</text>
+								<nax-icon v-if="rowBoxIcon(rowIndex).length > 0" :name="rowBoxIcon(rowIndex)" size="12" color="var(--nax-color-text-inverse, #ffffff)"></nax-icon>
 							</view>
 							<text
 								v-if="col.type == 'text' && !isEditingCell(colIndex, rowIndex)"
@@ -60,9 +60,11 @@
 								v-else-if="col.type == 'text'"
 								class="nax-table__td-input"
 								:class="tdInputClass(col)"
+								:style="tdInputStyle(col)"
 								:value="editValue"
 								:focus="true"
 								:type="col.dataType == 'number' ? 'number' : 'text'"
+								@input="onEditInput"
 								@blur="onCellBlur(col, colIndex, row, absIndex(rowIndex))"
 								@confirm="onCellConfirm(col, colIndex, row, absIndex(rowIndex))"
 							/>
@@ -85,8 +87,8 @@
 			</view>
 		</view>
 
-		<!-- 主表区 -->
-		<scroll-view class="nax-table__scroll-x" direction="horizontal" :scroll-x="true" :scroll-y="false" @scroll="onMainScrollX">
+		<!-- 主表区；direction=horizontal：uni-app x 官方横向滚动，scroll-x/scroll-y 已废弃 -->
+		<scroll-view class="nax-table__scroll-x" direction="horizontal" @scroll="onMainScrollX">
 			<view class="nax-table__inner" :style="innerStyle">
 				<!-- 分组表头行（无 fixed 列时才有意义；与 fixed 组合的场景列对齐以主区为准） -->
 				<view v-if="hasGroups && fixedCols.length == 0" class="nax-table__header nax-table__header--groups">
@@ -113,7 +115,7 @@
 					>
 						<view class="nax-table__th-main" :style="thMainStyle(col)">
 							<view v-if="col.type == 'selection'" class="nax-checkbox" :class="headerBoxClass" @click.stop="onToggleAll">
-								<text v-if="headerBoxMark.length > 0" class="nax-checkbox__mark">{{ headerBoxMark }}</text>
+								<nax-icon v-if="headerBoxIcon.length > 0" :name="headerBoxIcon" size="12" color="var(--nax-color-text-inverse, #ffffff)"></nax-icon>
 							</view>
 							<text v-else class="nax-table__th-text" :class="thTextClass(col)" :style="thTextStyle(col)">{{ headerLabel(col, colIndex) }}</text>
 							<view v-if="isSortable(col)" class="nax-table__sort">
@@ -126,7 +128,7 @@
 				<!-- 表体 -->
 				<scroll-view
 					class="nax-table__scroll-y"
-					:scroll-y="true"
+					direction="vertical"
 					:style="bodyStyle"
 					@scroll="onBodyScrollY"
 					@scrolltolower="onScrollToLower"
@@ -156,7 +158,7 @@
 							>
 								<view class="nax-table__td-main" :style="tdMainStyle(col)">
 									<view v-if="col.type == 'selection'" class="nax-checkbox" :class="[rowBoxClass(absIndex(rowIndex)), rowBoxDisabledClass(absIndex(rowIndex))]" @click.stop="onToggleRow(absIndex(rowIndex))">
-										<text v-if="rowBoxMark(absIndex(rowIndex)).length > 0" class="nax-checkbox__mark">{{ rowBoxMark(absIndex(rowIndex)) }}</text>
+										<nax-icon v-if="rowBoxIcon(absIndex(rowIndex)).length > 0" :name="rowBoxIcon(absIndex(rowIndex))" size="12" color="var(--nax-color-text-inverse, #ffffff)"></nax-icon>
 									</view>
 									<view v-else-if="col.type == 'operation'" class="nax-table__ops">
 										<text
@@ -179,9 +181,11 @@
 										v-else-if="col.type == 'text'"
 										class="nax-table__td-input"
 										:class="tdInputClass(col)"
+										:style="tdInputStyle(col)"
 										:value="editValue"
 										:focus="true"
 										:type="col.dataType == 'number' ? 'number' : 'text'"
+										@input="onEditInput"
 										@blur="onCellBlur(col, colIndex, row, absIndex(rowIndex))"
 										@confirm="onCellConfirm(col, colIndex, row, absIndex(rowIndex))"
 									/>
@@ -237,6 +241,7 @@
 			<view v-if="paging.navNum" class="nax-table__pager-jump">
 				<input
 					class="nax-table__pager-input"
+					:style="pagerInputStyle"
 					v-model="jumpNum"
 					type="number"
 					placeholder="页码"
@@ -381,12 +386,88 @@
 		return n.toString() + 'px'
 	}
 
-	const innerStyle = computed((): string => {
-		// 有固定列时主区左移量由 fixed-layer 宽度决定（用负 margin 让主区内容从覆盖层右侧起算）
-		var style = 'min-width:100%;flex-direction:column;flex-shrink:0;'
-		if (fixedWidthTotal.value > 0) {
-			style += 'padding-left:' + fixedWidthTotal.value.toString() + 'px;'
+	// ========== 容器宽度测量（App 端定宽兜底） ==========
+	// App 端横向滚动区内容不解析百分比 min-width，列少/内容窄时表格占不满容器；
+	// 实测容器宽后以 px 写入主区宽度，列宽合计超出容器时取列合计，保留横向滚动
+	const containerWidth = ref(0)
+	const tableInstance = getCurrentInstance()
+
+	function measureContainerWidth(retry : number) {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const proxy = tableInstance?.proxy
+		const query = uni.createSelectorQuery()
+		if (proxy != null) {
+			query.in(proxy)
 		}
+		query.select('.nax-table').boundingClientRect((rect : any | null) => {
+			if (rect != null) {
+				const info = rect as NodeInfo
+				if (info.width > 0) {
+					containerWidth.value = info.width
+					return
+				}
+			}
+			// App 端原生页面未就绪时可能测到 0（iOS 先例见 nax-button），短重试等待布局完成
+			if (retry > 0) {
+				setTimeout(() => {
+					measureContainerWidth(retry - 1)
+				}, 64)
+			}
+		}).exec()
+		// #endif
+	}
+
+	onMounted(() => {
+		measureContainerWidth(5)
+	})
+
+	/** 列宽是否含 rpx/% 等无法精确换算 px 的单位；存在时 App 端不写死宽度，退回 CSS 路径 */
+	const hasNonPxColWidth = computed((): boolean => {
+		for (var i = 0; i < props.columns.length; i++) {
+			const t = props.columns[i].width.trim()
+			if (t.length == 0) {
+				continue
+			}
+			if (t.indexOf('rpx') >= 0 || t.indexOf('%') >= 0) {
+				return true
+			}
+		}
+		return false
+	})
+
+	/** 列最小宽合计（px）：flex 列按 min-width、定宽列按 width 数值（与 thStyle/tdStyle 兜底一致） */
+	function colMinPxWidth(col : NaxTableColumn) : number {
+		const t = col.width.trim()
+		if (t.length == 0) {
+			return flexColMinWidth()
+		}
+		const n = parseFloat(t)
+		if (isNaN(n) || n <= 0) {
+			return 80
+		}
+		return n
+	}
+
+	const colsMinTotalWidth = computed((): number => {
+		var total = 0
+		for (var i = 0; i < props.columns.length; i++) {
+			total += colMinPxWidth(props.columns[i])
+		}
+		return total
+	})
+
+	const innerStyle = computed((): string => {
+		var style = 'min-width:100%;flex-direction:column;flex-shrink:0;'
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// 实测容器宽写死 px；列合计更宽时取列合计，保证横向滚动范围完整
+		if (containerWidth.value > 0 && !hasNonPxColWidth.value) {
+			var w = containerWidth.value
+			if (colsMinTotalWidth.value > w) {
+				w = colsMinTotalWidth.value
+			}
+			style = 'width:' + Math.ceil(w).toString() + 'px;' + style
+		}
+		// #endif
 		return style
 	})
 
@@ -418,16 +499,6 @@
 			}
 		}
 		return result
-	})
-
-	/** 固定列总宽（决定覆盖层宽度与主区 padding-left） */
-	const fixedWidthTotal = computed((): number => {
-		var total = 0
-		for (var i = 0; i < fixedCols.value.length; i++) {
-			const w = fixedColWidth(fixedCols.value[i])
-			total += w
-		}
-		return total
 	})
 
 	/** 固定列有效宽度：未指定 width 按 100px 处理 */
@@ -862,6 +933,26 @@
 		return ''
 	}
 
+	/** 输入框文字样式：App（含蒸汽）原生 input 的 var() 文字色/字号会失效（颜色退成白色、字号回退默认变大），需字面量内联（同 nax-input 处理） */
+	function inputTextStyle(color : string) : string {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		return 'color:' + (color.length > 0 ? color : '#333639') + ';font-size:14px;'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return ''
+		// #endif
+	}
+
+	/** 编辑输入框 inline 样式：跟随列 color，缺省取文本色 */
+	function tdInputStyle(col : NaxTableColumn) : string {
+		return inputTextStyle(col.color)
+	}
+
+	/** 跳页输入框 inline 样式（App 端同需字面量色/字号） */
+	const pagerInputStyle = computed((): string => {
+		return inputTextStyle('')
+	})
+
 	function tdTextStyle(col : NaxTableColumn) : string {
 		var style = ''
 		if (col.color.length > 0) {
@@ -1123,6 +1214,11 @@
 		commitEdit(col, colIndex, row, index)
 	}
 
+	/** 编辑中同步输入值：blur/confirm 提交读取 editValue，缺 @input 会一直拿到进入编辑时的旧值 */
+	function onEditInput(e : UniInputEvent) {
+		editValue.value = e.detail.value
+	}
+
 	// ========== 行焦点转移（row-blur） ==========
 	/** 上一活跃行（data 绝对下标） */
 	const activeRowIndex = ref(-1)
@@ -1224,12 +1320,13 @@
 		return ''
 	})
 
-	const headerBoxMark = computed((): string => {
+	/** 表头勾选图标：check 全选 / minus 半选，空为未选 */
+	const headerBoxIcon = computed((): string => {
 		if (isAllSelected.value) {
-			return '✓'
+			return 'check'
 		}
 		if (isSomeSelected.value) {
-			return '–'
+			return 'minus'
 		}
 		return ''
 	})
@@ -1238,8 +1335,9 @@
 		return isSelected(index) ? 'nax-checkbox--on' : ''
 	}
 
-	function rowBoxMark(index : number) : string {
-		return isSelected(index) ? '✓' : ''
+	/** 行勾选图标：check 选中，空为未选 */
+	function rowBoxIcon(index : number) : string {
+		return isSelected(index) ? 'check' : ''
 	}
 
 	/** 禁用行勾选框样式 */
@@ -1695,7 +1793,7 @@
 
 	.nax-table__inner {
 		flex-direction: column;
-		min-width: 100%;
+		/* min-width:100% 由 innerStyle 内联提供：App 端 CSS/内联均不支持百分比 min-width（编译报错），web/小程序走内联生效 */
 		flex-shrink: 0;
 		/* #ifdef APP-ANDROID || APP-IOS || APP-HARMONY */
 		align-self: flex-start;
@@ -1828,6 +1926,17 @@
 		background-color: var(--nax-color-bg, #ffffff);
 		border: 1px solid var(--nax-color-primary, #18a058);
 		border-radius: var(--nax-radius-sm, 3px);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		/* Web/小程序：box-sizing 对齐宽度计算；flex 子项 min-width:auto 不收缩，原生 input 会撑到默认固有宽度溢出单元格（同 nax-input__field 处理） */
+		box-sizing: border-box;
+		flex: 1;
+		width: 0;
+		min-width: 0;
+		outline: none;
+		box-shadow: none;
+		-webkit-appearance: none;
+		appearance: none;
+		/* #endif */
 	}
 
 	/* Android / 鸿蒙 / iOS：overflow 兜底；行数由 :max-lines 属性承担 */
@@ -1896,12 +2005,6 @@
 
 	.nax-checkbox--disabled {
 		opacity: 0.35;
-	}
-
-	.nax-checkbox__mark {
-		font-size: 11px;
-		line-height: 12px;
-		color: var(--nax-color-text-inverse, #ffffff);
 	}
 
 	/* 合计行 */
@@ -2057,6 +2160,15 @@
 		color: var(--nax-color-text, #333639);
 		text-align: center;
 		padding: 0;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		/* Web/小程序：border-box 对齐宽度计算；min-width:0 允许收缩到固定宽，不被原生 input 固有宽度撑大 */
+		box-sizing: border-box;
+		min-width: 0;
+		outline: none;
+		box-shadow: none;
+		-webkit-appearance: none;
+		appearance: none;
+		/* #endif */
 	}
 
 	.nax-table__pager-jump-text {

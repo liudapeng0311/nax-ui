@@ -109,8 +109,8 @@
 					></nax-table>
 				</view>
 				<view class="btn-row">
-					<nax-button size="sm" @click="onClearSelection">清空选择</nax-button>
-					<nax-button size="sm" type="tertiary" @click="onSelectFirst">选第一行</nax-button>
+					<nax-button size="sm" label="清空选择" @click="onClearSelection"></nax-button>
+					<nax-button size="sm" type="tertiary" label="选第一行" @click="onSelectFirst"></nax-button>
 				</view>
 				<text class="hint">selection 列全选/半选；「王五」行 selectable=false 禁用，不可勾选且不参与全选</text>
 			</view>
@@ -129,9 +129,9 @@
 					></nax-table>
 				</view>
 				<view class="btn-row">
-					<nax-button size="sm" @click="onClearHighlight">清除高亮</nax-button>
-					<nax-button size="sm" type="tertiary" @click="onResetPage">回第一页</nax-button>
-					<nax-button size="sm" type="tertiary" @click="onClearSort">清空排序</nax-button>
+					<nax-button size="sm" label="清除高亮" @click="onClearHighlight"></nax-button>
+					<nax-button size="sm" type="tertiary" label="回第一页" @click="onResetPage"></nax-button>
+					<nax-button size="sm" type="tertiary" label="清空排序" @click="onClearSort"></nax-button>
 				</view>
 				<text class="hint">点击行高亮后可 resetHighlight 清除；resetPage / clearSort / clearSelection / toggleRowSelection 均为实例方法</text>
 			</view>
