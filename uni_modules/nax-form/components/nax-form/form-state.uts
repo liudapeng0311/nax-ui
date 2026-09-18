@@ -259,9 +259,19 @@ export class NaxFormState {
 	}
 
 	/**
-	 * 校验一个字段，返回错误文案（空串表示通过）
+	 * 校验一个字段（值取自 model），返回错误文案（空串表示通过）
 	 */
 	validateOne(prop : string, event : string) : string {
+		return this.validateOneWithValue(prop, event, getModelValue(this._model(), prop))
+	}
+
+	/**
+	 * 校验一个字段（值由调用方提供，不读 model）。
+	 * 控件值变化时业务侧 model 往往尚未同步（页面多在 @change / @blur 里才 sync），
+	 * 控件驱动的校验若仍读 model 会拿到旧值，导致「值改了错误提示不消失」，
+	 * 因此这里必须用控件传入的当前值。
+	 */
+	validateOneWithValue(prop : string, event : string, value : any | null) : string {
 		if (prop.length == 0) {
 			return ''
 		}
@@ -270,8 +280,6 @@ export class NaxFormState {
 			this._setFieldError(prop, '')
 			return ''
 		}
-		const model = this._model()
-		const value = getModelValue(model, prop)
 		const msg = validateRules(rules, value, event)
 		this._setFieldError(prop, msg)
 		return msg

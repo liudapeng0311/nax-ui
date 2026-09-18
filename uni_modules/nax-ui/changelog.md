@@ -1,3 +1,6 @@
+## 0.3.6（2026-09-18）
+- 依赖组件更新：`nax-form`（0.2.0→0.2.1）修复规则 `trigger` 不生效（用户反馈：值已改动但错误提示不消失）——表单项新增向插槽控件提供字段级校验入口 `naxFormItemValidate`，控件驱动的校验改用控件当前值而非读 `model`
+- 依赖组件更新：`nax-input`（0.2.6→0.2.7）、`nax-textarea`（0.2.6→0.2.7）、`nax-search`（0.3.0→0.3.1）、`nax-number-box`（0.1.5→0.1.6）、`nax-checkbox`（0.1.6→0.1.7）、`nax-radio`（0.1.6→0.1.7）、`nax-switch`（0.1.5→0.1.6）、`nax-rate`（0.1.4→0.1.5）、`nax-slider`（1.0.3→1.0.4）、`nax-calendar`（0.1.4→0.1.5）、`nax-select`（0.3.0→0.3.1）、`nax-datetime-picker`（0.3.0→0.3.1）、`nax-upload`（0.1.14→0.1.15）接入表单校验联动，规则 `trigger: ['blur', 'change']` 自动生效
 ## 0.3.5（2026-09-10）
 - 依赖组件更新：`nax-textarea`（0.2.5→0.2.6）修复长按滚动页面时聚焦样式残留（触摸预亮 + touchmove 位移阈值撤回，对齐 nax-input 机制）；readonly 不再点亮聚焦样式
 - 依赖组件更新：`nax-popup`（0.3.0→0.3.1）修复 host 关闭退场期间位置残留（退场冻结最后面板位置）；小程序自定义 url 不支持 dialogPage 时不再静默降级空白面板（warn 后直接返回）；微信小程序左右抽屉胶囊避让按面板横向范围判定

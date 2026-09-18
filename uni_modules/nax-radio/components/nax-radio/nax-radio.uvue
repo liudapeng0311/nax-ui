@@ -102,6 +102,15 @@
 
 	const emit = defineEmits(['update:modelValue', 'change'])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	// Android inject 不能用 null 作为 Ref/函数默认值，否则 UTS 会推断为 Void。
 	// #ifdef APP-ANDROID
 	function fallbackSelect(_name : string) : boolean {
@@ -435,12 +444,14 @@
 				return
 			}
 			emit('change', name)
+			notifyFormItem('change', name)
 			return
 		}
 		// 单独使用：布尔切换；再次点击可取消
 		const next = !props.modelValue
 		emit('update:modelValue', next)
 		emit('change', next)
+		notifyFormItem('change', next)
 	}
 
 	function onBoxClick() {

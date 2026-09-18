@@ -431,6 +431,15 @@
 				'clear'
 			])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	// #ifdef MP-WEIXIN
 	// ===== 微信小程序：系统弹层 picker 实现（贴合微信原生 UI，无自建弹层）=====
 	/** selector | multiSelector（按 nax-select mode 映射） */
@@ -622,6 +631,7 @@
 		emitModelFromResult(result)
 		emit('confirm', result)
 		emit('change', result)
+		notifyFormItem('change', result)
 		mpPickerValue.value = vals.slice()
 	}
 
@@ -638,6 +648,7 @@
 		modelBound.value = false
 		emitClearedModel()
 		emit('clear')
+		notifyFormItem('change', null)
 		mpSyncValue()
 	}
 	// #endif
@@ -1854,6 +1865,7 @@
 					modelBound.value = false
 					emitClearedModel()
 					emit('clear')
+					notifyFormItem('change', null)
 				}
 
 
@@ -1881,6 +1893,7 @@
 				modelBound.value = true
 				emitModelFromResult(result)
 				emit('confirm', result)
+				notifyFormItem('change', result)
 			closePicker(true)
 		}
 	
@@ -1951,6 +1964,7 @@
 		lastSelectIndex.value = fixed.slice()
 		selectResult.value = buildSelectResult(fixed)
 		emit('change', selectResult.value)
+		notifyFormItem('change', selectResult.value)
 	}
 
 	/**

@@ -115,6 +115,15 @@
 		'plus'
 	])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	const LONG_PRESS_DELAY = 400
 	const LONG_PRESS_INTERVAL = 120
 
@@ -482,6 +491,7 @@
 			// 异步且非按钮：只通知外部（按钮异步见下方）
 			emit('update:modelValue', next)
 			emit('change', next)
+			notifyFormItem('change', next)
 			return
 		}
 
@@ -491,6 +501,7 @@
 			inputText.value = formatDisplay(current.value)
 			emit('update:modelValue', next)
 			emit('change', next)
+			notifyFormItem('change', next)
 			return
 		}
 
@@ -501,6 +512,7 @@
 			emit('update:modelValue', next)
 		}
 		emit('change', next)
+		notifyFormItem('change', next)
 	}
 
 	function stepBy(dir : string) {
@@ -702,6 +714,7 @@
 		if (props.asyncChange) {
 			emit('update:modelValue', next)
 			emit('change', next)
+			notifyFormItem('change', next)
 			return
 		}
 		current.value = next
@@ -709,6 +722,7 @@
 			emit('update:modelValue', next)
 		}
 		emit('change', next)
+		notifyFormItem('change', next)
 	}
 
 	function onFocus() {
@@ -722,6 +736,7 @@
 			focused.value = false
 			inputText.value = formatDisplay(current.value)
 			emit('blur', current.value)
+			notifyFormItem('blur', current.value)
 			return
 		}
 		focused.value = false
@@ -734,7 +749,9 @@
 			emit('update:modelValue', next)
 		}
 		emit('change', next)
+		// 输入过程中 onInput 已按 change 触发过；失焦这里只按 blur 触发，避免二次校验覆盖 change 规则结果
 		emit('blur', next)
+		notifyFormItem('blur', next)
 	}
 
 	watch((): number => {

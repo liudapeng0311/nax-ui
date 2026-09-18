@@ -1,3 +1,7 @@
+## 0.3.1（2026-09-18）
+- 接入 `nax-form` 表单校验联动：注入 `nax-form-item` 提供的字段级校验入口，确认选择 / 清空按 `change` 回调，使规则 `trigger: 'change'` / `['blur', 'change']` 自动生效（此前需业务侧手动调 `validateField`）
+- 校验使用控件当前值而非业务侧 `model`（`model` 多在 `@change` 才同步），选择或清空后错误提示即时消失
+- 未置于 `nax-form-item` 内时为空实现，行为不变；仅新增注入与回调，微信小程序端系统弹层路径同样接入；全端一致
 ## 0.3.0（2026-09-04）
 - **微信小程序端（`MP-WEIXIN`）改用微信系统弹层 `picker`**，贴合微信原生 UI：单列映射 `selector`、多列 / 联动映射 `multiSelector`（`columnchange` 实时重建后续列），滚动吸附后点「确定」回调，值即最终值，消除此前 `picker-view` 的 change 延迟与确认拦截问题
 - 微信端限制：系统弹层 UI 不可定制（`confirm-text` / `cancel-text` / `confirm-color` / `z-index` / `safe-area-inset-bottom` 等弹层定制 props 不生效；`title` 仅微信安卓端显示）；`v-model:show` 程序化打开不生效（点击触发条弹出，`show-trigger=false` 时微信端仍渲染触发条作为触发区域）；暗黑模式跟随微信宿主深色主题（需小程序开启 darkmode）

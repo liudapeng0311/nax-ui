@@ -1,3 +1,7 @@
+## 0.1.7（2026-09-18）
+- 接入 `nax-form` 表单校验联动：注入 `nax-form-item` 提供的字段级校验入口，勾选变化（含 `nax-checkbox-group` 多选）按 `change` 回调，使规则 `trigger: 'change'` / `['blur', 'change']` 自动生效（此前需业务侧手动调 `validateField`）
+- 校验使用控件当前值而非业务侧 `model`（`model` 多在 `@change` 才同步），勾选后错误提示即时消失
+- 未置于 `nax-form-item` 内时为空实现，行为不变；全端一致（无条件编译差异）
 ## 0.1.6（2026-08-18）
 - 蒸汽模式兼容：`lines` CSS 声明迁移为 `<text>` 的 `:max-lines` 属性（官方蒸汽模式方案），消除 Vapor 运行时与 CSS 编译器警告
 ## 0.1.5（2026-08-14）

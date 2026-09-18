@@ -1,3 +1,7 @@
+## 0.3.1（2026-09-18）
+- 接入 `nax-form` 表单校验联动：注入 `nax-form-item` 提供的字段级校验入口，确认选择 / 清空 / 滚轮列变化按 `change` 回调，使规则 `trigger: 'change'` / `['blur', 'change']` 自动生效（此前需业务侧手动调 `validateField`）
+- 校验使用控件当前值而非业务侧 `model`（`model` 多在 `@change` 才同步），选择或清空后错误提示即时消失
+- 未置于 `nax-form-item` 内时为空实现，行为不变；仅新增注入与回调，微信小程序端系统弹层路径同样接入；全端一致
 ## 0.3.0（2026-09-04）
 - **微信小程序端（`MP-WEIXIN`）可映射模式改用微信系统弹层 `picker`**，贴合微信原生 UI：`date`（fields=day）/ `year`（fields=year）/ `year-month`（fields=month）/ `time`（未开 `show-second`）分别映射 `mode="date"` / `mode="time"`，`min-date` / `max-date` / `min-hour` / `max-hour` 等范围映射 `start` / `end`；滚动吸附后点「确定」回调，值即最终值，消除此前 `picker-view` 的 change 延迟与确认拦截问题
 - 不可映射模式（`datetime` / `month-day` / `time` + `show-second`）微信端保持自建弹层（picker-view）不变

@@ -226,6 +226,15 @@
 		'clickIcon'
 	])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	// modelValue 可能被外部置 null（如 useStorage 置 null 删除 key 场景），统一规整为空串，
 	// 保证 innerValue 恒为 string（内部多处直接访问 .length）
 	function normalizeValue(value : any) : string {
@@ -555,7 +564,12 @@
 		}
 		isFocused.value = true
 		const val = e.detail.value
+		const before = innerValue.value
 		setValue(val)
+		// 值真正变化才按 change 触发校验，避免重复重校验（对齐 nax-input）
+		if (innerValue.value != before) {
+			notifyFormItem('change', val)
+		}
 	}
 
 	function onFocus(e: UniInputFocusEvent) {
@@ -575,8 +589,10 @@
 		// 对齐原生 input 语义：失焦时内容与聚焦时不同才触发 change
 		if (val != changeBaseValue) {
 			emit('change', val)
+			notifyFormItem('change', val)
 		}
 		emit('blur', val)
+		notifyFormItem('blur', val)
 	}
 
 	function onConfirm(e: UniInputConfirmEvent) {
@@ -595,6 +611,7 @@
 		setValue('')
 		isFocused.value = true
 		emit('clear')
+		notifyFormItem('change', '')
 	}
 
 	function onActionClick() {

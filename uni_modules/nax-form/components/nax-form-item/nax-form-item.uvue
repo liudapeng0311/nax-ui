@@ -127,6 +127,10 @@
 	function fallbackSetItemRules(_prop: string, _rules: any[]) {
 	}
 
+	function fallbackValidateField(_prop: string, _event: string, _value: any | null): string {
+		return ''
+	}
+
 	const inForm = inject('naxFormInForm', false) as boolean
 	const formErrorTypeRef = inject('naxFormErrorType', ref('message')) as Ref<string>
 	const formBorderBottomRef = inject('naxFormBorderBottom', ref(true)) as Ref<boolean>
@@ -139,6 +143,7 @@
 	const formRegisterRaw = inject('naxFormRegister', fallbackRegister) as (prop: string) => void
 	const formUnregisterRaw = inject('naxFormUnregister', fallbackUnregister) as (prop: string) => void
 	const formSetItemRulesRaw = inject('naxFormSetItemRules', fallbackSetItemRules) as (prop: string, rules: any[]) => void
+	const formValidateFieldRaw = inject('naxFormValidateField', fallbackValidateField) as (prop: string, event: string, value: any | null) => string
 
 	function readRefString(r: any | null, fallback: string): string {
 		if (r == null) {
@@ -176,6 +181,19 @@
 	function callSetItemRules(prop: string, rules: any[]) {
 		formSetItemRulesRaw(prop, rules)
 	}
+
+	/**
+	 * 向插槽内的表单控件暴露字段级校验入口。
+	 * 控件在自身值变化 / 失焦时回调本函数并带上当前值，nax-form 再按规则 trigger 过滤执行，
+	 * 使 rules 里的 trigger: ['blur', 'change'] 无需业务侧手动调 validateField 即可生效。
+	 * 值由控件传入而非读 model：业务侧 model 常在 @change / @blur 才同步，读 model 会拿到旧值。
+	 */
+	provide('naxFormItemValidate', (event: string, value: any | null) => {
+		if (!inForm || props.prop.length == 0) {
+			return
+		}
+		formValidateFieldRaw(props.prop, event, value)
+	})
 
 	const labelText = computed((): string => {
 		return props.label

@@ -172,8 +172,8 @@ watch((): any => props.labelSize, (value: any) => {
 	provide('naxFormSetItemRules', (prop: string, rules: any[]) => {
 		state.setItemRules(prop, rules)
 	})
-	provide('naxFormValidateField', (prop: string, event: string): string => {
-		return state.validateOne(prop, event)
+	provide('naxFormValidateField', (prop: string, event: string, value: any | null): string => {
+		return state.validateOneWithValue(prop, event, value)
 	})
 
 	defineExpose({

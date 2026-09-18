@@ -72,6 +72,15 @@
 
 	const emit = defineEmits(['update:modelValue', 'change'])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	const selected = ref('')
 	// Android inject 会按默认值推断具体运行时类型，需与子组件的 RefImpl 默认值保持一致。
 	// #ifdef APP-ANDROID
@@ -126,6 +135,7 @@
 		selected.value = name
 		emit('update:modelValue', name)
 		emit('change', name)
+		notifyFormItem('change', name)
 		return true
 	}
 

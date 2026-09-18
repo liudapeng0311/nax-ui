@@ -1,3 +1,7 @@
+## 0.2.7（2026-09-18）
+- 接入 `nax-form` 表单校验联动：注入 `nax-form-item` 提供的字段级校验入口，输入值变化时按 `change`、失焦时按 `blur`、点击清空时按 `change` 回调，使规则 `trigger: ['blur', 'change']` 自动生效（此前需业务侧手动调 `validateField`）
+- 校验使用控件当前值而非业务侧 `model`（`model` 多在 `@change` / `@blur` 才同步），值改对后错误提示即时消失
+- 未置于 `nax-form-item` 内时为空实现，行为不变；全端一致（无条件编译差异）
 ## 0.2.6（2026-09-01）
 - 修复 `modelValue` 被外部置 null 时崩溃（`Cannot read property length of null`）：`useStorage` 置 null 删除 key 等场景下 v-model 传入 null，`innerValue` 在初始化与 `modelValue` watch 双入口统一规整为空串，保证内部 `.length` 访问与原生 value 绑定安全；外部置 null 显示为空串（同清空语义），其它行为不变
 ## 0.2.5（2026-08-31）

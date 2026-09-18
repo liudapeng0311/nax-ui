@@ -1,3 +1,7 @@
+## 0.2.7（2026-09-18）
+- 接入 `nax-form` 表单校验联动：注入 `nax-form-item` 提供的字段级校验入口，输入值变化时按 `change`、失焦时按 `blur` 回调，使规则 `trigger: ['blur', 'change']` 自动生效（此前需业务侧手动调 `validateField`）
+- 校验使用控件当前值而非业务侧 `model`（`model` 多在 `@change` / `@blur` 才同步），值改对后错误提示即时消失
+- 未置于 `nax-form-item` 内时为空实现，行为不变；全端一致（无条件编译差异）
 ## 0.2.6（2026-09-10）
 - 修复长按滚动页面时聚焦样式残留：根节点触摸预亮对齐 nax-input 机制——`touchstart` 仅未聚焦时预亮并记录起点，`focus` 事件确认转正；新增 `touchmove` 位移超阈值（约 6px）判定为滚动/滑动手势撤回预亮样式，`touchcancel` 仅复位标记不撤样式（部分端点击也会派发且 focus 可能缺失）
 - `readonly` 不再点亮聚焦样式（原生 textarea 不可聚焦，点亮后无 focus 事件会残留），对齐 nax-input

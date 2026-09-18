@@ -274,6 +274,15 @@
 
 	const emit = defineEmits(['update:show', 'change', 'open', 'close'])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	const ANIM_DURATION = 280
 	const weekLabels = ['日', '一', '二', '三', '四', '五', '六'] as string[]
 
@@ -836,6 +845,7 @@
 				isToday: result == today.value
 			} as UTSJSONObject
 			emit('change', payload)
+			notifyFormItem('change', payload)
 			return
 		}
 		if (rangeStart.value.length == 0 || rangeEnd.value.length == 0) {
@@ -859,6 +869,7 @@
 			endWeek: getWeekText(rangeEnd.value)
 		} as UTSJSONObject
 		emit('change', payload)
+		notifyFormItem('change', payload)
 	}
 
 	function onDayClick(d: number) {

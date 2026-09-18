@@ -370,6 +370,15 @@
 			'clear'
 		])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	// #ifdef MP-WEIXIN
 	// ===== 微信小程序：系统弹层 picker 实现（date / year / year-month / time 无秒）=====
 	/** 系统 picker 的 mode */
@@ -497,6 +506,7 @@
 		emit('update:modelValue', ts)
 		emit('confirm', buildResult(clamped))
 		emit('change', buildResult(clamped))
+		notifyFormItem('change', buildResult(clamped))
 		mpPickerValue.value = s
 	}
 
@@ -523,6 +533,7 @@
 		modelBound.value = false
 		emit('update:modelValue', 0)
 		emit('clear')
+		notifyFormItem('change', 0)
 		mpSyncValue()
 	}
 	// #endif
@@ -1355,6 +1366,7 @@
 			currentParts.value = clamped
 		}
 		emit('change', buildResult(currentParts.value))
+		notifyFormItem('change', buildResult(currentParts.value))
 	}
 
 	function onWheelEnd(colIndex: number) {
@@ -1582,6 +1594,7 @@
 		modelBound.value = false
 		emit('update:modelValue', 0)
 		emit('clear')
+		notifyFormItem('change', 0)
 	}
 
 	function onMaskClick() {
@@ -1609,6 +1622,7 @@
 			modelBound.value = true
 			emit('update:modelValue', ts)
 		emit('confirm', result)
+		notifyFormItem('change', result)
 		closePicker(true)
 	}
 
@@ -1710,6 +1724,7 @@
 			lastSelectIndex.value = fixed.slice()
 		}
 		emit('change', buildResult(currentParts.value))
+		notifyFormItem('change', buildResult(currentParts.value))
 	}
 
 				function syncConfirmedFromModel() {

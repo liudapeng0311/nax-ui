@@ -222,6 +222,15 @@
 		'progress'
 	])
 
+	// 位于 nax-form-item 内时由表单项注入：值变化 / 失焦时回调，驱动规则 trigger 校验
+	function fallbackItemValidate(_event: string, _value: any | null) {
+	}
+	const formItemValidateRaw = inject('naxFormItemValidate', fallbackItemValidate) as (event: string, value: any | null) => void
+
+	function notifyFormItem(event: string, value: any | null) {
+		formItemValidateRaw(event, value)
+	}
+
 	function isDigits(s: string): boolean {
 		if (s.length == 0) {
 			return false
@@ -609,6 +618,7 @@
 
 	function setFileList(next: any[]) {
 		emit('update:fileList', next)
+		notifyFormItem('change', next)
 	}
 
 	function buildFileItem(url: string, thumb: string, name: string, typeName: string, size: number, status: string, message: string): UTSJSONObject {
@@ -1253,6 +1263,7 @@
 
 		const next = cloneListWithout(index)
 		emit('update:fileList', next)
+		notifyFormItem('change', next)
 		emit('delete', {
 			index: index,
 			file: item,

@@ -1,3 +1,9 @@
+## 0.2.1（2026-09-18）
+- 修复规则 `trigger` 不生效（用户反馈：设置 `trigger: ['blur', 'change']` 后值已改动，错误提示仍不消失）：此前 `nax-form` 已提供字段校验入口但库内无消费方，`nax-form-item` 的控件插槽也无法挂载事件，字段级校验只能由业务侧手动调 `validateField(prop, event)` 触发
+- `nax-form-item` 新增向插槽内表单控件提供字段级校验入口 `naxFormItemValidate(event, value)`；`NaxFormState` 新增 `validateOneWithValue(prop, event, value)`
+- 控件驱动的校验使用控件传入的当前值而非读 `model`：业务侧 `model` 多在 `@change` / `@blur` 时才同步，读 `model` 会取到旧值，错误提示依然不消失
+- 公共 `validate()` / `validateField()` 仍从 `model` 取值，快照与重置逻辑不变
+- 全端一致（无条件编译差异）：Android / iOS / 鸿蒙 / Web / 小程序行为相同
 ## 0.2.0（2026-08-27）
 - 新增 `labelSize` 标签字号属性：`nax-form` 表单级统一（空串跟随组件默认 15px），`nax-form-item` 可单项覆盖（空跟随 form）
 ## 0.1.8（2026-08-21）
