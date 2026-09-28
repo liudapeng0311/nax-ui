@@ -4,7 +4,7 @@ demo: form
 
 # nax-form / nax-form-item
 
-> 当前版本：0.2.0
+> 当前版本：0.2.1
 
 uni-app x 表单 / 表单项，功能覆盖常用场景。
 
@@ -65,6 +65,8 @@ function onSubmit() {
 ```
 
 > 小程序端若对象里的函数规则被过滤，请在 `onReady` 中调用 `setRules(rules)`。
+
+> 规则 `trigger` 对内置表单控件**自动生效**：控件在值变化时按 `change`、失焦时按 `blur` 触发本项校验，无需业务侧手动调用。已接入的控件：`nax-input`、`nax-textarea`、`nax-search`、`nax-number-box`、`nax-checkbox`（含 group）、`nax-radio`（含 group）、`nax-switch`、`nax-rate`、`nax-slider`、`nax-calendar`、`nax-select`、`nax-datetime-picker`、`nax-upload`。自定义控件可自行调用 `validateField(prop, 'change')` / `validateField(prop, 'blur')`。
 
 :::
 
@@ -429,4 +431,5 @@ function clearManualError() {
 ## 平台说明
 
 - 控件需自行 `v-model` 绑定到 `model` 字段；提交时调用 `validate()`。
-- 字段事件触发（blur/change）需业务侧调用 `validateField(prop, 'blur')`。
+- 内置表单控件的 `trigger`（`blur` / `change`）已自动联动，无需手动调 `validateField`；自定义控件可自行调用 `validateField(prop, 'blur')` / `validateField(prop, 'change')`。
+- 字段级校验按控件当前值判定，不依赖业务侧 `model` 是否已同步（`model` 常在 `@change` / `@blur` 才写入）；`validate()` 提交校验仍以 `model` 为准，请在提交前保持 `model` 与控件值一致。

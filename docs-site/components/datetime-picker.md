@@ -4,7 +4,7 @@ demo: datetime-picker
 
 # nax-datetime-picker
 
-> 当前版本：0.3.0
+> 当前版本：0.3.1
 
 uni-app x 时间选择器（底部弹层 + `picker-view`）。
 
@@ -279,10 +279,10 @@ function onFmtConfirm(e : UTSJSONObject) {
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | show | boolean | `false` | v-model:show 弹层显隐；微信小程序端系统弹层模式不生效（点触发条弹出，自动回写 false） |
-| modelValue | [Number, String] | `0 as any` | v-model 选中值（时间戳 ms，或日期时间字符串） |
+| modelValue | [Number, String] | `0` | v-model 选中值（时间戳 ms，或日期时间字符串） |
 | mode | string | `'datetime'` | `datetime` 日期时间 \| `date` 日期 \| `time` 时间 \| `year-month` 年月 \| `year` 年 \| `month-day` 月日 |
-| minDate | [Number, String] | `'' as any` | 可选范围下限（时间戳或 YYYY-MM-DD[ HH:mm:ss]） |
-| maxDate | [Number, String] | `'' as any` | 可选范围上限（时间戳或 YYYY-MM-DD[ HH:mm:ss]） |
+| minDate | [Number, String] | `''` | 可选范围下限（时间戳或 YYYY-MM-DD[ HH:mm:ss]） |
+| maxDate | [Number, String] | `''` | 可选范围上限（时间戳或 YYYY-MM-DD[ HH:mm:ss]） |
 | minHour | number | `0` | 小时范围下限 |
 | maxHour | number | `23` | 小时范围上限 |
 | minMinute | number | `0` | 分钟范围下限 |

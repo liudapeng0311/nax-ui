@@ -73,4 +73,5 @@ uni-app x 表单 / 表单项，功能覆盖常用场景。
 ## 平台说明
 
 - 控件需自行 `v-model` 绑定到 `model` 字段；提交时调用 `validate()`。
-- 字段事件触发（blur/change）需业务侧调用 `validateField(prop, 'blur')`。
+- 内置表单控件的 `trigger`（`blur` / `change`）已自动联动，无需手动调 `validateField`；自定义控件可自行调用 `validateField(prop, 'blur')` / `validateField(prop, 'change')`。
+- 字段级校验按控件当前值判定，不依赖业务侧 `model` 是否已同步（`model` 常在 `@change` / `@blur` 才写入）；`validate()` 提交校验仍以 `model` 为准，请在提交前保持 `model` 与控件值一致。

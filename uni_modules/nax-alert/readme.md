@@ -23,7 +23,7 @@
 ## Props
 
 | 属性 | 类型 | 默认 | 说明 |
-|------|------|------|
+|------|------|------|------|
 | type | string | `warning` | `primary` / `info` / `success` / `warning` / `error`（兼容 `danger`） |
 | variant | string | `light` | `light` 浅底 / `solid` 实心 |
 | effect | string | `''` | 兼容：`light` / `dark`（`dark` 等价 `solid`） |

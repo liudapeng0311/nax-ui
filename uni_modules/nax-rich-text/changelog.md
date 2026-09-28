@@ -1,3 +1,5 @@
+## 0.3.2（2026-09-22）
+- 修复单独安装缺包：组件内使用 `<nax-icon>`（视频 / 音频播放钮）与 `<nax-loading>`（视频加载反馈）但 `uni_modules.dependencies` 只声明了 `nax-ui-theme`，单独安装 `nax-rich-text` 时这两个组件缺失（套装安装不受影响）；依赖补 `nax-icon`、`nax-loading`，readme 安装说明同步
 ## 0.3.1（2026-09-01）
 - 修复 iOS 端视频点击播放不生效：`<video>` 改为常驻挂载、封面卡片覆盖其上（uni-app x 同层级渲染可覆盖），点击在用户手势内 `play()`（规避 iOS 动态挂载 / 非手势播放被拒，消除 `Possible Unhandled Promise Rejection` 告警）；App 端视频预先缓冲，点击通常即点即播；播放超时 4s 未开始自动退回可重试的播放按钮
 - 新增视频加载反馈：点击封面后圆钮显示旋转 loading（复用 nax-loading），`@play` 开始播放后隐藏

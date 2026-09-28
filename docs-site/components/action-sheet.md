@@ -253,8 +253,8 @@ function onCancel() {
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | show | boolean | `false` | v-model:show 控制显隐 |
-| actions | array | `() => [] as any[]` | 操作项列表（name/text、subname、disabled、type、color） |
-| list | array | `() => [] as any[]` | 兼容别名；actions 为空时使用 |
+| actions | array | `() => []` | 操作项列表（name/text、subname、disabled、type、color） |
+| list | array | `() => []` | 兼容别名；actions 为空时使用 |
 | title | string | `''` | 顶部标题 |
 | description | string | `''` | 顶部描述 |
 | tips | string | `''` | 同 description（兼容） |

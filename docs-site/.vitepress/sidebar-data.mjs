@@ -149,6 +149,10 @@ export const sidebar = {
           "link": "/components/virtual-list"
         },
         {
+          "text": "表格 <span class=\"nax-sidebar-en\">Table</span>",
+          "link": "/components/table"
+        },
+        {
           "text": "滑动操作 <span class=\"nax-sidebar-en\">SwipeAction</span>",
           "link": "/components/swipe-action"
         },

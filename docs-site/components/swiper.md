@@ -281,7 +281,7 @@ function next() {
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| list | array | `() => [] as any[]` | 图片 url 或对象；字段明细见下方 list 项表 |
+| list | array | `() => []` | 图片 url 或对象；字段明细见下方 list 项表 |
 | current | number | `0` | 当前页（v-model:current） |
 | height | string | `'160'` | 高度，默认 160（纯数字补 px） |
 | autoplay | boolean | `false` | 自动播放 |

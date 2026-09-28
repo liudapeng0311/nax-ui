@@ -379,10 +379,10 @@ function onClearFilter() {
 
 | 事件 | 说明 |
 |------|------|
-| load |  |
-| refresh |  |
-| update:refreshing |  |
-| click-error |  |
+| load | 需要加载更多 |
+| refresh | 下拉刷新触发 |
+| update:refreshing | 刷新状态同步（可 v-model:refreshing） |
+| click-error | 点击错误区 |
 
 
 ## Slots

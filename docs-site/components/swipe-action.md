@@ -367,7 +367,7 @@ function resetDeletable() {
 | disabled | boolean | `false` | 禁用滑动与按钮 |
 | name | string | `''` | 项标识；组内互斥推荐传稳定 id（不要用 index） |
 | index | number | `-1` | 业务序号（兼容 ；写入 click 载荷） |
-| options | array | `() => [] as any[]` | 按钮列表，字段明细见下方 options 项表 |
+| options | array | `() => []` | 按钮列表，字段明细见下方 options 项表 |
 | btnWidth | number | `72` | 默认按钮宽度（px） |
 | rightWidth | number | `0` | 自定义 right 插槽宽度（px）；>0 时优先使用 |
 | threshold | number | `0` | 展开阈值（px）；0 表示操作区宽度的一半 |

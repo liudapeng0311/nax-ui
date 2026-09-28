@@ -117,9 +117,8 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 | 插槽 | 说明 |
 |------|------|
 | `empty` | 自定义空态（默认内嵌 nax-empty 简化样式） |
-```
 
-## 实例方法（ref）
+## Methods（defineExpose）
 
 通过组件 ref 调用（uts 下需在业务侧声明 expose 类型）：
 
@@ -132,16 +131,34 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 | `clearSort()` | — | 排序状态复位（不改数据顺序） |
 | `resetPage()` | — | 回到第一页 |
 
+## 主题
 
-## 平台兼容
+通过 CSS 变量覆盖：
 
-| 平台 | 支持 |
-|------|------|
-| App（Android / iOS / 鸿蒙，蒸汽模式） | √ |
-| Web | √ |
-| 微信小程序 | √ |
+| Token | 用途 |
+|-------|------|
+| `--nax-color-bg` | 表格 / 单元格背景 |
+| `--nax-color-bg-secondary` | 表头 / 合计行 / 分页器底色 |
+| `--nax-color-bg-hover` | 行 hover 底色 |
+| `--nax-color-border` / `--nax-color-border-strong` | 单元格边框 / 编辑态边框 |
+| `--nax-color-divider` | 行分割线 |
+| `--nax-color-text` | 单元格文字 |
+| `--nax-color-text-secondary` | 表头 / 分页器等次要文字 |
+| `--nax-color-text-placeholder` | 空值占位 |
+| `--nax-color-text-disabled` | 禁用文字 |
+| `--nax-color-text-inverse` | 勾选标记反白色 |
+| `--nax-color-primary` / `--nax-color-primary-secondary` | 勾选框选中态 / 选中行底色 |
+| `--nax-color-success` / `--nax-color-warning` / `--nax-color-error` | 操作列按钮语义色 |
+| `--nax-radius-sm` / `--nax-radius-md` | 单元格 / 容器圆角 |
+| `--nax-font-size-sm` | 表头与单元格字号 |
 
-## 注意事项
+## 依赖
+
+- `nax-empty`（空态占位）
+- `nax-icon`（多选勾选 / 半选标记）
+- `nax-ui-theme`（可选 token）
+
+## 注意
 
 - 表头位于纵向滚动区之外，`height` 有值时表体独立滚动，表头天然固定
 - 列总宽超出容器时横向滚动（外层 scroll-view `scroll-x`），指定了 `width` 的列不参与均分
@@ -166,3 +183,9 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 - `virtual: true` + `height` + 固定 `rowH`（默认 44px）三者配合使用；行高不固定时不要开启
 - 实现为上下 spacer 占位 + 窗口裁剪（可见区 ± 5 行），与 `nax-virtual-list` 同思路
 - 与 `showPaging(inner)` 组合时窗口重置到当前页头部；与多选组合时选择按绝对下标维护
+
+## 平台说明
+
+- **App（Android / iOS / 鸿蒙，蒸汽模式）**：支持
+- **Web**：支持
+- **微信小程序**：支持

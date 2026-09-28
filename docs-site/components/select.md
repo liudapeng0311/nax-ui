@@ -4,7 +4,7 @@ demo: select
 
 # nax-select
 
-> 当前版本：0.3.0
+> 当前版本：0.3.1
 
 uni-app x 列选择器（底部弹层 + `picker-view`），功能覆盖常用场景。
 
@@ -360,10 +360,10 @@ const fruitList = [
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | show | boolean | `false` | v-model:show 控制弹层显隐；微信小程序端不生效（点触发条弹出，自动回写 false） |
-| modelValue | [String, Number, Boolean, Array] | `'' as any` | v-model 选中值；单列为单项 value，多列/联动为 value 数组 |
-| list | array | `() => [] as any[]` | 列数据；单列一维 / 多列二维 / 联动树形（children） |
+| modelValue | [String, Number, Boolean, Array] | `''` | v-model 选中值；单列为单项 value，多列/联动为 value 数组 |
+| list | array | `() => []` | 列数据；单列一维 / 多列二维 / 联动树形（children） |
 | mode | string | `'single-column'` | `single-column` 单列 \| `multi-column` 多列 \| `multi-column-auto` 多列联动（兼容 `mutil-column` / `mutil-column-auto`） |
-| defaultValue | array | `() => [] as any[]` | 默认选中下标数组，如 [0] / [1, 2] |
+| defaultValue | array | `() => []` | 默认选中下标数组，如 [0] / [1, 2] |
 | title | string | `''` | 顶部标题；微信小程序端仅安卓显示为系统弹层标题 |
 | confirmText | string | `'确认'` | 确认文案，默认「确认」；微信小程序端不生效（系统弹层固定文案） |
 | cancelText | string | `'取消'` | 取消文案，默认「取消」；微信小程序端不生效 |

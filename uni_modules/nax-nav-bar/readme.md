@@ -1,4 +1,4 @@
-﻿# nax-nav-bar
+# nax-nav-bar
 
 自定义顶部导航栏（需页面 `navigationStyle: custom`）。面向 uni-app x：状态栏安全区、fixed 占位、返回栈兜底、微信小程序胶囊预留。
 
@@ -46,7 +46,7 @@
 ## Props
 
 | 属性 | 类型 | 默认 | 说明 |
-|------|------|------|
+|------|------|------|------|
 | title | string | `''` | 标题 |
 | showBack | boolean | `true` | 是否显示返回区 |
 | backText | string | `''` | 返回文案 |

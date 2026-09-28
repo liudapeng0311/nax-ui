@@ -249,7 +249,7 @@ const list = ref([
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| list | array | `() => [] as string[]` | 通告文案，`string` 或 `{ text \| title \| label }` 对象 |
+| list | array | `() => []` | 通告文案，`string` 或 `{ text \| title \| label }` 对象 |
 | type | string | `'warning'` | `primary` 主要 \| `info` 信息 \| `success` 成功 \| `warning` 警告 \| `error` 错误 \| `none` 无 |
 | mode | string | `'horizontal'` | `horizontal` 横向 \| `vertical` 垂直 |
 | scroll | string | `''` | `seamless` 衔接 / `step` 步进；空则看 `is-circular` |

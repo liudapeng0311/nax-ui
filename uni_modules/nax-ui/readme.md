@@ -2,7 +2,7 @@
 
 `nax-ui` 是面向 uni-app x 的 UI 组件套装入口，定位为 **uni-app x 蒸汽模式组件库**：基于原生渲染管线的 vapor 模式（去虚拟 DOM），不承诺 VDOM 渲染模式兼容。
 
-组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前 52 个 `nax-*` 组件包、`nax-ui-theme`（主题）与 `nax-use`（组合式函数）（`nax-video` 独立发布，不在套装内）。可以安装整套，也可以只安装需要的独立组件。
+组件源码按独立 `nax-*` uni_modules 发布；本包不重复收录组件源码，而是通过 `package.json` 聚合当前 53 个 `nax-*` 组件包、`nax-ui-theme`（主题）与 `nax-use`（组合式函数）（`nax-video` 独立发布，不在套装内）。可以安装整套，也可以只安装需要的独立组件。
 
 ## 官方文档
 

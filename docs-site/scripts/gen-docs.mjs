@@ -27,7 +27,7 @@ const CATEGORIES = [
   },
   {
     text: '布局组件',
-    items: ['cell', 'card', 'grid', 'steps', 'list', 'virtual-list', 'swipe-action', 'swiper']
+    items: ['cell', 'card', 'grid', 'steps', 'list', 'virtual-list', 'table', 'swipe-action', 'swiper']
   },
   {
     text: '表单组件',
@@ -88,6 +88,7 @@ const COMPONENT_LABELS = {
   steps: '步骤条',
   list: '列表',
   'virtual-list': '虚拟列表',
+  table: '表格',
   'swipe-action': '滑动操作',
   swiper: '轮播',
   input: '输入框',
@@ -248,7 +249,8 @@ const SKIP_SECTIONS_OVERRIDES = {
   image: ['Slots'],
   list: ['Slots'],
   upload: ['Slots'],
-  'virtual-list': ['Slots']
+  'virtual-list': ['Slots'],
+  table: ['引入']
 }
 
 // 从代码示例区移出、改在 Props 之后单独成节的小节（键：组件名 -> 小节名数组）
@@ -259,7 +261,8 @@ const MOVE_SECTIONS_AFTER_PROPS = {
   upload: ['fileList 项结构'],
   form: ['规则字段（常用）'],
   picker: ['弹出位置'],
-  'action-sheet': ['actions 项字段']
+  'action-sheet': ['actions 项字段'],
+  table: ['列类型', 'NaxTableColumn', 'NaxTableOperation']
 }
 
 // 示例小节内容追加（键：组件名 -> 小节名 -> 追加的段落）
@@ -691,7 +694,7 @@ function parseUvue(uvuePath) {
   const description = []
   for (const line of jsdocLines) {
     const propM = line.match(/^@property\s+(?:\{([^}]+)\})?\s*([\w:-]+)\s*([\s\S]*)$/)
-    const eventM = line.match(/^@event\s+([\w:-]+)\s*([\s\S]*)$/)
+    const eventM = line.match(/^@event\s+(?:\{[^}]*\}\s*)?([\w:-]+)\s*([\s\S]*)$/)
     const slotM = line.match(/^@slot\s+([\w:-]+)\s*([\s\S]*)$/)
     const descM = line.match(/^@description\s+([\s\S]*)$/)
     if (propM) {
@@ -853,7 +856,8 @@ const SPECIAL_SECTIONS_OVERRIDES = {
   'nav-bar': ['注意'],
   'date-strip': ['注意'],
   tabbar: ['自定义底栏 + 原生 Tab 路由（推荐方案）'],
-  tabs: [{ name: '与内容区联动（全屏选项卡配方）', title: '全屏选项卡方案实现' }]
+  tabs: [{ name: '与内容区联动（全屏选项卡配方）', title: '全屏选项卡方案实现' }],
+  table: ['分组表头', '注意', '固定列（v3）', '虚拟滚动（v3）']
 }
 
 // 小节分类：
@@ -946,13 +950,19 @@ function typeDisplay(type) {
     String: 'string', Number: 'number', Boolean: 'boolean', Array: 'array',
     Object: 'object', UTSJSONObject: 'object', Date: 'Date', Function: 'function'
   }
-  return map[type] || type
+  // `Array as PropType<string[]>` 断言：取断言前的基础构造器，与其它组件页显示一致
+  const base = type.split(/\s+as\s+/)[0].trim()
+  return map[base] || map[type] || base
 }
 
 function defaultDisplay(raw) {
   if (raw === undefined) return '—'
-  const v = raw.trim()
-  if (v.startsWith('() =>')) return '`' + v + '`'
+  let v = raw.trim()
+  // `(): T => <expr>` 带返回类型的工厂：展示真正的默认值表达式
+  const factory = v.match(/^\(\)\s*:\s*[^=]*=>\s*([\s\S]+)$/)
+  if (factory) v = factory[1].trim()
+  // 去掉结尾的 uts 类型断言（`[] as any[]` → `[]`）
+  v = v.replace(/\s+as\s+[\w$.<>[\]]+$/, '').trim()
   return '`' + v + '`'
 }
 
@@ -1321,7 +1331,7 @@ function buildOverview(found) {
     }
     byCategory[CATEGORY_TEXT[f.name] || '其他'].push({ name: f.name, desc })
   }
-  const parts = ['# 组件总览', '', '> 52 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。', '']
+  const parts = ['# 组件总览', '', `> ${found.length} 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。`, '']
   for (const c of CATEGORIES) {
     const items = byCategory[c.text]
     if (!items || items.length === 0) continue

@@ -1,3 +1,6 @@
+## 0.3.7（2026-09-28）
+- 套装依赖补齐：`uni_modules.dependencies` 增加此前遗漏的 `nax-table`（0.1.0，columns/data 数据驱动的数据表格），`package.json` description 与 readme 的组件数表述同步为 53（聚合组件数 52 → 53）
+- 依赖组件更新：`nax-rich-text`（0.3.1→0.3.2）修复单独安装缺包——组件内使用 `<nax-icon>`（视频 / 音频播放钮）与 `<nax-loading>`（视频加载反馈），`uni_modules.dependencies` 此前只声明 `nax-ui-theme`，单独安装时这两个组件缺失（套装安装不受影响）
 ## 0.3.6（2026-09-18）
 - 依赖组件更新：`nax-form`（0.2.0→0.2.1）修复规则 `trigger` 不生效（用户反馈：值已改动但错误提示不消失）——表单项新增向插槽控件提供字段级校验入口 `naxFormItemValidate`，控件驱动的校验改用控件当前值而非读 `model`
 - 依赖组件更新：`nax-input`（0.2.6→0.2.7）、`nax-textarea`（0.2.6→0.2.7）、`nax-search`（0.3.0→0.3.1）、`nax-number-box`（0.1.5→0.1.6）、`nax-checkbox`（0.1.6→0.1.7）、`nax-radio`（0.1.6→0.1.7）、`nax-switch`（0.1.5→0.1.6）、`nax-rate`（0.1.4→0.1.5）、`nax-slider`（1.0.3→1.0.4）、`nax-calendar`（0.1.4→0.1.5）、`nax-select`（0.3.0→0.3.1）、`nax-datetime-picker`（0.3.0→0.3.1）、`nax-upload`（0.1.14→0.1.15）接入表单校验联动，规则 `trigger: ['blur', 'change']` 自动生效

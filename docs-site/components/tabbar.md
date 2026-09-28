@@ -220,7 +220,7 @@ function onColorUpdate(index : number) {
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | modelValue | number | `0` | 当前选中下标（v-model） |
-| list | array | `() => [] as any[]` | 项列表（text/name、icon/selectedIcon、iconPath/selectedIconPath、badge/dot、disabled、midButton、pagePath） |
+| list | array | `() => []` | 项列表（text/name、icon/selectedIcon、iconPath/selectedIconPath、badge/dot、disabled、midButton、pagePath） |
 | fixed | boolean | `true` | 是否 fixed 贴底，默认 true |
 | placeholder | boolean | `true` | fixed 时是否占位，默认 true |
 | border | boolean | `true` | 顶部分割线，默认 true |

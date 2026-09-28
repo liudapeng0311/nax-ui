@@ -4,7 +4,7 @@ demo: input
 
 # nax-input
 
-> 当前版本：0.2.6
+> 当前版本：0.2.7
 
 uni-app x 单行输入框。
 

@@ -4,7 +4,7 @@ demo: calendar
 
 # nax-calendar
 
-> 当前版本：0.1.4
+> 当前版本：0.1.5
 
 `nax-ui` 日历选择器（uni-app x / uvue）。
 
@@ -324,11 +324,11 @@ function onPageChange(e: UTSJSONObject) {
 | endText | string | `'结束'` | 范围结束标记文案（与 `startText` 配套） |
 | isActiveCurrent | boolean | `true` | 当前选中日是否高亮 |
 | isChange | boolean | `false` | 切换年月时是否触发 change（仅 date） |
-| holidays | array | `() => [] as string[]` | 节假日 YYYY-MM-DD 列表 |
-| workdays | array | `() => [] as string[]` | 加班日 YYYY-MM-DD 列表（与 `holidays` 配套） |
+| holidays | array | `() => []` | 节假日 YYYY-MM-DD 列表 |
+| workdays | array | `() => []` | 加班日 YYYY-MM-DD 列表（与 `holidays` 配套） |
 | festivals | object | `() => ({} as UTSJSONObject)` | 节日映射 { 'YYYY-MM-DD': '清明节' } |
 | showFestival | boolean | `false` | 是否显示内置公历节日 |
-| checkedDates | array | `() => [] as string[]` | 已打卡日期 |
+| checkedDates | array | `() => []` | 已打卡日期 |
 | todayChecked | boolean | `false` | 今日已打卡 |
 | checkinMode | boolean | `false` | 打卡签到模式 |
 | customClass | string | `''` | 根节点扩展 class |

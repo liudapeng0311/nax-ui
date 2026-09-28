@@ -1,4 +1,4 @@
-## 0.2.1（2026-09-18）
+## 0.2.1（2026-09-28）
 - 修复规则 `trigger` 不生效（用户反馈：设置 `trigger: ['blur', 'change']` 后值已改动，错误提示仍不消失）：此前 `nax-form` 已提供字段校验入口但库内无消费方，`nax-form-item` 的控件插槽也无法挂载事件，字段级校验只能由业务侧手动调 `validateField(prop, event)` 触发
 - `nax-form-item` 新增向插槽内表单控件提供字段级校验入口 `naxFormItemValidate(event, value)`；`NaxFormState` 新增 `validateOneWithValue(prop, event, value)`
 - 控件驱动的校验使用控件传入的当前值而非读 `model`：业务侧 `model` 多在 `@change` / `@blur` 时才同步，读 `model` 会取到旧值，错误提示依然不消失

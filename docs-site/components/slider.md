@@ -4,7 +4,7 @@ demo: slider
 
 # nax-slider
 
-> 当前版本：1.0.3
+> 当前版本：1.0.4
 
 uni-app x 滑动选择器，功能覆盖常用场景。
 

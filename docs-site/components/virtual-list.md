@@ -392,7 +392,7 @@ const emptyList = ref([] as UTSJSONObject[])
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| list | array | `() => [] as any[]` | 完整数据源（不切片传参；内部按滚动窗口渲染） |
+| list | array | `() => []` | 完整数据源（不切片传参；内部按滚动窗口渲染） |
 | itemHeight | number | `48` | 行高 px（固定等高） |
 | buffer | number | `6` | 上下额外缓冲行数，默认 6；鸿蒙不足 12 抬到 12 |
 | keyField | string | `''` | 业务 id 字段；行 DOM key 使用窗口位置 |

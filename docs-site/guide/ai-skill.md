@@ -33,14 +33,14 @@ git clone https://github.com/liudapeng0311/nax-ui-skills.git
 | OpenCode / 通用 | `~/.agents/skills/nax-ui/` |
 | 项目级 | 项目根目录 `.claude/skills/nax-ui/` 或 `.agents/skills/nax-ui/` |
 
-> 技能目录 = 仓库中的 `SKILL.md` + `references/`（组件索引、52 个组件 API 卡、nax-use 组合式函数卡、主题指南）。
+> 技能目录 = 仓库中的 `SKILL.md` + `references/`（组件索引、53 个组件 API 卡、nax-use 组合式函数卡、主题指南）。
 
 ## 技能包含什么
 
 ```
 SKILL.md                      # 使用流程 + uni-app x 代码规范 + 常见陷阱
 references/
-  component-index.md          # 52 个组件分类速查（基础/布局/表单/反馈/导航/展示）+ nax-use 组合式函数
+  component-index.md          # 53 个组件分类速查（基础/布局/表单/反馈/导航/展示）+ nax-use 组合式函数
   theme-guide.md              # 主题接入指南（L0/L1/L2、CSS 变量、暗色模式）
   components/nax-*.md         # 各组件 API 参考卡（Props/Events/Slots/Methods/用法示例）
 ```

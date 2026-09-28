@@ -4,7 +4,7 @@ demo: upload
 
 # nax-upload
 
-> 当前版本：0.1.14
+> 当前版本：0.1.15
 
 `nax-ui` 上传组件（uni-app x / uvue）。提供文件列表预览、选择、删除与状态展示能力。实际上传由业务在 `afterRead` 中调用 `uni.uploadFile` 等完成。
 
@@ -472,7 +472,7 @@ function onMockDelete(e : any) {
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| fileList | array | `() => [] as any[]` | 文件列表（受控） |
+| fileList | array | `() => []` | 文件列表（受控） |
 | accept | string | `'image'` | `image` 图片 \| `video` 视频 \| `media` 媒体 |
 | capture | string | `'album` | `album` 相册 \| `camera` 相机（逗号分隔可组合） |
 | compressed | boolean | `true` | 是否压缩图片 |

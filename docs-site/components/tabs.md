@@ -259,7 +259,7 @@ const keyList = [
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | modelValue | number | `0` | 当前选中下标（v-model） |
-| list | array | `() => [] as any[]` | 项列表（name/text/label/title、badge/count、dot、disabled；支持字符串项） |
+| list | array | `() => []` | 项列表（name/text/label/title、badge/count、dot、disabled；支持字符串项） |
 | keyName | string | `'name'` | 文案优先字段，默认 name |
 | scrollable | boolean | `true` | 横向滚动，默认 true；false 均分 |
 | scrollAlign | string | `'center'` | `left` 左对齐 \| `center` 居中；默认 `center`；`left` 为必要时贴左并露出前一项 |

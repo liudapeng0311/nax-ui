@@ -1,0 +1,13 @@
+## 0.1.0（2026-09-28）
+- 初版 `nax-table`（uni-app x / 蒸汽模式），columns + data 数据驱动的数据表格
+- 列类型 text / index / operation / selection；`stripe` 斑马纹、`border` 单元格边框、`highlight` 行点击高亮
+- 固定表头（表头位于纵向滚动区外，`height` 有值时表体独立滚动）+ 列宽超出容器时横向滚动
+- 文本列 `lines` 多行省略、`emptyString` 空值占位、`formatter` 自定义单元格文本、`align` / `headerAlign` 对齐、`color` 单元格文字色
+- 排序：`sorter: true` 组件内部排序（受控外观 + `sort-change`）/ `sorter: 'custom'` 仅 emit `sort-change` 由业务处理
+- 多选：`type: 'selection'` 表头全选 / 半选 + `selection-change`；列 `selectable` 控制行是否可勾选（禁用行不参与全选）
+- 合计行 `showSummary` / `sumText` / `summaryMethod`（cell 支持 `colspan` 跨列）、分组表头 `groupTitle`（相邻同名合并）
+- 分页 `showPaging`（`inner` 组件切片 / `outer` 受控 + `page-change`）、加载更多 `showLoadMore` / `finished` + `load-more`
+- 固定列 `fixed`（左侧覆盖层 + 主区 `@scroll` 纵向单向同步）、虚拟滚动 `virtual` + `rowH`（spacer 占位 + 窗口裁剪）
+- 可编辑单元格 `editable`（`cell-edit` 提交，组件不修改 `data`）；行焦点 `row-blur`；操作列 `renders` + `action`
+- 实例方法：`resetHighlight` / `clearSelection` / `toggleRowSelection` / `toggleAllSelection` / `clearSort` / `resetPage`
+- 依赖 `nax-empty`、`nax-icon`、`nax-ui-theme`

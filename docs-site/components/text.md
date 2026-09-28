@@ -187,7 +187,7 @@ function onCallClick() {
 |------|------|--------|------|
 | type | string | `'default'` | `default` 默认 \| `primary` 主题色 \| `info` 信息 \| `success` 成功 \| `warning` 警告 \| `error` 错误 \| `secondary` 次要 \| `placeholder` 占位 |
 | show | boolean | `true` | 是否显示 |
-| text | [String, Number] | `'' as any` | 显示文案 |
+| text | [String, Number] | `''` | 显示文案 |
 | prefixIcon | string | `''` | 前置 nax-icon 名 |
 | suffixIcon | string | `''` | 后置 nax-icon 名 |
 | mode | string | `'text'` | 模式：`text` 文本 \| `price` 价格 \| `phone` 手机号 \| `name` 姓名 \| `date` 日期 \| `link` 链接 |

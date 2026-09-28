@@ -4,7 +4,7 @@ demo: number-box
 
 # nax-number-box
 
-> 当前版本：0.1.5
+> 当前版本：0.1.6
 
 uni-app x 步进器（加减数量）。
 

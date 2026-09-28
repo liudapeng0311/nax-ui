@@ -13,6 +13,8 @@ uni_modules/nax-rich-text
 依赖：
 
 ```text
+uni_modules/nax-icon
+uni_modules/nax-loading
 uni_modules/nax-ui-theme
 ```
 

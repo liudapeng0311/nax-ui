@@ -258,7 +258,7 @@ function closeCmd() {
 ## Props（nax-dropdown-item）
 
 | 属性 | 类型 | 默认 | 说明 |
-|------|------|------|
+|------|------|------|------|
 | modelValue | string | `''` | 当前选中值（v-model），与 `options[].value` 对应 |
 | title | string | `''` | 菜单标题 |
 | options | array | `[]` | 选项 `{ label, value }` 或字符串 |

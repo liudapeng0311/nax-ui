@@ -193,7 +193,7 @@
 | `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；Web/微信小程序用 `WEB || MP-WEIXIN` 触底锁、剩余距离回差及追加后 scrollTop 恢复；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
 | `nax-table` | done | 插件包 `uni_modules/nax-table`；columns/data 驱动；stripe/border/highlight；固定表头（表头在纵向滚动区外）+ 横向 scroll-x；列类型 text/index/operation/selection；sorter 内部排序 + sort-change；lines 多行省略；emptyString/formatter；action 操作事件；插槽 empty；v2：selection 多选（全选/半选）+ selection-change、合计行 showSummary/sumText/summaryMethod(colspan 跨列)、分组表头 groupTitle、分页 showPaging（inner 切片/outer 受控）+ page-change、加载更多 showLoadMore/finished + load-more；v3：固定列 fixed（覆盖层 + 主区 @scroll 纵向单向同步、主区槽位 visibility 让位）、虚拟滚动 virtual+rowH（spacer 占位 + 窗口裁剪 ±5 行，多选/行号改 data 绝对下标）；demo `pages/components/table` |
 | `nax-video` | done | 插件包 `uni_modules/nax-video`（**独立发布，不聚合进 `nax-ui` 套装**）；无头视频；原生 `<video>` + `VideoContext`；默认 `controls=false`；作用域插槽状态/方法；多实例隔离；能力下限 4.61；iOS 未验证；demo `pages/components/video` |
-| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 52 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
+| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 53 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
 
 ---
 

@@ -4,7 +4,7 @@ demo: rich-text
 
 # nax-rich-text
 
-> 当前版本：0.3.1
+> 当前版本：0.3.2
 
 `nax-ui` 富文本组件（uni-app x / uvue）。
 双引擎设计：**自研解析渲染器**（默认 `parser`，App / Web / 小程序渲染一致）与**内置 rich-text 兜底**（`builtin`）。HTML 字符串 / 节点列表双入口，全局字号 / 颜色 / 行高 / 字体 / 链接色，以及**内容点击**（图片 / 链接 / 音频卡）事件。
@@ -147,7 +147,7 @@ function onItemClick(e : any) {
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | content | string | `''` | HTML 字符串（nodes 为空时生效） |
-| nodes | array | `() => [] as any[]` | 节点列表（非空时优先于 content） |
+| nodes | array | `() => []` | 节点列表（非空时优先于 content） |
 | engine | string | `'parser'` | 渲染引擎 parser（默认，自研解析渲染器，全端一致）\| builtin（内置 rich-text 兜底） |
 | mode | string | `'web'` | 仅 builtin 引擎生效：App 渲染模式 web \| native |
 | userSelect | boolean | `false` | 仅 builtin 引擎生效：文本是否可选中复制 |

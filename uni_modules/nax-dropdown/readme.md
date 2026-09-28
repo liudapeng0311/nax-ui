@@ -25,7 +25,7 @@
 ## Props（nax-dropdown）
 
 | 属性 | 类型 | 默认 | 说明 |
-|------|------|------|
+|------|------|------|------|
 | size | string | `'md'` | 菜单栏高度：`sm` / `md` / `lg` |
 | menuIcon | string | `'chevron-down'` | 收起图标 |
 | menuIconOpen | string | `'chevron-up'` | 展开图标 |
@@ -46,7 +46,7 @@
 ## Props（nax-dropdown-item）
 
 | 属性 | 类型 | 默认 | 说明 |
-|------|------|------|
+|------|------|------|------|
 | modelValue | string | `''` | 当前选中值（v-model），与 `options[].value` 对应 |
 | title | string | `''` | 菜单标题 |
 | options | array | `[]` | 选项 `{ label, value }` 或字符串 |

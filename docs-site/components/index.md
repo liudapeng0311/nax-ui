@@ -1,6 +1,6 @@
 # 组件总览
 
-> 52 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。
+> 53 个独立组件包 + 1 个主题包 + nax-use 组合式函数包，全部基于 uni-app x / uvue 实现，组件 easycom 自动注册。
 
 ## 基础组件
 
@@ -27,6 +27,7 @@
 | [nax-steps](/components/steps) | 步骤条容器。list 数据驱动或配合 nax-step 组合使用。 |
 | [nax-list](/components/list) | 滚动列表壳：内部 scroll-view 触底加载 + 下拉刷新 + 空/错/底态。虚拟列表见 nax-virtual-list。 |
 | [nax-virtual-list](/components/virtual-list) | 固定行高虚拟列表。App 端 spacer 窗口裁剪；Web/小程序固定总高 + translateY（规避滚动锚定连滚）。iOS/鸿蒙滚动合并更新 + scrollend 同步事件。 |
+| [nax-table](/components/table) | 数据表格。columns/data 驱动，支持斑马纹、边框、固定表头、横向滚动、排序、行数省略、空态、多选、合计行、分组表头、分页、加载更多、固定列、虚拟滚动。 |
 | [nax-swipe-action](/components/swipe-action) | 滑动操作。左滑露出右侧操作按钮；可与 nax-swipe-action-group 互斥展开。 |
 | [nax-swiper](/components/swiper) | 轮播。基于原生 swiper 封装。 |
 

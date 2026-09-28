@@ -256,7 +256,7 @@ function onStepClick(index: number) {
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| list | array | `() => [] as any[]` | 步骤列表（name/title、desc/description、status、icon、disabled；支持字符串） |
+| list | array | `() => []` | 步骤列表（name/title、desc/description、status、icon、disabled；支持字符串） |
 | current | number | `0` | 当前步下标（从 0 起），无显式 status 时推导 |
 | direction | string | `'horizontal'` | `horizontal` 横向 \| `vertical` 纵向（兼容 `row` / `column`） |
 | mode | string | `'number'` | `number` 数字 \| `dot` 圆点 |

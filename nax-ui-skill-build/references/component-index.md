@@ -1,4 +1,4 @@
-# nax-ui 组件索引（52 个组件 + nax-use 组合式函数）
+# nax-ui 组件索引（53 个组件 + nax-use 组合式函数）
 
 按需选择组件：**先看这里确定组件名，再读 `components/<name>.md` 获取完整 API**。
 所有组件 easycom 自动注册，模板中直接写 `<nax-xxx>` 即可，无需 import。
@@ -25,6 +25,7 @@
 | `nax-grid` / `nax-grid-item` | 宫格布局 | [components/nax-grid.md](components/nax-grid.md) |
 | `nax-list` | 滚动列表壳：触底加载 + 下拉刷新 + 空/加载/结束/错误状态 | [components/nax-list.md](components/nax-list.md) |
 | `nax-virtual-list` | 固定行高虚拟列表（大列表性能） | [components/nax-virtual-list.md](components/nax-virtual-list.md) |
+| `nax-table` | 数据表格；columns+data 驱动、斑马纹/边框/固定表头/横向滚动、排序、多选、合计行、分组表头、分页、固定列、虚拟滚动 | [components/nax-table.md](components/nax-table.md) |
 
 ## 展示与状态
 
