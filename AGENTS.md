@@ -345,8 +345,13 @@ git push github main
 
 1. **GitHub 直连不稳定**：本机直连 github.com 常被重置，推送前先确认 MyClash 代理（`127.0.0.1:7877`）运行中，必要时用：
    ```bash
-   git -c http.proxy=http://127.0.0.1:7877 -c https.proxy=http://127.0.0.1:7877 push github main
+   git -c "http.https://github.com.proxy=http://127.0.0.1:7877" push github main
    ```
+   - 必须用 **URL 作用域**写法：本机全局 gitconfig 存在 `http.https://github.com.proxy=http://127.0.0.1:7890`（该端口已无监听），其优先级高于通用的 `-c http.proxy=...`，只写通用项会被它覆盖并报 `Failed to connect to 127.0.0.1 port 7890`
+   - 对内部还会调 `git clone` / `git fetch` 的工具（如 `npx skills add`），子进程无法追加 `-c`，改用环境变量覆盖：
+     ```bash
+     GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=http.https://github.com.proxy GIT_CONFIG_VALUE_0=http://127.0.0.1:7877 <命令>
+     ```
 2. **认证方式**：GitHub 用 Personal Access Token（`repo` 权限）或 Git Credential Manager 浏览器授权（代理环境下 device flow 可能无反应，优先 PAT）；token 由用户提供，**不得写入仓库文件或 git 配置**
 3. 推送失败需排查解决后补推成功，并向用户汇报两端 commit 状态
 4. 新增 remote 已配置；若 clone 新机器，执行 `git remote add github https://github.com/liudapeng0311/nax-ui.git`
