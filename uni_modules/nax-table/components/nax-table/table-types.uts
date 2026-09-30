@@ -5,6 +5,9 @@
 
 export type TableColumnType = 'text' | 'index' | 'operation' | 'selection'
 
+/** 单元格编辑器：input 文本输入 / date~month-day 日期类（点击弹日期选择，需 editable: true） */
+export type TableColumnEditor = 'input' | 'date' | 'datetime' | 'time' | 'year' | 'year-month' | 'month-day'
+
 export type TableCellDataType = 'date' | 'number' | 'string'
 
 export class NaxTableColumn {
@@ -26,6 +29,8 @@ export class NaxTableColumn {
 	emptyString: string = ''
 	/** 单元格文字颜色（16 进制），空则走 token */
 	color: string = ''
+	/** 可编辑单元格的编辑框背景色（16 进制，展示态与编辑态共用；内联字面量，App 蒸汽模式同样生效），空则走 token */
+	backgroundColor: string = ''
 	/** 值 → 文案映射渲染（如 {'0':'男','1':'女'}）；设置后单元格优先按映射展示 */
 	filters: Map<string, string> = new Map()
 	/** 字段类型：date 日期 / number 数字 / string 字符串（默认）；影响 format 解析与可编辑输入 */
@@ -39,13 +44,24 @@ export class NaxTableColumn {
 	format: string = ''
 	/** 单元格是否可编辑：点击进入输入态，失焦/确认提交 cell-edit；只读列保持展示态 */
 	editable: boolean = false
+	/**
+	 * 单元格编辑器：input 文本输入（默认）/ date 日期 / datetime 日期时间 / time 时间 / year 年 / year-month 年月 / month-day 月日
+	 * 日期类编辑器需配合 `editable: true`，点击单元格弹日期选择（微信端 date / year / year-month / time 走微信原生 picker）
+	 */
+	editor: TableColumnEditor = 'input'
+	/** 日期类编辑器可选范围下限（'YYYY-MM-DD' 或 'YYYY-MM-DD HH:mm:ss'）；空则不限制 */
+	minDate: string = ''
+	/** 日期类编辑器可选范围上限（'YYYY-MM-DD' 或 'YYYY-MM-DD HH:mm:ss'）；空则不限制 */
+	maxDate: string = ''
+	/** datetime / time 编辑器是否显示秒列（微信端 time + 秒不可映射原生 picker，退回组件自建弹层） */
+	showSecond: boolean = false
 	/** 该列是否可排序：true 内部排序 / 'custom' 组件不排序、仅 emit sort-change 由业务处理 */
 	sorter: boolean | string = false
 	/** 分组表头：一级分组名；相邻同名列自动合并为一组，空串不参与分组 */
 	groupTitle: string = ''
 	/** 是否固定在左侧；固定列需显式指定 width（缺省按 100px 处理） */
 	fixed: boolean = false
-	/** 自定义渲染函数；返回值作为单元格文本 */
+	/** 自定义渲染函数；返回值作为单元格文本（index 列配了它即接管序号渲染，index 为 data 绝对下标，默认序号为 index + 1） */
 	formatter: ((row: any, index: number) => string) | null = null
 	/** 该行是否可勾选（仅 selection 列生效）；返回 false 时勾选框置灰且不可勾选 */
 	selectable: ((row: any, index: number) => boolean) | null = null

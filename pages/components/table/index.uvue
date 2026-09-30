@@ -105,6 +105,8 @@
 						:stripe="true"
 						:show-summary="true"
 						sum-text="合计"
+						header-background-color="#eef3ff"
+						summary-background-color="#fff7e6"
 						@selection-change="onSelectionChange"
 					></nax-table>
 				</view>
@@ -112,7 +114,7 @@
 					<nax-button size="sm" label="清空选择" @click="onClearSelection"></nax-button>
 					<nax-button size="sm" type="tertiary" label="选第一行" @click="onSelectFirst"></nax-button>
 				</view>
-				<text class="hint">selection 列全选/半选；「王五」行 selectable=false 禁用，不可勾选且不参与全选</text>
+				<text class="hint">selection 列全选/半选；「王五」行 selectable=false 禁用，不可勾选且不参与全选；表头/合计底色由 headerBackgroundColor / summaryBackgroundColor 指定（色值不随主题走，也可用 --nax-table-header-bg / --nax-table-summary-bg 覆盖）</text>
 			</view>
 
 			<view class="section">
@@ -164,7 +166,7 @@
 						@page-change="onPageChange"
 					></nax-table>
 				</view>
-				<text class="hint">pagingMode=inner：组件自动按 pageSize 切片，data 全量传入</text>
+				<text class="hint">pagingMode=inner：组件自动按 pageSize 切片，data 全量传入；序号列配了 formatter（「No.」前缀），序号取 data 绝对下标，第 2 页从 No.11 起</text>
 			</view>
 
 			<view class="section">
@@ -231,7 +233,7 @@
 				<view class="block">
 					<nax-table :data="typedData" :columns="typedCols"></nax-table>
 				</view>
-				<text class="hint">date 列按 YYYY-MM-DD 格式化；number 列千分位 + 2 位小数；weight 列百分比格式</text>
+				<text class="hint">date 列模板大小写不敏感（'YYYY-MM-DD' 与 'yyyy-mm-dd' 等价；mm 在 hh 之前按月份、之后按分钟）；number 列千分位 + 2 位小数；weight 列百分比格式</text>
 			</view>
 
 			<view class="section">
@@ -240,6 +242,22 @@
 					<nax-table :data="editData" :columns="editCols" @cell-edit="onCellEdit"></nax-table>
 				</view>
 				<text class="hint">姓名/城市列可编辑（底色区分），点击进入输入态，失焦或确认提交；年龄列只读</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">编辑框无缝（editGap=false）</text>
+				<view class="block">
+					<nax-table :data="editData" :columns="editSeamlessCols" :edit-gap="false" @cell-edit="onCellEdit"></nax-table>
+				</view>
+				<text class="hint">editGap=false 时编辑框铺满单元格，相邻可编辑列之间不再留缝；末列为右对齐可编辑数值列（编辑态文字仍靠右）且用 backgroundColor 自定义编辑框底色；与上表共用同一份数据源</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">日期编辑（editor + 日期选择）</text>
+				<view class="block">
+					<nax-table :data="dateEditData" :columns="dateEditCols" @cell-edit="onCellEdit"></nax-table>
+				</view>
+				<text class="hint">点击日期类单元格弹日期选择（App / Web 等端为底部弹层；微信小程序 date / year-month / time 走原生 picker，需再点一次单元格内的选择框）；datetime / month-day 在微信端退回组件弹层；原值是数字的列写回时间戳，字符串列按 format 写回</text>
 			</view>
 
 			<view class="section">
@@ -511,7 +529,9 @@
 
 	// 分页
 	const pageCols = [
-		new NaxTableColumn({ type: 'index', width: '50', align: 'center' }),
+		new NaxTableColumn({ type: 'index', label: '序号', width: '70', align: 'center', formatter: (row : any, index : number): string => {
+			return 'No.' + (index + 1).toString()
+		} }),
 		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
 		new NaxTableColumn({ name: 'city', label: '城市' }),
 		new NaxTableColumn({ name: 'score', label: '分数', width: '70', align: 'center' })
@@ -644,6 +664,7 @@
 	// 字段类型与格式化
 	const typedCols = [
 		new NaxTableColumn({ name: 'date', label: '日期', width: '110', dataType: 'date', format: 'YYYY-MM-DD' }),
+		new NaxTableColumn({ name: 'date', label: '日期（小写模板）', width: '140', dataType: 'date', format: 'yyyy-mm-dd' }),
 		new NaxTableColumn({ name: 'amount', label: '金额', width: '110', align: 'center', dataType: 'number', format: '#,###.00' }),
 		new NaxTableColumn({ name: 'weight', label: '占比', width: '90', align: 'center', dataType: 'number', format: '0.0%' })
 	]
@@ -663,6 +684,26 @@
 	editData.value.push({ name: '张三', city: '杭州', age: 24 })
 	editData.value.push({ name: '李四', city: '上海', age: 31 })
 	editData.value.push({ name: '王五', city: '深圳', age: 28 })
+
+	// 编辑框无缝（editGap=false）：末列为右对齐可编辑数值列（自定义编辑框底色），用于验证进编辑态仍保持右对齐
+	const editSeamlessCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名（可编辑）', width: '130', editable: true }),
+		new NaxTableColumn({ name: 'city', label: '城市（可编辑）', editable: true }),
+		new NaxTableColumn({ name: 'age', label: '年龄（可编辑/右对齐）', width: '160', align: 'right', dataType: 'number', editable: true, backgroundColor: '#daefe4' })
+	]
+
+	// 日期编辑（editor：date / datetime / time / year-month；末列为数字原值 → 写回时间戳）
+	const dateEditCols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '90' }),
+		new NaxTableColumn({ name: 'brd', label: '生日（date）', width: '140', editor: 'date', format: 'YYYY-MM-DD', editable: true, minDate: '1950-01-01', maxDate: '2030-12-31' }),
+		new NaxTableColumn({ name: 'joinAt', label: '入职（datetime）', width: '170', editor: 'datetime', format: 'YYYY-MM-DD HH:mm', editable: true }),
+		new NaxTableColumn({ name: 'workAt', label: '上班（time）', width: '120', editor: 'time', format: 'HH:mm', editable: true }),
+		new NaxTableColumn({ name: 'month', label: '月份（year-month）', width: '140', editor: 'year-month', format: 'YYYY-MM', editable: true }),
+		new NaxTableColumn({ name: 'ts', label: '时间戳（写回 number）', width: '170', editor: 'date', format: 'YYYY-MM-DD', editable: true })
+	]
+	const dateEditData = ref([] as any[])
+	dateEditData.value.push({ name: '张三', brd: '1985-07-02', joinAt: '2020-03-05 09:30', workAt: '09:00', month: '2026-09', ts: 1700000000000 })
+	dateEditData.value.push({ name: '李四', brd: '1995-07-02', joinAt: '2021-06-18 14:20', workAt: '08:30', month: '2026-10', ts: 1735689600000 })
 
 	function onCellEdit(payload : NaxTableCellEditPayload, row : any) {
 		// 组件不直接改 props.data，由业务接收 cell-edit 后更新自己的数据源

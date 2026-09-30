@@ -36,7 +36,7 @@
 					class="nax-table__row"
 					:class="rowClass(rowIndex)"
 					:style="virtualRowStyle()"
-					@click="onRowClick(row, rowIndex)"
+					@click="onRowClick(row, absIndex(rowIndex))"
 				>
 					<view
 						v-for="(col, colIndex) in fixedCols"
@@ -45,19 +45,40 @@
 						:style="fixedCellStyle(colIndex, fixedCols.length, false)"
 					>
 						<view class="nax-table__td-main" :style="tdMainStyle(col)">
-							<view v-if="col.type == 'selection'" class="nax-checkbox" :class="[rowBoxClass(rowIndex), rowBoxDisabledClass(rowIndex)]" @click.stop="onToggleRow(rowIndex)">
-								<nax-icon v-if="rowBoxIcon(rowIndex).length > 0" :name="rowBoxIcon(rowIndex)" size="12" color="var(--nax-color-text-inverse, #ffffff)"></nax-icon>
+							<view v-if="col.type == 'selection'" class="nax-checkbox" :class="[rowBoxClass(absIndex(rowIndex)), rowBoxDisabledClass(absIndex(rowIndex))]" @click.stop="onToggleRow(absIndex(rowIndex))">
+								<nax-icon v-if="rowBoxIcon(absIndex(rowIndex)).length > 0" :name="rowBoxIcon(absIndex(rowIndex))" size="12" color="var(--nax-color-text-inverse, #ffffff)"></nax-icon>
 							</view>
+							<!-- 微信原生 picker 分支：日期类列且处于编辑态时渲染，点它弹出系统选择器 -->
+							<!-- #ifdef MP-WEIXIN -->
+							<picker
+								v-if="isMpPickerCell(col, fixedColIndex(colIndex), absIndex(rowIndex))"
+								class="nax-table__td-picker"
+								:mode="mpPickerModeOf(col)"
+								:fields="mpPickerFieldsOf(col)"
+								:value="mpPickerValueOf(col, row)"
+								:start="col.minDate"
+								:end="col.maxDate"
+								@change="onMpPickerChange"
+								@cancel="onMpPickerCancel"
+							>
+								<text
+									class="nax-table__td-text"
+									:class="[tdTextClass(col), 'nax-table__td-text--editable']"
+									:style="tdTextStyle(col)"
+									:max-lines="col.lines"
+								>{{ formatCellText(row, col, absIndex(rowIndex)) }}</text>
+							</picker>
+							<!-- #endif -->
 							<text
-								v-if="col.type == 'text' && !isEditingCell(colIndex, rowIndex)"
+								v-if="col.type == 'text' && !isMpPickerCell(col, fixedColIndex(colIndex), absIndex(rowIndex)) && (isDateEditorCol(col) || !isEditingCell(fixedColIndex(colIndex), absIndex(rowIndex)))"
 								class="nax-table__td-text"
 								:class="[tdTextClass(col), isEditableCol(col) ? 'nax-table__td-text--editable' : '']"
 								:style="tdTextStyle(col)"
 								:max-lines="col.lines"
-								@click.stop="onCellClick(col, colIndex, row, absIndex(rowIndex))"
-							>{{ formatCellText(row, col, rowIndex) }}</text>
+								@click.stop="onCellClick(col, fixedColIndex(colIndex), row, absIndex(rowIndex))"
+							>{{ formatCellText(row, col, absIndex(rowIndex)) }}</text>
 							<input
-								v-else-if="col.type == 'text'"
+								v-else-if="col.type == 'text' && !isDateEditorCol(col)"
 								class="nax-table__td-input"
 								:class="tdInputClass(col)"
 								:style="tdInputStyle(col)"
@@ -65,15 +86,15 @@
 								:focus="true"
 								:type="col.dataType == 'number' ? 'number' : 'text'"
 								@input="onEditInput"
-								@blur="onCellBlur(col, colIndex, row, absIndex(rowIndex))"
-								@confirm="onCellConfirm(col, colIndex, row, absIndex(rowIndex))"
+								@blur="onCellBlur(col, fixedColIndex(colIndex), row, absIndex(rowIndex))"
+								@confirm="onCellConfirm(col, fixedColIndex(colIndex), row, absIndex(rowIndex))"
 							/>
 						</view>
 					</view>
 				</view>
 			</scroll-view>
 			<!-- 固定合计行 -->
-			<view v-if="showSummary" class="nax-table__summary nax-table__summary--fixed">
+			<view v-if="showSummary" class="nax-table__summary nax-table__summary--fixed" :style="summaryStyle">
 				<view
 					v-for="(col, colIndex) in fixedCols"
 					:key="'fs' + colIndex.toString()"
@@ -169,8 +190,29 @@
 											@click.stop="onAction(op, row, absIndex(rowIndex))"
 										>{{ op.name }}</text>
 									</view>
+									<!-- 微信原生 picker 分支：日期类列且处于编辑态时渲染，点它弹出系统选择器 -->
+									<!-- #ifdef MP-WEIXIN -->
+									<picker
+										v-if="isMpPickerCell(col, colIndex, absIndex(rowIndex))"
+										class="nax-table__td-picker"
+										:mode="mpPickerModeOf(col)"
+										:fields="mpPickerFieldsOf(col)"
+										:value="mpPickerValueOf(col, row)"
+										:start="col.minDate"
+										:end="col.maxDate"
+										@change="onMpPickerChange"
+										@cancel="onMpPickerCancel"
+									>
+										<text
+											class="nax-table__td-text"
+											:class="[tdTextClass(col), 'nax-table__td-text--editable']"
+											:style="tdTextStyle(col)"
+											:max-lines="col.lines"
+										>{{ formatCellText(row, col, absIndex(rowIndex)) }}</text>
+									</picker>
+									<!-- #endif -->
 									<text
-										v-if="col.type == 'text' && !isEditingCell(colIndex, absIndex(rowIndex))"
+										v-if="col.type == 'text' && !isMpPickerCell(col, colIndex, absIndex(rowIndex)) && (isDateEditorCol(col) || !isEditingCell(colIndex, absIndex(rowIndex)))"
 										class="nax-table__td-text"
 										:class="[tdTextClass(col), isEditableCol(col) ? 'nax-table__td-text--editable' : '']"
 										:style="tdTextStyle(col)"
@@ -178,7 +220,7 @@
 										@click.stop="onCellClick(col, colIndex, row, absIndex(rowIndex))"
 									>{{ formatCellText(row, col, absIndex(rowIndex)) }}</text>
 									<input
-										v-else-if="col.type == 'text'"
+										v-else-if="col.type == 'text' && !isDateEditorCol(col)"
 										class="nax-table__td-input"
 										:class="tdInputClass(col)"
 										:style="tdInputStyle(col)"
@@ -201,7 +243,7 @@
 					</view>
 				</scroll-view>
 				<!-- 合计行 -->
-				<view v-if="showSummary" class="nax-table__summary">
+				<view v-if="showSummary" class="nax-table__summary" :style="summaryStyle">
 					<view
 						v-for="(sc, sci) in summaryCells"
 						:key="summaryKey(sci)"
@@ -250,13 +292,27 @@
 				<text class="nax-table__pager-jump-text">/ {{ pagesTotal.toString() }} 页</text>
 			</view>
 		</view>
+
+		<!-- 日期编辑弹层：全表共用一个实例（编辑态单例）；微信端不可映射模式（datetime / month-day / time+秒）同样走这里 -->
+		<nax-datetime-picker
+			v-if="dateSheetEnabled"
+			v-model:show="datePickerShow"
+			v-model="dateEditValue"
+			:mode="dateEditMode"
+			:title="dateEditTitle"
+			:format="dateEditFormat"
+			:min-date="dateEditMin"
+			:max-date="dateEditMax"
+			:show-second="dateEditShowSecond"
+			@confirm="onDatePickerConfirm"
+		></nax-datetime-picker>
 	</view>
 </template>
 
 <script setup lang="uts">
 	/**
 	 * nax-table
-	 * @description 数据表格。columns/data 驱动，支持斑马纹、边框、固定表头、横向滚动、排序、行数省略、空态、多选、合计行、分组表头、分页、加载更多、固定列、虚拟滚动。
+	 * @description 数据表格。columns/data 驱动，支持斑马纹、边框、固定表头、横向滚动、排序、行数省略、空态、多选、合计行、分组表头、分页、加载更多、固定列、虚拟滚动、可编辑单元格（文本输入 / 日期选择）。
 	 * @property {Array<any>} data 行数据数组
 	 * @property {NaxTableColumn[]} columns 列配置；type 可为 text/index/operation/selection
 	 * @property {boolean} stripe 斑马纹，默认 false
@@ -264,11 +320,14 @@
 	 * @property {boolean} highlight 点击行高亮，默认 false
 	 * @property {string} height 表体高度；纯数字按 px；不传则随内容（不纵向滚动）
 	 * @property {string} thH 表头行高；纯数字按 px，默认 40
+	 * @property {string} headerBackgroundColor 表头底色（16 进制或任意 CSS 颜色字面量）；空则走 --nax-table-header-bg → --nax-color-bg-secondary
 	 * @property {string} tdH 单元格最小行高；纯数字按 px，默认 40
+	 * @property {boolean} editGap 可编辑单元格的编辑框是否与单元格左右边缘留空隙；false 时编辑框铺满单元格、相邻可编辑列无缝，默认 true
 	 * @property {string} emptyString 全局空值占位文案，列配置优先
 	 * @property {boolean} empty 是否显示空态（data 为空时），默认 true
 	 * @property {boolean} showSummary 合计行开关，默认 false
 	 * @property {string} sumText 合计行首格文案，默认「合计」
+	 * @property {string} summaryBackgroundColor 合计行底色（16 进制或任意 CSS 颜色字面量）；空则走 --nax-table-summary-bg → --nax-color-bg-secondary
 	 * @property {((columns: NaxTableColumn[], data: any[]) => NaxTableSummaryCell[]) | null} summaryMethod 自定义合计，colspan 跨列
 	 * @property {boolean} showPaging 分页器开关，默认 false
 	 * @property {string} pagingMode inner 组件内部分页（自动切片）/ outer 外部分页（只 emit page-change），默认 inner
@@ -299,11 +358,14 @@
 		highlight: { type: Boolean, default: false },
 		height: { type: String, default: '' },
 		thH: { type: String, default: '40' },
+		headerBackgroundColor: { type: String, default: '' },
 		tdH: { type: String, default: '40' },
+		editGap: { type: Boolean, default: true },
 		emptyString: { type: String, default: '' },
 		empty: { type: Boolean, default: true },
 		showSummary: { type: Boolean, default: false },
 		sumText: { type: String, default: '合计' },
+		summaryBackgroundColor: { type: String, default: '' },
 		summaryMethod: { type: Function as PropType<((columns: NaxTableColumn[], data: any[]) => NaxTableSummaryCell[]) | null>, default: null },
 		showPaging: { type: Boolean, default: false },
 		pagingMode: { type: String, default: 'inner' },
@@ -340,9 +402,9 @@
 		highlightIndex.value = -1
 		visStart.value = 0
 		visEnd.value = 20
-		editingColIndex.value = -1
-		editingRowIndex.value = -1
-		editValue.value = ''
+		clearEditState()
+		// 数据被替换时关闭日期弹层，避免弹层停留在已失效的单元格上
+		datePickerShow.value = false
 		activeRowIndex.value = -1
 	})
 
@@ -472,8 +534,21 @@
 		return style
 	})
 
+	/** 表头样式：行高 + 底色（prop 内联字面量优先，空则走 --nax-table-header-bg token） */
 	const headerStyle = computed((): string => {
-		return 'height:' + sizeToCss(props.thH, 40) + ';'
+		var style = 'height:' + sizeToCss(props.thH, 40) + ';'
+		if (props.headerBackgroundColor.length > 0) {
+			style += 'background-color:' + props.headerBackgroundColor + ';'
+		}
+		return style
+	})
+
+	/** 合计行样式：底色（prop 内联字面量优先，空则走 --nax-table-summary-bg token） */
+	const summaryStyle = computed((): string => {
+		if (props.summaryBackgroundColor.length > 0) {
+			return 'background-color:' + props.summaryBackgroundColor + ';'
+		}
+		return ''
 	})
 
 	const bodyStyle = computed((): string => {
@@ -511,12 +586,29 @@
 		return n
 	}
 
+	/** 固定列在 columns 中的绝对下标（固定层 v-for 的本地下标 → 绝对下标，供事件与编辑态判定用） */
+	function fixedColIndex(indexInFixed : number) : number {
+		var seen = 0
+		for (var i = 0; i < props.columns.length; i++) {
+			if (props.columns[i].fixed) {
+				if (seen == indexInFixed) {
+					return i
+				}
+				seen++
+			}
+		}
+		return -1
+	}
+
 	/** 固定列单元样式：固定宽 + 最后一列右侧阴影分界 */
 	function fixedCellStyle(indexInFixed : number, count : number, isHeader : boolean) : string {
 		const col = fixedCols.value[indexInFixed]
 		var style = 'width:' + fixedColWidth(col).toString() + 'px;flex-shrink:0;'
 		if (isHeader) {
 			style += 'height:100%;'
+		} else if (editFlushCol(col)) {
+			// 正文固定列同样让位给编辑框；表头保留 12px，避免表头文字与正文错位
+			style += 'padding-left:0;padding-right:0;'
 		}
 		if (indexInFixed == count - 1) {
 			// 最后一列加右分界
@@ -909,6 +1001,10 @@
 		if (col.fixed) {
 			style += 'visibility:hidden;'
 		}
+		// editGap=false：编辑框铺满单元格，左右内边距交给内部 text/input（相邻可编辑列不再留缝）
+		if (editFlushCol(col)) {
+			style += 'padding-left:0;padding-right:0;'
+		}
 		style += 'min-height:' + sizeToCss(props.tdH, 40) + ';'
 		return style
 	}
@@ -944,9 +1040,39 @@
 		// #endif
 	}
 
-	/** 编辑输入框 inline 样式：跟随列 color，缺省取文本色 */
+	/** 可编辑单元格铺满模式的内边距样式：左右内边距由内部 text/input 承担 */
+	function editInnerPaddingStyle() : string {
+		var s = 'padding-left:12px;padding-right:12px;'
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		// Web/小程序：text 默认 content-box，不补 box-sizing 会比单元格宽出左右内边距（同 .nax-table__td-input 处理）
+		s += 'box-sizing:border-box;'
+		// #endif
+		return s
+	}
+
+	/** 可编辑单元格编辑框背景色：列 backgroundColor 内联字面量（App 端原生节点 var() 解析不可靠），展示态与编辑态共用 */
+	function editBackgroundStyle(col : NaxTableColumn) : string {
+		if (!isEditableCol(col) || col.backgroundColor.length == 0) {
+			return ''
+		}
+		return 'background-color:' + col.backgroundColor + ';'
+	}
+
+	/** 编辑输入框 inline 样式：跟随列 color 与 align（原生 input 默认左对齐，右/中列进编辑态会跳回左边） */
 	function tdInputStyle(col : NaxTableColumn) : string {
-		return inputTextStyle(col.color)
+		var style = inputTextStyle(col.color)
+		const a = col.align.length > 0 ? col.align : 'left'
+		if (a == 'right') {
+			style += 'text-align:right;'
+		} else if (a == 'center') {
+			style += 'text-align:center;'
+		}
+		style += editBackgroundStyle(col)
+		if (editFlushCol(col)) {
+			// 与展示态同宽：td 已让出左右内边距，改由输入框承担，文字才与只读列对齐
+			style += editInnerPaddingStyle()
+		}
+		return style
 	}
 
 	/** 跳页输入框 inline 样式（App 端同需字面量色/字号） */
@@ -966,11 +1092,21 @@
 		} else if (a == 'center') {
 			style += 'text-align:center;'
 		}
+		style += editBackgroundStyle(col)
+		// editGap=false：左右内边距从 td 移到此处，编辑框才能铺满单元格、文字仍与只读列对齐
+		if (editFlushCol(col)) {
+			style += editInnerPaddingStyle()
+		}
 		return style
 	}
 
 	function cellText(row : any, col : NaxTableColumn, index : number) : string {
 		if (col.type == 'index') {
+			// 序号列默认 1 起始；配 formatter 时交业务自定义编号（如「第 1 行」「No.01」），index 为 data 绝对下标
+			if (col.formatter != null) {
+				const f = col.formatter!
+				return f(row, index)
+			}
 			return (index + 1).toString()
 		}
 		if (col.formatter != null) {
@@ -1012,7 +1148,122 @@
 		return n < 10 ? '0' + n.toString() : n.toString()
 	}
 
-	/** 日期格式化：把 Date 各分量替换进模板（YYYY/MM/DD/HH/mm/ss） */
+	/** 日期模板取 token（转小写比较，模板大小写不敏感） */
+	function dateTokenAt(pattern : string, start : number, len : number) : string {
+		var s = ''
+		for (var i = 0; i < len && start + i < pattern.length; i++) {
+			s += pattern.charAt(start + i).toLowerCase()
+		}
+		return s
+	}
+
+	/** 日期串解析：yyyy-MM-dd / yyyy/MM/dd / yyyy.MM.dd [HH:mm[:ss]]（'T' 分隔亦可）；非法或带时区标识返回 null */
+	function parseDateParts(s : string) : number[] | null {
+		const t = s.trim()
+		// 带时区标识（Z / ±偏移）的串交回平台解析，避免把 UTC 时刻当本地时刻
+		if (t.indexOf('Z') >= 0 || t.indexOf('z') >= 0 || t.indexOf('+') >= 0) {
+			return null
+		}
+		const norm = replaceAll(replaceAll(replaceAll(t, 'T', ' '), '/', '-'), '.', '-')
+		const segs = norm.split(' ')
+		const dateSegs = segs[0].split('-')
+		if (dateSegs.length != 3) {
+			return null
+		}
+		const y = parseInt(dateSegs[0])
+		const mo = parseInt(dateSegs[1])
+		const day = parseInt(dateSegs[2])
+		if (isNaN(y) || isNaN(mo) || isNaN(day)) {
+			return null
+		}
+		// 分量越界直接放弃，避免 new Date 自动进位成另一个日期
+		if (y <= 0 || mo < 1 || mo > 12 || day < 1 || day > 31) {
+			return null
+		}
+		var h = 0
+		var mi = 0
+		var sec = 0
+		for (var k = 1; k < segs.length; k++) {
+			if (segs[k].length == 0) {
+				continue
+			}
+			const timeSegs = segs[k].split(':')
+			h = parseInt(timeSegs[0])
+			if (isNaN(h) || h < 0 || h > 23) {
+				return null
+			}
+			if (timeSegs.length > 1) {
+				mi = parseInt(timeSegs[1])
+				if (isNaN(mi) || mi < 0 || mi > 59) {
+					return null
+				}
+			}
+			if (timeSegs.length > 2) {
+				sec = parseInt(timeSegs[2])
+				if (isNaN(sec) || sec < 0 || sec > 59) {
+					return null
+				}
+			}
+			break
+		}
+		const out = [] as number[]
+		out.push(y)
+		out.push(mo)
+		out.push(day)
+		out.push(h)
+		out.push(mi)
+		out.push(sec)
+		return out
+	}
+
+	/**
+	 * 日期模板格式化：yyyy/yy 年、mm 月或分、dd 日、hh 时、ss 秒（模板大小写不敏感，'yyyy-mm-dd' 与 'YYYY-MM-DD' 等价）
+	 * mm 歧义按 Excel 习惯消解：出现在小时占位之后按分钟，否则按月份
+	 */
+	function formatDateByPattern(d : Date, pattern : string) : string {
+		var out = ''
+		var i = 0
+		var hourSeen = false
+		while (i < pattern.length) {
+			if (dateTokenAt(pattern, i, 4) == 'yyyy') {
+				out += d.getFullYear().toString()
+				i += 4
+				continue
+			}
+			const tk = dateTokenAt(pattern, i, 2)
+			if (tk == 'yy') {
+				out += pad2(d.getFullYear() % 100)
+				i += 2
+				continue
+			}
+			if (tk == 'mm') {
+				out += hourSeen ? pad2(d.getMinutes()) : pad2(d.getMonth() + 1)
+				i += 2
+				continue
+			}
+			if (tk == 'dd') {
+				out += pad2(d.getDate())
+				i += 2
+				continue
+			}
+			if (tk == 'hh') {
+				out += pad2(d.getHours())
+				hourSeen = true
+				i += 2
+				continue
+			}
+			if (tk == 'ss') {
+				out += pad2(d.getSeconds())
+				i += 2
+				continue
+			}
+			out += pattern.charAt(i)
+			i++
+		}
+		return out
+	}
+
+	/** 日期格式化：字符串先自行拆分量再构造本地时间（避免纯日期串被按 UTC 解析后取值差一天、以及 App 端 new Date(string) 解析差异） */
 	function formatDate(v : any, pattern : string) : string {
 		var d : Date | null = null
 		if (v instanceof Date) {
@@ -1021,22 +1272,26 @@
 			// 时间戳（ms）
 			d = new Date(v as number)
 		} else if (typeof v == 'string') {
-			const parsed = new Date(v as string)
-			if (!isNaN(parsed.getTime())) {
-				d = parsed
+			const s = (v as string).trim()
+			if (s.length > 0) {
+				const parts = parseDateParts(s)
+				if (parts != null) {
+					const p = parts!
+					d = new Date(p[0], p[1] - 1, p[2], p[3], p[4], p[5])
+				} else {
+					// 兜底：带时区标识（Z / ±偏移）的串交给平台解析；其余把 '-' 换 '/'（App 端原生对 '-' 日期串支持不一致，同 nax-datetime-picker）
+					const tzAware = s.indexOf('Z') >= 0 || s.indexOf('z') >= 0 || s.indexOf('+') >= 0
+					const parsed = tzAware ? new Date(s) : new Date(replaceAll(s, '-', '/'))
+					if (!isNaN(parsed.getTime())) {
+						d = parsed
+					}
+				}
 			}
 		}
 		if (d == null || isNaN(d!.getTime())) {
 			return v != null ? v.toString() : ''
 		}
-		var out = pattern
-		out = replaceAll(out, 'YYYY', d!.getFullYear().toString())
-		out = replaceAll(out, 'MM', pad2(d!.getMonth() + 1))
-		out = replaceAll(out, 'DD', pad2(d!.getDate()))
-		out = replaceAll(out, 'HH', pad2(d!.getHours()))
-		out = replaceAll(out, 'mm', pad2(d!.getMinutes()))
-		out = replaceAll(out, 'ss', pad2(d!.getSeconds()))
-		return out
+		return formatDateByPattern(d!, pattern)
 	}
 
 	/** 数字格式化：'#' 整数位 + 固定小数位；模板含 ',' 千分位；含 '%' 输出百分比 */
@@ -1144,7 +1399,12 @@
 		if (props.highlight) {
 			highlightIndex.value = index
 		}
-		// 可编辑列：点击进入输入态
+		// 可编辑列：日期类编辑器弹日期选择，其它进入输入态
+		if (isDateEditorCol(col)) {
+			// 微信原生 picker 列只进编辑态，由单元格内的 picker 点击后弹出
+			startDateEdit(col, colIndex, index, row)
+			return
+		}
 		if (isEditableCol(col)) {
 			startEdit(col, colIndex, index, row)
 			return
@@ -1166,6 +1426,11 @@
 
 	function isEditableCol(col : NaxTableColumn) : boolean {
 		return col.editable && col.type == 'text' && col.name.length > 0
+	}
+
+	/** 编辑框是否铺满单元格（editGap=false）；表头不受影响，正文 td 让出左右内边距给编辑框 */
+	function editFlushCol(col : NaxTableColumn) : boolean {
+		return !props.editGap && isEditableCol(col)
 	}
 
 	function isEditingCell(colIndex : number, rowIndex : number) : boolean {
@@ -1219,6 +1484,288 @@
 	function onEditInput(e : UniInputEvent) {
 		editValue.value = e.detail.value
 	}
+
+	// ========== 日期单元格编辑（editor 为日期类） ==========
+	/** 日期弹层开关：非微信端与微信不可映射模式（datetime / month-day / time+秒）走组件自建弹层 */
+	const datePickerShow = ref(false)
+	/** 弹层当前值（时间戳或日期串，交 nax-datetime-picker 解析） */
+	const dateEditValue = ref('' as any)
+	/** 弹层配置（进入编辑态时按列同步） */
+	const dateEditMode = ref('datetime')
+	const dateEditTitle = ref('')
+	const dateEditFormat = ref('')
+	const dateEditMin = ref('')
+	const dateEditMax = ref('')
+	const dateEditShowSecond = ref(false)
+
+	/** 该列是否日期类编辑器（须配合 editable） */
+	function isDateEditorCol(col : NaxTableColumn) : boolean {
+		return isEditableCol(col) && col.editor != 'input'
+	}
+
+	/** 日期编辑器默认展示模板（列未指定 format 时） */
+	function dateEditorPattern(col : NaxTableColumn) : string {
+		const e = col.editor
+		if (e == 'date') {
+			return 'YYYY-MM-DD'
+		}
+		if (e == 'time') {
+			return col.showSecond ? 'HH:mm:ss' : 'HH:mm'
+		}
+		if (e == 'year') {
+			return 'YYYY'
+		}
+		if (e == 'year-month') {
+			return 'YYYY-MM'
+		}
+		if (e == 'month-day') {
+			return 'MM-DD'
+		}
+		return col.showSecond ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD HH:mm'
+	}
+
+	/** 日期编辑器弹层标题 */
+	function dateEditorTitle(editor : string) : string {
+		if (editor == 'time') {
+			return '选择时间'
+		}
+		if (editor == 'year') {
+			return '选择年份'
+		}
+		if (editor == 'year-month') {
+			return '选择年月'
+		}
+		if (editor == 'month-day') {
+			return '选择月日'
+		}
+		if (editor == 'datetime') {
+			return '选择日期时间'
+		}
+		return '选择日期'
+	}
+
+	/** 时间串（HH:mm[:ss]）→ 今天该时刻时间戳；非时间串返回 -1 */
+	function timeTextToTimestamp(s : string) : number {
+		const segs = s.trim().split(':')
+		if (segs.length < 2) {
+			return -1
+		}
+		// 首段必须是纯时（1-2 位数字），避免把「带日期的时间串」误判为时间部分
+		const hs = segs[0].trim()
+		if (hs.length == 0 || hs.length > 2) {
+			return -1
+		}
+		const h = parseInt(hs)
+		const mi = parseInt(segs[1])
+		if (isNaN(h) || isNaN(mi) || h < 0 || h > 23 || mi < 0 || mi > 59) {
+			return -1
+		}
+		const now = new Date()
+		return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, mi, 0).getTime()
+	}
+
+	/** 日期编辑写回值：原值是数字 → 时间戳；字符串 → 按列 format（缺省用编辑器默认模板）格式化 */
+	function dateEditNewValue(col : NaxTableColumn, row : any, ts : number, pickerText : string) : any {
+		const old = row[col.name]
+		if (typeof old == 'number') {
+			return ts
+		}
+		const pattern = col.format.length > 0 ? col.format : dateEditorPattern(col)
+		const text = formatDate(ts, pattern)
+		if (text.length > 0) {
+			return text
+		}
+		return pickerText
+	}
+
+	/** 日期编辑提交：与文本编辑同语义（值有变化才 emit cell-edit，组件不改 data） */
+	function emitDateEdit(col : NaxTableColumn, colIndex : number, row : any, index : number, newVal : any) {
+		const oldVal = row[col.name]
+		const same = (oldVal == null && newVal == null) || (oldVal != null && newVal != null && oldVal.toString() == newVal.toString())
+		if (same) {
+			return
+		}
+		const payload = new NaxTableCellEditPayload()
+		payload.name = col.name
+		payload.colIndex = colIndex
+		payload.index = index
+		payload.oldValue = oldVal
+		payload.value = newVal
+		emit('cell-edit', payload, row)
+	}
+
+	/** 清空单元格编辑态（文本输入与日期弹层共用） */
+	function clearEditState() {
+		editingColIndex.value = -1
+		editingRowIndex.value = -1
+		editValue.value = ''
+	}
+
+	/** 微信端是否用原生 picker（date / year / year-month / time 无秒）；其它端恒 false */
+	function isMpPickerCol(col : NaxTableColumn) : boolean {
+		// #ifdef MP-WEIXIN
+		if (!isDateEditorCol(col)) {
+			return false
+		}
+		const e = col.editor
+		// 微信 picker 无 datetime / month-day 模式；time 无秒列，均退回自建弹层
+		if (e == 'datetime' || e == 'month-day') {
+			return false
+		}
+		if (e == 'time' && col.showSecond) {
+			return false
+		}
+		return true
+		// #endif
+		// #ifndef MP-WEIXIN
+		return false
+		// #endif
+	}
+
+	/** 微信原生 picker 是否接管该单元格（仅编辑态渲染，避免与展示文本重复） */
+	function isMpPickerCell(col : NaxTableColumn, colIndex : number, rowIndex : number) : boolean {
+		return isMpPickerCol(col) && isEditingCell(colIndex, rowIndex)
+	}
+
+	/** 是否需要组件自建日期弹层：存在「微信原生 picker 接不了」的日期列（非微信端即任意日期列） */
+	const dateSheetEnabled = computed((): boolean => {
+		for (var i = 0; i < props.columns.length; i++) {
+			const c = props.columns[i]
+			if (isDateEditorCol(c) && !isMpPickerCol(c)) {
+				return true
+			}
+		}
+		return false
+	})
+
+	/** 进入日期编辑：记录编辑单元格；非微信原生分支直接打开弹层（微信端由单元格内 picker 点击弹出） */
+	function startDateEdit(col : NaxTableColumn, colIndex : number, index : number, row : any) {
+		const v = row[col.name]
+		dateEditValue.value = v == null ? '' : v.toString()
+		dateEditMode.value = col.editor
+		dateEditTitle.value = dateEditorTitle(col.editor)
+		dateEditFormat.value = col.format
+		dateEditMin.value = col.minDate
+		dateEditMax.value = col.maxDate
+		dateEditShowSecond.value = col.showSecond
+		editingColIndex.value = colIndex
+		editingRowIndex.value = index
+		if (!isMpPickerCol(col)) {
+			datePickerShow.value = true
+		}
+	}
+
+	/** 当前编辑单元格的列（弹层确认时用；编辑态单例） */
+	function editingCol() : NaxTableColumn | null {
+		if (editingColIndex.value < 0 || editingColIndex.value >= props.columns.length) {
+			return null
+		}
+		return props.columns[editingColIndex.value]
+	}
+
+	/** 当前编辑单元格的行（viewData 绝对下标） */
+	function editingRow() : any {
+		const list = viewData.value
+		if (editingRowIndex.value < 0 || editingRowIndex.value >= list.length) {
+			return null
+		}
+		return list[editingRowIndex.value]
+	}
+
+	/** 日期弹层确认：时间戳 + formatted → 按原值类型写回并提交 cell-edit */
+	function onDatePickerConfirm(e : UTSJSONObject) {
+		const col = editingCol()
+		const row = editingRow()
+		if (col == null || row == null) {
+			return
+		}
+		const ts = e.getNumber('timestamp')
+		if (ts == null) {
+			return
+		}
+		const formatted = e.getString('formatted')
+		const newVal = dateEditNewValue(col!, row, ts!, formatted != null ? formatted : '')
+		emitDateEdit(col!, editingColIndex.value, row, editingRowIndex.value, newVal)
+	}
+
+	/** 弹层关闭（确认/取消/点遮罩）统一收尾：清编辑态 */
+	watch((): boolean => datePickerShow.value, (nv : boolean) => {
+		if (!nv) {
+			clearEditState()
+		}
+	})
+
+	// #ifdef MP-WEIXIN
+	// ===== 微信端：可映射模式用原生 picker（date / year / year-month / time 无秒）=====
+	/** 微信原生 picker 的 mode */
+	function mpPickerModeOf(col : NaxTableColumn) : string {
+		return col.editor == 'time' ? 'time' : 'date'
+	}
+
+	/** 微信 date 模式的粒度 */
+	function mpPickerFieldsOf(col : NaxTableColumn) : string {
+		if (col.editor == 'year') {
+			return 'year'
+		}
+		if (col.editor == 'year-month') {
+			return 'month'
+		}
+		return 'day'
+	}
+
+	/** 微信原生 picker 的 value（'YYYY-MM-DD' / 'YYYY' / 'YYYY-MM' / 'HH:mm'） */
+	function mpPickerValueOf(col : NaxTableColumn, row : any) : string {
+		const raw = row[col.name]
+		if (col.editor == 'time') {
+			// 时间列的原生值可能是 'HH:mm[:ss]' 时间串，也可能带完整日期
+			const asTime = timeTextToTimestamp(raw != null ? raw.toString() : '')
+			if (asTime > 0) {
+				return formatDate(asTime, 'HH:mm')
+			}
+		}
+		return formatDate(raw, dateEditorPattern(col))
+	}
+
+	/** 微信原生 picker 回传串 → 时间戳；解析失败返回 -1 */
+	function mpPickerTextToTimestamp(col : NaxTableColumn, s : string) : number {
+		if (col.editor == 'time') {
+			return timeTextToTimestamp(s)
+		}
+		const segs = s.split('-')
+		const y = parseInt(segs[0])
+		const mo = segs.length > 1 ? parseInt(segs[1]) : 1
+		const d = segs.length > 2 ? parseInt(segs[2]) : 1
+		if (isNaN(y) || isNaN(mo) || isNaN(d)) {
+			return -1
+		}
+		return new Date(y, mo - 1, d, 0, 0, 0).getTime()
+	}
+
+	/** 微信端确认：原生 picker 点「确定」后回调；来源单元格取自编辑态（原生 picker 无 open 事件） */
+	function onMpPickerChange(e : UniPickerChangeEvent) {
+		const col = editingCol()
+		const row = editingRow()
+		if (col == null || row == null) {
+			return
+		}
+		const val = e.detail.value
+		if (typeof val != 'string') {
+			return
+		}
+		const ts = mpPickerTextToTimestamp(col!, val as string)
+		if (ts <= 0) {
+			return
+		}
+		const newVal = dateEditNewValue(col!, row, ts, '')
+		emitDateEdit(col!, editingColIndex.value, row, editingRowIndex.value, newVal)
+		clearEditState()
+	}
+
+	/** 微信端取消：退出编辑态（单元格回展示态，再次点击可重开） */
+	function onMpPickerCancel() {
+		clearEditState()
+	}
+	// #endif
 
 	// ========== 行焦点转移（row-blur） ==========
 	/** 上一活跃行（data 绝对下标） */
@@ -1804,7 +2351,8 @@
 	.nax-table__header {
 		flex-direction: row;
 		align-items: stretch;
-		background-color: var(--nax-color-bg-secondary, #fafafc);
+		/* 表头底色：--nax-table-header-bg 优先，缺省回退全局次要底色；prop headerBackgroundColor 以内联覆盖 */
+		background-color: var(--nax-table-header-bg, var(--nax-color-bg-secondary, #fafafc));
 		border-bottom: 1px solid var(--nax-color-border, #f0f0f3);
 	}
 
@@ -1914,6 +2462,15 @@
 		border-bottom: 1px dashed var(--nax-color-border-strong, #e5e5ea);
 		padding-left: 4px;
 		padding-right: 4px;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		/* Web/小程序：text 默认 content-box，不补 box-sizing 会比单元格宽出左右内边距（同 .nax-table__td-input 处理） */
+		box-sizing: border-box;
+		/* #endif */
+	}
+
+	/* 微信原生 picker 触发区：占满单元格，点击区域与单元格一致 */
+	.nax-table__td-picker {
+		width: 100%;
 	}
 
 	/* 单元格编辑输入框（编辑态） */
@@ -2012,7 +2569,8 @@
 	.nax-table__summary {
 		flex-direction: row;
 		align-items: stretch;
-		background-color: var(--nax-color-bg-secondary, #fafafc);
+		/* 合计行底色：--nax-table-summary-bg 优先，缺省回退全局次要底色；prop summaryBackgroundColor 以内联覆盖 */
+		background-color: var(--nax-table-summary-bg, var(--nax-color-bg-secondary, #fafafc));
 		border-top: 1px solid var(--nax-color-border, #f0f0f3);
 	}
 

@@ -1,6 +1,6 @@
 # nax-table 表格
 
-> nax-ui 数据表格组件（uni-app x / 蒸汽模式）。columns + data 数据驱动，支持斑马纹、边框、固定表头、横向滚动、排序、行数省略、空态与操作列。
+> nax-ui 数据表格组件（uni-app x / 蒸汽模式）。columns + data 数据驱动：斑马纹 / 边框、固定表头 + 横向滚动、排序、行数省略、空态、多选、合计行、分组表头、分页、加载更多、固定列、虚拟滚动，以及可编辑单元格（文本输入 / 日期选择）、序号列自定义编号、表头与合计行底色配置。
 
 ## 引入
 
@@ -33,13 +33,65 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 | type | 说明 |
 |------|------|
 | `text`（默认） | 普通文本列，取 `row[col.name]` |
-| `index` | 序号列，自动展示行号（从 1 开始） |
+| `index` | 序号列，默认展示行号（从 1 开始，取 data 绝对下标：排序/分页/虚拟滚动下连续）；配 `formatter` 可自定义编号（如 `'No.' + (index + 1)`），表头文案用 `label`（缺省 `#`） |
 | `operation` | 操作列，配合 `renders` 渲染按钮 |
 | `selection` | 多选列，表头为全选/半选框 |
 
 ## 分组表头
 
 列配置 `groupTitle` 相邻相同即合并为一组（一级分组）；无 `groupTitle` 的列不参与分组行。
+
+## 可编辑单元格
+
+列配置 `editable: true` 后点击单元格进入输入态，失焦或回车（确认）提交 `cell-edit`：
+
+```uvue
+<template>
+	<nax-table :data="list" :columns="cols" @cell-edit="onCellEdit"></nax-table>
+</template>
+
+<script setup>
+	import { NaxTableColumn, NaxTableCellEditPayload } from '@/uni_modules/nax-table/components/nax-table/table-types.uts'
+
+	const cols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '120', editable: true }),
+		new NaxTableColumn({ name: 'age', label: '年龄', width: '100', align: 'right', dataType: 'number', editable: true, backgroundColor: '#daefe4' }),
+		new NaxTableColumn({ name: 'brd', label: '生日', width: '140', editor: 'date', format: 'YYYY-MM-DD', editable: true })
+	]
+	const list = [
+		{ name: '张三', age: 24, brd: '1985-07-02' },
+		{ name: '李四', age: 31, brd: '1995-07-02' }
+	]
+
+	function onCellEdit(payload : NaxTableCellEditPayload, row : any) {
+		// 组件不改 data：必须回写，否则单元格保持旧值
+		row[payload.name] = payload.value
+		uni.showToast({ title: payload.value.toString(), icon: 'none' })
+	}
+</script>
+```
+
+- **回写是必须的**：组件只 emit `cell-edit`，不修改 `props.data`；业务不回写时单元格会保持旧值（不是提交失败，而是数据源没变）
+- 编辑态与展示态对齐一致：列 `align: 'right'` / `'center'` 时输入框内文字同样右对齐 / 居中
+- 编辑框底色：列 `backgroundColor`（16 进制）同时作用于展示态灰框与编辑态输入框，点击前后不会突然变色；字面量色值不随主题变化（暗色主题下需自行给深色值），不传时走主题 token（展示态 `--nax-color-bg-hover`、编辑态 `--nax-color-bg`）
+- `editGap`（默认 `true`）控制编辑框与单元格左右边缘的空隙；`edit-gap="false"` 时编辑框铺满单元格、相邻可编辑列之间无缝，文字仍与只读列对齐
+- `dataType: 'number'` 提交时自动转数值；输入无法解析为数值（清空、含非数字字符等）时回退原值并**仍会触发** `cell-edit`（`payload.value` 与 `payload.oldValue` 相等即本次未改变值）
+- 编辑态为单例：同一时刻只有一个单元格处于输入态，切换单元格即提交上一个
+- **日期编辑**：列配 `editor`（`date` / `datetime` / `time` / `year` / `year-month` / `month-day`）+ `editable: true` 后，点击单元格弹日期选择（`minDate` / `maxDate` 限范围，`showSecond` 给 datetime / time 加秒列），确认后同样提交 `cell-edit`；写回值按原值类型：**原值是数字 → 时间戳（number）**，字符串 → 按列 `format`（缺省用编辑器默认模板，如 `YYYY-MM-DD`）格式化的字符串
+- 日期编辑不出现文本输入框，单元格保持展示态（`editGap` / `backgroundColor` 等对日期列同样生效）
+
+## 字段格式化（dataType + format）
+
+| dataType | format 示例 | 原始值 | 展示 |
+|----------|-------------|--------|------|
+| `date` | `YYYY-MM-DD`（等价 `yyyy-mm-dd`） | `1985-07-02` | `1985-07-02` |
+| `date` | `yyyy/MM/dd HH:mm:ss` | `1985-07-02 08:05:00` | `1985/07/02 08:05:00` |
+| `number` | `#,###.00` | `1234567.891` | `1,234,567.89` |
+| `number` | `0.0%` | `0.456` | `45.6%` |
+
+- 日期模板大小写不敏感，token：`yyyy` / `yy` 年、`mm` 月或分、`dd` 日、`hh` 时、`ss` 秒；`mm` 出现在 `hh` 之后按分钟、否则按月份（因此 `YYYY-MM-DD HH:mm:ss` 与 `yyyy-mm-dd` 都能按预期工作）
+- 日期串优先自行拆分量构造本地时间（规避纯日期串按时区差一天与 App 端字符串解析差异），无法解析时按原值展示
+- `dataType: 'string'` 不套用 `format`；列 `formatter` / `filters` 优先级高于 `format`
 
 ## Props
 
@@ -52,11 +104,14 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 | `highlight` | 点击行高亮 | `boolean` | `false` |
 | `height` | 表体高度；纯数字按 px；不传随内容不纵向滚动 | `string` | `''` |
 | `thH` | 表头行高 | `string` | `'40'` |
+| `headerBackgroundColor` | 表头底色（16 进制或任意 CSS 颜色字面量）；空则走 `--nax-table-header-bg` → `--nax-color-bg-secondary` | `string` | `''` |
 | `tdH` | 单元格最小行高 | `string` | `'40'` |
+| `editGap` | 可编辑单元格的编辑框是否与单元格左右边缘留空隙；`false` 时编辑框铺满单元格、相邻可编辑列无缝 | `boolean` | `true` |
 | `emptyString` | 全局空值占位文案（列配置 `emptyString` 优先） | `string` | `''` |
 | `empty` | data 为空时是否展示内置空态 | `boolean` | `true` |
 | `showSummary` | 合计行开关 | `boolean` | `false` |
 | `sumText` | 合计行首格文案 | `string` | `'合计'` |
+| `summaryBackgroundColor` | 合计行底色（16 进制或任意 CSS 颜色字面量）；空则走 `--nax-table-summary-bg` → `--nax-color-bg-secondary` | `string` | `''` |
 | `summaryMethod` | 自定义合计 `(columns, data) => NaxTableSummaryCell[]`；cell 支持 `colspan` 跨列 | `function \| null` | `null` |
 | `showPaging` | 分页器开关 | `boolean` | `false` |
 | `pagingMode` | `inner` 组件内部自动切片 / `outer` 只 emit `page-change` | `string` | `'inner'` |
@@ -83,12 +138,17 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 | `filters` | 值 → 文案映射（如 `new Map([['0','男'],['1','女']])`），命中展示文案、未命中回退原值 | `new Map()` |
 | `selectable` | 行是否可勾选 `(row, index) => boolean`（仅 selection 列生效）；返回 false 时勾选框置灰、不可勾选且不参与全选 | `null` |
 | `dataType` | 字段类型 `date/number/string`（默认 string）；影响 `format` 解析与可编辑输入键盘 | `string` |
-| `format` | 展示格式：date 列用日期模板（`YYYY-MM-DD HH:mm:ss` 占位替换）；number 列 `#,###.00` 千分位+小数位、含 `%` 输出百分比 | `''` |
-| `editable` | 单元格是否可编辑：点击进入输入态（底色与只读列区分），失焦/确认提交 `cell-edit` | `false` |
+| `format` | 展示格式：date 列用日期模板（大小写不敏感，`yyyy`/`yy` 年、`mm` 月或分、`dd` 日、`hh` 时、`ss` 秒；`mm` 在 `hh` 之后按分钟、否则按月份，如 `YYYY-MM-DD HH:mm:ss`）；number 列 `#,###.00` 千分位+小数位、含 `%` 输出百分比 | `''` |
+| `editable` | 单元格是否可编辑：点击进入输入态（底色与只读列区分，编辑态沿用列 `align` 对齐），失焦/确认提交 `cell-edit`；配合 `editGap` 控制编辑框是否铺满单元格 | `false` |
+| `editor` | 单元格编辑器：`input` 文本输入（默认）/ `date` 日期 / `datetime` 日期时间 / `time` 时间 / `year` 年 / `year-month` 年月 / `month-day` 月日；日期类需配合 `editable: true`，点击弹日期选择 | `'input'` |
+| `minDate` | 日期类编辑器可选范围下限（`'YYYY-MM-DD'` 或 `'YYYY-MM-DD HH:mm:ss'`）；空则不限制 | `''` |
+| `maxDate` | 日期类编辑器可选范围上限；空则不限制 | `''` |
+| `showSecond` | `datetime` / `time` 编辑器是否显示秒列（微信端 `time` + 秒不可映射原生 picker，退回组件弹层） | `false` |
 | `emptyString` | 空值占位文案 | `''` |
 | `color` | 单元格文字颜色（16 进制） | `''` |
+| `backgroundColor` | 可编辑单元格的编辑框背景色（16 进制，展示态与编辑态共用；内联字面量，App 蒸汽模式同样生效）；仅 `editable: true` 的列生效 | `''` |
 | `sorter` | 是否可排序（仅 text 列）：`true` 内部排序 / `'custom'` 组件不排序、仅 emit `sort-change`（`source='custom'`）由业务处理 | `false` |
-| `formatter` | 自定义单元格文本 `(row, index) => string` | `null` |
+| `formatter` | 自定义单元格文本 `(row, index) => string`；`index` 列配了它即接管序号渲染（`index` 为 data 绝对下标，默认序号为 `index + 1`） | `null` |
 | `renders` | operation 列按钮 `NaxTableOperation[]` | `[]` |
 
 ## NaxTableOperation
@@ -138,7 +198,9 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 | Token | 用途 |
 |-------|------|
 | `--nax-color-bg` | 表格 / 单元格背景 |
-| `--nax-color-bg-secondary` | 表头 / 合计行 / 分页器底色 |
+| `--nax-color-bg-secondary` | 表头 / 合计行 / 分页器底色（下面两个 token 的回退值） |
+| `--nax-table-header-bg` | 表头底色（优先于 `--nax-color-bg-secondary`，只影响本表格） |
+| `--nax-table-summary-bg` | 合计行底色（优先于 `--nax-color-bg-secondary`，只影响本表格） |
 | `--nax-color-bg-hover` | 行 hover 底色 |
 | `--nax-color-border` / `--nax-color-border-strong` | 单元格边框 / 编辑态边框 |
 | `--nax-color-divider` | 行分割线 |
@@ -156,6 +218,7 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 
 - `nax-empty`（空态占位）
 - `nax-icon`（多选勾选 / 半选标记）
+- `nax-datetime-picker`（日期类编辑器弹层，仅列配了日期类 `editor` 时挂载）
 - `nax-ui-theme`（可选 token）
 
 ## 注意
@@ -167,7 +230,7 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 - 合计行默认对「全为数值的 text 列」自动求和（保留 2 位）；非数值列留空；`summaryMethod` 传入后完全由业务控制，`colspan` 可跨列（跨列样式按列宽求和 / flex 计数展开）
 - `pagingMode=inner` 时 `data` 传全量、组件按 `pageSize` 切片；`outer` 时仅展示当前页数据 + emit `page-change` 由业务请求
 - 多选状态按 data 绝对下标维护，`data` 替换或翻页会自动清空；虚拟滚动换窗不影响已选状态；列配置 `selectable` 返回 false 的行勾选框置灰、不可勾选、不参与全选
-- 可编辑单元格：组件不直接修改 `props.data`，提交 `cell-edit` 后由业务更新数据源；`dataType: 'number'` 提交时自动转数值（解析失败回退原值）；编辑态为单例（同时只有一个单元格在编辑）
+- 可编辑单元格：组件不直接修改 `props.data`，提交 `cell-edit` 后由业务更新数据源（不回写则单元格保持旧值，见「可编辑单元格」）；`dataType: 'number'` 提交时自动转数值（解析失败回退原值且仍触发 `cell-edit`）；编辑态为单例（同时只有一个单元格在编辑）
 - 行焦点转移：`row-blur` 在点击另一行/单元格时对上一活跃行触发；App 端无 hover/焦点概念，为活跃行切换的近似语义
 
 ## 固定列（v3）
@@ -188,4 +251,4 @@ easycom 自动注册，页面直接使用 `<nax-table />`，无需 import。
 
 - **App（Android / iOS / 鸿蒙，蒸汽模式）**：支持
 - **Web**：支持
-- **微信小程序**：支持
+- **微信小程序**：支持；日期编辑的 `date` / `year` / `year-month` / `time`（未开 `showSecond`）用微信原生 picker（系统弹层不可定制，且**只能由用户点击弹出**——点单元格进入编辑态后，再点单元格内的选择框才弹出系统选择器）；`datetime` / `month-day` / `time` + `showSecond` 无法映射，退回组件自建弹层（`nax-datetime-picker`），与其它端一致
