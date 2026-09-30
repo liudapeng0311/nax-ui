@@ -1,0 +1,708 @@
+/**
+ * useChunkUpload — 分片上传组合式函数（无头：只提供状态与控制方法，UI 完全交给业务）
+ *
+ * 设计目标：协议无关。引擎只负责与协议无关的调度（测量文件大小、按偏移读分片、
+ * 并发控制、失败重试、进度聚合、暂停/恢复），"分片怎么发"由业务注入三个回调
+ * （init / sendChunk / complete），可对接任意后端（自研协议、OSS / COS multipart 等）。
+ * 一个引擎实例同一时间只跑一个文件任务；多文件请创建多个实例或顺序复用。
+ *
+ * 用法（必须在 setup 内同步调用）：
+ * ```
+ * import { useChunkUpload, NaxChunkUploadOptions } from '@/uni_modules/nax-use/composables/use-chunk-upload.uts'
+ *
+ * const opts : NaxChunkUploadOptions = {
+ *   chunkSize: 4 * 1024 * 1024,
+ *   init: (context, onDone, onFail) => {
+ *     // 请求后端创建上传任务；onDone 第二参数为已成功分片下标数组（断点续传，不支持传 null）
+ *   },
+ *   sendChunk: (chunk, onDone, onFail) => {
+ *     // chunk.bytes 即本片二进制（ArrayBuffer），按业务协议发出（uni.request data / SDK 均可）
+ *   },
+ *   complete: (uploadId, onDone, onFail) => {
+ *     // 通知后端合并分片；onDone 返回最终文件 URL
+ *   }
+ * }
+ * const uploader = useChunkUpload(opts)
+ * // 开始：uploader.start(filePath, fileSize)
+ * // 状态：uploader.status / progress / uploadedCount / totalChunks / uploadedBytes / totalBytes
+ * // 控制：uploader.pause() / resume() / abort()
+ * ```
+ *
+ * 端差异：
+ * - App / 小程序：FileSystemManager open + read(fd, position, length) 按偏移读分片
+ * - Web：getFileSystemManager 不支持，改用 fetch 读 blob 后 Blob.slice 切片
+ * - 分片数据统一以 ArrayBuffer 交给 sendChunk；uni.request data 传 ArrayBuffer
+ *   需 App 4.51+ / iOS 4.61+，均在套装版本门槛之上
+ */
+
+import { ref, onUnmounted, getCurrentInstance, Ref } from 'vue'
+
+/** init 阶段上下文 */
+export type NaxChunkUploadInitContext = {
+	/** 本地文件路径 */
+	path : string,
+	/** 文件总字节 */
+	size : number,
+	/** 文件名（start 时传入，可空） */
+	name : string,
+	/** 单片字节数（最后一片可能更小） */
+	chunkSize : number,
+	/** 总分片数 */
+	total : number
+}
+
+/** 单个分片上下文 */
+export type NaxChunkUploadChunk = {
+	uploadId : string,
+	/** 0 起的分片序号 */
+	index : number,
+	/** 总分片数 */
+	total : number,
+	/** 本片起始字节偏移 */
+	offset : number,
+	/** 本片字节数 */
+	size : number,
+	/** 本片二进制数据 */
+	bytes : ArrayBuffer,
+	path : string
+}
+
+/**
+ * 创建上传任务。onDone 返回 uploadId；第二参数为已成功分片下标数组
+ * （断点续传：服务端已有记录时返回，无记录或不支持传 null）
+ */
+export type NaxChunkUploadInitCallback = (context : NaxChunkUploadInitContext, onDone : (uploadId : string, uploadedIndexes : number[] | null) => void, onFail : (error : string) => void) => void
+
+/** 上传单个分片；成功调 onDone，失败调 onFail（引擎按 retry 配置自动重试） */
+export type NaxChunkUploadSendCallback = (chunk : NaxChunkUploadChunk, onDone : () => void, onFail : (error : string) => void) => void
+
+/** 全部分片完成后合并；onDone 返回最终文件 URL */
+export type NaxChunkUploadCompleteCallback = (uploadId : string, onDone : (url : string) => void, onFail : (error : string) => void) => void
+
+export type NaxChunkUploadOptions = {
+	/** 分片大小（字节）；默认 4MB；<=0 取默认值 */
+	chunkSize ?: number,
+	/** 并发上传分片数；默认 1（顺序）；范围 1-8 */
+	concurrent ?: number,
+	/** 单片失败重试次数（不含首次）；默认 2 */
+	retry ?: number,
+	/** 重试间隔（毫秒）；默认 500 */
+	retryDelay ?: number,
+	/** 创建上传任务（拿 uploadId + 可选断点续传信息） */
+	init : NaxChunkUploadInitCallback,
+	/** 上传单个分片 */
+	sendChunk : NaxChunkUploadSendCallback,
+	/** 合并分片并返回最终 URL */
+	complete : NaxChunkUploadCompleteCallback,
+	/** 单片成功回调（细粒度 UI 用） */
+	onChunkSuccess ?: (index : number, total : number) => void,
+	/** 整体成功回调（返回最终 URL） */
+	onSuccess ?: (url : string) => void,
+	/** 整体失败回调 */
+	onFail ?: (error : string) => void
+}
+
+export class NaxChunkUploadState {
+	private _options : NaxChunkUploadOptions
+	private _chunkSize : number
+	private _concurrent : number
+	private _retryLimit : number
+	private _retryDelay : number
+
+	private _status : Ref<string>
+	private _progress : Ref<number>
+	private _uploadedCount : Ref<number>
+	private _totalChunks : Ref<number>
+	private _uploadedBytes : Ref<number>
+	private _totalBytes : Ref<number>
+	private _uploadId : Ref<string>
+	private _error : Ref<string>
+
+	private _path : string = ''
+	private _size : number = 0
+	private _name : string = ''
+	private _chunkLengths : number[] = []
+	private _done : boolean[] = []
+	private _inflight : boolean[] = []
+	private _retries : number[] = []
+	private _active : number = 0
+	// 代际号：abort/重开后递增，旧任务的异步回调据此丢弃结果
+	private _generation : number = 0
+	// Web 端整文件 Blob 缓存（仅 #ifdef WEB 分支使用，App/小程序不用）
+	private _webBlob : any | null = null
+	private _fd : string = ''
+
+	constructor(options : NaxChunkUploadOptions) {
+		this._options = options
+
+		const cs = options.chunkSize
+		if (cs != null && cs > 0) {
+			this._chunkSize = cs
+		} else {
+			this._chunkSize = 4 * 1024 * 1024
+		}
+
+		const copt = options.concurrent
+		if (copt == null) {
+			this._concurrent = 1
+		} else if (copt < 1) {
+			this._concurrent = 1
+		} else if (copt > 8) {
+			this._concurrent = 8
+		} else {
+			this._concurrent = copt
+		}
+
+		const rt = options.retry
+		if (rt != null && rt > 0) {
+			this._retryLimit = rt
+		} else {
+			this._retryLimit = 2
+		}
+
+		const rd = options.retryDelay
+		if (rd != null && rd > 0) {
+			this._retryDelay = rd
+		} else {
+			this._retryDelay = 500
+		}
+
+		this._status = ref<string>('idle')
+		this._progress = ref<number>(0)
+		this._uploadedCount = ref<number>(0)
+		this._totalChunks = ref<number>(0)
+		this._uploadedBytes = ref<number>(0)
+		this._totalBytes = ref<number>(0)
+		this._uploadId = ref<string>('')
+		this._error = ref<string>('')
+	}
+
+	/** 语义状态：idle（未开始/已中止）| preparing（测量大小/创建任务）| uploading（分片上传中）| paused（已暂停）| merging（合并中）| success | failed */
+	get status() : string {
+		return this._status.value
+	}
+	/** 进度 0-100（按已传字节计） */
+	get progress() : number {
+		return this._progress.value
+	}
+	get uploadedCount() : number {
+		return this._uploadedCount.value
+	}
+	get totalChunks() : number {
+		return this._totalChunks.value
+	}
+	get uploadedBytes() : number {
+		return this._uploadedBytes.value
+	}
+	get totalBytes() : number {
+		return this._totalBytes.value
+	}
+	get uploadId() : string {
+		return this._uploadId.value
+	}
+	get error() : string {
+		return this._error.value
+	}
+	/** 是否进行中（preparing / uploading / merging） */
+	get running() : boolean {
+		const s = this._status.value
+		return s == 'preparing' || s == 'uploading' || s == 'merging'
+	}
+
+	/**
+	 * 开始上传一个文件。preparing/uploading/merging 中重复调用忽略；
+	 * paused 中调用等同 resume()；failed/success/idle 中重新开始。
+	 * size 传 0 时引擎自行测量（App/小程序 stat；Web 读 blob 取 size）。
+	 */
+	start(path : string, size : number, name : string = '') : void {
+		if (path.length == 0) {
+			return
+		}
+		const s = this._status.value
+		if (s == 'preparing' || s == 'uploading' || s == 'merging') {
+			return
+		}
+		if (s == 'paused') {
+			this.resume()
+			return
+		}
+		this._generation++
+		const gen = this._generation
+		this._path = path
+		this._name = name
+		this._size = size > 0 ? size : 0
+		this._chunkLengths = [] as number[]
+		this._done = [] as boolean[]
+		this._inflight = [] as boolean[]
+		this._retries = [] as number[]
+		this._active = 0
+		this._webBlob = null
+		this._uploadId.value = ''
+		this._error.value = ''
+		this._progress.value = 0
+		this._uploadedCount.value = 0
+		this._totalChunks.value = 0
+		this._uploadedBytes.value = 0
+		this._totalBytes.value = 0
+		this._status.value = 'preparing'
+		if (this._size > 0) {
+			this._beginInit(gen)
+			return
+		}
+		this._resolveFileSize(gen)
+	}
+
+	/** 暂停：停止派发新分片，已发出的分片请求自然完成后挂起 */
+	pause() : void {
+		const s = this._status.value
+		if (s == 'preparing' || s == 'uploading') {
+			this._status.value = 'paused'
+		}
+	}
+
+	/** 从暂停处继续（含重试等待中的分片） */
+	resume() : void {
+		if (this._status.value != 'paused') {
+			return
+		}
+		this._status.value = 'uploading'
+		this._dispatch(this._generation)
+	}
+
+	/** 中止当前任务回到 idle；已发出的分片请求结果将被忽略；可重新 start */
+	abort() : void {
+		if (this._status.value == 'idle') {
+			return
+		}
+		this._generation++
+		this._resetTask()
+	}
+
+	/** 释放资源；组件/页面卸载时由 useChunkUpload 自动调用 */
+	dispose() : void {
+		this._generation++
+		this._resetTask()
+	}
+
+	private _resetTask() : void {
+		this._status.value = 'idle'
+		this._error.value = ''
+		this._uploadId.value = ''
+		this._progress.value = 0
+		this._uploadedCount.value = 0
+		this._totalChunks.value = 0
+		this._uploadedBytes.value = 0
+		this._totalBytes.value = 0
+		this._chunkLengths = [] as number[]
+		this._done = [] as boolean[]
+		this._inflight = [] as boolean[]
+		this._retries = [] as number[]
+		this._active = 0
+		this._webBlob = null
+		this._closeFd()
+	}
+
+	// ---------- 内部调度 ----------
+
+	private _resolveFileSize(gen : number) : void {
+		const g = gen
+		// #ifdef WEB
+		// Web 无 FileSystemManager：fetch blob 取 size，并顺便缓存 Blob 供切片
+		fetch(this._path).then((res : any) : any => {
+			return (res as any).blob()
+		}).then((blob : any) : void => {
+			if (g != this._generation) {
+				return
+			}
+			this._webBlob = blob
+			this._size = (blob as any).size as number
+			if (this._size <= 0) {
+				this._failTask(g, '无法获取文件大小（size 为 0）')
+				return
+			}
+			this._beginInit(g)
+		}).catch((err : any) : void => {
+			if (g != this._generation) {
+				return
+			}
+			this._failTask(g, '读取文件失败：' + (err != null ? err.toString() : 'unknown'))
+		})
+		// #endif
+		// #ifndef WEB
+		const fsm = uni.getFileSystemManager()
+		fsm.stat({
+			path: this._path,
+			recursive: false,
+			success: (res) => {
+				if (g != this._generation) {
+					return
+				}
+				if (res.stats.length == 0) {
+					this._failTask(g, '无法获取文件大小：stat 结果为空')
+					return
+				}
+				this._size = res.stats[0].stats.size
+				if (this._size <= 0) {
+					this._failTask(g, '无法获取文件大小（size 为 0）')
+					return
+				}
+				this._beginInit(g)
+			},
+			fail: (err) => {
+				if (g != this._generation) {
+					return
+				}
+				this._failTask(g, '无法获取文件大小：' + err.errMsg)
+			}
+		})
+		// #endif
+	}
+
+	private _beginInit(gen : number) : void {
+		if (gen != this._generation) {
+			return
+		}
+		const total = this._size > 0 ? Math.ceil(this._size / this._chunkSize) : 0
+		this._totalChunks.value = total
+		this._totalBytes.value = this._size
+
+		const lengths = [] as number[]
+		const done = [] as boolean[]
+		const inflight = [] as boolean[]
+		const retries = [] as number[]
+		let left = this._size
+		let i = 0
+		while (i < total) {
+			const len = left > this._chunkSize ? this._chunkSize : left
+			lengths.push(len)
+			done.push(false)
+			inflight.push(false)
+			retries.push(0)
+			left -= len
+			i++
+		}
+		this._chunkLengths = lengths
+		this._done = done
+		this._inflight = inflight
+		this._retries = retries
+
+		const ctx : NaxChunkUploadInitContext = {
+			path: this._path,
+			size: this._size,
+			name: this._name,
+			chunkSize: this._chunkSize,
+			total: total
+		}
+		const g = gen
+		this._options.init(ctx, (uploadId : string, uploaded : number[] | null) => {
+			if (g != this._generation) {
+				return
+			}
+			this._uploadId.value = uploadId
+			if (uploaded != null) {
+				let k = 0
+				while (k < uploaded.length) {
+					const idx = uploaded[k]
+					if (idx >= 0 && idx < total && !this._done[idx]) {
+						this._done[idx] = true
+						this._uploadedCount.value++
+						this._uploadedBytes.value += lengths[idx]
+					}
+					k++
+				}
+				this._updateProgress()
+			}
+			if (this._status.value == 'preparing') {
+				this._status.value = 'uploading'
+				// App/小程序先开 fd 再派发，避免并发读时重复 open
+				this._withFd(() => {
+					if (g != this._generation) {
+						return
+					}
+					if (this._status.value != 'uploading') {
+						return
+					}
+					this._dispatch(g)
+				}, (error : string) => {
+					this._failTask(g, error)
+				})
+			}
+		}, (error : string) => {
+			if (g != this._generation) {
+				return
+			}
+			this._failTask(g, 'init 失败：' + error)
+		})
+	}
+
+	/** 扫描待传分片，填满并发窗口；全部完成且无在途请求时进入合并 */
+	private _dispatch(gen : number) : void {
+		if (gen != this._generation) {
+			return
+		}
+		if (this._status.value != 'uploading') {
+			return
+		}
+		const total = this._totalChunks.value
+		let dispatched = false
+		let i = 0
+		while (i < total) {
+			if (this._done[i] || this._inflight[i]) {
+				i++
+				continue
+			}
+			if (this._active >= this._concurrent) {
+				break
+			}
+			this._inflight[i] = true
+			this._active++
+			dispatched = true
+			this._readAndSend(i, gen)
+			i++
+		}
+		if (!dispatched && this._active == 0) {
+			this._finishAll(gen)
+		}
+	}
+
+	private _readAndSend(index : number, gen : number) : void {
+		const g = gen
+		const offset = index * this._chunkSize
+		const length = this._chunkLengths[index]
+		this._readChunk(offset, length, (bytes : ArrayBuffer) => {
+			if (g != this._generation) {
+				return
+			}
+			const ctx : NaxChunkUploadChunk = {
+				uploadId: this._uploadId.value,
+				index: index,
+				total: this._totalChunks.value,
+				offset: offset,
+				size: length,
+				bytes: bytes,
+				path: this._path
+			}
+			this._options.sendChunk(ctx, () => {
+				if (g != this._generation) {
+					return
+				}
+				this._inflight[index] = false
+				this._active--
+				this._done[index] = true
+				this._uploadedCount.value++
+				this._uploadedBytes.value += length
+				this._updateProgress()
+				const cb = this._options.onChunkSuccess
+				if (cb != null) {
+					cb(index, this._totalChunks.value)
+				}
+				this._dispatch(g)
+			}, (error : string) => {
+				if (g != this._generation) {
+					return
+				}
+				this._inflight[index] = false
+				this._active--
+				this._scheduleChunkRetry(index, g, error)
+			})
+		}, (error : string) => {
+			if (g != this._generation) {
+				return
+			}
+			this._inflight[index] = false
+			this._active--
+			this._scheduleChunkRetry(index, g, error)
+		})
+	}
+
+	/** 单片失败：预算内延时重试（重占并发窗口），超限则整体失败 */
+	private _scheduleChunkRetry(index : number, gen : number, error : string) : void {
+		this._retries[index]++
+		if (this._retries[index] <= this._retryLimit) {
+			const g = gen
+			setTimeout(() => {
+				if (g != this._generation) {
+					return
+				}
+				if (this._status.value != 'uploading') {
+					return
+				}
+				this._dispatch(g)
+			}, this._retryDelay)
+			return
+		}
+		this._failTask(gen, '分片 ' + index.toString() + ' 失败（已重试 ' + this._retryLimit.toString() + ' 次）：' + error)
+	}
+
+	private _finishAll(gen : number) : void {
+		if (gen != this._generation) {
+			return
+		}
+		this._status.value = 'merging'
+		const g = gen
+		this._options.complete(this._uploadId.value, (url : string) => {
+			if (g != this._generation) {
+				return
+			}
+			this._status.value = 'success'
+			this._progress.value = 100
+			this._closeFd()
+			const cb = this._options.onSuccess
+			if (cb != null) {
+				cb(url)
+			}
+		}, (error : string) => {
+			if (g != this._generation) {
+				return
+			}
+			this._failTask(g, '合并失败：' + error)
+		})
+	}
+
+	private _failTask(gen : number, message : string) : void {
+		if (gen != this._generation) {
+			return
+		}
+		const s = this._status.value
+		if (s == 'success' || s == 'failed' || s == 'idle') {
+			return
+		}
+		this._status.value = 'failed'
+		this._error.value = message
+		this._closeFd()
+		const cb = this._options.onFail
+		if (cb != null) {
+			cb(message)
+		}
+	}
+
+	private _updateProgress() : void {
+		if (this._size <= 0) {
+			this._progress.value = 100
+			return
+		}
+		const p = Math.round((this._uploadedBytes.value / this._size) * 100)
+		this._progress.value = p > 100 ? 100 : (p < 0 ? 0 : p)
+	}
+
+	// ---------- 分片读取（端差异集中于此） ----------
+
+	/**
+	 * 按偏移读取一片，成功返回恰好 length 字节的 ArrayBuffer。
+	 * 读到字节数与预期不符视为文件已变化，直接报错（分片边界由 start 时的 size 决定）。
+	 */
+	private _readChunk(offset : number, length : number, onGot : (bytes : ArrayBuffer) => void, onFail : (error : string) => void) : void {
+		// #ifdef WEB
+		this._ensureWebBlob((blob : any) => {
+			const b = blob as any
+			const sliced = b.slice(offset, offset + length)
+			sliced.arrayBuffer().then((bytes : any) : void => {
+				onGot(bytes as ArrayBuffer)
+			}).catch((err : any) : void => {
+				onFail('读取文件分片失败：' + (err != null ? err.toString() : 'unknown'))
+			})
+		}, (error : string) => {
+			onFail(error)
+		})
+		// #endif
+		// #ifndef WEB
+		this._withFd((fd : string) => {
+			const fsm = uni.getFileSystemManager()
+			const buffer = new ArrayBuffer(length)
+			fsm.read({
+				fd: fd,
+				arrayBuffer: buffer,
+				offset: 0,
+				position: offset,
+				length: length,
+				success: (res) => {
+					if (res.bytesRead == length) {
+						onGot(buffer)
+					} else {
+						onFail('文件长度与预期不符（读到 ' + res.bytesRead.toString() + ' 字节，预期 ' + length.toString() + '），文件可能已被修改')
+					}
+				},
+				fail: (err) => {
+					onFail('读取文件分片失败：' + err.errMsg)
+				}
+			})
+		}, (error : string) => {
+			onFail(error)
+		})
+		// #endif
+	}
+
+	/**
+	 * App/小程序：惰性打开文件句柄并复用（顺序/并发读均显式传 position，互不影响）；
+	 * Web：无 fd 概念，直接通过。
+	 */
+	private _withFd(onReady : (fd : string) => void, onFail : (error : string) => void) : void {
+		// #ifdef WEB
+		onReady('')
+		// #endif
+		// #ifndef WEB
+		if (this._fd.length > 0) {
+			onReady(this._fd)
+			return
+		}
+		const fsm = uni.getFileSystemManager()
+		fsm.open({
+			filePath: this._path,
+			flag: 'r',
+			success: (res) => {
+				this._fd = res.fd
+				onReady(res.fd)
+			},
+			fail: (err) => {
+				onFail('打开文件失败：' + err.errMsg)
+			}
+		})
+		// #endif
+	}
+
+	private _closeFd() : void {
+		// #ifndef WEB
+		if (this._fd.length == 0) {
+			return
+		}
+		const fd = this._fd
+		this._fd = ''
+		try {
+			uni.getFileSystemManager().close({ fd: fd })
+		} catch (e) {
+			// 关闭失败忽略：fd 随任务结束释放
+		}
+		// #endif
+	}
+
+	// #ifdef WEB
+	/** 惰性读取整文件 Blob 并缓存（chooseImage 在 Web 端返回 blob: URL） */
+	private _ensureWebBlob(onGot : (blob : any) => void, onFail : (error : string) => void) : void {
+		if (this._webBlob != null) {
+			onGot(this._webBlob)
+			return
+		}
+		fetch(this._path).then((res : any) : any => {
+			return (res as any).blob()
+		}).then((blob : any) : void => {
+			this._webBlob = blob
+			onGot(blob)
+		}).catch((err : any) : void => {
+			onFail('读取文件失败：' + (err != null ? err.toString() : 'unknown'))
+		})
+	}
+	// #endif
+}
+
+/**
+ * 创建分片上传引擎。必须在 setup 内同步调用（内部依赖组件实例注册卸载清理）。
+ */
+export function useChunkUpload(options : NaxChunkUploadOptions) : NaxChunkUploadState {
+	const state = new NaxChunkUploadState(options)
+	if (getCurrentInstance() != null) {
+		onUnmounted(() => {
+			state.dispose()
+		})
+	}
+	return state
+}

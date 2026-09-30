@@ -1,0 +1,330 @@
+<template>
+	<view class="page-root nax-theme" :class="themeExtraClass">
+		<nax-nav-bar
+			:back-icon-color="navBackIconColor"
+			title="useChunkUpload 分片上传"
+			home-url="/pages/index/index"
+			:border="true"
+		></nax-nav-bar>
+		<scroll-view class="page-scroll">
+		<view class="nax-theme page" :class="themeExtraClass">
+
+			<view class="section">
+				<text class="section__title">nax-upload + useChunkUpload（模拟协议）</text>
+				<text class="hint">引擎协议无关：init / sendChunk / complete 三个回调由业务注入。此处为模拟实现（无真实网络请求），真实业务在回调里用 uni.request 对接自家后端或 OSS/COS。选图后自动按 64KB 分片、并发 2 上传，分片 2 首次会模拟失败以演示自动重试。</text>
+				<view class="row row--gap">
+					<nax-upload :custom-class="uploadThemeClass"
+						:file-list="chunkList"
+						:max-count="1"
+						@after-read="onChunkAfterRead"
+						@delete="onChunkDelete"
+					></nax-upload>
+				</view>
+				<view class="row row--gap">
+					<view class="progress-wrap">
+						<nax-progress :percent="uploader.progress"></nax-progress>
+					</view>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">状态：{{ statusText }} · 分片 {{ uploader.uploadedCount }}/{{ uploader.totalChunks }} · 已传 {{ uploader.uploadedBytes }}/{{ uploader.totalBytes }} 字节</text>
+				</view>
+				<view class="row row--gap" v-if="uploader.error.length > 0">
+					<text class="row__text">错误：{{ uploader.error }}</text>
+				</view>
+				<view class="row row--gap">
+					<nax-button size="sm" type="primary" label="暂停" :disabled="!canPause" @click="doPause"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" type="primary" label="继续" :disabled="!canResume" @click="doResume"></nax-button>
+					<view class="gap"></view>
+					<nax-button size="sm" label="中止" :disabled="!canAbort" @click="doAbort"></nax-button>
+				</view>
+				<view class="row row--gap">
+					<text class="row__text">最近事件：{{ lastEvent }}</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<text class="section__title">引擎状态与 UI 解耦</text>
+				<text class="hint">引擎只提供状态与控制方法，不持有 UI。删除预览图、切走页面都不会中断上传；暂停/继续/中止也只作用于引擎，与 fileList 展示互不影响。</text>
+			</view>
+
+		</view>
+	</scroll-view>
+	</view>
+</template>
+
+<script setup>
+	import { computed, ref } from 'vue'
+	import { bindDemoThemePage, demoDarkRef, demoNavBackIconColor } from '@/common/demo-theme.uts'
+	import { useChunkUpload, NaxChunkUploadOptions } from '@/uni_modules/nax-use/composables/use-chunk-upload.uts'
+
+	bindDemoThemePage()
+	const darkMode = demoDarkRef
+
+	const navBackIconColor = computed((): string => {
+		// Android 模板编译不直接调用导入的 UTS 函数，避免生成未解析的 invoke。
+		// #ifdef APP-ANDROID
+		return ''
+		// #endif
+		// #ifndef APP-ANDROID
+		return demoNavBackIconColor(darkMode.value)
+		// #endif
+	})
+
+	const themeExtraClass = computed((): string => {
+		if (darkMode.value) {
+			return 'nax-theme-dark'
+		}
+		return ''
+	})
+
+	const uploadThemeClass = computed((): string => {
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		// 原生 App 组件隔离边界需要将主题 class 直接挂到组件根节点。
+		if (darkMode.value) {
+			return 'nax-theme nax-theme-dark'
+		}
+		return 'nax-theme'
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		return ''
+		// #endif
+	})
+
+	onShow(() => {
+		darkMode.value = bindDemoThemePage()
+	})
+
+	const lastEvent = ref('等待选图')
+	const chunkList = ref([] as any[])
+
+	function cloneList(list : any[]) : any[] {
+		const next = [] as any[]
+		let i = 0
+		while (i < list.length) {
+			next.push(list[i])
+			i++
+		}
+		return next
+	}
+
+	function updateChunkItem(status : string, message : string, remoteUrl : string) {
+		const cur = cloneList(chunkList.value)
+		if (cur.length == 0) {
+			return
+		}
+		const it = cur[0] as UTSJSONObject
+		const u0 = it.getString('url')
+		const t0 = it.getString('thumb')
+		const url = remoteUrl.length > 0 ? remoteUrl : (u0 != null ? u0 : '')
+		cur[0] = {
+			url: url,
+			thumb: t0 != null ? t0 : url,
+			type: 'image',
+			status: status,
+			message: message
+		} as UTSJSONObject
+		chunkList.value = cur
+	}
+
+	// 模拟协议：分片 2 首次失败，演示自动重试
+	let mockFailArmed = true
+
+	const uploaderOpts : NaxChunkUploadOptions = {
+		chunkSize: 64 * 1024,
+		concurrent: 2,
+		retry: 2,
+		retryDelay: 500,
+		init: (context, onDone, onFail) => {
+			mockFailArmed = true
+			// 真实业务：uni.request 请求后端创建任务，拿 uploadId 与已传分片（断点续传）
+			setTimeout(() => {
+				onDone('mock-upload-' + Date.now().toString(), null)
+			}, 300)
+		},
+		sendChunk: (chunk, onDone, onFail) => {
+			// 真实业务：把 chunk.bytes（ArrayBuffer）按协议发出，如 uni.request data 或直传 OSS
+			if (chunk.index == 2 && mockFailArmed) {
+				mockFailArmed = false
+				setTimeout(() => {
+					onFail('模拟网络抖动')
+				}, 200)
+				return
+			}
+			setTimeout(() => {
+				onDone()
+			}, 150 + Math.floor(Math.random() * 350))
+		},
+		complete: (uploadId, onDone, onFail) => {
+			// 真实业务：请求后端合并分片，返回最终文件 URL
+			setTimeout(() => {
+				onDone('https://cdn.example.com/mock/' + uploadId + '.png')
+			}, 400)
+		},
+		onChunkSuccess: (index, total) => {
+			updateChunkItem('uploading', '分片 ' + (index + 1).toString() + '/' + total.toString(), '')
+			lastEvent.value = '分片 ' + index.toString() + ' 成功'
+		},
+		onSuccess: (url) => {
+			updateChunkItem('success', '', url)
+			lastEvent.value = 'onSuccess：' + url
+		},
+		onFail: (error) => {
+			const short = error.length > 24 ? error.substring(0, 24) + '…' : error
+			updateChunkItem('failed', short, '')
+			lastEvent.value = 'onFail：' + error
+		}
+	}
+	const uploader = useChunkUpload(uploaderOpts)
+
+	const statusText = computed((): string => {
+		const s = uploader.status
+		if (s == 'preparing') {
+			return '准备中'
+		}
+		if (s == 'uploading') {
+			return '上传中'
+		}
+		if (s == 'paused') {
+			return '已暂停'
+		}
+		if (s == 'merging') {
+			return '合并中'
+		}
+		if (s == 'success') {
+			return '成功'
+		}
+		if (s == 'failed') {
+			return '失败'
+		}
+		return '未开始'
+	})
+
+	const canPause = computed((): boolean => {
+		const s = uploader.status
+		return s == 'preparing' || s == 'uploading'
+	})
+	const canResume = computed((): boolean => {
+		return uploader.status == 'paused'
+	})
+	const canAbort = computed((): boolean => {
+		const s = uploader.status
+		return s == 'preparing' || s == 'uploading' || s == 'paused' || s == 'merging'
+	})
+
+	function onChunkAfterRead(e : any) {
+		const payload = e as UTSJSONObject
+		const files = payload.getArray('files')
+		if (files == null || files.length == 0) {
+			return
+		}
+		const raw = files[0] as UTSJSONObject
+		const url = raw.getString('url')
+		const size = raw.getNumber('size')
+		const path = url != null ? url : ''
+		if (path.length == 0) {
+			return
+		}
+		if (uploader.running || uploader.status == 'paused') {
+			// 换新文件：中止旧任务（含暂停中的），避免 start() 在 paused 下被当作 resume
+			uploader.abort()
+		}
+		chunkList.value = [
+			{
+				url: path,
+				thumb: path,
+				type: 'image',
+				status: 'uploading',
+				message: '准备中'
+			} as UTSJSONObject
+		] as any[]
+		lastEvent.value = 'start()'
+		uploader.start(path, size != null ? size : 0, 'demo.png')
+	}
+
+	function onChunkDelete(_e : any) {
+		chunkList.value = [] as any[]
+		lastEvent.value = '已移除预览（引擎状态不受影响）'
+	}
+
+	function doPause() {
+		uploader.pause()
+		lastEvent.value = 'pause()'
+	}
+	function doResume() {
+		uploader.resume()
+		lastEvent.value = 'resume()'
+	}
+	function doAbort() {
+		uploader.abort()
+		lastEvent.value = 'abort()'
+		updateChunkItem('failed', '已中止', '')
+	}
+</script>
+
+<style>
+
+	.page-root {
+		flex: 1;
+		flex-direction: column;
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		height: 100%;
+		/* #endif */
+	}
+
+	.page-scroll {
+		flex: 1;
+		height: 0;
+	}
+	.page {
+		padding: 16px;
+		background-color: var(--nax-color-bg-secondary, #fafafc);
+	}
+
+	.section {
+		margin-bottom: 16px;
+		padding: 14px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: 1px;
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.section__title {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--nax-color-text, #333639);
+		margin-bottom: 12px;
+	}
+
+	.hint {
+		font-size: 12px;
+		color: var(--nax-color-text-secondary, #767c82);
+		line-height: 18px;
+		margin-bottom: 12px;
+	}
+
+	.row {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.row--gap {
+		margin-top: 12px;
+	}
+
+	.row__text {
+		font-size: 13px;
+		color: var(--nax-color-text-secondary, #767c82);
+		flex: 1;
+	}
+
+	.gap {
+		width: 8px;
+	}
+
+	.progress-wrap {
+		flex: 1;
+	}
+</style>
