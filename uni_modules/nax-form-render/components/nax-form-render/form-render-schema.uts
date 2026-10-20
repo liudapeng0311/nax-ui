@@ -1,0 +1,354 @@
+/**
+ * nax-form-render schema 解析（无头）：JSON 字符串 / 数组 / 对象 → 统一字段列表。
+ *
+ * 端差异：App（Android/iOS/鸿蒙）上 `any` 不能点属性访问，只能用 UTSJSONObject 的 API；
+ * Web / 小程序为普通对象，走字段访问。两分支用条件编译隔离。
+ * 本文件属于 nax-form-render 包内部实现，不对外承诺 API。
+ */
+import {
+	NaxFormField,
+	NaxFormFieldOption
+} from './form-render-types.uts'
+
+/** 读任意字段：App 走 UTSJSONObject API，其余端点属性 */
+export function readAny(item : any, key : string) : any | null {
+	if (item == null) {
+		return null
+	}
+	// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+	const obj = item as UTSJSONObject
+	return obj.getAny(key)
+	// #endif
+	// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+	return (item as any)[key]
+	// #endif
+}
+
+export function readStr(item : any, key : string, fallback : string) : string {
+	const v = readAny(item, key)
+	if (v == null) {
+		return fallback
+	}
+	if (typeof v == 'string') {
+		return v as string
+	}
+	if (typeof v == 'number' || typeof v == 'boolean') {
+		return '' + v
+	}
+	return fallback
+}
+
+export function readBool(item : any, key : string, fallback : boolean) : boolean {
+	const v = readAny(item, key)
+	if (v == null) {
+		return fallback
+	}
+	if (typeof v == 'boolean') {
+		return v as boolean
+	}
+	if (typeof v == 'number') {
+		return (v as number) != 0
+	}
+	if (typeof v == 'string') {
+		const s = v as string
+		return s == 'true' || s == '1'
+	}
+	return fallback
+}
+
+export function readNum(item : any, key : string, fallback : number) : number {
+	const v = readAny(item, key)
+	if (v == null) {
+		return fallback
+	}
+	if (typeof v == 'number') {
+		return v as number
+	}
+	if (typeof v == 'string') {
+		const s = v as string
+		if (s.length == 0) {
+			return fallback
+		}
+		const n = parseFloat(s)
+		if (n == n) {
+			return n
+		}
+	}
+	return fallback
+}
+
+/** 读字符串数组（trigger 用）；兼容单字符串 */
+export function readStrArray(item : any, key : string) : string[] {
+	const out = [] as string[]
+	const v = readAny(item, key)
+	if (v == null) {
+		return out
+	}
+	if (typeof v == 'string') {
+		const s = v as string
+		if (s.length > 0) {
+			out.push(s)
+		}
+		return out
+	}
+	const arr = v as any[]
+	if (arr == null) {
+		return out
+	}
+	let i = 0
+	while (i < arr.length) {
+		const e = arr[i]
+		if (e != null && typeof e == 'string') {
+			out.push(e as string)
+		}
+		i++
+	}
+	return out
+}
+
+function parseOptions(raw : any) : NaxFormFieldOption[] {
+	const out = [] as NaxFormFieldOption[]
+	if (raw == null) {
+		return out
+	}
+	const arr = raw as any[]
+	if (arr == null) {
+		return out
+	}
+	let i = 0
+	while (i < arr.length) {
+		const it = arr[i]
+		const value = readStr(it, 'value', '')
+		const label = readStr(it, 'label', value)
+		const disabled = readBool(it, 'disabled', false)
+		out.push({
+			value: value,
+			label: label,
+			disabled: disabled
+		} as NaxFormFieldOption)
+		i++
+	}
+	return out
+}
+
+/** 归一化控件类型：容错别名 → 标准枚举值 */
+export function normalizeFieldType(raw : string) : string {
+	const t = raw.trim().toLowerCase()
+	if (t.length == 0) return 'text'
+	if (t == 'input' || t == 'text') return 'text'
+	if (t == 'password') return 'password'
+	if (t == 'number-input' || t == 'numberinput') return 'number-input'
+	if (t == 'digit') return 'digit'
+	if (t == 'tel') return 'tel'
+	if (t == 'textarea') return 'textarea'
+	if (t == 'search') return 'search'
+	if (t == 'select') return 'select'
+	if (t == 'switch') return 'switch'
+	if (t == 'radio') return 'radio'
+	if (t == 'checkbox') return 'checkbox'
+	if (t == 'checkbox-group' || t == 'checkboxgroup') return 'checkbox-group'
+	if (t == 'number' || t == 'number-box') return 'number'
+	if (t == 'slider') return 'slider'
+	if (t == 'rate') return 'rate'
+	if (t == 'date') return 'date'
+	if (t == 'datetime') return 'datetime'
+	if (t == 'time') return 'time'
+	if (t == 'year-month' || t == 'yearmonth') return 'year-month'
+	if (t == 'calendar') return 'calendar'
+	if (t == 'date-strip' || t == 'datestrip') return 'date-strip'
+	return t
+}
+
+/** 把一条原始配置解析为 NaxFormField；prop 为空视为无效，返回 null */
+export function parseField(raw : any) : NaxFormField | null {
+	const prop = readStr(raw, 'prop', '')
+	if (prop.length == 0) {
+		return null
+	}
+	const type = normalizeFieldType(readStr(raw, 'type', 'text'))
+	const label = readStr(raw, 'label', prop)
+	const placeholder = readStr(raw, 'placeholder', '')
+	const required = readBool(raw, 'required', false)
+	const disabled = readBool(raw, 'disabled', false)
+	const options = parseOptions(readAny(raw, 'options'))
+	const maxlength = readNum(raw, 'maxlength', -1)
+	const tip = readStr(raw, 'tip', '')
+	const minDate = readStr(raw, 'minDate', readStr(raw, 'min-date', ''))
+	const maxDate = readStr(raw, 'maxDate', readStr(raw, 'max-date', ''))
+	const showSecond = readBool(raw, 'showSecond', false)
+	const trigger = readStrArray(raw, 'trigger')
+
+	var minV = 0
+	var maxV = 999999
+	var stepV = 1
+	if (type == 'number' || type == 'slider' || type == 'rate') {
+		minV = readNum(raw, 'min', type == 'rate' ? 1 : 0)
+		maxV = readNum(raw, 'max', type == 'rate' ? 5 : 999999)
+		stepV = readNum(raw, 'step', 1)
+	}
+
+	const rulesRaw = readAny(raw, 'rules')
+
+	const field = {
+		prop: prop,
+		label: label,
+		type: type,
+		placeholder: placeholder,
+		required: required,
+		disabled: disabled,
+		options: options,
+		min: minV,
+		max: maxV,
+		step: stepV,
+		maxlength: maxlength,
+		rules: [] as any[],
+		trigger: trigger,
+		minDate: minDate,
+		maxDate: maxDate,
+		showSecond: showSecond,
+		tip: tip
+	} as NaxFormField
+
+	if (rulesRaw != null) {
+		field.rules = rulesRaw as any[]
+	}
+	return field
+}
+
+/**
+ * 解析 schema → 字段列表。
+ * 支持三种入参：
+ * - JSON 字符串（'[{...}]' 或 '[{...}]' 形式的数组）
+ * - 数组（any[]，元素为 JSONObject）
+ * - 单个对象（含 fields 数组字段的对象，或单个字段）
+ * 解析失败返回空数组，不抛错。
+ */
+export function parseSchema(input : any | null) : NaxFormField[] {
+	const out = [] as NaxFormField[]
+	if (input == null) {
+		return out
+	}
+
+	// JSON 字符串
+	if (typeof input == 'string') {
+		const s = (input as string).trim()
+		if (s.length == 0) {
+			return out
+		}
+		if (s[0] == '[') {
+			const arr = JSON.parseArray(s)
+			if (arr == null) {
+				return out
+			}
+			return parseFieldArray(arr)
+		}
+		// 对象形式：取 fields / columns / list 任一数组字段
+		const obj = JSON.parseObject(s)
+		if (obj == null) {
+			return out
+		}
+		return parseSchema(obj)
+	}
+
+	// 数组
+	if (typeof input == 'number' || typeof input == 'boolean') {
+		return out
+	}
+	const maybeArr = input as any[]
+	if (maybeArr != null && typeof maybeArr.length == 'number') {
+		return parseFieldArray(maybeArr)
+	}
+
+	// 对象：优先取 fields，其次 list（兼容常见命名）
+	const fields = readAny(input, 'fields')
+	if (fields != null) {
+		const arr2 = fields as any[]
+		if (arr2 != null && typeof arr2.length == 'number') {
+			return parseFieldArray(arr2)
+		}
+	}
+	const list = readAny(input, 'list')
+	if (list != null) {
+		const arr3 = list as any[]
+		if (arr3 != null && typeof arr3.length == 'number') {
+			return parseFieldArray(arr3)
+		}
+	}
+
+	// 兜底：当作单个字段
+	const single = parseField(input)
+	if (single != null) {
+		out.push(single)
+	}
+	return out
+}
+
+function parseFieldArray(arr : any[]) : NaxFormField[] {
+	const out = [] as NaxFormField[]
+	let i = 0
+	while (i < arr.length) {
+		const f = parseField(arr[i])
+		if (f != null) {
+			out.push(f)
+		}
+		i++
+	}
+	return out
+}
+
+/**
+ * 该类型字段的初始值（保证控件拿到类型匹配的值）。
+ * 开关 / 多选给 false / []，数字类给 min，其余给空串。
+ */
+export function initialValueFor(field : NaxFormField) : any | null {
+	const t = field.type
+	if (t == 'switch' || t == 'checkbox') {
+		return false
+	}
+	if (t == 'checkbox-group') {
+		return [] as string[]
+	}
+	if (t == 'number' || t == 'slider') {
+		return field.min
+	}
+	if (t == 'rate') {
+		return field.min
+	}
+	return ''
+}
+
+/**
+ * 由 schema 生成 nax-form 的 rules 对象。
+ * 仅当字段 required 为 true 时生成 required 规则；字段自带 rules 时优先用字段的。
+ * 返回 UTSJSONObject（nax-form 的 rules prop 要求）。
+ */
+export function buildRules(fields : NaxFormField[]) : UTSJSONObject {
+	const rules = {} as UTSJSONObject
+	let i = 0
+	while (i < fields.length) {
+		const f = fields[i]
+		if (f.rules.length > 0) {
+			rules.set(f.prop, f.rules)
+			i++
+			continue
+		}
+		if (f.required) {
+			var trigger = [] as string[]
+			if (f.trigger.length > 0) {
+				trigger = f.trigger
+			} else {
+				trigger.push('blur')
+				trigger.push('change')
+			}
+			rules.set(f.prop, [
+				{
+					required: true,
+					message: '请填写' + f.label,
+					trigger: trigger
+				} as UTSJSONObject
+			] as any[])
+		}
+		i++
+	}
+	return rules
+}

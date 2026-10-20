@@ -1,0 +1,857 @@
+<template>
+	<view class="nax-form-render" :class="rootClass">
+		<nax-form
+			ref="formRef"
+			:model="values"
+			:rules="formRules"
+			:error-type="errorType"
+			:border-bottom="borderBottom"
+			:label-position="labelPosition"
+			:label-width="labelWidth"
+			:label-align="labelAlign"
+			:label-size="labelSize"
+		>
+			<nax-form-item
+				v-for="(field, index) in fields"
+				:key="field.prop"
+				:label="field.label"
+				:prop="field.prop"
+				:required="field.required"
+			>
+				<view class="nax-form-render__control">
+					<!-- 文本类：text / password / number-input / digit / tel -->
+					<nax-input
+						v-if="isTextLike(field.type)"
+						:model-value="strVal(field.prop)"
+						:type="inputType(field.type)"
+						:placeholder="field.placeholder"
+						:disabled="field.disabled || disabled"
+						:password-icon="field.type == 'password'"
+						clearable
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-input>
+
+					<!-- 多行文本 -->
+					<nax-textarea
+						v-else-if="field.type == 'textarea'"
+						:model-value="strVal(field.prop)"
+						:placeholder="field.placeholder"
+						:disabled="field.disabled || disabled"
+						:maxlength="maxlengthOf(field)"
+						:auto-height="true"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-textarea>
+
+					<!-- 搜索框（不显示右侧搜索按钮，避免占位过宽） -->
+					<nax-search
+						v-else-if="field.type == 'search'"
+						:model-value="strVal(field.prop)"
+						:placeholder="field.placeholder"
+						:disabled="field.disabled || disabled"
+						:show-action="false"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-search>
+
+					<!-- 列选择器（内置触发条，自包含弹层） -->
+					<nax-select
+						v-else-if="field.type == 'select'"
+						:model-value="strVal(field.prop)"
+						:list="field.options"
+						:disabled="field.disabled || disabled"
+						:placeholder="placeholderOf(field)"
+						show-trigger
+						@update:model-value="onValueChange(field.prop, $event)"
+						@clear="onCleared(field.prop)"
+					></nax-select>
+
+					<!-- 开关 -->
+					<nax-switch
+						v-else-if="field.type == 'switch'"
+						:model-value="boolVal(field.prop)"
+						:disabled="field.disabled || disabled"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-switch>
+
+					<!-- 单选组 -->
+					<nax-radio-group
+						v-else-if="field.type == 'radio'"
+						:model-value="strVal(field.prop)"
+						:disabled="field.disabled || disabled"
+						wrap
+						@update:model-value="onValueChange(field.prop, $event)"
+					>
+						<nax-radio
+							v-for="opt in field.options"
+							:key="opt.value"
+							:name="opt.value"
+							:label="opt.label"
+							:disabled="opt.disabled == true"
+						></nax-radio>
+					</nax-radio-group>
+
+					<!-- 单个复选（boolean） -->
+					<nax-checkbox
+						v-else-if="field.type == 'checkbox'"
+						:model-value="boolVal(field.prop)"
+						:label="placeholderOf(field)"
+						:disabled="field.disabled || disabled"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-checkbox>
+
+					<!-- 多选组（string[]） -->
+					<nax-checkbox-group
+						v-else-if="field.type == 'checkbox-group'"
+						:model-value="arrVal(field.prop)"
+						:disabled="field.disabled || disabled"
+						wrap
+						@update:model-value="onValueChange(field.prop, $event)"
+					>
+						<nax-checkbox
+							v-for="opt in field.options"
+							:key="opt.value"
+							:name="opt.value"
+							:label="opt.label"
+							:disabled="opt.disabled == true"
+						></nax-checkbox>
+					</nax-checkbox-group>
+
+					<!-- 步进器 -->
+					<nax-number-box
+						v-else-if="field.type == 'number'"
+						:model-value="numVal(field.prop)"
+						:min="field.min"
+						:max="field.max"
+						:step="field.step"
+						:disabled="field.disabled || disabled"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-number-box>
+
+					<!-- 滑动选择 -->
+					<nax-slider
+						v-else-if="field.type == 'slider'"
+						:model-value="numVal(field.prop)"
+						:min="field.min"
+						:max="field.max"
+						:step="field.step"
+						:disabled="field.disabled || disabled"
+						show-edge-value
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-slider>
+
+					<!-- 评分 -->
+					<nax-rate
+						v-else-if="field.type == 'rate'"
+						:model-value="numVal(field.prop)"
+						:count="rateCountOf(field)"
+						:readonly="field.disabled || disabled"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-rate>
+
+					<!-- 日期时间（内置触发条，自包含弹层；确认后回写字符串） -->
+					<nax-datetime-picker
+						v-else-if="isDatetimeType(field.type)"
+						:model-value="strVal(field.prop)"
+						:mode="datetimeModeOf(field.type)"
+						:min-date="field.minDate"
+						:max-date="field.maxDate"
+						:show-second="field.showSecond"
+						:disabled="field.disabled || disabled"
+						:placeholder="placeholderOf(field)"
+						show-trigger
+						@confirm="onDatetimeConfirm(field.prop, $event)"
+						@clear="onCleared(field.prop)"
+					></nax-datetime-picker>
+
+					<!-- 日历：无 modelValue，初值走 default-date，取值走 change 的 result -->
+					<nax-calendar
+						v-else-if="field.type == 'calendar'"
+						:show="boolValOfShow(field.prop)"
+						mode="date"
+						:default-date="strVal(field.prop)"
+						:min-date="field.minDate"
+						:max-date="field.maxDate"
+						:readonly="field.disabled || disabled"
+						@update:show="onCalendarShow(field.prop, $event)"
+						@change="onCalendarChange(field.prop, $event)"
+					></nax-calendar>
+
+					<!-- 日期横条（行内，无弹层） -->
+					<nax-date-strip
+						v-else-if="field.type == 'date-strip'"
+						:model-value="strVal(field.prop)"
+						value-format="YYYY-MM-DD"
+						:min="field.minDate"
+						:max="field.maxDate"
+						@update:model-value="onValueChange(field.prop, $event)"
+					></nax-date-strip>
+
+					<!-- 未知类型：给出可诊断的提示，而不是静默空白 -->
+					<view v-else class="nax-form-render__unknown">
+						<text class="nax-form-render__unknown-text">不支持的控件类型：{{ field.type }}</text>
+					</view>
+
+					<!-- 日历触发条：calendar 无内置触发条，需自渲染入口 -->
+					<view
+						v-if="field.type == 'calendar'"
+						class="nax-form-render__trigger"
+						:hover-class="triggerHoverClass"
+						:hover-start-time="20"
+						:hover-stay-time="70"
+						@click="openCalendar(field.prop)"
+					>
+						<text class="nax-form-render__trigger-text" :class="triggerTextClassOf(field.prop)" :max-lines="1">{{ calendarDisplay(field.prop, placeholderOf(field)) }}</text>
+						<view class="nax-form-render__trigger-arrow">
+							<nax-icon name="chevron-down" size="16" color="var(--nax-color-text-secondary, #767c82)"></nax-icon>
+						</view>
+					</view>
+
+					<text v-if="field.tip.length > 0" class="nax-form-render__tip">{{ field.tip }}</text>
+				</view>
+			</nax-form-item>
+		</nax-form>
+	</view>
+</template>
+
+<script setup lang="uts">
+	/**
+	 * nax-form-render
+	 * @description 动态表单渲染器：由 schema（JSON 字符串 / 数组 / 对象）渲染表单项，校验规则同步生成。
+	 *   内部组合 nax-form + nax-form-item，因此标签、错误展示、字段注册与校验链路与手写表单一致。
+	 *   控件类型为**封闭枚举**（见 form-render-types.uts 的 NaxFormFieldType）：受蒸汽模式渲染机制约束，
+	 *   模板在编译期静态分析，无法运行期构造组件，因此分支在源码内穷举；新增类型需改组件源码。
+	 * @property {string|Array|Object} schema 字段配置；支持 JSON 字符串 / 字段数组 / 含 fields 的对象
+	 * @property {Object} modelValue v-model 表单值（prop -> 值）；用于传入初始值，值变化时回写
+	 * @property {Object} rules 额外校验规则（字段 -> 规则数组）；与 schema 生成的规则合并，同字段以本 prop 优先
+	 * @property {string} errorType 错误提示：message | toast | border-bottom | none
+	 * @property {boolean} borderBottom 是否显示表单项下边框
+	 * @property {string} labelPosition left | top
+	 * @property {string|number} labelWidth 标签宽度（px）
+	 * @property {string} labelAlign left | center | right
+	 * @property {string|number} labelSize 标签字号（px）
+	 * @property {boolean} disabled 整体禁用（与字段级 disabled 取或）
+	 * @property {string} customClass 根节点扩展 class
+	 * @method validate 校验全部字段，Promise<boolean>
+	 * @method validateField 校验指定字段
+	 * @method resetFields 重置为初始快照并清空错误
+	 * @method clearValidate 清空校验结果
+	 * @method setSchema 运行时替换 schema（按新字段重建值，保留同名字段已有值）
+	 * @method getModel 读取当前表单值（UTSJSONObject）
+	 * @event update:modelValue 表单值变化
+	 * @event change 表单值变化（同 update:modelValue，附带触发字段名）
+	 * @event confirm 确认类控件（datetime / calendar）确认
+	 * @event open / close 弹层类控件显隐（calendar）
+	 */
+	import { NaxFormField } from './form-render-types.uts'
+	import {
+		parseSchema,
+		buildRules,
+		initialValueFor,
+		readAny
+	} from './form-render-schema.uts'
+
+	const props = defineProps({
+		schema: {
+			type: [String, Array, Object],
+			default: ''
+		},
+		modelValue: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		rules: {
+			type: Object,
+			default: () => ({} as UTSJSONObject)
+		},
+		errorType: {
+			type: String,
+			default: 'message'
+		},
+		borderBottom: {
+			type: Boolean,
+			default: true
+		},
+		labelPosition: {
+			type: String,
+			default: 'left'
+		},
+		labelWidth: {
+			type: [String, Number],
+			default: 80
+		},
+		labelAlign: {
+			type: String,
+			default: 'left'
+		},
+		labelSize: {
+			type: [String, Number],
+			default: ''
+		},
+		disabled: {
+			type: Boolean,
+			default: false
+		},
+		customClass: {
+			type: String,
+			default: ''
+		}
+	})
+
+	const emit = defineEmits([
+		'update:modelValue',
+		'change',
+		'confirm',
+		'open',
+		'close'
+	])
+
+	// 内层 nax-form 的 expose；App UTS 不能用 any 调方法，需声明类型
+	type NaxFormExpose = {
+		validate : () => Promise<boolean>,
+		validateField : (fieldProps : any | null, event : string) => UTSJSONObject[],
+		resetFields : () => void,
+		clearValidate : (fieldProps : any | null) => void,
+		setRules : (rules : UTSJSONObject) => void
+	}
+
+	const formRef = ref(null as NaxFormExpose | null)
+
+	const fields = ref([] as NaxFormField[])
+	/** 表单值：prop -> 值；整体替换以保证响应式（UTSJSONObject 原地改属性不触发更新） */
+	const values = ref({} as UTSJSONObject)
+	/** schema 生成的规则 + props.rules 合并结果 */
+	const formRules = ref({} as UTSJSONObject)
+	/** 弹层类控件的显隐（calendar 需外部控制） */
+	const showMap = ref({} as UTSJSONObject)
+	/** 已确认值的展示文案（datetime / calendar 的触发条回显） */
+	const displayMap = ref({} as UTSJSONObject)
+
+	const triggerHoverClass = computed((): string => 'nax-form-render__trigger--hover')
+
+	const rootClass = computed((): string => {
+		if (props.customClass.length > 0) {
+			return props.customClass
+		}
+		return ''
+	})
+
+	// ---------- 类型判定（模板只读布尔/字符串，避免在模板里写复杂表达式） ----------
+
+	function isTextLike(t : string) : boolean {
+		return t == 'text' || t == 'password' || t == 'number-input' || t == 'digit' || t == 'tel'
+	}
+
+	function isDatetimeType(t : string) : boolean {
+		return t == 'date' || t == 'datetime' || t == 'time' || t == 'year-month'
+	}
+
+	function inputType(t : string) : string {
+		if (t == 'password') return 'password'
+		if (t == 'number-input') return 'number'
+		if (t == 'digit') return 'digit'
+		if (t == 'tel') return 'tel'
+		return 'text'
+	}
+
+	function datetimeModeOf(t : string) : string {
+		if (t == 'datetime') return 'datetime'
+		if (t == 'time') return 'time'
+		if (t == 'year-month') return 'year-month'
+		return 'date'
+	}
+
+	function maxlengthOf(field : NaxFormField) : number {
+		if (field.maxlength > 0) return field.maxlength
+		return 200
+	}
+
+	function rateCountOf(field : NaxFormField) : number {
+		if (field.max > 0) return field.max
+		return 5
+	}
+
+	function placeholderOf(field : NaxFormField) : string {
+		if (field.placeholder.length > 0) return field.placeholder
+		return '请选择'
+	}
+
+	// ---------- 值读取 ----------
+
+	function rawVal(prop : string) : any | null {
+		return readAny(values.value, prop)
+	}
+
+	function strVal(prop : string) : string {
+		const v = rawVal(prop)
+		if (v == null) return ''
+		if (typeof v == 'string') return v as string
+		if (typeof v == 'number') return (v as number).toString()
+		if (typeof v == 'boolean') {
+			if (v as boolean) return 'true'
+			return ''
+		}
+		return ''
+	}
+
+	function numVal(prop : string) : number {
+		const v = rawVal(prop)
+		if (v == null) return 0
+		if (typeof v == 'number') return v as number
+		if (typeof v == 'string') {
+			const n = parseFloat(v as string)
+			if (n == n) return n
+		}
+		return 0
+	}
+
+	function boolVal(prop : string) : boolean {
+		const v = rawVal(prop)
+		if (v == null) return false
+		if (typeof v == 'boolean') return v as boolean
+		if (typeof v == 'number') return (v as number) != 0
+		if (typeof v == 'string') {
+			const s = v as string
+			return s == 'true' || s == '1'
+		}
+		return false
+	}
+
+	function arrVal(prop : string) : string[] {
+		const v = rawVal(prop)
+		const out = [] as string[]
+		if (v == null) return out
+		if (typeof v == 'string' || typeof v == 'number' || typeof v == 'boolean') return out
+		const arr = v as any[]
+		if (arr == null) return out
+		let i = 0
+		while (i < arr.length) {
+			const e = arr[i]
+			if (e != null) {
+				out.push('' + e)
+			}
+			i++
+		}
+		return out
+	}
+
+	function boolValOfShow(prop : string) : boolean {
+		return boolFromObj(showMap.value, prop)
+	}
+
+	function boolFromObj(obj : UTSJSONObject, key : string) : boolean {
+		const v = obj.getAny(key)
+		if (v == null) return false
+		if (typeof v == 'boolean') return v as boolean
+		return false
+	}
+
+	function strFromObj(obj : UTSJSONObject, key : string) : string {
+		const v = obj.getAny(key)
+		if (v == null) return ''
+		if (typeof v == 'string') return v as string
+		return ''
+	}
+
+	function triggerTextClassOf(prop : string) : string {
+		const d = strFromObj(displayMap.value, prop)
+		if (d.length == 0) {
+			return 'nax-form-render__trigger-text--placeholder'
+		}
+		return ''
+	}
+
+	function calendarDisplay(prop : string, fallback : string) : string {
+		const d = strFromObj(displayMap.value, prop)
+		if (d.length > 0) return d
+		return fallback
+	}
+
+	// ---------- 值写入 ----------
+
+	/** 复制一份 values 并写入，整体替换以触发响应式 */
+	function setValue(prop : string, value : any | null) {
+		const next = {} as UTSJSONObject
+		// 保留已有键
+		let i = 0
+		while (i < fields.value.length) {
+			const p = fields.value[i].prop
+			if (p != prop) {
+				const old = values.value.getAny(p)
+				if (old != null) {
+					next.set(p, old)
+				}
+			}
+			i++
+		}
+		next.set(prop, value)
+		values.value = next
+	}
+
+	function setDisplay(prop : string, text : string) {
+		const next = {} as UTSJSONObject
+		let i = 0
+		while (i < fields.value.length) {
+			const p = fields.value[i].prop
+			const old = displayMap.value.getAny(p)
+			if (old != null && p != prop) {
+				next.set(p, old)
+			}
+			i++
+		}
+		if (text.length > 0) {
+			next.set(prop, text)
+		}
+		displayMap.value = next
+	}
+
+	function setShow(prop : string, show : boolean) {
+		const next = {} as UTSJSONObject
+		let i = 0
+		while (i < fields.value.length) {
+			const p = fields.value[i].prop
+			const old = showMap.value.getAny(p)
+			if (old != null) {
+				next.set(p, old)
+			}
+			i++
+		}
+		next.set(prop, show)
+		showMap.value = next
+	}
+
+	function onValueChange(prop : string, value : any | null) {
+		setValue(prop, value)
+		notify(prop)
+	}
+
+	/** 控件自带清除按钮（select / datetime-picker）：清空值并复位展示文案 */
+	function onCleared(prop : string) {
+		setValue(prop, '')
+		setDisplay(prop, '')
+		notify(prop)
+	}
+
+	function onDatetimeConfirm(prop : string, e : UTSJSONObject) {
+		// datetime-picker 的 confirm 载荷带 formatted（按 mode/format 输出），作为字符串值存储，
+		// 保证 date / datetime / time / year-month 与 date-strip 的值形态一致
+		const formatted = e.getString('formatted')
+		var text = ''
+		if (formatted != null) {
+			text = formatted
+		} else {
+			const ts = e.getNumber('timestamp')
+			if (ts != null) {
+				text = ts.toString()
+			}
+		}
+		setValue(prop, text)
+		setDisplay(prop, text)
+		emit('confirm', buildPayload(prop, text))
+		notify(prop)
+	}
+
+	function openCalendar(prop : string) {
+		if (props.disabled) {
+			return
+		}
+		setShow(prop, true)
+		emit('open', prop)
+	}
+
+	function onCalendarShow(prop : string, show : boolean) {
+		setShow(prop, show)
+		if (!show) {
+			emit('close', prop)
+		}
+	}
+
+	function onCalendarChange(prop : string, e : UTSJSONObject) {
+		// 单选模式的 payload 带 result（'YYYY-MM-DD'）
+		const result = e.getString('result')
+		var text = ''
+		if (result != null) {
+			text = result
+		}
+		if (text.length > 0) {
+			setValue(prop, text)
+			setDisplay(prop, text)
+		}
+		emit('confirm', buildPayload(prop, text))
+		notify(prop)
+	}
+
+	function buildPayload(prop : string, value : any | null) : UTSJSONObject {
+		return {
+			prop: prop,
+			value: value,
+			model: values.value
+		} as UTSJSONObject
+	}
+
+	function notify(prop : string) {
+		emit('update:modelValue', values.value)
+		emit('change', buildPayload(prop, rawVal(prop)))
+	}
+
+	// ---------- schema 生命周期 ----------
+
+	/** 合并 props.rules（同字段以 props.rules 优先） */
+	function mergeRules(base : UTSJSONObject) : UTSJSONObject {
+		const out = {} as UTSJSONObject
+		let i = 0
+		while (i < fields.value.length) {
+			const p = fields.value[i].prop
+			const b = base.getAny(p)
+			if (b != null) {
+				out.set(p, b)
+			}
+			i++
+		}
+		const extra = props.rules
+		if (extra != null) {
+			let j = 0
+			while (j < fields.value.length) {
+				const p2 = fields.value[j].prop
+				const e = extra.getAny(p2)
+				if (e != null) {
+					out.set(p2, e)
+				}
+				j++
+			}
+		}
+		return out
+	}
+
+	/** setSchema 的运行时覆盖值；为 null 时用 props.schema */
+	var overrideSchema : any | null = null
+
+	function currentSchema() : any | null {
+		if (overrideSchema != null) {
+			return overrideSchema
+		}
+		return props.schema
+	}
+
+	/**
+	 * 按 schema 重建字段与初始值。
+	 * keepExisting 为 true 时保留同名字段的已有值（用于运行时换 schema）。
+	 */
+	function applySchema(keepExisting : boolean) {
+		const parsed = parseSchema(currentSchema())
+		const old = values.value
+		const next = {} as UTSJSONObject
+		let i = 0
+		while (i < parsed.length) {
+			const f = parsed[i]
+			var v : any | null = null
+			if (keepExisting) {
+				v = old.getAny(f.prop)
+			}
+			if (v == null) {
+				v = initialValueFor(f)
+			}
+			next.set(f.prop, v)
+			i++
+		}
+		fields.value = parsed
+		values.value = next
+		displayMap.value = {} as UTSJSONObject
+		showMap.value = {} as UTSJSONObject
+		formRules.value = mergeRules(buildRules(parsed))
+	}
+
+	function setSchema(schema : any | null) {
+		overrideSchema = schema
+		applySchema(true)
+		const target = formRef.value
+		if (target != null) {
+			target.clearValidate(null)
+		}
+	}
+
+	// ---------- 对外方法 ----------
+
+	function validate() : Promise<boolean> {
+		const target = formRef.value
+		if (target == null) {
+			return Promise.resolve(false)
+		}
+		return target.validate()
+	}
+
+	function validateField(fieldProps : any | null = null, event : string = '') : UTSJSONObject[] {
+		const target = formRef.value
+		if (target == null) {
+			return [] as UTSJSONObject[]
+		}
+		return target.validateField(fieldProps, event)
+	}
+
+	function resetFields() {
+		const target = formRef.value
+		if (target == null) {
+			return
+		}
+		// 先回到 schema 初始值（保留当前字段集合），再让 nax-form 重置自身快照
+		applySchema(false)
+		target.clearValidate(null)
+		emit('update:modelValue', values.value)
+	}
+
+	function clearValidate(fieldProps : any | null = null) {
+		const target = formRef.value
+		if (target == null) {
+			return
+		}
+		target.clearValidate(fieldProps)
+	}
+
+	function getModel() : UTSJSONObject {
+		return values.value
+	}
+
+	defineExpose({
+		validate,
+		validateField,
+		resetFields,
+		clearValidate,
+		setSchema,
+		getModel
+	})
+
+	// ---------- 初始化与响应 ----------
+
+	// 用 props.schema 作为源（overrideSchema 优先）
+	watch((): any => props.schema, (_ : any) => {
+		overrideSchema = null
+		applySchema(false)
+	})
+
+	watch((): any => props.rules, (_ : any) => {
+		formRules.value = mergeRules(buildRules(fields.value))
+	})
+
+	// 外部 v-model 传入初值：仅补齐内部仍为空、而外部有值的字段（不覆盖用户已改的值）
+	watch((): any => props.modelValue, (nv : any) => {
+		if (nv == null) return
+		const external = nv as UTSJSONObject
+		const next = {} as UTSJSONObject
+		var changed = false
+		let i = 0
+		while (i < fields.value.length) {
+			const p = fields.value[i].prop
+			const cur = values.value.getAny(p)
+			const ext = external.getAny(p)
+			if (isEmptyValue(cur) && !isEmptyValue(ext)) {
+				next.set(p, ext)
+				changed = true
+			} else {
+				next.set(p, cur)
+			}
+			i++
+		}
+		if (!changed) {
+			return
+		}
+		values.value = next
+		// 同步展示文案（日期类触发条回显）
+		i = 0
+		while (i < fields.value.length) {
+			const f = fields.value[i]
+			const sv = values.value.getAny(f.prop)
+			if (sv != null && typeof sv == 'string') {
+				setDisplay(f.prop, sv as string)
+			}
+			i++
+		}
+	})
+
+	function isEmptyValue(v : any | null) : boolean {
+		if (v == null) return true
+		if (typeof v == 'string') return (v as string).length == 0
+		if (typeof v == 'boolean') return !(v as boolean)
+		const arr = v as any[]
+		if (arr != null && typeof arr.length == 'number') {
+			return arr.length == 0
+		}
+		return false
+	}
+
+	// 首次构建：用 props.schema（忽略 overrideSchema 的初始 null）
+	applySchema(false)
+</script>
+
+<style>
+	.nax-form-render {
+		flex-direction: column;
+		align-items: stretch;
+		/* #ifdef APP-ANDROID */
+		align-self: stretch;
+		/* #endif */
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		width: 100%;
+		/* #endif */
+	}
+
+	.nax-form-render__control {
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.nax-form-render__tip {
+		margin-top: 4px;
+		font-size: 12px;
+		line-height: 17px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.nax-form-render__unknown {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.nax-form-render__unknown-text {
+		font-size: 13px;
+		color: var(--nax-color-error, #d03050);
+	}
+
+	.nax-form-render__trigger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 40px;
+		padding-left: var(--nax-space-3, 12px);
+		padding-right: var(--nax-space-3, 12px);
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.nax-form-render__trigger--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.nax-form-render__trigger-text {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		/* #endif */
+	}
+
+	.nax-form-render__trigger-text--placeholder {
+		color: var(--nax-color-text-placeholder, #e5e5ea);
+	}
+
+	.nax-form-render__trigger-arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+</style>

@@ -33,7 +33,7 @@ const CATEGORIES = [
     text: '表单组件',
     items: [
       'input', 'search', 'textarea', 'select', 'calendar', 'datetime-picker', 'date-strip', 'keyboard',
-      'switch', 'slider', 'checkbox', 'radio', 'number-box', 'rate', 'upload', 'form'
+      'switch', 'slider', 'checkbox', 'radio', 'number-box', 'rate', 'upload', 'form', 'form-render'
     ]
   },
   {
@@ -107,6 +107,7 @@ const COMPONENT_LABELS = {
   rate: '评分',
   upload: '上传',
   form: '表单',
+  'form-render': '动态表单',
   transition: '过渡',
   loading: '加载',
   progress: '进度条',

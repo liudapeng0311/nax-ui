@@ -228,6 +228,10 @@ export const sidebar = {
         {
           "text": "表单 <span class=\"nax-sidebar-en\">Form</span>",
           "link": "/components/form"
+        },
+        {
+          "text": "动态表单 <span class=\"nax-sidebar-en\">FormRender</span>",
+          "link": "/components/form-render"
         }
       ]
     },

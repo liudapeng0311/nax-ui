@@ -1,0 +1,91 @@
+/**
+ * nax-form-render schema 类型
+ *
+ * 控件类型是**封闭枚举**：受 uni-app x 蒸汽模式渲染机制约束（模板编译期静态分析，
+ * 不支持运行期构造组件），渲染分支在组件源码内以 v-if / v-else-if 长链穷举。
+ * 新增控件类型需要修改组件源码，不能由 schema 引入任意组件。
+ */
+
+/**
+ * 支持的控件类型。
+ * 与组件内渲染分支一一对应；schema 里出现枚举外的值会被跳过并给出占位提示。
+ */
+export type NaxFormFieldType =
+	'text' |
+	'password' |
+	'number-input' |
+	'digit' |
+	'tel' |
+	'textarea' |
+	'search' |
+	'select' |
+	'switch' |
+	'radio' |
+	'checkbox' |
+	'checkbox-group' |
+	'number' |
+	'slider' |
+	'rate' |
+	'date' |
+	'datetime' |
+	'time' |
+	'year-month' |
+	'calendar' |
+	'date-strip'
+
+/** 选项项（select / radio / checkbox-group 共用） */
+export type NaxFormFieldOption = {
+	/** 选项值；作为回写到 model 的值 */
+	value : string,
+	/** 选项文案 */
+	label : string,
+	/** 是否禁用该项 */
+	disabled : boolean
+}
+
+/**
+ * 单个字段的 schema。
+ * 未知字段会被忽略，不会抛错（便于服务端渐进下发）。
+ * 所有字段都在构造函数式赋值时给出默认值，因此声明为必填（避免 uts 的 null 检查告警）。
+ */
+export type NaxFormField = {
+	/** 字段名；对应 model 的 key，也是 nax-form-item 的 prop（必填） */
+	prop : string,
+	/** 标签文案 */
+	label : string,
+	/** 控件类型，见 NaxFormFieldType；默认 text */
+	type : string,
+	/** 占位文案 */
+	placeholder : string,
+	/** 是否必填；为 true 时自动生成 required 规则并显示星号 */
+	required : boolean,
+	/** 是否禁用该字段 */
+	disabled : boolean,
+	/** 选项数据（select / radio / checkbox-group 需要） */
+	options : NaxFormFieldOption[],
+	/** 数字类控件的下限（number / slider / rate 使用） */
+	min : number,
+	/** 数字类控件的上限 */
+	max : number,
+	/** 步长（number / slider 使用） */
+	step : number,
+	/** 文本最大长度，映射到控件的 maxlength；-1 表示用组件默认 */
+	maxlength : number,
+	/** 该字段的校验规则（数组），非空时取代由 required 生成的规则 */
+	rules : any[],
+	/** 该字段的校验触发时机；空数组表示用默认 ['blur', 'change'] */
+	trigger : string[],
+	/** 日期类控件可选范围下限（'YYYY-MM-DD' 或时间戳） */
+	minDate : string,
+	/** 日期类控件可选范围上限 */
+	maxDate : string,
+	/** datetime / time 是否显示秒列 */
+	showSecond : boolean,
+	/** 提示文案，展示在控件下方（灰色小字） */
+	tip : string
+}
+
+/** 组件对外派发的表单值：prop -> 值 */
+export type NaxFormRenderValue = {
+	[prop : string] : any
+}
