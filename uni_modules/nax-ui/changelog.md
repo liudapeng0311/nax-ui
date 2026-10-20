@@ -1,3 +1,6 @@
+## 0.4.0（2026-10-20）
+- 新增组件 `nax-form-render`（0.1.0）并纳入套装依赖聚合：schema/JSON 驱动的动态表单渲染器，控件类型为封闭枚举（蒸汽模式模板编译期静态分析，分支源码内穷举），复用 `nax-form` + `nax-form-item` 的标签与校验链路（聚合组件数 53 → 54，`nax-video` 仍独立发布不在套装内）
+- `package.json` description、readme 与 `docs/component-inventory.md` 的组件数表述同步为 54
 ## 0.3.7（2026-09-28）
 - 套装依赖补齐：`uni_modules.dependencies` 增加此前遗漏的 `nax-table`（0.1.0，columns/data 数据驱动的数据表格），`package.json` description 与 readme 的组件数表述同步为 53（聚合组件数 52 → 53）
 - 依赖组件更新：`nax-rich-text`（0.3.1→0.3.2）修复单独安装缺包——组件内使用 `<nax-icon>`（视频 / 音频播放钮）与 `<nax-loading>`（视频加载反馈），`uni_modules.dependencies` 此前只声明 `nax-ui-theme`，单独安装时这两个组件缺失（套装安装不受影响）

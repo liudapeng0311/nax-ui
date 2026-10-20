@@ -1,6 +1,6 @@
 # nax-table 表格
 
-> nax-ui 数据表格组件（uni-app x / 蒸汽模式）。columns + data 数据驱动，支持斑马纹、边框、固定表头、横向滚动、排序、行数省略、空态与操作列。
+> nax-ui 数据表格组件（uni-app x / 蒸汽模式）。columns + data 数据驱动：斑马纹 / 边框、固定表头 + 横向滚动、排序、行数省略、空态、多选、合计行、分组表头、分页、加载更多、固定列、虚拟滚动，以及可编辑单元格（文本输入 / 日期选择）、序号列自定义编号、表头与合计行底色配置。
 
 ## 用法示例
 
@@ -24,6 +24,32 @@
 </script>
 ```
 
+```uvue
+<template>
+	<nax-table :data="list" :columns="cols" @cell-edit="onCellEdit"></nax-table>
+</template>
+
+<script setup>
+	import { NaxTableColumn, NaxTableCellEditPayload } from '@/uni_modules/nax-table/components/nax-table/table-types.uts'
+
+	const cols = [
+		new NaxTableColumn({ name: 'name', label: '姓名', width: '120', editable: true }),
+		new NaxTableColumn({ name: 'age', label: '年龄', width: '100', align: 'right', dataType: 'number', editable: true, backgroundColor: '#daefe4' }),
+		new NaxTableColumn({ name: 'brd', label: '生日', width: '140', editor: 'date', format: 'YYYY-MM-DD', editable: true })
+	]
+	const list = [
+		{ name: '张三', age: 24, brd: '1985-07-02' },
+		{ name: '李四', age: 31, brd: '1995-07-02' }
+	]
+
+	function onCellEdit(payload : NaxTableCellEditPayload, row : any) {
+		// 组件不改 data：必须回写，否则单元格保持旧值
+		row[payload.name] = payload.value
+		uni.showToast({ title: payload.value.toString(), icon: 'none' })
+	}
+</script>
+```
+
 ## Props — Props
 
 | 参数 | 说明 | 类型 | 默认值 |
@@ -35,11 +61,14 @@
 | `highlight` | 点击行高亮 | `boolean` | `false` |
 | `height` | 表体高度；纯数字按 px；不传随内容不纵向滚动 | `string` | `''` |
 | `thH` | 表头行高 | `string` | `'40'` |
+| `headerBackgroundColor` | 表头底色（16 进制或任意 CSS 颜色字面量）；空则走 `--nax-table-header-bg` → `--nax-color-bg-secondary` | `string` | `''` |
 | `tdH` | 单元格最小行高 | `string` | `'40'` |
+| `editGap` | 可编辑单元格的编辑框是否与单元格左右边缘留空隙；`false` 时编辑框铺满单元格、相邻可编辑列无缝 | `boolean` | `true` |
 | `emptyString` | 全局空值占位文案（列配置 `emptyString` 优先） | `string` | `''` |
 | `empty` | data 为空时是否展示内置空态 | `boolean` | `true` |
 | `showSummary` | 合计行开关 | `boolean` | `false` |
 | `sumText` | 合计行首格文案 | `string` | `'合计'` |
+| `summaryBackgroundColor` | 合计行底色（16 进制或任意 CSS 颜色字面量）；空则走 `--nax-table-summary-bg` → `--nax-color-bg-secondary` | `string` | `''` |
 | `summaryMethod` | 自定义合计 `(columns, data) => NaxTableSummaryCell[]`；cell 支持 `colspan` 跨列 | `function \| null` | `null` |
 | `showPaging` | 分页器开关 | `boolean` | `false` |
 | `pagingMode` | `inner` 组件内部自动切片 / `outer` 只 emit `page-change` | `string` | `'inner'` |
@@ -66,12 +95,17 @@
 | `filters` | 值 → 文案映射（如 `new Map([['0','男'],['1','女']])`），命中展示文案、未命中回退原值 | `new Map()` |
 | `selectable` | 行是否可勾选 `(row, index) => boolean`（仅 selection 列生效）；返回 false 时勾选框置灰、不可勾选且不参与全选 | `null` |
 | `dataType` | 字段类型 `date/number/string`（默认 string）；影响 `format` 解析与可编辑输入键盘 | `string` |
-| `format` | 展示格式：date 列用日期模板（`YYYY-MM-DD HH:mm:ss` 占位替换）；number 列 `#,###.00` 千分位+小数位、含 `%` 输出百分比 | `''` |
-| `editable` | 单元格是否可编辑：点击进入输入态（底色与只读列区分），失焦/确认提交 `cell-edit` | `false` |
+| `format` | 展示格式：date 列用日期模板（大小写不敏感，`yyyy`/`yy` 年、`mm` 月或分、`dd` 日、`hh` 时、`ss` 秒；`mm` 在 `hh` 之后按分钟、否则按月份，如 `YYYY-MM-DD HH:mm:ss`）；number 列 `#,###.00` 千分位+小数位、含 `%` 输出百分比 | `''` |
+| `editable` | 单元格是否可编辑：点击进入输入态（底色与只读列区分，编辑态沿用列 `align` 对齐），失焦/确认提交 `cell-edit`；配合 `editGap` 控制编辑框是否铺满单元格 | `false` |
+| `editor` | 单元格编辑器：`input` 文本输入（默认）/ `date` 日期 / `datetime` 日期时间 / `time` 时间 / `year` 年 / `year-month` 年月 / `month-day` 月日；日期类需配合 `editable: true`，点击弹日期选择 | `'input'` |
+| `minDate` | 日期类编辑器可选范围下限（`'YYYY-MM-DD'` 或 `'YYYY-MM-DD HH:mm:ss'`）；空则不限制 | `''` |
+| `maxDate` | 日期类编辑器可选范围上限；空则不限制 | `''` |
+| `showSecond` | `datetime` / `time` 编辑器是否显示秒列（微信端 `time` + 秒不可映射原生 picker，退回组件弹层） | `false` |
 | `emptyString` | 空值占位文案 | `''` |
 | `color` | 单元格文字颜色（16 进制） | `''` |
+| `backgroundColor` | 可编辑单元格的编辑框背景色（16 进制，展示态与编辑态共用；内联字面量，App 蒸汽模式同样生效）；仅 `editable: true` 的列生效 | `''` |
 | `sorter` | 是否可排序（仅 text 列）：`true` 内部排序 / `'custom'` 组件不排序、仅 emit `sort-change`（`source='custom'`）由业务处理 | `false` |
-| `formatter` | 自定义单元格文本 `(row, index) => string` | `null` |
+| `formatter` | 自定义单元格文本 `(row, index) => string`；`index` 列配了它即接管序号渲染（`index` 为 data 绝对下标，默认序号为 `index + 1`） | `null` |
 | `renders` | operation 列按钮 `NaxTableOperation[]` | `[]` |
 
 ## Props — NaxTableOperation
@@ -116,10 +150,11 @@
 
 - `nax-empty`（空态占位）
 - `nax-icon`（多选勾选 / 半选标记）
+- `nax-datetime-picker`（日期类编辑器弹层，仅列配了日期类 `editor` 时挂载）
 - `nax-ui-theme`（可选 token）
 
 ## 平台说明
 
 - **App（Android / iOS / 鸿蒙，蒸汽模式）**：支持
 - **Web**：支持
-- **微信小程序**：支持
+- **微信小程序**：支持；日期编辑的 `date` / `year` / `year-month` / `time`（未开 `showSecond`）用微信原生 picker（系统弹层不可定制，且**只能由用户点击弹出**——点单元格进入编辑态后，再点单元格内的选择框才弹出系统选择器）；`datetime` / `month-day` / `time` + `showSecond` 无法映射，退回组件自建弹层（`nax-datetime-picker`），与其它端一致

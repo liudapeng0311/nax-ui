@@ -1,4 +1,4 @@
-# nax-ui 组件索引（53 个组件 + nax-use 组合式函数）
+# nax-ui 组件索引（54 个组件 + nax-use 组合式函数）
 
 按需选择组件：**先看这里确定组件名，再读 `components/<name>.md` 获取完整 API**。
 所有组件 easycom 自动注册，模板中直接写 `<nax-xxx>` 即可，无需 import。
@@ -62,6 +62,7 @@
 | `nax-rate` | 评分；`v-model`、allowHalf | [components/nax-rate.md](components/nax-rate.md) |
 | `nax-upload` | 上传；选图/预览/删除 | [components/nax-upload.md](components/nax-upload.md) |
 | `nax-form` / `nax-form-item` | 表单校验容器；rules、validate() | [components/nax-form.md](components/nax-form.md) |
+| `nax-form-render` | 动态表单渲染器；schema/JSON 驱动，控件类型为封闭枚举，`required` 自动生成校验；methods `validate`/`setSchema`/`getModel` | [components/nax-form-render.md](components/nax-form-render.md) |
 
 ## 反馈 Feedback
 
@@ -99,6 +100,7 @@
 | `useDatetimeParts` | 日期时间 parts（与 `nax-datetime-picker` 同一引擎，依赖该包；供自建 picker-view） |
 | `useInterval` | 可控轮询；start/stop/running/count（均响应式） |
 | `useStorage` | 响应式本地缓存；改值即写缓存，置 `null` 删除 key |
+| `useChunkUpload` | 分片上传；协议无关（init/sendChunk/complete 三回调），chunkSize/concurrent/retry 配置、进度聚合与暂停/恢复/中止 |
 
 ## 选择建议（常见需求 → 组件）
 

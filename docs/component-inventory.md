@@ -9,7 +9,7 @@
 
 命名统一：`nax-<name>`；组件包目录：`uni_modules/nax-<name>/components/nax-<name>/nax-<name>.uvue`；套装入口为 `uni_modules/nax-ui`，仅聚合依赖。
 
-当前落地：53 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装。组合式函数（无头逻辑复用）见第 6 节。
+当前落地：55 个独立组件包 + 1 个主题包，组件 demo 统一位于 `pages/components/<name>/index.uvue`；另有 `tabs-swiper` 场景 demo。`nax-video` 为独立组件包，不聚合进 `nax-ui` 套装（套装聚合 54 个）。组合式函数（无头逻辑复用）见第 6 节。
 
 ---
 
@@ -94,6 +94,7 @@
 | 上传 | `nax-upload` | P1 | 图片/视频选择与预览上传 | `fileList` `accept` `maxCount` `maxSize` `multiple` `deletable` / `afterRead` `delete` `oversize` **done** |
 | 表单项 | `nax-form-item` | P1 | 标签+控件+错误 | `label` `prop` `rules` `required` `status` `error-message` `labelPosition` `labelWidth` / **done** |
 | 表单 | `nax-form` | P1 | 校验容器 | `model` `rules` `errorType` `labelPosition` `labelWidth` / `validate` `validateField` `resetFields` `clearValidate` `setRules` **done** |
+| 动态表单 | `nax-form-render` | P1 | schema/JSON 驱动的表单渲染器（控件类型为封闭枚举） | `schema` `v-model` `rules` `labelPosition` `labelWidth` `labelAlign` `labelSize` `borderBottom` `errorType` `disabled` `showLabel` / `update:modelValue` `change` `confirm` / `validate` `resetFields` `clearValidate` `setSchema` `getModel` **done** |
 
 ### 3.2 反馈 Feedback
 
@@ -173,6 +174,7 @@
 | `nax-search` | done | 插件包 `uni_modules/nax-search`；shape/showAction/animation/search/custom；清除不依赖 focus |
 | `nax-rate` | done | 插件包 `uni_modules/nax-rate`；v-model/count/allowHalf/minCount/滑动打分/readonly |
 | `nax-form` / `nax-form-item` | done | 插件包 `uni_modules/nax-form`；轻量 rules 校验 + provide/inject |
+| `nax-form-render` | done | 插件包 `uni_modules/nax-form-render`；schema/JSON 驱动动态表单；**控件类型为封闭枚举**（蒸汽模式模板编译期静态分析，无法运行期构造组件，分支在源码内穷举，新增类型需改组件源码）；覆盖 16 类控件（text/password/number-input/digit/tel/textarea/search/select/switch/radio/checkbox/checkbox-group/number/slider/rate/date/datetime/time/year-month/calendar/date-strip）；`required` 自动生成校验规则；内部组合 `nax-form` + `nax-form-item` 复用标签与校验链路；值回写统一走 `update:modelValue`（`v-for` 内不能绑动态 key 的 `v-model`）；schema 解析的读字段在 App 走 `UTSJSONObject` API（条件编译）；methods `validate`/`validateField`/`resetFields`/`clearValidate`/`setSchema`（换 schema 保留同名字段值）/`getModel`；demo `pages/components/form-render` |
 | `nax-upload` | done | autoUpload/action/header/formData;  插件包 `uni_modules/nax-upload`；选图/预览/删除/状态；实际上传在 afterRead |
 | `nax-line` | done | 插件包 `uni_modules/nax-line`；布局纯线条；direction/size/dashed/type/space/inset；默认 `--nax-color-divider` |
 | `nax-cell` / `nax-cell-group` | done | 插件包 `uni_modules/nax-cell`；icon/is-link/inset/provide-inject |
@@ -193,7 +195,7 @@
 | `nax-virtual-list` | done | 插件包 `uni_modules/nax-virtual-list`；全端 spacer 窗口裁剪；Web/微信小程序用 `WEB || MP-WEIXIN` 触底锁、剩余距离回差及追加后 scrollTop 恢复；鸿蒙 `APP-HARMONY` 窗口滞后 + scrollend 同步；作用域插槽 item/index；load/refresh/empty；scrollToIndex/scrollToOffset；demo `pages/components/virtual-list` |
 | `nax-table` | done | 插件包 `uni_modules/nax-table`；columns/data 驱动；stripe/border/highlight；固定表头（表头在纵向滚动区外）+ 横向 scroll-x；列类型 text/index/operation/selection；sorter 内部排序 + sort-change；lines 多行省略；emptyString/formatter；action 操作事件；插槽 empty；v2：selection 多选（全选/半选）+ selection-change、合计行 showSummary/sumText/summaryMethod(colspan 跨列)、分组表头 groupTitle、分页 showPaging（inner 切片/outer 受控）+ page-change、加载更多 showLoadMore/finished + load-more；v3：固定列 fixed（覆盖层 + 主区 @scroll 纵向单向同步、主区槽位 visibility 让位）、虚拟滚动 virtual+rowH（spacer 占位 + 窗口裁剪 ±5 行，多选/行号改 data 绝对下标）；demo `pages/components/table` |
 | `nax-video` | done | 插件包 `uni_modules/nax-video`（**独立发布，不聚合进 `nax-ui` 套装**）；无头视频；原生 `<video>` + `VideoContext`；默认 `controls=false`；作用域插槽状态/方法；多实例隔离；能力下限 4.61；iOS 未验证；demo `pages/components/video` |
-| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 53 个 `nax-*` 组件包与 `nax-ui-theme`；demo 路径统一为 `pages/components/<name>/index` |
+| `nax-ui` 套装 | done | `uni_modules/nax-ui/package.json` 聚合当前 54 个 `nax-*` 组件包与 `nax-ui-theme`（`nax-video` 独立发布不在套装内）；demo 路径统一为 `pages/components/<name>/index` |
 
 ---
 
