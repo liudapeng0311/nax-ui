@@ -308,7 +308,12 @@ export class NaxChunkUploadState {
 		const g = gen
 		// #ifdef WEB
 		// Web 无 FileSystemManager：fetch blob 取 size，并顺便缓存 Blob 供切片
-		fetch(this._path).then((res : any) : any => {
+		const fetched = fetch(this._path)
+		if (fetched == null) {
+			this._failTask(g, '读取文件失败：fetch 不可用')
+			return
+		}
+		fetched.then((res : any) : any => {
 			return (res as any).blob()
 		}).then((blob : any) : void => {
 			if (g != this._generation) {
@@ -682,7 +687,12 @@ export class NaxChunkUploadState {
 			onGot(this._webBlob)
 			return
 		}
-		fetch(this._path).then((res : any) : any => {
+		const fetched = fetch(this._path)
+		if (fetched == null) {
+			onFail('读取文件失败：fetch 不可用')
+			return
+		}
+		fetched.then((res : any) : any => {
 			return (res as any).blob()
 		}).then((blob : any) : void => {
 			this._webBlob = blob
