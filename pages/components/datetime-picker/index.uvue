@@ -24,6 +24,20 @@
 			</view>
 
 			<view class="section">
+				<text class="section__title">预设初值（进入页面即回显）</text>
+				<nax-datetime-picker
+					v-model:show="presetShow"
+					v-model="presetValue"
+					mode="datetime"
+					show-trigger
+					title="预设时间"
+					placeholder="请选择"
+					@confirm="onPresetConfirm"
+				></nax-datetime-picker>
+				<text class="hint">初值：{{ formatTs(presetValue) }}（v-model 绑非 0 时间戳即回显，打开弹层直接停在该值）</text>
+			</view>
+
+			<view class="section">
 				<text class="section__title">内置触发条 + 日期 date</text>
 				<nax-datetime-picker
 					v-model:show="dateShow"
@@ -117,6 +131,80 @@
 			</view>
 
 			<view class="section">
+				<text class="section__title">日期时间区间（两个 picker 互约束）</text>
+				<view class="row">
+					<view class="range-col">
+						<nax-datetime-picker
+							v-model:show="segStartShow"
+							v-model="segStartValue"
+							mode="datetime"
+							size="sm"
+							show-trigger
+							title="开始时间"
+							placeholder="开始时间"
+							:max-date="segStartMax"
+							@confirm="onSegStartConfirm"
+							@clear="onSegStartClear"
+						></nax-datetime-picker>
+					</view>
+					<text class="range-sep">~</text>
+					<view class="range-col">
+						<nax-datetime-picker
+							v-model:show="segEndShow"
+							v-model="segEndValue"
+							mode="datetime"
+							size="sm"
+							show-trigger
+							title="结束时间"
+							placeholder="结束时间"
+							:min-date="segEndMin"
+							@confirm="onSegEndConfirm"
+							@clear="onSegEndClear"
+						></nax-datetime-picker>
+					</view>
+				</view>
+				<text class="hint">结果：{{ segDisplay }}（先选哪个都行，起止互相约束）</text>
+			</view>
+
+			<view class="section">
+				<text class="section__title">日期时间区间（单触发条 + 两步选择）</text>
+				<view
+					class="range-trigger"
+					hover-class="range-trigger--hover"
+					:hover-start-time="20"
+					:hover-stay-time="70"
+					@click="onSpanOpen"
+				>
+					<text class="range-trigger__text" :class="spanTextClass" :max-lines="1">{{ spanDisplay }}</text>
+					<view v-if="spanHasValue" class="range-trigger__clear" @click.stop="onSpanClear">
+						<nax-icon name="close" size="16" color="#767c82"></nax-icon>
+					</view>
+					<view v-else class="range-trigger__arrow">
+						<nax-icon name="chevron-down" size="16" color="#767c82"></nax-icon>
+					</view>
+				</view>
+				<text class="hint">点触发条先选开始，确认后自动接着选结束</text>
+				<nax-datetime-picker
+					v-model:show="spanStartShow"
+					v-model="spanStartValue"
+					mode="datetime"
+					title="选择开始时间"
+					:max-date="spanStartMax"
+					@confirm="onSpanStartConfirm"
+					@cancel="onSpanStartCancel"
+					@close="onSpanStartClose"
+				></nax-datetime-picker>
+				<nax-datetime-picker
+					v-model:show="spanEndShow"
+					v-model="spanEndValue"
+					mode="datetime"
+					title="选择结束时间"
+					:min-date="spanEndMin"
+					@confirm="onSpanEndConfirm"
+				></nax-datetime-picker>
+			</view>
+
+			<view class="section">
 				<text class="section__title">自定义 format / 无单位</text>
 				<nax-datetime-picker
 					v-model:show="fmtShow"
@@ -178,7 +266,29 @@
 		darkMode.value = bindDemoThemePage()
 	})
 
+	function pad2(n: number): string {
+		if (n < 10) return '0' + n.toString()
+		return n.toString()
+	}
+
+	/** 与组件 datetime 模式默认输出一致（YYYY-MM-DD HH:mm） */
+	function formatTs(ts: number): string {
+		if (ts <= 0) return ''
+		const d = new Date(ts)
+		return d.getFullYear().toString() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes())
+	}
+
+	/** 今天的某个时刻，用于预设初值（演示进入页面即回显） */
+	function todayAt(hour: number, minute: number): number {
+		const now = new Date()
+		return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0).getTime()
+	}
+
 	const lastEvent = ref('无')
+
+	// 预设初值：进页面即回显（v-model 给非 0 时间戳即可）
+	const presetShow = ref(false)
+	const presetValue = ref(todayAt(10, 30))
 
 	const dtShow = ref(false)
 	const dtValue = ref(0)
@@ -212,6 +322,48 @@
 	const fmtValue = ref(0)
 	const fmtText = ref('未选择')
 
+	// 区间示例一：两个 picker 并列，min/max 互相约束；预设值进页面即回显
+	const segStartShow = ref(false)
+	const segStartValue = ref(todayAt(9, 0))
+	const segEndShow = ref(false)
+	const segEndValue = ref(todayAt(18, 0))
+
+	// 未选时传 0，组件按「未传边界」处理，等价于不约束
+	const segStartMax = computed((): number => segEndValue.value)
+	const segEndMin = computed((): number => segStartValue.value)
+
+	const segDisplay = computed((): string => {
+		const s = formatTs(segStartValue.value)
+		const e = formatTs(segEndValue.value)
+		if (s.length == 0 && e.length == 0) return '未选择'
+		return (s.length > 0 ? s : '不限') + ' ~ ' + (e.length > 0 ? e : '不限')
+	})
+
+	// 区间示例二：单触发条，确认起点后自动接着选终点
+	const spanStartShow = ref(false)
+	const spanStartValue = ref(0)
+	const spanEndShow = ref(false)
+	const spanEndValue = ref(0)
+	/** 起点已确认、待接续打开终点；取消/清空时复位，避免误触发 */
+	let spanPendingEnd = false
+
+	const spanStartMax = computed((): number => spanEndValue.value)
+	const spanEndMin = computed((): number => spanStartValue.value)
+
+	const spanHasValue = computed((): boolean => spanStartValue.value > 0 || spanEndValue.value > 0)
+
+	const spanDisplay = computed((): string => {
+		if (!spanHasValue.value) return '选择日期时间区间'
+		const s = formatTs(spanStartValue.value)
+		const e = formatTs(spanEndValue.value)
+		return (s.length > 0 ? s : '开始时间') + ' ~ ' + (e.length > 0 ? e : '结束时间')
+	})
+
+	const spanTextClass = computed((): string => {
+		if (!spanHasValue.value) return 'range-trigger__text--placeholder'
+		return ''
+	})
+
 	function readFormatted(e: UTSJSONObject): string {
 		const s = e.getString('formatted')
 		if (s != null && s.length > 0) {
@@ -222,6 +374,10 @@
 			return ts.toString()
 		}
 		return ''
+	}
+
+	function onPresetConfirm(e: UTSJSONObject) {
+		lastEvent.value = 'confirm preset → ' + readFormatted(e)
 	}
 
 	function onDtConfirm(e: UTSJSONObject) {
@@ -271,6 +427,62 @@
 
 	function onCancel(name: string) {
 		lastEvent.value = 'cancel ' + name
+	}
+
+	function onSegStartConfirm(e: UTSJSONObject) {
+		lastEvent.value = 'confirm seg start → ' + readFormatted(e)
+	}
+
+	function onSegStartClear() {
+		lastEvent.value = 'clear seg start'
+	}
+
+	function onSegEndConfirm(e: UTSJSONObject) {
+		lastEvent.value = 'confirm seg end → ' + readFormatted(e)
+	}
+
+	function onSegEndClear() {
+		lastEvent.value = 'clear seg end'
+	}
+
+	function onSpanOpen() {
+		// 已选到终点则从头开始，否则从起点开始补全
+		if (spanStartValue.value > 0 && spanEndValue.value > 0) {
+			spanStartShow.value = true
+			return
+		}
+		if (spanStartValue.value == 0) {
+			spanStartShow.value = true
+			return
+		}
+		spanEndShow.value = true
+	}
+
+	function onSpanStartConfirm(e: UTSJSONObject) {
+		lastEvent.value = 'confirm span start → ' + readFormatted(e)
+		// 起点确认（弹层关闭动画结束后）自动接续选终点
+		spanPendingEnd = true
+	}
+
+	function onSpanStartCancel() {
+		spanPendingEnd = false
+	}
+
+	function onSpanStartClose() {
+		if (!spanPendingEnd) return
+		spanPendingEnd = false
+		spanEndShow.value = true
+	}
+
+	function onSpanEndConfirm(e: UTSJSONObject) {
+		lastEvent.value = 'confirm span end → ' + readFormatted(e)
+	}
+
+	function onSpanClear() {
+		spanStartValue.value = 0
+		spanEndValue.value = 0
+		spanPendingEnd = false
+		lastEvent.value = 'clear span'
 	}
 </script>
 
@@ -336,5 +548,58 @@
 
 	.gap {
 		width: 10px;
+	}
+
+	.range-col {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.range-sep {
+		padding-left: 6px;
+		padding-right: 6px;
+		font-size: 14px;
+		color: var(--nax-color-text-secondary, #767c82);
+	}
+
+	.range-trigger {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		height: 40px;
+		padding-left: 12px;
+		padding-right: 12px;
+		background-color: var(--nax-color-bg, #ffffff);
+		border-radius: var(--nax-radius-md, 3px);
+		border-width: var(--nax-border-width, 1px);
+		border-style: solid;
+		border-color: var(--nax-color-border, #f0f0f3);
+	}
+
+	.range-trigger--hover {
+		background-color: var(--nax-color-bg-hover, #f3f3f5);
+	}
+
+	.range-trigger__text {
+		flex: 1;
+		min-width: 0;
+		font-size: var(--nax-font-size-md, 16px);
+		color: var(--nax-color-text, #333639);
+		/* #ifndef APP-ANDROID || APP-IOS || APP-HARMONY */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		/* #endif */
+	}
+
+	.range-trigger__text--placeholder {
+		color: var(--nax-color-text-placeholder, #e5e5ea);
+	}
+
+	.range-trigger__clear,
+	.range-trigger__arrow {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

@@ -68,6 +68,141 @@ uni-app x 时间选择器（底部弹层 + `picker-view`）。
 | mask-closable | true | 点遮罩关闭；**微信小程序端系统弹层模式不生效** |
 | safe-area-inset-bottom | true | 底部安全区；**微信小程序端系统弹层模式不生效** |
 
+## 预设初值
+
+`v-model` 绑定非 `0` 的初值，进入页面触发条即显示该时间，打开弹层也直接停在它上面（`preserveSelection` 默认 `true`），无需手动 set：
+
+```uvue
+<nax-datetime-picker
+  v-model:show="show"
+  v-model="value"
+  mode="datetime"
+  show-trigger
+  @confirm="onConfirm"
+></nax-datetime-picker>
+```
+
+```uts
+// 今天 10:30
+function todayAt(hour : number, minute : number) : number {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0).getTime()
+}
+
+const value = ref(todayAt(10, 30))
+```
+
+初值可传时间戳（ms）或日期字符串，两种写法等价：
+
+```uts
+const value = ref(new Date(2026, 0, 1, 9, 0, 0).getTime())  // 时间戳
+const value = ref('2026-01-01 09:00')                        // 字符串
+```
+
+设为 `0`（或 `''` / `null`）表示未选择，触发条显示 `placeholder`。若初始时间早于 `min-date` 或晚于 `max-date`，会被自动收敛到边界内。
+
+## 日期时间区间
+
+组件以**单值**为模型（`v-model` 一个时间戳），区间用两个实例组合实现，不需要额外组件。
+
+### 两个 picker 并列
+
+起止各一个内置触发条，用 `min-date` / `max-date` 互相约束，先选哪个都行：
+
+```uvue
+<view class="row">
+  <nax-datetime-picker
+    v-model:show="startShow"
+    v-model="startValue"
+    mode="datetime"
+    show-trigger
+    placeholder="开始时间"
+    :max-date="endValue"
+    @confirm="onStartConfirm"
+  ></nax-datetime-picker>
+  <nax-datetime-picker
+    v-model:show="endShow"
+    v-model="endValue"
+    mode="datetime"
+    show-trigger
+    placeholder="结束时间"
+    :min-date="startValue"
+    @confirm="onEndConfirm"
+  ></nax-datetime-picker>
+</view>
+```
+
+未选中时 `v-model` 为 `0`，传给 `min-date` / `max-date` 即视为「未传边界」，等价于不约束，无需额外判断。
+
+### 单触发条 + 两步选择
+
+只要一个触发条时，两个实例都不传 `show-trigger`（不渲染内置触发条），自己渲染触发区，并在起点 `close` 后自动打开终点：
+
+```uvue
+<view class="range-trigger" @click="onSpanOpen">
+  <text>{{ spanDisplay }}</text>
+</view>
+
+<nax-datetime-picker
+  v-model:show="startShow"
+  v-model="startValue"
+  mode="datetime"
+  title="选择开始时间"
+  :max-date="endValue"
+  @confirm="onStartConfirm"
+  @cancel="onSpanCancel"
+  @close="onStartClose"
+></nax-datetime-picker>
+<nax-datetime-picker
+  v-model:show="endShow"
+  v-model="endValue"
+  mode="datetime"
+  title="选择结束时间"
+  :min-date="startValue"
+  @confirm="onEndConfirm"
+></nax-datetime-picker>
+```
+
+```uts
+const startShow = ref(false)
+const startValue = ref(0)
+const endShow = ref(false)
+const endValue = ref(0)
+let pendingEnd = false
+
+function onSpanOpen() {
+  if (startValue.value == 0) {
+    startShow.value = true
+  } else if (endValue.value == 0) {
+    endShow.value = true
+  } else {
+    startShow.value = true
+  }
+}
+
+function onStartConfirm(e : UTSJSONObject) {
+  // 起点确认，待弹层退场后接续选终点
+  pendingEnd = true
+}
+
+function onSpanCancel() {
+  pendingEnd = false
+}
+
+function onStartClose() {
+  if (!pendingEnd) return
+  pendingEnd = false
+  endShow.value = true
+}
+```
+
+接续时机用 `@close` 而非 `@confirm`：`close` 在退场动画结束后触发（面板已卸载），此时再打开第二个弹层不会出现两层遮罩叠加。
+
+### 注意
+
+- 微信小程序端可映射模式（`date` / `year` / `year-month` / `time` 无秒）走微信系统弹层，`v-model:show` 不生效。单触发条两步方案请用 `datetime` / `month-day` / `time` + `show-second`（自建弹层），或仅在其他端使用。
+- 纯日期区间还可直接用 `nax-calendar`（`mode="range"`）或 `nax-date-strip`（`type="range"`）。
+
 ## 事件
 
 confirm 回调字段：value / timestamp / formatted / year / month / day / hour / minute / second / mode。
