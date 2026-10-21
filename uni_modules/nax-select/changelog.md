@@ -1,3 +1,8 @@
+## 0.3.2（2026-10-21）
+- **修复 Web / 小程序端打开弹层报错 `obj.getAny is not a function`**：`list` 传入普通对象字面量（如 `[{ value, label }]`）时崩溃。原因是 `asObject` 的 `as UTSJSONObject` 在 JS 端仅为类型标注，编译后被擦除，普通对象不带 `getAny` / `getString` / `getArray` 方法
+- 新增跨端读字段 helper（`readAnyField` / `readStringField` / `readNumberField`）：App 端仍走 `UTSJSONObject.getAny`，Web / 小程序端改走属性访问，并支持 `a.b` 形式 keyPath，两端行为一致
+- 替换全部读取点：`resolveLabel` / `resolveValue` / `resolveExtra` / `getChildren`（原 `getArray` 在 Web 端同样不存在）、触发条回显、`confirm` 时 `update:modelValue` 取值
+- 仅影响 Web / 小程序端的读取路径；Android / iOS / 鸿蒙行为不变
 ## 0.3.1（2026-09-18）
 - 接入 `nax-form` 表单校验联动：注入 `nax-form-item` 提供的字段级校验入口，确认选择 / 清空按 `change` 回调，使规则 `trigger: 'change'` / `['blur', 'change']` 自动生效（此前需业务侧手动调 `validateField`）
 - 校验使用控件当前值而非业务侧 `model`（`model` 多在 `@change` 才同步），选择或清空后错误提示即时消失

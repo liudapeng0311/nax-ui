@@ -821,7 +821,7 @@
 			let i = 0
 			while (i < confirmedResult.value.length) {
 				const row = confirmedResult.value[i]
-				const label = row.getString('label')
+				const label = readStringField(row, 'label')
 				const part = label != null ? label : ''
 				if (i > 0) {
 					text += props.separator
@@ -999,6 +999,60 @@
 		return item as UTSJSONObject
 	}
 
+	/**
+	 * 读取对象字段：App 端 UTSJSONObject 有 getAny 等 API；
+	 * Web / 小程序端 list 多为普通对象字面量（`as UTSJSONObject` 在 JS 端只是类型标注，运行期不会转换成带方法的实例），
+	 * 只能走属性访问，否则 `.getAny is not a function`。
+	 * 两端都支持 a.b 形式的 keyPath，保证行为一致。
+	 */
+	function readAnyField(item: any | null, key: string): any | null {
+		if (item == null) {
+			return null
+		}
+		// #ifdef APP-ANDROID || APP-IOS || APP-HARMONY
+		const obj = item as UTSJSONObject
+		return obj.getAny(key)
+		// #endif
+		// #ifndef APP-ANDROID || APP-IOS || APP-HARMONY
+		if (key.indexOf('.') < 0) {
+			return (item as any)[key]
+		}
+		let cur : any | null = item
+		const parts = key.split('.')
+		let i = 0
+		while (i < parts.length) {
+			if (cur == null) {
+				return null
+			}
+			cur = (cur as any)[parts[i]]
+			i++
+		}
+		return cur
+		// #endif
+	}
+
+	function readStringField(item: any | null, key: string): string | null {
+		const v = readAnyField(item, key)
+		if (v == null) {
+			return null
+		}
+		if (typeof v == 'string') {
+			return v as string
+		}
+		return null
+	}
+
+	function readNumberField(item: any | null, key: string): number | null {
+		const v = readAnyField(item, key)
+		if (v == null) {
+			return null
+		}
+		if (typeof v == 'number') {
+			return v as number
+		}
+		return null
+	}
+
 	function isArrayValue(val: any | null): boolean {
 		if (val == null) {
 			return false
@@ -1053,15 +1107,15 @@
 			return ''
 		}
 		const key = props.labelName
-		const s = obj.getString(key)
+		const s = readStringField(obj, key)
 		if (s != null && s.length > 0) {
 			return s
 		}
-		const n = obj.getNumber(key)
+		const n = readNumberField(obj, key)
 		if (n != null) {
 			return n.toString()
 		}
-		const anyVal = obj.getAny(key)
+		const anyVal = readAnyField(obj, key)
 		if (anyVal != null) {
 			if (typeof anyVal == 'string') {
 				return anyVal as string
@@ -1071,11 +1125,11 @@
 			}
 		}
 		// 兼容 text / name
-		const text = obj.getString('text')
+		const text = readStringField(obj, 'text')
 		if (text != null && text.length > 0) {
 			return text
 		}
-		const name = obj.getString('name')
+		const name = readStringField(obj, 'name')
 		if (name != null && name.length > 0) {
 			return name
 		}
@@ -1094,7 +1148,7 @@
 			return null
 		}
 		const key = props.valueName
-		const anyVal = obj.getAny(key)
+		const anyVal = readAnyField(obj, key)
 		if (anyVal != null) {
 			return anyVal
 		}
@@ -1111,7 +1165,7 @@
 		if (obj == null) {
 			return null
 		}
-		return obj.getAny('extra')
+		return readAnyField(obj, 'extra')
 	}
 
 	function copyAnyArray(list: any[]): any[] {
@@ -1137,23 +1191,14 @@
 			return [] as any[]
 		}
 		const key = props.childName
-		// 1) getArray
-		const arr = obj.getArray(key)
-		if (arr != null && arr.length >= 0) {
+		// 1) 直接取字段（App 走 getAny，Web/小程序走下标）
+		const arr = readAnyField(obj, key)
+		if (arr != null && isArrayValue(arr)) {
 			return arr as any[]
 		}
-		// 2) getAny + 数组判断（鸿蒙嵌套字段常见）
-		const anyVal = obj.getAny(key)
-		if (anyVal != null && isArrayValue(anyVal)) {
-			return anyVal as any[]
-		}
-		// 3) 兼容 children / child / list
+		// 2) 兼容 children 子节点字段
 		if (key != 'children') {
-			const arr2 = obj.getArray('children')
-			if (arr2 != null) {
-				return arr2 as any[]
-			}
-			const any2 = obj.getAny('children')
+			const any2 = readAnyField(obj, 'children')
 			if (any2 != null && isArrayValue(any2)) {
 				return any2 as any[]
 			}
@@ -1519,13 +1564,13 @@
 				return
 			}
 			if (modeName.value == 'single-column') {
-				emit('update:modelValue', result[0].getAny('value'))
+				emit('update:modelValue', readAnyField(result[0], 'value'))
 				return
 			}
 				const values = [] as any[]
 				let i = 0
 				while (i < result.length) {
-					values.push(result[i].getAny('value'))
+					values.push(readAnyField(result[i], 'value'))
 					i++
 				}
 			emit('update:modelValue', values)
